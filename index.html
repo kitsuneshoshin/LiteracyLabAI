@@ -305,18 +305,62 @@ const PRAISE = {
   middle: (g)=>`Nice work — your paragraphing is becoming much stronger, right in line with the ${g} inference-and-evidence target.`,
   high: (g)=>`Strong draft. Your thesis directly answers the question, which is exactly what examiners are looking for at ${g} level.`,
 };
-const GROWTH_TIP = {
-  early: "You're writing full sentences beautifully! Next time, try starting one sentence with a describing word, like “Suddenly,” to make your story even more exciting.",
-  elementary: "Try opening one sentence with a fronted adverbial, such as “Without warning,” or “Later that day,” to add variety and match your current target.",
+
+// Base skill each growth tip targets, before it's explained through the student's interest.
+const GROWTH_TIP_BASE = {
+  early: "Next time, try starting one sentence with a describing word, like “Suddenly,” to make your story even more exciting.",
+  elementary: "Try opening one sentence with a fronted adverbial, such as “Without warning,” or “Later that day,” to add variety.",
   middle: "Push your argument one step further: add a sentence that directly addresses a counterargument before returning to your main point.",
   high: "To move this from “in progress” to “mastered,” close one body paragraph with a synthesis sentence that links your evidence back to the wider debate, rather than restating your point.",
 };
-const MICRO_MISSION = {
-  early: "Next story: use 3 describing words (adjectives) to tell us what things look like!",
-  elementary: "Next mission: start two sentences with a fronted adverbial, like “Without hesitation,”",
-  middle: "Next submission: include one sentence that considers the opposite point of view before you respond to it.",
-  high: "Next submission: end each body paragraph with a synthesis sentence linking evidence back to your thesis.",
+const MICRO_MISSION_BASE = {
+  early: "Use 3 describing words (adjectives) to tell us what things look like!",
+  elementary: "Start two sentences with a fronted adverbial, like “Without hesitation,”",
+  middle: "Include one sentence that considers the opposite point of view before you respond to it.",
+  high: "End each body paragraph with a synthesis sentence linking evidence back to your thesis.",
 };
+
+// Explains the same skill through the lens of the student's chosen interest, so
+// the feedback lands as something they already understand rather than an abstract rule.
+const INTEREST_ANALOGY = {
+  space:   { early: "like a rocket launch — a big countdown before the exciting blast-off",
+             elementary: "like a mission control checklist, where each step has to happen in the right order before launch",
+             middle: "like a launch countdown — tension building in careful stages before the big moment",
+             high: "like a spacecraft's trajectory, where every stage quietly corrects course toward one destination" },
+  coding:  { early: "like giving a robot instructions — first this, then this, then this",
+             elementary: "like a level you're building in a game — one clear goal, then a twist to keep it interesting",
+             middle: "like a function: one clear input (your point), a process (your reasoning), and an output (your conclusion)",
+             high: "like well-structured code, where each paragraph is a function that takes your evidence in and returns a clear conclusion" },
+  gaming:  { early: "like a mini-boss fight — build up the excitement, then the big moment",
+             elementary: "like levelling up — each part of your story unlocks the next part of the adventure",
+             middle: "like a boss fight: raise the tension, then land your strongest hit — your best evidence — at the right moment",
+             high: "like a well-paced boss encounter, with rising stakes, a clear turning point, and a resolution" },
+  lit:     { early: "like your favourite story — a beginning, an exciting middle, and a happy ending",
+             elementary: "like the end of a book chapter, which should leave the reader wanting to turn the page",
+             middle: "like foreshadowing in a novel — plant a detail early, then pay it off later",
+             high: "like a novel's narrative arc: setup, complication, then resolution" },
+  history: { early: "like telling a story about long ago — first, next, and last",
+             elementary: "like a timeline, where one event leads clearly into the next",
+             middle: "like cause and effect in a historical event, where one action leads clearly to the next",
+             high: "like a historian building a case: evidence first, interpretation second" },
+  pop:     { early: "like your favourite show building up to the exciting bit",
+             elementary: "like a trailer — hook the audience early, save the best part for last",
+             middle: "like a plot twist in a film: set it up quietly, then reveal it",
+             high: "like a well-edited scene — build-up, climax, then a clean cut to the next idea" },
+  exam:    { early: "like following a recipe, one step at a time, in order",
+             elementary: "like a checklist, where you tick off one step before moving to the next",
+             middle: "like a mark scheme — hit each point clearly, in the order it's expecting",
+             high: "like an examiner's mark scheme: address the question, evidence it, then weigh it up" },
+};
+function analogyFor(interest, tier){
+  return (INTEREST_ANALOGY[interest] || INTEREST_ANALOGY.exam)[tier];
+}
+function growthTipFor(tier, interest){
+  return `${GROWTH_TIP_BASE[tier]} Think of it ${analogyFor(interest, tier)}.`;
+}
+function microMissionFor(tier, interest){
+  return `${MICRO_MISSION_BASE[tier]} It works ${analogyFor(interest, tier)} — one step earning the next.`;
+}
 
 /* ---------------------------------------------------------------- */
 /* Small shared UI primitives                                        */
@@ -577,13 +621,18 @@ function FeedbackPanel({ tier, gradeLabel, country, interest, seed }){
       </div>
 
       <div className="card p-5 sm:p-6" style={{ borderColor: "var(--cyan)", borderWidth: 1.5 }}>
-        <div className="flex items-center gap-2 mb-2">
-          <div className="w-8 h-8 rounded-full grid place-items-center" style={{ background: "var(--cyan-tint)", color: "var(--cyan-ink)" }}>
-            <IconTarget size={16} strokeWidth={2.2} />
+        <div className="flex items-center justify-between gap-2 mb-2 flex-wrap">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-full grid place-items-center" style={{ background: "var(--cyan-tint)", color: "var(--cyan-ink)" }}>
+              <IconTarget size={16} strokeWidth={2.2} />
+            </div>
+            <h3 className="font-display font-bold" style={{ color: "var(--ink)" }}>Your next growth step</h3>
           </div>
-          <h3 className="font-display font-bold" style={{ color: "var(--ink)" }}>Your next growth step</h3>
+          <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold" style={{ background: "var(--cyan-tint)", color: "var(--cyan-ink)" }}>
+            explained through {interestLabel}
+          </span>
         </div>
-        <p className="text-[15px] leading-relaxed font-read" style={{ color: "var(--ink)" }}>{GROWTH_TIP[tier]}</p>
+        <p className="text-[15px] leading-relaxed font-read" style={{ color: "var(--ink)" }}>{growthTipFor(tier, interest)}</p>
       </div>
 
       <div className="card p-5 sm:p-6">
@@ -609,7 +658,7 @@ function FeedbackPanel({ tier, gradeLabel, country, interest, seed }){
         </div>
         <div>
           <div className="font-display font-bold text-sm text-white mb-1">Micro-mission for next time</div>
-          <p className="text-[13px]" style={{ color: "#D5DEEE" }}>{MICRO_MISSION[tier]}</p>
+          <p className="text-[13px]" style={{ color: "#D5DEEE" }}>{microMissionFor(tier, interest)}</p>
         </div>
       </div>
     </div>
