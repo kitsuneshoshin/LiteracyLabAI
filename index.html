@@ -11,64 +11,64 @@
     --surface-2: #F1F5F9;
     --border: #E2E8F0;
     --border-soft: #EDF1F7;
-    --ink: #111827;
-    --ink-soft: #475569;
-    --ink-faint: #94A3B8;
-    --cyan: #4F46E5;
-    --cyan-glow: #4F46E5;
-    --cyan-tint: #EEF0FE;
-    --gold: #0876AB;
-    --gold-glow: #0EA5E9;
-    --gold-tint: #E6F6FE;
-    --navy-deep: #111827;
-    --grid-line: rgba(17,24,39,0.05);
-    --glow-1: rgba(79,70,229,0.10);
-    --glow-2: rgba(14,165,233,0.10);
-    --shadow: 222 47% 11%;
+    --ink: #1E293B;
+    --ink-soft: #52607A;
+    --ink-faint: #8996AC;
+    --cyan: #0E7A93;
+    --cyan-glow: #00D2FF;
+    --cyan-tint: #E3FAFF;
+    --gold: #92600A;
+    --gold-glow: #F59E0B;
+    --gold-tint: #FEF3DA;
+    --navy-deep: #1E293B;
+    --grid-line: rgba(30,41,59,0.05);
+    --glow-1: rgba(0,210,255,0.12);
+    --glow-2: rgba(245,158,11,0.10);
+    --shadow: 220 45% 20%;
   }
   @media (prefers-color-scheme: dark){
     :root:not([data-theme="light"]){
-      --bg: #0B1120;
-      --bg-elevated: #0F1729;
-      --surface: #131B2E;
-      --surface-2: #182238;
-      --border: #263352;
-      --border-soft: #1B2740;
-      --ink: #EAF0FB;
-      --ink-soft: #9AA8C7;
-      --ink-faint: #5E6E90;
-      --cyan: #818CF8;
-      --cyan-glow: #818CF8;
-      --cyan-tint: #1D2145;
-      --gold: #38BDF8;
-      --gold-glow: #38BDF8;
-      --gold-tint: #10293B;
+      --bg: #0A1120;
+      --bg-elevated: #0E1728;
+      --surface: #131E33;
+      --surface-2: #182644;
+      --border: #263756;
+      --border-soft: #1E2C48;
+      --ink: #E9EEF9;
+      --ink-soft: #97A6C4;
+      --ink-faint: #6B7A9B;
+      --cyan: #2BE1FF;
+      --cyan-glow: #2BE1FF;
+      --cyan-tint: #12303B;
+      --gold: #FDBA3F;
+      --gold-glow: #FDBA3F;
+      --gold-tint: #3A2C11;
       --navy-deep: #101828;
       --grid-line: rgba(255,255,255,0.05);
-      --glow-1: rgba(129,140,248,0.16);
-      --glow-2: rgba(56,189,248,0.12);
+      --glow-1: rgba(43,225,255,0.16);
+      --glow-2: rgba(253,186,63,0.10);
     }
   }
   :root[data-theme="dark"]{
-    --bg: #0B1120;
-    --bg-elevated: #0F1729;
-    --surface: #131B2E;
-    --surface-2: #182238;
-    --border: #263352;
-    --border-soft: #1B2740;
-    --ink: #EAF0FB;
-    --ink-soft: #9AA8C7;
-    --ink-faint: #5E6E90;
-    --cyan: #818CF8;
-    --cyan-glow: #818CF8;
-    --cyan-tint: #1D2145;
-    --gold: #38BDF8;
-    --gold-glow: #38BDF8;
-    --gold-tint: #10293B;
+    --bg: #0A1120;
+    --bg-elevated: #0E1728;
+    --surface: #131E33;
+    --surface-2: #182644;
+    --border: #263756;
+    --border-soft: #1E2C48;
+    --ink: #E9EEF9;
+    --ink-soft: #97A6C4;
+    --ink-faint: #6B7A9B;
+    --cyan: #2BE1FF;
+    --cyan-glow: #2BE1FF;
+    --cyan-tint: #12303B;
+    --gold: #FDBA3F;
+    --gold-glow: #FDBA3F;
+    --gold-tint: #3A2C11;
     --navy-deep: #101828;
     --grid-line: rgba(255,255,255,0.05);
-    --glow-1: rgba(129,140,248,0.16);
-    --glow-2: rgba(56,189,248,0.12);
+    --glow-1: rgba(43,225,255,0.16);
+    --glow-2: rgba(253,186,63,0.10);
   }
 
   *{ box-sizing: border-box; }
@@ -104,12 +104,13 @@
     white-space: nowrap;
   }
   .btn:active{ transform: translateY(1px); }
-  .btn-primary{ background: linear-gradient(100deg, #4F46E5, #0EA5E9); color: #FFFFFF; box-shadow: 0 8px 20px -8px rgba(79,70,229,.45); }
-  :root:not([data-theme="light"]) .btn-primary, :root[data-theme="dark"] .btn-primary{ background: linear-gradient(100deg, var(--cyan-glow), var(--gold-glow)); color: #051022; box-shadow: 0 0 0 1px rgba(129,140,248,.3), 0 8px 24px -8px rgba(56,189,248,.5); }
-  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .btn-primary{ background: linear-gradient(100deg, var(--cyan-glow), var(--gold-glow)); color: #051022; } }
-  .btn-primary:hover{ box-shadow: 0 10px 26px -8px rgba(79,70,229,.55); }
+  .btn-primary{ background: var(--cyan-glow); color: #04303A; box-shadow: 0 8px 20px -8px rgba(0,210,255,.5); }
+  :root:not([data-theme="light"]) .btn-primary, :root[data-theme="dark"] .btn-primary{ color: #04222A; box-shadow: 0 0 0 1px rgba(43,225,255,.3), 0 8px 24px -8px rgba(43,225,255,.5); }
+  .btn-primary:hover{ box-shadow: 0 10px 26px -8px rgba(0,210,255,.6); }
   .btn-ghost{ background: transparent; color: var(--ink); border-color: var(--border); }
   .btn-ghost:hover{ border-color: var(--ink-faint); }
+  .btn-gold{ background: var(--gold-glow); color: #3B2606; box-shadow: 0 8px 20px -8px rgba(245,158,11,.5); }
+  .btn-gold:hover{ box-shadow: 0 10px 26px -8px rgba(245,158,11,.6); }
   .btn-lg{ padding: 15px 26px; font-size: 15.5px; border-radius: 12px; }
 
   /* ---------------- Nav ---------------- */
@@ -168,8 +169,8 @@
   .pv-tag{ display:inline-flex; align-items:center; gap:5px; font-size:10.5px; font-weight:700; padding:3px 8px; border-radius:999px; background: var(--cyan-tint); color: var(--cyan); margin-bottom:8px; }
   .pv-text{ font-family:"Source Serif 4", serif; font-size:14px; line-height:1.55; color: var(--ink); }
   .pv-vocab{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-  .pv-vocab div{ background: var(--gold-tint); border-radius:10px; padding:10px 12px; }
-  .pv-vocab b{ display:block; font-size:12.5px; color: var(--gold); margin-bottom:2px; }
+  .pv-vocab div{ background: var(--cyan-tint); border-radius:10px; padding:10px 12px; }
+  .pv-vocab b{ display:block; font-size:12.5px; color: var(--cyan); margin-bottom:2px; }
   .pv-vocab span{ font-size:11.5px; color: var(--ink-soft); line-height:1.4; }
 
   /* ---------------- Sections ---------------- */
@@ -224,14 +225,15 @@
   .pricing{ display:grid; grid-template-columns: 1fr 1fr; gap: 24px; max-width: 780px; margin: 0 auto; }
   @media (max-width: 640px){ .pricing{ grid-template-columns: 1fr; } }
   .price-card{ border:1px solid var(--border); border-radius:18px; padding: 30px 26px; background: var(--surface); }
-  .price-card.pro{ border-color: var(--cyan); position:relative; background: linear-gradient(180deg, color-mix(in srgb, var(--cyan) 6%, var(--surface)), var(--surface)); }
-  .price-card.pro::before{ content:"MOST POPULAR"; position:absolute; top:-11px; left:26px; background: linear-gradient(100deg, var(--cyan-glow), var(--gold-glow)); color:#FFFFFF; font-size:10.5px; font-weight:800; letter-spacing:.06em; padding:4px 10px; border-radius:999px; }
+  .price-card.pro{ border-color: var(--gold-glow); position:relative; background: linear-gradient(180deg, color-mix(in srgb, var(--gold-glow) 6%, var(--surface)), var(--surface)); }
+  .price-card.pro::before{ content:"MOST POPULAR"; position:absolute; top:-11px; left:26px; background: var(--gold-glow); color:#3B2606; font-size:10.5px; font-weight:800; letter-spacing:.06em; padding:4px 10px; border-radius:999px; }
   .price-plan{ font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color: var(--ink-faint); }
   .price-amount{ font-size:36px; font-weight:800; margin-top:10px; letter-spacing:-0.01em; }
   .price-amount span{ font-size:14px; font-weight:500; color: var(--ink-faint); }
   .price-list{ margin-top:20px; display:flex; flex-direction:column; gap:11px; }
   .price-list div{ display:flex; gap:9px; align-items:flex-start; font-size:14px; color: var(--ink-soft); }
   .price-list svg{ flex-shrink:0; margin-top:2px; color: var(--cyan); }
+  .price-card.pro .price-list svg{ color: var(--gold-glow); }
   .price-card .btn{ width:100%; margin-top:24px; }
 
   /* faq */
@@ -268,10 +270,9 @@
     <div class="brand">
       <span class="brand-mark">
         <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-          <defs><linearGradient id="navMark" x1="3" y1="20" x2="21" y2="3"><stop offset="0" stop-color="#4F46E5"/><stop offset="1" stop-color="#0EA5E9"/></linearGradient></defs>
-          <path d="M5.4 18.4l1.8-1.5M7.2 16.7l1.8-1.5" stroke="url(#navMark)" stroke-width="1.5" stroke-linecap="round"/>
-          <path d="M4 19.2c2-1 4-2.6 5.6-5.2L13 12.7V9.6H16V6.6H19V4.1" stroke="url(#navMark)" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M18.6 4.7L20.6 3L21.7 4.6" stroke="url(#navMark)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M9 3h6M10 3v6.2L4.8 18a2 2 0 0 0 1.7 3h11a2 2 0 0 0 1.7-3L14 9.2V3" stroke="#00D2FF" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M12 10l-2.7 6.4c-.3.8.2 1.6 1.1 1.6h3.2c.9 0 1.4-.8 1.1-1.6L12 10z" fill="#F59E0B"/>
+          <path d="M12 12.2v4.4" stroke="#1E293B" stroke-width="1" stroke-linecap="round"/>
         </svg>
       </span>
       LiteracyLab <span style="color:var(--cyan)">AI</span>
@@ -376,7 +377,7 @@
             <div class="pv-text font-read">"Push your argument further — like a boss fight: raise the tension, then land your strongest hit at the right moment."</div>
           </div>
           <div class="pv-card" style="background:linear-gradient(135deg, var(--navy-deep), #2B3B54); border:none;">
-            <div style="color:#7DD3FC; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; margin-bottom:6px;">Micro-mission</div>
+            <div style="color:#7CEBFF; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; margin-bottom:6px;">Micro-mission</div>
             <div style="color:#D5DEEE; font-size:13.5px; line-height:1.55;">Next submission: end each body paragraph with a sentence linking evidence back to your thesis.</div>
           </div>
         </div>
@@ -469,7 +470,7 @@
           <div><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> Advanced exam-technique scoring</div>
           <div><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> Weekly progress reports by email</div>
         </div>
-        <a class="btn btn-primary" href="app.html">Upgrade to Pro</a>
+        <a class="btn btn-gold" href="app.html">Upgrade to Pro</a>
       </div>
     </div>
   </div>

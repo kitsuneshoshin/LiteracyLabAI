@@ -15,43 +15,41 @@
     --surface-2: #F1F5F9;
     --border: #E2E8F0;
     --border-soft: #EDF1F7;
-    --ink: #111827;
-    --ink-soft: #475569;
-    --ink-faint: #94A3B8;
-    --cyan: #4F46E5;
-    --cyan-ink: #4338CA;
-    --cyan-tint: #EEF0FE;
-    --gold: #0EA5E9;
-    --gold-ink: #0876AB;
-    --gold-tint: #E6F6FE;
-    --accent-grad: linear-gradient(100deg, #4F46E5, #0EA5E9);
-    --navy-tint: #EEF1F8;
+    --ink: #1E293B;
+    --ink-soft: #52607A;
+    --ink-faint: #8996AC;
+    --cyan: #00D2FF;
+    --cyan-ink: #0E7A93;
+    --cyan-tint: #E3FAFF;
+    --gold: #F59E0B;
+    --gold-ink: #92600A;
+    --gold-tint: #FEF3DA;
+    --navy-tint: #E7EBF6;
     --good: #0F9D66;
     --good-tint: #DEF7EC;
     --warn: #C2760A;
     --warn-tint: #FCEACB;
     --bad: #D6483C;
     --bad-tint: #FBE2DF;
-    --shadow: 222 47% 11%;
+    --shadow: 220 45% 20%;
   }
   @media (prefers-color-scheme: dark){
     :root:not([data-theme="light"]){
-      --bg: #0B1120;
-      --bg-grid: #0F1729;
-      --surface: #131B2E;
-      --surface-2: #182238;
-      --border: #263352;
-      --border-soft: #1B2740;
-      --ink: #EAF0FB;
-      --ink-soft: #9AA8C7;
-      --ink-faint: #5E6E90;
-      --cyan: #818CF8;
-      --cyan-ink: #A5B4FC;
-      --cyan-tint: #1D2145;
-      --gold: #38BDF8;
-      --gold-ink: #7DD3FC;
-      --gold-tint: #10293B;
-      --accent-grad: linear-gradient(100deg, #818CF8, #38BDF8);
+      --bg: #0A1120;
+      --bg-grid: #0E1728;
+      --surface: #131E33;
+      --surface-2: #182644;
+      --border: #263756;
+      --border-soft: #1E2C48;
+      --ink: #E9EEF9;
+      --ink-soft: #97A6C4;
+      --ink-faint: #6B7A9B;
+      --cyan: #2BE1FF;
+      --cyan-ink: #7CEBFF;
+      --cyan-tint: #12303B;
+      --gold: #FDBA3F;
+      --gold-ink: #FDBA3F;
+      --gold-tint: #3A2C11;
       --navy-tint: #1B2740;
       --good: #35D399;
       --good-tint: #10301F;
@@ -62,22 +60,21 @@
     }
   }
   :root[data-theme="dark"]{
-    --bg: #0B1120;
-    --bg-grid: #0F1729;
-    --surface: #131B2E;
-    --surface-2: #182238;
-    --border: #263352;
-    --border-soft: #1B2740;
-    --ink: #EAF0FB;
-    --ink-soft: #9AA8C7;
-    --ink-faint: #5E6E90;
-    --cyan: #818CF8;
-    --cyan-ink: #A5B4FC;
-    --cyan-tint: #1D2145;
-    --gold: #38BDF8;
-    --gold-ink: #7DD3FC;
-    --gold-tint: #10293B;
-    --accent-grad: linear-gradient(100deg, #818CF8, #38BDF8);
+    --bg: #0A1120;
+    --bg-grid: #0E1728;
+    --surface: #131E33;
+    --surface-2: #182644;
+    --border: #263756;
+    --border-soft: #1E2C48;
+    --ink: #E9EEF9;
+    --ink-soft: #97A6C4;
+    --ink-faint: #6B7A9B;
+    --cyan: #2BE1FF;
+    --cyan-ink: #7CEBFF;
+    --cyan-tint: #12303B;
+    --gold: #FDBA3F;
+    --gold-ink: #FDBA3F;
+    --gold-tint: #3A2C11;
     --navy-tint: #1B2740;
     --good: #35D399;
     --good-tint: #10301F;
@@ -100,7 +97,7 @@
   .font-display{ font-family:"Lexend", ui-sans-serif, system-ui, sans-serif; }
   .font-read{ font-family:"Source Serif 4", Georgia, "Times New Roman", serif; }
   h1,h2,h3,h4{ text-wrap: balance; }
-  ::selection{ background: var(--cyan); color:#FFFFFF; }
+  ::selection{ background: var(--cyan); color:#04222A; }
 
   .card{
     background: var(--surface);
@@ -158,18 +155,13 @@ function Icon({ children, size = 20, strokeWidth = 1.8, className = "" }) {
 const IconFlask = (p) => <Icon {...p}><path d="M9 3h6M10 3v6.2L4.8 18a2 2 0 0 0 1.7 3h11a2 2 0 0 0 1.7-3L14 9.2V3" /><path d="M7.5 15h9" /></Icon>;
 const IconBook = (p) => <Icon {...p}><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15.5H6.5A2.5 2.5 0 0 0 4 21" /><path d="M4 5.5v15A2.5 2.5 0 0 0 6.5 23" /></Icon>;
 // Brand mark: a quill whose trailing stroke resolves into a rising bar-chart / growth arrow.
-function IconMark({ size = 24, id = "llMark" }){
+// Brand mark: a fountain pen nib seated inside a laboratory flask silhouette.
+function IconMark({ size = 24 }){
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-      <defs>
-        <linearGradient id={id} x1="3" y1="20" x2="21" y2="3">
-          <stop offset="0" stopColor="#4F46E5" />
-          <stop offset="1" stopColor="#0EA5E9" />
-        </linearGradient>
-      </defs>
-      <path d="M5.4 18.4l1.8-1.5M7.2 16.7l1.8-1.5" stroke={`url(#${id})`} strokeWidth="1.5" strokeLinecap="round" />
-      <path d="M4 19.2c2-1 4-2.6 5.6-5.2L13 12.7V9.6H16V6.6H19V4.1" stroke={`url(#${id})`} strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M18.6 4.7L20.6 3L21.7 4.6" stroke={`url(#${id})`} strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M9 3h6M10 3v6.2L4.8 18a2 2 0 0 0 1.7 3h11a2 2 0 0 0 1.7-3L14 9.2V3" stroke="#00D2FF" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M12 10l-2.7 6.4c-.3.8.2 1.6 1.1 1.6h3.2c.9 0 1.4-.8 1.1-1.6L12 10z" fill="#F59E0B" />
+      <path d="M12 12.2v4.4" stroke="#1E293B" strokeWidth="1" strokeLinecap="round" />
     </svg>
   );
 }
@@ -463,7 +455,7 @@ function Header({ view, setView, used, total, theme, setTheme }){
             <span className="text-xs font-medium" style={{ color: "var(--ink-soft)" }}>
               Free Plan: <span className="font-bold tabular" style={{ color: remaining <= 1 ? "var(--bad)" : "var(--ink)" }}>{remaining}</span> of {total} monthly stories/essays remaining
             </span>
-            <span className="rounded-full px-2 py-1 text-[11px] font-bold" style={{ background: "var(--gold-tint)", color: "var(--gold-ink)" }}>FREE</span>
+            <span className="rounded-full px-2 py-1 text-[11px] font-bold" style={{ background: "var(--navy-tint)", color: "var(--ink)" }}>FREE</span>
           </div>
         </div>
       </div>
@@ -587,9 +579,9 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
         </div>
 
         <div className="card p-6 relative overflow-hidden" style={{ background: "linear-gradient(160deg, var(--ink), #2B3B54)" }}>
-          <div className="absolute -right-6 -top-6 w-28 h-28 rounded-full" style={{ background: "radial-gradient(circle, var(--cyan) 0%, transparent 70%)", opacity: .35 }} />
+          <div className="absolute -right-6 -top-6 w-28 h-28 rounded-full" style={{ background: "radial-gradient(circle, var(--gold) 0%, transparent 70%)", opacity: .35 }} />
           <div className="relative">
-            <div className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold mb-3" style={{ background: "var(--gold)", color: "#FFFFFF" }}>
+            <div className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold mb-3" style={{ background: "var(--gold)", color: "#3B2606" }}>
               <IconCrown size={12} strokeWidth={2.4} /> LITERACYLAB PRO
             </div>
             <h3 className="font-display font-bold text-lg text-white mb-1.5">{remaining <= 1 ? "Almost at your monthly limit" : "Unlock unlimited submissions"}</h3>
@@ -598,11 +590,11 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
             </p>
             <ul className="text-[13px] space-y-1.5 mb-5" style={{ color: "#DCE4F2" }}>
               {["Unlimited monthly submissions","Advanced exam-technique scoring","Weekly progress reports by email"].map(t=>(
-                <li key={t} className="flex items-center gap-2"><IconCheck size={13} strokeWidth={2.4} style={{ color: "var(--cyan)" }} />{t}</li>
+                <li key={t} className="flex items-center gap-2"><IconCheck size={13} strokeWidth={2.4} style={{ color: "var(--gold)" }} />{t}</li>
               ))}
             </ul>
             <button className="focus-ring w-full rounded-xl py-2.5 font-display font-bold text-sm inline-flex items-center justify-center gap-1.5"
-              style={{ background: "var(--cyan)", color: "#FFFFFF" }}>
+              style={{ background: "var(--gold)", color: "#3B2606" }}>
               Upgrade to Pro <IconArrowRight size={15} strokeWidth={2.3} />
             </button>
           </div>
@@ -656,15 +648,15 @@ function FeedbackPanel({ tier, gradeLabel, country, interest, seed }){
 
       <div className="card p-5 sm:p-6">
         <div className="flex items-center gap-2 mb-3">
-          <div className="w-8 h-8 rounded-full grid place-items-center" style={{ background: "var(--gold-tint)", color: "var(--gold-ink)" }}>
+          <div className="w-8 h-8 rounded-full grid place-items-center" style={{ background: "var(--cyan-tint)", color: "var(--cyan-ink)" }}>
             <IconSparkle size={16} strokeWidth={2.2} />
           </div>
           <h3 className="font-display font-bold" style={{ color: "var(--ink)" }}>Vocabulary spotlight — {interestLabel} edition</h3>
         </div>
         <div className="grid sm:grid-cols-2 gap-3">
           {vocabList.map(([term,def])=> (
-            <div key={term} className="rounded-xl p-4" style={{ background: "var(--gold-tint)" }}>
-              <div className="font-display font-bold text-sm mb-1" style={{ color: "var(--gold-ink)" }}>{term}</div>
+            <div key={term} className="rounded-xl p-4" style={{ background: "var(--cyan-tint)" }}>
+              <div className="font-display font-bold text-sm mb-1" style={{ color: "var(--cyan-ink)" }}>{term}</div>
               <div className="text-[13px] leading-snug" style={{ color: "var(--ink)" }}>{def}</div>
             </div>
           ))}
@@ -672,7 +664,7 @@ function FeedbackPanel({ tier, gradeLabel, country, interest, seed }){
       </div>
 
       <div className="card p-5 sm:p-6 flex items-start gap-3" style={{ background: "linear-gradient(135deg, var(--ink), #2B3B54)" }}>
-        <div className="w-9 h-9 rounded-full grid place-items-center shrink-0" style={{ background: "var(--gold)", color: "#FFFFFF" }}>
+        <div className="w-9 h-9 rounded-full grid place-items-center shrink-0" style={{ background: "var(--cyan)", color: "#04303A" }}>
           <IconFlame size={17} strokeWidth={2.2} />
         </div>
         <div>
@@ -804,10 +796,10 @@ function TierEditor({ tier, meta, text, setText, words, phase, onSubmit, onNew, 
 
   if (tier === "early") {
     return (
-      <div className="card p-6 relative overflow-hidden" style={{ borderRadius: 28, borderWidth: 2, borderStyle: "dashed", borderColor: "var(--gold)" }}>
+      <div className="card p-6 relative overflow-hidden" style={{ borderRadius: 28, borderWidth: 2, borderStyle: "dashed", borderColor: "var(--cyan)" }}>
         {phase === "analyzing" && <AnalyzingOverlay />}
         <div className="flex items-center gap-2 mb-3">
-          <span className="w-9 h-9 rounded-2xl grid place-items-center" style={{ background: "var(--gold-tint)", color: "var(--gold-ink)" }}><IconSparkle size={18} /></span>
+          <span className="w-9 h-9 rounded-2xl grid place-items-center" style={{ background: "var(--cyan-tint)", color: "var(--cyan-ink)" }}><IconSparkle size={18} /></span>
           <h3 className="font-display font-extrabold text-xl" style={{ color: "var(--ink)" }}>{meta.title}</h3>
         </div>
         <p className="font-read text-lg leading-snug mb-4" style={{ color: "var(--ink)" }}>{meta.prompt}</p>
@@ -823,7 +815,7 @@ function TierEditor({ tier, meta, text, setText, words, phase, onSubmit, onNew, 
           {phase !== "done" ? (
             <button onClick={onSubmit} disabled={disabled}
               className="focus-ring inline-flex items-center gap-2 rounded-full px-5 py-2.5 font-display font-extrabold text-sm disabled:opacity-60"
-              style={{ background: "var(--gold)", color: "#FFFFFF" }}>
+              style={{ background: "var(--cyan)", color: "#04303A" }}>
               {locked ? <><IconLock size={15} /> Upgrade to Continue</> : <>{submitLabel} <IconSend size={15} /></>}
             </button>
           ) : (
@@ -870,7 +862,7 @@ function TierEditor({ tier, meta, text, setText, words, phase, onSubmit, onNew, 
           {phase !== "done" ? (
             <button onClick={onSubmit} disabled={disabled}
               className="focus-ring inline-flex items-center gap-2 rounded-full px-5 py-2.5 font-display font-bold text-sm disabled:opacity-60"
-              style={{ background: "var(--cyan)", color: "#FFFFFF" }}>
+              style={{ background: "var(--cyan)", color: "#04303A" }}>
               {locked ? <><IconLock size={15} /> Upgrade to Continue</> : <>{submitLabel} <IconSend size={15} /></>}
             </button>
           ) : (
@@ -991,7 +983,7 @@ function App(){
       <div className="md:hidden mx-auto max-w-6xl px-4 pt-3">
         <div className="rounded-xl border px-3 py-2 text-xs font-medium flex items-center justify-between" style={{ borderColor: "var(--border)", background: "var(--surface-2)", color: "var(--ink-soft)" }}>
           <span>Free Plan: <b className="tabular" style={{ color: "var(--ink)" }}>{total-used}</b> of {total} remaining</span>
-          <span className="rounded-full px-2 py-0.5 text-[10px] font-bold" style={{ background: "var(--gold-tint)", color: "var(--gold-ink)" }}>FREE</span>
+          <span className="rounded-full px-2 py-0.5 text-[10px] font-bold" style={{ background: "var(--navy-tint)", color: "var(--ink)" }}>FREE</span>
         </div>
       </div>
       {view === "dashboard" ? (
