@@ -1,0 +1,993 @@
+<title>LiteracyLab AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700;800&family=Source+Serif+4:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.24.7/babel.min.js"></script>
+
+<style>
+  :root{
+    --bg: #EEF2F8;
+    --bg-grid: #E3E9F4;
+    --surface: #FFFFFF;
+    --surface-2: #F6F8FC;
+    --border: #DCE3EF;
+    --border-soft: #E7ECF5;
+    --ink: #1E293B;
+    --ink-soft: #5B6B85;
+    --ink-faint: #8996AC;
+    --cyan: #00D2FF;
+    --cyan-ink: #0E7A93;
+    --cyan-tint: #E3FAFF;
+    --gold: #F59E0B;
+    --gold-ink: #92600A;
+    --gold-tint: #FEF3DA;
+    --navy-tint: #E7EBF6;
+    --good: #0F9D66;
+    --good-tint: #DEF7EC;
+    --warn: #C2760A;
+    --warn-tint: #FCEACB;
+    --bad: #D6483C;
+    --bad-tint: #FBE2DF;
+    --shadow: 220 45% 20%;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg: #0A1120;
+      --bg-grid: #0E1728;
+      --surface: #131E33;
+      --surface-2: #182644;
+      --border: #263756;
+      --border-soft: #1E2C48;
+      --ink: #E9EEF9;
+      --ink-soft: #97A6C4;
+      --ink-faint: #6B7A9B;
+      --cyan: #2BE1FF;
+      --cyan-ink: #7CEBFF;
+      --cyan-tint: #12303B;
+      --gold: #FDBA3F;
+      --gold-ink: #FDBA3F;
+      --gold-tint: #3A2C11;
+      --navy-tint: #1B2740;
+      --good: #35D399;
+      --good-tint: #10301F;
+      --warn: #E8A23A;
+      --warn-tint: #3A2A0E;
+      --bad: #F17469;
+      --bad-tint: #3A1712;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg: #0A1120;
+    --bg-grid: #0E1728;
+    --surface: #131E33;
+    --surface-2: #182644;
+    --border: #263756;
+    --border-soft: #1E2C48;
+    --ink: #E9EEF9;
+    --ink-soft: #97A6C4;
+    --ink-faint: #6B7A9B;
+    --cyan: #2BE1FF;
+    --cyan-ink: #7CEBFF;
+    --cyan-tint: #12303B;
+    --gold: #FDBA3F;
+    --gold-ink: #FDBA3F;
+    --gold-tint: #3A2C11;
+    --navy-tint: #1B2740;
+    --good: #35D399;
+    --good-tint: #10301F;
+    --warn: #E8A23A;
+    --warn-tint: #3A2A0E;
+    --bad: #F17469;
+    --bad-tint: #3A1712;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;}
+  body{
+    background:
+      radial-gradient(1200px 500px at 15% -10%, var(--navy-tint), transparent 60%),
+      var(--bg);
+    color: var(--ink);
+    font-family: "Lexend", ui-sans-serif, system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .font-display{ font-family:"Lexend", ui-sans-serif, system-ui, sans-serif; }
+  .font-read{ font-family:"Source Serif 4", Georgia, "Times New Roman", serif; }
+  h1,h2,h3,h4{ text-wrap: balance; }
+  ::selection{ background: var(--cyan); color:#04222A; }
+
+  .card{
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    box-shadow: 0 1px 2px hsl(var(--shadow) / 0.04), 0 10px 30px -18px hsl(var(--shadow) / 0.25);
+  }
+  .divider{ border-color: var(--border-soft); }
+  .focus-ring:focus-visible{ outline: 2.5px solid var(--cyan); outline-offset: 2px; }
+  .tabular{ font-variant-numeric: tabular-nums; }
+
+  .scrollbar-thin::-webkit-scrollbar{ height:6px; width:6px; }
+  .scrollbar-thin::-webkit-scrollbar-thumb{ background: var(--border); border-radius: 10px; }
+
+  @keyframes float-in{
+    from{ opacity:0; transform: translateY(8px); }
+    to{ opacity:1; transform: translateY(0); }
+  }
+  .animate-float-in{ animation: float-in .45s cubic-bezier(.16,1,.3,1) both; }
+
+  @keyframes spin-slow{ to{ transform: rotate(360deg); } }
+  .animate-spin-slow{ animation: spin-slow 1.4s linear infinite; }
+
+  @keyframes pulse-ring{
+    0%{ box-shadow: 0 0 0 0 hsl(190 100% 50% / .35); }
+    100%{ box-shadow: 0 0 0 14px hsl(190 100% 50% / 0); }
+  }
+  .analyzing-pulse{ animation: pulse-ring 1.6s cubic-bezier(.4,0,.6,1) infinite; }
+
+  @media (prefers-reduced-motion: reduce){
+    .animate-float-in, .animate-spin-slow, .analyzing-pulse{ animation: none !important; }
+  }
+
+  input[type="range"]{ accent-color: var(--cyan); }
+</style>
+
+<div id="root"></div>
+
+<script type="text/babel" data-presets="react">
+const { useState, useMemo, useEffect, useRef } = React;
+
+/* ---------------------------------------------------------------- */
+/* Minimal line-icon set (lucide-style: 24x24, stroke, round caps)   */
+/* ---------------------------------------------------------------- */
+function Icon({ children, size = 20, strokeWidth = 1.8, className = "" }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className}>
+      {children}
+    </svg>
+  );
+}
+const IconFlask = (p) => <Icon {...p}><path d="M9 3h6M10 3v6.2L4.8 18a2 2 0 0 0 1.7 3h11a2 2 0 0 0 1.7-3L14 9.2V3" /><path d="M7.5 15h9" /></Icon>;
+const IconBook = (p) => <Icon {...p}><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15.5H6.5A2.5 2.5 0 0 0 4 21" /><path d="M4 5.5v15A2.5 2.5 0 0 0 6.5 23" /></Icon>;
+const IconGrid = (p) => <Icon {...p}><rect x="3.5" y="3.5" width="7" height="7" rx="1.4" /><rect x="13.5" y="3.5" width="7" height="7" rx="1.4" /><rect x="3.5" y="13.5" width="7" height="7" rx="1.4" /><rect x="13.5" y="13.5" width="7" height="7" rx="1.4" /></Icon>;
+const IconPen = (p) => <Icon {...p}><path d="M4 20l4.2-.9L19 8.3a1.9 1.9 0 0 0 0-2.7l-.6-.6a1.9 1.9 0 0 0-2.7 0L4.9 15.8z" /><path d="M13.5 6.5l4 4" /></Icon>;
+const IconSparkle = (p) => <Icon {...p}><path d="M12 3l1.6 4.8L18 9.5l-4.4 1.7L12 16l-1.6-4.8L6 9.5l4.4-1.7z" /><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z" /></Icon>;
+const IconChevron = (p) => <Icon {...p}><path d="M6 9l6 6 6-6" /></Icon>;
+const IconFlame = (p) => <Icon {...p}><path d="M12 22c4 0 6.5-2.7 6.5-6.2 0-3-1.8-4.9-3-6.8-.3 1.6-1.1 2.6-2 3.1.3-2.4-.6-5-3-7-.2 2.6-1.2 4-2.6 5.6C6.4 12 5.5 13.6 5.5 15.8 5.5 19.3 8 22 12 22z" /></Icon>;
+const IconTarget = (p) => <Icon {...p}><circle cx="12" cy="12" r="8" /><circle cx="12" cy="12" r="4.2" /><circle cx="12" cy="12" r=".6" fill="currentColor" /></Icon>;
+const IconTrend = (p) => <Icon {...p}><path d="M3.5 16.5l6-6 4 4 7-7.5" /><path d="M14 6.5h6.5V13" /></Icon>;
+const IconAward = (p) => <Icon {...p}><circle cx="12" cy="8.5" r="5" /><path d="M8.3 12.8L6.5 21l5.5-3 5.5 3-1.8-8.2" /></Icon>;
+const IconCheck = (p) => <Icon {...p}><path d="M4.5 12.5l5 5 10-11" /></Icon>;
+const IconClock = (p) => <Icon {...p}><circle cx="12" cy="12" r="8.5" /><path d="M12 7.5V12l3.2 2" /></Icon>;
+const IconAlert = (p) => <Icon {...p}><path d="M12 3.5L22 20H2z" /><path d="M12 10v4" /><circle cx="12" cy="17" r=".6" fill="currentColor" /></Icon>;
+const IconLock = (p) => <Icon {...p}><rect x="5" y="10.5" width="14" height="10" rx="2" /><path d="M8 10.5V7.8a4 4 0 0 1 8 0v2.7" /></Icon>;
+const IconCrown = (p) => <Icon {...p}><path d="M4 17.5h16L18.5 8l-4 4-2.5-6-2.5 6-4-4z" /><path d="M5.5 20h13" /></Icon>;
+const IconSend = (p) => <Icon {...p}><path d="M4 12l16-8-6.5 17-3-6.5z" /><path d="M13.5 12.5L20 4" /></Icon>;
+const IconOrbit = (p) => <Icon {...p}><circle cx="12" cy="12" r="2" /><ellipse cx="12" cy="12" rx="9" ry="4" transform="rotate(35 12 12)" /></Icon>;
+const IconCode = (p) => <Icon {...p}><path d="M8.5 8L4 12.2 8.5 16.4" /><path d="M15.5 8l4.5 4.2-4.5 4.2" /><path d="M13.2 6.5l-2.4 11" /></Icon>;
+const IconGamepad = (p) => <Icon {...p}><rect x="2.5" y="8" width="19" height="9.5" rx="4" /><path d="M7.5 10.5v3M6 12h3" /><circle cx="16" cy="11" r=".7" fill="currentColor" /><circle cx="18" cy="13" r=".7" fill="currentColor" /></Icon>;
+const IconFeather = (p) => <Icon {...p}><path d="M20 4c-6 0-13 4-15 12-.4 1.4.6 2.4 2 2C15 16 20 9 20 4z" /><path d="M5 20l9-9" /></Icon>;
+const IconLandmark = (p) => <Icon {...p}><path d="M4 21h16M5 21V10.5M19 21V10.5M3 10.5L12 4l9 6.5" /><path d="M9 21v-6.5M15 21v-6.5" /></Icon>;
+const IconClapper = (p) => <Icon {...p}><path d="M3.5 10.5l15.6-3.7 1 4.2L4.5 14.7z" /><rect x="3.5" y="10.5" width="17" height="9.5" rx="1.6" /></Icon>;
+const IconGrad = (p) => <Icon {...p}><path d="M2.5 9.5L12 5l9.5 4.5L12 14z" /><path d="M6.5 11.6v4.7c0 1.3 2.5 2.7 5.5 2.7s5.5-1.4 5.5-2.7v-4.7" /></Icon>;
+const IconMic = (p) => <Icon {...p}><rect x="9" y="3" width="6" height="11" rx="3" /><path d="M6 11a6 6 0 0 0 12 0M12 17v4M9 21h6" /></Icon>;
+const IconArrowRight = (p) => <Icon {...p}><path d="M4.5 12h15M13.5 6l6 6-6 6" /></Icon>;
+const IconMoon = (p) => <Icon {...p}><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z" /></Icon>;
+const IconSun = (p) => <Icon {...p}><circle cx="12" cy="12" r="4.2" /><path d="M12 2.5v2.3M12 19.2v2.3M4.4 4.4l1.6 1.6M18 18l1.6 1.6M2.5 12h2.3M19.2 12h2.3M4.4 19.6L6 18M18 6l1.6-1.6" /></Icon>;
+
+/* ---------------------------------------------------------------- */
+/* Domain data                                                       */
+/* ---------------------------------------------------------------- */
+const COUNTRIES = ["United Kingdom", "United States", "Australia", "Canada"];
+
+const GRADE_DATA = {
+  "United Kingdom": { grades: ["Reception","Year 1","Year 2","Year 3","Year 4","Year 5","Year 6","Year 7","Year 8","Year 9","Year 10","Year 11","Year 12","Year 13"], tiers: [3,7,10,14] },
+  "United States":  { grades: ["Kindergarten","Grade 1","Grade 2","Grade 3","Grade 4","Grade 5","Grade 6","Grade 7","Grade 8","Grade 9","Grade 10","Grade 11","Grade 12"], tiers: [3,6,9,13] },
+  "Australia":      { grades: ["Foundation","Year 1","Year 2","Year 3","Year 4","Year 5","Year 6","Year 7","Year 8","Year 9","Year 10","Year 11","Year 12"], tiers: [3,7,10,13] },
+  "Canada":         { grades: ["Kindergarten","Grade 1","Grade 2","Grade 3","Grade 4","Grade 5","Grade 6","Grade 7","Grade 8","Grade 9","Grade 10","Grade 11","Grade 12"], tiers: [3,6,9,13] },
+};
+const TIER_KEYS = ["early","elementary","middle","high"];
+function tierForGrade(country, idx){
+  const t = GRADE_DATA[country].tiers;
+  if (idx < t[0]) return "early";
+  if (idx < t[1]) return "elementary";
+  if (idx < t[2]) return "middle";
+  return "high";
+}
+function defaultGradeIndexForTier(country, tierKey){
+  const t = GRADE_DATA[country].tiers;
+  const bounds = { early:[0,t[0]-1], elementary:[t[0],t[1]-1], middle:[t[1],t[2]-1], high:[t[2], GRADE_DATA[country].grades.length-1] };
+  const [lo] = bounds[tierKey];
+  return lo;
+}
+
+const TIER_META = {
+  early:      { label: "Early Readers", ageRange: "Ages 5–7",  icon: IconFeather, blurb: "Big text, warm encouragement, read-aloud support." },
+  elementary: { label: "Elementary",    ageRange: "Ages 8–11", icon: IconAward,   blurb: "Missions, badges, and a live word-count goal." },
+  middle:     { label: "Middle School", ageRange: "Ages 12–14",icon: IconBook,    blurb: "A calm, distraction-free analytical workspace." },
+  high:       { label: "High School",   ageRange: "Ages 15–18",icon: IconGrad,    blurb: "A professional editor for essays and exam technique." },
+};
+
+const INTERESTS = [
+  { id: "space",    label: "Space",    icon: IconOrbit },
+  { id: "coding",   label: "Coding",   icon: IconCode },
+  { id: "gaming",   label: "Gaming",   icon: IconGamepad },
+  { id: "lit",      label: "Literature", icon: IconFeather },
+  { id: "history",  label: "History",  icon: IconLandmark },
+  { id: "pop",      label: "Pop Culture", icon: IconClapper },
+  { id: "exam",     label: "College / Exam Prep", icon: IconGrad },
+];
+
+const MASTERY_TARGETS = {
+  early: [
+    { name: "Phonics Blending", status: "Mastered", pct: 92 },
+    { name: "Sight-Word Recognition", status: "In Progress", pct: 68 },
+    { name: "Capitals & Full Stops", status: "In Progress", pct: 55 },
+  ],
+  elementary: [
+    { name: "Fronted Adverbials", status: "In Progress", pct: 64 },
+    { name: "Paragraph Structure", status: "Mastered", pct: 88 },
+    { name: "Descriptive Adjectives", status: "Needs Attention", pct: 41 },
+    { name: "Speech Punctuation", status: "In Progress", pct: 59 },
+  ],
+  middle: [
+    { name: "Modal Verbs", status: "Mastered", pct: 90 },
+    { name: "Inference & Evidence", status: "In Progress", pct: 71 },
+    { name: "Essay Structure (PEEL)", status: "In Progress", pct: 66 },
+    { name: "Cohesive Devices", status: "Needs Attention", pct: 38 },
+  ],
+  high: [
+    { name: "Thesis Construction", status: "In Progress", pct: 73 },
+    { name: "Rhetorical Devices", status: "Mastered", pct: 85 },
+    { name: "Argumentative Structure", status: "In Progress", pct: 62 },
+    { name: "Exam Technique & Timing", status: "Needs Attention", pct: 45 },
+  ],
+};
+
+const STATUS_STYLE = {
+  "Mastered":       { bg: "var(--good-tint)", ink: "var(--good)", icon: IconCheck },
+  "In Progress":    { bg: "var(--warn-tint)", ink: "var(--warn)", icon: IconClock },
+  "Needs Attention":{ bg: "var(--bad-tint)",  ink: "var(--bad)",  icon: IconAlert },
+};
+
+const PROMPTS = {
+  early: { title: "Today’s Story Spark", target: 60,
+    prompt: "Tell a short story about a brave dinosaur who builds a rocket to visit the moon.",
+    sample: "Once upon a time there was a big green dinosaur named Rex. Rex wanted to go to the moon. He built a rocket out of rocks and sticks. \"I am ready!\" said Rex, and the rocket zoomed into the sky. He saw shiny stars and a big grey moon. Rex landed softly and jumped up high because the moon was bouncy. It was the best day ever." },
+  elementary: { title: "This Week’s Mission", target: 150,
+    prompt: "Write an adventure story where your character discovers a hidden world inside their favourite game.",
+    sample: "Mia was building a new base when the ground beneath her cracked open. She fell through a swirling blue tunnel and landed in a blocky forest she had never seen before. The trees glowed faintly, and somewhere in the distance she could hear a strange rumbling sound. Mia gripped her pickaxe tightly and took a step forward. A creeper rustled in the bushes nearby, but Mia had an idea. She quickly dug a trench and lured the creeper inside before it could explode. Her heart was pounding, but she felt braver than ever. This hidden world was dangerous, but Mia knew she had the skills to survive it, one block at a time." },
+  middle: { title: "Analytical Response", target: 350,
+    prompt: "Write a short analysis: how does the author use setting to build tension in a story you have read recently?",
+    sample: "In many stories, setting is used deliberately to build a sense of unease before anything actually happens. A quiet house at night, an empty corridor, or a forest with no birdsong all signal to the reader that something is wrong, long before the plot confirms it. This technique works because it draws on the reader's own instincts about safety and silence, creating dramatic irony between what the character notices and what the reader senses. A skilled writer will often withhold direct explanation, instead layering small sensory details — a flickering light, a closed door that was open before — so tension accumulates gradually rather than arriving all at once." },
+  high: { title: "Timed Essay Response", target: 800,
+    prompt: "“Ambition is always portrayed as a destructive force in literature.” To what extent do you agree? Refer to at least two texts in your response.",
+    sample: "Ambition, in much of the literary canon, is rarely presented as a neutral force; it is instead a catalyst that reveals character under pressure. While it is true that unchecked ambition often precipitates downfall — Macbeth's spiralling violence being the most obvious example — to characterise ambition as uniformly destructive overlooks the more nuanced treatment many writers afford it. In several texts, ambition operates as a double-edged mechanism: the same drive that isolates a character from their community is often what permits them to challenge an unjust status quo in the first place. This essay will argue that ambition functions less as a moral verdict and more as a magnifying glass, intensifying whatever qualities — virtuous or otherwise — a character already possesses." },
+};
+
+const VOCAB_BANK = {
+  space:   { early:[["enormous","so huge it could be the size of a whole planet"],["glimmer","to shine with a soft, twinkling light, like distant stars"]],
+             elementary:[["vast","stretching so far it feels like it has no end, like outer space"],["hurtle","to move forward extremely fast, the way a rocket does at launch"]],
+             middle:[["celestial","relating to the sky or outer space, such as celestial bodies"],["propulsion","the force that pushes something forward, like a rocket engine"]],
+             high:[["cosmic imagery","using space-scale comparisons to make an idea feel vast or urgent"],["juxtaposition","placing two contrasting ideas — a tiny craft, an infinite sky — side by side for effect"]] },
+  coding:  { early:[["clever","quick-thinking and smart, like solving a tricky puzzle"],["fix","to correct a mistake so something works properly again"]],
+             elementary:[["glitch","a small unexpected error that makes something behave oddly"],["loop","a set of steps that repeats again and again"]],
+             middle:[["algorithm","a clear set of steps followed in order to solve a problem"],["iterate","to repeat a process, improving it a little each time"]],
+             high:[["logical scaffolding","structuring an argument in ordered, dependent steps, the way a program is built"],["parallelism","repeating a grammatical pattern to build rhythm and emphasis"]] },
+  gaming:  { early:[["valiant","very brave, especially when facing something scary"],["victory","the moment of winning after a hard challenge"]],
+             elementary:[["strategy","a clever plan used to reach a goal"],["achievement","something impressive earned through effort"]],
+             middle:[["immersive","so engaging that you forget the outside world"],["adversary","an opponent or rival working against the main character"]],
+             high:[["escalation","a structure where stakes rise in stages toward a climax"],["anaphora","repeating a word or phrase at the start of successive sentences for emphasis"]] },
+  lit:     { early:[["sorrowful","feeling very sad"],["exclaimed","said suddenly and loudly, showing strong feeling"]],
+             elementary:[["vivid","described so clearly it feels real in your mind"],["narrator","the voice telling the story"]],
+             middle:[["foreshadowing","a hint dropped early that suggests what will happen later"],["symbolism","using an object or image to represent a bigger idea"]],
+             high:[["unreliable narrator","a narrator whose credibility is deliberately in question"],["pathos","language crafted to appeal to the reader's emotions"]] },
+  history: { early:[["ancient","from a very long time ago"],["important","mattering a great deal"]],
+             elementary:[["invasion","when one group enters another's land by force"],["monarch","a king or queen who rules a country"]],
+             middle:[["primary source","first-hand evidence from the time period being studied"],["legacy","the lasting effect something leaves behind"]],
+             high:[["turning point","a moment after which events could not return to how they were"],["counterfactual reasoning","exploring what might have happened had events unfolded differently"]] },
+  pop:     { early:[["sensational","amazing and exciting"],["renowned","famous and well respected"]],
+             elementary:[["trend","something many people are suddenly interested in"],["spotlight","the centre of everyone's attention"]],
+             middle:[["iconic","so recognisable it represents an entire era or idea"],["satire","using humour to criticise or point out flaws"]],
+             high:[["cultural commentary","writing that uses a text to comment on wider society"],["hyperbole","deliberate exaggeration used for emphasis or effect"]] },
+  exam:    { early:[["careful","done with close attention to detail"],["clear","easy to understand"]],
+             elementary:[["demonstrate","to clearly show a skill or piece of knowledge"],["analyse","to look closely at something to explain how it works"]],
+             middle:[["substantiate","to support a claim with solid evidence"],["concise","expressed clearly in few words"]],
+             high:[["synthesis","combining ideas from multiple sources into one coherent argument"],["counter-rebuttal","directly addressing an opposing view before reinforcing your own"]] },
+};
+
+const PRAISE = {
+  early: (g)=>`Wonderful storytelling! You used capital letters and full stops correctly all the way through — exactly what we’re practising this term in ${g}.`,
+  elementary: (g)=>`Great effort! Your story has a clear beginning, middle and end, and you’re getting closer to mastering fronted adverbials for ${g}.`,
+  middle: (g)=>`Nice work — your paragraphing is becoming much stronger, right in line with the ${g} inference-and-evidence target.`,
+  high: (g)=>`Strong draft. Your thesis directly answers the question, which is exactly what examiners are looking for at ${g} level.`,
+};
+
+// Base skill each growth tip targets, before it's explained through the student's interest.
+const GROWTH_TIP_BASE = {
+  early: "Next time, try starting one sentence with a describing word, like “Suddenly,” to make your story even more exciting.",
+  elementary: "Try opening one sentence with a fronted adverbial, such as “Without warning,” or “Later that day,” to add variety.",
+  middle: "Push your argument one step further: add a sentence that directly addresses a counterargument before returning to your main point.",
+  high: "To move this from “in progress” to “mastered,” close one body paragraph with a synthesis sentence that links your evidence back to the wider debate, rather than restating your point.",
+};
+const MICRO_MISSION_BASE = {
+  early: "Use 3 describing words (adjectives) to tell us what things look like!",
+  elementary: "Start two sentences with a fronted adverbial, like “Without hesitation,”",
+  middle: "Include one sentence that considers the opposite point of view before you respond to it.",
+  high: "End each body paragraph with a synthesis sentence linking evidence back to your thesis.",
+};
+
+// Explains the same skill through the lens of the student's chosen interest, so
+// the feedback lands as something they already understand rather than an abstract rule.
+const INTEREST_ANALOGY = {
+  space:   { early: "like a rocket launch — a big countdown before the exciting blast-off",
+             elementary: "like a mission control checklist, where each step has to happen in the right order before launch",
+             middle: "like a launch countdown — tension building in careful stages before the big moment",
+             high: "like a spacecraft's trajectory, where every stage quietly corrects course toward one destination" },
+  coding:  { early: "like giving a robot instructions — first this, then this, then this",
+             elementary: "like a level you're building in a game — one clear goal, then a twist to keep it interesting",
+             middle: "like a function: one clear input (your point), a process (your reasoning), and an output (your conclusion)",
+             high: "like well-structured code, where each paragraph is a function that takes your evidence in and returns a clear conclusion" },
+  gaming:  { early: "like a mini-boss fight — build up the excitement, then the big moment",
+             elementary: "like levelling up — each part of your story unlocks the next part of the adventure",
+             middle: "like a boss fight: raise the tension, then land your strongest hit — your best evidence — at the right moment",
+             high: "like a well-paced boss encounter, with rising stakes, a clear turning point, and a resolution" },
+  lit:     { early: "like your favourite story — a beginning, an exciting middle, and a happy ending",
+             elementary: "like the end of a book chapter, which should leave the reader wanting to turn the page",
+             middle: "like foreshadowing in a novel — plant a detail early, then pay it off later",
+             high: "like a novel's narrative arc: setup, complication, then resolution" },
+  history: { early: "like telling a story about long ago — first, next, and last",
+             elementary: "like a timeline, where one event leads clearly into the next",
+             middle: "like cause and effect in a historical event, where one action leads clearly to the next",
+             high: "like a historian building a case: evidence first, interpretation second" },
+  pop:     { early: "like your favourite show building up to the exciting bit",
+             elementary: "like a trailer — hook the audience early, save the best part for last",
+             middle: "like a plot twist in a film: set it up quietly, then reveal it",
+             high: "like a well-edited scene — build-up, climax, then a clean cut to the next idea" },
+  exam:    { early: "like following a recipe, one step at a time, in order",
+             elementary: "like a checklist, where you tick off one step before moving to the next",
+             middle: "like a mark scheme — hit each point clearly, in the order it's expecting",
+             high: "like an examiner's mark scheme: address the question, evidence it, then weigh it up" },
+};
+function analogyFor(interest, tier){
+  return (INTEREST_ANALOGY[interest] || INTEREST_ANALOGY.exam)[tier];
+}
+function growthTipFor(tier, interest){
+  return `${GROWTH_TIP_BASE[tier]} Think of it ${analogyFor(interest, tier)}.`;
+}
+function microMissionFor(tier, interest){
+  return `${MICRO_MISSION_BASE[tier]} It works ${analogyFor(interest, tier)} — one step earning the next.`;
+}
+
+/* ---------------------------------------------------------------- */
+/* Small shared UI primitives                                        */
+/* ---------------------------------------------------------------- */
+function Pill({ active, onClick, icon: IconEl, children, tone = "cyan" }){
+  const toneVars = tone === "gold"
+    ? { "--t-bg": "var(--gold-tint)", "--t-ink": "var(--gold-ink)", "--t-ring": "var(--gold)" }
+    : { "--t-bg": "var(--cyan-tint)", "--t-ink": "var(--cyan-ink)", "--t-ring": "var(--cyan)" };
+  return (
+    <button onClick={onClick}
+      className={"focus-ring inline-flex items-center gap-1.5 rounded-full border px-3.5 py-2 text-sm font-medium transition-all " +
+        (active ? "border-transparent" : "border-[var(--border)] text-[var(--ink-soft)] hover:border-[var(--ink-faint)]")}
+      style={{
+        ...(active ? toneVars : {}),
+        background: active ? "var(--t-bg)" : "var(--surface)",
+        color: active ? "var(--t-ink)" : "var(--ink-soft)",
+        boxShadow: active ? "inset 0 0 0 1.5px var(--t-ring)" : "none",
+      }}>
+      {IconEl && <IconEl size={15} strokeWidth={2} />}
+      {children}
+    </button>
+  );
+}
+
+function StatusTag({ status }){
+  const s = STATUS_STYLE[status];
+  const SIcon = s.icon;
+  return (
+    <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold whitespace-nowrap"
+      style={{ background: s.bg, color: s.ink }}>
+      <SIcon size={12} strokeWidth={2.4} />{status}
+    </span>
+  );
+}
+
+function SectionLabel({ children }){
+  return <div className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--ink-faint)" }}>{children}</div>;
+}
+
+/* ---------------------------------------------------------------- */
+/* Header                                                             */
+/* ---------------------------------------------------------------- */
+function Header({ view, setView, used, total, theme, setTheme }){
+  const remaining = total - used;
+  return (
+    <header className="sticky top-0 z-30 border-b backdrop-blur-md" style={{ borderColor: "var(--border)", background: "color-mix(in srgb, var(--surface) 88%, transparent)" }}>
+      <div className="mx-auto max-w-6xl px-4 sm:px-6 py-3.5 flex items-center justify-between gap-3 flex-wrap">
+        <a href="index.html" className="focus-ring flex items-center gap-2.5" style={{ textDecoration: "none" }}>
+          <div className="relative w-10 h-10 rounded-2xl grid place-items-center shrink-0"
+            style={{ background: "linear-gradient(135deg, var(--ink), #33455F)" }}>
+            <IconFlask size={16} strokeWidth={2} className="text-[var(--cyan)] absolute -translate-x-1.5 -translate-y-1" />
+            <IconBook size={16} strokeWidth={2} className="text-[var(--gold)] absolute translate-x-1.5 translate-y-1.5" />
+          </div>
+          <div className="leading-tight">
+            <div className="font-display font-bold text-[17px]" style={{ color: "var(--ink)" }}>LiteracyLab <span style={{ color: "var(--cyan-ink)" }}>AI</span></div>
+            <div className="text-[11px] font-medium" style={{ color: "var(--ink-faint)" }}>Adaptive reading &amp; writing coach</div>
+          </div>
+        </a>
+
+        <div className="flex items-center gap-2 order-3 sm:order-2 w-full sm:w-auto justify-center">
+          <div className="inline-flex p-1 rounded-full border" style={{ borderColor: "var(--border)", background: "var(--surface-2)" }}>
+            {[["workspace","Student Workspace",IconPen],["dashboard","Parent & Student Dashboard",IconGrid]].map(([key,label,IconEl])=>(
+              <button key={key} onClick={()=>setView(key)}
+                className="focus-ring inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[13px] font-semibold transition-colors"
+                style={ view===key ? { background: "var(--ink)", color: "white" } : { color: "var(--ink-soft)" } }
+              >
+                <IconEl size={14} strokeWidth={2.2} />
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 order-2 sm:order-3">
+          <button onClick={()=>setTheme(theme === "dark" ? "light" : "dark")}
+            className="focus-ring w-8 h-8 rounded-full border grid place-items-center shrink-0"
+            style={{ borderColor: "var(--border)", color: "var(--ink-soft)" }} aria-label="Toggle theme">
+            {theme === "dark" ? <IconSun size={15} /> : <IconMoon size={15} />}
+          </button>
+          <div className="hidden md:flex items-center gap-2 rounded-full border pl-3 pr-1 py-1" style={{ borderColor: "var(--border)", background: "var(--surface-2)" }}>
+            <span className="text-xs font-medium" style={{ color: "var(--ink-soft)" }}>
+              Free Plan: <span className="font-bold tabular" style={{ color: remaining <= 1 ? "var(--bad)" : "var(--ink)" }}>{remaining}</span> of {total} monthly stories/essays remaining
+            </span>
+            <span className="rounded-full px-2 py-1 text-[11px] font-bold" style={{ background: "var(--gold-tint)", color: "var(--gold-ink)" }}>FREE</span>
+          </div>
+        </div>
+      </div>
+    </header>
+  );
+}
+
+/* ---------------------------------------------------------------- */
+/* Dashboard                                                          */
+/* ---------------------------------------------------------------- */
+function StatTile({ icon: IconEl, label, value, sub, accent }){
+  return (
+    <div className="card p-5 flex flex-col gap-3">
+      <div className="flex items-center justify-between">
+        <SectionLabel>{label}</SectionLabel>
+        <div className="w-8 h-8 rounded-lg grid place-items-center" style={{ background: accent + "1A", color: accent }}>
+          <IconEl size={16} strokeWidth={2} />
+        </div>
+      </div>
+      <div className="font-display font-extrabold text-3xl tabular" style={{ color: "var(--ink)" }}>{value}</div>
+      <div className="text-[13px]" style={{ color: "var(--ink-soft)" }}>{sub}</div>
+    </div>
+  );
+}
+
+function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests, toggleInterest, used, total, setView }){
+  const grades = GRADE_DATA[country].grades;
+  const gradeLabel = grades[gradeIdx];
+  const remaining = total - used;
+
+  return (
+    <div className="mx-auto max-w-6xl px-4 sm:px-6 py-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="lg:col-span-2 flex flex-col gap-6">
+        <div className="card p-6">
+          <div className="flex items-start justify-between gap-4 flex-wrap mb-5">
+            <div>
+              <h2 className="font-display font-bold text-xl" style={{ color: "var(--ink)" }}>Learner setup</h2>
+              <p className="text-sm mt-0.5" style={{ color: "var(--ink-soft)" }}>Curriculum, year group and interests personalise every prompt and feedback note.</p>
+            </div>
+            <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold" style={{ background: "var(--navy-tint)", color: "var(--ink)" }}>
+              {React.createElement(TIER_META[tier].icon, { size: 13, strokeWidth: 2.3 })}
+              {TIER_META[tier].label} · {TIER_META[tier].ageRange}
+            </span>
+          </div>
+
+          <div className="grid sm:grid-cols-2 gap-4 mb-6">
+            <label className="flex flex-col gap-1.5">
+              <span className="text-xs font-semibold" style={{ color: "var(--ink-soft)" }}>Country curriculum</span>
+              <div className="relative">
+                <select value={country} onChange={(e)=>setCountry(e.target.value)}
+                  className="focus-ring w-full appearance-none rounded-xl border px-3.5 py-2.5 pr-9 text-sm font-medium"
+                  style={{ borderColor: "var(--border)", background: "var(--surface)", color: "var(--ink)" }}>
+                  {COUNTRIES.map(c=> <option key={c} value={c}>{c}</option>)}
+                </select>
+                <IconChevron size={15} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2" style={{ color: "var(--ink-faint)" }} />
+              </div>
+            </label>
+            <label className="flex flex-col gap-1.5">
+              <span className="text-xs font-semibold" style={{ color: "var(--ink-soft)" }}>Grade / year</span>
+              <div className="relative">
+                <select value={gradeIdx} onChange={(e)=>setGradeIdx(Number(e.target.value))}
+                  className="focus-ring w-full appearance-none rounded-xl border px-3.5 py-2.5 pr-9 text-sm font-medium"
+                  style={{ borderColor: "var(--border)", background: "var(--surface)", color: "var(--ink)" }}>
+                  {grades.map((g,i)=> <option key={g} value={i}>{g}</option>)}
+                </select>
+                <IconChevron size={15} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2" style={{ color: "var(--ink-faint)" }} />
+              </div>
+            </label>
+          </div>
+
+          <span className="text-xs font-semibold" style={{ color: "var(--ink-soft)" }}>Interests &amp; goals</span>
+          <div className="flex flex-wrap gap-2 mt-2">
+            {INTERESTS.map(({id,label,icon})=> (
+              <Pill key={id} active={interests.includes(id)} onClick={()=>toggleInterest(id)} icon={icon}>{label}</Pill>
+            ))}
+          </div>
+        </div>
+
+        <div className="card p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-display font-bold text-xl" style={{ color: "var(--ink)" }}>Target mastery — {gradeLabel}</h2>
+            <span className="text-xs font-medium" style={{ color: "var(--ink-faint)" }}>{country}</span>
+          </div>
+          <div className="overflow-x-auto -mx-2 px-2">
+            <table className="w-full text-sm border-collapse min-w-[420px]">
+              <thead>
+                <tr className="text-left" style={{ color: "var(--ink-faint)" }}>
+                  <th className="font-semibold text-xs uppercase tracking-wider pb-2.5 pr-3">Curriculum target</th>
+                  <th className="font-semibold text-xs uppercase tracking-wider pb-2.5 pr-3">Progress</th>
+                  <th className="font-semibold text-xs uppercase tracking-wider pb-2.5">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {MASTERY_TARGETS[tier].map((row,i)=>(
+                  <tr key={row.name} className="border-t" style={{ borderColor: "var(--border-soft)" }}>
+                    <td className="py-3 pr-3 font-medium" style={{ color: "var(--ink)" }}>{row.name}</td>
+                    <td className="py-3 pr-3 w-40">
+                      <div className="flex items-center gap-2">
+                        <div className="h-2 rounded-full flex-1" style={{ background: "var(--surface-2)" }}>
+                          <div className="h-2 rounded-full" style={{ width: row.pct + "%", background: STATUS_STYLE[row.status].ink }} />
+                        </div>
+                        <span className="text-xs font-semibold tabular w-8" style={{ color: "var(--ink-soft)" }}>{row.pct}%</span>
+                      </div>
+                    </td>
+                    <td className="py-3"><StatusTag status={row.status} /></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-6">
+        <div className="grid grid-cols-2 gap-4">
+          <StatTile icon={IconTrend} label="Overall Mastery" value="72%" sub="+6% this month" accent="#0F9D66" />
+          <StatTile icon={IconPen} label="Words Written" value="8,450" sub="Across 14 pieces" accent="#0E7A93" />
+          <div className="col-span-2">
+            <StatTile icon={IconFlame} label="Active Streak" value="12 days" sub="Personal best: 19 days" accent="#F59E0B" />
+          </div>
+        </div>
+
+        <div className="card p-6 relative overflow-hidden" style={{ background: "linear-gradient(160deg, var(--ink), #2B3B54)" }}>
+          <div className="absolute -right-6 -top-6 w-28 h-28 rounded-full" style={{ background: "radial-gradient(circle, var(--cyan) 0%, transparent 70%)", opacity: .35 }} />
+          <div className="relative">
+            <div className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold mb-3" style={{ background: "var(--gold)", color: "#3B2606" }}>
+              <IconCrown size={12} strokeWidth={2.4} /> LITERACYLAB PRO
+            </div>
+            <h3 className="font-display font-bold text-lg text-white mb-1.5">{remaining <= 1 ? "Almost at your monthly limit" : "Unlock unlimited submissions"}</h3>
+            <p className="text-[13px] mb-4" style={{ color: "#C7D2E4" }}>
+              You’ve used {used} of {total} free stories/essays this month. Pro adds unlimited submissions, deeper rhetorical analysis and progress reports for every child.
+            </p>
+            <ul className="text-[13px] space-y-1.5 mb-5" style={{ color: "#DCE4F2" }}>
+              {["Unlimited monthly submissions","Advanced exam-technique scoring","Weekly progress reports by email"].map(t=>(
+                <li key={t} className="flex items-center gap-2"><IconCheck size={13} strokeWidth={2.4} style={{ color: "var(--cyan)" }} />{t}</li>
+              ))}
+            </ul>
+            <button className="focus-ring w-full rounded-xl py-2.5 font-display font-bold text-sm inline-flex items-center justify-center gap-1.5"
+              style={{ background: "var(--cyan)", color: "#04303A" }}>
+              Upgrade to Pro <IconArrowRight size={15} strokeWidth={2.3} />
+            </button>
+          </div>
+        </div>
+
+        <button onClick={()=>setView("workspace")}
+          className="focus-ring card p-5 flex items-center justify-between text-left hover:border-[var(--cyan)] transition-colors">
+          <div>
+            <div className="font-display font-semibold text-sm" style={{ color: "var(--ink)" }}>Go to Student Workspace</div>
+            <div className="text-xs mt-0.5" style={{ color: "var(--ink-soft)" }}>Start today’s {TIER_META[tier].label.toLowerCase()} writing session</div>
+          </div>
+          <IconArrowRight size={18} style={{ color: "var(--cyan-ink)" }} />
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/* ---------------------------------------------------------------- */
+/* Feedback engine output                                             */
+/* ---------------------------------------------------------------- */
+function FeedbackPanel({ tier, gradeLabel, country, interest, seed }){
+  const vocabList = VOCAB_BANK[interest] ? VOCAB_BANK[interest][tier] : VOCAB_BANK.exam[tier];
+  const interestLabel = (INTERESTS.find(i=>i.id===interest) || INTERESTS[0]).label;
+  return (
+    <div className="animate-float-in flex flex-col gap-4">
+      <div className="card p-5 sm:p-6" style={{ borderColor: "var(--good)", borderWidth: 1.5 }}>
+        <div className="flex items-center gap-2 mb-2">
+          <div className="w-8 h-8 rounded-full grid place-items-center" style={{ background: "var(--good-tint)", color: "var(--good)" }}>
+            <IconCheck size={16} strokeWidth={2.4} />
+          </div>
+          <h3 className="font-display font-bold" style={{ color: "var(--ink)" }}>Praise &amp; encouragement</h3>
+        </div>
+        <p className="text-[15px] leading-relaxed font-read" style={{ color: "var(--ink)" }}>{PRAISE[tier](gradeLabel)}</p>
+      </div>
+
+      <div className="card p-5 sm:p-6" style={{ borderColor: "var(--cyan)", borderWidth: 1.5 }}>
+        <div className="flex items-center justify-between gap-2 mb-2 flex-wrap">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-full grid place-items-center" style={{ background: "var(--cyan-tint)", color: "var(--cyan-ink)" }}>
+              <IconTarget size={16} strokeWidth={2.2} />
+            </div>
+            <h3 className="font-display font-bold" style={{ color: "var(--ink)" }}>Your next growth step</h3>
+          </div>
+          <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold" style={{ background: "var(--cyan-tint)", color: "var(--cyan-ink)" }}>
+            explained through {interestLabel}
+          </span>
+        </div>
+        <p className="text-[15px] leading-relaxed font-read" style={{ color: "var(--ink)" }}>{growthTipFor(tier, interest)}</p>
+      </div>
+
+      <div className="card p-5 sm:p-6">
+        <div className="flex items-center gap-2 mb-3">
+          <div className="w-8 h-8 rounded-full grid place-items-center" style={{ background: "var(--gold-tint)", color: "var(--gold-ink)" }}>
+            <IconSparkle size={16} strokeWidth={2.2} />
+          </div>
+          <h3 className="font-display font-bold" style={{ color: "var(--ink)" }}>Vocabulary spotlight — {interestLabel} edition</h3>
+        </div>
+        <div className="grid sm:grid-cols-2 gap-3">
+          {vocabList.map(([term,def])=> (
+            <div key={term} className="rounded-xl p-4" style={{ background: "var(--gold-tint)" }}>
+              <div className="font-display font-bold text-sm mb-1" style={{ color: "var(--gold-ink)" }}>{term}</div>
+              <div className="text-[13px] leading-snug" style={{ color: "var(--ink)" }}>{def}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="card p-5 sm:p-6 flex items-start gap-3" style={{ background: "linear-gradient(135deg, var(--ink), #2B3B54)" }}>
+        <div className="w-9 h-9 rounded-full grid place-items-center shrink-0" style={{ background: "var(--gold)", color: "#3B2606" }}>
+          <IconFlame size={17} strokeWidth={2.2} />
+        </div>
+        <div>
+          <div className="font-display font-bold text-sm text-white mb-1">Micro-mission for next time</div>
+          <p className="text-[13px]" style={{ color: "#D5DEEE" }}>{microMissionFor(tier, interest)}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ---------------------------------------------------------------- */
+/* Student Workspace                                                  */
+/* ---------------------------------------------------------------- */
+function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, interests, used, total, onSubmit }){
+  const grades = GRADE_DATA[country].grades;
+  const gradeLabel = grades[gradeIdx];
+  const meta = PROMPTS[tier];
+  const [text, setText] = useState(meta.sample);
+  const [phase, setPhase] = useState("draft"); // draft | analyzing | done
+  const [activeInterest, setActiveInterest] = useState(interests[0] || "exam");
+  const timerRef = useRef(null);
+  const locked = used >= total;
+
+  useEffect(()=>{ setText(PROMPTS[tier].sample); setPhase("draft"); }, [tier]);
+  useEffect(()=>{ if (interests.length && !interests.includes(activeInterest)) setActiveInterest(interests[0]); }, [interests]);
+  useEffect(()=> ()=> clearTimeout(timerRef.current), []);
+
+  const words = useMemo(()=> text.trim().length ? text.trim().split(/\s+/).length : 0, [text]);
+
+  function handleSubmit(){
+    if (locked || phase === "analyzing") return;
+    setPhase("analyzing");
+    timerRef.current = setTimeout(()=>{ setPhase("done"); onSubmit(); }, 2000);
+  }
+  function handleNew(){
+    setText("");
+    setPhase("draft");
+  }
+
+  const tierIcon = TIER_META[tier].icon;
+
+  return (
+    <div className="mx-auto max-w-6xl px-4 sm:px-6 py-8">
+      <div className="flex items-center justify-between flex-wrap gap-3 mb-6">
+        <div>
+          <h2 className="font-display font-bold text-2xl" style={{ color: "var(--ink)" }}>Student Workspace</h2>
+          <p className="text-sm mt-0.5" style={{ color: "var(--ink-soft)" }}>{country} · {gradeLabel}</p>
+        </div>
+        <div className="flex items-center gap-1.5 rounded-full border p-1" style={{ borderColor: "var(--border)", background: "var(--surface-2)" }}>
+          {TIER_KEYS.map(k=>{
+            const TIcon = TIER_META[k].icon;
+            return (
+              <button key={k} onClick={()=>{ setTierOverride(k); }}
+                className="focus-ring flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition-colors"
+                style={ tier===k ? { background: "var(--ink)", color: "white" } : { color: "var(--ink-soft)" } }
+                title={TIER_META[k].ageRange}>
+                <TIcon size={13} strokeWidth={2.2} />{TIER_META[k].label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="grid lg:grid-cols-5 gap-6">
+        <div className="lg:col-span-3 flex flex-col gap-4">
+          <TierEditor
+            tier={tier} meta={meta} text={text} setText={setText} words={words}
+            phase={phase} onSubmit={handleSubmit} onNew={handleNew} locked={locked}
+            interests={interests} activeInterest={activeInterest} setActiveInterest={setActiveInterest}
+          />
+        </div>
+
+        <div className="lg:col-span-2 flex flex-col gap-4">
+          <div className="card p-4 flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg grid place-items-center shrink-0" style={{ background: "var(--navy-tint)", color: "var(--ink)" }}>
+              {React.createElement(tierIcon, { size: 15, strokeWidth: 2.2 })}
+            </div>
+            <div className="text-[13px]" style={{ color: "var(--ink-soft)" }}><span className="font-semibold" style={{ color: "var(--ink)" }}>{TIER_META[tier].label}:</span> {TIER_META[tier].blurb}</div>
+          </div>
+
+          {phase !== "done" && (
+            <div className="card p-6 flex flex-col items-center justify-center text-center gap-3 min-h-[220px]" style={{ borderStyle: "dashed" }}>
+              <div className="w-11 h-11 rounded-full grid place-items-center" style={{ background: "var(--cyan-tint)", color: "var(--cyan-ink)" }}>
+                <IconSparkle size={20} strokeWidth={2} />
+              </div>
+              <div className="font-display font-semibold text-sm" style={{ color: "var(--ink)" }}>Key Takeaways will appear here</div>
+              <p className="text-[13px] max-w-[26ch]" style={{ color: "var(--ink-faint)" }}>Submit your {tier === "high" ? "essay" : "story"} to see personalised feedback from LiteracyLab AI.</p>
+            </div>
+          )}
+          {phase === "done" && (
+            <FeedbackPanel tier={tier} gradeLabel={gradeLabel} country={country} interest={activeInterest} seed={words} />
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function AnalyzingOverlay(){
+  return (
+    <div className="absolute inset-0 z-10 grid place-items-center rounded-[20px]" style={{ background: "color-mix(in srgb, var(--surface) 88%, transparent)", backdropFilter: "blur(2px)" }}>
+      <div className="flex flex-col items-center gap-4 px-6 text-center">
+        <div className="relative w-14 h-14 rounded-full grid place-items-center analyzing-pulse" style={{ background: "var(--cyan-tint)" }}>
+          <IconSparkle size={24} strokeWidth={2} className="animate-spin-slow" style={{ color: "var(--cyan-ink)" }} />
+        </div>
+        <div className="font-display font-semibold text-sm" style={{ color: "var(--ink)" }}>LiteracyLab AI is analyzing curriculum benchmarks…</div>
+        <div className="text-xs" style={{ color: "var(--ink-faint)" }}>Checking grammar, structure and vocabulary against your targets</div>
+      </div>
+    </div>
+  );
+}
+
+function WordMeter({ words, target }){
+  const pct = Math.min(100, Math.round((words/target)*100));
+  return (
+    <div className="flex items-center gap-2.5">
+      <div className="h-1.5 w-24 rounded-full" style={{ background: "var(--surface-2)" }}>
+        <div className="h-1.5 rounded-full transition-all" style={{ width: pct + "%", background: pct >= 100 ? "var(--good)" : "var(--cyan)" }} />
+      </div>
+      <span className="text-xs font-semibold tabular whitespace-nowrap" style={{ color: "var(--ink-soft)" }}>{words} / {target} words</span>
+    </div>
+  );
+}
+
+function TierEditor({ tier, meta, text, setText, words, phase, onSubmit, onNew, locked, interests, activeInterest, setActiveInterest }){
+  const submitLabel = tier === "high" ? "Submit Essay" : "Submit Story";
+  const disabled = phase === "analyzing" || locked;
+
+  if (tier === "early") {
+    return (
+      <div className="card p-6 relative overflow-hidden" style={{ borderRadius: 28, borderWidth: 2, borderStyle: "dashed", borderColor: "var(--gold)" }}>
+        {phase === "analyzing" && <AnalyzingOverlay />}
+        <div className="flex items-center gap-2 mb-3">
+          <span className="w-9 h-9 rounded-2xl grid place-items-center" style={{ background: "var(--gold-tint)", color: "var(--gold-ink)" }}><IconSparkle size={18} /></span>
+          <h3 className="font-display font-extrabold text-xl" style={{ color: "var(--ink)" }}>{meta.title}</h3>
+        </div>
+        <p className="font-read text-lg leading-snug mb-4" style={{ color: "var(--ink)" }}>{meta.prompt}</p>
+        <button className="focus-ring inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold mb-3" style={{ background: "var(--cyan-tint)", color: "var(--cyan-ink)" }}>
+          <IconMic size={14} strokeWidth={2.3} /> Read prompt aloud
+        </button>
+        <textarea value={text} onChange={(e)=>setText(e.target.value)} rows={9} disabled={disabled}
+          className="focus-ring w-full rounded-2xl border-2 p-4 font-read text-xl leading-relaxed resize-none"
+          style={{ borderColor: "var(--border)", background: "var(--surface-2)", color: "var(--ink)" }}
+          placeholder="Start typing your story here…" />
+        <div className="flex items-center justify-between mt-4 flex-wrap gap-3">
+          <WordMeter words={words} target={meta.target} />
+          {phase !== "done" ? (
+            <button onClick={onSubmit} disabled={disabled}
+              className="focus-ring inline-flex items-center gap-2 rounded-full px-5 py-2.5 font-display font-extrabold text-sm disabled:opacity-60"
+              style={{ background: "var(--gold)", color: "#3B2606" }}>
+              {locked ? <><IconLock size={15} /> Upgrade to Continue</> : <>{submitLabel} <IconSend size={15} /></>}
+            </button>
+          ) : (
+            <button onClick={onNew} className="focus-ring inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-bold" style={{ background: "var(--navy-tint)", color: "var(--ink)" }}>New Story</button>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  if (tier === "elementary") {
+    const badges = [
+      { label: "Word Wizard", earned: words >= 50 },
+      { label: "Great Opener", earned: /^[A-Z]/.test(text.trim()) },
+      { label: "Mission Ready", earned: words >= meta.target },
+    ];
+    return (
+      <div className="card p-6 relative overflow-hidden" style={{ borderRadius: 24 }}>
+        {phase === "analyzing" && <AnalyzingOverlay />}
+        <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+          <div className="flex items-center gap-2">
+            <span className="w-9 h-9 rounded-xl grid place-items-center" style={{ background: "var(--cyan-tint)", color: "var(--cyan-ink)" }}><IconTarget size={17} /></span>
+            <h3 className="font-display font-bold text-lg" style={{ color: "var(--ink)" }}>{meta.title}</h3>
+          </div>
+          <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold" style={{ background: "var(--gold-tint)", color: "var(--gold-ink)" }}>
+            <IconFlame size={12} /> +50 XP on submit
+          </span>
+        </div>
+        <p className="text-[15px] mb-4" style={{ color: "var(--ink)" }}>{meta.prompt}</p>
+        <div className="flex gap-2 mb-4 flex-wrap">
+          {badges.map(b=> (
+            <span key={b.label} className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold"
+              style={{ background: b.earned ? "var(--good-tint)" : "var(--surface-2)", color: b.earned ? "var(--good)" : "var(--ink-faint)" }}>
+              <IconAward size={12} strokeWidth={2.3} /> {b.label}
+            </span>
+          ))}
+        </div>
+        <textarea value={text} onChange={(e)=>setText(e.target.value)} rows={10} disabled={disabled}
+          className="focus-ring w-full rounded-2xl border p-4 text-base leading-relaxed resize-none"
+          style={{ borderColor: "var(--border)", background: "var(--surface-2)", color: "var(--ink)" }}
+          placeholder="Start your mission here…" />
+        <div className="flex items-center justify-between mt-4 flex-wrap gap-3">
+          <WordMeter words={words} target={meta.target} />
+          {phase !== "done" ? (
+            <button onClick={onSubmit} disabled={disabled}
+              className="focus-ring inline-flex items-center gap-2 rounded-full px-5 py-2.5 font-display font-bold text-sm disabled:opacity-60"
+              style={{ background: "var(--cyan)", color: "#04303A" }}>
+              {locked ? <><IconLock size={15} /> Upgrade to Continue</> : <>{submitLabel} <IconSend size={15} /></>}
+            </button>
+          ) : (
+            <button onClick={onNew} className="focus-ring inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-bold" style={{ background: "var(--navy-tint)", color: "var(--ink)" }}>New Mission</button>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  if (tier === "middle") {
+    return (
+      <div className="card p-0 relative overflow-hidden">
+        {phase === "analyzing" && <AnalyzingOverlay />}
+        <div className="px-6 pt-5 pb-4 border-b" style={{ borderColor: "var(--border-soft)" }}>
+          <SectionLabel>Analytical response</SectionLabel>
+          <h3 className="font-display font-semibold text-lg mt-0.5" style={{ color: "var(--ink)" }}>{meta.title}</h3>
+          <p className="text-sm mt-1.5" style={{ color: "var(--ink-soft)" }}>{meta.prompt}</p>
+        </div>
+        <textarea value={text} onChange={(e)=>setText(e.target.value)} rows={14} disabled={disabled}
+          className="focus-ring w-full p-6 font-read text-[16px] leading-[1.75] resize-none border-0"
+          style={{ background: "var(--surface)", color: "var(--ink)" }}
+          placeholder="Write your response here…" />
+        <div className="flex items-center justify-between px-6 py-4 border-t flex-wrap gap-3" style={{ borderColor: "var(--border-soft)" }}>
+          <WordMeter words={words} target={meta.target} />
+          {phase !== "done" ? (
+            <button onClick={onSubmit} disabled={disabled}
+              className="focus-ring inline-flex items-center gap-2 rounded-lg px-4 py-2 font-display font-semibold text-sm disabled:opacity-60"
+              style={{ background: "var(--ink)", color: "white" }}>
+              {locked ? <><IconLock size={15} /> Upgrade to Continue</> : <>{submitLabel} <IconSend size={14} /></>}
+            </button>
+          ) : (
+            <button onClick={onNew} className="focus-ring inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-semibold" style={{ background: "var(--surface-2)", color: "var(--ink)" }}>New response</button>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // high school
+  return (
+    <div className="card p-0 relative overflow-hidden">
+      {phase === "analyzing" && <AnalyzingOverlay />}
+      <div className="px-6 pt-5 pb-4 border-b flex items-start justify-between gap-3 flex-wrap" style={{ borderColor: "var(--border-soft)", background: "var(--surface-2)" }}>
+        <div>
+          <SectionLabel>Timed essay practice</SectionLabel>
+          <h3 className="font-display font-semibold text-lg mt-0.5" style={{ color: "var(--ink)" }}>{meta.title}</h3>
+        </div>
+        <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold shrink-0" style={{ background: "var(--surface)", color: "var(--ink-soft)", border: "1px solid var(--border)" }}>
+          <IconClock size={13} /> 40:00 remaining
+        </span>
+      </div>
+      <p className="font-read text-[15px] px-6 pt-4 pb-2 leading-relaxed" style={{ color: "var(--ink)" }}>{meta.prompt}</p>
+      <textarea value={text} onChange={(e)=>setText(e.target.value)} rows={16} disabled={disabled}
+        className="focus-ring w-full px-6 py-4 font-read text-[15.5px] leading-[1.8] resize-none border-0"
+        style={{ background: "var(--surface)", color: "var(--ink)" }}
+        placeholder="Begin your response here…" />
+      <div className="flex items-center justify-between px-6 py-4 border-t flex-wrap gap-3" style={{ borderColor: "var(--border-soft)" }}>
+        <WordMeter words={words} target={meta.target} />
+        {phase !== "done" ? (
+          <button onClick={onSubmit} disabled={disabled}
+            className="focus-ring inline-flex items-center gap-2 rounded-lg px-5 py-2.5 font-display font-semibold text-sm disabled:opacity-60"
+            style={{ background: "var(--ink)", color: "white" }}>
+            {locked ? <><IconLock size={15} /> Upgrade to Continue</> : <>{submitLabel} <IconSend size={14} /></>}
+          </button>
+        ) : (
+          <button onClick={onNew} className="focus-ring inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-semibold" style={{ background: "var(--surface-2)", color: "var(--ink)" }}>New essay</button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ---------------------------------------------------------------- */
+/* App                                                                */
+/* ---------------------------------------------------------------- */
+function App(){
+  const [theme, setTheme] = useState("system");
+  const [view, setView] = useState("workspace");
+  const [country, setCountry] = useState("United Kingdom");
+  const [gradeIdx, setGradeIdx] = useState(5); // Year 5
+  const [tierOverride, setTierOverride] = useState(null);
+  const [interests, setInterests] = useState(["space","gaming"]);
+  const [used, setUsed] = useState(1);
+  const total = 3;
+
+  useEffect(()=>{
+    const root = document.documentElement;
+    if (theme === "system") root.removeAttribute("data-theme");
+    else root.setAttribute("data-theme", theme);
+  }, [theme]);
+
+  const naturalTier = tierForGrade(country, gradeIdx);
+  const tier = tierOverride || naturalTier;
+
+  function setTierAndSyncGrade(k){
+    setTierOverride(k);
+    setGradeIdx(defaultGradeIndexForTier(country, k));
+  }
+  function handleCountryChange(c){
+    setCountry(c);
+    setGradeIdx(defaultGradeIndexForTier(c, tier));
+  }
+  function handleGradeChange(idx){
+    setGradeIdx(idx);
+    setTierOverride(null);
+  }
+  function toggleInterest(id){
+    setInterests(prev => prev.includes(id) ? prev.filter(x=>x!==id) : [...prev, id]);
+  }
+  function handleSubmit(){
+    setUsed(u => Math.min(total, u+1));
+  }
+
+  return (
+    <div className="min-h-screen">
+      <Header view={view} setView={setView} used={used} total={total} theme={theme === "system" ? "light" : theme} setTheme={setTheme} />
+      <div className="md:hidden mx-auto max-w-6xl px-4 pt-3">
+        <div className="rounded-xl border px-3 py-2 text-xs font-medium flex items-center justify-between" style={{ borderColor: "var(--border)", background: "var(--surface-2)", color: "var(--ink-soft)" }}>
+          <span>Free Plan: <b className="tabular" style={{ color: "var(--ink)" }}>{total-used}</b> of {total} remaining</span>
+          <span className="rounded-full px-2 py-0.5 text-[10px] font-bold" style={{ background: "var(--gold-tint)", color: "var(--gold-ink)" }}>FREE</span>
+        </div>
+      </div>
+      {view === "dashboard" ? (
+        <Dashboard country={country} setCountry={handleCountryChange} gradeIdx={gradeIdx} setGradeIdx={handleGradeChange}
+          tier={tier} interests={interests} toggleInterest={toggleInterest} used={used} total={total} setView={setView} />
+      ) : (
+        <Workspace country={country} gradeIdx={gradeIdx} setGradeIdx={handleGradeChange} tier={tier} setTierOverride={setTierAndSyncGrade}
+          interests={interests} used={used} total={total} onSubmit={handleSubmit} />
+      )}
+      <footer className="mx-auto max-w-6xl px-4 sm:px-6 py-10 text-center text-xs" style={{ color: "var(--ink-faint)" }}>
+        LiteracyLab AI · interactive prototype — all learner data shown is sample data.
+      </footer>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
