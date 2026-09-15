@@ -189,18 +189,30 @@ const IconGrad = (p) => <Icon {...p}><path d="M2.5 9.5L12 5l9.5 4.5L12 14z" /><p
 const IconMic = (p) => <Icon {...p}><rect x="9" y="3" width="6" height="11" rx="3" /><path d="M6 11a6 6 0 0 0 12 0M12 17v4M9 21h6" /></Icon>;
 const IconArrowRight = (p) => <Icon {...p}><path d="M4.5 12h15M13.5 6l6 6-6 6" /></Icon>;
 const IconMoon = (p) => <Icon {...p}><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z" /></Icon>;
+const IconX = (p) => <Icon {...p}><path d="M6 6l12 12M18 6L6 18" /></Icon>;
 const IconSun = (p) => <Icon {...p}><circle cx="12" cy="12" r="4.2" /><path d="M12 2.5v2.3M12 19.2v2.3M4.4 4.4l1.6 1.6M18 18l1.6 1.6M2.5 12h2.3M19.2 12h2.3M4.4 19.6L6 18M18 6l1.6-1.6" /></Icon>;
 
 /* ---------------------------------------------------------------- */
 /* Domain data                                                       */
 /* ---------------------------------------------------------------- */
-const COUNTRIES = ["United Kingdom", "United States", "Australia", "Canada"];
+const COUNTRIES = [
+  "🇬🇧 United Kingdom",
+  "🇺🇸 United States",
+  "🇦🇺 Australia",
+  "🇨🇦 Canada",
+  "🇦🇪 UAE & GCC Hubs",
+  "🇸🇬 Singapore & SE Asia",
+  "🌐 Global ESL Mode",
+];
 
 const GRADE_DATA = {
-  "United Kingdom": { grades: ["Reception","Year 1","Year 2","Year 3","Year 4","Year 5","Year 6","Year 7","Year 8","Year 9","Year 10","Year 11","Year 12","Year 13"], tiers: [3,7,10,14] },
-  "United States":  { grades: ["Kindergarten","Grade 1","Grade 2","Grade 3","Grade 4","Grade 5","Grade 6","Grade 7","Grade 8","Grade 9","Grade 10","Grade 11","Grade 12"], tiers: [3,6,9,13] },
-  "Australia":      { grades: ["Foundation","Year 1","Year 2","Year 3","Year 4","Year 5","Year 6","Year 7","Year 8","Year 9","Year 10","Year 11","Year 12"], tiers: [3,7,10,13] },
-  "Canada":         { grades: ["Kindergarten","Grade 1","Grade 2","Grade 3","Grade 4","Grade 5","Grade 6","Grade 7","Grade 8","Grade 9","Grade 10","Grade 11","Grade 12"], tiers: [3,6,9,13] },
+  "🇬🇧 United Kingdom": { curriculum: "UK National Curriculum / GCSE", grades: ["Reception","Year 1","Year 2","Year 3","Year 4","Year 5","Year 6","Year 7","Year 8","Year 9","Year 10","Year 11","Year 12","Year 13"], tiers: [3,7,10,14] },
+  "🇺🇸 United States":  { curriculum: "Common Core State Standards / AP", grades: ["Kindergarten","Grade 1","Grade 2","Grade 3","Grade 4","Grade 5","Grade 6","Grade 7","Grade 8","Grade 9","Grade 10","Grade 11","Grade 12"], tiers: [3,6,9,13] },
+  "🇦🇺 Australia":      { curriculum: "ACARA Curriculum Standards", grades: ["Foundation","Year 1","Year 2","Year 3","Year 4","Year 5","Year 6","Year 7","Year 8","Year 9","Year 10","Year 11","Year 12"], tiers: [3,7,10,13] },
+  "🇨🇦 Canada":         { curriculum: "Provincial Language Arts Benchmarks", grades: ["Kindergarten","Grade 1","Grade 2","Grade 3","Grade 4","Grade 5","Grade 6","Grade 7","Grade 8","Grade 9","Grade 10","Grade 11","Grade 12"], tiers: [3,6,9,13] },
+  "🇦🇪 UAE & GCC Hubs": { curriculum: "Cambridge IGCSE & IB Primary/Middle Years", grades: ["Cambridge Primary 1","Cambridge Primary 2","Cambridge Primary 3","Cambridge Primary 4","Cambridge Primary 5","Cambridge Primary 6","Lower Secondary 7","Lower Secondary 8","Lower Secondary 9","IGCSE Year 10","IGCSE Year 11","AS Level (Yr 12)","A Level (Yr 13)"], tiers: [3,6,9,13] },
+  "🇸🇬 Singapore & SE Asia": { curriculum: "Cambridge Academic & IB Pathway", grades: ["Primary 1","Primary 2","Primary 3","Primary 4","Primary 5","Primary 6","Secondary 1","Secondary 2","Secondary 3","O-Level / IGCSE Yr 4","O-Level / IGCSE Yr 5","IB Diploma Yr 1","IB Diploma Yr 2"], tiers: [3,6,9,13] },
+  "🌐 Global ESL Mode": { curriculum: "CEFR Alignment: A1 Beginner to C2 Proficient", grades: ["A1 Beginner","A2 Elementary","B1 Intermediate","B2 Upper-Intermediate","C1 Advanced","C2 Proficient"], tiers: [1,2,4,6] },
 };
 const TIER_KEYS = ["early","elementary","middle","high"];
 function tierForGrade(country, idx){
@@ -218,10 +230,10 @@ function defaultGradeIndexForTier(country, tierKey){
 }
 
 const TIER_META = {
-  early:      { label: "Early Readers", ageRange: "Ages 5–7",  icon: IconFeather, blurb: "Big text, warm encouragement, read-aloud support." },
-  elementary: { label: "Elementary",    ageRange: "Ages 8–11", icon: IconAward,   blurb: "Missions, badges, and a live word-count goal." },
-  middle:     { label: "Middle School", ageRange: "Ages 12–14",icon: IconBook,    blurb: "A calm, distraction-free analytical workspace." },
-  high:       { label: "High School",   ageRange: "Ages 15–18",icon: IconGrad,    blurb: "A professional editor for essays and exam technique." },
+  early:      { label: "Early Years",   ageRange: "Ages 5–7",  icon: IconFeather, blurb: "Large buttons, simple language, and heavy visual rewards." },
+  elementary: { label: "Elementary",    ageRange: "Ages 8–10", icon: IconAward,   blurb: "Gamified progress bars, word targets, and dynamic feedback pills." },
+  middle:     { label: "Middle School", ageRange: "Ages 11–13",icon: IconBook,    blurb: "Balanced academic UI focused on paragraph structure and vocabulary." },
+  high:       { label: "High School",   ageRange: "Ages 14–18",icon: IconGrad,    blurb: "A sleek, distraction-free editor for thesis strength and exam prep (AP, GCSE, IB)." },
 };
 
 const INTERESTS = [
@@ -267,16 +279,16 @@ const STATUS_STYLE = {
 };
 
 const PROMPTS = {
-  early: { title: "Today’s Story Spark", target: 60,
+  early: { title: "Today’s Story Spark", target: 60, maxChars: 800,
     prompt: "Tell a short story about a brave dinosaur who builds a rocket to visit the moon.",
     sample: "Once upon a time there was a big green dinosaur named Rex. Rex wanted to go to the moon. He built a rocket out of rocks and sticks. \"I am ready!\" said Rex, and the rocket zoomed into the sky. He saw shiny stars and a big grey moon. Rex landed softly and jumped up high because the moon was bouncy. It was the best day ever." },
-  elementary: { title: "This Week’s Mission", target: 150,
+  elementary: { title: "This Week’s Mission", target: 150, maxChars: 1500,
     prompt: "Write an adventure story where your character discovers a hidden world inside their favourite game.",
     sample: "Mia was building a new base when the ground beneath her cracked open. She fell through a swirling blue tunnel and landed in a blocky forest she had never seen before. The trees glowed faintly, and somewhere in the distance she could hear a strange rumbling sound. Mia gripped her pickaxe tightly and took a step forward. A creeper rustled in the bushes nearby, but Mia had an idea. She quickly dug a trench and lured the creeper inside before it could explode. Her heart was pounding, but she felt braver than ever. This hidden world was dangerous, but Mia knew she had the skills to survive it, one block at a time." },
-  middle: { title: "Analytical Response", target: 350,
+  middle: { title: "Analytical Response", target: 350, maxChars: 3000,
     prompt: "Write a short analysis: how does the author use setting to build tension in a story you have read recently?",
     sample: "In many stories, setting is used deliberately to build a sense of unease before anything actually happens. A quiet house at night, an empty corridor, or a forest with no birdsong all signal to the reader that something is wrong, long before the plot confirms it. This technique works because it draws on the reader's own instincts about safety and silence, creating dramatic irony between what the character notices and what the reader senses. A skilled writer will often withhold direct explanation, instead layering small sensory details — a flickering light, a closed door that was open before — so tension accumulates gradually rather than arriving all at once." },
-  high: { title: "Timed Essay Response", target: 800,
+  high: { title: "Timed Essay Response", target: 800, maxChars: 6000,
     prompt: "“Ambition is always portrayed as a destructive force in literature.” To what extent do you agree? Refer to at least two texts in your response.",
     sample: "Ambition, in much of the literary canon, is rarely presented as a neutral force; it is instead a catalyst that reveals character under pressure. While it is true that unchecked ambition often precipitates downfall — Macbeth's spiralling violence being the most obvious example — to characterise ambition as uniformly destructive overlooks the more nuanced treatment many writers afford it. In several texts, ambition operates as a double-edged mechanism: the same drive that isolates a character from their community is often what permits them to challenge an unjust status quo in the first place. This essay will argue that ambition functions less as a moral verdict and more as a magnifying glass, intensifying whatever qualities — virtuous or otherwise — a character already possesses." },
 };
@@ -313,10 +325,10 @@ const VOCAB_BANK = {
 };
 
 const PRAISE = {
-  early: (g)=>`Wonderful storytelling! You used capital letters and full stops correctly all the way through — exactly what we’re practising this term in ${g}.`,
-  elementary: (g)=>`Great effort! Your story has a clear beginning, middle and end, and you’re getting closer to mastering fronted adverbials for ${g}.`,
-  middle: (g)=>`Nice work — your paragraphing is becoming much stronger, right in line with the ${g} inference-and-evidence target.`,
-  high: (g)=>`Strong draft. Your thesis directly answers the question, which is exactly what examiners are looking for at ${g} level.`,
+  early: (g,c)=>`Wonderful storytelling! You used capital letters and full stops correctly all the way through — exactly what we’re practising this term in ${g} (${c}).`,
+  elementary: (g,c)=>`Great effort! Your story has a clear beginning, middle and end, and you’re getting closer to mastering fronted adverbials for ${g}, calibrated to ${c}.`,
+  middle: (g,c)=>`Nice work — your paragraphing is becoming much stronger, right in line with the ${g} inference-and-evidence target under ${c}.`,
+  high: (g,c)=>`Strong draft. Your thesis directly answers the question, which is exactly what examiners look for at ${g} level under ${c}.`,
 };
 
 // Base skill each growth tip targets, before it's explained through the student's interest.
@@ -457,6 +469,11 @@ function Header({ view, setView, used, total, theme, setTheme }){
             </span>
             <span className="rounded-full px-2 py-1 text-[11px] font-bold" style={{ background: "var(--navy-tint)", color: "var(--ink)" }}>FREE</span>
           </div>
+          <button onClick={()=>setView("dashboard")}
+            className="focus-ring hidden sm:inline-flex items-center gap-1.5 rounded-full px-3.5 py-2 text-[13px] font-bold"
+            style={{ background: "var(--gold)", color: "#3B2606" }}>
+            <IconCrown size={13} strokeWidth={2.4} /> Upgrade to Pro
+          </button>
         </div>
       </div>
     </header>
@@ -512,9 +529,10 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
                 </select>
                 <IconChevron size={15} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2" style={{ color: "var(--ink-faint)" }} />
               </div>
+              <span className="text-[11px]" style={{ color: "var(--ink-faint)" }}>{GRADE_DATA[country].curriculum}</span>
             </label>
             <label className="flex flex-col gap-1.5">
-              <span className="text-xs font-semibold" style={{ color: "var(--ink-soft)" }}>Grade / year</span>
+              <span className="text-xs font-semibold" style={{ color: "var(--ink-soft)" }}>Grade / year / level</span>
               <div className="relative">
                 <select value={gradeIdx} onChange={(e)=>setGradeIdx(Number(e.target.value))}
                   className="focus-ring w-full appearance-none rounded-xl border px-3.5 py-2.5 pr-9 text-sm font-medium"
@@ -595,8 +613,9 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
             </ul>
             <button className="focus-ring w-full rounded-xl py-2.5 font-display font-bold text-sm inline-flex items-center justify-center gap-1.5"
               style={{ background: "var(--gold)", color: "#3B2606" }}>
-              Upgrade to Pro <IconArrowRight size={15} strokeWidth={2.3} />
+              Upgrade to Pro — $14.99/mo <IconArrowRight size={15} strokeWidth={2.3} />
             </button>
+            <div className="text-[11px] text-center mt-2" style={{ color: "#9BA9C6" }}>Billed monthly via Stripe · cancel anytime</div>
           </div>
         </div>
 
@@ -619,6 +638,7 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
 function FeedbackPanel({ tier, gradeLabel, country, interest, seed }){
   const vocabList = VOCAB_BANK[interest] ? VOCAB_BANK[interest][tier] : VOCAB_BANK.exam[tier];
   const interestLabel = (INTERESTS.find(i=>i.id===interest) || INTERESTS[0]).label;
+  const curriculum = GRADE_DATA[country].curriculum;
   return (
     <div className="animate-float-in flex flex-col gap-4">
       <div className="card p-5 sm:p-6" style={{ borderColor: "var(--good)", borderWidth: 1.5 }}>
@@ -626,9 +646,9 @@ function FeedbackPanel({ tier, gradeLabel, country, interest, seed }){
           <div className="w-8 h-8 rounded-full grid place-items-center" style={{ background: "var(--good-tint)", color: "var(--good)" }}>
             <IconCheck size={16} strokeWidth={2.4} />
           </div>
-          <h3 className="font-display font-bold" style={{ color: "var(--ink)" }}>Praise &amp; encouragement</h3>
+          <h3 className="font-display font-bold" style={{ color: "var(--ink)" }}>Glows — what you did well</h3>
         </div>
-        <p className="text-[15px] leading-relaxed font-read" style={{ color: "var(--ink)" }}>{PRAISE[tier](gradeLabel)}</p>
+        <p className="text-[15px] leading-relaxed font-read" style={{ color: "var(--ink)" }}>{PRAISE[tier](gradeLabel, curriculum)}</p>
       </div>
 
       <div className="card p-5 sm:p-6" style={{ borderColor: "var(--cyan)", borderWidth: 1.5 }}>
@@ -637,7 +657,7 @@ function FeedbackPanel({ tier, gradeLabel, country, interest, seed }){
             <div className="w-8 h-8 rounded-full grid place-items-center" style={{ background: "var(--cyan-tint)", color: "var(--cyan-ink)" }}>
               <IconTarget size={16} strokeWidth={2.2} />
             </div>
-            <h3 className="font-display font-bold" style={{ color: "var(--ink)" }}>Your next growth step</h3>
+            <h3 className="font-display font-bold" style={{ color: "var(--ink)" }}>Grows — your next step</h3>
           </div>
           <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold" style={{ background: "var(--cyan-tint)", color: "var(--cyan-ink)" }}>
             explained through {interestLabel}
@@ -651,13 +671,18 @@ function FeedbackPanel({ tier, gradeLabel, country, interest, seed }){
           <div className="w-8 h-8 rounded-full grid place-items-center" style={{ background: "var(--cyan-tint)", color: "var(--cyan-ink)" }}>
             <IconSparkle size={16} strokeWidth={2.2} />
           </div>
-          <h3 className="font-display font-bold" style={{ color: "var(--ink)" }}>Vocabulary spotlight — {interestLabel} edition</h3>
+          <h3 className="font-display font-bold" style={{ color: "var(--ink)" }}>Vocabulary Upgrades — {interestLabel} edition</h3>
         </div>
-        <div className="grid sm:grid-cols-2 gap-3">
+        <div className="flex flex-wrap gap-2.5">
           {vocabList.map(([term,def])=> (
-            <div key={term} className="rounded-xl p-4" style={{ background: "var(--cyan-tint)" }}>
-              <div className="font-display font-bold text-sm mb-1" style={{ color: "var(--cyan-ink)" }}>{term}</div>
-              <div className="text-[13px] leading-snug" style={{ color: "var(--ink)" }}>{def}</div>
+            <div key={term} tabIndex={0}
+              className="group relative rounded-full pl-3.5 pr-4 py-2 cursor-default focus-ring"
+              style={{ background: "var(--cyan-tint)" }}>
+              <span className="font-display font-bold text-sm" style={{ color: "var(--cyan-ink)" }}>{term}</span>
+              <div className="pointer-events-none absolute left-1/2 bottom-full mb-2 w-56 -translate-x-1/2 rounded-xl p-3 text-[12.5px] leading-snug opacity-0 scale-95 origin-bottom transition-all duration-150 group-hover:opacity-100 group-hover:scale-100 group-focus:opacity-100 group-focus:scale-100 z-10"
+                style={{ background: "var(--ink)", color: "white", boxShadow: "0 10px 30px -12px hsl(var(--shadow) / 0.4)" }}>
+                {def}
+              </div>
             </div>
           ))}
         </div>
@@ -688,6 +713,7 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
   const [activeInterest, setActiveInterest] = useState(interests[0] || "exam");
   const timerRef = useRef(null);
   const locked = used >= total;
+  const [bannerDismissed, setBannerDismissed] = useState(false);
 
   useEffect(()=>{ setText(PROMPTS[tier].sample); setPhase("draft"); }, [tier]);
   useEffect(()=>{ if (interests.length && !interests.includes(activeInterest)) setActiveInterest(interests[0]); }, [interests]);
@@ -760,6 +786,23 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
           )}
         </div>
       </div>
+
+      {!bannerDismissed && (
+        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 w-[calc(100%-2rem)] max-w-md">
+          <div className="card px-4 py-3 flex items-center gap-3 animate-float-in" style={{ borderColor: locked ? "var(--bad)" : "var(--gold)", borderWidth: 1.5 }}>
+            <div className="w-8 h-8 rounded-full grid place-items-center shrink-0" style={{ background: "var(--gold-tint)", color: "var(--gold-ink)" }}>
+              <IconFlame size={15} strokeWidth={2.2} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="text-[13px] font-semibold" style={{ color: "var(--ink)" }}>{used} of {total} Free Monthly Submissions Used</div>
+              <div className="text-[11px]" style={{ color: "var(--ink-faint)" }}>{locked ? "Upgrade to Pro for unlimited submissions." : "Resets automatically at the start of next month."}</div>
+            </div>
+            <button onClick={()=>setBannerDismissed(true)} className="focus-ring w-7 h-7 rounded-full grid place-items-center shrink-0" style={{ color: "var(--ink-faint)" }} aria-label="Dismiss">
+              <IconX size={14} />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -778,14 +821,23 @@ function AnalyzingOverlay(){
   );
 }
 
-function WordMeter({ words, target }){
+function WordMeter({ words, target, chars, maxChars }){
   const pct = Math.min(100, Math.round((words/target)*100));
+  const charPct = maxChars ? chars / maxChars : 0;
+  const nearCap = charPct >= 0.9;
   return (
-    <div className="flex items-center gap-2.5">
-      <div className="h-1.5 w-24 rounded-full" style={{ background: "var(--surface-2)" }}>
-        <div className="h-1.5 rounded-full transition-all" style={{ width: pct + "%", background: pct >= 100 ? "var(--good)" : "var(--cyan)" }} />
+    <div className="flex flex-col gap-1">
+      <div className="flex items-center gap-2.5">
+        <div className="h-1.5 w-24 rounded-full" style={{ background: "var(--surface-2)" }}>
+          <div className="h-1.5 rounded-full transition-all" style={{ width: pct + "%", background: pct >= 100 ? "var(--good)" : "var(--cyan)" }} />
+        </div>
+        <span className="text-xs font-semibold tabular whitespace-nowrap" style={{ color: "var(--ink-soft)" }}>{words} / {target} words</span>
       </div>
-      <span className="text-xs font-semibold tabular whitespace-nowrap" style={{ color: "var(--ink-soft)" }}>{words} / {target} words</span>
+      {maxChars != null && (
+        <span className="text-[11px] tabular" style={{ color: nearCap ? "var(--bad)" : "var(--ink-faint)" }}>
+          {chars.toLocaleString()} / {maxChars.toLocaleString()} characters{nearCap ? " — approaching limit" : ""}
+        </span>
+      )}
     </div>
   );
 }
@@ -806,12 +858,12 @@ function TierEditor({ tier, meta, text, setText, words, phase, onSubmit, onNew, 
         <button className="focus-ring inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold mb-3" style={{ background: "var(--cyan-tint)", color: "var(--cyan-ink)" }}>
           <IconMic size={14} strokeWidth={2.3} /> Read prompt aloud
         </button>
-        <textarea value={text} onChange={(e)=>setText(e.target.value)} rows={9} disabled={disabled}
+        <textarea value={text} onChange={(e)=>setText(e.target.value)} rows={9} disabled={disabled} maxLength={meta.maxChars}
           className="focus-ring w-full rounded-2xl border-2 p-4 font-read text-xl leading-relaxed resize-none"
           style={{ borderColor: "var(--border)", background: "var(--surface-2)", color: "var(--ink)" }}
           placeholder="Start typing your story here…" />
         <div className="flex items-center justify-between mt-4 flex-wrap gap-3">
-          <WordMeter words={words} target={meta.target} />
+          <WordMeter words={words} target={meta.target} chars={text.length} maxChars={meta.maxChars} />
           {phase !== "done" ? (
             <button onClick={onSubmit} disabled={disabled}
               className="focus-ring inline-flex items-center gap-2 rounded-full px-5 py-2.5 font-display font-extrabold text-sm disabled:opacity-60"
@@ -853,12 +905,12 @@ function TierEditor({ tier, meta, text, setText, words, phase, onSubmit, onNew, 
             </span>
           ))}
         </div>
-        <textarea value={text} onChange={(e)=>setText(e.target.value)} rows={10} disabled={disabled}
+        <textarea value={text} onChange={(e)=>setText(e.target.value)} rows={10} disabled={disabled} maxLength={meta.maxChars}
           className="focus-ring w-full rounded-2xl border p-4 text-base leading-relaxed resize-none"
           style={{ borderColor: "var(--border)", background: "var(--surface-2)", color: "var(--ink)" }}
           placeholder="Start your mission here…" />
         <div className="flex items-center justify-between mt-4 flex-wrap gap-3">
-          <WordMeter words={words} target={meta.target} />
+          <WordMeter words={words} target={meta.target} chars={text.length} maxChars={meta.maxChars} />
           {phase !== "done" ? (
             <button onClick={onSubmit} disabled={disabled}
               className="focus-ring inline-flex items-center gap-2 rounded-full px-5 py-2.5 font-display font-bold text-sm disabled:opacity-60"
@@ -882,12 +934,12 @@ function TierEditor({ tier, meta, text, setText, words, phase, onSubmit, onNew, 
           <h3 className="font-display font-semibold text-lg mt-0.5" style={{ color: "var(--ink)" }}>{meta.title}</h3>
           <p className="text-sm mt-1.5" style={{ color: "var(--ink-soft)" }}>{meta.prompt}</p>
         </div>
-        <textarea value={text} onChange={(e)=>setText(e.target.value)} rows={14} disabled={disabled}
+        <textarea value={text} onChange={(e)=>setText(e.target.value)} rows={14} disabled={disabled} maxLength={meta.maxChars}
           className="focus-ring w-full p-6 font-read text-[16px] leading-[1.75] resize-none border-0"
           style={{ background: "var(--surface)", color: "var(--ink)" }}
           placeholder="Write your response here…" />
         <div className="flex items-center justify-between px-6 py-4 border-t flex-wrap gap-3" style={{ borderColor: "var(--border-soft)" }}>
-          <WordMeter words={words} target={meta.target} />
+          <WordMeter words={words} target={meta.target} chars={text.length} maxChars={meta.maxChars} />
           {phase !== "done" ? (
             <button onClick={onSubmit} disabled={disabled}
               className="focus-ring inline-flex items-center gap-2 rounded-lg px-4 py-2 font-display font-semibold text-sm disabled:opacity-60"
@@ -916,12 +968,12 @@ function TierEditor({ tier, meta, text, setText, words, phase, onSubmit, onNew, 
         </span>
       </div>
       <p className="font-read text-[15px] px-6 pt-4 pb-2 leading-relaxed" style={{ color: "var(--ink)" }}>{meta.prompt}</p>
-      <textarea value={text} onChange={(e)=>setText(e.target.value)} rows={16} disabled={disabled}
+      <textarea value={text} onChange={(e)=>setText(e.target.value)} rows={16} disabled={disabled} maxLength={meta.maxChars}
         className="focus-ring w-full px-6 py-4 font-read text-[15.5px] leading-[1.8] resize-none border-0"
         style={{ background: "var(--surface)", color: "var(--ink)" }}
         placeholder="Begin your response here…" />
       <div className="flex items-center justify-between px-6 py-4 border-t flex-wrap gap-3" style={{ borderColor: "var(--border-soft)" }}>
-        <WordMeter words={words} target={meta.target} />
+        <WordMeter words={words} target={meta.target} chars={text.length} maxChars={meta.maxChars} />
         {phase !== "done" ? (
           <button onClick={onSubmit} disabled={disabled}
             className="focus-ring inline-flex items-center gap-2 rounded-lg px-5 py-2.5 font-display font-semibold text-sm disabled:opacity-60"
@@ -942,7 +994,7 @@ function TierEditor({ tier, meta, text, setText, words, phase, onSubmit, onNew, 
 function App(){
   const [theme, setTheme] = useState("system");
   const [view, setView] = useState("workspace");
-  const [country, setCountry] = useState("United Kingdom");
+  const [country, setCountry] = useState("🇬🇧 United Kingdom");
   const [gradeIdx, setGradeIdx] = useState(5); // Year 5
   const [tierOverride, setTierOverride] = useState(null);
   const [interests, setInterests] = useState(["space","gaming"]);
