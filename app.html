@@ -9,47 +9,49 @@
 
 <style>
   :root{
-    --bg: #EEF2F8;
-    --bg-grid: #E3E9F4;
+    --bg: #F8FAFC;
+    --bg-grid: #EEF2F8;
     --surface: #FFFFFF;
-    --surface-2: #F6F8FC;
-    --border: #DCE3EF;
-    --border-soft: #E7ECF5;
-    --ink: #1E293B;
-    --ink-soft: #5B6B85;
-    --ink-faint: #8996AC;
-    --cyan: #00D2FF;
-    --cyan-ink: #0E7A93;
-    --cyan-tint: #E3FAFF;
-    --gold: #F59E0B;
-    --gold-ink: #92600A;
-    --gold-tint: #FEF3DA;
-    --navy-tint: #E7EBF6;
+    --surface-2: #F1F5F9;
+    --border: #E2E8F0;
+    --border-soft: #EDF1F7;
+    --ink: #111827;
+    --ink-soft: #475569;
+    --ink-faint: #94A3B8;
+    --cyan: #4F46E5;
+    --cyan-ink: #4338CA;
+    --cyan-tint: #EEF0FE;
+    --gold: #0EA5E9;
+    --gold-ink: #0876AB;
+    --gold-tint: #E6F6FE;
+    --accent-grad: linear-gradient(100deg, #4F46E5, #0EA5E9);
+    --navy-tint: #EEF1F8;
     --good: #0F9D66;
     --good-tint: #DEF7EC;
     --warn: #C2760A;
     --warn-tint: #FCEACB;
     --bad: #D6483C;
     --bad-tint: #FBE2DF;
-    --shadow: 220 45% 20%;
+    --shadow: 222 47% 11%;
   }
   @media (prefers-color-scheme: dark){
     :root:not([data-theme="light"]){
-      --bg: #0A1120;
-      --bg-grid: #0E1728;
-      --surface: #131E33;
-      --surface-2: #182644;
-      --border: #263756;
-      --border-soft: #1E2C48;
-      --ink: #E9EEF9;
-      --ink-soft: #97A6C4;
-      --ink-faint: #6B7A9B;
-      --cyan: #2BE1FF;
-      --cyan-ink: #7CEBFF;
-      --cyan-tint: #12303B;
-      --gold: #FDBA3F;
-      --gold-ink: #FDBA3F;
-      --gold-tint: #3A2C11;
+      --bg: #0B1120;
+      --bg-grid: #0F1729;
+      --surface: #131B2E;
+      --surface-2: #182238;
+      --border: #263352;
+      --border-soft: #1B2740;
+      --ink: #EAF0FB;
+      --ink-soft: #9AA8C7;
+      --ink-faint: #5E6E90;
+      --cyan: #818CF8;
+      --cyan-ink: #A5B4FC;
+      --cyan-tint: #1D2145;
+      --gold: #38BDF8;
+      --gold-ink: #7DD3FC;
+      --gold-tint: #10293B;
+      --accent-grad: linear-gradient(100deg, #818CF8, #38BDF8);
       --navy-tint: #1B2740;
       --good: #35D399;
       --good-tint: #10301F;
@@ -60,21 +62,22 @@
     }
   }
   :root[data-theme="dark"]{
-    --bg: #0A1120;
-    --bg-grid: #0E1728;
-    --surface: #131E33;
-    --surface-2: #182644;
-    --border: #263756;
-    --border-soft: #1E2C48;
-    --ink: #E9EEF9;
-    --ink-soft: #97A6C4;
-    --ink-faint: #6B7A9B;
-    --cyan: #2BE1FF;
-    --cyan-ink: #7CEBFF;
-    --cyan-tint: #12303B;
-    --gold: #FDBA3F;
-    --gold-ink: #FDBA3F;
-    --gold-tint: #3A2C11;
+    --bg: #0B1120;
+    --bg-grid: #0F1729;
+    --surface: #131B2E;
+    --surface-2: #182238;
+    --border: #263352;
+    --border-soft: #1B2740;
+    --ink: #EAF0FB;
+    --ink-soft: #9AA8C7;
+    --ink-faint: #5E6E90;
+    --cyan: #818CF8;
+    --cyan-ink: #A5B4FC;
+    --cyan-tint: #1D2145;
+    --gold: #38BDF8;
+    --gold-ink: #7DD3FC;
+    --gold-tint: #10293B;
+    --accent-grad: linear-gradient(100deg, #818CF8, #38BDF8);
     --navy-tint: #1B2740;
     --good: #35D399;
     --good-tint: #10301F;
@@ -97,7 +100,7 @@
   .font-display{ font-family:"Lexend", ui-sans-serif, system-ui, sans-serif; }
   .font-read{ font-family:"Source Serif 4", Georgia, "Times New Roman", serif; }
   h1,h2,h3,h4{ text-wrap: balance; }
-  ::selection{ background: var(--cyan); color:#04222A; }
+  ::selection{ background: var(--cyan); color:#FFFFFF; }
 
   .card{
     background: var(--surface);
@@ -108,6 +111,8 @@
   .divider{ border-color: var(--border-soft); }
   .focus-ring:focus-visible{ outline: 2.5px solid var(--cyan); outline-offset: 2px; }
   .tabular{ font-variant-numeric: tabular-nums; }
+  button, a, .card, select, textarea{ transition: background-color .18s ease, border-color .18s ease, box-shadow .18s ease, color .18s ease, transform .12s ease; }
+  @media (prefers-reduced-motion: reduce){ button, a, .card, select, textarea{ transition: none; } }
 
   .scrollbar-thin::-webkit-scrollbar{ height:6px; width:6px; }
   .scrollbar-thin::-webkit-scrollbar-thumb{ background: var(--border); border-radius: 10px; }
@@ -152,6 +157,22 @@ function Icon({ children, size = 20, strokeWidth = 1.8, className = "" }) {
 }
 const IconFlask = (p) => <Icon {...p}><path d="M9 3h6M10 3v6.2L4.8 18a2 2 0 0 0 1.7 3h11a2 2 0 0 0 1.7-3L14 9.2V3" /><path d="M7.5 15h9" /></Icon>;
 const IconBook = (p) => <Icon {...p}><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15.5H6.5A2.5 2.5 0 0 0 4 21" /><path d="M4 5.5v15A2.5 2.5 0 0 0 6.5 23" /></Icon>;
+// Brand mark: a quill whose trailing stroke resolves into a rising bar-chart / growth arrow.
+function IconMark({ size = 24, id = "llMark" }){
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <defs>
+        <linearGradient id={id} x1="3" y1="20" x2="21" y2="3">
+          <stop offset="0" stopColor="#4F46E5" />
+          <stop offset="1" stopColor="#0EA5E9" />
+        </linearGradient>
+      </defs>
+      <path d="M5.4 18.4l1.8-1.5M7.2 16.7l1.8-1.5" stroke={`url(#${id})`} strokeWidth="1.5" strokeLinecap="round" />
+      <path d="M4 19.2c2-1 4-2.6 5.6-5.2L13 12.7V9.6H16V6.6H19V4.1" stroke={`url(#${id})`} strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M18.6 4.7L20.6 3L21.7 4.6" stroke={`url(#${id})`} strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
 const IconGrid = (p) => <Icon {...p}><rect x="3.5" y="3.5" width="7" height="7" rx="1.4" /><rect x="13.5" y="3.5" width="7" height="7" rx="1.4" /><rect x="3.5" y="13.5" width="7" height="7" rx="1.4" /><rect x="13.5" y="13.5" width="7" height="7" rx="1.4" /></Icon>;
 const IconPen = (p) => <Icon {...p}><path d="M4 20l4.2-.9L19 8.3a1.9 1.9 0 0 0 0-2.7l-.6-.6a1.9 1.9 0 0 0-2.7 0L4.9 15.8z" /><path d="M13.5 6.5l4 4" /></Icon>;
 const IconSparkle = (p) => <Icon {...p}><path d="M12 3l1.6 4.8L18 9.5l-4.4 1.7L12 16l-1.6-4.8L6 9.5l4.4-1.7z" /><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z" /></Icon>;
@@ -409,10 +430,8 @@ function Header({ view, setView, used, total, theme, setTheme }){
     <header className="sticky top-0 z-30 border-b backdrop-blur-md" style={{ borderColor: "var(--border)", background: "color-mix(in srgb, var(--surface) 88%, transparent)" }}>
       <div className="mx-auto max-w-6xl px-4 sm:px-6 py-3.5 flex items-center justify-between gap-3 flex-wrap">
         <a href="index.html" className="focus-ring flex items-center gap-2.5" style={{ textDecoration: "none" }}>
-          <div className="relative w-10 h-10 rounded-2xl grid place-items-center shrink-0"
-            style={{ background: "linear-gradient(135deg, var(--ink), #33455F)" }}>
-            <IconFlask size={16} strokeWidth={2} className="text-[var(--cyan)] absolute -translate-x-1.5 -translate-y-1" />
-            <IconBook size={16} strokeWidth={2} className="text-[var(--gold)] absolute translate-x-1.5 translate-y-1.5" />
+          <div className="w-9 h-9 grid place-items-center shrink-0">
+            <IconMark size={30} />
           </div>
           <div className="leading-tight">
             <div className="font-display font-bold text-[17px]" style={{ color: "var(--ink)" }}>LiteracyLab <span style={{ color: "var(--cyan-ink)" }}>AI</span></div>
@@ -570,7 +589,7 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
         <div className="card p-6 relative overflow-hidden" style={{ background: "linear-gradient(160deg, var(--ink), #2B3B54)" }}>
           <div className="absolute -right-6 -top-6 w-28 h-28 rounded-full" style={{ background: "radial-gradient(circle, var(--cyan) 0%, transparent 70%)", opacity: .35 }} />
           <div className="relative">
-            <div className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold mb-3" style={{ background: "var(--gold)", color: "#3B2606" }}>
+            <div className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold mb-3" style={{ background: "var(--gold)", color: "#FFFFFF" }}>
               <IconCrown size={12} strokeWidth={2.4} /> LITERACYLAB PRO
             </div>
             <h3 className="font-display font-bold text-lg text-white mb-1.5">{remaining <= 1 ? "Almost at your monthly limit" : "Unlock unlimited submissions"}</h3>
@@ -583,7 +602,7 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
               ))}
             </ul>
             <button className="focus-ring w-full rounded-xl py-2.5 font-display font-bold text-sm inline-flex items-center justify-center gap-1.5"
-              style={{ background: "var(--cyan)", color: "#04303A" }}>
+              style={{ background: "var(--cyan)", color: "#FFFFFF" }}>
               Upgrade to Pro <IconArrowRight size={15} strokeWidth={2.3} />
             </button>
           </div>
@@ -653,7 +672,7 @@ function FeedbackPanel({ tier, gradeLabel, country, interest, seed }){
       </div>
 
       <div className="card p-5 sm:p-6 flex items-start gap-3" style={{ background: "linear-gradient(135deg, var(--ink), #2B3B54)" }}>
-        <div className="w-9 h-9 rounded-full grid place-items-center shrink-0" style={{ background: "var(--gold)", color: "#3B2606" }}>
+        <div className="w-9 h-9 rounded-full grid place-items-center shrink-0" style={{ background: "var(--gold)", color: "#FFFFFF" }}>
           <IconFlame size={17} strokeWidth={2.2} />
         </div>
         <div>
@@ -804,7 +823,7 @@ function TierEditor({ tier, meta, text, setText, words, phase, onSubmit, onNew, 
           {phase !== "done" ? (
             <button onClick={onSubmit} disabled={disabled}
               className="focus-ring inline-flex items-center gap-2 rounded-full px-5 py-2.5 font-display font-extrabold text-sm disabled:opacity-60"
-              style={{ background: "var(--gold)", color: "#3B2606" }}>
+              style={{ background: "var(--gold)", color: "#FFFFFF" }}>
               {locked ? <><IconLock size={15} /> Upgrade to Continue</> : <>{submitLabel} <IconSend size={15} /></>}
             </button>
           ) : (
@@ -851,7 +870,7 @@ function TierEditor({ tier, meta, text, setText, words, phase, onSubmit, onNew, 
           {phase !== "done" ? (
             <button onClick={onSubmit} disabled={disabled}
               className="focus-ring inline-flex items-center gap-2 rounded-full px-5 py-2.5 font-display font-bold text-sm disabled:opacity-60"
-              style={{ background: "var(--cyan)", color: "#04303A" }}>
+              style={{ background: "var(--cyan)", color: "#FFFFFF" }}>
               {locked ? <><IconLock size={15} /> Upgrade to Continue</> : <>{submitLabel} <IconSend size={15} /></>}
             </button>
           ) : (
@@ -982,8 +1001,13 @@ function App(){
         <Workspace country={country} gradeIdx={gradeIdx} setGradeIdx={handleGradeChange} tier={tier} setTierOverride={setTierAndSyncGrade}
           interests={interests} used={used} total={total} onSubmit={handleSubmit} />
       )}
-      <footer className="mx-auto max-w-6xl px-4 sm:px-6 py-10 text-center text-xs" style={{ color: "var(--ink-faint)" }}>
-        LiteracyLab AI · interactive prototype — all learner data shown is sample data.
+      <footer className="mx-auto max-w-6xl px-4 sm:px-6 py-10 text-center text-xs flex flex-col items-center gap-2" style={{ color: "var(--ink-faint)" }}>
+        <div>LiteracyLab AI · interactive prototype — all learner data shown is sample data.</div>
+        <div className="flex items-center gap-4">
+          <a href="index.html" className="hover:underline" style={{ color: "var(--ink-faint)" }}>Home</a>
+          <a href="privacy.html" className="hover:underline" style={{ color: "var(--ink-faint)" }}>Privacy</a>
+          <a href="terms.html" className="hover:underline" style={{ color: "var(--ink-faint)" }}>Terms</a>
+        </div>
       </footer>
     </div>
   );

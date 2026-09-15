@@ -5,70 +5,70 @@
 
 <style>
   :root{
-    --bg: #F5F7FB;
+    --bg: #F8FAFC;
     --bg-elevated: #FFFFFF;
     --surface: #FFFFFF;
-    --surface-2: #EDF1F8;
-    --border: #DDE3EF;
-    --border-soft: #E7ECF5;
-    --ink: #10182B;
-    --ink-soft: #4C5975;
-    --ink-faint: #8592AC;
-    --cyan: #009DC2;
-    --cyan-glow: #00D2FF;
-    --cyan-tint: #E3F8FE;
-    --gold: #B5750A;
-    --gold-glow: #F59E0B;
-    --gold-tint: #FCEFD7;
-    --navy-deep: #1E293B;
-    --grid-line: rgba(16,24,43,0.06);
-    --glow-1: rgba(0,210,255,0.16);
-    --glow-2: rgba(245,158,11,0.10);
-    --shadow: 220 45% 20%;
+    --surface-2: #F1F5F9;
+    --border: #E2E8F0;
+    --border-soft: #EDF1F7;
+    --ink: #111827;
+    --ink-soft: #475569;
+    --ink-faint: #94A3B8;
+    --cyan: #4F46E5;
+    --cyan-glow: #4F46E5;
+    --cyan-tint: #EEF0FE;
+    --gold: #0876AB;
+    --gold-glow: #0EA5E9;
+    --gold-tint: #E6F6FE;
+    --navy-deep: #111827;
+    --grid-line: rgba(17,24,39,0.05);
+    --glow-1: rgba(79,70,229,0.10);
+    --glow-2: rgba(14,165,233,0.10);
+    --shadow: 222 47% 11%;
   }
   @media (prefers-color-scheme: dark){
     :root:not([data-theme="light"]){
-      --bg: #060911;
-      --bg-elevated: #0B101C;
-      --surface: #0D1322;
-      --surface-2: #121A2E;
-      --border: #202A42;
-      --border-soft: #171F34;
-      --ink: #EEF2FB;
-      --ink-soft: #97A3C4;
-      --ink-faint: #5C6788;
-      --cyan: #2BE1FF;
-      --cyan-glow: #2BE1FF;
-      --cyan-tint: #0F2630;
-      --gold: #FDBA3F;
-      --gold-glow: #FDBA3F;
-      --gold-tint: #2E230D;
+      --bg: #0B1120;
+      --bg-elevated: #0F1729;
+      --surface: #131B2E;
+      --surface-2: #182238;
+      --border: #263352;
+      --border-soft: #1B2740;
+      --ink: #EAF0FB;
+      --ink-soft: #9AA8C7;
+      --ink-faint: #5E6E90;
+      --cyan: #818CF8;
+      --cyan-glow: #818CF8;
+      --cyan-tint: #1D2145;
+      --gold: #38BDF8;
+      --gold-glow: #38BDF8;
+      --gold-tint: #10293B;
       --navy-deep: #101828;
       --grid-line: rgba(255,255,255,0.05);
-      --glow-1: rgba(43,225,255,0.16);
-      --glow-2: rgba(253,186,63,0.10);
+      --glow-1: rgba(129,140,248,0.16);
+      --glow-2: rgba(56,189,248,0.12);
     }
   }
   :root[data-theme="dark"]{
-    --bg: #060911;
-    --bg-elevated: #0B101C;
-    --surface: #0D1322;
-    --surface-2: #121A2E;
-    --border: #202A42;
-    --border-soft: #171F34;
-    --ink: #EEF2FB;
-    --ink-soft: #97A3C4;
-    --ink-faint: #5C6788;
-    --cyan: #2BE1FF;
-    --cyan-glow: #2BE1FF;
-    --cyan-tint: #0F2630;
-    --gold: #FDBA3F;
-    --gold-glow: #FDBA3F;
-    --gold-tint: #2E230D;
+    --bg: #0B1120;
+    --bg-elevated: #0F1729;
+    --surface: #131B2E;
+    --surface-2: #182238;
+    --border: #263352;
+    --border-soft: #1B2740;
+    --ink: #EAF0FB;
+    --ink-soft: #9AA8C7;
+    --ink-faint: #5E6E90;
+    --cyan: #818CF8;
+    --cyan-glow: #818CF8;
+    --cyan-tint: #1D2145;
+    --gold: #38BDF8;
+    --gold-glow: #38BDF8;
+    --gold-tint: #10293B;
     --navy-deep: #101828;
     --grid-line: rgba(255,255,255,0.05);
-    --glow-1: rgba(43,225,255,0.16);
-    --glow-2: rgba(253,186,63,0.10);
+    --glow-1: rgba(129,140,248,0.16);
+    --glow-2: rgba(56,189,248,0.12);
   }
 
   *{ box-sizing: border-box; }
@@ -104,10 +104,10 @@
     white-space: nowrap;
   }
   .btn:active{ transform: translateY(1px); }
-  .btn-primary{ background: var(--ink); color: var(--bg); }
-  :root:not([data-theme="light"]) .btn-primary, :root[data-theme="dark"] .btn-primary{ background: linear-gradient(135deg, var(--cyan-glow), #6BE9FF); color: #032027; box-shadow: 0 0 0 1px rgba(43,225,255,.3), 0 8px 24px -8px rgba(43,225,255,.5); }
-  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .btn-primary{ background: linear-gradient(135deg, var(--cyan-glow), #6BE9FF); color: #032027; } }
-  .btn-primary:hover{ box-shadow: 0 8px 24px -8px var(--glow-1), 0 0 0 1px var(--border); }
+  .btn-primary{ background: linear-gradient(100deg, #4F46E5, #0EA5E9); color: #FFFFFF; box-shadow: 0 8px 20px -8px rgba(79,70,229,.45); }
+  :root:not([data-theme="light"]) .btn-primary, :root[data-theme="dark"] .btn-primary{ background: linear-gradient(100deg, var(--cyan-glow), var(--gold-glow)); color: #051022; box-shadow: 0 0 0 1px rgba(129,140,248,.3), 0 8px 24px -8px rgba(56,189,248,.5); }
+  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .btn-primary{ background: linear-gradient(100deg, var(--cyan-glow), var(--gold-glow)); color: #051022; } }
+  .btn-primary:hover{ box-shadow: 0 10px 26px -8px rgba(79,70,229,.55); }
   .btn-ghost{ background: transparent; color: var(--ink); border-color: var(--border); }
   .btn-ghost:hover{ border-color: var(--ink-faint); }
   .btn-lg{ padding: 15px 26px; font-size: 15.5px; border-radius: 12px; }
@@ -121,8 +121,7 @@
   }
   .nav-inner{ display:flex; align-items:center; justify-content:space-between; gap:16px; padding-block: 14px; }
   .brand{ display:flex; align-items:center; gap:10px; font-weight:700; font-size:16px; }
-  .brand-mark{ width:30px; height:30px; border-radius:9px; display:grid; place-items:center; position:relative; background: linear-gradient(135deg, var(--navy-deep), #33455F); flex-shrink:0; }
-  .brand-mark svg{ position:absolute; }
+  .brand-mark{ width:30px; height:30px; display:grid; place-items:center; position:relative; flex-shrink:0; }
   .nav-links{ display:flex; align-items:center; gap:28px; font-size:14px; font-weight:500; color: var(--ink-soft); }
   .nav-links a:hover{ color: var(--ink); }
   .nav-cta{ display:flex; align-items:center; gap:10px; }
@@ -226,7 +225,7 @@
   @media (max-width: 640px){ .pricing{ grid-template-columns: 1fr; } }
   .price-card{ border:1px solid var(--border); border-radius:18px; padding: 30px 26px; background: var(--surface); }
   .price-card.pro{ border-color: var(--cyan); position:relative; background: linear-gradient(180deg, color-mix(in srgb, var(--cyan) 6%, var(--surface)), var(--surface)); }
-  .price-card.pro::before{ content:"MOST POPULAR"; position:absolute; top:-11px; left:26px; background: var(--cyan-glow); color:#04222A; font-size:10.5px; font-weight:800; letter-spacing:.06em; padding:4px 10px; border-radius:999px; }
+  .price-card.pro::before{ content:"MOST POPULAR"; position:absolute; top:-11px; left:26px; background: linear-gradient(100deg, var(--cyan-glow), var(--gold-glow)); color:#FFFFFF; font-size:10.5px; font-weight:800; letter-spacing:.06em; padding:4px 10px; border-radius:999px; }
   .price-plan{ font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color: var(--ink-faint); }
   .price-amount{ font-size:36px; font-weight:800; margin-top:10px; letter-spacing:-0.01em; }
   .price-amount span{ font-size:14px; font-weight:500; color: var(--ink-faint); }
@@ -234,6 +233,22 @@
   .price-list div{ display:flex; gap:9px; align-items:flex-start; font-size:14px; color: var(--ink-soft); }
   .price-list svg{ flex-shrink:0; margin-top:2px; color: var(--cyan); }
   .price-card .btn{ width:100%; margin-top:24px; }
+
+  /* faq */
+  .faq-list{ max-width: 760px; margin: 0 auto; display:flex; flex-direction:column; gap:12px; }
+  .faq-item{ border:1px solid var(--border); border-radius:14px; background: var(--surface); overflow:hidden; }
+  .faq-item summary{ list-style:none; cursor:pointer; padding: 18px 22px; font-weight:600; font-size:15px; display:flex; align-items:center; justify-content:space-between; gap:16px; }
+  .faq-item summary::-webkit-details-marker{ display:none; }
+  .faq-item summary .faq-plus{ flex-shrink:0; width:20px; height:20px; position:relative; }
+  .faq-item summary .faq-plus::before, .faq-item summary .faq-plus::after{ content:""; position:absolute; background: var(--cyan); border-radius:2px; transition: transform .2s ease; }
+  .faq-item summary .faq-plus::before{ top:9px; left:2px; width:16px; height:2px; }
+  .faq-item summary .faq-plus::after{ top:2px; left:9px; width:2px; height:16px; }
+  .faq-item[open] summary .faq-plus::after{ transform: rotate(90deg); opacity:0; }
+  .faq-item .faq-a{ padding: 0 22px 20px; font-size:14.5px; line-height:1.65; color: var(--ink-soft); }
+  .faq-a a{ color: var(--cyan); font-weight:600; text-decoration: underline; text-underline-offset:2px; }
+  .faq-tabs{ display:flex; justify-content:center; gap:8px; margin-bottom:28px; }
+  .faq-tabs button{ font-family:"Lexend",sans-serif; font-size:13px; font-weight:600; padding:8px 16px; border-radius:999px; border:1px solid var(--border); background:var(--surface); color:var(--ink-soft); cursor:pointer; }
+  .faq-tabs button.active{ background: var(--ink); color: var(--bg); border-color: var(--ink); }
 
   /* final cta */
   .final-cta{ text-align:center; position:relative; overflow:hidden; }
@@ -252,8 +267,12 @@
   <div class="wrap nav-inner">
     <div class="brand">
       <span class="brand-mark">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2BE1FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transform:translate(-3px,-2px)"><path d="M9 3h6M10 3v6.2L4.8 18a2 2 0 0 0 1.7 3h11a2 2 0 0 0 1.7-3L14 9.2V3"/></svg>
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transform:translate(4px,4px)"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15.5H6.5A2.5 2.5 0 0 0 4 21"/></svg>
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+          <defs><linearGradient id="navMark" x1="3" y1="20" x2="21" y2="3"><stop offset="0" stop-color="#4F46E5"/><stop offset="1" stop-color="#0EA5E9"/></linearGradient></defs>
+          <path d="M5.4 18.4l1.8-1.5M7.2 16.7l1.8-1.5" stroke="url(#navMark)" stroke-width="1.5" stroke-linecap="round"/>
+          <path d="M4 19.2c2-1 4-2.6 5.6-5.2L13 12.7V9.6H16V6.6H19V4.1" stroke="url(#navMark)" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M18.6 4.7L20.6 3L21.7 4.6" stroke="url(#navMark)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
       </span>
       LiteracyLab <span style="color:var(--cyan)">AI</span>
     </div>
@@ -261,6 +280,7 @@
       <a href="#product">Product</a>
       <a href="#how">How it works</a>
       <a href="#pricing">Pricing</a>
+      <a href="#faq">FAQ</a>
     </div>
     <div class="nav-cta">
       <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
@@ -356,7 +376,7 @@
             <div class="pv-text font-read">"Push your argument further — like a boss fight: raise the tension, then land your strongest hit at the right moment."</div>
           </div>
           <div class="pv-card" style="background:linear-gradient(135deg, var(--navy-deep), #2B3B54); border:none;">
-            <div style="color:#F59E0B; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; margin-bottom:6px;">Micro-mission</div>
+            <div style="color:#7DD3FC; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; margin-bottom:6px;">Micro-mission</div>
             <div style="color:#D5DEEE; font-size:13.5px; line-height:1.55;">Next submission: end each body paragraph with a sentence linking evidence back to your thesis.</div>
           </div>
         </div>
@@ -455,6 +475,37 @@
   </div>
 </section>
 
+<section class="section-alt" id="faq">
+  <div class="wrap">
+    <div class="section-head" style="margin-inline:auto; text-align:center;">
+      <span class="eyebrow" style="justify-content:center;">FAQ</span>
+      <h2>Questions parents and students actually ask.</h2>
+    </div>
+    <div class="faq-list">
+      <details class="faq-item" open>
+        <summary>How does the 3 free monthly submissions work?<span class="faq-plus"></span></summary>
+        <div class="faq-a">Every account gets 3 free story or essay submissions each calendar month — full Key Takeaways feedback included, no watered-down version. Your count resets automatically at the start of each billing cycle, so there's nothing to remember or manually renew. Once you're using it every week, <a href="index.html#pricing">Pro</a> removes the monthly cap entirely.</div>
+      </details>
+      <details class="faq-item">
+        <summary>Is my child's writing safe and private?<span class="faq-plus"></span></summary>
+        <div class="faq-a">Yes. Submissions are processed solely to generate feedback for your child — we never sell or rent writing samples or personal data, and we don't use your child's submissions to train public AI models. Parents can view, export, or permanently delete a child's writing history at any time. Full details are in our <a href="privacy.html">Privacy Policy</a>.</div>
+      </details>
+      <details class="faq-item">
+        <summary>How does LiteracyLab AI align with my country's curriculum?<span class="faq-plus"></span></summary>
+        <div class="faq-a">You choose your country — UK, US, Australia, or Canada — and your child's grade or year group, and every mastery target, growth tip, and vocabulary suggestion is scaled to that curriculum's actual expectations (e.g. fronted adverbials for UK Key Stage 2, rhetorical devices for US high-school English). It's not one generic rubric stretched across every country.</div>
+      </details>
+      <details class="faq-item">
+        <summary>Can I cancel my LiteracyLab Pro subscription anytime?<span class="faq-plus"></span></summary>
+        <div class="faq-a">Yes — Pro is billed monthly through Stripe with no lock-in contract. Cancel from your account settings in a couple of clicks and you won't be charged again; you'll keep Pro access through the end of the period you already paid for.</div>
+      </details>
+      <details class="faq-item">
+        <summary>What happens when my child reaches their 3-story limit?<span class="faq-plus"></span></summary>
+        <div class="faq-a">The workspace clearly shows when they're at the limit and pauses new submissions — nothing is lost, and drafts already in progress stay saved. From there you can either upgrade to Pro for unlimited submissions right away, or simply wait for the free allowance to reset at the start of next month.</div>
+      </details>
+    </div>
+  </div>
+</section>
+
 <section class="final-cta">
   <div class="hero-glow" style="height:100%;"></div>
   <div class="wrap" style="position:relative;">
@@ -472,7 +523,9 @@
     <div class="foot-links">
       <a href="app.html">Workspace</a>
       <a href="#pricing">Pricing</a>
-      <a href="#how">How it works</a>
+      <a href="#faq">FAQ</a>
+      <a href="privacy.html">Privacy</a>
+      <a href="terms.html">Terms</a>
     </div>
   </div>
 </footer>
