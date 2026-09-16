@@ -593,7 +593,7 @@ function Header({ view, setView, used, total, theme, setTheme }){
           </button>
           <div className="hidden md:flex items-center gap-2 rounded-full border pl-3 pr-1 py-1" style={{ borderColor: "var(--border)", background: "var(--surface-2)" }}>
             <span className="text-xs font-medium" style={{ color: "var(--ink-soft)" }}>
-              Free Plan: <span className="font-bold tabular" style={{ color: remaining <= 1 ? "var(--bad)" : "var(--ink)" }}>{remaining}</span> of {total} monthly stories/essays remaining
+              Free Plan: <span className="font-bold tabular" style={{ color: remaining <= 1 ? "var(--bad)" : "var(--ink)" }}>{remaining}</span> of {total} monthly submissions remaining
             </span>
             <span className="rounded-full px-2 py-1 text-[11px] font-bold" style={{ background: "var(--navy-tint)", color: "var(--ink)" }}>FREE</span>
           </div>
@@ -766,7 +766,7 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
             </div>
             <h3 className="font-display font-bold text-lg text-white mb-1.5">{remaining <= 1 ? "Almost at your monthly limit" : "Unlock unlimited submissions"}</h3>
             <p className="text-[13px] mb-4" style={{ color: "#C7D2E4" }}>
-              You’ve used {used} of {total} free stories/essays this month. Pro adds unlimited submissions, deeper rhetorical analysis and progress reports for every child.
+              You’ve used {used} of {total} free submissions this month. Pro adds unlimited submissions, deeper rhetorical analysis and progress reports for every child.
             </p>
             <ul className="text-[13px] space-y-1.5 mb-5" style={{ color: "#DCE4F2" }}>
               {["Unlimited monthly submissions","Advanced exam-technique scoring","Weekly progress reports by email"].map(t=>(
