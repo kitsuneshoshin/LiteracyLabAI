@@ -460,6 +460,23 @@ const MICRO_MISSION_BASE = {
   high: "End each body paragraph with a synthesis sentence linking evidence back to your thesis.",
 };
 
+// A one-tap commitment, not just a satisfaction rating: asking "what will you try
+// next time?" makes the student actively choose an action, which research on
+// feedback effectiveness (Hattie & Timperley) links to far better follow-through
+// than simply rating whether feedback felt helpful.
+const WRITING_COMMIT_OPTIONS = {
+  early: ["Start a sentence with a describing word", "Read my story out loud before I finish", "Use one of today's new words"],
+  elementary: ["Start a sentence with a fronted adverbial", "Check my story has a clear beginning and end", "Use one of today's vocabulary upgrades"],
+  middle: ["Add a sentence considering the other side", "Check every paragraph makes one clear point", "Use one of today's vocabulary upgrades"],
+  high: ["End a paragraph with a synthesis sentence", "Check my thesis directly answers the question", "Use one of today's rhetorical techniques"],
+};
+const READING_COMMIT_OPTIONS = {
+  early: ["Find the exact sentence that answers a question", "Read the passage again before answering", "Use one of today's new words"],
+  elementary: ["Look back at the text before I answer", "Explain my answer using words from the passage", "Use one of today's vocabulary upgrades"],
+  middle: ["Find one detail in the text that supports my answer", "Notice how the setting affects the mood", "Use one of today's vocabulary upgrades"],
+  high: ["Find the strongest evidence for my answer", "Notice one rhetorical technique the writer used", "Use one of today's vocabulary upgrades"],
+};
+
 // Explains the same skill through the lens of the student's chosen interest, so
 // the feedback lands as something they already understand rather than an abstract rule.
 const INTEREST_ANALOGY = {
@@ -626,7 +643,7 @@ function StatTile({ icon: IconEl, label, value, sub, accent }){
   );
 }
 
-function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests, toggleInterest, confidence, setConfidence, motivation, setMotivation, used, total, setView }){
+function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests, toggleInterest, confidenceWriting, setConfidenceWriting, confidenceReading, setConfidenceReading, motivation, setMotivation, used, total, setView }){
   const grades = GRADE_DATA[country].grades;
   const gradeLabel = grades[gradeIdx];
   const remaining = total - used;
@@ -683,10 +700,17 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
             ))}
           </div>
 
-          <span className="text-xs font-semibold" style={{ color: "var(--ink-soft)" }}>How confident do you feel about writing &amp; reading?</span>
+          <span className="text-xs font-semibold" style={{ color: "var(--ink-soft)" }}>How confident do you feel about writing?</span>
+          <div className="flex flex-wrap gap-2 mt-2 mb-4">
+            {CONFIDENCE_LEVELS.map(({id,label})=> (
+              <Pill key={id} active={confidenceWriting===id} onClick={()=>setConfidenceWriting(id)}>{label}</Pill>
+            ))}
+          </div>
+
+          <span className="text-xs font-semibold" style={{ color: "var(--ink-soft)" }}>How confident do you feel about reading?</span>
           <div className="flex flex-wrap gap-2 mt-2 mb-5">
             {CONFIDENCE_LEVELS.map(({id,label})=> (
-              <Pill key={id} active={confidence===id} onClick={()=>setConfidence(id)}>{label}</Pill>
+              <Pill key={id} active={confidenceReading===id} onClick={()=>setConfidenceReading(id)}>{label}</Pill>
             ))}
           </div>
 
@@ -826,6 +850,34 @@ function ThumbsFeedback({ context }){
   );
 }
 
+// The higher-leverage signal: not "did you like this" but "what will you actually do
+// with it" — a committed action, chosen from options drawn from this piece's own Grow.
+function CommitPrompt({ options }){
+  const [picked, setPicked] = useState(null);
+  if (picked) {
+    return (
+      <div className="rounded-xl p-3 flex items-center gap-2" style={{ background: "var(--good-tint)" }}>
+        <IconCheck size={15} strokeWidth={2.4} style={{ color: "var(--good)" }} />
+        <span className="text-[13px] font-medium" style={{ color: "var(--ink)" }}>Locked in: <strong>{picked}</strong> — we'll check in on this next time.</span>
+      </div>
+    );
+  }
+  return (
+    <div>
+      <div className="text-[12.5px] font-semibold mb-2" style={{ color: "var(--ink-soft)" }}>What will you try next time?</div>
+      <div className="flex flex-wrap gap-2">
+        {options.map(opt=>(
+          <button key={opt} onClick={()=>setPicked(opt)}
+            className="focus-ring text-left rounded-full border px-3.5 py-2 text-[13px] font-medium"
+            style={{ borderColor: "var(--cyan)", color: "var(--cyan-ink)", background: "var(--cyan-tint)" }}>
+            {opt}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function FeedbackPanel({ tier, gradeLabel, country, interest, confidence, motivation, seed }){
   const vocabList = VOCAB_BANK[interest] ? VOCAB_BANK[interest][tier] : VOCAB_BANK.exam[tier];
   const interestLabel = (INTERESTS.find(i=>i.id===interest) || INTERESTS[0]).label;
@@ -855,7 +907,10 @@ function FeedbackPanel({ tier, gradeLabel, country, interest, confidence, motiva
             explained through {interestLabel}
           </span>
         </div>
-        <p className="text-[15px] leading-relaxed font-read" style={{ color: "var(--ink)" }}>{growthTipFor(tier, interest, motivation)}</p>
+        <p className="text-[15px] leading-relaxed font-read mb-4" style={{ color: "var(--ink)" }}>{growthTipFor(tier, interest, motivation)}</p>
+        <div className="pt-4 border-t" style={{ borderColor: "var(--border-soft)" }}>
+          <CommitPrompt options={WRITING_COMMIT_OPTIONS[tier]} />
+        </div>
       </div>
 
       <div className="card p-5 sm:p-6">
@@ -895,11 +950,12 @@ function FeedbackPanel({ tier, gradeLabel, country, interest, confidence, motiva
   );
 }
 
-function ReadingFeedbackPanel({ tier, country, interest, score, totalQ }){
+function ReadingFeedbackPanel({ tier, country, interest, confidence, score, totalQ }){
   const vocabList = VOCAB_BANK[interest] ? VOCAB_BANK[interest][tier] : VOCAB_BANK.exam[tier];
   const interestLabel = (INTERESTS.find(i=>i.id===interest) || INTERESTS[0]).label;
   const curriculum = GRADE_DATA[country].curriculum;
   const pct = Math.round((score/totalQ)*100);
+  const opener = CONFIDENCE_OPENER[confidence] || "";
   return (
     <div className="animate-float-in flex flex-col gap-4">
       <div className="card p-5 sm:p-6 flex items-center gap-4" style={{ borderColor: "var(--good)", borderWidth: 1.5 }}>
@@ -908,7 +964,7 @@ function ReadingFeedbackPanel({ tier, country, interest, score, totalQ }){
         </div>
         <div>
           <h3 className="font-display font-bold mb-1" style={{ color: "var(--ink)" }}>Glows — what you did well</h3>
-          <p className="text-[14.5px] leading-relaxed font-read" style={{ color: "var(--ink)" }}>{readingGlows(tier, score, totalQ, curriculum)}</p>
+          <p className="text-[14.5px] leading-relaxed font-read" style={{ color: "var(--ink)" }}>{opener}{readingGlows(tier, score, totalQ, curriculum)}</p>
         </div>
       </div>
 
@@ -924,7 +980,10 @@ function ReadingFeedbackPanel({ tier, country, interest, score, totalQ }){
             explained through {interestLabel}
           </span>
         </div>
-        <p className="text-[15px] leading-relaxed font-read" style={{ color: "var(--ink)" }}>{readingGrows(tier, score, totalQ, interest)}</p>
+        <p className="text-[15px] leading-relaxed font-read mb-4" style={{ color: "var(--ink)" }}>{readingGrows(tier, score, totalQ, interest)}</p>
+        <div className="pt-4 border-t" style={{ borderColor: "var(--border-soft)" }}>
+          <CommitPrompt options={READING_COMMIT_OPTIONS[tier]} />
+        </div>
       </div>
 
       <div className="card p-5 sm:p-6">
@@ -957,7 +1016,7 @@ function ReadingFeedbackPanel({ tier, country, interest, score, totalQ }){
 /* ---------------------------------------------------------------- */
 /* Student Workspace                                                  */
 /* ---------------------------------------------------------------- */
-function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, interests, confidence, motivation, used, total, onSubmit }){
+function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, interests, confidenceWriting, confidenceReading, motivation, used, total, onSubmit }){
   const grades = GRADE_DATA[country].grades;
   const gradeLabel = grades[gradeIdx];
   const meta = PROMPTS[tier];
@@ -1064,10 +1123,10 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
             </div>
           )}
           {phase === "done" && exerciseType === "writing" && (
-            <FeedbackPanel tier={tier} gradeLabel={gradeLabel} country={country} interest={activeInterest} confidence={confidence} motivation={motivation} seed={words} />
+            <FeedbackPanel tier={tier} gradeLabel={gradeLabel} country={country} interest={activeInterest} confidence={confidenceWriting} motivation={motivation} seed={words} />
           )}
           {phase === "done" && exerciseType === "reading" && (
-            <ReadingFeedbackPanel tier={tier} country={country} interest={activeInterest} score={readingScore} totalQ={readingQuestions.length} />
+            <ReadingFeedbackPanel tier={tier} country={country} interest={activeInterest} confidence={confidenceReading} score={readingScore} totalQ={readingQuestions.length} />
           )}
         </div>
       </div>
@@ -1336,7 +1395,8 @@ function App(){
   const [gradeIdx, setGradeIdx] = useState(5); // Year 5
   const [tierOverride, setTierOverride] = useState(null);
   const [interests, setInterests] = useState(["space","gaming"]);
-  const [confidence, setConfidence] = useState("growing");
+  const [confidenceWriting, setConfidenceWriting] = useState("growing");
+  const [confidenceReading, setConfidenceReading] = useState("growing");
   const [motivation, setMotivation] = useState("enjoyment");
   const [used, setUsed] = useState(1);
   const total = 3;
@@ -1381,11 +1441,13 @@ function App(){
       {view === "dashboard" ? (
         <Dashboard country={country} setCountry={handleCountryChange} gradeIdx={gradeIdx} setGradeIdx={handleGradeChange}
           tier={tier} interests={interests} toggleInterest={toggleInterest}
-          confidence={confidence} setConfidence={setConfidence} motivation={motivation} setMotivation={setMotivation}
+          confidenceWriting={confidenceWriting} setConfidenceWriting={setConfidenceWriting}
+          confidenceReading={confidenceReading} setConfidenceReading={setConfidenceReading}
+          motivation={motivation} setMotivation={setMotivation}
           used={used} total={total} setView={setView} />
       ) : (
         <Workspace country={country} gradeIdx={gradeIdx} setGradeIdx={handleGradeChange} tier={tier} setTierOverride={setTierAndSyncGrade}
-          interests={interests} confidence={confidence} motivation={motivation} used={used} total={total} onSubmit={handleSubmit} />
+          interests={interests} confidenceWriting={confidenceWriting} confidenceReading={confidenceReading} motivation={motivation} used={used} total={total} onSubmit={handleSubmit} />
       )}
       <footer className="mx-auto max-w-6xl px-4 sm:px-6 py-10 text-center text-xs flex flex-col items-center gap-2" style={{ color: "var(--ink-faint)" }}>
         <div>LiteracyLab AI · interactive prototype — all learner data shown is sample data.</div>
