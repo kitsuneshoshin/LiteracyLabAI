@@ -6,6 +6,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.24.7/babel.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 
 <style>
   :root{
@@ -140,6 +141,42 @@
 
 <script type="text/babel" data-presets="react">
 const { useState, useMemo, useEffect, useRef } = React;
+
+/* ---------------------------------------------------------------- */
+/* Backend config                                                     */
+/* ---------------------------------------------------------------- */
+// The Supabase URL and anon key are meant to be public (Supabase's own
+// security model — access control lives in Row Level Security policies, not
+// key secrecy). Fill these in once the Supabase project exists. Until then,
+// the app runs fully in local demo mode, exactly as it did before the
+// backend existed — nothing breaks by leaving these blank.
+const SUPABASE_URL = "";
+const SUPABASE_ANON_KEY = "";
+const BACKEND_CONFIGURED = SUPABASE_URL.startsWith("http") && SUPABASE_ANON_KEY.length > 20;
+const supabaseClient = BACKEND_CONFIGURED ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+
+const FREE_MONTHLY_CAP = 3;
+
+// Attaches the signed-in user's access token to a call against our own /api
+// serverless functions. Throws if somehow called without a session.
+async function authedFetch(session, path, options = {}) {
+  const res = await fetch(path, {
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${session.access_token}`,
+      ...(options.headers || {}),
+    },
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.error || `Request to ${path} failed (${res.status}).`);
+    err.statusCode = res.status;
+    err.payload = data;
+    throw err;
+  }
+  return data;
+}
 
 /* ---------------------------------------------------------------- */
 /* Minimal line-icon set (lucide-style: 24x24, stroke, round caps)   */
@@ -573,7 +610,7 @@ function SectionLabel({ children }){
 /* ---------------------------------------------------------------- */
 /* Header                                                             */
 /* ---------------------------------------------------------------- */
-function Header({ view, setView, used, total, theme, setTheme }){
+function Header({ view, setView, used, total, theme, setTheme, backendLive, onSignOut }){
   const remaining = total - used;
   return (
     <header className="sticky top-0 z-30 border-b backdrop-blur-md" style={{ borderColor: "var(--border)", background: "color-mix(in srgb, var(--surface) 88%, transparent)" }}>
@@ -619,6 +656,11 @@ function Header({ view, setView, used, total, theme, setTheme }){
             style={{ background: "var(--gold)", color: "#3B2606" }}>
             <IconCrown size={13} strokeWidth={2.4} /> Upgrade to Pro
           </button>
+          {backendLive && (
+            <button onClick={onSignOut} className="focus-ring hidden sm:inline-flex items-center rounded-full px-3 py-2 text-[13px] font-semibold" style={{ color: "var(--ink-faint)" }}>
+              Sign out
+            </button>
+          )}
         </div>
       </div>
     </header>
@@ -643,7 +685,7 @@ function StatTile({ icon: IconEl, label, value, sub, accent }){
   );
 }
 
-function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests, toggleInterest, confidenceWriting, setConfidenceWriting, confidenceReading, setConfidenceReading, motivation, setMotivation, used, total, setView }){
+function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests, toggleInterest, confidenceWriting, setConfidenceWriting, confidenceReading, setConfidenceReading, motivation, setMotivation, used, total, setView, history, backendLive }){
   const grades = GRADE_DATA[country].grades;
   const gradeLabel = grades[gradeIdx];
   const remaining = total - used;
@@ -775,11 +817,23 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
 
       <div className="flex flex-col gap-6">
         <div className="grid grid-cols-2 gap-4">
-          <StatTile icon={IconTrend} label="Overall Mastery" value="72%" sub="+6% this month" accent="#0F9D66" />
-          <StatTile icon={IconPen} label="Words Written" value="8,450" sub="Across 14 pieces" accent="#0E7A93" />
-          <div className="col-span-2">
-            <StatTile icon={IconFlame} label="Active Streak" value="12 days" sub="Personal best: 19 days" accent="#F59E0B" />
-          </div>
+          {backendLive ? (
+            <>
+              <StatTile icon={IconTrend} label="Reading Accuracy" value={history?.avgReadingScore != null ? `${history.avgReadingScore}%` : "—"} sub={history ? `From ${history.totalSubmissions} submission${history.totalSubmissions===1?"":"s"}` : "Loading…"} accent="#0F9D66" />
+              <StatTile icon={IconPen} label="Words Written" value={history ? history.wordsWritten.toLocaleString() : "—"} sub={history ? `Across ${history.totalSubmissions} pieces` : "Loading…"} accent="#0E7A93" />
+              <div className="col-span-2">
+                <StatTile icon={IconFlame} label="Active Streak" value={history ? `${history.activeStreak} day${history.activeStreak===1?"":"s"}` : "—"} sub="Real progress, tracked from your submissions" accent="#F59E0B" />
+              </div>
+            </>
+          ) : (
+            <>
+              <StatTile icon={IconTrend} label="Overall Mastery" value="72%" sub="+6% this month" accent="#0F9D66" />
+              <StatTile icon={IconPen} label="Words Written" value="8,450" sub="Across 14 pieces" accent="#0E7A93" />
+              <div className="col-span-2">
+                <StatTile icon={IconFlame} label="Active Streak" value="12 days" sub="Personal best: 19 days" accent="#F59E0B" />
+              </div>
+            </>
+          )}
         </div>
 
         <div className="card p-6 relative overflow-hidden" style={{ background: "linear-gradient(160deg, var(--ink), #2B3B54)" }}>
@@ -823,8 +877,15 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
 /* ---------------------------------------------------------------- */
 // A short, low-friction "did this land?" check — captured per piece of feedback
 // rather than guessed once at signup, since feedback receptivity shifts over time.
-function ThumbsFeedback({ context }){
+function ThumbsFeedback({ context, session, submissionId, backendLive }){
   const [value, setValue] = useState(null);
+  function pick(v){
+    setValue(v);
+    if (backendLive && submissionId) {
+      authedFetch(session, "/api/commit", { method: "POST", body: JSON.stringify({ submissionId, helpfulRating: v }) })
+        .catch((err)=> console.error("Failed to log feedback rating:", err));
+    }
+  }
   if (value) {
     return (
       <div className="text-[12.5px] flex items-center gap-1.5" style={{ color: "var(--ink-faint)" }}>
@@ -837,11 +898,11 @@ function ThumbsFeedback({ context }){
     <div className="flex items-center gap-2.5 flex-wrap">
       <span className="text-[12.5px] font-medium" style={{ color: "var(--ink-faint)" }}>Did this feedback help?</span>
       <div className="flex items-center gap-1.5">
-        <button onClick={()=>setValue("up")} aria-label="Yes, this helped"
+        <button onClick={()=>pick("up")} aria-label="Yes, this helped"
           className="focus-ring w-8 h-8 rounded-full grid place-items-center border" style={{ borderColor: "var(--border)", color: "var(--ink-soft)" }}>
           <IconThumbsUp size={14} strokeWidth={2.2} />
         </button>
-        <button onClick={()=>setValue("down")} aria-label="No, this didn't help"
+        <button onClick={()=>pick("down")} aria-label="No, this didn't help"
           className="focus-ring w-8 h-8 rounded-full grid place-items-center border" style={{ borderColor: "var(--border)", color: "var(--ink-soft)" }}>
           <IconThumbsDown size={14} strokeWidth={2.2} />
         </button>
@@ -852,8 +913,15 @@ function ThumbsFeedback({ context }){
 
 // The higher-leverage signal: not "did you like this" but "what will you actually do
 // with it" — a committed action, chosen from options drawn from this piece's own Grow.
-function CommitPrompt({ options }){
+function CommitPrompt({ options, session, submissionId, backendLive }){
   const [picked, setPicked] = useState(null);
+  function pick(opt){
+    setPicked(opt);
+    if (backendLive && submissionId) {
+      authedFetch(session, "/api/commit", { method: "POST", body: JSON.stringify({ submissionId, chosenAction: opt }) })
+        .catch((err)=> console.error("Failed to log commitment:", err));
+    }
+  }
   if (picked) {
     return (
       <div className="rounded-xl p-3 flex items-center gap-2" style={{ background: "var(--good-tint)" }}>
@@ -867,7 +935,7 @@ function CommitPrompt({ options }){
       <div className="text-[12.5px] font-semibold mb-2" style={{ color: "var(--ink-soft)" }}>What will you try next time?</div>
       <div className="flex flex-wrap gap-2">
         {options.map(opt=>(
-          <button key={opt} onClick={()=>setPicked(opt)}
+          <button key={opt} onClick={()=>pick(opt)}
             className="focus-ring text-left rounded-full border px-3.5 py-2 text-[13px] font-medium"
             style={{ borderColor: "var(--cyan)", color: "var(--cyan-ink)", background: "var(--cyan-tint)" }}>
             {opt}
@@ -878,11 +946,21 @@ function CommitPrompt({ options }){
   );
 }
 
-function FeedbackPanel({ tier, gradeLabel, country, interest, confidence, motivation, seed }){
-  const vocabList = VOCAB_BANK[interest] ? VOCAB_BANK[interest][tier] : VOCAB_BANK.exam[tier];
+function FeedbackPanel({ tier, gradeLabel, country, interest, confidence, motivation, seed, feedback, submissionId, session, backendLive }){
   const interestLabel = (INTERESTS.find(i=>i.id===interest) || INTERESTS[0]).label;
   const curriculum = GRADE_DATA[country].curriculum;
   const opener = CONFIDENCE_OPENER[confidence] || "";
+
+  // When connected to the backend, `feedback` is the real LLM response for THIS
+  // submission's actual text. Otherwise fall back to the scripted demo content.
+  const glow = feedback?.glow || `${opener}${PRAISE[tier](gradeLabel, curriculum)}`;
+  const grow = feedback?.grow || growthTipFor(tier, interest, motivation);
+  const vocabList = feedback?.vocab
+    ? feedback.vocab.map(v=>[v.term, v.definition])
+    : (VOCAB_BANK[interest] ? VOCAB_BANK[interest][tier] : VOCAB_BANK.exam[tier]);
+  const microMission = feedback?.microMission || microMissionFor(tier, interest);
+  const commitOptions = feedback?.commitOptions || WRITING_COMMIT_OPTIONS[tier];
+
   return (
     <div className="animate-float-in flex flex-col gap-4">
       <div className="card p-5 sm:p-6" style={{ borderColor: "var(--good)", borderWidth: 1.5 }}>
@@ -892,7 +970,7 @@ function FeedbackPanel({ tier, gradeLabel, country, interest, confidence, motiva
           </div>
           <h3 className="font-display font-bold" style={{ color: "var(--ink)" }}>Glows — what you did well</h3>
         </div>
-        <p className="text-[15px] leading-relaxed font-read" style={{ color: "var(--ink)" }}>{opener}{PRAISE[tier](gradeLabel, curriculum)}</p>
+        <p className="text-[15px] leading-relaxed font-read" style={{ color: "var(--ink)" }}>{glow}</p>
       </div>
 
       <div className="card p-5 sm:p-6" style={{ borderColor: "var(--cyan)", borderWidth: 1.5 }}>
@@ -907,9 +985,9 @@ function FeedbackPanel({ tier, gradeLabel, country, interest, confidence, motiva
             explained through {interestLabel}
           </span>
         </div>
-        <p className="text-[15px] leading-relaxed font-read mb-4" style={{ color: "var(--ink)" }}>{growthTipFor(tier, interest, motivation)}</p>
+        <p className="text-[15px] leading-relaxed font-read mb-4" style={{ color: "var(--ink)" }}>{grow}</p>
         <div className="pt-4 border-t" style={{ borderColor: "var(--border-soft)" }}>
-          <CommitPrompt options={WRITING_COMMIT_OPTIONS[tier]} />
+          <CommitPrompt options={commitOptions} session={session} submissionId={submissionId} backendLive={backendLive} />
         </div>
       </div>
 
@@ -941,21 +1019,28 @@ function FeedbackPanel({ tier, gradeLabel, country, interest, confidence, motiva
         </div>
         <div>
           <div className="font-display font-bold text-sm text-white mb-1">Micro-mission for next time</div>
-          <p className="text-[13px]" style={{ color: "#D5DEEE" }}>{microMissionFor(tier, interest)}</p>
+          <p className="text-[13px]" style={{ color: "#D5DEEE" }}>{microMission}</p>
         </div>
       </div>
 
-      <ThumbsFeedback context="writing feedback" />
+      <ThumbsFeedback context="writing feedback" session={session} submissionId={submissionId} backendLive={backendLive} />
     </div>
   );
 }
 
-function ReadingFeedbackPanel({ tier, country, interest, confidence, score, totalQ }){
-  const vocabList = VOCAB_BANK[interest] ? VOCAB_BANK[interest][tier] : VOCAB_BANK.exam[tier];
+function ReadingFeedbackPanel({ tier, country, interest, confidence, score, totalQ, feedback, submissionId, session, backendLive }){
   const interestLabel = (INTERESTS.find(i=>i.id===interest) || INTERESTS[0]).label;
   const curriculum = GRADE_DATA[country].curriculum;
   const pct = Math.round((score/totalQ)*100);
   const opener = CONFIDENCE_OPENER[confidence] || "";
+
+  const glow = feedback?.glow || `${opener}${readingGlows(tier, score, totalQ, curriculum)}`;
+  const grow = feedback?.grow || readingGrows(tier, score, totalQ, interest);
+  const vocabList = feedback?.vocab
+    ? feedback.vocab.map(v=>[v.term, v.definition])
+    : (VOCAB_BANK[interest] ? VOCAB_BANK[interest][tier] : VOCAB_BANK.exam[tier]);
+  const commitOptions = feedback?.commitOptions || READING_COMMIT_OPTIONS[tier];
+
   return (
     <div className="animate-float-in flex flex-col gap-4">
       <div className="card p-5 sm:p-6 flex items-center gap-4" style={{ borderColor: "var(--good)", borderWidth: 1.5 }}>
@@ -964,7 +1049,7 @@ function ReadingFeedbackPanel({ tier, country, interest, confidence, score, tota
         </div>
         <div>
           <h3 className="font-display font-bold mb-1" style={{ color: "var(--ink)" }}>Glows — what you did well</h3>
-          <p className="text-[14.5px] leading-relaxed font-read" style={{ color: "var(--ink)" }}>{opener}{readingGlows(tier, score, totalQ, curriculum)}</p>
+          <p className="text-[14.5px] leading-relaxed font-read" style={{ color: "var(--ink)" }}>{glow}</p>
         </div>
       </div>
 
@@ -980,9 +1065,9 @@ function ReadingFeedbackPanel({ tier, country, interest, confidence, score, tota
             explained through {interestLabel}
           </span>
         </div>
-        <p className="text-[15px] leading-relaxed font-read mb-4" style={{ color: "var(--ink)" }}>{readingGrows(tier, score, totalQ, interest)}</p>
+        <p className="text-[15px] leading-relaxed font-read mb-4" style={{ color: "var(--ink)" }}>{grow}</p>
         <div className="pt-4 border-t" style={{ borderColor: "var(--border-soft)" }}>
-          <CommitPrompt options={READING_COMMIT_OPTIONS[tier]} />
+          <CommitPrompt options={commitOptions} session={session} submissionId={submissionId} backendLive={backendLive} />
         </div>
       </div>
 
@@ -1008,7 +1093,7 @@ function ReadingFeedbackPanel({ tier, country, interest, confidence, score, tota
         </div>
       </div>
 
-      <ThumbsFeedback context="reading feedback" />
+      <ThumbsFeedback context="reading feedback" session={session} submissionId={submissionId} backendLive={backendLive} />
     </div>
   );
 }
@@ -1016,7 +1101,7 @@ function ReadingFeedbackPanel({ tier, country, interest, confidence, score, tota
 /* ---------------------------------------------------------------- */
 /* Student Workspace                                                  */
 /* ---------------------------------------------------------------- */
-function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, interests, confidenceWriting, confidenceReading, motivation, used, total, onSubmit }){
+function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, interests, confidenceWriting, confidenceReading, motivation, used, total, onSubmit, session, backendLive }){
   const grades = GRADE_DATA[country].grades;
   const gradeLabel = grades[gradeIdx];
   const meta = PROMPTS[tier];
@@ -1026,11 +1111,14 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
   const [readingScore, setReadingScore] = useState(0);
   const [phase, setPhase] = useState("draft"); // draft | analyzing | done
   const [activeInterest, setActiveInterest] = useState(interests[0] || "exam");
+  const [backendFeedback, setBackendFeedback] = useState(null); // real LLM output, when connected
+  const [submissionId, setSubmissionId] = useState(null);
+  const [submitError, setSubmitError] = useState(null);
   const timerRef = useRef(null);
   const locked = used >= total;
   const [bannerDismissed, setBannerDismissed] = useState(false);
 
-  useEffect(()=>{ setText(PROMPTS[tier].sample); setAnswers({}); setPhase("draft"); }, [tier, exerciseType]);
+  useEffect(()=>{ setText(PROMPTS[tier].sample); setAnswers({}); setPhase("draft"); setBackendFeedback(null); setSubmissionId(null); setSubmitError(null); }, [tier, exerciseType]);
   useEffect(()=>{ if (interests.length && !interests.includes(activeInterest)) setActiveInterest(interests[0]); }, [interests]);
   useEffect(()=> ()=> clearTimeout(timerRef.current), []);
 
@@ -1038,19 +1126,45 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
   const readingQuestions = READING_BANK[tier].questions;
   const allAnswered = readingQuestions.every((_,i)=> answers[i] != null);
 
-  function handleSubmit(){
+  async function handleSubmit(){
     if (locked || phase === "analyzing") return;
-    if (exerciseType === "reading") {
-      const score = readingQuestions.reduce((n,q,i)=> n + (answers[i] === q.correct ? 1 : 0), 0);
-      setReadingScore(score);
-    }
+    setSubmitError(null);
     setPhase("analyzing");
-    timerRef.current = setTimeout(()=>{ setPhase("done"); onSubmit(); }, 2000);
+
+    if (!backendLive) {
+      // Demo mode: no account connected, so this simulates the flow with scripted content.
+      timerRef.current = setTimeout(()=>{
+        if (exerciseType === "reading") {
+          const score = readingQuestions.reduce((n,q,i)=> n + (answers[i] === q.correct ? 1 : 0), 0);
+          setReadingScore(score);
+        }
+        setPhase("done");
+        onSubmit();
+      }, 2000);
+      return;
+    }
+
+    try {
+      const payload = exerciseType === "writing"
+        ? { kind: "writing", tier, country, gradeLabel, interest: activeInterest, confidenceWriting, motivation, prompt: meta.prompt, text }
+        : { kind: "reading", tier, country, gradeLabel, interest: activeInterest, confidenceReading, answers: readingQuestions.map((_,i)=> answers[i] ?? null) };
+      const result = await authedFetch(session, "/api/submit", { method: "POST", body: JSON.stringify(payload) });
+      setBackendFeedback(result.feedback);
+      setSubmissionId(result.submissionId);
+      if (exerciseType === "reading") setReadingScore(result.score);
+      setPhase("done");
+      onSubmit(result.usage);
+    } catch (err) {
+      setSubmitError(err.payload?.error || err.message || "Something went wrong generating feedback. Please try again.");
+      setPhase("draft");
+    }
   }
   function handleNew(){
     setText("");
     setAnswers({});
     setPhase("draft");
+    setBackendFeedback(null);
+    setSubmissionId(null);
   }
 
   const tierIcon = TIER_META[tier].icon;
@@ -1112,21 +1226,23 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
           </div>
 
           {phase !== "done" && (
-            <div className="card p-6 flex flex-col items-center justify-center text-center gap-3 min-h-[220px]" style={{ borderStyle: "dashed" }}>
-              <div className="w-11 h-11 rounded-full grid place-items-center" style={{ background: "var(--cyan-tint)", color: "var(--cyan-ink)" }}>
-                <IconSparkle size={20} strokeWidth={2} />
+            <div className="card p-6 flex flex-col items-center justify-center text-center gap-3 min-h-[220px]" style={{ borderStyle: submitError ? "solid" : "dashed", borderColor: submitError ? "var(--bad)" : undefined }}>
+              <div className="w-11 h-11 rounded-full grid place-items-center" style={{ background: submitError ? "var(--bad-tint)" : "var(--cyan-tint)", color: submitError ? "var(--bad)" : "var(--cyan-ink)" }}>
+                {submitError ? <IconAlert size={20} strokeWidth={2} /> : <IconSparkle size={20} strokeWidth={2} />}
               </div>
-              <div className="font-display font-semibold text-sm" style={{ color: "var(--ink)" }}>Key Takeaways will appear here</div>
-              <p className="text-[13px] max-w-[26ch]" style={{ color: "var(--ink-faint)" }}>
-                {exerciseType === "writing" ? `Submit your ${tier === "high" ? "essay" : "story"}` : "Check your understanding"} to see personalised feedback from LiteracyLab AI.
+              <div className="font-display font-semibold text-sm" style={{ color: "var(--ink)" }}>{submitError ? "Couldn't generate feedback" : "Key Takeaways will appear here"}</div>
+              <p className="text-[13px] max-w-[28ch]" style={{ color: "var(--ink-faint)" }}>
+                {submitError || `${exerciseType === "writing" ? `Submit your ${tier === "high" ? "essay" : "story"}` : "Check your understanding"} to see personalised feedback from LiteracyLab AI.`}
               </p>
             </div>
           )}
           {phase === "done" && exerciseType === "writing" && (
-            <FeedbackPanel tier={tier} gradeLabel={gradeLabel} country={country} interest={activeInterest} confidence={confidenceWriting} motivation={motivation} seed={words} />
+            <FeedbackPanel tier={tier} gradeLabel={gradeLabel} country={country} interest={activeInterest} confidence={confidenceWriting} motivation={motivation} seed={words}
+              feedback={backendFeedback} submissionId={submissionId} session={session} backendLive={backendLive} />
           )}
           {phase === "done" && exerciseType === "reading" && (
-            <ReadingFeedbackPanel tier={tier} country={country} interest={activeInterest} confidence={confidenceReading} score={readingScore} totalQ={readingQuestions.length} />
+            <ReadingFeedbackPanel tier={tier} country={country} interest={activeInterest} confidence={confidenceReading} score={readingScore} totalQ={readingQuestions.length}
+              feedback={backendFeedback} submissionId={submissionId} session={session} backendLive={backendLive} />
           )}
         </div>
       </div>
@@ -1388,7 +1504,9 @@ function TierEditor({ tier, meta, text, setText, words, phase, onSubmit, onNew, 
 /* ---------------------------------------------------------------- */
 /* App                                                                */
 /* ---------------------------------------------------------------- */
-function App(){
+function App({ session }){
+  const backendLive = BACKEND_CONFIGURED && !!session;
+
   const [theme, setTheme] = useState("system");
   const [view, setView] = useState("workspace");
   const [country, setCountry] = useState("🇬🇧 United Kingdom");
@@ -1399,13 +1517,53 @@ function App(){
   const [confidenceReading, setConfidenceReading] = useState("growing");
   const [motivation, setMotivation] = useState("enjoyment");
   const [used, setUsed] = useState(1);
-  const total = 3;
+  const [total, setTotal] = useState(FREE_MONTHLY_CAP);
+  const [profileLoaded, setProfileLoaded] = useState(!backendLive);
+  const [history, setHistory] = useState(null);
 
   useEffect(()=>{
     const root = document.documentElement;
     if (theme === "system") root.removeAttribute("data-theme");
     else root.setAttribute("data-theme", theme);
   }, [theme]);
+
+  // On login: pull the real learner-setup and usage numbers instead of the local defaults.
+  useEffect(()=>{
+    if (!backendLive) return;
+    (async ()=>{
+      try {
+        const [{ profile }, usage] = await Promise.all([
+          authedFetch(session, "/api/child-profile"),
+          authedFetch(session, "/api/usage"),
+        ]);
+        setCountry(profile.country);
+        setGradeIdx(profile.grade_idx);
+        setInterests(profile.interests || []);
+        setConfidenceWriting(profile.confidence_writing);
+        setConfidenceReading(profile.confidence_reading);
+        setMotivation(profile.motivation);
+        setUsed(usage.used);
+        setTotal(usage.cap === Infinity ? 999 : usage.cap);
+      } catch (err) {
+        console.error("Failed to load learner profile:", err);
+      } finally {
+        setProfileLoaded(true);
+      }
+    })();
+  }, [backendLive]);
+
+  useEffect(()=>{
+    if (!backendLive || view !== "dashboard") return;
+    authedFetch(session, "/api/history").then(setHistory).catch((err)=> console.error("Failed to load history:", err));
+  }, [backendLive, view, used]);
+
+  // Fire-and-forget persistence — the UI doesn't wait on this, it just keeps the
+  // server's copy of the learner setup in sync with what's shown locally.
+  function persistProfile(patch){
+    if (!backendLive) return;
+    authedFetch(session, "/api/child-profile", { method: "POST", body: JSON.stringify(patch) })
+      .catch((err)=> console.error("Failed to save learner setup:", err));
+  }
 
   const naturalTier = tierForGrade(country, gradeIdx);
   const tier = tierOverride || naturalTier;
@@ -1417,21 +1575,44 @@ function App(){
   function handleCountryChange(c){
     setCountry(c);
     setGradeIdx(defaultGradeIndexForTier(c, tier));
+    persistProfile({ country: c, grade_idx: defaultGradeIndexForTier(c, tier) });
   }
   function handleGradeChange(idx){
     setGradeIdx(idx);
     setTierOverride(null);
+    persistProfile({ grade_idx: idx });
   }
   function toggleInterest(id){
-    setInterests(prev => prev.includes(id) ? prev.filter(x=>x!==id) : [...prev, id]);
+    setInterests(prev => {
+      const next = prev.includes(id) ? prev.filter(x=>x!==id) : [...prev, id];
+      persistProfile({ interests: next });
+      return next;
+    });
   }
-  function handleSubmit(){
-    setUsed(u => Math.min(total, u+1));
+  function handleSetConfidenceWriting(v){ setConfidenceWriting(v); persistProfile({ confidence_writing: v }); }
+  function handleSetConfidenceReading(v){ setConfidenceReading(v); persistProfile({ confidence_reading: v }); }
+  function handleSetMotivation(v){ setMotivation(v); persistProfile({ motivation: v }); }
+
+  function handleSubmit(usageFromServer){
+    if (backendLive && usageFromServer) {
+      setUsed(usageFromServer.used);
+      if (usageFromServer.cap !== Infinity) setTotal(usageFromServer.cap);
+    } else {
+      setUsed(u => Math.min(total, u+1));
+    }
+  }
+  async function handleSignOut(){
+    if (supabaseClient) await supabaseClient.auth.signOut();
+  }
+
+  if (!profileLoaded) {
+    return <div className="min-h-screen grid place-items-center" style={{ background: "var(--bg)" }}><IconSparkle size={24} className="animate-spin-slow" style={{ color: "var(--cyan-ink)" }} /></div>;
   }
 
   return (
     <div className="min-h-screen">
-      <Header view={view} setView={setView} used={used} total={total} theme={theme === "system" ? "light" : theme} setTheme={setTheme} />
+      <Header view={view} setView={setView} used={used} total={total} theme={theme === "system" ? "light" : theme} setTheme={setTheme}
+        backendLive={backendLive} onSignOut={handleSignOut} />
       <div className="md:hidden mx-auto max-w-6xl px-4 pt-3">
         <div className="rounded-xl border px-3 py-2 text-xs font-medium flex items-center justify-between" style={{ borderColor: "var(--border)", background: "var(--surface-2)", color: "var(--ink-soft)" }}>
           <span>Free Plan: <b className="tabular" style={{ color: "var(--ink)" }}>{total-used}</b> of {total} remaining</span>
@@ -1441,16 +1622,17 @@ function App(){
       {view === "dashboard" ? (
         <Dashboard country={country} setCountry={handleCountryChange} gradeIdx={gradeIdx} setGradeIdx={handleGradeChange}
           tier={tier} interests={interests} toggleInterest={toggleInterest}
-          confidenceWriting={confidenceWriting} setConfidenceWriting={setConfidenceWriting}
-          confidenceReading={confidenceReading} setConfidenceReading={setConfidenceReading}
-          motivation={motivation} setMotivation={setMotivation}
-          used={used} total={total} setView={setView} />
+          confidenceWriting={confidenceWriting} setConfidenceWriting={handleSetConfidenceWriting}
+          confidenceReading={confidenceReading} setConfidenceReading={handleSetConfidenceReading}
+          motivation={motivation} setMotivation={handleSetMotivation}
+          used={used} total={total} setView={setView} history={history} backendLive={backendLive} />
       ) : (
         <Workspace country={country} gradeIdx={gradeIdx} setGradeIdx={handleGradeChange} tier={tier} setTierOverride={setTierAndSyncGrade}
-          interests={interests} confidenceWriting={confidenceWriting} confidenceReading={confidenceReading} motivation={motivation} used={used} total={total} onSubmit={handleSubmit} />
+          interests={interests} confidenceWriting={confidenceWriting} confidenceReading={confidenceReading} motivation={motivation}
+          used={used} total={total} onSubmit={handleSubmit} session={session} backendLive={backendLive} />
       )}
       <footer className="mx-auto max-w-6xl px-4 sm:px-6 py-10 text-center text-xs flex flex-col items-center gap-2" style={{ color: "var(--ink-faint)" }}>
-        <div>LiteracyLab AI · interactive prototype — all learner data shown is sample data.</div>
+        <div>LiteracyLab AI · {backendLive ? "your account data is private to you" : "interactive prototype — all learner data shown is sample data"}.</div>
         <div className="flex items-center gap-4">
           <a href="index.html" className="hover:underline" style={{ color: "var(--ink-faint)" }}>Home</a>
           <a href="privacy.html" className="hover:underline" style={{ color: "var(--ink-faint)" }}>Privacy</a>
@@ -1461,5 +1643,110 @@ function App(){
   );
 }
 
-ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+/* ---------------------------------------------------------------- */
+/* Auth                                                                */
+/* ---------------------------------------------------------------- */
+function AuthScreen(){
+  const [mode, setMode] = useState("signup"); // signup | login
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [status, setStatus] = useState("idle"); // idle | loading | check-email | error
+  const [errorMsg, setErrorMsg] = useState("");
+
+  async function handleSubmit(e){
+    e.preventDefault();
+    setStatus("loading");
+    setErrorMsg("");
+    try {
+      if (mode === "signup") {
+        const { error } = await supabaseClient.auth.signUp({ email, password });
+        if (error) throw error;
+        setStatus("check-email");
+      } else {
+        const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+        // onAuthStateChange in AuthGate picks up the new session automatically.
+      }
+    } catch (err) {
+      setStatus("error");
+      setErrorMsg(err.message || "Something went wrong.");
+    }
+  }
+
+  return (
+    <div className="min-h-screen flex items-center justify-center px-4" style={{ background: "var(--bg)" }}>
+      <div className="w-full max-w-sm">
+        <div className="flex items-center gap-2.5 justify-center mb-6">
+          <IconMark size={30} />
+          <span className="font-display font-bold text-lg" style={{ color: "var(--ink)" }}>LiteracyLab <span style={{ color: "var(--cyan-ink)" }}>AI</span></span>
+        </div>
+        <div className="card p-6">
+          {status === "check-email" ? (
+            <div className="text-center py-4">
+              <div className="w-11 h-11 rounded-full grid place-items-center mx-auto mb-3" style={{ background: "var(--good-tint)", color: "var(--good)" }}>
+                <IconCheck size={20} strokeWidth={2.4} />
+              </div>
+              <h2 className="font-display font-bold mb-1.5" style={{ color: "var(--ink)" }}>Check your email</h2>
+              <p className="text-sm" style={{ color: "var(--ink-soft)" }}>We sent a confirmation link to <strong>{email}</strong>. Click it, then come back and log in.</p>
+              <button onClick={()=>{ setStatus("idle"); setMode("login"); }} className="focus-ring mt-4 text-sm font-semibold" style={{ color: "var(--cyan-ink)" }}>Back to log in</button>
+            </div>
+          ) : (
+            <>
+              <h2 className="font-display font-bold text-lg mb-1" style={{ color: "var(--ink)" }}>{mode === "signup" ? "Create your account" : "Welcome back"}</h2>
+              <p className="text-sm mb-5" style={{ color: "var(--ink-soft)" }}>{mode === "signup" ? "One account per household — set up your learner after signing up." : "Log in to see your learner's dashboard."}</p>
+              <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+                <label className="flex flex-col gap-1.5">
+                  <span className="text-xs font-semibold" style={{ color: "var(--ink-soft)" }}>Email</span>
+                  <input type="email" required value={email} onChange={(e)=>setEmail(e.target.value)}
+                    className="focus-ring w-full rounded-xl border px-3.5 py-2.5 text-sm" style={{ borderColor: "var(--border)", background: "var(--surface)", color: "var(--ink)" }} placeholder="parent@email.com" />
+                </label>
+                <label className="flex flex-col gap-1.5">
+                  <span className="text-xs font-semibold" style={{ color: "var(--ink-soft)" }}>Password</span>
+                  <input type="password" required minLength={8} value={password} onChange={(e)=>setPassword(e.target.value)}
+                    className="focus-ring w-full rounded-xl border px-3.5 py-2.5 text-sm" style={{ borderColor: "var(--border)", background: "var(--surface)", color: "var(--ink)" }} placeholder="At least 8 characters" />
+                </label>
+                {status === "error" && (
+                  <div className="text-[13px] rounded-lg px-3 py-2" style={{ background: "var(--bad-tint)", color: "var(--bad)" }}>{errorMsg}</div>
+                )}
+                <button type="submit" disabled={status === "loading"}
+                  className="focus-ring w-full rounded-xl py-2.5 font-display font-bold text-sm disabled:opacity-60"
+                  style={{ background: "var(--cyan)", color: "#04303A" }}>
+                  {status === "loading" ? "Please wait…" : mode === "signup" ? "Create account" : "Log in"}
+                </button>
+              </form>
+              <button onClick={()=>setMode(mode === "signup" ? "login" : "signup")} className="focus-ring w-full text-center text-sm font-semibold mt-4" style={{ color: "var(--cyan-ink)" }}>
+                {mode === "signup" ? "Already have an account? Log in" : "New here? Create an account"}
+              </button>
+            </>
+          )}
+        </div>
+        <p className="text-center text-xs mt-4" style={{ color: "var(--ink-faint)" }}>By continuing you agree to our <a href="terms.html" className="underline">Terms</a> and <a href="privacy.html" className="underline">Privacy Policy</a>.</p>
+      </div>
+    </div>
+  );
+}
+
+function AuthGate(){
+  const [session, setSession] = useState(undefined); // undefined = loading, null = signed out
+
+  useEffect(()=>{
+    if (!BACKEND_CONFIGURED) return;
+    supabaseClient.auth.getSession().then(({ data })=> setSession(data.session));
+    const { data: sub } = supabaseClient.auth.onAuthStateChange((_event, newSession)=> setSession(newSession));
+    return ()=> sub.subscription.unsubscribe();
+  }, []);
+
+  if (!BACKEND_CONFIGURED) {
+    return <App session={null} />;
+  }
+  if (session === undefined) {
+    return <div className="min-h-screen grid place-items-center" style={{ background: "var(--bg)" }}><IconSparkle size={24} className="animate-spin-slow" style={{ color: "var(--cyan-ink)" }} /></div>;
+  }
+  if (session === null) {
+    return <AuthScreen />;
+  }
+  return <App session={session} />;
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<AuthGate />);
 </script>
