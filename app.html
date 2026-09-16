@@ -298,6 +298,36 @@ const MASTERY_TARGETS = {
   ],
 };
 
+// Real UK statutory/exam-board references, standardised on AQA for GCSE.
+// KS1/KS2 codes: DfE National Curriculum English Appendix 2 + STA reading test content domains.
+// KS3: broad Programme of Study aims (secondary English isn't codified year-by-year like primary).
+// KS4: AQA GCSE English Language & Literature Assessment Objectives.
+const MASTERY_TARGETS_UK = {
+  early: [
+    { name: "Sentence Punctuation", standard: "Y1 statutory · Writing PoS", status: "Mastered", pct: 89 },
+    { name: "Expanded Noun Phrases", standard: "Y2 statutory · Writing PoS", status: "In Progress", pct: 61 },
+    { name: "Inference From the Text", standard: "Content domain 1d · KS1 reading", status: "Needs Attention", pct: 38 },
+  ],
+  elementary: [
+    { name: "Fronted Adverbials", standard: "Y4 statutory · English App. 2", status: "In Progress", pct: 64 },
+    { name: "Modal Verbs", standard: "Y6 statutory · English App. 2", status: "Needs Attention", pct: 41 },
+    { name: "Inference & Justification", standard: "Content domain 2d · KS2 reading", status: "In Progress", pct: 59 },
+    { name: "Cohesion Across Paragraphs", standard: "Y5–6 statutory · English App. 2", status: "Mastered", pct: 88 },
+  ],
+  middle: [
+    { name: "Rhetorical Awareness", standard: "KS3 Programme of Study aim", status: "In Progress", pct: 66 },
+    { name: "Summarising & Organising Ideas", standard: "KS3 Programme of Study aim", status: "Mastered", pct: 90 },
+    { name: "Inference & Textual Evidence", standard: "KS3 reading aim", status: "In Progress", pct: 71 },
+    { name: "Accurate, Fluent Writing", standard: "KS3 Programme of Study aim", status: "Needs Attention", pct: 38 },
+  ],
+  high: [
+    { name: "Viewpoint & Argument Writing", standard: "AQA GCSE English Language · AO5", status: "In Progress", pct: 73 },
+    { name: "Analysing Language for Effect", standard: "AQA GCSE English Language · AO2", status: "Mastered", pct: 85 },
+    { name: "Comparing Writers' Perspectives", standard: "AQA GCSE English Language · AO3", status: "In Progress", pct: 62 },
+    { name: "Technical Accuracy", standard: "AQA GCSE English Language · AO6", status: "Needs Attention", pct: 45 },
+  ],
+};
+
 const STATUS_STYLE = {
   "Mastered":       { bg: "var(--good-tint)", ink: "var(--good)", icon: IconCheck },
   "In Progress":    { bg: "var(--warn-tint)", ink: "var(--warn)", icon: IconClock },
@@ -572,6 +602,8 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
   const grades = GRADE_DATA[country].grades;
   const gradeLabel = grades[gradeIdx];
   const remaining = total - used;
+  const isMapped = country === "🇬🇧 United Kingdom";
+  const targets = isMapped ? MASTERY_TARGETS_UK[tier] : MASTERY_TARGETS[tier];
 
   return (
     <div className="mx-auto max-w-6xl px-4 sm:px-6 py-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -637,10 +669,23 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
         </div>
 
         <div className="card p-6">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-1 flex-wrap gap-2">
             <h2 className="font-display font-bold text-xl" style={{ color: "var(--ink)" }}>Target mastery — {gradeLabel}</h2>
-            <span className="text-xs font-medium" style={{ color: "var(--ink-faint)" }}>{country}</span>
+            {isMapped ? (
+              <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold" style={{ background: "var(--good-tint)", color: "var(--good)" }}>
+                <IconCheck size={12} strokeWidth={2.6} /> DfE &amp; AQA verified
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold" style={{ background: "var(--surface-2)", color: "var(--ink-faint)" }}>
+                Illustrative — syllabus mapping in progress
+              </span>
+            )}
           </div>
+          <p className="text-xs mb-4" style={{ color: "var(--ink-faint)" }}>
+            {isMapped
+              ? "Each target cites the exact statutory year group, content domain, or AQA GCSE Assessment Objective it's drawn from."
+              : `Targets for ${country} are placeholders modelled on the UK's mapped curriculum until a full ${country} syllabus mapping is completed.`}
+          </p>
           <div className="overflow-x-auto -mx-2 px-2">
             <table className="w-full text-sm border-collapse min-w-[420px]">
               <thead>
@@ -651,9 +696,12 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
                 </tr>
               </thead>
               <tbody>
-                {MASTERY_TARGETS[tier].map((row,i)=>(
+                {targets.map((row,i)=>(
                   <tr key={row.name} className="border-t" style={{ borderColor: "var(--border-soft)" }}>
-                    <td className="py-3 pr-3 font-medium" style={{ color: "var(--ink)" }}>{row.name}</td>
+                    <td className="py-3 pr-3">
+                      <div className="font-medium" style={{ color: "var(--ink)" }}>{row.name}</div>
+                      {row.standard && <div className="text-[11px] mt-0.5" style={{ color: "var(--ink-faint)" }}>{row.standard}</div>}
+                    </td>
                     <td className="py-3 pr-3 w-40">
                       <div className="flex items-center gap-2">
                         <div className="h-2 rounded-full flex-1" style={{ background: "var(--surface-2)" }}>
