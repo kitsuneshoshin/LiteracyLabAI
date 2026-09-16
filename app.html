@@ -328,6 +328,34 @@ const MASTERY_TARGETS_UK = {
   ],
 };
 
+// Real US references: Common Core State Standards (grades K-8 are codified year-by-year,
+// unlike UK's KS3) plus College Board's AP English Language "Big Ideas" for the AP track.
+const MASTERY_TARGETS_US = {
+  early: [
+    { name: "Opinion Writing With Reasons", standard: "CCSS.ELA-LITERACY.W.1.1", status: "In Progress", pct: 58 },
+    { name: "Frequently Occurring Conjunctions", standard: "CCSS.ELA-LITERACY.L.1.1", status: "Mastered", pct: 91 },
+    { name: "Answering Questions About Key Details", standard: "CCSS.ELA-LITERACY.RI.1.1 / RL.1.1", status: "Needs Attention", pct: 42 },
+  ],
+  elementary: [
+    { name: "Modal Auxiliaries", standard: "CCSS.ELA-LITERACY.L.4.1.c", status: "In Progress", pct: 64 },
+    { name: "Opinion Writing & Organization", standard: "CCSS.ELA-LITERACY.W.4.1", status: "Mastered", pct: 88 },
+    { name: "Drawing Inferences From the Text", standard: "CCSS.ELA-LITERACY.RL.4.1 / RI.4.1", status: "In Progress", pct: 59 },
+    { name: "Organizing Related Ideas", standard: "CCSS.ELA-LITERACY.W.4.1 (org. structure)", status: "Needs Attention", pct: 41 },
+  ],
+  middle: [
+    { name: "Argument Writing (Claims & Evidence)", standard: "CCSS.ELA-LITERACY.W.6.1", status: "In Progress", pct: 66 },
+    { name: "Citing Textual Evidence for Inference", standard: "CCSS.ELA-LITERACY.RL.6.1 / RI.6.1", status: "Mastered", pct: 90 },
+    { name: "Organizing Reasons & Evidence", standard: "CCSS.ELA-LITERACY.W.6.1 (organization)", status: "In Progress", pct: 71 },
+    { name: "Precise Claims vs. Counterclaims", standard: "CCSS.ELA-LITERACY.W.8.1", status: "Needs Attention", pct: 38 },
+  ],
+  high: [
+    { name: "Precise Claims & Counterclaims", standard: "CCSS.ELA-LITERACY.W.9-10.1", status: "In Progress", pct: 73 },
+    { name: "Rhetorical Analysis", standard: "AP Eng. Lang. · Big Idea: Style", status: "Mastered", pct: 85 },
+    { name: "Argument Organization", standard: "AP Eng. Lang. · Reasoning & Organization", status: "In Progress", pct: 62 },
+    { name: "Exam Technique & Timing", standard: "AP timed free-response format", status: "Needs Attention", pct: 45 },
+  ],
+};
+
 const STATUS_STYLE = {
   "Mastered":       { bg: "var(--good-tint)", ink: "var(--good)", icon: IconCheck },
   "In Progress":    { bg: "var(--warn-tint)", ink: "var(--warn)", icon: IconClock },
@@ -602,8 +630,10 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
   const grades = GRADE_DATA[country].grades;
   const gradeLabel = grades[gradeIdx];
   const remaining = total - used;
-  const isMapped = country === "🇬🇧 United Kingdom";
-  const targets = isMapped ? MASTERY_TARGETS_UK[tier] : MASTERY_TARGETS[tier];
+  const MAPPED_TARGETS = { "🇬🇧 United Kingdom": MASTERY_TARGETS_UK, "🇺🇸 United States": MASTERY_TARGETS_US };
+  const MAPPED_BADGE = { "🇬🇧 United Kingdom": "DfE & AQA verified", "🇺🇸 United States": "Common Core & AP verified" };
+  const isMapped = !!MAPPED_TARGETS[country];
+  const targets = isMapped ? MAPPED_TARGETS[country][tier] : MASTERY_TARGETS[tier];
 
   return (
     <div className="mx-auto max-w-6xl px-4 sm:px-6 py-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -673,7 +703,7 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
             <h2 className="font-display font-bold text-xl" style={{ color: "var(--ink)" }}>Target mastery — {gradeLabel}</h2>
             {isMapped ? (
               <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold" style={{ background: "var(--good-tint)", color: "var(--good)" }}>
-                <IconCheck size={12} strokeWidth={2.6} /> DfE &amp; AQA verified
+                <IconCheck size={12} strokeWidth={2.6} /> {MAPPED_BADGE[country]}
               </span>
             ) : (
               <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold" style={{ background: "var(--surface-2)", color: "var(--ink-faint)" }}>
@@ -683,8 +713,8 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
           </div>
           <p className="text-xs mb-4" style={{ color: "var(--ink-faint)" }}>
             {isMapped
-              ? "Each target cites the exact statutory year group, content domain, or AQA GCSE Assessment Objective it's drawn from."
-              : `Targets for ${country} are placeholders modelled on the UK's mapped curriculum until a full ${country} syllabus mapping is completed.`}
+              ? "Each target cites the exact standard, content domain, or Assessment Objective it's drawn from."
+              : `Targets for ${country} are placeholders modelled on the mapped regions until a full ${country} syllabus mapping is completed.`}
           </p>
           <div className="overflow-x-auto -mx-2 px-2">
             <table className="w-full text-sm border-collapse min-w-[420px]">

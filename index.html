@@ -237,6 +237,27 @@
   .price-card.pro .price-list svg{ color: var(--gold-glow); }
   .price-card .btn{ width:100%; margin-top:24px; }
 
+  /* comparison */
+  .compare{ border:1px solid var(--border); border-radius:18px; overflow:hidden; background:var(--surface); }
+  .compare-row{ display:grid; grid-template-columns: 1.3fr 1fr 1fr; align-items:center; }
+  .compare-row + .compare-row{ border-top:1px solid var(--border-soft); }
+  .compare-row.head{ background:var(--surface-2); font-weight:700; font-size:13px; }
+  .compare-cell{ padding:16px 18px; font-size:14px; }
+  .compare-row.head .compare-cell:nth-child(2){ color:var(--ink-faint); }
+  .compare-row.head .compare-cell:nth-child(3){ color:var(--cyan); }
+  .compare-cell.label{ color:var(--ink); font-weight:600; }
+  .compare-cell.no{ color:var(--ink-faint); }
+  .compare-cell.no svg{ color:var(--ink-faint); }
+  .compare-cell.yes{ color:var(--ink); font-weight:500; }
+  .compare-cell.yes svg{ color:var(--good); flex-shrink:0; }
+  .compare-cell{ display:flex; align-items:center; gap:8px; }
+  @media (max-width: 640px){
+    .compare-row{ grid-template-columns: 1fr; }
+    .compare-cell{ padding:8px 18px; }
+    .compare-row.head .compare-cell:first-child{ padding-top:14px; }
+    .compare-row:not(.head){ padding-bottom:6px; }
+  }
+
   /* faq */
   .faq-list{ max-width: 760px; margin: 0 auto; display:flex; flex-direction:column; gap:12px; }
   .faq-item{ border:1px solid var(--border); border-radius:14px; background: var(--surface); overflow:hidden; }
@@ -341,6 +362,43 @@
       <div class="trust-item">🇦🇪 Cambridge &amp; IB</div>
       <div class="trust-item">🇸🇬 Cambridge &amp; IB Pathway</div>
       <div class="trust-item">🌐 CEFR A1–C2</div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">Not just a chatbot</span>
+      <h2>You could paste this into ChatGPT. Here's what you'd lose.</h2>
+      <p>A general-purpose AI can comment on a paragraph. It doesn't know your child's grade, their school's curriculum, or what they wrote last month — and it wasn't built with a five-year-old's data in mind.</p>
+    </div>
+    <div class="compare">
+      <div class="compare-row head">
+        <div class="compare-cell">Capability</div>
+        <div class="compare-cell">A generic AI chatbot</div>
+        <div class="compare-cell">LiteracyLab AI</div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-cell label">Curriculum-specific feedback</div>
+        <div class="compare-cell no"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg> Generic writing advice, same for every age</div>
+        <div class="compare-cell yes"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> Cited against real standards for their grade &amp; country</div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-cell label">Progress over time</div>
+        <div class="compare-cell no"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg> No memory between conversations</div>
+        <div class="compare-cell yes"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> A dashboard tracking mastery across every submission</div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-cell label">Built for a 5-year-old vs. an 18-year-old</div>
+        <div class="compare-cell no"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg> One interface, one tone, for everyone</div>
+        <div class="compare-cell yes"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> Four age-tiered workspaces, from read-aloud to exam prep</div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-cell label">A child's writing data</div>
+        <div class="compare-cell no"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg> General consumer terms, not built for minors</div>
+        <div class="compare-cell yes"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> COPPA-minded by design — never sold, never used to train public models</div>
+      </div>
     </div>
   </div>
 </section>
