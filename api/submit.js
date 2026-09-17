@@ -69,7 +69,7 @@ module.exports = async function handler(req, res) {
       const { score, totalQuestions, bank } = gradeReading(tier, answers);
       const llmPrompt = buildReadingPrompt({
         tier, country, gradeLabel, interest,
-        confidenceReading: body.confidenceReading,
+        confidenceReading: body.confidenceReading, motivation: body.motivation,
         passageTitle: bank.title, passage: bank.passage, questions: bank.questions,
         answers, score, totalQuestions,
       });

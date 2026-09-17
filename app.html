@@ -352,6 +352,20 @@ const CONFIDENCE_OPENER = {
   growing: "",
   confident: "",
 };
+// "Getting there" gets the plain Grow at exactly the difficulty it's written for —
+// that's the ZPD sweet spot. "Very confident" gets that same Grow plus a stretch
+// clause, since a confident learner is being under-served by a step they've
+// already outgrown (Vygotsky's zone of proximal development: match the challenge
+// to the learner, not the topic).
+const CONFIDENCE_STRETCH = {
+  early: "Since you're feeling confident, try one more challenge: use a word you've never used in a story before.",
+  elementary: "Since you're feeling confident, try combining two techniques in the same paragraph instead of just one.",
+  middle: "Since you're feeling confident, try applying this same skill to a trickier example — one where the answer isn't obvious.",
+  high: "Since you're feeling confident, push further: apply this technique somewhere it's harder to pull off convincingly.",
+};
+function confidenceStretch(tier, confidence){
+  return confidence === "confident" ? ` ${CONFIDENCE_STRETCH[tier]}` : "";
+}
 
 const MASTERY_TARGETS = {
   early: [
@@ -623,9 +637,9 @@ function analogyFor(interest, tier, country){
   if (interest === "sports") return sportsAnalogy(tier, country);
   return (INTEREST_ANALOGY[interest] || INTEREST_ANALOGY.exam)[tier];
 }
-function growthTipFor(tier, interest, motivation, country){
+function growthTipFor(tier, interest, motivation, country, confidence){
   const closer = MOTIVATION_CLOSER[motivation] || MOTIVATION_CLOSER.enjoyment;
-  return `${GROWTH_TIP_BASE[tier]} Think of it ${analogyFor(interest, tier, country)}. ${closer}`;
+  return `${GROWTH_TIP_BASE[tier]} Think of it ${analogyFor(interest, tier, country)}. ${closer}${confidenceStretch(tier, confidence)}`;
 }
 function microMissionFor(tier, interest, country){
   return `${MICRO_MISSION_BASE[tier]} It works ${analogyFor(interest, tier, country)} — one step earning the next.`;
@@ -636,11 +650,12 @@ function readingGlows(tier, score, totalQ, curriculum){
   if (score === totalQ) return `Perfect score! You picked out every detail needed for ${skill.toLowerCase()} — exactly what ${curriculum} expects at this level.`;
   return `Nice reading — you got ${score} of ${totalQ} right, which shows a solid handle on ${skill.toLowerCase()} under ${curriculum}.`;
 }
-function readingGrows(tier, score, totalQ, interest, country){
+function readingGrows(tier, score, totalQ, interest, country, motivation, confidence){
   const base = score === totalQ
     ? "Try reading the next passage a little faster and see if your comprehension holds up under time pressure."
     : "Go back to the question you missed and find the exact sentence in the passage that answers it — that habit is the fastest way to stop losing marks on inference questions.";
-  return `${base} Think of it ${analogyFor(interest, tier, country)}.`;
+  const closer = MOTIVATION_CLOSER[motivation] || MOTIVATION_CLOSER.enjoyment;
+  return `${base} Think of it ${analogyFor(interest, tier, country)}. ${closer}${confidenceStretch(tier, confidence)}`;
 }
 
 /* ---------------------------------------------------------------- */
@@ -1048,7 +1063,7 @@ function FeedbackPanel({ tier, gradeLabel, country, interest, confidence, motiva
   // When connected to the backend, `feedback` is the real LLM response for THIS
   // submission's actual text. Otherwise fall back to the scripted demo content.
   const glow = feedback?.glow || `${opener}${PRAISE[tier](gradeLabel, curriculum)}`;
-  const grow = feedback?.grow || growthTipFor(tier, interest, motivation, country);
+  const grow = feedback?.grow || growthTipFor(tier, interest, motivation, country, confidence);
   const vocabList = feedback?.vocab
     ? feedback.vocab.map(v=>[v.term, v.definition])
     : vocabFor(interest, tier, country);
@@ -1122,14 +1137,14 @@ function FeedbackPanel({ tier, gradeLabel, country, interest, confidence, motiva
   );
 }
 
-function ReadingFeedbackPanel({ tier, country, interest, confidence, score, totalQ, feedback, submissionId, session, backendLive }){
+function ReadingFeedbackPanel({ tier, country, interest, confidence, motivation, score, totalQ, feedback, submissionId, session, backendLive }){
   const interestLabel = (INTERESTS.find(i=>i.id===interest) || INTERESTS[0]).label;
   const curriculum = GRADE_DATA[country].curriculum;
   const pct = Math.round((score/totalQ)*100);
   const opener = CONFIDENCE_OPENER[confidence] || "";
 
   const glow = feedback?.glow || `${opener}${readingGlows(tier, score, totalQ, curriculum)}`;
-  const grow = feedback?.grow || readingGrows(tier, score, totalQ, interest, country);
+  const grow = feedback?.grow || readingGrows(tier, score, totalQ, interest, country, motivation, confidence);
   const vocabList = feedback?.vocab
     ? feedback.vocab.map(v=>[v.term, v.definition])
     : vocabFor(interest, tier, country);
@@ -1241,7 +1256,7 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
     try {
       const payload = exerciseType === "writing"
         ? { kind: "writing", tier, country, gradeLabel, interest: activeInterest, confidenceWriting, motivation, prompt: meta.prompt, text }
-        : { kind: "reading", tier, country, gradeLabel, interest: activeInterest, confidenceReading, answers: readingQuestions.map((_,i)=> answers[i] ?? null) };
+        : { kind: "reading", tier, country, gradeLabel, interest: activeInterest, confidenceReading, motivation, answers: readingQuestions.map((_,i)=> answers[i] ?? null) };
       const result = await authedFetch(session, "/api/submit", { method: "POST", body: JSON.stringify(payload) });
       setBackendFeedback(result.feedback);
       setSubmissionId(result.submissionId);
@@ -1335,7 +1350,7 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
               feedback={backendFeedback} submissionId={submissionId} session={session} backendLive={backendLive} />
           )}
           {phase === "done" && exerciseType === "reading" && (
-            <ReadingFeedbackPanel tier={tier} country={country} interest={activeInterest} confidence={confidenceReading} score={readingScore} totalQ={readingQuestions.length}
+            <ReadingFeedbackPanel tier={tier} country={country} interest={activeInterest} confidence={confidenceReading} motivation={motivation} score={readingScore} totalQ={readingQuestions.length}
               feedback={backendFeedback} submissionId={submissionId} session={session} backendLive={backendLive} />
           )}
         </div>
