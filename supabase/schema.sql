@@ -46,9 +46,13 @@ create table if not exists public.child_profiles (
   confidence_writing text not null default 'growing',
   confidence_reading text not null default 'growing',
   motivation text not null default 'enjoyment',
+  onboarded boolean not null default false,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+-- Safe to re-run against an existing table created before this column existed.
+alter table public.child_profiles add column if not exists onboarded boolean not null default false;
 
 alter table public.child_profiles enable row level security;
 

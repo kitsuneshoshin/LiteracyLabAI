@@ -610,7 +610,7 @@ function SectionLabel({ children }){
 /* ---------------------------------------------------------------- */
 /* Header                                                             */
 /* ---------------------------------------------------------------- */
-function Header({ view, setView, used, total, theme, setTheme, backendLive, onSignOut }){
+function Header({ view, setView, used, total, theme, setTheme, backendLive, onSignOut, needsOnboarding }){
   const remaining = total - used;
   return (
     <header className="sticky top-0 z-30 border-b backdrop-blur-md" style={{ borderColor: "var(--border)", background: "color-mix(in srgb, var(--surface) 88%, transparent)" }}>
@@ -627,15 +627,18 @@ function Header({ view, setView, used, total, theme, setTheme, backendLive, onSi
 
         <div className="flex items-center gap-2 order-3 sm:order-2 w-full sm:w-auto justify-center">
           <div className="inline-flex p-1 rounded-full border" style={{ borderColor: "var(--border)", background: "var(--surface-2)" }}>
-            {[["workspace","Student Workspace",IconPen],["dashboard","Parent & Student Dashboard",IconGrid]].map(([key,label,IconEl])=>(
-              <button key={key} onClick={()=>setView(key)}
-                className="focus-ring inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[13px] font-semibold transition-colors"
-                style={ view===key ? { background: "var(--ink)", color: "white" } : { color: "var(--ink-soft)" } }
-              >
-                <IconEl size={14} strokeWidth={2.2} />
-                {label}
-              </button>
-            ))}
+            {[["workspace","Student Workspace",IconPen],["dashboard","Parent & Student Dashboard",IconGrid]].map(([key,label,IconEl])=>{
+              const disabled = needsOnboarding && key === "workspace";
+              return (
+                <button key={key} onClick={()=>setView(key)} disabled={disabled} title={disabled ? "Finish learner setup first" : undefined}
+                  className="focus-ring inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[13px] font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                  style={ view===key ? { background: "var(--ink)", color: "white" } : { color: "var(--ink-soft)" } }
+                >
+                  <IconEl size={14} strokeWidth={2.2} />
+                  {label}
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -685,7 +688,7 @@ function StatTile({ icon: IconEl, label, value, sub, accent }){
   );
 }
 
-function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests, toggleInterest, confidenceWriting, setConfidenceWriting, confidenceReading, setConfidenceReading, motivation, setMotivation, used, total, setView, history, backendLive }){
+function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests, toggleInterest, confidenceWriting, setConfidenceWriting, confidenceReading, setConfidenceReading, motivation, setMotivation, used, total, setView, history, backendLive, needsOnboarding, onCompleteOnboarding }){
   const grades = GRADE_DATA[country].grades;
   const gradeLabel = grades[gradeIdx];
   const remaining = total - used;
@@ -695,6 +698,20 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
   const targets = isMapped ? MAPPED_TARGETS[country][tier] : MASTERY_TARGETS[tier];
 
   return (
+    <>
+    {needsOnboarding && (
+      <div className="mx-auto max-w-6xl px-4 sm:px-6 pt-8">
+        <div className="rounded-2xl px-5 py-4 flex items-center gap-3 flex-wrap" style={{ background: "var(--cyan-tint)", border: "1.5px solid var(--cyan)" }}>
+          <div className="w-9 h-9 rounded-full grid place-items-center shrink-0" style={{ background: "var(--cyan)", color: "#04303A" }}>
+            <IconSparkle size={17} strokeWidth={2.2} />
+          </div>
+          <div className="flex-1 min-w-[200px]">
+            <div className="font-display font-bold text-sm" style={{ color: "var(--ink)" }}>Welcome! Let's set up your learner first.</div>
+            <div className="text-[13px]" style={{ color: "var(--ink-soft)" }}>This takes under a minute and personalises every piece of feedback from here on.</div>
+          </div>
+        </div>
+      </div>
+    )}
     <div className="mx-auto max-w-6xl px-4 sm:px-6 py-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
       <div className="lg:col-span-2 flex flex-col gap-6">
         <div className="card p-6">
@@ -859,16 +876,18 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
           </div>
         </div>
 
-        <button onClick={()=>setView("workspace")}
-          className="focus-ring card p-5 flex items-center justify-between text-left hover:border-[var(--cyan)] transition-colors">
+        <button onClick={needsOnboarding ? onCompleteOnboarding : ()=>setView("workspace")}
+          className="focus-ring card p-5 flex items-center justify-between text-left transition-colors"
+          style={ needsOnboarding ? { borderColor: "var(--cyan)", borderWidth: 1.5, background: "var(--cyan-tint)" } : {} }>
           <div>
-            <div className="font-display font-semibold text-sm" style={{ color: "var(--ink)" }}>Go to Student Workspace</div>
-            <div className="text-xs mt-0.5" style={{ color: "var(--ink-soft)" }}>Start today’s {TIER_META[tier].label.toLowerCase()} writing or reading session</div>
+            <div className="font-display font-semibold text-sm" style={{ color: "var(--ink)" }}>{needsOnboarding ? "Start Writing" : "Go to Student Workspace"}</div>
+            <div className="text-xs mt-0.5" style={{ color: "var(--ink-soft)" }}>{needsOnboarding ? "Setup saved — begin your first session" : `Start today’s ${TIER_META[tier].label.toLowerCase()} writing or reading session`}</div>
           </div>
           <IconArrowRight size={18} style={{ color: "var(--cyan-ink)" }} />
         </button>
       </div>
     </div>
+    </>
   );
 }
 
@@ -1520,6 +1539,7 @@ function App({ session }){
   const [total, setTotal] = useState(FREE_MONTHLY_CAP);
   const [profileLoaded, setProfileLoaded] = useState(!backendLive);
   const [history, setHistory] = useState(null);
+  const [needsOnboarding, setNeedsOnboarding] = useState(false);
 
   useEffect(()=>{
     const root = document.documentElement;
@@ -1544,6 +1564,10 @@ function App({ session }){
         setMotivation(profile.motivation);
         setUsed(usage.used);
         setTotal(usage.cap === Infinity ? 999 : usage.cap);
+        if (!profile.onboarded) {
+          setNeedsOnboarding(true);
+          setView("dashboard");
+        }
       } catch (err) {
         console.error("Failed to load learner profile:", err);
       } finally {
@@ -1592,6 +1616,17 @@ function App({ session }){
   function handleSetConfidenceWriting(v){ setConfidenceWriting(v); persistProfile({ confidence_writing: v }); }
   function handleSetConfidenceReading(v){ setConfidenceReading(v); persistProfile({ confidence_reading: v }); }
   function handleSetMotivation(v){ setMotivation(v); persistProfile({ motivation: v }); }
+  function completeOnboarding(){
+    setNeedsOnboarding(false);
+    persistProfile({ onboarded: true });
+    setView("workspace");
+  }
+  // Blocks jumping to the workspace via the header nav switcher until setup is done —
+  // the "Start Writing" button on the dashboard is the only way past this.
+  function guardedSetView(v){
+    if (needsOnboarding && v === "workspace") return;
+    setView(v);
+  }
 
   function handleSubmit(usageFromServer){
     if (backendLive && usageFromServer) {
@@ -1611,8 +1646,8 @@ function App({ session }){
 
   return (
     <div className="min-h-screen">
-      <Header view={view} setView={setView} used={used} total={total} theme={theme === "system" ? "light" : theme} setTheme={setTheme}
-        backendLive={backendLive} onSignOut={handleSignOut} />
+      <Header view={view} setView={guardedSetView} used={used} total={total} theme={theme === "system" ? "light" : theme} setTheme={setTheme}
+        backendLive={backendLive} onSignOut={handleSignOut} needsOnboarding={needsOnboarding} />
       <div className="md:hidden mx-auto max-w-6xl px-4 pt-3">
         <div className="rounded-xl border px-3 py-2 text-xs font-medium flex items-center justify-between" style={{ borderColor: "var(--border)", background: "var(--surface-2)", color: "var(--ink-soft)" }}>
           <span>Free Plan: <b className="tabular" style={{ color: "var(--ink)" }}>{total-used}</b> of {total} remaining</span>
@@ -1625,7 +1660,8 @@ function App({ session }){
           confidenceWriting={confidenceWriting} setConfidenceWriting={handleSetConfidenceWriting}
           confidenceReading={confidenceReading} setConfidenceReading={handleSetConfidenceReading}
           motivation={motivation} setMotivation={handleSetMotivation}
-          used={used} total={total} setView={setView} history={history} backendLive={backendLive} />
+          used={used} total={total} setView={setView} history={history} backendLive={backendLive}
+          needsOnboarding={needsOnboarding} onCompleteOnboarding={completeOnboarding} />
       ) : (
         <Workspace country={country} gradeIdx={gradeIdx} setGradeIdx={handleGradeChange} tier={tier} setTierOverride={setTierAndSyncGrade}
           interests={interests} confidenceWriting={confidenceWriting} confidenceReading={confidenceReading} motivation={motivation}
