@@ -150,8 +150,8 @@ const { useState, useMemo, useEffect, useRef } = React;
 // key secrecy). Fill these in once the Supabase project exists. Until then,
 // the app runs fully in local demo mode, exactly as it did before the
 // backend existed — nothing breaks by leaving these blank.
-const SUPABASE_URL = "";
-const SUPABASE_ANON_KEY = "";
+const SUPABASE_URL = "https://ughwccheiqgdcnoffvit.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVnaHdjY2hlaXFnZGNub2Zmdml0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk2NDE1OTYsImV4cCI6MjEwNTIxNzU5Nn0.tLDzaC2fRs23vYW5mJfXQN0KaWgT2q0WRa9uClNRMOU";
 const BACKEND_CONFIGURED = SUPABASE_URL.startsWith("http") && SUPABASE_ANON_KEY.length > 20;
 const supabaseClient = BACKEND_CONFIGURED ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
