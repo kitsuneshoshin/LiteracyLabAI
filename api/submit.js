@@ -1,7 +1,7 @@
 const { getSupabaseAdmin } = require("./_lib/supabaseAdmin");
 const { requireUser, sendError } = require("./_lib/auth");
 const { getMonthlyUsage } = require("./_lib/usage");
-const { generateFeedbackJSON } = require("./_lib/anthropic");
+const { generateFeedbackJSON } = require("./_lib/openai");
 const { buildWritingPrompt, buildReadingPrompt } = require("./_lib/prompt");
 const { gradeReading } = require("./_lib/readingBank");
 
