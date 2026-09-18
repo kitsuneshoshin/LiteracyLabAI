@@ -90,10 +90,10 @@ module.exports = async function handler(req, res) {
         feedback, model_used: modelUsed,
       };
     } else if (kind === "reading") {
-      const { answers } = body;
+      const { answers, passageIndex } = body;
       if (!Array.isArray(answers)) return res.status(400).json({ error: "answers array is required for a reading submission." });
 
-      const { score, totalQuestions, bank } = gradeReading(tier, answers);
+      const { score, totalQuestions, bank } = gradeReading(tier, passageIndex, answers);
       const llmPrompt = buildReadingPrompt({
         tier, country, gradeLabel, interest,
         confidenceReading: body.confidenceReading, motivation: body.motivation,
@@ -107,7 +107,7 @@ module.exports = async function handler(req, res) {
 
       submissionRow = {
         profile_id: user.id, child_id: childProfile.id, kind: "reading", tier, country, grade_label: gradeLabel, interest,
-        content: { answers },
+        content: { answers, passageIndex },
         score, total_questions: totalQuestions,
         feedback, model_used: modelUsed,
       };
