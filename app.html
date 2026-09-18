@@ -1355,19 +1355,48 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
   const [backendFeedback, setBackendFeedback] = useState(null); // real LLM output, when connected
   const [submissionId, setSubmissionId] = useState(null);
   const [submitError, setSubmitError] = useState(null);
-  const [readingPassageIdx, setReadingPassageIdx] = useState(()=> pickPassageIndex(tier));
+  const [readingPassageIdx, setReadingPassageIdx] = useState(()=> pickPassageIndex(tier)); // demo mode only
+  const [readingPassage, setReadingPassage] = useState(null); // backendLive: AI-generated {submissionId, title, skill, passage, questions}
+  const [readingLoading, setReadingLoading] = useState(false);
   const timerRef = useRef(null);
   const locked = used >= total;
   const [bannerDismissed, setBannerDismissed] = useState(false);
 
-  useEffect(()=>{ setText(PROMPTS[tier].sample); setAnswers({}); setPhase("draft"); setBackendFeedback(null); setSubmissionId(null); setSubmitError(null); setReadingPassageIdx(pickPassageIndex(tier)); }, [tier, exerciseType]);
+  // Generates a brand-new reading passage. In demo mode this just rerolls
+  // the local static bank; with a live backend it calls the AI to write an
+  // original one (consuming this account's usage credit up front — see
+  // api/reading-passage.js) so no student ever sees the same passage twice.
+  async function requestNewPassage(){
+    if (!backendLive) { setReadingPassageIdx(pickPassageIndex(tier)); return; }
+    if (locked) return;
+    setReadingLoading(true);
+    setReadingPassage(null);
+    setSubmitError(null);
+    try {
+      const result = await authedFetch(session, "/api/reading-passage", {
+        method: "POST",
+        body: JSON.stringify({ tier, country, gradeLabel, interest: activeInterest }),
+      });
+      setReadingPassage({ submissionId: result.submissionId, title: result.title, skill: result.skill, passage: result.passage, questions: result.questions });
+      onSubmit(result.usage);
+    } catch (err) {
+      setSubmitError(err.payload?.error || err.message || "Couldn't generate a reading passage. Please try again.");
+    } finally {
+      setReadingLoading(false);
+    }
+  }
+
+  useEffect(()=>{
+    setText(PROMPTS[tier].sample); setAnswers({}); setPhase("draft"); setBackendFeedback(null); setSubmissionId(null); setSubmitError(null);
+    if (exerciseType === "reading") requestNewPassage();
+  }, [tier, exerciseType]);
   useEffect(()=>{ if (interests.length && !interests.includes(activeInterest)) setActiveInterest(interests[0]); }, [interests]);
   useEffect(()=> ()=> clearTimeout(timerRef.current), []);
 
   const words = useMemo(()=> text.trim().length ? text.trim().split(/\s+/).length : 0, [text]);
-  const readingBankEntry = READING_BANK[tier][readingPassageIdx];
-  const readingQuestions = readingBankEntry.questions;
-  const allAnswered = readingQuestions.every((_,i)=> answers[i] != null);
+  const readingBankEntry = backendLive ? readingPassage : READING_BANK[tier][readingPassageIdx];
+  const readingQuestions = readingBankEntry ? readingBankEntry.questions : [];
+  const allAnswered = readingQuestions.length > 0 && readingQuestions.every((_,i)=> answers[i] != null);
 
   async function handleSubmit(){
     if (locked || phase === "analyzing") return;
@@ -1390,11 +1419,17 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
     try {
       const payload = exerciseType === "writing"
         ? { kind: "writing", tier, country, gradeLabel, interest: activeInterest, confidenceWriting, motivation, prompt: meta.prompt, text }
-        : { kind: "reading", tier, country, gradeLabel, interest: activeInterest, confidenceReading, motivation, passageIndex: readingPassageIdx, answers: readingQuestions.map((_,i)=> answers[i] ?? null) };
+        : { kind: "reading", confidenceReading, motivation, submissionId: readingBankEntry.submissionId, answers: readingQuestions.map((_,i)=> answers[i] ?? null) };
       const result = await authedFetch(session, "/api/submit", { method: "POST", body: JSON.stringify(payload) });
       setBackendFeedback(result.feedback);
       setSubmissionId(result.submissionId);
-      if (exerciseType === "reading") setReadingScore(result.score);
+      if (exerciseType === "reading") {
+        setReadingScore(result.score);
+        // The answer key was withheld when the passage was generated so it
+        // never sat in a network response before grading — now that grading
+        // is done, merge it back in so the UI can highlight right/wrong.
+        setReadingPassage(prev => prev ? { ...prev, questions: result.questions } : prev);
+      }
       setPhase("done");
       onSubmit(result.usage);
     } catch (err) {
@@ -1408,7 +1443,7 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
     setPhase("draft");
     setBackendFeedback(null);
     setSubmissionId(null);
-    if (exerciseType === "reading") setReadingPassageIdx(pickPassageIndex(tier));
+    if (exerciseType === "reading") requestNewPassage();
   }
 
   const tierIcon = TIER_META[tier].icon;
@@ -1453,6 +1488,21 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
               phase={phase} onSubmit={handleSubmit} onNew={handleNew} locked={locked}
               interests={interests} activeInterest={activeInterest} setActiveInterest={setActiveInterest}
             />
+          ) : (backendLive && (readingLoading || !readingBankEntry)) ? (
+            <div className="card p-10 flex flex-col items-center justify-center text-center gap-3 min-h-[300px]">
+              {locked ? (
+                <>
+                  <IconLock size={22} style={{ color: "var(--ink-faint)" }} />
+                  <div className="font-display font-semibold text-sm" style={{ color: "var(--ink)" }}>Upgrade to Pro for more reading passages</div>
+                  <p className="text-[13px] max-w-[28ch]" style={{ color: "var(--ink-faint)" }}>You've used all your free submissions this month.</p>
+                </>
+              ) : (
+                <>
+                  <IconSparkle size={24} className="animate-spin-slow" style={{ color: "var(--cyan-ink)" }} />
+                  <div className="font-display font-semibold text-sm" style={{ color: "var(--ink)" }}>Writing you a fresh passage…</div>
+                </>
+              )}
+            </div>
           ) : (
             <ReadingExercise
               bank={readingBankEntry} answers={answers} setAnswers={setAnswers} allAnswered={allAnswered}

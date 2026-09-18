@@ -42,7 +42,11 @@ module.exports = async function handler(req, res) {
     const distinctDates = [...new Set(submissions.map((s) => s.created_at.slice(0, 10)))];
     const activeStreak = computeStreak(distinctDates);
 
-    const readingSubs = submissions.filter((s) => s.kind === "reading" && s.total_questions);
+    // A reading row is created (and its usage credit spent) as soon as its
+    // passage is generated, before the student answers anything - so
+    // total_questions alone isn't enough to know it was actually graded.
+    // score is only set once api/submit.js completes it.
+    const readingSubs = submissions.filter((s) => s.kind === "reading" && s.total_questions && s.score != null);
     const avgReadingScore = readingSubs.length
       ? Math.round((readingSubs.reduce((sum, s) => sum + s.score / s.total_questions, 0) / readingSubs.length) * 100)
       : null;

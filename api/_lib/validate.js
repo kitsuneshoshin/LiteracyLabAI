@@ -87,4 +87,54 @@ function validateFeedback(parsed, { tier, standardsList, targetNames }) {
   return { ok: issues.length === 0, issues };
 }
 
-module.exports = { validateFeedback };
+// Approximate word-count bounds per tier for an AI-generated reading
+// passage — wide enough to allow natural variation, tight enough to catch
+// the model producing something wildly too short/long for the age group.
+const PASSAGE_WORD_BOUNDS = { early: [20, 100], elementary: [60, 220], middle: [100, 320], high: [140, 450] };
+
+function wordCount(text) {
+  return text.trim().split(/\s+/).filter(Boolean).length;
+}
+
+// Structural checks for an AI-generated reading passage + questions. Can't
+// verify the "correct" answer is actually correct (that would need a second
+// model call), but catches the failure modes that matter most: wrong shape,
+// a passage way off-length for the age group, or an out-of-range answer
+// index that would silently break grading.
+function validatePassage(parsed, { tier }) {
+  const issues = [];
+
+  if (!checkString(parsed?.title, 2, 100)) issues.push("title is missing or an unreasonable length");
+  if (!checkString(parsed?.skill, 2, 100)) issues.push("skill is missing or an unreasonable length");
+  if (!checkString(parsed?.passage, 20, 3000)) {
+    issues.push("passage is missing or an unreasonable length");
+  } else {
+    const [min, max] = PASSAGE_WORD_BOUNDS[tier] || [20, 400];
+    const words = wordCount(parsed.passage);
+    if (words < min || words > max) issues.push(`passage is ${words} words, expected roughly ${min}-${max} for this age tier`);
+  }
+
+  if (!Array.isArray(parsed?.questions) || parsed.questions.length !== 3) {
+    issues.push("questions must be an array of exactly 3 items");
+  } else {
+    parsed.questions.forEach((q, i) => {
+      if (!checkString(q?.q, 5, 300)) issues.push(`questions[${i}].q is missing or an unreasonable length`);
+      if (!Array.isArray(q?.options) || q.options.length !== 4) {
+        issues.push(`questions[${i}].options must be an array of exactly 4 items`);
+      } else {
+        q.options.forEach((opt, oi) => {
+          if (!checkString(opt, 1, 150)) issues.push(`questions[${i}].options[${oi}] is missing or an unreasonable length`);
+        });
+        const unique = new Set(q.options.map((o) => String(o).trim().toLowerCase()));
+        if (unique.size !== q.options.length) issues.push(`questions[${i}].options has duplicate answer choices`);
+      }
+      if (!Number.isInteger(q?.correct) || q.correct < 0 || q.correct > 3) {
+        issues.push(`questions[${i}].correct must be an integer from 0 to 3`);
+      }
+    });
+  }
+
+  return { ok: issues.length === 0, issues };
+}
+
+module.exports = { validateFeedback, validatePassage };

@@ -139,10 +139,54 @@ Respond with ONLY a JSON object (no markdown fences, no commentary) with exactly
 }`;
 }
 
+const PASSAGE_LENGTH = {
+  early: "3-5 short, simple sentences (roughly 40-60 words)",
+  elementary: "6-10 sentences (roughly 100-150 words)",
+  middle: "8-12 sentences (roughly 150-220 words), with some more complex sentence structures",
+  high: "10-15 sentences (roughly 200-300 words), written in a more sophisticated, adult-register style",
+};
+
+const PASSAGE_SKILL = {
+  early: "recalling key details stated directly in the text",
+  elementary: "making inferences that go slightly beyond what's stated directly",
+  middle: "inferring mood, tone, or an author's implied purpose",
+  high: "analysing an argument's claim, structure, and rhetorical technique",
+};
+
+// Generates a brand-new passage + comprehension questions on demand instead
+// of picking from a small fixed bank, so a returning student never sees the
+// same text twice. The generated answer key (the "correct" indices) is
+// stripped out before this ever reaches the client — see api/reading-passage.js.
+function buildReadingPassagePrompt({ tier, country, gradeLabel, interest }) {
+  return `You are generating an ORIGINAL reading-comprehension exercise for a ${TIER_LABEL[tier]} student in ${gradeLabel} (${country}).
+
+Write a short, wholly original passage — never copied or closely paraphrased from any existing published book, article, or other copyrighted work — appropriate for this age, plus 3 multiple-choice comprehension questions about it.
+
+The student's stated interest is: ${interest}. Where it fits naturally, let the passage's subject matter connect to this interest, but the passage must stand alone and be fully understandable without any outside knowledge of that interest.
+
+Requirements:
+- Passage length: ${PASSAGE_LENGTH[tier]}.
+- The questions should primarily test this comprehension skill: ${PASSAGE_SKILL[tier]}.
+- Exactly 3 questions, each with exactly 4 answer options and exactly ONE unambiguously correct answer that is clearly supported by the passage. The other 3 options must be clearly wrong to a careful reader, not intentionally tricky or debatable.
+- Do not reuse character names, settings, or plots from well-known published works.
+
+Respond with ONLY a JSON object (no markdown fences, no commentary) with exactly this shape:
+{
+  "title": "a short title for the passage",
+  "skill": "the one comprehension skill this set of questions tests, in plain words",
+  "passage": "the full original passage text",
+  "questions": [
+    { "q": "question text", "options": ["option A", "option B", "option C", "option D"], "correct": 0 },
+    { "q": "question text", "options": ["option A", "option B", "option C", "option D"], "correct": 1 },
+    { "q": "question text", "options": ["option A", "option B", "option C", "option D"], "correct": 2 }
+  ]
+}`;
+}
+
 // Appended on a retry after the validator rejects the first attempt — tells
 // the model exactly what it got wrong rather than just asking it to try again.
 function correctiveAddendum(issues) {
   return `\n\nYour previous attempt failed these checks — fix every one of them in this attempt:\n${issues.map(i => `- ${i}`).join("\n")}`;
 }
 
-module.exports = { buildWritingPrompt, buildReadingPrompt, correctiveAddendum };
+module.exports = { buildWritingPrompt, buildReadingPrompt, buildReadingPassagePrompt, correctiveAddendum };
