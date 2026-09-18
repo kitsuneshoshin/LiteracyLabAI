@@ -31,7 +31,18 @@ function checkString(value, min, max) {
   return typeof value === "string" && value.trim().length >= min && value.trim().length <= max;
 }
 
-function validateFeedback(parsed, { tier, standardsList }) {
+// glowTarget/growTarget drive the real mastery computation in
+// api/progress.js, so an exact (case-insensitive) match against the
+// target list actually given to the model matters — a paraphrase would
+// silently fail to aggregate into that student's per-skill history.
+function matchesATarget(value, targetNames) {
+  if (!targetNames || targetNames.length === 0) return true;
+  if (typeof value !== "string") return false;
+  const lower = value.trim().toLowerCase();
+  return targetNames.some((n) => n.toLowerCase() === lower);
+}
+
+function validateFeedback(parsed, { tier, standardsList, targetNames }) {
   const issues = [];
 
   if (!checkString(parsed?.glow, 20, 600)) issues.push("glow is missing, too short, or too long");
@@ -64,6 +75,13 @@ function validateFeedback(parsed, { tier, standardsList }) {
     if (!mentionsAStandard(parsed.glow, standardsList)) {
       issues.push("glow does not appear to reference the specific curriculum standard it was given");
     }
+  }
+
+  if (!matchesATarget(parsed?.glowTarget, targetNames)) {
+    issues.push(`glowTarget must exactly match one of the given skill area names: ${(targetNames || []).join(", ")}`);
+  }
+  if (!matchesATarget(parsed?.growTarget, targetNames)) {
+    issues.push(`growTarget must exactly match one of the given skill area names: ${(targetNames || []).join(", ")}`);
   }
 
   return { ok: issues.length === 0, issues };

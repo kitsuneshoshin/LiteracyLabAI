@@ -451,10 +451,39 @@ const MASTERY_TARGETS_US = {
   ],
 };
 
+// Verified against the live v9 Australian Curriculum content descriptors
+// (australiancurriculum.edu.au) for Foundation, Year 2, Year 4, Year 7 and
+// Year 10. Years 11-12 are set by state/territory senior-secondary syllabuses
+// (e.g. NSW HSC, VCE), not ACARA, so "high" is anchored to Year 10 — the
+// last nationally common year — rather than a fabricated senior code.
+const MASTERY_TARGETS_AU = {
+  early: [
+    { name: "Sentence Boundary Punctuation", standard: "AC9E2LY06 · Year 2 Literacy", status: "In Progress", pct: 61 },
+    { name: "Compound Sentences", standard: "AC9E2LA06 · Year 2 Language", status: "Needs Attention", pct: 39 },
+    { name: "Literal & Inferred Meaning", standard: "AC9E2LY05 · Year 2 Literacy", status: "In Progress", pct: 57 },
+  ],
+  elementary: [
+    { name: "Complex Sentences", standard: "AC9E4LA06 · Year 4 Language", status: "In Progress", pct: 63 },
+    { name: "Planning & Editing Texts", standard: "AC9E4LY06 · Year 4 Literacy", status: "Mastered", pct: 86 },
+    { name: "Comprehension Strategies", standard: "AC9E4LY05 · Year 4 Literacy", status: "In Progress", pct: 68 },
+  ],
+  middle: [
+    { name: "Complex & Compound-Complex Sentences", standard: "AC9E7LA05 · Year 7 Language", status: "In Progress", pct: 65 },
+    { name: "Structuring Texts With Literary Devices", standard: "AC9E7LY06 · Year 7 Literacy", status: "Mastered", pct: 87 },
+    { name: "Analysing & Summarising Information", standard: "AC9E7LY05 · Year 7 Literacy", status: "Needs Attention", pct: 42 },
+  ],
+  high: [
+    { name: "Evaluating Sentence Structure", standard: "AC9E10LA05 · Year 10 Language", status: "In Progress", pct: 70 },
+    { name: "Analytical & Persuasive Writing", standard: "AC9E10LY06 · Year 10 Literacy", status: "In Progress", pct: 64 },
+    { name: "Interpreting Complex & Abstract Ideas", standard: "AC9E10LY05 · Year 10 Literacy", status: "Needs Attention", pct: 44 },
+  ],
+};
+
 const STATUS_STYLE = {
   "Mastered":       { bg: "var(--good-tint)", ink: "var(--good)", icon: IconCheck },
   "In Progress":    { bg: "var(--warn-tint)", ink: "var(--warn)", icon: IconClock },
   "Needs Attention":{ bg: "var(--bad-tint)",  ink: "var(--bad)",  icon: IconAlert },
+  "Not Yet Assessed":{ bg: "var(--surface-2)", ink: "var(--ink-faint)", icon: IconClock },
 };
 
 const PROMPTS = {
@@ -777,14 +806,19 @@ function StatTile({ icon: IconEl, label, value, sub, accent }){
   );
 }
 
-function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests, toggleInterest, confidenceWriting, setConfidenceWriting, confidenceReading, setConfidenceReading, motivation, setMotivation, used, total, setView, history, backendLive, needsOnboarding, onCompleteOnboarding }){
+function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests, toggleInterest, confidenceWriting, setConfidenceWriting, confidenceReading, setConfidenceReading, motivation, setMotivation, used, total, setView, history, progress, backendLive, needsOnboarding, onCompleteOnboarding }){
   const grades = GRADE_DATA[country].grades;
   const gradeLabel = grades[gradeIdx];
   const remaining = total - used;
-  const MAPPED_TARGETS = { "🇬🇧 United Kingdom": MASTERY_TARGETS_UK, "🇺🇸 United States": MASTERY_TARGETS_US };
-  const MAPPED_BADGE = { "🇬🇧 United Kingdom": "DfE & AQA verified", "🇺🇸 United States": "Common Core & AP verified" };
+  const MAPPED_TARGETS = { "🇬🇧 United Kingdom": MASTERY_TARGETS_UK, "🇺🇸 United States": MASTERY_TARGETS_US, "🇦🇺 Australia": MASTERY_TARGETS_AU };
+  const MAPPED_BADGE = { "🇬🇧 United Kingdom": "DfE & AQA verified", "🇺🇸 United States": "Common Core & AP verified", "🇦🇺 Australia": "ACARA v9.0 verified" };
   const isMapped = !!MAPPED_TARGETS[country];
-  const targets = isMapped ? MAPPED_TARGETS[country][tier] : MASTERY_TARGETS[tier];
+  // With a live backend, real per-skill mastery (computed from this
+  // student's own submission history — see api/progress.js) replaces the
+  // static demo numbers below, once it's loaded.
+  const targets = backendLive
+    ? (progress ? progress.targets : null)
+    : (isMapped ? MAPPED_TARGETS[country][tier] : MASTERY_TARGETS[tier]);
 
   return (
     <>
@@ -885,10 +919,21 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
             )}
           </div>
           <p className="text-xs mb-4" style={{ color: "var(--ink-faint)" }}>
-            {isMapped
-              ? "Each target cites the exact standard, content domain, or Assessment Objective it's drawn from."
-              : `Targets for ${country} are placeholders modelled on the mapped regions until a full ${country} syllabus mapping is completed.`}
+            {backendLive
+              ? (isMapped
+                  ? "Each target cites the exact standard it's drawn from. Progress below is computed from your own submission history, not a demo number."
+                  : `${country} isn't individually mapped to a national standard yet, so target names are illustrative — but the progress shown is still computed from your own submission history.`)
+              : (isMapped
+                  ? "Each target cites the exact standard, content domain, or Assessment Objective it's drawn from."
+                  : `Targets for ${country} are placeholders modelled on the mapped regions until a full ${country} syllabus mapping is completed.`)}
           </p>
+          {backendLive && !targets && (
+            <div className="text-sm py-6 text-center" style={{ color: "var(--ink-faint)" }}>Loading your progress…</div>
+          )}
+          {backendLive && targets && targets.every(t=>t.assessedCount === 0) && (
+            <div className="text-sm py-6 text-center" style={{ color: "var(--ink-faint)" }}>Submit a story or a reading exercise to start tracking mastery against these targets.</div>
+          )}
+          {targets && !(backendLive && targets.every(t=>t.assessedCount === 0)) && (
           <div className="overflow-x-auto -mx-2 px-2">
             <table className="w-full text-sm border-collapse min-w-[420px]">
               <thead>
@@ -908,9 +953,9 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
                     <td className="py-3 pr-3 w-40">
                       <div className="flex items-center gap-2">
                         <div className="h-2 rounded-full flex-1" style={{ background: "var(--surface-2)" }}>
-                          <div className="h-2 rounded-full" style={{ width: row.pct + "%", background: STATUS_STYLE[row.status].ink }} />
+                          <div className="h-2 rounded-full" style={{ width: (row.pct ?? 0) + "%", background: STATUS_STYLE[row.status].ink }} />
                         </div>
-                        <span className="text-xs font-semibold tabular w-8" style={{ color: "var(--ink-soft)" }}>{row.pct}%</span>
+                        <span className="text-xs font-semibold tabular w-8" style={{ color: "var(--ink-soft)" }}>{row.pct != null ? `${row.pct}%` : "—"}</span>
                       </div>
                     </td>
                     <td className="py-3"><StatusTag status={row.status} /></td>
@@ -919,6 +964,7 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
               </tbody>
             </table>
           </div>
+          )}
         </div>
       </div>
 
@@ -1629,6 +1675,7 @@ function App({ session }){
   const [total, setTotal] = useState(FREE_MONTHLY_CAP);
   const [profileLoaded, setProfileLoaded] = useState(!backendLive);
   const [history, setHistory] = useState(null);
+  const [progress, setProgress] = useState(null);
   const [needsOnboarding, setNeedsOnboarding] = useState(false);
 
   useEffect(()=>{
@@ -1681,6 +1728,13 @@ function App({ session }){
 
   const naturalTier = tierForGrade(country, gradeIdx);
   const tier = tierOverride || naturalTier;
+
+  useEffect(()=>{
+    if (!backendLive || view !== "dashboard") return;
+    authedFetch(session, `/api/progress?tier=${tier}&country=${encodeURIComponent(country)}`)
+      .then(setProgress)
+      .catch((err)=> console.error("Failed to load mastery progress:", err));
+  }, [backendLive, view, tier, country, used]);
 
   function setTierAndSyncGrade(k){
     setTierOverride(k);
@@ -1750,7 +1804,7 @@ function App({ session }){
           confidenceWriting={confidenceWriting} setConfidenceWriting={handleSetConfidenceWriting}
           confidenceReading={confidenceReading} setConfidenceReading={handleSetConfidenceReading}
           motivation={motivation} setMotivation={handleSetMotivation}
-          used={used} total={total} setView={setView} history={history} backendLive={backendLive}
+          used={used} total={total} setView={setView} history={history} progress={progress} backendLive={backendLive}
           needsOnboarding={needsOnboarding} onCompleteOnboarding={completeOnboarding} />
       ) : (
         <Workspace country={country} gradeIdx={gradeIdx} setGradeIdx={handleGradeChange} tier={tier} setTierOverride={setTierAndSyncGrade}

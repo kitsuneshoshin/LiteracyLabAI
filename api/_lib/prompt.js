@@ -22,6 +22,14 @@ function standardsClause(country, tier) {
   return `This region (${country}) has not yet been mapped to individual standard codes for this tier. Reference "${curriculumLabel(country)}" in general terms in the Glow — do NOT invent a specific standard code, grade-level number, or content-domain letter that hasn't been given to you.`;
 }
 
+// Tells the model which named skill areas it may tag the Glow/Grow against.
+// Those tags (glowTarget/growTarget) are what the dashboard's mastery table
+// is actually computed from later — see api/progress.js — so an exact,
+// verbatim match to one of these names matters more than for free prose.
+function targetsClause(targetNames) {
+  return `You must also identify which ONE skill area from this list the Glow demonstrates a strength in, and which ONE (can be the same or different) the Grow is building towards. Use the EXACT name from this list, verbatim, character-for-character — do not paraphrase it: ${targetNames.map((n) => `"${n}"`).join(", ")}.`;
+}
+
 // A single worked example, shown to every call regardless of the actual
 // student, purely to anchor tone/structure/specificity. Models follow a
 // concrete example far more reliably than an abstract description of one.
@@ -35,9 +43,11 @@ Student text fragment: "...the dark forest was really scary and the trees looked
     { "term": "murmur", "definition": "a soft, low sound, like mission control talking quietly in the background" }
   ],
   "microMission": "In your next story, start one sentence with a fronted adverbial before you reveal something scary or exciting.",
-  "commitOptions": ["Start a sentence with a fronted adverbial", "Reread my scary bit out loud", "Use one of today's new words"]
+  "commitOptions": ["Start a sentence with a fronted adverbial", "Reread my scary bit out loud", "Use one of today's new words"],
+  "glowTarget": "Fronted Adverbials",
+  "growTarget": "Fronted Adverbials"
 }
-Notice: the glow quotes the student's actual words, the standard is named naturally (not bolted on), the analogy is concrete, vocab defs are one plain sentence each, and nothing here is generic enough to paste into any other student's feedback. Match that bar exactly for the real student below — every claim must be traceable to what they actually wrote/answered.`;
+Notice: the glow quotes the student's actual words, the standard is named naturally (not bolted on), the analogy is concrete, vocab defs are one plain sentence each, glowTarget/growTarget are copied verbatim from the given list, and nothing here is generic enough to paste into any other student's feedback. Match that bar exactly for the real student below — every claim must be traceable to what they actually wrote/answered.`;
 
 function successCriteria() {
   return `Before you respond, check your own draft against these pass/fail criteria — if any fail, revise before sending:
@@ -45,10 +55,11 @@ function successCriteria() {
 2. The glow's curriculum reference is either the exact standard you were given, or (if none was given) a general curriculum phrase — never an invented code.
 3. The grow names exactly ONE step, uses the student's stated interest as a real, concrete analogy (not just name-dropped), and ends with the motivation-appropriate line.
 4. Every sentence would be understandable read aloud to a student at this exact age — no jargon without the analogy carrying it.
-5. Both vocab definitions are one plain sentence each, framed through the student's interest where natural.`;
+5. Both vocab definitions are one plain sentence each, framed through the student's interest where natural.
+6. glowTarget and growTarget are copied EXACTLY, character-for-character, from the provided list of skill area names — not paraphrased, shortened, or invented.`;
 }
 
-function buildWritingPrompt({ tier, country, gradeLabel, interest, confidenceWriting, motivation, prompt, text }) {
+function buildWritingPrompt({ tier, country, gradeLabel, interest, confidenceWriting, motivation, prompt, text, targetNames }) {
   return `You are the feedback engine inside LiteracyLab AI, an educational product for a ${TIER_LABEL[tier]} student in ${gradeLabel} (${country}).
 
 A student was given this writing prompt:
@@ -63,6 +74,7 @@ Their stated interest for personalising feedback is: ${interest}.
 ${CONFIDENCE_NOTE[confidenceWriting] || ""}
 ${MOTIVATION_NOTE[motivation] || ""}
 ${standardsClause(country, tier)}
+${targetsClause(targetNames)}
 
 Read the actual submitted text closely — every point you make must be traceable to something specifically in it (quote a short fragment where useful), not a generic template response.
 
@@ -79,11 +91,13 @@ Respond with ONLY a JSON object (no markdown fences, no commentary) with exactly
     { "term": "a second word or short phrase", "definition": "a one-sentence, age-appropriate definition, framed using their interest where natural" }
   ],
   "microMission": "One concrete, specific instruction for their NEXT submission that directly follows from the grow above.",
-  "commitOptions": ["3 short first-person action phrases (5-8 words each) the student could tap to commit to trying next time, each directly derived from the grow above — not generic"]
+  "commitOptions": ["3 short first-person action phrases (5-8 words each) the student could tap to commit to trying next time, each directly derived from the grow above — not generic"],
+  "glowTarget": "the exact skill area name from the given list that the glow demonstrates",
+  "growTarget": "the exact skill area name from the given list that the grow is building towards"
 }`;
 }
 
-function buildReadingPrompt({ tier, country, gradeLabel, interest, confidenceReading, motivation, passageTitle, passage, questions, answers, score, totalQuestions }) {
+function buildReadingPrompt({ tier, country, gradeLabel, interest, confidenceReading, motivation, passageTitle, passage, questions, answers, score, totalQuestions, targetNames }) {
   const answerLines = questions.map((q, i) => {
     const chosen = answers[i];
     const isCorrect = chosen === q.correct;
@@ -104,6 +118,7 @@ Their stated interest for personalising feedback is: ${interest}.
 ${CONFIDENCE_NOTE[confidenceReading] || ""}
 ${MOTIVATION_NOTE[motivation] || ""}
 ${standardsClause(country, tier)}
+${targetsClause(targetNames)}
 
 ${WORKED_EXAMPLE}
 
@@ -118,7 +133,9 @@ Respond with ONLY a JSON object (no markdown fences, no commentary) with exactly
     { "term": "a second word or phrase from the passage", "definition": "a one-sentence, age-appropriate definition, framed using their interest where natural" }
   ],
   "microMission": "One concrete instruction for their next reading passage that follows from the grow above.",
-  "commitOptions": ["3 short first-person action phrases (5-8 words each) the student could tap to commit to trying next time, derived from the grow above"]
+  "commitOptions": ["3 short first-person action phrases (5-8 words each) the student could tap to commit to trying next time, derived from the grow above"],
+  "glowTarget": "the exact skill area name from the given list that the glow demonstrates",
+  "growTarget": "the exact skill area name from the given list that the grow is building towards"
 }`;
 }
 

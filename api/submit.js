@@ -5,6 +5,7 @@ const { generateFeedbackJSON } = require("./_lib/openai");
 const { buildWritingPrompt, buildReadingPrompt, correctiveAddendum } = require("./_lib/prompt");
 const { gradeReading } = require("./_lib/readingBank");
 const { standardsFor } = require("./_lib/curriculum");
+const { targetsFor } = require("./_lib/masteryTargets");
 const { validateFeedback } = require("./_lib/validate");
 
 // Server-side character caps, mirroring PROMPTS[tier].maxChars in app.html.
@@ -19,13 +20,14 @@ const VALID_TIERS = ["early", "elementary", "middle", "high"];
 // nothing gets saved) than to hand a child bad feedback.
 async function generateAndValidate(prompt, tier, country) {
   const standardsList = standardsFor(country, tier);
+  const targetNames = targetsFor(country, tier).map((t) => t.name);
   let attempt = await generateFeedbackJSON(prompt);
-  let check = validateFeedback(attempt.parsed, { tier, standardsList });
+  let check = validateFeedback(attempt.parsed, { tier, standardsList, targetNames });
   if (check.ok) return attempt;
 
   console.warn("Feedback validation failed on attempt 1:", check.issues);
   attempt = await generateFeedbackJSON(prompt + correctiveAddendum(check.issues));
-  check = validateFeedback(attempt.parsed, { tier, standardsList });
+  check = validateFeedback(attempt.parsed, { tier, standardsList, targetNames });
   if (check.ok) return attempt;
 
   console.warn("Feedback validation failed on attempt 2:", check.issues);
@@ -74,6 +76,7 @@ module.exports = async function handler(req, res) {
         tier, country, gradeLabel, interest,
         confidenceWriting: body.confidenceWriting, motivation: body.motivation,
         prompt, text,
+        targetNames: targetsFor(country, tier).map((t) => t.name),
       });
       const result = await generateAndValidate(llmPrompt, tier, country);
       feedback = result.parsed;
@@ -96,6 +99,7 @@ module.exports = async function handler(req, res) {
         confidenceReading: body.confidenceReading, motivation: body.motivation,
         passageTitle: bank.title, passage: bank.passage, questions: bank.questions,
         answers, score, totalQuestions,
+        targetNames: targetsFor(country, tier).map((t) => t.name),
       });
       const result = await generateAndValidate(llmPrompt, tier, country);
       feedback = result.parsed;
