@@ -183,10 +183,39 @@ Respond with ONLY a JSON object (no markdown fences, no commentary) with exactly
 }`;
 }
 
+const WRITING_EXERCISE_TYPE = {
+  early: "a short imaginative story prompt (one or two sentences), with a simple, concrete premise a young child can picture immediately",
+  elementary: "an adventure-story prompt (one or two sentences) that gives the student a clear situation or discovery to build a story around",
+  middle: "a short analytical-response prompt (one or two sentences) asking the student to analyse a literary technique (e.g. setting, characterisation, tension) in a story or text they've read recently — it must NOT name a specific book, since the student could have read anything",
+  high: "a persuasive/argumentative essay prompt in the style of a timed exam question: a debatable claim (often as a quotation) followed by an instruction to agree or disagree with reference to texts or examples",
+};
+
+// Generates a brand-new writing prompt on demand instead of reusing one
+// fixed prompt per tier, so a returning student doesn't write to the same
+// prompt every session. Mirrors buildReadingPassagePrompt's reasoning.
+function buildWritingPromptGenerator({ tier, country, gradeLabel, interest }) {
+  return `You are generating an ORIGINAL creative-writing or essay prompt for a ${TIER_LABEL[tier]} student in ${gradeLabel} (${country}).
+
+Write ${WRITING_EXERCISE_TYPE[tier]}.
+
+The student's stated interest is: ${interest}. Where it fits naturally, let the prompt's subject matter connect to this interest, but the prompt must stand alone and make sense to any student regardless of that interest.
+
+Requirements:
+- The prompt must be wholly original — not copied or closely paraphrased from any existing published writing prompt, exam question, or exercise.
+- Do not reuse character names, settings, or specific plots from well-known published works.
+- Keep the prompt itself short (one or two sentences) — the student does the writing, not you.
+
+Respond with ONLY a JSON object (no markdown fences, no commentary) with exactly this shape:
+{
+  "title": "a short, punchy title for this writing exercise (a few words)",
+  "prompt": "the one-or-two-sentence writing prompt itself"
+}`;
+}
+
 // Appended on a retry after the validator rejects the first attempt — tells
 // the model exactly what it got wrong rather than just asking it to try again.
 function correctiveAddendum(issues) {
   return `\n\nYour previous attempt failed these checks — fix every one of them in this attempt:\n${issues.map(i => `- ${i}`).join("\n")}`;
 }
 
-module.exports = { buildWritingPrompt, buildReadingPrompt, buildReadingPassagePrompt, correctiveAddendum };
+module.exports = { buildWritingPrompt, buildReadingPrompt, buildReadingPassagePrompt, buildWritingPromptGenerator, correctiveAddendum };

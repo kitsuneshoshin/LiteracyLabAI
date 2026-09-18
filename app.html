@@ -500,6 +500,10 @@ const PROMPTS = {
     prompt: "“Ambition is always portrayed as a destructive force in literature.” To what extent do you agree? Refer to at least two texts in your response.",
     sample: "Ambition, in much of the literary canon, is rarely presented as a neutral force; it is instead a catalyst that reveals character under pressure. While it is true that unchecked ambition often precipitates downfall — Macbeth's spiralling violence being the most obvious example — to characterise ambition as uniformly destructive overlooks the more nuanced treatment many writers afford it. In several texts, ambition operates as a double-edged mechanism: the same drive that isolates a character from their community is often what permits them to challenge an unjust status quo in the first place. This essay will argue that ambition functions less as a moral verdict and more as a magnifying glass, intensifying whatever qualities — virtuous or otherwise — a character already possesses." },
 };
+// Word-count target and character cap per tier — these are fixed UI limits,
+// not part of the prompt content, so they apply whether the prompt itself
+// comes from PROMPTS (demo mode) or is freshly AI-generated (backendLive).
+const TIER_WRITING_LIMITS = Object.fromEntries(Object.entries(PROMPTS).map(([k,v])=>[k,{ target: v.target, maxChars: v.maxChars }]));
 
 // Multiple passages per tier so repeated reading sessions don't show the
 // same text every time — a random one is picked each time an exercise
@@ -1345,9 +1349,8 @@ function ReadingFeedbackPanel({ tier, country, interest, confidence, motivation,
 function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, interests, confidenceWriting, confidenceReading, motivation, used, total, onSubmit, session, backendLive }){
   const grades = GRADE_DATA[country].grades;
   const gradeLabel = grades[gradeIdx];
-  const meta = PROMPTS[tier];
   const [exerciseType, setExerciseType] = useState("writing"); // writing | reading
-  const [text, setText] = useState(meta.sample);
+  const [text, setText] = useState(()=> (backendLive ? "" : PROMPTS[tier].sample));
   const [answers, setAnswers] = useState({});
   const [readingScore, setReadingScore] = useState(0);
   const [phase, setPhase] = useState("draft"); // draft | analyzing | done
@@ -1358,9 +1361,39 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
   const [readingPassageIdx, setReadingPassageIdx] = useState(()=> pickPassageIndex(tier)); // demo mode only
   const [readingPassage, setReadingPassage] = useState(null); // backendLive: AI-generated {submissionId, title, skill, passage, questions}
   const [readingLoading, setReadingLoading] = useState(false);
+  const [writingPrompt, setWritingPrompt] = useState(null); // backendLive: AI-generated {submissionId, title, prompt}
+  const [writingLoading, setWritingLoading] = useState(false);
   const timerRef = useRef(null);
   const locked = used >= total;
   const [bannerDismissed, setBannerDismissed] = useState(false);
+
+  const meta = backendLive
+    ? (writingPrompt ? { ...TIER_WRITING_LIMITS[tier], title: writingPrompt.title, prompt: writingPrompt.prompt } : null)
+    : PROMPTS[tier];
+
+  // Generates a brand-new writing prompt. In demo mode the prompt is static
+  // (PROMPTS[tier]); with a live backend it calls the AI for an original one
+  // tailored to tier/country/interest, consuming this account's usage
+  // credit up front — same reasoning and pattern as requestNewPassage below,
+  // so a returning student doesn't see the same prompt every session.
+  async function requestNewWritingPrompt(){
+    if (!backendLive || locked) return;
+    setWritingLoading(true);
+    setWritingPrompt(null);
+    setSubmitError(null);
+    try {
+      const result = await authedFetch(session, "/api/writing-prompt", {
+        method: "POST",
+        body: JSON.stringify({ tier, country, gradeLabel, interest: activeInterest }),
+      });
+      setWritingPrompt({ submissionId: result.submissionId, title: result.title, prompt: result.prompt });
+      onSubmit(result.usage);
+    } catch (err) {
+      setSubmitError(err.payload?.error || err.message || "Couldn't generate a writing prompt. Please try again.");
+    } finally {
+      setWritingLoading(false);
+    }
+  }
 
   // Generates a brand-new reading passage. In demo mode this just rerolls
   // the local static bank; with a live backend it calls the AI to write an
@@ -1387,8 +1420,13 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
   }
 
   useEffect(()=>{
-    setText(PROMPTS[tier].sample); setAnswers({}); setPhase("draft"); setBackendFeedback(null); setSubmissionId(null); setSubmitError(null);
-    if (exerciseType === "reading") requestNewPassage();
+    setAnswers({}); setPhase("draft"); setBackendFeedback(null); setSubmissionId(null); setSubmitError(null);
+    if (exerciseType === "writing") {
+      if (backendLive) { setText(""); requestNewWritingPrompt(); }
+      else setText(PROMPTS[tier].sample);
+    } else {
+      requestNewPassage();
+    }
   }, [tier, exerciseType]);
   useEffect(()=>{ if (interests.length && !interests.includes(activeInterest)) setActiveInterest(interests[0]); }, [interests]);
   useEffect(()=> ()=> clearTimeout(timerRef.current), []);
@@ -1418,7 +1456,7 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
 
     try {
       const payload = exerciseType === "writing"
-        ? { kind: "writing", tier, country, gradeLabel, interest: activeInterest, confidenceWriting, motivation, prompt: meta.prompt, text }
+        ? { kind: "writing", confidenceWriting, motivation, submissionId: writingPrompt.submissionId, text }
         : { kind: "reading", confidenceReading, motivation, submissionId: readingBankEntry.submissionId, answers: readingQuestions.map((_,i)=> answers[i] ?? null) };
       const result = await authedFetch(session, "/api/submit", { method: "POST", body: JSON.stringify(payload) });
       setBackendFeedback(result.feedback);
@@ -1444,6 +1482,7 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
     setBackendFeedback(null);
     setSubmissionId(null);
     if (exerciseType === "reading") requestNewPassage();
+    else if (backendLive) requestNewWritingPrompt();
   }
 
   const tierIcon = TIER_META[tier].icon;
@@ -1482,7 +1521,22 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
 
       <div className="grid lg:grid-cols-5 gap-6">
         <div className="lg:col-span-3 flex flex-col gap-4">
-          {exerciseType === "writing" ? (
+          {(exerciseType === "writing" && backendLive && (writingLoading || !meta)) ? (
+            <div className="card p-10 flex flex-col items-center justify-center text-center gap-3 min-h-[300px]">
+              {locked ? (
+                <>
+                  <IconLock size={22} style={{ color: "var(--ink-faint)" }} />
+                  <div className="font-display font-semibold text-sm" style={{ color: "var(--ink)" }}>Upgrade to Pro for more writing prompts</div>
+                  <p className="text-[13px] max-w-[28ch]" style={{ color: "var(--ink-faint)" }}>You've used all your free submissions this month.</p>
+                </>
+              ) : (
+                <>
+                  <IconSparkle size={24} className="animate-spin-slow" style={{ color: "var(--cyan-ink)" }} />
+                  <div className="font-display font-semibold text-sm" style={{ color: "var(--ink)" }}>Writing you a fresh prompt…</div>
+                </>
+              )}
+            </div>
+          ) : exerciseType === "writing" ? (
             <TierEditor
               tier={tier} meta={meta} text={text} setText={setText} words={words}
               phase={phase} onSubmit={handleSubmit} onNew={handleNew} locked={locked}

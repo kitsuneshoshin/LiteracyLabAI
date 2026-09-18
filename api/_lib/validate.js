@@ -137,4 +137,14 @@ function validatePassage(parsed, { tier }) {
   return { ok: issues.length === 0, issues };
 }
 
-module.exports = { validateFeedback, validatePassage };
+// Structural check for an AI-generated writing prompt — deliberately loose
+// on content (there's no "correct answer" to a creative prompt), just
+// catches the model returning something malformed or absurdly short/long.
+function validateWritingPrompt(parsed, { tier }) {
+  const issues = [];
+  if (!checkString(parsed?.title, 2, 100)) issues.push("title is missing or an unreasonable length");
+  if (!checkString(parsed?.prompt, 10, 400)) issues.push("prompt is missing, too short, or too long");
+  return { ok: issues.length === 0, issues };
+}
+
+module.exports = { validateFeedback, validatePassage, validateWritingPrompt };

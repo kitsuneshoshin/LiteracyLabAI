@@ -10,7 +10,6 @@ const { validateFeedback } = require("./_lib/validate");
 // Server-side character caps, mirroring PROMPTS[tier].maxChars in app.html.
 // Enforced here too since a client-side maxLength is trivially bypassed.
 const MAX_CHARS = { early: 800, elementary: 1500, middle: 3000, high: 6000 };
-const VALID_TIERS = ["early", "elementary", "middle", "high"];
 
 // Generates feedback, validates it against the deterministic checks, and
 // retries once with a corrective note before giving up. A submission that
@@ -47,48 +46,53 @@ module.exports = async function handler(req, res) {
     const { kind } = body;
 
     if (kind === "writing") {
-      // Writing is the "new billable unit" path — usage is only checked and
-      // consumed here, at the point a submissions row is actually created.
-      const usage = await getMonthlyUsage(supabase, user.id);
-      if (usage.used >= usage.cap) {
-        return res.status(402).json({ error: "Free monthly submission limit reached.", usage });
-      }
-
-      const { tier, country, gradeLabel, interest, prompt, text } = body;
-      if (!VALID_TIERS.includes(tier)) return res.status(400).json({ error: `Invalid tier: ${tier}` });
-      if (!country || !gradeLabel) return res.status(400).json({ error: "country and gradeLabel are required." });
+      // Writing's billable unit was already consumed when the prompt was
+      // generated (see api/writing-prompt.js) — that's what inserted this
+      // row in the first place. This step only completes it, so there's no
+      // usage-cap check or new row here, just grading + feedback, mirroring
+      // the reading branch below.
+      const { submissionId, text } = body;
+      if (!submissionId) return res.status(400).json({ error: "submissionId is required for a writing submission." });
       if (!text || typeof text !== "string") return res.status(400).json({ error: "text is required for a writing submission." });
-      if (text.length > MAX_CHARS[tier]) {
-        return res.status(400).json({ error: `Submission exceeds the ${MAX_CHARS[tier]}-character limit for this tier.` });
-      }
 
-      const { data: childProfile, error: childErr } = await supabase
-        .from("child_profiles").select("id").eq("profile_id", user.id).limit(1).single();
-      if (childErr) throw childErr;
+      const { data: existing, error: fetchErr } = await supabase
+        .from("submissions")
+        .select("id, tier, country, grade_label, interest, content, feedback")
+        .eq("id", submissionId)
+        .eq("profile_id", user.id)
+        .single();
+      if (fetchErr || !existing) return res.status(404).json({ error: "Writing prompt not found for this account." });
+      if (existing.feedback) return res.status(409).json({ error: "This writing prompt has already been submitted." });
+
+      const generated = existing.content && existing.content.generatedPrompt;
+      if (!generated) return res.status(500).json({ error: "This writing prompt is missing its original text." });
+
+      if (text.length > MAX_CHARS[existing.tier]) {
+        return res.status(400).json({ error: `Submission exceeds the ${MAX_CHARS[existing.tier]}-character limit for this tier.` });
+      }
 
       const llmPrompt = buildWritingPrompt({
-        tier, country, gradeLabel, interest,
+        tier: existing.tier, country: existing.country, gradeLabel: existing.grade_label, interest: existing.interest,
         confidenceWriting: body.confidenceWriting, motivation: body.motivation,
-        prompt, text,
-        targetNames: targetsForGrade(country, gradeLabel, tier).targets.map((t) => t.name),
+        prompt: generated.prompt, text,
+        targetNames: targetsForGrade(existing.country, existing.grade_label, existing.tier).targets.map((t) => t.name),
       });
-      const result = await generateAndValidate(llmPrompt, tier, country, gradeLabel);
+      const result = await generateAndValidate(llmPrompt, existing.tier, existing.country, existing.grade_label);
 
-      const submissionRow = {
-        profile_id: user.id, child_id: childProfile.id, kind: "writing", tier, country, grade_label: gradeLabel, interest,
-        content: { prompt, text },
-        word_count: text.trim().split(/\s+/).filter(Boolean).length,
-        char_count: text.length,
-        feedback: result.parsed, model_used: result.modelUsed,
-      };
-      const { data: saved, error: insertErr } = await supabase
-        .from("submissions").insert(submissionRow).select("id, created_at").single();
-      if (insertErr) throw insertErr;
+      const wordCount = text.trim().split(/\s+/).filter(Boolean).length;
+      const { error: updateErr } = await supabase
+        .from("submissions")
+        .update({
+          content: { ...existing.content, text },
+          word_count: wordCount, char_count: text.length,
+          feedback: result.parsed, model_used: result.modelUsed,
+        })
+        .eq("id", submissionId);
+      if (updateErr) throw updateErr;
 
       const updatedUsage = await getMonthlyUsage(supabase, user.id);
       return res.status(200).json({
-        submissionId: saved.id, createdAt: saved.created_at,
-        feedback: result.parsed, usage: updatedUsage,
+        submissionId, feedback: result.parsed, usage: updatedUsage,
       });
     }
 
