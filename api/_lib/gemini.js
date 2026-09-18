@@ -17,6 +17,19 @@ function getGemini() {
 // gemini-1.5-flash is the model covered by Google AI Studio's free tier.
 const DEFAULT_MODEL = "gemini-1.5-flash";
 
+// Maps a raw provider error into something safe and useful to show a
+// parent or child, instead of exposing quota/billing internals.
+function friendlyProviderMessage(e) {
+  const status = e.status || e.statusCode;
+  if (status === 429) {
+    return "Our AI feedback service is getting a lot of requests right now. Please wait a minute and try submitting again.";
+  }
+  if (status === 401 || status === 403) {
+    return "There's a setup issue with our AI feedback service. We've been notified — please try again shortly.";
+  }
+  return "We couldn't generate feedback right now. Please try submitting again in a moment.";
+}
+
 // Calls the model with the given prompt and parses the response as JSON.
 // Uses Gemini's native JSON mode (responseMimeType) so the model is
 // constrained to valid JSON rather than relying on prompt instructions alone.
@@ -28,7 +41,18 @@ async function generateFeedbackJSON(prompt) {
     generationConfig: { responseMimeType: "application/json", maxOutputTokens: 1024 },
   });
 
-  const result = await model.generateContent(prompt);
+  let result;
+  try {
+    result = await model.generateContent(prompt);
+  } catch (e) {
+    // Never surface the raw provider error to a student — it can contain
+    // billing/quota details meant for whoever manages the API key, not a
+    // parent or child looking at a feedback card. Log the real one for us.
+    console.error("Gemini API call failed:", e);
+    const err = new Error(friendlyProviderMessage(e));
+    err.statusCode = e.status === 429 ? 429 : 502;
+    throw err;
+  }
   const raw = result.response.text() || "";
 
   let parsed;
