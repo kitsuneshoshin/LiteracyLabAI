@@ -3,7 +3,7 @@
 // masteryTargets.js is the single source of truth for the standards
 // themselves — this file just formats them for the prompt.
 
-const { targetsFor, isMappedCountry } = require("./masteryTargets");
+const { targetsFor, targetsForGrade, isMappedCountry } = require("./masteryTargets");
 
 const CURRICULUM_LABEL = {
   "🇬🇧 United Kingdom": "UK National Curriculum / GCSE",
@@ -22,9 +22,12 @@ function curriculumLabel(country) {
 // Only UK, US and Australia are mapped to real, individually-cited
 // standards so far. Everything else must be told to stay generic rather
 // than invent a fake code — returning null signals exactly that.
-function standardsFor(country, tier) {
+// Pass gradeLabel when known (e.g. "Year 7") to get Australia's exact-year
+// citation instead of the coarser tier-level one.
+function standardsFor(country, tier, gradeLabel) {
   if (!isMappedCountry(country)) return null;
-  return targetsFor(country, tier).map((t) => `${t.name} (${t.standard})`);
+  const targets = gradeLabel ? targetsForGrade(country, gradeLabel, tier).targets : targetsFor(country, tier);
+  return targets.map((t) => `${t.name} (${t.standard})`);
 }
 
 module.exports = { curriculumLabel, standardsFor, CURRICULUM_LABEL };

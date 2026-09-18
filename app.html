@@ -927,6 +927,11 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
                   ? "Each target cites the exact standard, content domain, or Assessment Objective it's drawn from."
                   : `Targets for ${country} are placeholders modelled on the mapped regions until a full ${country} syllabus mapping is completed.`)}
           </p>
+          {backendLive && progress?.approximatedFrom && (
+            <p className="text-xs mb-4 -mt-2" style={{ color: "var(--ink-faint)" }}>
+              {gradeLabel} isn't set by a national standard, so targets shown are anchored to {progress.approximatedFrom}, the closest year that is.
+            </p>
+          )}
           {backendLive && !targets && (
             <div className="text-sm py-6 text-center" style={{ color: "var(--ink-faint)" }}>Loading your progress…</div>
           )}
@@ -1728,13 +1733,14 @@ function App({ session }){
 
   const naturalTier = tierForGrade(country, gradeIdx);
   const tier = tierOverride || naturalTier;
+  const gradeLabel = GRADE_DATA[country].grades[gradeIdx];
 
   useEffect(()=>{
     if (!backendLive || view !== "dashboard") return;
-    authedFetch(session, `/api/progress?tier=${tier}&country=${encodeURIComponent(country)}`)
+    authedFetch(session, `/api/progress?tier=${tier}&country=${encodeURIComponent(country)}&gradeLabel=${encodeURIComponent(gradeLabel)}`)
       .then(setProgress)
       .catch((err)=> console.error("Failed to load mastery progress:", err));
-  }, [backendLive, view, tier, country, used]);
+  }, [backendLive, view, tier, country, gradeLabel, used]);
 
   function setTierAndSyncGrade(k){
     setTierOverride(k);

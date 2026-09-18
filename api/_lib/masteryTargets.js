@@ -130,7 +130,95 @@ function targetsFor(country, tier) {
   return MASTERY_TARGETS_GENERIC[tier] || [];
 }
 
+// Full per-year Australian Curriculum v9.0 mapping — every code below was
+// read directly off the live content descriptors at
+// australiancurriculum.edu.au for that exact year level (Foundation
+// through Year 10), not inferred from a neighbouring year. Years 11-12
+// aren't set by ACARA at all (they're state/territory senior-secondary
+// syllabuses — NSW HSC, VCE, etc.), so those two years fall back to Year
+// 10, the closest real, citable anchor, rather than a fabricated code.
+const MASTERY_TARGETS_AU_BY_GRADE = {
+  "Foundation": [
+    { name: "Punctuation & Capital Letters", standard: "AC9EFLA09 · Foundation Language" },
+    { name: "Creating Short Written Texts", standard: "AC9EFLY06 · Foundation Literacy" },
+    { name: "Comprehension Strategies", standard: "AC9EFLY05 · Foundation Literacy" },
+  ],
+  "Year 1": [
+    { name: "Simple Sentences", standard: "AC9E1LA06 · Year 1 Language" },
+    { name: "Creating & Editing Short Texts", standard: "AC9E1LY06 · Year 1 Literacy" },
+    { name: "Comprehension Strategies", standard: "AC9E1LY05 · Year 1 Literacy" },
+  ],
+  "Year 2": [
+    { name: "Compound Sentences", standard: "AC9E2LA06 · Year 2 Language" },
+    { name: "Creating & Editing Texts", standard: "AC9E2LY06 · Year 2 Literacy" },
+    { name: "Comprehension Strategies", standard: "AC9E2LY05 · Year 2 Literacy" },
+  ],
+  "Year 3": [
+    { name: "Clauses & Subject-Verb Agreement", standard: "AC9E3LA06 · Year 3 Language" },
+    { name: "Planning & Publishing Texts", standard: "AC9E3LY06 · Year 3 Literacy" },
+    { name: "Comprehension Strategies", standard: "AC9E3LY05 · Year 3 Literacy" },
+  ],
+  "Year 4": [
+    { name: "Complex Sentences", standard: "AC9E4LA06 · Year 4 Language" },
+    { name: "Planning, Editing & Publishing Texts", standard: "AC9E4LY06 · Year 4 Literacy" },
+    { name: "Comprehension Strategies", standard: "AC9E4LY05 · Year 4 Literacy" },
+  ],
+  "Year 5": [
+    { name: "Complex Sentences for Effect", standard: "AC9E5LA05 · Year 5 Language" },
+    { name: "Planning, Editing & Publishing Texts", standard: "AC9E5LY06 · Year 5 Literacy" },
+    { name: "Comprehension Strategies", standard: "AC9E5LY05 · Year 5 Literacy" },
+  ],
+  "Year 6": [
+    { name: "Embedded Clauses", standard: "AC9E6LA05 · Year 6 Language" },
+    { name: "Planning, Editing & Publishing Texts", standard: "AC9E6LY06 · Year 6 Literacy" },
+    { name: "Comprehension Strategies", standard: "AC9E6LY05 · Year 6 Literacy" },
+  ],
+  "Year 7": [
+    { name: "Complex & Compound-Complex Sentences", standard: "AC9E7LA05 · Year 7 Language" },
+    { name: "Structuring Texts With Literary Devices", standard: "AC9E7LY06 · Year 7 Literacy" },
+    { name: "Analysing & Summarising Information", standard: "AC9E7LY05 · Year 7 Literacy" },
+  ],
+  "Year 8": [
+    { name: "Embedded Clauses That Expand Ideas", standard: "AC9E8LA05 · Year 8 Language" },
+    { name: "Organising & Selecting Text Structures", standard: "AC9E8LY06 · Year 8 Literacy" },
+    { name: "Interpreting & Evaluating Ideas", standard: "AC9E8LY05 · Year 8 Literacy" },
+  ],
+  "Year 9": [
+    { name: "Varying Sentence Structure for Effect", standard: "AC9E9LA05 · Year 9 Language" },
+    { name: "Organising & Developing Ideas", standard: "AC9E9LY06 · Year 9 Literacy" },
+    { name: "Comparing & Contrasting Ideas", standard: "AC9E9LY05 · Year 9 Literacy" },
+  ],
+  "Year 10": [
+    { name: "Evaluating Sentence Structure", standard: "AC9E10LA05 · Year 10 Language" },
+    { name: "Analytical & Persuasive Writing", standard: "AC9E10LY06 · Year 10 Literacy" },
+    { name: "Interpreting Complex & Abstract Ideas", standard: "AC9E10LY05 · Year 10 Literacy" },
+  ],
+};
+
+// Countries mapped at individual-year granularity. Anything not listed
+// here still works via targetsFor()'s tier-level buckets — this is an
+// additive, per-country upgrade, not a replacement.
+const GRADE_MAPPED_TARGETS = {
+  "🇦🇺 Australia": MASTERY_TARGETS_AU_BY_GRADE,
+};
+
+// The precise version of targetsFor(): resolves to the exact grade/year
+// when that country has been mapped at that granularity, and reports when
+// it had to anchor to a nearby real year instead of the one asked for
+// (e.g. AU Year 11/12 -> Year 10) so the UI can be honest about it.
+function targetsForGrade(country, gradeLabel, tier) {
+  const byGrade = GRADE_MAPPED_TARGETS[country];
+  if (byGrade) {
+    if (byGrade[gradeLabel]) return { targets: byGrade[gradeLabel], grain: "grade", approximatedFrom: null };
+    const keys = Object.keys(byGrade);
+    const last = keys[keys.length - 1];
+    return { targets: byGrade[last], grain: "grade", approximatedFrom: last };
+  }
+  return { targets: targetsFor(country, tier), grain: "tier", approximatedFrom: null };
+}
+
 module.exports = {
   MASTERY_TARGETS_UK, MASTERY_TARGETS_US, MASTERY_TARGETS_AU, MASTERY_TARGETS_GENERIC,
-  MAPPED_TARGETS, isMappedCountry, targetsFor,
+  MASTERY_TARGETS_AU_BY_GRADE, GRADE_MAPPED_TARGETS,
+  MAPPED_TARGETS, isMappedCountry, targetsFor, targetsForGrade,
 };

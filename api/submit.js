@@ -5,7 +5,7 @@ const { generateFeedbackJSON } = require("./_lib/openai");
 const { buildWritingPrompt, buildReadingPrompt, correctiveAddendum } = require("./_lib/prompt");
 const { gradeReading } = require("./_lib/readingBank");
 const { standardsFor } = require("./_lib/curriculum");
-const { targetsFor } = require("./_lib/masteryTargets");
+const { targetsForGrade } = require("./_lib/masteryTargets");
 const { validateFeedback } = require("./_lib/validate");
 
 // Server-side character caps, mirroring PROMPTS[tier].maxChars in app.html.
@@ -18,9 +18,9 @@ const VALID_TIERS = ["early", "elementary", "middle", "high"];
 // fails both attempts throws rather than ever reaching the student — better
 // to show an error (which doesn't consume their free submission, since
 // nothing gets saved) than to hand a child bad feedback.
-async function generateAndValidate(prompt, tier, country) {
-  const standardsList = standardsFor(country, tier);
-  const targetNames = targetsFor(country, tier).map((t) => t.name);
+async function generateAndValidate(prompt, tier, country, gradeLabel) {
+  const standardsList = standardsFor(country, tier, gradeLabel);
+  const targetNames = targetsForGrade(country, gradeLabel, tier).targets.map((t) => t.name);
   let attempt = await generateFeedbackJSON(prompt);
   let check = validateFeedback(attempt.parsed, { tier, standardsList, targetNames });
   if (check.ok) return attempt;
@@ -76,14 +76,14 @@ module.exports = async function handler(req, res) {
         tier, country, gradeLabel, interest,
         confidenceWriting: body.confidenceWriting, motivation: body.motivation,
         prompt, text,
-        targetNames: targetsFor(country, tier).map((t) => t.name),
+        targetNames: targetsForGrade(country, gradeLabel, tier).targets.map((t) => t.name),
       });
-      const result = await generateAndValidate(llmPrompt, tier, country);
+      const result = await generateAndValidate(llmPrompt, tier, country, gradeLabel);
       feedback = result.parsed;
       modelUsed = result.modelUsed;
 
       submissionRow = {
-        profile_id: user.id, child_id: childProfile.id, kind: "writing", tier, country, interest,
+        profile_id: user.id, child_id: childProfile.id, kind: "writing", tier, country, grade_label: gradeLabel, interest,
         content: { prompt, text },
         word_count: text.trim().split(/\s+/).filter(Boolean).length,
         char_count: text.length,
@@ -99,14 +99,14 @@ module.exports = async function handler(req, res) {
         confidenceReading: body.confidenceReading, motivation: body.motivation,
         passageTitle: bank.title, passage: bank.passage, questions: bank.questions,
         answers, score, totalQuestions,
-        targetNames: targetsFor(country, tier).map((t) => t.name),
+        targetNames: targetsForGrade(country, gradeLabel, tier).targets.map((t) => t.name),
       });
-      const result = await generateAndValidate(llmPrompt, tier, country);
+      const result = await generateAndValidate(llmPrompt, tier, country, gradeLabel);
       feedback = result.parsed;
       modelUsed = result.modelUsed;
 
       submissionRow = {
-        profile_id: user.id, child_id: childProfile.id, kind: "reading", tier, country, interest,
+        profile_id: user.id, child_id: childProfile.id, kind: "reading", tier, country, grade_label: gradeLabel, interest,
         content: { answers },
         score, total_questions: totalQuestions,
         feedback, model_used: modelUsed,
