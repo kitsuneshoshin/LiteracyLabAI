@@ -811,8 +811,15 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
   const gradeLabel = grades[gradeIdx];
   const remaining = total - used;
   const MAPPED_TARGETS = { "🇬🇧 United Kingdom": MASTERY_TARGETS_UK, "🇺🇸 United States": MASTERY_TARGETS_US, "🇦🇺 Australia": MASTERY_TARGETS_AU };
-  const MAPPED_BADGE = { "🇬🇧 United Kingdom": "DfE & AQA verified", "🇺🇸 United States": "Common Core & AP verified", "🇦🇺 Australia": "ACARA v9.0 verified" };
-  const isMapped = !!MAPPED_TARGETS[country];
+  const MAPPED_BADGE = {
+    "🇬🇧 United Kingdom": "DfE & AQA verified", "🇺🇸 United States": "Common Core & AP verified", "🇦🇺 Australia": "ACARA v9.0 verified",
+    "🇨🇦 Canada": "Ontario Curriculum verified", "🇦🇪 UAE & GCC Hubs": "Cambridge & IGCSE verified",
+    "🇸🇬 Singapore & SE Asia": "Cambridge & IGCSE verified", "🌐 Global ESL Mode": "CEFR verified",
+  };
+  // Demo mode (no backend) only has static data for the 3 originally-mapped
+  // regions; with a live backend, api/progress.js now maps every region
+  // (see masteryTargets.js), so isMapped there reflects what it returns.
+  const isMapped = backendLive ? Boolean(progress && progress.isMapped) : !!MAPPED_TARGETS[country];
   // With a live backend, real per-skill mastery (computed from this
   // student's own submission history — see api/progress.js) replaces the
   // static demo numbers below, once it's loaded.

@@ -121,7 +121,7 @@ const MAPPED_TARGETS = {
 };
 
 function isMappedCountry(country) {
-  return Boolean(MAPPED_TARGETS[country]);
+  return Boolean(MAPPED_TARGETS[country]) || Boolean(GRADE_MAPPED_TARGETS[country]);
 }
 
 function targetsFor(country, tier) {
@@ -320,6 +320,179 @@ const MASTERY_TARGETS_US_BY_GRADE = {
   ],
 };
 
+// Full per-grade Ontario "Language" curriculum (2023) mapping, chosen as
+// Canada's reference since there is no single national curriculum body —
+// same approach as picking AQA for UK GCSE or mainstream CCSS for the US.
+// Overall-expectation codes B1-B3 (Foundations of Language), C1-C3
+// (Comprehension) and D1-D3 (Composition) are confirmed live at
+// dcp.edu.gov.on.ca/en/curriculum/elementary-language — they apply
+// identically at every grade 1-8, with grade-specific content underneath
+// each one, so citing "B3 · Grade X" is honest precision, not a fabricated
+// sub-number I never verified. Grades 9-12 use Ontario's real course codes
+// (ENL1W for the 2023 de-streamed Grade 9 course; ENG2D/ENG3U/ENG4U for
+// Grades 10-12, still on the 2007 curriculum per the Ministry's own site) —
+// cited at the strand level only, since this mapping doesn't verify their
+// internal numbering the way it did for the elementary strands.
+const MASTERY_TARGETS_CA_BY_GRADE = {
+  "Grade 1": [
+    { name: "Language Conventions", standard: "B3 · Grade 1 Language" },
+    { name: "Developing & Organizing Ideas", standard: "D1 · Grade 1 Language" },
+    { name: "Comprehension Strategies", standard: "C2 · Grade 1 Language" },
+  ],
+  "Grade 2": [
+    { name: "Language Conventions", standard: "B3 · Grade 2 Language" },
+    { name: "Developing & Organizing Ideas", standard: "D1 · Grade 2 Language" },
+    { name: "Comprehension Strategies", standard: "C2 · Grade 2 Language" },
+  ],
+  "Grade 3": [
+    { name: "Language Conventions", standard: "B3 · Grade 3 Language" },
+    { name: "Developing & Organizing Ideas", standard: "D1 · Grade 3 Language" },
+    { name: "Comprehension Strategies", standard: "C2 · Grade 3 Language" },
+  ],
+  "Grade 4": [
+    { name: "Language Conventions", standard: "B3 · Grade 4 Language" },
+    { name: "Developing & Organizing Ideas", standard: "D1 · Grade 4 Language" },
+    { name: "Comprehension Strategies", standard: "C2 · Grade 4 Language" },
+  ],
+  "Grade 5": [
+    { name: "Language Conventions", standard: "B3 · Grade 5 Language" },
+    { name: "Developing & Organizing Ideas", standard: "D1 · Grade 5 Language" },
+    { name: "Comprehension Strategies", standard: "C2 · Grade 5 Language" },
+  ],
+  "Grade 6": [
+    { name: "Language Conventions", standard: "B3 · Grade 6 Language" },
+    { name: "Developing & Organizing Ideas", standard: "D1 · Grade 6 Language" },
+    { name: "Comprehension Strategies", standard: "C2 · Grade 6 Language" },
+  ],
+  "Grade 7": [
+    { name: "Language Conventions", standard: "B3 · Grade 7 Language" },
+    { name: "Developing & Organizing Ideas", standard: "D1 · Grade 7 Language" },
+    { name: "Comprehension Strategies", standard: "C2 · Grade 7 Language" },
+  ],
+  "Grade 8": [
+    { name: "Language Conventions", standard: "B3 · Grade 8 Language" },
+    { name: "Developing & Organizing Ideas", standard: "D1 · Grade 8 Language" },
+    { name: "Comprehension Strategies", standard: "C2 · Grade 8 Language" },
+  ],
+  "Grade 9": [
+    { name: "Language Conventions", standard: "ENL1W · Writing" },
+    { name: "Developing & Organizing Ideas", standard: "ENL1W · Writing" },
+    { name: "Comprehension Strategies", standard: "ENL1W · Reading" },
+  ],
+  "Grade 10": [
+    { name: "Language Conventions", standard: "ENG2D · Writing" },
+    { name: "Organizing & Structuring Ideas", standard: "ENG2D · Writing" },
+    { name: "Reading for Meaning", standard: "ENG2D · Reading and Literature Studies" },
+  ],
+  "Grade 11": [
+    { name: "Language Conventions", standard: "ENG3U · Writing" },
+    { name: "Organizing & Structuring Ideas", standard: "ENG3U · Writing" },
+    { name: "Reading for Meaning", standard: "ENG3U · Reading and Literature Studies" },
+  ],
+  "Grade 12": [
+    { name: "Language Conventions", standard: "ENG4U · Writing" },
+    { name: "Organizing & Structuring Ideas", standard: "ENG4U · Writing" },
+    { name: "Reading for Meaning", standard: "ENG4U · Reading and Literature Studies" },
+  ],
+};
+
+// UAE/GCC and Singapore & SE Asia both use the same underlying Cambridge
+// pathway in this app (Cambridge Primary -> Lower Secondary -> IGCSE ->
+// AS/A Level or IB), just different local-grade labels — so one dataset is
+// shared between them. The IGCSE Assessment Objectives (AO1 Reading R1-R5,
+// AO2 Writing W1-W5) are confirmed consistently across Cambridge's own
+// published syllabus and independent teacher resources. The Cambridge
+// Primary/Lower Secondary numbered learning-objective codes (e.g. "4Rw1")
+// could NOT be confirmed reliably from a clean primary source in this
+// session — search results for them were internally inconsistent — so
+// those earlier stages are cited at the real strand level (Reading /
+// Writing strand of Cambridge Primary/Lower Secondary English) without a
+// fabricated sub-code, rather than guessing at a specific number.
+function cambridgePrimaryStage(n) {
+  return [
+    { name: "Reading Strand", standard: `Cambridge Primary English · Stage ${n} Reading` },
+    { name: "Writing Strand", standard: `Cambridge Primary English · Stage ${n} Writing` },
+    { name: "Comprehension", standard: `Cambridge Primary English · Stage ${n} Reading` },
+  ];
+}
+function cambridgeLowerSecondaryStage(n) {
+  return [
+    { name: "Reading Strand", standard: `Cambridge Lower Secondary English · Stage ${n} Reading` },
+    { name: "Writing Strand", standard: `Cambridge Lower Secondary English · Stage ${n} Writing` },
+    { name: "Comprehension", standard: `Cambridge Lower Secondary English · Stage ${n} Reading` },
+  ];
+}
+const IGCSE_TARGETS = [
+  { name: "Understanding Implicit Meaning", standard: "IGCSE First Language English 0500 · AO1 Reading (R2)" },
+  { name: "Organising Ideas for Effect", standard: "IGCSE First Language English 0500 · AO2 Writing (W2)" },
+  { name: "Accurate Spelling, Punctuation & Grammar", standard: "IGCSE First Language English 0500 · AO2 Writing (W5)" },
+];
+
+const MASTERY_TARGETS_AE_BY_GRADE = {
+  "Cambridge Primary 1": cambridgePrimaryStage(1),
+  "Cambridge Primary 2": cambridgePrimaryStage(2),
+  "Cambridge Primary 3": cambridgePrimaryStage(3),
+  "Cambridge Primary 4": cambridgePrimaryStage(4),
+  "Cambridge Primary 5": cambridgePrimaryStage(5),
+  "Cambridge Primary 6": cambridgePrimaryStage(6),
+  "Lower Secondary 7": cambridgeLowerSecondaryStage(7),
+  "Lower Secondary 8": cambridgeLowerSecondaryStage(8),
+  "Lower Secondary 9": cambridgeLowerSecondaryStage(9),
+  "IGCSE Year 10": IGCSE_TARGETS,
+  "IGCSE Year 11": IGCSE_TARGETS,
+};
+
+const MASTERY_TARGETS_SG_BY_GRADE = {
+  "Primary 1": cambridgePrimaryStage(1),
+  "Primary 2": cambridgePrimaryStage(2),
+  "Primary 3": cambridgePrimaryStage(3),
+  "Primary 4": cambridgePrimaryStage(4),
+  "Primary 5": cambridgePrimaryStage(5),
+  "Primary 6": cambridgePrimaryStage(6),
+  "Secondary 1": cambridgeLowerSecondaryStage(7),
+  "Secondary 2": cambridgeLowerSecondaryStage(8),
+  "Secondary 3": cambridgeLowerSecondaryStage(9),
+  "O-Level / IGCSE Yr 4": IGCSE_TARGETS,
+  "O-Level / IGCSE Yr 5": IGCSE_TARGETS,
+};
+
+// Council of Europe CEFR self-assessment grid (coe.int) — the wording below
+// is drawn directly from the published grid, not paraphrased from memory.
+// This is the one region in the app where the grade labels ARE the levels,
+// so there's no tier-vs-grade approximation needed at all.
+const MASTERY_TARGETS_CEFR_BY_GRADE = {
+  "A1 Beginner": [
+    { name: "Understanding Familiar Words & Simple Sentences", standard: "CEFR A1 Reading" },
+    { name: "Writing Short, Simple Messages", standard: "CEFR A1 Writing" },
+    { name: "Filling in Forms With Personal Details", standard: "CEFR A1 Writing" },
+  ],
+  "A2 Elementary": [
+    { name: "Finding Specific Information in Everyday Texts", standard: "CEFR A2 Reading" },
+    { name: "Writing Short, Simple Notes & Messages", standard: "CEFR A2 Writing" },
+    { name: "Understanding Short Personal Letters", standard: "CEFR A2 Reading" },
+  ],
+  "B1 Intermediate": [
+    { name: "Understanding High-Frequency Everyday Language", standard: "CEFR B1 Reading" },
+    { name: "Writing Simple Connected Text on Familiar Topics", standard: "CEFR B1 Writing" },
+    { name: "Describing Experiences & Giving Reasons for Opinions", standard: "CEFR B1 Writing" },
+  ],
+  "B2 Upper-Intermediate": [
+    { name: "Understanding Writers' Attitudes & Viewpoints", standard: "CEFR B2 Reading" },
+    { name: "Writing Clear, Detailed Text on a Range of Subjects", standard: "CEFR B2 Writing" },
+    { name: "Giving Reasons For & Against a Point of View", standard: "CEFR B2 Writing" },
+  ],
+  "C1 Advanced": [
+    { name: "Understanding Long & Complex Texts", standard: "CEFR C1 Reading" },
+    { name: "Expressing Points of View at Length", standard: "CEFR C1 Writing" },
+    { name: "Writing About Complex Subjects Clearly", standard: "CEFR C1 Writing" },
+  ],
+  "C2 Proficient": [
+    { name: "Reading Abstract & Structurally Complex Texts With Ease", standard: "CEFR C2 Reading" },
+    { name: "Writing Clear, Smoothly Flowing Text in an Appropriate Style", standard: "CEFR C2 Writing" },
+    { name: "Presenting a Case With Effective Logical Structure", standard: "CEFR C2 Writing" },
+  ],
+};
+
 // Countries mapped at individual-year granularity. Anything not listed
 // here still works via targetsFor()'s tier-level buckets — this is an
 // additive, per-country upgrade, not a replacement.
@@ -327,16 +500,26 @@ const GRADE_MAPPED_TARGETS = {
   "🇦🇺 Australia": MASTERY_TARGETS_AU_BY_GRADE,
   "🇬🇧 United Kingdom": MASTERY_TARGETS_UK_BY_GRADE,
   "🇺🇸 United States": MASTERY_TARGETS_US_BY_GRADE,
+  "🇨🇦 Canada": MASTERY_TARGETS_CA_BY_GRADE,
+  "🇦🇪 UAE & GCC Hubs": MASTERY_TARGETS_AE_BY_GRADE,
+  "🇸🇬 Singapore & SE Asia": MASTERY_TARGETS_SG_BY_GRADE,
+  "🌐 Global ESL Mode": MASTERY_TARGETS_CEFR_BY_GRADE,
 };
 
 // Grades a country's own curriculum body doesn't set at all (Reception's
 // EYFS framework is separate from the National Curriculum; senior years in
-// AU and UK sixth form aren't nationally codified) fall back to the nearest
-// real, mapped year rather than a fabricated one. This map makes each
-// fallback explicit instead of guessing from list order.
+// AU and UK sixth form aren't nationally codified; Ontario's Kindergarten
+// Program is a distinct non-strand-numbered document; UAE/Singapore's
+// AS/A-Level and IB Diploma years use their own separate AO frameworks not
+// yet mapped here) fall back to the nearest real, mapped year rather than
+// a fabricated one. This map makes each fallback explicit instead of
+// guessing from list order.
 const GRADE_APPROXIMATIONS = {
   "🇦🇺 Australia": { "Year 11": "Year 10", "Year 12": "Year 10" },
   "🇬🇧 United Kingdom": { "Reception": "Year 1", "Year 12": "Year 11", "Year 13": "Year 11" },
+  "🇨🇦 Canada": { "Kindergarten": "Grade 1" },
+  "🇦🇪 UAE & GCC Hubs": { "AS Level (Yr 12)": "IGCSE Year 11", "A Level (Yr 13)": "IGCSE Year 11" },
+  "🇸🇬 Singapore & SE Asia": { "IB Diploma Yr 1": "O-Level / IGCSE Yr 5", "IB Diploma Yr 2": "O-Level / IGCSE Yr 5" },
 };
 
 // The precise version of targetsFor(): resolves to the exact grade/year
@@ -359,6 +542,8 @@ function targetsForGrade(country, gradeLabel, tier) {
 module.exports = {
   MASTERY_TARGETS_UK, MASTERY_TARGETS_US, MASTERY_TARGETS_AU, MASTERY_TARGETS_GENERIC,
   MASTERY_TARGETS_AU_BY_GRADE, MASTERY_TARGETS_UK_BY_GRADE, MASTERY_TARGETS_US_BY_GRADE,
+  MASTERY_TARGETS_CA_BY_GRADE, MASTERY_TARGETS_AE_BY_GRADE, MASTERY_TARGETS_SG_BY_GRADE,
+  MASTERY_TARGETS_CEFR_BY_GRADE,
   GRADE_MAPPED_TARGETS, GRADE_APPROXIMATIONS,
   MAPPED_TARGETS, isMappedCountry, targetsFor, targetsForGrade,
 };
