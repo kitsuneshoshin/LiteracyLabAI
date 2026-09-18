@@ -2,13 +2,37 @@ const { getSupabaseAdmin } = require("./_lib/supabaseAdmin");
 const { requireUser, sendError } = require("./_lib/auth");
 const { getMonthlyUsage } = require("./_lib/usage");
 const { generateFeedbackJSON } = require("./_lib/openai");
-const { buildWritingPrompt, buildReadingPrompt } = require("./_lib/prompt");
+const { buildWritingPrompt, buildReadingPrompt, correctiveAddendum } = require("./_lib/prompt");
 const { gradeReading } = require("./_lib/readingBank");
+const { standardsFor } = require("./_lib/curriculum");
+const { validateFeedback } = require("./_lib/validate");
 
 // Server-side character caps, mirroring PROMPTS[tier].maxChars in app.html.
 // Enforced here too since a client-side maxLength is trivially bypassed.
 const MAX_CHARS = { early: 800, elementary: 1500, middle: 3000, high: 6000 };
 const VALID_TIERS = ["early", "elementary", "middle", "high"];
+
+// Generates feedback, validates it against the deterministic checks, and
+// retries once with a corrective note before giving up. A submission that
+// fails both attempts throws rather than ever reaching the student — better
+// to show an error (which doesn't consume their free submission, since
+// nothing gets saved) than to hand a child bad feedback.
+async function generateAndValidate(prompt, tier, country) {
+  const standardsList = standardsFor(country, tier);
+  let attempt = await generateFeedbackJSON(prompt);
+  let check = validateFeedback(attempt.parsed, { tier, standardsList });
+  if (check.ok) return attempt;
+
+  console.warn("Feedback validation failed on attempt 1:", check.issues);
+  attempt = await generateFeedbackJSON(prompt + correctiveAddendum(check.issues));
+  check = validateFeedback(attempt.parsed, { tier, standardsList });
+  if (check.ok) return attempt;
+
+  console.warn("Feedback validation failed on attempt 2:", check.issues);
+  const err = new Error("The AI response didn't meet our quality checks after two attempts. Please try submitting again.");
+  err.statusCode = 502;
+  throw err;
+}
 
 module.exports = async function handler(req, res) {
   try {
@@ -51,7 +75,7 @@ module.exports = async function handler(req, res) {
         confidenceWriting: body.confidenceWriting, motivation: body.motivation,
         prompt, text,
       });
-      const result = await generateFeedbackJSON(llmPrompt);
+      const result = await generateAndValidate(llmPrompt, tier, country);
       feedback = result.parsed;
       modelUsed = result.modelUsed;
 
@@ -73,7 +97,7 @@ module.exports = async function handler(req, res) {
         passageTitle: bank.title, passage: bank.passage, questions: bank.questions,
         answers, score, totalQuestions,
       });
-      const result = await generateFeedbackJSON(llmPrompt);
+      const result = await generateAndValidate(llmPrompt, tier, country);
       feedback = result.parsed;
       modelUsed = result.modelUsed;
 
