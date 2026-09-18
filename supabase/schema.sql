@@ -72,6 +72,7 @@ create table if not exists public.submissions (
   kind text not null check (kind in ('writing', 'reading')),
   tier text not null check (tier in ('early', 'elementary', 'middle', 'high')),
   country text not null,
+  grade_label text,                 -- e.g. "Year 7" — lets mastery be scored per exact year, not just tier
   interest text,
   content jsonb not null,          -- the raw text (writing) or answers (reading)
   word_count int,
@@ -82,6 +83,9 @@ create table if not exists public.submissions (
   model_used text,
   created_at timestamptz not null default now()
 );
+
+-- Safe to re-run against an existing table created before this column existed.
+alter table public.submissions add column if not exists grade_label text;
 
 alter table public.submissions enable row level security;
 
