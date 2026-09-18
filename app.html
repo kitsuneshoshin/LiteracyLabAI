@@ -501,36 +501,106 @@ const PROMPTS = {
     sample: "Ambition, in much of the literary canon, is rarely presented as a neutral force; it is instead a catalyst that reveals character under pressure. While it is true that unchecked ambition often precipitates downfall — Macbeth's spiralling violence being the most obvious example — to characterise ambition as uniformly destructive overlooks the more nuanced treatment many writers afford it. In several texts, ambition operates as a double-edged mechanism: the same drive that isolates a character from their community is often what permits them to challenge an unjust status quo in the first place. This essay will argue that ambition functions less as a moral verdict and more as a magnifying glass, intensifying whatever qualities — virtuous or otherwise — a character already possesses." },
 };
 
+// Multiple passages per tier so repeated reading sessions don't show the
+// same text every time — a random one is picked each time an exercise
+// starts (see Workspace's pickPassageIndex) and its index travels with the
+// submission so the server (api/_lib/readingBank.js, kept in sync by hand)
+// grades against the same passage the student actually saw.
 const READING_BANK = {
-  early: { title: "Sunny the Rabbit", skill: "Recalling key details",
-    passage: "Mia has a pet rabbit named Sunny. Every morning, Mia gives Sunny fresh carrots and clean water. Sunny loves to hop around the garden and dig small holes near the fence. One day, Sunny found a shiny button in the grass and carried it back to her hutch. Mia was surprised and laughed when she saw it!",
-    questions: [
-      { q: "What is the name of Mia's pet?", options: ["Sunny","Buttons","Hoppy","Daisy"], correct: 0 },
-      { q: "What did Sunny find in the grass?", options: ["A carrot","A shiny button","A stick","A flower"], correct: 1 },
-      { q: "Where does Sunny like to hop around?", options: ["The kitchen","The garden","The park","The school"], correct: 1 },
-    ] },
-  elementary: { title: "The Blocky World", skill: "Making inferences",
-    passage: "Jayden opened his eyes to find himself standing in a strange, blocky world. Towering trees made of green squares stretched above him, and in the distance, a river sparkled under a pixelated sun. He had read about worlds like this in his favourite game, but never imagined stepping into one. Cautiously, he picked up a stick lying nearby, hoping it might help him build a shelter before nightfall. A distant growl echoed through the trees, and Jayden's heart began to race.",
-    questions: [
-      { q: "How does Jayden most likely feel when he hears the growl?", options: ["Bored","Nervous","Sleepy","Proud"], correct: 1 },
-      { q: "Why does Jayden pick up the stick?", options: ["To draw in the dirt","To help build a shelter","To throw it away","To give to a friend"], correct: 1 },
-      { q: "What word best describes the world Jayden finds himself in?", options: ["Blocky","Foggy","Empty","Underwater"], correct: 0 },
-    ] },
-  middle: { title: "The Old Lighthouse", skill: "Inferring mood and tone",
-    passage: "The old lighthouse stood alone at the edge of the cliff, its paint peeling and its windows dark. Local fishermen said it had been abandoned for decades, ever since the keeper vanished one stormy night without a trace. Elena climbed the narrow, creaking stairs slowly, her flashlight flickering against the damp stone walls. At the top, she found a logbook, its final entry unfinished mid-sentence. A cold gust of wind slammed a shutter somewhere below, and Elena froze, straining to hear if the sound would come again.",
-    questions: [
-      { q: "What does the unfinished logbook entry suggest?", options: ["The keeper left in a hurry or was interrupted","The keeper finished his shift normally","The lighthouse was never used","Elena wrote the logbook herself"], correct: 0 },
-      { q: "What is the overall mood the author creates?", options: ["Cheerful and relaxed","Tense and eerie","Comedic","Romantic"], correct: 1 },
-      { q: "Why does Elena \"freeze\" at the end?", options: ["She is cold from the wind","She is startled and listening for danger","She fell asleep","She finished reading"], correct: 1 },
-    ] },
-  high: { title: "On Ambition", skill: "Analysing argument and rhetoric",
-    passage: "Ambition, when unrestrained by conscience, has toppled empires and ended friendships; yet the same restless drive has propelled explorers across oceans and scientists toward cures once thought impossible. To dismiss ambition as inherently corrosive is to ignore the countless advances it has quietly financed. The question worth asking is not whether ambition is good or bad, but what tempers it — humility, accountability, or simply the presence of someone willing to say no. Absent those checks, even the noblest ambition curdles into something indistinguishable from greed.",
-    questions: [
-      { q: "What is the author's main claim?", options: ["Ambition is always destructive","Ambition's effect depends on what restrains it","Ambition should be eliminated","Ambition only benefits scientists"], correct: 1 },
-      { q: "What rhetorical technique opens the passage?", options: ["Antithesis / contrast","Rhetorical question","Statistic","Personal anecdote"], correct: 0 },
-      { q: "According to the passage, what \"tempers\" ambition?", options: ["Money and fame","Humility, accountability, or someone willing to say no","Government regulation","Nothing can temper it"], correct: 1 },
-    ] },
+  early: [
+    { title: "Sunny the Rabbit", skill: "Recalling key details",
+      passage: "Mia has a pet rabbit named Sunny. Every morning, Mia gives Sunny fresh carrots and clean water. Sunny loves to hop around the garden and dig small holes near the fence. One day, Sunny found a shiny button in the grass and carried it back to her hutch. Mia was surprised and laughed when she saw it!",
+      questions: [
+        { q: "What is the name of Mia's pet?", options: ["Sunny","Buttons","Hoppy","Daisy"], correct: 0 },
+        { q: "What did Sunny find in the grass?", options: ["A carrot","A shiny button","A stick","A flower"], correct: 1 },
+        { q: "Where does Sunny like to hop around?", options: ["The kitchen","The garden","The park","The school"], correct: 1 },
+      ] },
+    { title: "Ben's Kite", skill: "Recalling key details",
+      passage: "Ben has a red kite. On windy days, Ben and his dad fly the kite in the park. The kite dances high in the sky like a bird. One day, the string broke and the kite flew far away. Ben was sad, but the next morning, a kind neighbour returned it with a big smile.",
+      questions: [
+        { q: "What colour is Ben's kite?", options: ["Red","Blue","Yellow","Green"], correct: 0 },
+        { q: "When do Ben and his dad fly the kite?", options: ["At night","On windy days","When it rains","Never"], correct: 1 },
+        { q: "What happened to the kite?", options: ["It broke into pieces","The string broke and it flew away","It got stuck in a tree","Ben lost it at the park"], correct: 1 },
+      ] },
+    { title: "The Lost Puppy", skill: "Recalling key details",
+      passage: "Ruby found a small puppy shivering near the school gate. It had no collar and looked hungry. Ruby wrapped the puppy in her jacket and carried it home. Her mum helped her make posters with the puppy's picture. Two days later, a happy family came to the door — it was their puppy, Max!",
+      questions: [
+        { q: "Where did Ruby find the puppy?", options: ["At the park","Near the school gate","In her garden","At the shop"], correct: 1 },
+        { q: "Why did Ruby wrap the puppy in her jacket?", options: ["It was shivering and cold","It was dirty","It was sleepy","It was scared of her"], correct: 0 },
+        { q: "What was the puppy's name?", options: ["Ruby","Rex","Max","Buddy"], correct: 2 },
+      ] },
+  ],
+  elementary: [
+    { title: "The Blocky World", skill: "Making inferences",
+      passage: "Jayden opened his eyes to find himself standing in a strange, blocky world. Towering trees made of green squares stretched above him, and in the distance, a river sparkled under a pixelated sun. He had read about worlds like this in his favourite game, but never imagined stepping into one. Cautiously, he picked up a stick lying nearby, hoping it might help him build a shelter before nightfall. A distant growl echoed through the trees, and Jayden's heart began to race.",
+      questions: [
+        { q: "How does Jayden most likely feel when he hears the growl?", options: ["Bored","Nervous","Sleepy","Proud"], correct: 1 },
+        { q: "Why does Jayden pick up the stick?", options: ["To draw in the dirt","To help build a shelter","To throw it away","To give to a friend"], correct: 1 },
+        { q: "What word best describes the world Jayden finds himself in?", options: ["Blocky","Foggy","Empty","Underwater"], correct: 0 },
+      ] },
+    { title: "The Science Fair Surprise", skill: "Making inferences",
+      passage: "Maya had spent three weeks building a volcano model for the science fair, mixing baking soda and vinegar to make it erupt. The night before the fair, her little brother knocked over the model while chasing the cat. Maya stared at the crushed cardboard mountain, her eyes stinging. She took a deep breath, gathered the pieces, and stayed up rebuilding it with her dad until midnight. The next day, when the judges asked what she'd learned, Maya smiled and said, \"That sometimes the best experiments happen after everything falls apart.\"",
+      questions: [
+        { q: "How does Maya likely feel when she first sees the crushed model?", options: ["Excited","Upset","Bored","Proud"], correct: 1 },
+        { q: "What can you infer about Maya's character from how she responds?", options: ["She gives up easily","She is determined and resilient","She blames her brother","She doesn't care about the fair"], correct: 1 },
+        { q: "What does Maya's answer to the judges suggest?", options: ["She regrets entering the fair","She found meaning in overcoming the setback","She thinks volcanoes are boring","She wants to quit science"], correct: 1 },
+      ] },
+    { title: "Message in a Bottle", skill: "Making inferences",
+      passage: "While walking along the beach after a storm, Tomás spotted something glinting in the sand — an old glass bottle with a rolled-up note inside. His hands trembled as he pulled out the paper, careful not to tear the faded ink. The message was written in a language he didn't recognize, but a small hand-drawn map was tucked beside it. Tomás glanced up and down the empty shore, wondering how long the bottle had been drifting, and from how far away.",
+      questions: [
+        { q: "How does Tomás feel when he opens the bottle?", options: ["Annoyed","Nervous and excited","Sleepy","Angry"], correct: 1 },
+        { q: "What can you infer about how long the bottle traveled?", options: ["It just arrived that day","It likely drifted for a long time, from an unknown distance","It was thrown from the same beach","It was never in the water"], correct: 1 },
+        { q: "Why might the author include the detail about the \"faded ink\"?", options: ["To show the note is old","To show Tomás is careless","To show it rained recently","To show the note is fake"], correct: 0 },
+      ] },
+  ],
+  middle: [
+    { title: "The Old Lighthouse", skill: "Inferring mood and tone",
+      passage: "The old lighthouse stood alone at the edge of the cliff, its paint peeling and its windows dark. Local fishermen said it had been abandoned for decades, ever since the keeper vanished one stormy night without a trace. Elena climbed the narrow, creaking stairs slowly, her flashlight flickering against the damp stone walls. At the top, she found a logbook, its final entry unfinished mid-sentence. A cold gust of wind slammed a shutter somewhere below, and Elena froze, straining to hear if the sound would come again.",
+      questions: [
+        { q: "What does the unfinished logbook entry suggest?", options: ["The keeper left in a hurry or was interrupted","The keeper finished his shift normally","The lighthouse was never used","Elena wrote the logbook herself"], correct: 0 },
+        { q: "What is the overall mood the author creates?", options: ["Cheerful and relaxed","Tense and eerie","Comedic","Romantic"], correct: 1 },
+        { q: "Why does Elena \"freeze\" at the end?", options: ["She is cold from the wind","She is startled and listening for danger","She fell asleep","She finished reading"], correct: 1 },
+      ] },
+    { title: "The Silent Auction", skill: "Inferring mood and tone",
+      passage: "The gallery was hushed except for the soft shuffle of shoes on polished floors. Rosa stood before the painting she had restored for months, her stomach twisting as two bidders raised their paddles in quick succession. She had poured her savings into materials, certain the piece was worth far more than anyone recognized. When the auctioneer's gavel finally struck, the final price displayed on the screen made the room erupt in murmurs. Rosa exhaled, unsure whether the sound rising in her chest was relief or disbelief.",
+      questions: [
+        { q: "What is the overall mood of the passage?", options: ["Tense and uncertain","Playful and lighthearted","Angry and hostile","Calm and sleepy"], correct: 0 },
+        { q: "What does Rosa's \"stomach twisting\" suggest about her emotional state?", options: ["She is bored","She is anxious about the outcome","She is hungry","She is confident"], correct: 1 },
+        { q: "Why might the author leave the final price unstated directly?", options: ["To keep suspense and focus on Rosa's reaction","Because it doesn't matter","Because Rosa didn't hear it","To confuse the reader"], correct: 0 },
+      ] },
+    { title: "The Last Broadcast", skill: "Inferring mood and tone",
+      passage: "Static crackled through the radio room as Mara adjusted the dial for the hundredth time that week. Ever since the storm had knocked out the town's main tower, her grandfather's old shortwave set had become the only link to the outside world. Tonight, faint voices cut through the noise — a rescue team, still hours away. Mara's hand hovered over the transmit button, weighing every word she might say, aware that whatever she chose could be the last message anyone heard from their side of the mountain.",
+      questions: [
+        { q: "What is the mood the author creates?", options: ["Tense and urgent","Cheerful","Bored","Romantic"], correct: 0 },
+        { q: "What can be inferred about the town's situation?", options: ["It is isolated and waiting for help","It has already been rescued","It was never in danger","Mara is broadcasting for fun"], correct: 0 },
+        { q: "Why does Mara hesitate before pressing the transmit button?", options: ["She doesn't know how the radio works","She feels the weight and importance of her words","She is scared of static","She wants to end the broadcast"], correct: 1 },
+      ] },
+  ],
+  high: [
+    { title: "On Ambition", skill: "Analysing argument and rhetoric",
+      passage: "Ambition, when unrestrained by conscience, has toppled empires and ended friendships; yet the same restless drive has propelled explorers across oceans and scientists toward cures once thought impossible. To dismiss ambition as inherently corrosive is to ignore the countless advances it has quietly financed. The question worth asking is not whether ambition is good or bad, but what tempers it — humility, accountability, or simply the presence of someone willing to say no. Absent those checks, even the noblest ambition curdles into something indistinguishable from greed.",
+      questions: [
+        { q: "What is the author's main claim?", options: ["Ambition is always destructive","Ambition's effect depends on what restrains it","Ambition should be eliminated","Ambition only benefits scientists"], correct: 1 },
+        { q: "What rhetorical technique opens the passage?", options: ["Antithesis / contrast","Rhetorical question","Statistic","Personal anecdote"], correct: 0 },
+        { q: "According to the passage, what \"tempers\" ambition?", options: ["Money and fame","Humility, accountability, or someone willing to say no","Government regulation","Nothing can temper it"], correct: 1 },
+      ] },
+    { title: "On Silence", skill: "Analysing argument and rhetoric",
+      passage: "We are taught to fear silence — to fill every pause with noise, every gap in conversation with commentary. Yet silence is not the absence of meaning; it is often where meaning is made. The pause before a difficult answer, the quiet after an apology, the stillness in a crowded room after unwelcome news — these silences communicate more precisely than words ever could. To rush to fill them is not politeness; it is often a failure of nerve. Perhaps what we call \"awkward silence\" is simply silence doing its job: forcing us to sit, however briefly, with what is true.",
+      questions: [
+        { q: "What is the author's main claim?", options: ["Silence is meaningless and should be avoided","Silence often communicates more than words and shouldn't be rushed","People should never speak","Awkward silence is always a mistake"], correct: 1 },
+        { q: "What rhetorical technique is used in listing \"the pause... the quiet... the stillness\"?", options: ["Parallelism (repetition of structure)","Statistics","Direct quotation","Sarcasm"], correct: 0 },
+        { q: "What does the author suggest \"awkward silence\" really is?", options: ["A social failure","Silence doing its job of confronting us with truth","A sign of rudeness","Something to always eliminate"], correct: 1 },
+      ] },
+    { title: "The Myth of the Self-Made Success", skill: "Analysing argument and rhetoric",
+      passage: "No success is entirely self-made, however earned it may feel to the person who achieved it. Behind every triumphant narrative lies a scaffolding of unseen support: a teacher who noticed potential, a policy that made opportunity possible, a family member who absorbed risk so another could take it. Acknowledging this is not the same as diminishing effort or talent — both remain essential. But the myth of pure self-sufficiency does real damage: it blinds the successful to their own good fortune, and it teaches the struggling that failure is theirs alone to bear. A more honest story would credit both the individual and the invisible hands that helped lift them.",
+      questions: [
+        { q: "What is the author's central argument?", options: ["Success is entirely due to luck","Success involves both individual effort and unacknowledged support","Effort and talent don't matter","Hard work always guarantees success"], correct: 1 },
+        { q: "What is the effect of the phrase \"invisible hands\"?", options: ["It is a literal description","It is a metaphor for unseen help and support","It refers to a specific person","It suggests dishonesty"], correct: 1 },
+        { q: "According to the passage, what \"damage\" does the self-made myth cause?", options: ["It makes people work harder","It blinds the successful to luck and blames failure solely on individuals","It has no real effect","It only affects wealthy people"], correct: 1 },
+      ] },
+  ],
 };
+function pickPassageIndex(tier){ return Math.floor(Math.random() * READING_BANK[tier].length); }
 
 const VOCAB_BANK = {
   space:   { early:[["enormous","so huge it could be the size of a whole planet"],["glimmer","to shine with a soft, twinkling light, like distant stars"]],
@@ -675,7 +745,7 @@ function microMissionFor(tier, interest, country){
 }
 
 function readingGlows(tier, score, totalQ, curriculum){
-  const skill = READING_BANK[tier].skill;
+  const skill = READING_BANK[tier][0].skill; // same comprehension skill across all passages in a tier
   if (score === totalQ) return `Perfect score! You picked out every detail needed for ${skill.toLowerCase()} — exactly what ${curriculum} expects at this level.`;
   return `Nice reading — you got ${score} of ${totalQ} right, which shows a solid handle on ${skill.toLowerCase()} under ${curriculum}.`;
 }
@@ -820,6 +890,7 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
   // regions; with a live backend, api/progress.js now maps every region
   // (see masteryTargets.js), so isMapped there reflects what it returns.
   const isMapped = backendLive ? Boolean(progress && progress.isMapped) : !!MAPPED_TARGETS[country];
+  const [proComingSoon, setProComingSoon] = useState(false);
   // With a live backend, real per-skill mastery (computed from this
   // student's own submission history — see api/progress.js) replaces the
   // static demo numbers below, once it's loaded.
@@ -1009,18 +1080,21 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
             </div>
             <h3 className="font-display font-bold text-lg text-white mb-1.5">{remaining <= 1 ? "Almost at your monthly limit" : "Unlock unlimited submissions"}</h3>
             <p className="text-[13px] mb-4" style={{ color: "#C7D2E4" }}>
-              You’ve used {used} of {total} free submissions this month. Pro adds unlimited submissions, deeper rhetorical analysis and progress reports for every child.
+              You’ve used {used} of {total} free submissions this month. Pro adds unlimited submissions, deeper rhetorical analysis and weekly progress reports for your learner.
             </p>
             <ul className="text-[13px] space-y-1.5 mb-5" style={{ color: "#DCE4F2" }}>
               {["Unlimited monthly submissions","Advanced exam-technique scoring","Weekly progress reports by email"].map(t=>(
                 <li key={t} className="flex items-center gap-2"><IconCheck size={13} strokeWidth={2.4} style={{ color: "var(--gold)" }} />{t}</li>
               ))}
             </ul>
-            <button className="focus-ring w-full rounded-xl py-2.5 font-display font-bold text-sm inline-flex items-center justify-center gap-1.5"
+            <button onClick={()=>setProComingSoon(true)} disabled={proComingSoon}
+              className="focus-ring w-full rounded-xl py-2.5 font-display font-bold text-sm inline-flex items-center justify-center gap-1.5 disabled:opacity-70"
               style={{ background: "var(--gold)", color: "#3B2606" }}>
-              Upgrade to Pro — $14.99/mo <IconArrowRight size={15} strokeWidth={2.3} />
+              {proComingSoon ? "Pro isn't available yet" : <>Upgrade to Pro — $14.99/mo <IconArrowRight size={15} strokeWidth={2.3} /></>}
             </button>
-            <div className="text-[11px] text-center mt-2" style={{ color: "#9BA9C6" }}>Billed monthly via Stripe · cancel anytime</div>
+            <div className="text-[11px] text-center mt-2" style={{ color: "#9BA9C6" }}>
+              {proComingSoon ? "Billing isn't live yet — check back soon." : "Billed monthly via Stripe · cancel anytime"}
+            </div>
           </div>
         </div>
 
@@ -1281,16 +1355,18 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
   const [backendFeedback, setBackendFeedback] = useState(null); // real LLM output, when connected
   const [submissionId, setSubmissionId] = useState(null);
   const [submitError, setSubmitError] = useState(null);
+  const [readingPassageIdx, setReadingPassageIdx] = useState(()=> pickPassageIndex(tier));
   const timerRef = useRef(null);
   const locked = used >= total;
   const [bannerDismissed, setBannerDismissed] = useState(false);
 
-  useEffect(()=>{ setText(PROMPTS[tier].sample); setAnswers({}); setPhase("draft"); setBackendFeedback(null); setSubmissionId(null); setSubmitError(null); }, [tier, exerciseType]);
+  useEffect(()=>{ setText(PROMPTS[tier].sample); setAnswers({}); setPhase("draft"); setBackendFeedback(null); setSubmissionId(null); setSubmitError(null); setReadingPassageIdx(pickPassageIndex(tier)); }, [tier, exerciseType]);
   useEffect(()=>{ if (interests.length && !interests.includes(activeInterest)) setActiveInterest(interests[0]); }, [interests]);
   useEffect(()=> ()=> clearTimeout(timerRef.current), []);
 
   const words = useMemo(()=> text.trim().length ? text.trim().split(/\s+/).length : 0, [text]);
-  const readingQuestions = READING_BANK[tier].questions;
+  const readingBankEntry = READING_BANK[tier][readingPassageIdx];
+  const readingQuestions = readingBankEntry.questions;
   const allAnswered = readingQuestions.every((_,i)=> answers[i] != null);
 
   async function handleSubmit(){
@@ -1314,7 +1390,7 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
     try {
       const payload = exerciseType === "writing"
         ? { kind: "writing", tier, country, gradeLabel, interest: activeInterest, confidenceWriting, motivation, prompt: meta.prompt, text }
-        : { kind: "reading", tier, country, gradeLabel, interest: activeInterest, confidenceReading, motivation, answers: readingQuestions.map((_,i)=> answers[i] ?? null) };
+        : { kind: "reading", tier, country, gradeLabel, interest: activeInterest, confidenceReading, motivation, passageIndex: readingPassageIdx, answers: readingQuestions.map((_,i)=> answers[i] ?? null) };
       const result = await authedFetch(session, "/api/submit", { method: "POST", body: JSON.stringify(payload) });
       setBackendFeedback(result.feedback);
       setSubmissionId(result.submissionId);
@@ -1332,6 +1408,7 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
     setPhase("draft");
     setBackendFeedback(null);
     setSubmissionId(null);
+    if (exerciseType === "reading") setReadingPassageIdx(pickPassageIndex(tier));
   }
 
   const tierIcon = TIER_META[tier].icon;
@@ -1378,7 +1455,7 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
             />
           ) : (
             <ReadingExercise
-              tier={tier} answers={answers} setAnswers={setAnswers} allAnswered={allAnswered}
+              bank={readingBankEntry} answers={answers} setAnswers={setAnswers} allAnswered={allAnswered}
               phase={phase} onSubmit={handleSubmit} onNew={handleNew} locked={locked}
             />
           )}
@@ -1469,8 +1546,7 @@ function WordMeter({ words, target, chars, maxChars }){
   );
 }
 
-function ReadingExercise({ tier, answers, setAnswers, allAnswered, phase, onSubmit, onNew, locked }){
-  const bank = READING_BANK[tier];
+function ReadingExercise({ bank, answers, setAnswers, allAnswered, phase, onSubmit, onNew, locked }){
   const disabled = phase === "analyzing" || locked;
   return (
     <div className="card p-0 relative overflow-hidden">
