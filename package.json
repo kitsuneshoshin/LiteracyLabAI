@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "description": "LiteracyLab AI — static front-end plus Vercel serverless functions for real AI feedback, auth, and progress history.",
   "dependencies": {
-    "@google/generative-ai": "^0.21.0",
-    "@supabase/supabase-js": "^2.45.4"
+    "@supabase/supabase-js": "^2.45.4",
+    "openai": "^4.68.0"
   }
 }
