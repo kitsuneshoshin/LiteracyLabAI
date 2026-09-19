@@ -1484,7 +1484,13 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
   const [answers, setAnswers] = useState({});
   const [readingScore, setReadingScore] = useState(0);
   const [phase, setPhase] = useState("draft"); // draft | analyzing | done
-  const [activeInterest, setActiveInterest] = useState(interests[0] || "exam");
+  // Live testing found this defaulting to the literal id "exam" ("College /
+  // Exam Prep") whenever a child had no interests selected yet, regardless
+  // of age tier — INTERESTS_BY_TIER doesn't even offer that option below
+  // "high", so a parent who skipped the interest picker during onboarding
+  // got every piece of feedback for their 7-year-old framed around exam
+  // prep. Falls back to the first tier-appropriate interest instead.
+  const [activeInterest, setActiveInterest] = useState(()=> interests[0] || interestsForTier(tier)[0]?.id || "space");
   const [backendFeedback, setBackendFeedback] = useState(null); // real LLM output, when connected
   const [submissionId, setSubmissionId] = useState(null);
   const [submitError, setSubmitError] = useState(null);
@@ -1608,7 +1614,19 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
       }
     }
   }, [tier, exerciseType]);
-  useEffect(()=>{ if (interests.length && !interests.includes(activeInterest)) setActiveInterest(interests[0]); }, [interests]);
+  useEffect(()=>{
+    // Keeps activeInterest valid as either the child's selected interests or
+    // the tier itself changes (e.g. tabbing from High School, where "exam"
+    // is valid, down to Elementary, where it isn't offered at all).
+    const validForTier = interestsForTier(tier).map(i=>i.id);
+    if (interests.length) {
+      if (!interests.includes(activeInterest)) {
+        setActiveInterest(interests.find(id=>validForTier.includes(id)) || interests[0]);
+      }
+    } else if (!validForTier.includes(activeInterest)) {
+      setActiveInterest(validForTier[0] || "space");
+    }
+  }, [interests, tier]);
   useEffect(()=> ()=> clearTimeout(timerRef.current), []);
 
   const words = useMemo(()=> text.trim().length ? text.trim().split(/\s+/).length : 0, [text]);
