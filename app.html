@@ -1581,10 +1581,31 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
   useEffect(()=>{
     setAnswers({}); setPhase("draft"); setBackendFeedback(null); setSubmissionId(null); setSubmitError(null);
     if (exerciseType === "writing") {
-      if (backendLive) { setText(""); requestNewWritingPrompt(); }
-      else setText(PROMPTS[tier].sample);
+      if (backendLive) {
+        setText("");
+        // Live testing surfaced a real billing bug here: this effect used to
+        // call requestNewWritingPrompt()/requestNewPassage() unconditionally,
+        // and both bill a usage credit the instant they're called (see
+        // api/writing-prompt.js, api/reading-passage.js) - so every age-tier
+        // tab click and every Writing/Reading toggle silently spent a
+        // credit, and a curious student could burn their entire monthly
+        // quota without ever writing a word. An in-memory "already
+        // generated this tier" cache alone isn't enough to fix it either,
+        // because Workspace fully remounts (losing that cache) every time
+        // the student visits the Dashboard and comes back. So generation is
+        // now NEVER automatic: this only restores an already-cached ungraded
+        // prompt for free (below), and otherwise leaves it to the explicit
+        // "Get my prompt" button in the render, so spending a credit always
+        // requires a deliberate tap, on first visit or any later one.
+        const cached = pendingWritingRef.current[tier];
+        setWritingPrompt(cached || null);
+      } else setText(PROMPTS[tier].sample);
     } else {
-      requestNewPassage();
+      if (backendLive) {
+        setReadingPassage(pendingReadingRef.current[tier] || null);
+      } else {
+        requestNewPassage(); // demo mode: free, just rerolls the local static bank
+      }
     }
   }, [tier, exerciseType]);
   useEffect(()=>{ if (interests.length && !interests.includes(activeInterest)) setActiveInterest(interests[0]); }, [interests]);
@@ -1693,10 +1714,21 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
                   <div className="font-display font-semibold text-sm" style={{ color: "var(--ink)" }}>Upgrade to Pro for more writing prompts</div>
                   <p className="text-[13px] max-w-[28ch]" style={{ color: "var(--ink-faint)" }}>You've used all your free submissions this month.</p>
                 </>
-              ) : (
+              ) : writingLoading ? (
                 <>
                   <IconSparkle size={24} className="animate-spin-slow" style={{ color: "var(--cyan-ink)" }} />
                   <div className="font-display font-semibold text-sm" style={{ color: "var(--ink)" }}>Writing you a fresh prompt…</div>
+                </>
+              ) : (
+                <>
+                  <IconSparkle size={22} style={{ color: "var(--cyan-ink)" }} />
+                  <div className="font-display font-semibold text-sm" style={{ color: "var(--ink)" }}>Ready for a {TIER_META[tier].label.toLowerCase()} prompt?</div>
+                  <p className="text-[13px] max-w-[30ch]" style={{ color: "var(--ink-faint)" }}>This uses 1 of your {total === 999 ? "" : `${total - used} remaining `}submissions.</p>
+                  <button onClick={()=>requestNewWritingPrompt()}
+                    className="focus-ring inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-bold mt-1"
+                    style={{ background: "var(--cyan)", color: "#fff" }}>
+                    Get my prompt
+                  </button>
                 </>
               )}
             </div>
@@ -1714,10 +1746,21 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
                   <div className="font-display font-semibold text-sm" style={{ color: "var(--ink)" }}>Upgrade to Pro for more reading passages</div>
                   <p className="text-[13px] max-w-[28ch]" style={{ color: "var(--ink-faint)" }}>You've used all your free submissions this month.</p>
                 </>
-              ) : (
+              ) : readingLoading ? (
                 <>
                   <IconSparkle size={24} className="animate-spin-slow" style={{ color: "var(--cyan-ink)" }} />
                   <div className="font-display font-semibold text-sm" style={{ color: "var(--ink)" }}>Writing you a fresh passage…</div>
+                </>
+              ) : (
+                <>
+                  <IconSparkle size={22} style={{ color: "var(--cyan-ink)" }} />
+                  <div className="font-display font-semibold text-sm" style={{ color: "var(--ink)" }}>Ready for a {TIER_META[tier].label.toLowerCase()} passage?</div>
+                  <p className="text-[13px] max-w-[30ch]" style={{ color: "var(--ink-faint)" }}>This uses 1 of your {total === 999 ? "" : `${total - used} remaining `}submissions.</p>
+                  <button onClick={()=>requestNewPassage()}
+                    className="focus-ring inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-bold mt-1"
+                    style={{ background: "var(--cyan)", color: "#fff" }}>
+                    Get my passage
+                  </button>
                 </>
               )}
             </div>
