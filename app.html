@@ -1868,7 +1868,12 @@ function ReadingExercise({ bank, answers, setAnswers, allAnswered, phase, onSubm
 
 function TierEditor({ tier, meta, text, setText, words, phase, onSubmit, onNew, locked, interests, activeInterest, setActiveInterest }){
   const submitLabel = tier === "high" ? "Submit Essay" : "Submit Story";
-  const disabled = phase === "analyzing" || locked;
+  // Without the phase==="done" check, the textarea stayed editable after
+  // feedback was shown even though there was no way to resubmit those edits
+  // — confusing on its own, and it would also desync the annotated-feedback
+  // view (which highlights quotes against this same live text) from what
+  // was actually graded.
+  const disabled = phase === "analyzing" || phase === "done" || locked;
 
   if (tier === "early") {
     return (
