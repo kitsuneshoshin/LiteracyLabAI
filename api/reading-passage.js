@@ -51,9 +51,19 @@ module.exports = async function handler(req, res) {
     if (!VALID_TIERS.includes(tier)) return res.status(400).json({ error: `Invalid tier: ${tier}` });
     if (!country || !gradeLabel) return res.status(400).json({ error: "country and gradeLabel are required." });
 
-    const { data: childProfile, error: childErr } = await supabase
-      .from("child_profiles").select("id").eq("profile_id", user.id).limit(1).single();
+    // .maybeSingle() + create-if-missing rather than .single(): a request
+    // reaching here before api/child-profile.js's GET ever ran (which is
+    // what normally creates the default row) would otherwise throw a
+    // confusing "no rows" DB error instead of just working.
+    let { data: childProfile, error: childErr } = await supabase
+      .from("child_profiles").select("id").eq("profile_id", user.id).limit(1).maybeSingle();
     if (childErr) throw childErr;
+    if (!childProfile) {
+      const { data: created, error: createErr } = await supabase
+        .from("child_profiles").insert({ profile_id: user.id }).select("id").single();
+      if (createErr) throw createErr;
+      childProfile = created;
+    }
 
     const llmPrompt = buildReadingPassagePrompt({ tier, country, gradeLabel, interest });
     const { parsed } = await generateAndValidate(llmPrompt, tier);

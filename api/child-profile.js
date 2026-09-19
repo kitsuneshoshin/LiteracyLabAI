@@ -38,12 +38,17 @@ module.exports = async function handler(req, res) {
       for (const key of allowed) if (key in body) patch[key] = body[key];
       patch.updated_at = new Date().toISOString();
 
-      const { data, error } = await supabase
-        .from("child_profiles")
-        .update(patch)
-        .eq("profile_id", user.id)
-        .select("*")
-        .single();
+      // Find-then-update rather than a bare update(): if no row exists yet
+      // (POST reaching here before GET ever ran to create the default one),
+      // .update() silently matches zero rows and .single() throws a
+      // confusing "no rows" error instead of a real profile.
+      const { data: existing, error: findErr } = await supabase
+        .from("child_profiles").select("id").eq("profile_id", user.id).limit(1).maybeSingle();
+      if (findErr) throw findErr;
+
+      const { data, error } = existing
+        ? await supabase.from("child_profiles").update(patch).eq("id", existing.id).select("*").single()
+        : await supabase.from("child_profiles").insert({ profile_id: user.id, ...patch }).select("*").single();
       if (error) throw error;
       return res.status(200).json({ profile: data });
     }

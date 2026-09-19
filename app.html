@@ -1494,6 +1494,18 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
   const [writingPrompt, setWritingPrompt] = useState(null); // backendLive: AI-generated {submissionId, title, prompt}
   const [writingLoading, setWritingLoading] = useState(false);
   const timerRef = useRef(null);
+  // Each writing-prompt/reading-passage generation is billable (see
+  // api/writing-prompt.js and api/reading-passage.js) - it inserts a
+  // submissions row the moment it's generated, not when the student
+  // eventually submits. Without caching one pending (not-yet-submitted)
+  // generation per tier here, merely clicking through the tier tabs or the
+  // Writing/Reading toggle would silently burn a real usage credit on every
+  // click, since that switch re-runs the effect below. Cleared for a tier
+  // once that submission is actually completed (it can't be reused after
+  // that - submitting again 409s) or when "New Story"/"New Passage" is
+  // tapped explicitly, which is a genuine, intentional new credit spend.
+  const pendingWritingRef = useRef({});
+  const pendingReadingRef = useRef({});
   const locked = used >= total;
   const [bannerDismissed, setBannerDismissed] = useState(false);
 
@@ -1506,8 +1518,15 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
   // tailored to tier/country/interest, consuming this account's usage
   // credit up front — same reasoning and pattern as requestNewPassage below,
   // so a returning student doesn't see the same prompt every session.
-  async function requestNewWritingPrompt(){
+  async function requestNewWritingPrompt(force){
     if (!backendLive || locked) return;
+    if (!force && pendingWritingRef.current[tier]) {
+      // Already have an ungraded prompt for this tier from earlier in the
+      // session (e.g. the student tabbed away and back) - reuse it instead
+      // of spending another credit on a prompt they haven't answered yet.
+      setWritingPrompt(pendingWritingRef.current[tier]);
+      return;
+    }
     setWritingLoading(true);
     setWritingPrompt(null);
     setSubmitError(null);
@@ -1516,7 +1535,9 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
         method: "POST",
         body: JSON.stringify({ tier, country, gradeLabel, interest: activeInterest }),
       });
-      setWritingPrompt({ submissionId: result.submissionId, title: result.title, prompt: result.prompt });
+      const fresh = { submissionId: result.submissionId, title: result.title, prompt: result.prompt };
+      pendingWritingRef.current[tier] = fresh;
+      setWritingPrompt(fresh);
       onSubmit(result.usage);
     } catch (err) {
       setSubmitError(err.payload?.error || err.message || "Couldn't generate a writing prompt. Please try again.");
@@ -1529,9 +1550,15 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
   // the local static bank; with a live backend it calls the AI to write an
   // original one (consuming this account's usage credit up front — see
   // api/reading-passage.js) so no student ever sees the same passage twice.
-  async function requestNewPassage(){
+  async function requestNewPassage(force){
     if (!backendLive) { setReadingPassageIdx(pickPassageIndex(tier)); return; }
     if (locked) return;
+    if (!force && pendingReadingRef.current[tier]) {
+      // Same reasoning as requestNewWritingPrompt above - reuse an ungraded
+      // passage for this tier instead of re-billing a credit for it.
+      setReadingPassage(pendingReadingRef.current[tier]);
+      return;
+    }
     setReadingLoading(true);
     setReadingPassage(null);
     setSubmitError(null);
@@ -1540,7 +1567,9 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
         method: "POST",
         body: JSON.stringify({ tier, country, gradeLabel, interest: activeInterest }),
       });
-      setReadingPassage({ submissionId: result.submissionId, title: result.title, skill: result.skill, passage: result.passage, questions: result.questions });
+      const fresh = { submissionId: result.submissionId, title: result.title, skill: result.skill, passage: result.passage, questions: result.questions };
+      pendingReadingRef.current[tier] = fresh;
+      setReadingPassage(fresh);
       onSubmit(result.usage);
     } catch (err) {
       setSubmitError(err.payload?.error || err.message || "Couldn't generate a reading passage. Please try again.");
@@ -1591,6 +1620,11 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
       const result = await authedFetch(session, "/api/submit", { method: "POST", body: JSON.stringify(payload) });
       setBackendFeedback(result.feedback);
       setSubmissionId(result.submissionId);
+      // This tier's pending generation is now used up (resubmitting it would
+      // 409) - drop it from the cache so tabbing back to this tier later
+      // fetches a genuinely new one instead of reusing the completed one.
+      if (exerciseType === "writing") delete pendingWritingRef.current[tier];
+      else delete pendingReadingRef.current[tier];
       if (exerciseType === "reading") {
         setReadingScore(result.score);
         // The answer key was withheld when the passage was generated so it
@@ -1611,8 +1645,8 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
     setPhase("draft");
     setBackendFeedback(null);
     setSubmissionId(null);
-    if (exerciseType === "reading") requestNewPassage();
-    else if (backendLive) requestNewWritingPrompt();
+    if (exerciseType === "reading") requestNewPassage(true);
+    else if (backendLive) requestNewWritingPrompt(true);
   }
 
   const tierIcon = TIER_META[tier].icon;
