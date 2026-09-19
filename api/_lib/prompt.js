@@ -30,6 +30,23 @@ function targetsClause(targetNames) {
   return `You must also identify which ONE skill area from this list the Glow demonstrates a strength in, and which ONE (can be the same or different) the Grow is building towards. Use the EXACT name from this list, verbatim, character-for-character — do not paraphrase it: ${targetNames.map((n) => `"${n}"`).join(", ")}.`;
 }
 
+// Tells the model to also return short exact quotes from the student's own
+// text, tagged glow/grow, so the UI can highlight directly in their writing
+// where each point applies — instead of prose feedback the student has to
+// manually map back onto what they wrote.
+function highlightsClause() {
+  return `You must also return 2-5 "highlights": short fragments copied EXACTLY, character-for-character (including any spelling or grammar mistakes — do not correct them), from the student's submitted text above. Each one is tagged "glow" (something that worked) or "grow" (something to improve), with a short note explaining why. These must be real substrings that appear verbatim in the submitted text — never paraphrase or reconstruct a quote from memory.`;
+}
+
+// When the student previously tapped a "what will you try next time?"
+// commitment, this asks the model to genuinely check whether the new
+// submission shows evidence of it — never fabricated, and omitted if
+// there's nothing real to say.
+function followUpClause(previousCommitment) {
+  if (!previousCommitment) return "";
+  return `\n\nLast time, this student committed to trying: "${previousCommitment}" in their next submission. Look for genuine evidence of this in what they submitted now. If you find real evidence, briefly and warmly acknowledge it. If there's no clear evidence, gently note that without scolding — it's still worth trying. Put this 1-sentence check-in in a "followUp" field. Never claim evidence that isn't actually there.`;
+}
+
 // A single worked example, shown to every call regardless of the actual
 // student, purely to anchor tone/structure/specificity. Models follow a
 // concrete example far more reliably than an abstract description of one.
@@ -45,9 +62,13 @@ Student text fragment: "...the dark forest was really scary and the trees looked
   "microMission": "In your next story, start one sentence with a fronted adverbial before you reveal something scary or exciting.",
   "commitOptions": ["Start a sentence with a fronted adverbial", "Reread my scary bit out loud", "Use one of today's new words"],
   "glowTarget": "Fronted Adverbials",
-  "growTarget": "Fronted Adverbials"
+  "growTarget": "Fronted Adverbials",
+  "highlights": [
+    { "quote": "the dark forest was really scary", "type": "glow", "note": "Great tense-building detail right here." },
+    { "quote": "the trees looked spooky", "type": "grow", "note": "Try a fronted adverbial to open this instead, e.g. \\"Without warning, the trees looked spooky.\\"" }
+  ]
 }
-Notice: the glow quotes the student's actual words, the standard is named naturally (not bolted on), the analogy is concrete, vocab defs are one plain sentence each, glowTarget/growTarget are copied verbatim from the given list, and nothing here is generic enough to paste into any other student's feedback. Match that bar exactly for the real student below — every claim must be traceable to what they actually wrote/answered.`;
+Notice: the glow quotes the student's actual words, the standard is named naturally (not bolted on), the analogy is concrete, vocab defs are one plain sentence each, glowTarget/growTarget are copied verbatim from the given list, and each highlight's "quote" is an exact substring of the student's text (typos and all) rather than a paraphrase. Match that bar exactly for the real student below — every claim must be traceable to what they actually wrote/answered.`;
 
 function successCriteria() {
   return `Before you respond, check your own draft against these pass/fail criteria — if any fail, revise before sending:
@@ -56,10 +77,11 @@ function successCriteria() {
 3. The grow names exactly ONE step, uses the student's stated interest as a real, concrete analogy (not just name-dropped), and ends with the motivation-appropriate line.
 4. Every sentence would be understandable read aloud to a student at this exact age — no jargon without the analogy carrying it.
 5. Both vocab definitions are one plain sentence each, framed through the student's interest where natural.
-6. glowTarget and growTarget are copied EXACTLY, character-for-character, from the provided list of skill area names — not paraphrased, shortened, or invented.`;
+6. glowTarget and growTarget are copied EXACTLY, character-for-character, from the provided list of skill area names — not paraphrased, shortened, or invented.
+7. Every highlight's "quote" is an exact, verbatim substring you can point to in the submitted text above — not a cleaned-up or paraphrased version of it.`;
 }
 
-function buildWritingPrompt({ tier, country, gradeLabel, interest, confidenceWriting, motivation, prompt, text, targetNames }) {
+function buildWritingPrompt({ tier, country, gradeLabel, interest, confidenceWriting, motivation, prompt, text, targetNames, previousCommitment }) {
   return `You are the feedback engine inside LiteracyLab AI, an educational product for a ${TIER_LABEL[tier]} student in ${gradeLabel} (${country}).
 
 A student was given this writing prompt:
@@ -75,6 +97,8 @@ ${CONFIDENCE_NOTE[confidenceWriting] || ""}
 ${MOTIVATION_NOTE[motivation] || ""}
 ${standardsClause(country, tier)}
 ${targetsClause(targetNames)}
+${highlightsClause()}
+${followUpClause(previousCommitment)}
 
 Read the actual submitted text closely — every point you make must be traceable to something specifically in it (quote a short fragment where useful), not a generic template response.
 
@@ -93,11 +117,13 @@ Respond with ONLY a JSON object (no markdown fences, no commentary) with exactly
   "microMission": "One concrete, specific instruction for their NEXT submission that directly follows from the grow above.",
   "commitOptions": ["3 short first-person action phrases (5-8 words each) the student could tap to commit to trying next time, each directly derived from the grow above — not generic"],
   "glowTarget": "the exact skill area name from the given list that the glow demonstrates",
-  "growTarget": "the exact skill area name from the given list that the grow is building towards"
+  "growTarget": "the exact skill area name from the given list that the grow is building towards",
+  "highlights": [{ "quote": "an exact substring copied from the submitted text", "type": "glow or grow", "note": "a short reason" }],
+  "followUp": ${previousCommitment ? '"a short, honest 1-sentence check-in on the previous commitment noted above"' : "null"}
 }`;
 }
 
-function buildReadingPrompt({ tier, country, gradeLabel, interest, confidenceReading, motivation, passageTitle, passage, questions, answers, score, totalQuestions, targetNames }) {
+function buildReadingPrompt({ tier, country, gradeLabel, interest, confidenceReading, motivation, passageTitle, passage, questions, answers, score, totalQuestions, targetNames, previousCommitment }) {
   const answerLines = questions.map((q, i) => {
     const chosen = answers[i];
     const isCorrect = chosen === q.correct;
@@ -119,6 +145,7 @@ ${CONFIDENCE_NOTE[confidenceReading] || ""}
 ${MOTIVATION_NOTE[motivation] || ""}
 ${standardsClause(country, tier)}
 ${targetsClause(targetNames)}
+${followUpClause(previousCommitment)}
 
 ${WORKED_EXAMPLE}
 
@@ -135,7 +162,8 @@ Respond with ONLY a JSON object (no markdown fences, no commentary) with exactly
   "microMission": "One concrete instruction for their next reading passage that follows from the grow above.",
   "commitOptions": ["3 short first-person action phrases (5-8 words each) the student could tap to commit to trying next time, derived from the grow above"],
   "glowTarget": "the exact skill area name from the given list that the glow demonstrates",
-  "growTarget": "the exact skill area name from the given list that the grow is building towards"
+  "growTarget": "the exact skill area name from the given list that the grow is building towards",
+  "followUp": ${previousCommitment ? '"a short, honest 1-sentence check-in on the previous commitment noted above"' : "null"}
 }`;
 }
 

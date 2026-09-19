@@ -1227,7 +1227,69 @@ function CommitPrompt({ options, session, submissionId, backendLive }){
   );
 }
 
-function FeedbackPanel({ tier, gradeLabel, country, interest, confidence, motivation, seed, feedback, submissionId, session, backendLive }){
+// Renders the student's own submitted text with the AI's highlight quotes
+// picked out inline (green = glow, burgundy = grow), plus a plain-language
+// list below each one — so feedback that's otherwise just prose the student
+// has to mentally map back onto their story is instead pinned directly to
+// the words it's about.
+function AnnotatedText({ text, highlights }){
+  const spans = useMemo(()=>{
+    if (!text || !Array.isArray(highlights) || highlights.length === 0) return null;
+    const lowerText = text.toLowerCase();
+    const found = [];
+    highlights.forEach((h, i)=>{
+      if (!h?.quote) return;
+      const idx = lowerText.indexOf(String(h.quote).toLowerCase());
+      if (idx === -1) return; // defensive: shouldn't happen, server validates this, but never crash the UI over it
+      found.push({ start: idx, end: idx + h.quote.length, type: h.type === "grow" ? "grow" : "glow", note: h.note, key: i });
+    });
+    found.sort((a,b)=> a.start - b.start);
+    const nonOverlapping = [];
+    let cursor = 0;
+    found.forEach(f=>{ if (f.start >= cursor) { nonOverlapping.push(f); cursor = f.end; } });
+    return nonOverlapping;
+  }, [text, highlights]);
+
+  if (!spans || spans.length === 0) {
+    return <p className="whitespace-pre-wrap font-read text-[14.5px] leading-relaxed" style={{ color: "var(--ink)" }}>{text}</p>;
+  }
+
+  const parts = [];
+  let pos = 0;
+  spans.forEach((f, i)=>{
+    if (f.start > pos) parts.push(<span key={`t${i}`}>{text.slice(pos, f.start)}</span>);
+    const isGlow = f.type === "glow";
+    parts.push(
+      <mark key={`h${i}`} title={f.note} tabIndex={0}
+        className="focus-ring rounded px-0.5 cursor-help"
+        style={{ background: isGlow ? "var(--good-tint)" : "var(--bad-tint)", color: isGlow ? "var(--good)" : "var(--bad)", textDecoration: "underline", textDecorationStyle: "dotted", textUnderlineOffset: 2 }}>
+        {text.slice(f.start, f.end)}
+      </mark>
+    );
+    pos = f.end;
+  });
+  if (pos < text.length) parts.push(<span key="tail">{text.slice(pos)}</span>);
+
+  return (
+    <div>
+      <p className="whitespace-pre-wrap font-read text-[14.5px] leading-relaxed" style={{ color: "var(--ink)" }}>{parts}</p>
+      <div className="flex items-center gap-3 mt-3 text-[11px] font-semibold" style={{ color: "var(--ink-faint)" }}>
+        <span className="inline-flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full" style={{ background: "var(--good)" }} />Glow</span>
+        <span className="inline-flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full" style={{ background: "var(--bad)" }} />Grow</span>
+      </div>
+      <div className="flex flex-col gap-1.5 mt-3 pt-3 border-t" style={{ borderColor: "var(--border-soft)" }}>
+        {spans.map((f, i)=>(
+          <div key={i} className="text-[12.5px] leading-snug flex items-start gap-1.5">
+            <span className="font-bold shrink-0" style={{ color: f.type === "glow" ? "var(--good)" : "var(--bad)" }}>{f.type === "glow" ? "✓" : "→"}</span>
+            <span style={{ color: "var(--ink-soft)" }}><strong style={{ color: "var(--ink)" }}>&ldquo;{text.slice(f.start, f.end)}&rdquo;</strong> — {f.note}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function FeedbackPanel({ tier, gradeLabel, country, interest, confidence, motivation, seed, feedback, submissionId, session, backendLive, submittedText }){
   const interestLabel = (INTERESTS.find(i=>i.id===interest) || INTERESTS[0]).label;
   const curriculum = GRADE_DATA[country].curriculum;
   const opener = CONFIDENCE_OPENER[confidence] || "";
@@ -1244,6 +1306,28 @@ function FeedbackPanel({ tier, gradeLabel, country, interest, confidence, motiva
 
   return (
     <div className="animate-float-in flex flex-col gap-4">
+      {feedback?.followUp && (
+        <div className="card p-4 flex items-start gap-2.5" style={{ borderColor: "var(--gold)", borderWidth: 1.5, background: "var(--gold-tint)" }}>
+          <IconFlame size={16} strokeWidth={2.2} style={{ color: "var(--gold-ink)", marginTop: 2 }} />
+          <div>
+            <div className="font-display font-bold text-[12.5px] mb-0.5" style={{ color: "var(--gold-ink)" }}>Checking in on last time</div>
+            <p className="text-[13.5px] leading-snug" style={{ color: "var(--ink)" }}>{feedback.followUp}</p>
+          </div>
+        </div>
+      )}
+
+      {submittedText && feedback?.highlights && (
+        <div className="card p-5 sm:p-6">
+          <div className="flex items-center gap-2 mb-3">
+            <div className="w-8 h-8 rounded-full grid place-items-center" style={{ background: "var(--navy-tint)", color: "var(--ink)" }}>
+              <IconPen size={15} strokeWidth={2.2} />
+            </div>
+            <h3 className="font-display font-bold" style={{ color: "var(--ink)" }}>Your submission, annotated</h3>
+          </div>
+          <AnnotatedText text={submittedText} highlights={feedback.highlights} />
+        </div>
+      )}
+
       <div className="card p-5 sm:p-6" style={{ borderColor: "var(--good)", borderWidth: 1.5 }}>
         <div className="flex items-center gap-2 mb-2">
           <div className="w-8 h-8 rounded-full grid place-items-center" style={{ background: "var(--good-tint)", color: "var(--good)" }}>
@@ -1324,6 +1408,16 @@ function ReadingFeedbackPanel({ tier, country, interest, confidence, motivation,
 
   return (
     <div className="animate-float-in flex flex-col gap-4">
+      {feedback?.followUp && (
+        <div className="card p-4 flex items-start gap-2.5" style={{ borderColor: "var(--gold)", borderWidth: 1.5, background: "var(--gold-tint)" }}>
+          <IconFlame size={16} strokeWidth={2.2} style={{ color: "var(--gold-ink)", marginTop: 2 }} />
+          <div>
+            <div className="font-display font-bold text-[12.5px] mb-0.5" style={{ color: "var(--gold-ink)" }}>Checking in on last time</div>
+            <p className="text-[13.5px] leading-snug" style={{ color: "var(--ink)" }}>{feedback.followUp}</p>
+          </div>
+        </div>
+      )}
+
       <div className="card p-5 sm:p-6 flex items-center gap-4" style={{ borderColor: "var(--good)", borderWidth: 1.5 }}>
         <div className="w-14 h-14 rounded-full grid place-items-center shrink-0 font-display font-extrabold text-lg" style={{ background: "var(--good-tint)", color: "var(--good)" }}>
           {pct}%
@@ -1622,7 +1716,7 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
           )}
           {phase === "done" && exerciseType === "writing" && (
             <FeedbackPanel tier={tier} gradeLabel={gradeLabel} country={country} interest={activeInterest} confidence={confidenceWriting} motivation={motivation} seed={words}
-              feedback={backendFeedback} submissionId={submissionId} session={session} backendLive={backendLive} />
+              feedback={backendFeedback} submissionId={submissionId} session={session} backendLive={backendLive} submittedText={text} />
           )}
           {phase === "done" && exerciseType === "reading" && (
             <ReadingFeedbackPanel tier={tier} country={country} interest={activeInterest} confidence={confidenceReading} motivation={motivation} score={readingScore} totalQ={readingQuestions.length}

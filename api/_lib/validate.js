@@ -31,6 +31,10 @@ function checkString(value, min, max) {
   return typeof value === "string" && value.trim().length >= min && value.trim().length <= max;
 }
 
+function normalizeForMatch(s) {
+  return String(s).toLowerCase().replace(/\s+/g, " ").trim();
+}
+
 // glowTarget/growTarget drive the real mastery computation in
 // api/progress.js, which looks the value up as an exact key in a Map keyed
 // by the canonical target names — a paraphrase wouldn't fail loudly, it
@@ -56,7 +60,7 @@ function matchesATarget(value, targetNames) {
   return resolveTarget(value, targetNames) !== null;
 }
 
-function validateFeedback(parsed, { tier, standardsList, targetNames }) {
+function validateFeedback(parsed, { tier, standardsList, targetNames, submittedText }) {
   const issues = [];
 
   if (!checkString(parsed?.glow, 20, 600)) issues.push("glow is missing, too short, or too long");
@@ -96,6 +100,26 @@ function validateFeedback(parsed, { tier, standardsList, targetNames }) {
   }
   if (!matchesATarget(parsed?.growTarget, targetNames)) {
     issues.push(`growTarget must exactly match one of the given skill area names: ${(targetNames || []).join(", ")}`);
+  }
+
+  // Only writing feedback carries a submittedText to check highlights
+  // against — reading has no free-text submission of the student's own to
+  // quote from.
+  if (submittedText) {
+    if (!Array.isArray(parsed?.highlights) || parsed.highlights.length < 2 || parsed.highlights.length > 6) {
+      issues.push("highlights must be an array of 2-6 items");
+    } else {
+      const normalizedText = normalizeForMatch(submittedText);
+      parsed.highlights.forEach((h, i) => {
+        if (!checkString(h?.quote, 3, 200)) {
+          issues.push(`highlights[${i}].quote is missing or an unreasonable length`);
+        } else if (!normalizedText.includes(normalizeForMatch(h.quote))) {
+          issues.push(`highlights[${i}].quote does not appear verbatim in the student's submitted text — it must be an exact substring, not a paraphrase`);
+        }
+        if (h?.type !== "glow" && h?.type !== "grow") issues.push(`highlights[${i}].type must be "glow" or "grow"`);
+        if (!checkString(h?.note, 5, 200)) issues.push(`highlights[${i}].note is missing or an unreasonable length`);
+      });
+    }
   }
 
   return { ok: issues.length === 0, issues };

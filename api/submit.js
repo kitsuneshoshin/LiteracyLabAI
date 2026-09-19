@@ -18,7 +18,7 @@ const MAX_CHARS = { early: 800, elementary: 1500, middle: 3000, high: 6000 };
 // child an error instead of feedback.
 const MAX_ATTEMPTS = 3;
 
-async function generateAndValidate(prompt, tier, country, gradeLabel) {
+async function generateAndValidate(prompt, tier, country, gradeLabel, submittedText) {
   const standardsList = standardsFor(country, tier, gradeLabel);
   const targetNames = targetsForGrade(country, gradeLabel, tier).targets.map((t) => t.name);
   let nextPrompt = prompt;
@@ -26,7 +26,7 @@ async function generateAndValidate(prompt, tier, country, gradeLabel) {
 
   for (let i = 1; i <= MAX_ATTEMPTS; i++) {
     const attempt = await generateFeedbackJSON(nextPrompt);
-    const check = validateFeedback(attempt.parsed, { tier, standardsList, targetNames });
+    const check = validateFeedback(attempt.parsed, { tier, standardsList, targetNames, submittedText });
     if (check.ok) {
       // Snap glowTarget/growTarget to the exact canonical string so
       // api/progress.js's exact-key Map lookup actually finds them.
@@ -45,6 +45,23 @@ async function generateAndValidate(prompt, tier, country, gradeLabel) {
   );
   err.statusCode = 502;
   throw err;
+}
+
+// Looks up the most recent "what will you try next time?" commitment this
+// account made for this exercise kind, excluding the submission being
+// graded right now — used so feedback can genuinely check in on it. Returns
+// null if there isn't one (first submission of this kind, or they never tapped one).
+async function getPreviousCommitment(supabase, profileId, kind, excludeSubmissionId) {
+  const { data } = await supabase
+    .from("commitments")
+    .select("chosen_action, submission_id, submissions!inner(kind)")
+    .eq("profile_id", profileId)
+    .eq("submissions.kind", kind)
+    .neq("submission_id", excludeSubmissionId)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  return data ? data.chosen_action : null;
 }
 
 module.exports = async function handler(req, res) {
@@ -85,13 +102,14 @@ module.exports = async function handler(req, res) {
         return res.status(400).json({ error: `Submission exceeds the ${MAX_CHARS[existing.tier]}-character limit for this tier.` });
       }
 
+      const previousCommitment = await getPreviousCommitment(supabase, user.id, "writing", submissionId);
       const llmPrompt = buildWritingPrompt({
         tier: existing.tier, country: existing.country, gradeLabel: existing.grade_label, interest: existing.interest,
         confidenceWriting: body.confidenceWriting, motivation: body.motivation,
-        prompt: generated.prompt, text,
+        prompt: generated.prompt, text, previousCommitment,
         targetNames: targetsForGrade(existing.country, existing.grade_label, existing.tier).targets.map((t) => t.name),
       });
-      const result = await generateAndValidate(llmPrompt, existing.tier, existing.country, existing.grade_label);
+      const result = await generateAndValidate(llmPrompt, existing.tier, existing.country, existing.grade_label, text);
 
       const wordCount = text.trim().split(/\s+/).filter(Boolean).length;
       const { error: updateErr } = await supabase
@@ -135,11 +153,12 @@ module.exports = async function handler(req, res) {
       bank.questions.forEach((q, i) => { if (answers[i] === q.correct) score += 1; });
       const totalQuestions = bank.questions.length;
 
+      const previousCommitment = await getPreviousCommitment(supabase, user.id, "reading", submissionId);
       const llmPrompt = buildReadingPrompt({
         tier: existing.tier, country: existing.country, gradeLabel: existing.grade_label, interest: existing.interest,
         confidenceReading: body.confidenceReading, motivation: body.motivation,
         passageTitle: bank.title, passage: bank.passage, questions: bank.questions,
-        answers, score, totalQuestions,
+        answers, score, totalQuestions, previousCommitment,
         targetNames: targetsForGrade(existing.country, existing.grade_label, existing.tier).targets.map((t) => t.name),
       });
       const result = await generateAndValidate(llmPrompt, existing.tier, existing.country, existing.grade_label);

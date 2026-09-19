@@ -41,7 +41,7 @@ async function generateFeedbackJSON(prompt) {
   try {
     completion = await openai.chat.completions.create({
       model,
-      max_tokens: 1024,
+      max_tokens: 1536,
       response_format: { type: "json_object" },
       messages: [{ role: "user", content: prompt }],
     });
