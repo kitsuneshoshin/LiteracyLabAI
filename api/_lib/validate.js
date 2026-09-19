@@ -32,14 +32,28 @@ function checkString(value, min, max) {
 }
 
 // glowTarget/growTarget drive the real mastery computation in
-// api/progress.js, so an exact (case-insensitive) match against the
-// target list actually given to the model matters — a paraphrase would
-// silently fail to aggregate into that student's per-skill history.
+// api/progress.js, which looks the value up as an exact key in a Map keyed
+// by the canonical target names — a paraphrase wouldn't fail loudly, it
+// would just silently fail to aggregate into that student's per-skill
+// history. So matching is fuzzy (models reliably drop punctuation like "&"
+// even when told to copy verbatim), but a match must still be snapped back
+// to the exact canonical string via resolveTarget before it's saved.
+function normalizeTargetKey(value) {
+  return String(value).toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+}
+
+function resolveTarget(value, targetNames) {
+  if (typeof value !== "string" || !targetNames || targetNames.length === 0) return null;
+  const lower = value.trim().toLowerCase();
+  const exact = targetNames.find((n) => n.toLowerCase() === lower);
+  if (exact) return exact;
+  const key = normalizeTargetKey(value);
+  return targetNames.find((n) => normalizeTargetKey(n) === key) || null;
+}
+
 function matchesATarget(value, targetNames) {
   if (!targetNames || targetNames.length === 0) return true;
-  if (typeof value !== "string") return false;
-  const lower = value.trim().toLowerCase();
-  return targetNames.some((n) => n.toLowerCase() === lower);
+  return resolveTarget(value, targetNames) !== null;
 }
 
 function validateFeedback(parsed, { tier, standardsList, targetNames }) {
@@ -147,4 +161,4 @@ function validateWritingPrompt(parsed, { tier }) {
   return { ok: issues.length === 0, issues };
 }
 
-module.exports = { validateFeedback, validatePassage, validateWritingPrompt };
+module.exports = { validateFeedback, validatePassage, validateWritingPrompt, resolveTarget };

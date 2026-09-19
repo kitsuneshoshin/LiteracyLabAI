@@ -5,32 +5,43 @@ const { generateFeedbackJSON } = require("./_lib/openai");
 const { buildWritingPrompt, buildReadingPrompt, correctiveAddendum } = require("./_lib/prompt");
 const { standardsFor } = require("./_lib/curriculum");
 const { targetsForGrade } = require("./_lib/masteryTargets");
-const { validateFeedback } = require("./_lib/validate");
+const { validateFeedback, resolveTarget } = require("./_lib/validate");
 
 // Server-side character caps, mirroring PROMPTS[tier].maxChars in app.html.
 // Enforced here too since a client-side maxLength is trivially bypassed.
 const MAX_CHARS = { early: 800, elementary: 1500, middle: 3000, high: 6000 };
 
 // Generates feedback, validates it against the deterministic checks, and
-// retries once with a corrective note before giving up. A submission that
-// fails both attempts throws rather than ever reaching the student — better
-// to show an error than to hand a child bad feedback.
+// retries with a corrective note before giving up. Generation is
+// non-deterministic — the same input can pass or fail these checks between
+// runs — so a few attempts absorb that variance before we ever show a
+// child an error instead of feedback.
+const MAX_ATTEMPTS = 3;
+
 async function generateAndValidate(prompt, tier, country, gradeLabel) {
   const standardsList = standardsFor(country, tier, gradeLabel);
   const targetNames = targetsForGrade(country, gradeLabel, tier).targets.map((t) => t.name);
-  let attempt = await generateFeedbackJSON(prompt);
-  let check = validateFeedback(attempt.parsed, { tier, standardsList, targetNames });
-  if (check.ok) return attempt;
+  let nextPrompt = prompt;
+  let lastIssues = [];
 
-  console.warn("Feedback validation failed on attempt 1:", check.issues);
-  attempt = await generateFeedbackJSON(prompt + correctiveAddendum(check.issues));
-  check = validateFeedback(attempt.parsed, { tier, standardsList, targetNames });
-  if (check.ok) return attempt;
+  for (let i = 1; i <= MAX_ATTEMPTS; i++) {
+    const attempt = await generateFeedbackJSON(nextPrompt);
+    const check = validateFeedback(attempt.parsed, { tier, standardsList, targetNames });
+    if (check.ok) {
+      // Snap glowTarget/growTarget to the exact canonical string so
+      // api/progress.js's exact-key Map lookup actually finds them.
+      attempt.parsed.glowTarget = resolveTarget(attempt.parsed.glowTarget, targetNames) || attempt.parsed.glowTarget;
+      attempt.parsed.growTarget = resolveTarget(attempt.parsed.growTarget, targetNames) || attempt.parsed.growTarget;
+      return attempt;
+    }
+    console.warn(`Feedback validation failed on attempt ${i}:`, check.issues);
+    lastIssues = check.issues;
+    nextPrompt = prompt + correctiveAddendum(check.issues);
+  }
 
-  console.warn("Feedback validation failed on attempt 2:", check.issues);
   const err = new Error(
-    "The AI response didn't meet our quality checks after two attempts. Please try submitting again." +
-      (check.issues && check.issues.length ? ` (${check.issues.join("; ")})` : "")
+    `The AI response didn't meet our quality checks after ${MAX_ATTEMPTS} attempts. Please try submitting again.` +
+      (lastIssues.length ? ` (${lastIssues.join("; ")})` : "")
   );
   err.statusCode = 502;
   throw err;
