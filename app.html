@@ -1564,7 +1564,6 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
                   <IconLock size={22} style={{ color: "var(--ink-faint)" }} />
                   <div className="font-display font-semibold text-sm" style={{ color: "var(--ink)" }}>Upgrade to Pro for more writing prompts</div>
                   <p className="text-[13px] max-w-[28ch]" style={{ color: "var(--ink-faint)" }}>You've used all your free submissions this month.</p>
-                  <p className="text-[11px]" style={{ color: "var(--ink-faint)" }}>[debug] used={String(used)} total={String(total)} lastError={String(submitError)}</p>
                 </>
               ) : (
                 <>
@@ -1930,7 +1929,7 @@ function App({ session }){
         setConfidenceReading(profile.confidence_reading);
         setMotivation(profile.motivation);
         setUsed(usage.used);
-        setTotal(usage.cap === Infinity ? 999 : usage.cap);
+        setTotal(usage.cap == null ? 999 : usage.cap);
         setPlan(usage.plan || "free");
         if (!profile.onboarded) {
           setNeedsOnboarding(true);
@@ -2007,7 +2006,7 @@ function App({ session }){
   function handleSubmit(usageFromServer){
     if (backendLive && usageFromServer) {
       setUsed(usageFromServer.used);
-      if (usageFromServer.cap !== Infinity) setTotal(usageFromServer.cap);
+      setTotal(usageFromServer.cap == null ? 999 : usageFromServer.cap);
       if (usageFromServer.plan) setPlan(usageFromServer.plan);
     } else {
       setUsed(u => Math.min(total, u+1));
@@ -2022,7 +2021,7 @@ function App({ session }){
     if (!new URLSearchParams(window.location.search).has("upgraded")) return;
     authedFetch(session, "/api/usage").then((usage)=>{
       setUsed(usage.used);
-      setTotal(usage.cap === Infinity ? 999 : usage.cap);
+      setTotal(usage.cap == null ? 999 : usage.cap);
       setPlan(usage.plan || "free");
     }).catch((err)=> console.error("Failed to refresh usage after upgrade:", err));
     window.history.replaceState(null, "", window.location.pathname);
