@@ -28,7 +28,10 @@ async function generateAndValidate(prompt, tier, country, gradeLabel) {
   if (check.ok) return attempt;
 
   console.warn("Feedback validation failed on attempt 2:", check.issues);
-  const err = new Error("The AI response didn't meet our quality checks after two attempts. Please try submitting again.");
+  const err = new Error(
+    "The AI response didn't meet our quality checks after two attempts. Please try submitting again." +
+      (check.issues && check.issues.length ? ` (${check.issues.join("; ")})` : "")
+  );
   err.statusCode = 502;
   throw err;
 }
