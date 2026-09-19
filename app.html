@@ -9,88 +9,89 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 
 <style>
+  /* "Trusted Advisor" palette (Soft Stone + Muted Burgundy). The variable
+     names below (--cyan, --gold, etc.) are kept as-is even though the
+     colors themselves are no longer cyan/gold — renaming would mean
+     touching every one of the ~150 call sites across this file for zero
+     functional benefit, since everything already themes through these
+     custom properties. --cyan is the brand accent (burgundy). */
   :root{
-    --bg: #F8FAFC;
-    --bg-grid: #EEF2F8;
+    --bg: #F1F1EF;
     --surface: #FFFFFF;
-    --surface-2: #F1F5F9;
-    --border: #E2E8F0;
-    --border-soft: #EDF1F7;
-    --ink: #1E293B;
-    --ink-soft: #52607A;
-    --ink-faint: #8996AC;
-    --cyan: #00D2FF;
-    --cyan-ink: #0E7A93;
-    --cyan-tint: #E3FAFF;
-    --gold: #F59E0B;
-    --gold-ink: #92600A;
-    --gold-tint: #FEF3DA;
-    --navy-tint: #E7EBF6;
-    --good: #0F9D66;
-    --good-tint: #DEF7EC;
-    --warn: #C2760A;
-    --warn-tint: #FCEACB;
-    --bad: #D6483C;
-    --bad-tint: #FBE2DF;
-    --shadow: 220 45% 20%;
+    --surface-2: #E5E5E2;
+    --border: #D3D3CF;
+    --border-soft: #DEDEDB;
+    --ink: #212121;
+    --ink-soft: #5A5A56;
+    --ink-faint: #8F8F8A;
+    --cyan: #7A3B45;
+    --cyan-ink: #552830;
+    --cyan-tint: #EBDEE0;
+    --gold: #8C7040;
+    --gold-ink: #5F4A26;
+    --gold-tint: #E9E2D2;
+    --navy-tint: #E7E4DD;
+    --good: #3F7A52;
+    --good-tint: #E1EDE3;
+    --warn: #A97A2E;
+    --warn-tint: #F1E7D3;
+    --bad: #B14A42;
+    --bad-tint: #F3E1DE;
+    --shadow: 20 15% 20%;
   }
   @media (prefers-color-scheme: dark){
     :root:not([data-theme="light"]){
-      --bg: #0A1120;
-      --bg-grid: #0E1728;
-      --surface: #131E33;
-      --surface-2: #182644;
-      --border: #263756;
-      --border-soft: #1E2C48;
-      --ink: #E9EEF9;
-      --ink-soft: #97A6C4;
-      --ink-faint: #6B7A9B;
-      --cyan: #2BE1FF;
-      --cyan-ink: #7CEBFF;
-      --cyan-tint: #12303B;
-      --gold: #FDBA3F;
-      --gold-ink: #FDBA3F;
-      --gold-tint: #3A2C11;
-      --navy-tint: #1B2740;
-      --good: #35D399;
-      --good-tint: #10301F;
-      --warn: #E8A23A;
-      --warn-tint: #3A2A0E;
-      --bad: #F17469;
-      --bad-tint: #3A1712;
+      --bg: #161513;
+      --surface: #1E1B18;
+      --surface-2: #26221D;
+      --border: #37322B;
+      --border-soft: #2C2721;
+      --ink: #EDE9E2;
+      --ink-soft: #B3AB9C;
+      --ink-faint: #7C7568;
+      --cyan: #C4776E;
+      --cyan-ink: #E3A79F;
+      --cyan-tint: #362320;
+      --gold: #C9A050;
+      --gold-ink: #C9A050;
+      --gold-tint: #3A2E17;
+      --navy-tint: #2C2822;
+      --good: #6FBE86;
+      --good-tint: #1C2E20;
+      --warn: #D9A857;
+      --warn-tint: #3A2E14;
+      --bad: #E08078;
+      --bad-tint: #3A211C;
     }
   }
   :root[data-theme="dark"]{
-    --bg: #0A1120;
-    --bg-grid: #0E1728;
-    --surface: #131E33;
-    --surface-2: #182644;
-    --border: #263756;
-    --border-soft: #1E2C48;
-    --ink: #E9EEF9;
-    --ink-soft: #97A6C4;
-    --ink-faint: #6B7A9B;
-    --cyan: #2BE1FF;
-    --cyan-ink: #7CEBFF;
-    --cyan-tint: #12303B;
-    --gold: #FDBA3F;
-    --gold-ink: #FDBA3F;
-    --gold-tint: #3A2C11;
-    --navy-tint: #1B2740;
-    --good: #35D399;
-    --good-tint: #10301F;
-    --warn: #E8A23A;
-    --warn-tint: #3A2A0E;
-    --bad: #F17469;
-    --bad-tint: #3A1712;
+    --bg: #161513;
+    --surface: #1E1B18;
+    --surface-2: #26221D;
+    --border: #37322B;
+    --border-soft: #2C2721;
+    --ink: #EDE9E2;
+    --ink-soft: #B3AB9C;
+    --ink-faint: #7C7568;
+    --cyan: #C4776E;
+    --cyan-ink: #E3A79F;
+    --cyan-tint: #362320;
+    --gold: #C9A050;
+    --gold-ink: #C9A050;
+    --gold-tint: #3A2E17;
+    --navy-tint: #2C2822;
+    --good: #6FBE86;
+    --good-tint: #1C2E20;
+    --warn: #D9A857;
+    --warn-tint: #3A2E14;
+    --bad: #E08078;
+    --bad-tint: #3A211C;
   }
 
   *{box-sizing:border-box;}
   html,body{margin:0;}
   body{
-    background:
-      radial-gradient(1200px 500px at 15% -10%, var(--navy-tint), transparent 60%),
-      var(--bg);
+    background: var(--bg);
     color: var(--ink);
     font-family: "Lexend", ui-sans-serif, system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
@@ -98,7 +99,7 @@
   .font-display{ font-family:"Lexend", ui-sans-serif, system-ui, sans-serif; }
   .font-read{ font-family:"Source Serif 4", Georgia, "Times New Roman", serif; }
   h1,h2,h3,h4{ text-wrap: balance; }
-  ::selection{ background: var(--cyan); color:#04222A; }
+  ::selection{ background: var(--cyan); color:#fff; }
 
   .card{
     background: var(--surface);
@@ -125,8 +126,8 @@
   .animate-spin-slow{ animation: spin-slow 1.4s linear infinite; }
 
   @keyframes pulse-ring{
-    0%{ box-shadow: 0 0 0 0 hsl(190 100% 50% / .35); }
-    100%{ box-shadow: 0 0 0 14px hsl(190 100% 50% / 0); }
+    0%{ box-shadow: 0 0 0 0 hsl(351 40% 40% / .35); }
+    100%{ box-shadow: 0 0 0 14px hsl(351 40% 40% / 0); }
   }
   .analyzing-pulse{ animation: pulse-ring 1.6s cubic-bezier(.4,0,.6,1) infinite; }
 
@@ -196,9 +197,9 @@ const IconBook = (p) => <Icon {...p}><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15.5
 function IconMark({ size = 24 }){
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-      <path d="M9 3h6M10 3v6.2L4.8 18a2 2 0 0 0 1.7 3h11a2 2 0 0 0 1.7-3L14 9.2V3" stroke="#00D2FF" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M12 10l-2.7 6.4c-.3.8.2 1.6 1.1 1.6h3.2c.9 0 1.4-.8 1.1-1.6L12 10z" fill="#F59E0B" />
-      <path d="M12 12.2v4.4" stroke="#1E293B" strokeWidth="1" strokeLinecap="round" />
+      <path d="M9 3h6M10 3v6.2L4.8 18a2 2 0 0 0 1.7 3h11a2 2 0 0 0 1.7-3L14 9.2V3" stroke="var(--cyan)" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M12 10l-2.7 6.4c-.3.8.2 1.6 1.1 1.6h3.2c.9 0 1.4-.8 1.1-1.6L12 10z" fill="var(--gold)" />
+      <path d="M12 12.2v4.4" stroke="var(--ink)" strokeWidth="1" strokeLinecap="round" />
     </svg>
   );
 }
@@ -848,7 +849,7 @@ function Header({ view, setView, used, total, theme, setTheme, backendLive, onSi
           </div>
           <button onClick={()=>setView("dashboard")}
             className="focus-ring hidden sm:inline-flex items-center gap-1.5 rounded-full px-3.5 py-2 text-[13px] font-bold"
-            style={{ background: "var(--gold)", color: "#3B2606" }}>
+            style={{ background: "var(--gold)", color: "#fff" }}>
             <IconCrown size={13} strokeWidth={2.4} /> Upgrade to Pro
           </button>
           {backendLive && (
@@ -907,7 +908,7 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
     {needsOnboarding && (
       <div className="mx-auto max-w-6xl px-4 sm:px-6 pt-8">
         <div className="rounded-2xl px-5 py-4 flex items-center gap-3 flex-wrap" style={{ background: "var(--cyan-tint)", border: "1.5px solid var(--cyan)" }}>
-          <div className="w-9 h-9 rounded-full grid place-items-center shrink-0" style={{ background: "var(--cyan)", color: "#04303A" }}>
+          <div className="w-9 h-9 rounded-full grid place-items-center shrink-0" style={{ background: "var(--cyan)", color: "#fff" }}>
             <IconSparkle size={17} strokeWidth={2.2} />
           </div>
           <div className="flex-1 min-w-[200px]">
@@ -1059,44 +1060,44 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
         <div className="grid grid-cols-2 gap-4">
           {backendLive ? (
             <>
-              <StatTile icon={IconTrend} label="Reading Accuracy" value={history?.avgReadingScore != null ? `${history.avgReadingScore}%` : "—"} sub={history ? `From ${history.totalSubmissions} submission${history.totalSubmissions===1?"":"s"}` : "Loading…"} accent="#0F9D66" />
-              <StatTile icon={IconPen} label="Words Written" value={history ? history.wordsWritten.toLocaleString() : "—"} sub={history ? `Across ${history.totalSubmissions} pieces` : "Loading…"} accent="#0E7A93" />
+              <StatTile icon={IconTrend} label="Reading Accuracy" value={history?.avgReadingScore != null ? `${history.avgReadingScore}%` : "—"} sub={history ? `From ${history.totalSubmissions} submission${history.totalSubmissions===1?"":"s"}` : "Loading…"} accent="var(--good)" />
+              <StatTile icon={IconPen} label="Words Written" value={history ? history.wordsWritten.toLocaleString() : "—"} sub={history ? `Across ${history.totalSubmissions} pieces` : "Loading…"} accent="var(--cyan-ink)" />
               <div className="col-span-2">
-                <StatTile icon={IconFlame} label="Active Streak" value={history ? `${history.activeStreak} day${history.activeStreak===1?"":"s"}` : "—"} sub="Real progress, tracked from your submissions" accent="#F59E0B" />
+                <StatTile icon={IconFlame} label="Active Streak" value={history ? `${history.activeStreak} day${history.activeStreak===1?"":"s"}` : "—"} sub="Real progress, tracked from your submissions" accent="var(--gold)" />
               </div>
             </>
           ) : (
             <>
-              <StatTile icon={IconTrend} label="Overall Mastery" value="72%" sub="+6% this month" accent="#0F9D66" />
-              <StatTile icon={IconPen} label="Words Written" value="8,450" sub="Across 14 pieces" accent="#0E7A93" />
+              <StatTile icon={IconTrend} label="Overall Mastery" value="72%" sub="+6% this month" accent="var(--good)" />
+              <StatTile icon={IconPen} label="Words Written" value="8,450" sub="Across 14 pieces" accent="var(--cyan-ink)" />
               <div className="col-span-2">
-                <StatTile icon={IconFlame} label="Active Streak" value="12 days" sub="Personal best: 19 days" accent="#F59E0B" />
+                <StatTile icon={IconFlame} label="Active Streak" value="12 days" sub="Personal best: 19 days" accent="var(--gold)" />
               </div>
             </>
           )}
         </div>
 
-        <div className="card p-6 relative overflow-hidden" style={{ background: "linear-gradient(160deg, var(--ink), #2B3B54)" }}>
+        <div className="card p-6 relative overflow-hidden" style={{ background: "linear-gradient(160deg, var(--ink), #3E2028)" }}>
           <div className="absolute -right-6 -top-6 w-28 h-28 rounded-full" style={{ background: "radial-gradient(circle, var(--gold) 0%, transparent 70%)", opacity: .35 }} />
           <div className="relative">
-            <div className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold mb-3" style={{ background: "var(--gold)", color: "#3B2606" }}>
+            <div className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold mb-3" style={{ background: "var(--gold)", color: "#fff" }}>
               <IconCrown size={12} strokeWidth={2.4} /> LITERACYLAB PRO
             </div>
             <h3 className="font-display font-bold text-lg text-white mb-1.5">{remaining <= 1 ? "Almost at your monthly limit" : "Unlock unlimited submissions"}</h3>
-            <p className="text-[13px] mb-4" style={{ color: "#C7D2E4" }}>
+            <p className="text-[13px] mb-4" style={{ color: "#E4D6D2" }}>
               You’ve used {used} of {total} free submissions this month. Pro adds unlimited submissions, deeper rhetorical analysis and weekly progress reports for your learner.
             </p>
-            <ul className="text-[13px] space-y-1.5 mb-5" style={{ color: "#DCE4F2" }}>
+            <ul className="text-[13px] space-y-1.5 mb-5" style={{ color: "#EDE1DC" }}>
               {["Unlimited monthly submissions","Advanced exam-technique scoring","Weekly progress reports by email"].map(t=>(
                 <li key={t} className="flex items-center gap-2"><IconCheck size={13} strokeWidth={2.4} style={{ color: "var(--gold)" }} />{t}</li>
               ))}
             </ul>
             <button onClick={()=>setProComingSoon(true)} disabled={proComingSoon}
               className="focus-ring w-full rounded-xl py-2.5 font-display font-bold text-sm inline-flex items-center justify-center gap-1.5 disabled:opacity-70"
-              style={{ background: "var(--gold)", color: "#3B2606" }}>
+              style={{ background: "var(--gold)", color: "#fff" }}>
               {proComingSoon ? "Pro isn't available yet" : <>Upgrade to Pro — $14.99/mo <IconArrowRight size={15} strokeWidth={2.3} /></>}
             </button>
-            <div className="text-[11px] text-center mt-2" style={{ color: "#9BA9C6" }}>
+            <div className="text-[11px] text-center mt-2" style={{ color: "#B9A69F" }}>
               {proComingSoon ? "Billing isn't live yet — check back soon." : "Billed monthly via Stripe · cancel anytime"}
             </div>
           </div>
@@ -1258,13 +1259,13 @@ function FeedbackPanel({ tier, gradeLabel, country, interest, confidence, motiva
         </div>
       </div>
 
-      <div className="card p-5 sm:p-6 flex items-start gap-3" style={{ background: "linear-gradient(135deg, var(--ink), #2B3B54)" }}>
-        <div className="w-9 h-9 rounded-full grid place-items-center shrink-0" style={{ background: "var(--cyan)", color: "#04303A" }}>
+      <div className="card p-5 sm:p-6 flex items-start gap-3" style={{ background: "linear-gradient(135deg, var(--ink), #3E2028)" }}>
+        <div className="w-9 h-9 rounded-full grid place-items-center shrink-0" style={{ background: "var(--cyan)", color: "#fff" }}>
           <IconFlame size={17} strokeWidth={2.2} />
         </div>
         <div>
           <div className="font-display font-bold text-sm text-white mb-1">Micro-mission for next time</div>
-          <p className="text-[13px]" style={{ color: "#D5DEEE" }}>{microMission}</p>
+          <p className="text-[13px]" style={{ color: "#E4D6D2" }}>{microMission}</p>
         </div>
       </div>
 
@@ -1513,7 +1514,7 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
         {[["writing","Writing",IconPen],["reading","Reading Comprehension",IconBookOpenCheck]].map(([key,label,IconEl])=>(
           <button key={key} onClick={()=>setExerciseType(key)}
             className="focus-ring flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold transition-colors"
-            style={ exerciseType===key ? { background: "var(--cyan)", color: "#04303A" } : { color: "var(--ink-soft)" } }>
+            style={ exerciseType===key ? { background: "var(--cyan)", color: "#fff" } : { color: "var(--ink-soft)" } }>
             <IconEl size={13} strokeWidth={2.2} />{label}
           </button>
         ))}
@@ -1727,7 +1728,7 @@ function TierEditor({ tier, meta, text, setText, words, phase, onSubmit, onNew, 
           {phase !== "done" ? (
             <button onClick={onSubmit} disabled={disabled}
               className="focus-ring inline-flex items-center gap-2 rounded-full px-5 py-2.5 font-display font-extrabold text-sm disabled:opacity-60"
-              style={{ background: "var(--cyan)", color: "#04303A" }}>
+              style={{ background: "var(--cyan)", color: "#fff" }}>
               {locked ? <><IconLock size={15} /> Upgrade to Continue</> : <>{submitLabel} <IconSend size={15} /></>}
             </button>
           ) : (
@@ -1774,7 +1775,7 @@ function TierEditor({ tier, meta, text, setText, words, phase, onSubmit, onNew, 
           {phase !== "done" ? (
             <button onClick={onSubmit} disabled={disabled}
               className="focus-ring inline-flex items-center gap-2 rounded-full px-5 py-2.5 font-display font-bold text-sm disabled:opacity-60"
-              style={{ background: "var(--cyan)", color: "#04303A" }}>
+              style={{ background: "var(--cyan)", color: "#fff" }}>
               {locked ? <><IconLock size={15} /> Upgrade to Continue</> : <>{submitLabel} <IconSend size={15} /></>}
             </button>
           ) : (
@@ -2083,7 +2084,7 @@ function AuthScreen(){
                 )}
                 <button type="submit" disabled={status === "loading"}
                   className="focus-ring w-full rounded-xl py-2.5 font-display font-bold text-sm disabled:opacity-60"
-                  style={{ background: "var(--cyan)", color: "#04303A" }}>
+                  style={{ background: "var(--cyan)", color: "#fff" }}>
                   {status === "loading" ? "Please wait…" : mode === "signup" ? "Create account" : "Log in"}
                 </button>
               </form>

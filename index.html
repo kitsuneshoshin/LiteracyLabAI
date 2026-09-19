@@ -1,74 +1,68 @@
 <title>LiteracyLab AI</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700;800;900&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=Lexend:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
 <style>
   :root{
-    --bg: #F8FAFC;
+    --bg: #F1F1EF;
     --bg-elevated: #FFFFFF;
     --surface: #FFFFFF;
-    --surface-2: #F1F5F9;
-    --border: #E2E8F0;
-    --border-soft: #EDF1F7;
-    --ink: #1E293B;
-    --ink-soft: #52607A;
-    --ink-faint: #8996AC;
-    --cyan: #0E7A93;
-    --cyan-glow: #00D2FF;
-    --cyan-tint: #E3FAFF;
-    --gold: #92600A;
-    --gold-glow: #F59E0B;
-    --gold-tint: #FEF3DA;
-    --navy-deep: #1E293B;
-    --grid-line: rgba(30,41,59,0.05);
-    --glow-1: rgba(0,210,255,0.12);
-    --glow-2: rgba(245,158,11,0.10);
-    --shadow: 220 45% 20%;
+    --surface-2: #E5E5E2;
+    --border: #D3D3CF;
+    --border-soft: #DEDEDB;
+    --ink: #212121;
+    --ink-soft: #5A5A56;
+    --ink-faint: #8F8F8A;
+    --accent: #7A3B45;
+    --accent-ink: #552830;
+    --accent-tint: #EBDEE0;
+    --gold: #8C7040;
+    --gold-ink: #5F4A26;
+    --gold-tint: #E9E2D2;
+    --good: #3F7A52;
+    --grid-line: rgba(33,33,33,0.05);
+    --shadow: 20 15% 20%;
   }
   @media (prefers-color-scheme: dark){
     :root:not([data-theme="light"]){
-      --bg: #0A1120;
-      --bg-elevated: #0E1728;
-      --surface: #131E33;
-      --surface-2: #182644;
-      --border: #263756;
-      --border-soft: #1E2C48;
-      --ink: #E9EEF9;
-      --ink-soft: #97A6C4;
-      --ink-faint: #6B7A9B;
-      --cyan: #2BE1FF;
-      --cyan-glow: #2BE1FF;
-      --cyan-tint: #12303B;
-      --gold: #FDBA3F;
-      --gold-glow: #FDBA3F;
-      --gold-tint: #3A2C11;
-      --navy-deep: #101828;
+      --bg: #161513;
+      --bg-elevated: #1B1815;
+      --surface: #1E1B18;
+      --surface-2: #26221D;
+      --border: #37322B;
+      --border-soft: #2C2721;
+      --ink: #EDE9E2;
+      --ink-soft: #B3AB9C;
+      --ink-faint: #7C7568;
+      --accent: #C4776E;
+      --accent-ink: #E3A79F;
+      --accent-tint: #362320;
+      --gold: #C9A050;
+      --gold-ink: #C9A050;
+      --gold-tint: #3A2E17;
+      --good: #6FBE86;
       --grid-line: rgba(255,255,255,0.05);
-      --glow-1: rgba(43,225,255,0.16);
-      --glow-2: rgba(253,186,63,0.10);
     }
   }
   :root[data-theme="dark"]{
-    --bg: #0A1120;
-    --bg-elevated: #0E1728;
-    --surface: #131E33;
-    --surface-2: #182644;
-    --border: #263756;
-    --border-soft: #1E2C48;
-    --ink: #E9EEF9;
-    --ink-soft: #97A6C4;
-    --ink-faint: #6B7A9B;
-    --cyan: #2BE1FF;
-    --cyan-glow: #2BE1FF;
-    --cyan-tint: #12303B;
-    --gold: #FDBA3F;
-    --gold-glow: #FDBA3F;
-    --gold-tint: #3A2C11;
-    --navy-deep: #101828;
+    --bg: #161513;
+    --bg-elevated: #1B1815;
+    --surface: #1E1B18;
+    --surface-2: #26221D;
+    --border: #37322B;
+    --border-soft: #2C2721;
+    --ink: #EDE9E2;
+    --ink-soft: #B3AB9C;
+    --ink-faint: #7C7568;
+    --accent: #C4776E;
+    --accent-ink: #E3A79F;
+    --accent-tint: #362320;
+    --gold: #C9A050;
+    --gold-ink: #C9A050;
+    --gold-tint: #3A2E17;
+    --good: #6FBE86;
     --grid-line: rgba(255,255,255,0.05);
-    --glow-1: rgba(43,225,255,0.16);
-    --glow-2: rgba(253,186,63,0.10);
   }
 
   *{ box-sizing: border-box; }
@@ -77,137 +71,122 @@
     margin: 0;
     background: var(--bg);
     color: var(--ink);
-    font-family: "Lexend", ui-sans-serif, system-ui, sans-serif;
+    font-family: "Source Serif 4", Georgia, serif;
     -webkit-font-smoothing: antialiased;
-    padding-inline: 0;
   }
-  ::selection{ background: var(--cyan-glow); color: #04222A; }
+  ::selection{ background: var(--accent); color: #fff; }
   a{ color: inherit; }
-  h1,h2,h3{ text-wrap: balance; margin: 0; font-family: "Lexend", sans-serif; }
+  h1,h2,h3{ text-wrap: balance; margin: 0; font-family: "Fraunces", serif; font-weight: 500; }
   p{ margin: 0; }
-  .font-read{ font-family: "Source Serif 4", Georgia, serif; }
-  .wrap{ max-width: 1180px; margin-inline: auto; padding-inline: 24px; }
-  @media (max-width: 640px){ .wrap{ padding-inline: 18px; } }
+  .sans{ font-family: "Lexend", ui-sans-serif, system-ui, sans-serif; }
+  .wrap{ max-width: 1140px; margin-inline: auto; padding-inline: 24px; }
+  @media (max-width: 640px){ .wrap{ padding-inline: 16px; } }
 
   .eyebrow{
     display: inline-flex; align-items: center; gap: 8px;
-    font-size: 12.5px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
-    color: var(--cyan);
+    font-family: "Lexend", sans-serif; font-size: 12.5px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase;
+    color: var(--gold-ink);
   }
-  .eyebrow::before{ content:""; width: 6px; height: 6px; border-radius: 50%; background: var(--cyan-glow); box-shadow: 0 0 12px 2px var(--cyan-glow); }
+  .eyebrow::before{ content:""; width: 6px; height: 6px; border-radius: 50%; background: var(--gold); }
 
   .btn{
     display: inline-flex; align-items: center; justify-content: center; gap: 8px;
     font-family: "Lexend", sans-serif; font-weight: 600; font-size: 14.5px;
-    padding: 12px 20px; border-radius: 10px; text-decoration: none; cursor: pointer;
-    border: 1px solid transparent; transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
+    padding: 13px 22px; border-radius: 8px; text-decoration: none; cursor: pointer;
+    border: 1px solid transparent; transition: background .15s ease, border-color .15s ease;
     white-space: nowrap;
   }
   .btn:active{ transform: translateY(1px); }
-  .btn-primary{ background: var(--cyan-glow); color: #04303A; box-shadow: 0 8px 20px -8px rgba(0,210,255,.5); }
-  :root:not([data-theme="light"]) .btn-primary, :root[data-theme="dark"] .btn-primary{ color: #04222A; box-shadow: 0 0 0 1px rgba(43,225,255,.3), 0 8px 24px -8px rgba(43,225,255,.5); }
-  .btn-primary:hover{ box-shadow: 0 10px 26px -8px rgba(0,210,255,.6); }
+  .btn-primary{ background: var(--accent); color: #fff; }
+  .btn-primary:hover{ background: var(--accent-ink); }
+  :root[data-theme="dark"] .btn-primary:hover, :root:not([data-theme="light"]) .btn-primary:hover{ background: color-mix(in srgb, var(--accent) 80%, white 20%); }
   .btn-ghost{ background: transparent; color: var(--ink); border-color: var(--border); }
   .btn-ghost:hover{ border-color: var(--ink-faint); }
-  .btn-gold{ background: var(--gold-glow); color: #3B2606; box-shadow: 0 8px 20px -8px rgba(245,158,11,.5); }
-  .btn-gold:hover{ box-shadow: 0 10px 26px -8px rgba(245,158,11,.6); }
-  .btn-lg{ padding: 15px 26px; font-size: 15.5px; border-radius: 12px; }
+  .btn-gold{ background: var(--gold); color: #fff; }
+  .btn-gold:hover{ background: var(--gold-ink); }
+  .btn-lg{ padding: 16px 26px; font-size: 15.5px; }
 
   /* ---------------- Nav ---------------- */
   .nav{
     position: sticky; top: 0; z-index: 40;
-    background: color-mix(in srgb, var(--bg) 82%, transparent);
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
     backdrop-filter: blur(10px);
     border-bottom: 1px solid var(--border-soft);
   }
   .nav-inner{ display:flex; align-items:center; justify-content:space-between; gap:16px; padding-block: 14px; }
-  .brand{ display:flex; align-items:center; gap:10px; font-weight:700; font-size:16px; }
-  .brand-mark{ width:30px; height:30px; display:grid; place-items:center; position:relative; flex-shrink:0; }
-  .nav-links{ display:flex; align-items:center; gap:28px; font-size:14px; font-weight:500; color: var(--ink-soft); }
+  .brand{ display:flex; align-items:center; gap:10px; font-family:"Fraunces",serif; font-weight:600; font-size:19px; letter-spacing:-0.01em; }
+  .brand-mark{ width:28px; height:28px; display:grid; place-items:center; position:relative; flex-shrink:0; }
+  .nav-links{ display:flex; align-items:center; gap:28px; font-family:"Lexend",sans-serif; font-size:14px; font-weight:500; color: var(--ink-soft); }
   .nav-links a:hover{ color: var(--ink); }
   .nav-cta{ display:flex; align-items:center; gap:10px; }
   .theme-toggle{ width:34px; height:34px; border-radius:50%; border:1px solid var(--border); display:grid; place-items:center; background: var(--surface); color: var(--ink-soft); cursor:pointer; }
   @media (max-width: 780px){ .nav-links{ display:none; } }
 
   /* ---------------- Hero ---------------- */
-  .hero{ position: relative; overflow: hidden; padding-top: 88px; padding-bottom: 72px; }
-  .hero-glow{
-    position:absolute; inset: -10% -10% auto -10%; height: 640px; pointer-events:none; z-index:0;
-    background:
-      radial-gradient(560px 340px at 22% 20%, var(--glow-1), transparent 62%),
-      radial-gradient(480px 320px at 82% 8%, var(--glow-2), transparent 60%);
-  }
-  .hero-grid{
-    position:absolute; inset:0; z-index:0; pointer-events:none;
-    background-image: linear-gradient(var(--grid-line) 1px, transparent 1px), linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
-    background-size: 64px 64px;
-    -webkit-mask-image: radial-gradient(ellipse 60% 50% at 50% 0%, black 40%, transparent 85%);
-            mask-image: radial-gradient(ellipse 60% 50% at 50% 0%, black 40%, transparent 85%);
-  }
-  .hero-inner{ position:relative; z-index:1; text-align:center; }
-  .hero h1{ font-size: clamp(34px, 6vw, 66px); font-weight: 800; letter-spacing: -0.02em; line-height: 1.06; margin-top: 18px; }
-  .hero h1 em{ font-style: normal; background: linear-gradient(100deg, var(--cyan), var(--cyan-glow) 60%); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .hero{ padding-top: 64px; padding-bottom: 40px; }
+  .hero-inner{ text-align:center; }
+  .hero h1{ font-size: clamp(32px, 5.4vw, 58px); line-height: 1.08; letter-spacing: -0.01em; margin-top: 18px; }
+  .hero h1 em{ font-style: italic; color: var(--accent); }
   .hero-sub{ max-width: 620px; margin: 20px auto 0; font-size: 17.5px; line-height: 1.6; color: var(--ink-soft); }
-  .hero-ctas{ display:flex; align-items:center; justify-content:center; gap:12px; margin-top: 30px; flex-wrap:wrap; }
-  .hero-meta{ margin-top: 18px; font-size: 12.5px; color: var(--ink-faint); }
+  .hero-ctas{ display:flex; align-items:center; justify-content:center; gap:12px; margin-top: 28px; flex-wrap:wrap; }
+  .hero-meta{ margin-top: 16px; font-family:"Lexend",sans-serif; font-size: 12.5px; color: var(--ink-faint); }
   @media (max-width: 640px){ .hide-sm{ display:none; } }
 
   /* ---------------- Product preview panel ---------------- */
   .preview-shell{
-    position: relative; z-index: 1; margin: 56px auto 0; max-width: 920px;
-    border-radius: 20px; border: 1px solid var(--border); background: var(--surface);
-    box-shadow: 0 1px 2px hsl(var(--shadow) / .05), 0 40px 80px -32px hsl(var(--shadow) / .35);
-    overflow: hidden;
+    position: relative; z-index: 1; margin: 48px auto 0; max-width: 940px;
+    border-radius: 10px; border: 1px solid var(--border); background: var(--surface);
+    box-shadow: 0 1px 2px hsl(var(--shadow) / .04), 0 40px 80px -32px hsl(var(--shadow) / .3);
+    overflow: hidden; text-align: left;
   }
   .preview-chrome{ display:flex; align-items:center; gap:6px; padding: 12px 16px; border-bottom: 1px solid var(--border-soft); }
   .preview-chrome span{ width:9px; height:9px; border-radius:50%; background: var(--border); }
   .preview-body{ padding: 28px; display:grid; grid-template-columns: 1.1fr 1fr; gap: 22px; }
   @media (max-width: 760px){ .preview-body{ grid-template-columns: 1fr; } }
-  .pv-card{ border: 1px solid var(--border-soft); border-radius: 14px; padding: 16px; background: var(--surface-2); }
-  .pv-label{ font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color: var(--ink-faint); margin-bottom:8px; }
-  .pv-praise{ border-color: color-mix(in srgb, #0F9D66 40%, var(--border-soft)); }
-  .pv-tip{ border-color: color-mix(in srgb, var(--cyan) 40%, var(--border-soft)); }
-  .pv-tag{ display:inline-flex; align-items:center; gap:5px; font-size:10.5px; font-weight:700; padding:3px 8px; border-radius:999px; background: var(--cyan-tint); color: var(--cyan); margin-bottom:8px; }
-  .pv-text{ font-family:"Source Serif 4", serif; font-size:14px; line-height:1.55; color: var(--ink); }
+  .pv-card{ border: 1px solid var(--border-soft); border-radius: 6px; padding: 18px; background: var(--surface-2); }
+  .pv-label{ font-family:"Lexend",sans-serif; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color: var(--ink-faint); margin-bottom:9px; }
+  .pv-praise{ border-color: color-mix(in srgb, var(--good) 35%, var(--border-soft)); }
+  .pv-tip{ border-color: color-mix(in srgb, var(--accent) 35%, var(--border-soft)); }
+  .pv-tag{ font-family:"Lexend",sans-serif; display:inline-flex; align-items:center; gap:5px; font-size:10.5px; font-weight:700; padding:3px 9px; border-radius:999px; background: var(--accent-tint); color: var(--accent-ink); margin-bottom:9px; }
+  .pv-text{ font-family:"Source Serif 4", serif; font-size:14.5px; line-height:1.55; color: var(--ink); }
   .pv-vocab{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-  .pv-vocab div{ background: var(--cyan-tint); border-radius:10px; padding:10px 12px; }
-  .pv-vocab b{ display:block; font-size:12.5px; color: var(--cyan); margin-bottom:2px; }
-  .pv-vocab span{ font-size:11.5px; color: var(--ink-soft); line-height:1.4; }
+  .pv-vocab div{ background: var(--accent-tint); border-radius:6px; padding:10px 12px; }
+  .pv-vocab b{ font-family:"Lexend",sans-serif; display:block; font-size:12.5px; color: var(--accent-ink); margin-bottom:2px; }
+  .pv-vocab span{ font-family:"Lexend",sans-serif; font-size:11.5px; color: var(--ink-soft); line-height:1.4; }
 
   /* ---------------- Sections ---------------- */
-  section{ padding-block: 88px; }
-  @media (max-width: 640px){ section{ padding-block: 56px; } }
-  .section-head{ max-width: 620px; margin-bottom: 48px; }
-  .section-head h2{ font-size: clamp(26px, 3.6vw, 38px); font-weight: 700; letter-spacing:-0.01em; margin-top: 10px; }
-  .section-head p{ margin-top: 12px; font-size: 16px; color: var(--ink-soft); line-height: 1.6; }
+  section{ padding-block: 84px; }
+  @media (max-width: 640px){ section{ padding-block: 52px; } }
+  .section-head{ max-width: 620px; margin-bottom: 46px; }
+  .section-head h2{ font-size: clamp(25px, 3.4vw, 36px); margin-top: 10px; }
+  .section-head p{ margin-top: 12px; font-size: 16px; color: var(--ink-soft); line-height: 1.65; }
   .section-alt{ background: var(--bg-elevated); border-top: 1px solid var(--border-soft); border-bottom: 1px solid var(--border-soft); }
 
   /* trust row */
-  .trust{ display:flex; flex-wrap:wrap; gap: 14px; justify-content:center; }
-  .trust-item{ display:flex; align-items:center; gap:9px; padding:10px 16px; border:1px solid var(--border); border-radius: 999px; font-size:13.5px; font-weight:600; color: var(--ink-soft); background: var(--surface); }
-  .trust-item svg{ color: var(--cyan); }
+  .trust{ display:flex; flex-wrap:wrap; gap: 10px; justify-content:center; }
+  .trust-item{ font-family:"Lexend",sans-serif; display:flex; align-items:center; gap:9px; padding:9px 16px; border:1px solid var(--border); border-radius: 999px; font-size:13px; font-weight:600; color: var(--ink-soft); background: var(--surface); }
 
   /* feature split */
   .split{ display:grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items:center; }
   .split.reverse .split-media{ order: 2; }
   @media (max-width: 860px){ .split, .split.reverse .split-media{ grid-template-columns: 1fr; order:0; } .split{ display:flex; flex-direction:column; gap:32px; } }
-  .split-copy h3{ font-size: clamp(22px,2.8vw,28px); font-weight:700; letter-spacing:-0.01em; }
+  .split-copy h3{ font-size: clamp(21px,2.6vw,26px); }
   .split-copy p{ margin-top:14px; font-size:15.5px; line-height:1.65; color: var(--ink-soft); }
-  .split-list{ margin-top:18px; display:flex; flex-direction:column; gap:10px; }
+  .split-list{ margin-top:18px; display:flex; flex-direction:column; gap:10px; font-family:"Lexend",sans-serif; }
   .split-list div{ display:flex; align-items:flex-start; gap:10px; font-size:14.5px; color: var(--ink); }
-  .split-list svg{ flex-shrink:0; margin-top:2px; color: var(--cyan); }
+  .split-list svg{ flex-shrink:0; margin-top:2px; color: var(--accent); }
 
   .tier-tabs{ display:flex; gap:6px; padding:4px; border:1px solid var(--border); border-radius:999px; background: var(--surface-2); width:fit-content; margin-bottom:18px; flex-wrap:wrap; }
   .tier-tabs button{ font-family:"Lexend",sans-serif; font-size:12.5px; font-weight:600; padding:8px 14px; border-radius:999px; border:none; background:transparent; color: var(--ink-soft); cursor:pointer; }
   .tier-tabs button.active{ background: var(--ink); color: var(--bg); }
-  .tier-panel{ border:1px solid var(--border); border-radius:16px; background: var(--surface); padding:20px; min-height: 190px; }
-  .tier-panel .t-title{ font-weight:700; font-size:14.5px; margin-bottom:6px; }
-  .tier-panel .t-prompt{ font-family:"Source Serif 4",serif; font-size:14px; color: var(--ink-soft); line-height:1.55; margin-bottom:14px; }
-  .tier-meter{ display:flex; align-items:center; gap:8px; font-size:12px; color: var(--ink-faint); font-weight:600; }
+  .tier-panel{ border:1px solid var(--border); border-radius:6px; background: var(--surface); padding:22px; min-height: 190px; }
+  .tier-panel .t-title{ font-family:"Fraunces",serif; font-weight:600; font-size:16px; margin-bottom:6px; }
+  .tier-panel .t-prompt{ font-family:"Source Serif 4",serif; font-size:14.5px; color: var(--ink-soft); line-height:1.55; margin-bottom:14px; }
+  .tier-meter{ font-family:"Lexend",sans-serif; display:flex; align-items:center; gap:8px; font-size:12px; color: var(--ink-faint); font-weight:600; }
   .tier-meter .bar{ flex:1; height:5px; border-radius:99px; background: var(--surface-2); max-width:140px; }
-  .tier-meter .bar i{ display:block; height:100%; border-radius:99px; background: var(--cyan-glow); }
+  .tier-meter .bar i{ display:block; height:100%; border-radius:99px; background: var(--accent); }
 
-  .mastery-row{ display:flex; align-items:center; justify-content:space-between; gap:12px; padding:11px 0; border-top:1px solid var(--border-soft); font-size:13.5px; }
+  .mastery-row{ font-family:"Lexend",sans-serif; display:flex; align-items:center; justify-content:space-between; gap:12px; padding:11px 0; border-top:1px solid var(--border-soft); font-size:13.5px; }
   .mastery-row:first-child{ border-top:none; }
   .mastery-name{ font-weight:600; }
   .mastery-bar{ flex:1; height:6px; border-radius:99px; background:var(--surface-2); margin: 0 12px; max-width: 160px; }
@@ -215,36 +194,36 @@
   .mastery-tag{ font-size:11px; font-weight:700; padding:3px 9px; border-radius:999px; white-space:nowrap; }
 
   /* how it works */
-  .steps{ display:grid; grid-template-columns: repeat(3,1fr); gap: 28px; counter-reset: step; }
+  .steps{ display:grid; grid-template-columns: repeat(3,1fr); gap: 24px; }
   @media (max-width: 760px){ .steps{ grid-template-columns: 1fr; } }
-  .step{ position:relative; padding: 26px 22px; border:1px solid var(--border); border-radius:16px; background: var(--surface); }
-  .step-num{ font-family:"Lexend",sans-serif; font-size:13px; font-weight:800; color: var(--cyan); letter-spacing:.05em; }
-  .step h4{ margin-top:10px; font-size:17px; font-weight:700; }
-  .step p{ margin-top:8px; font-size:14px; line-height:1.6; color: var(--ink-soft); }
+  .step{ padding: 26px 22px; border:1px solid var(--border); border-radius:6px; background: var(--surface); }
+  .step-num{ font-family:"Lexend",sans-serif; font-size:13px; font-weight:800; color: var(--gold-ink); letter-spacing:.05em; }
+  .step h4{ margin-top:10px; font-family:"Fraunces",serif; font-size:17px; font-weight:600; }
+  .step p{ margin-top:8px; font-family:"Lexend",sans-serif; font-size:13.5px; line-height:1.6; color: var(--ink-soft); }
 
   /* pricing */
-  .pricing{ display:grid; grid-template-columns: 1fr 1fr; gap: 24px; max-width: 780px; margin: 0 auto; }
+  .pricing{ display:grid; grid-template-columns: 1fr 1fr; gap: 22px; max-width: 780px; margin: 0 auto; }
   @media (max-width: 640px){ .pricing{ grid-template-columns: 1fr; } }
-  .price-card{ border:1px solid var(--border); border-radius:18px; padding: 30px 26px; background: var(--surface); }
-  .price-card.pro{ border-color: var(--gold-glow); position:relative; background: linear-gradient(180deg, color-mix(in srgb, var(--gold-glow) 6%, var(--surface)), var(--surface)); }
-  .price-card.pro::before{ content:"MOST POPULAR"; position:absolute; top:-11px; left:26px; background: var(--gold-glow); color:#3B2606; font-size:10.5px; font-weight:800; letter-spacing:.06em; padding:4px 10px; border-radius:999px; }
-  .price-plan{ font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color: var(--ink-faint); }
-  .price-amount{ font-size:36px; font-weight:800; margin-top:10px; letter-spacing:-0.01em; }
-  .price-amount span{ font-size:14px; font-weight:500; color: var(--ink-faint); }
-  .price-list{ margin-top:20px; display:flex; flex-direction:column; gap:11px; }
+  .price-card{ border:1px solid var(--border); border-radius:8px; padding: 30px 26px; background: var(--surface); }
+  .price-card.pro{ border-color: var(--gold); position:relative; background: linear-gradient(180deg, var(--gold-tint), var(--surface) 55%); }
+  .price-card.pro::before{ content:"MOST POPULAR"; position:absolute; top:-11px; left:26px; background: var(--gold); color:#fff; font-family:"Lexend",sans-serif; font-size:10.5px; font-weight:800; letter-spacing:.06em; padding:4px 10px; border-radius:999px; }
+  .price-plan{ font-family:"Lexend",sans-serif; font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color: var(--ink-faint); }
+  .price-amount{ font-family:"Fraunces",serif; font-size:36px; font-weight:600; margin-top:10px; letter-spacing:-0.01em; }
+  .price-amount span{ font-family:"Lexend",sans-serif; font-size:14px; font-weight:500; color: var(--ink-faint); }
+  .price-list{ margin-top:20px; display:flex; flex-direction:column; gap:11px; font-family:"Lexend",sans-serif; }
   .price-list div{ display:flex; gap:9px; align-items:flex-start; font-size:14px; color: var(--ink-soft); }
-  .price-list svg{ flex-shrink:0; margin-top:2px; color: var(--cyan); }
-  .price-card.pro .price-list svg{ color: var(--gold-glow); }
+  .price-list svg{ flex-shrink:0; margin-top:2px; color: var(--accent); }
+  .price-card.pro .price-list svg{ color: var(--gold); }
   .price-card .btn{ width:100%; margin-top:24px; }
 
   /* comparison */
-  .compare{ border:1px solid var(--border); border-radius:18px; overflow:hidden; background:var(--surface); }
+  .compare{ border:1px solid var(--border); border-radius:8px; overflow:hidden; background:var(--surface); }
   .compare-row{ display:grid; grid-template-columns: 1.3fr 1fr 1fr; align-items:center; }
   .compare-row + .compare-row{ border-top:1px solid var(--border-soft); }
-  .compare-row.head{ background:var(--surface-2); font-weight:700; font-size:13px; }
-  .compare-cell{ padding:16px 18px; font-size:14px; }
+  .compare-row.head{ background:var(--surface-2); font-family:"Lexend",sans-serif; font-weight:700; font-size:13px; }
+  .compare-cell{ padding:16px 18px; font-family:"Lexend",sans-serif; font-size:14px; }
   .compare-row.head .compare-cell:nth-child(2){ color:var(--ink-faint); }
-  .compare-row.head .compare-cell:nth-child(3){ color:var(--cyan); }
+  .compare-row.head .compare-cell:nth-child(3){ color:var(--accent); }
   .compare-cell.label{ color:var(--ink); font-weight:600; }
   .compare-cell.no{ color:var(--ink-faint); }
   .compare-cell.no svg{ color:var(--ink-faint); }
@@ -260,28 +239,25 @@
 
   /* faq */
   .faq-list{ max-width: 760px; margin: 0 auto; display:flex; flex-direction:column; gap:12px; }
-  .faq-item{ border:1px solid var(--border); border-radius:14px; background: var(--surface); overflow:hidden; }
-  .faq-item summary{ list-style:none; cursor:pointer; padding: 18px 22px; font-weight:600; font-size:15px; display:flex; align-items:center; justify-content:space-between; gap:16px; }
+  .faq-item{ border:1px solid var(--border); border-radius:6px; background: var(--surface); overflow:hidden; }
+  .faq-item summary{ font-family:"Lexend",sans-serif; list-style:none; cursor:pointer; padding: 18px 22px; font-weight:600; font-size:15px; display:flex; align-items:center; justify-content:space-between; gap:16px; }
   .faq-item summary::-webkit-details-marker{ display:none; }
   .faq-item summary .faq-plus{ flex-shrink:0; width:20px; height:20px; position:relative; }
-  .faq-item summary .faq-plus::before, .faq-item summary .faq-plus::after{ content:""; position:absolute; background: var(--cyan); border-radius:2px; transition: transform .2s ease; }
+  .faq-item summary .faq-plus::before, .faq-item summary .faq-plus::after{ content:""; position:absolute; background: var(--accent); border-radius:2px; transition: transform .2s ease; }
   .faq-item summary .faq-plus::before{ top:9px; left:2px; width:16px; height:2px; }
   .faq-item summary .faq-plus::after{ top:2px; left:9px; width:2px; height:16px; }
   .faq-item[open] summary .faq-plus::after{ transform: rotate(90deg); opacity:0; }
-  .faq-item .faq-a{ padding: 0 22px 20px; font-size:14.5px; line-height:1.65; color: var(--ink-soft); }
-  .faq-a a{ color: var(--cyan); font-weight:600; text-decoration: underline; text-underline-offset:2px; }
-  .faq-tabs{ display:flex; justify-content:center; gap:8px; margin-bottom:28px; }
-  .faq-tabs button{ font-family:"Lexend",sans-serif; font-size:13px; font-weight:600; padding:8px 16px; border-radius:999px; border:1px solid var(--border); background:var(--surface); color:var(--ink-soft); cursor:pointer; }
-  .faq-tabs button.active{ background: var(--ink); color: var(--bg); border-color: var(--ink); }
+  .faq-item .faq-a{ font-family:"Lexend",sans-serif; padding: 0 22px 20px; font-size:14.5px; line-height:1.65; color: var(--ink-soft); }
+  .faq-a a{ color: var(--accent); font-weight:600; text-decoration: underline; text-underline-offset:2px; }
 
   /* final cta */
-  .final-cta{ text-align:center; position:relative; overflow:hidden; }
-  .final-cta h2{ font-size: clamp(28px, 4.2vw, 44px); font-weight:800; letter-spacing:-0.02em; }
+  .final-cta{ text-align:center; background: var(--bg-elevated); border-top:1px solid var(--border-soft); }
+  .final-cta h2{ font-size: clamp(27px, 4vw, 42px); }
   .final-cta p{ margin-top:14px; font-size:16px; color: var(--ink-soft); max-width:520px; margin-inline:auto; }
-  .final-cta .hero-ctas{ margin-top: 28px; }
+  .final-cta .hero-ctas{ margin-top: 26px; }
 
-  footer{ border-top:1px solid var(--border-soft); padding-block: 36px; }
-  .foot-inner{ display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; font-size:13px; color: var(--ink-faint); }
+  footer{ border-top:1px solid var(--border-soft); padding-block: 32px; }
+  .foot-inner{ font-family:"Lexend",sans-serif; display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; font-size:12.5px; color: var(--ink-faint); }
   .foot-links{ display:flex; gap:20px; }
 
   @media (prefers-reduced-motion: reduce){ html{ scroll-behavior:auto; } }
@@ -291,13 +267,13 @@
   <div class="wrap nav-inner">
     <div class="brand">
       <span class="brand-mark">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-          <path d="M9 3h6M10 3v6.2L4.8 18a2 2 0 0 0 1.7 3h11a2 2 0 0 0 1.7-3L14 9.2V3" stroke="#00D2FF" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M12 10l-2.7 6.4c-.3.8.2 1.6 1.1 1.6h3.2c.9 0 1.4-.8 1.1-1.6L12 10z" fill="#F59E0B"/>
-          <path d="M12 12.2v4.4" stroke="#1E293B" stroke-width="1" stroke-linecap="round"/>
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+          <path d="M9 3h6M10 3v6.2L4.8 18a2 2 0 0 0 1.7 3h11a2 2 0 0 0 1.7-3L14 9.2V3" stroke="var(--accent)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M12 10l-2.7 6.4c-.3.8.2 1.6 1.1 1.6h3.2c.9 0 1.4-.8 1.1-1.6L12 10z" fill="var(--gold)"/>
+          <path d="M12 12.2v4.4" stroke="var(--ink)" stroke-width="1" stroke-linecap="round"/>
         </svg>
       </span>
-      LiteracyLab <span style="color:var(--cyan)">AI</span>
+      LiteracyLab <span style="color:var(--accent)">AI</span>
     </div>
     <div class="nav-links">
       <a href="#product">Product</a>
@@ -315,11 +291,9 @@
 </div>
 
 <section class="hero">
-  <div class="hero-glow"></div>
-  <div class="hero-grid"></div>
   <div class="wrap hero-inner">
-    <span class="eyebrow">AI Literacy Coach · Ages 5–18</span>
-    <h1>Reading &amp; writing feedback that meets<br class="hide-sm"> every learner <em>where they are.</em></h1>
+    <span class="eyebrow">A literacy coach, not a chatbot · Ages 5–18</span>
+    <h1>Feedback your child's <em>own teacher</em> would recognise.</h1>
     <p class="hero-sub">LiteracyLab AI reads what your child writes — or checks what they understood — maps it against their real school curriculum, and turns it into feedback they'll actually want to act on — explained through the things they already love.</p>
     <div class="hero-ctas">
       <a class="btn btn-primary btn-lg" href="app.html">Start free — 3 submissions a month</a>
@@ -332,7 +306,7 @@
       <div class="preview-body">
         <div style="display:flex; flex-direction:column; gap:14px;">
           <div class="pv-card pv-praise">
-            <div class="pv-label">Glows — what you did well</div>
+            <div class="pv-label">Glow — what you did well</div>
             <div class="pv-text">"Your thesis directly answers the question — exactly what examiners look for at Year 11 level."</div>
           </div>
           <div class="pv-card pv-tip">
@@ -357,9 +331,9 @@
     <div class="trust">
       <div class="trust-item">🇬🇧 UK National Curriculum</div>
       <div class="trust-item">🇺🇸 Common Core / AP</div>
-      <div class="trust-item">🇦🇺 ACARA Standards</div>
-      <div class="trust-item">🇨🇦 Provincial Benchmarks</div>
-      <div class="trust-item">🇦🇪 Cambridge &amp; IB</div>
+      <div class="trust-item">🇦🇺 ACARA v9.0</div>
+      <div class="trust-item">🇨🇦 Ontario Curriculum</div>
+      <div class="trust-item">🇦🇪 Cambridge &amp; IGCSE</div>
       <div class="trust-item">🇸🇬 Cambridge &amp; IB Pathway</div>
       <div class="trust-item">🌐 CEFR A1–C2</div>
     </div>
@@ -418,7 +392,7 @@
           <button data-tier="middle">Middle School</button>
           <button data-tier="high">High School</button>
         </div>
-        <p style="font-size:14px;color:var(--ink-faint);">Click a tier to preview its workspace on the right.</p>
+        <p style="font-family:'Lexend',sans-serif; font-size:14px;color:var(--ink-faint);">Click a tier to preview its workspace on the right.</p>
       </div>
       <div class="split-media">
         <div class="tier-panel" id="tierPanel">
@@ -438,9 +412,9 @@
             <span class="pv-tag">explained through Gaming</span>
             <div class="pv-text font-read">"Push your argument further — like a boss fight: raise the tension, then land your strongest hit at the right moment."</div>
           </div>
-          <div class="pv-card" style="background:linear-gradient(135deg, var(--navy-deep), #2B3B54); border:none;">
-            <div style="color:#7CEBFF; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; margin-bottom:6px;">Micro-mission</div>
-            <div style="color:#D5DEEE; font-size:13.5px; line-height:1.55;">Next submission: end each body paragraph with a sentence linking evidence back to your thesis.</div>
+          <div class="pv-card" style="background:linear-gradient(135deg, var(--ink), #3E2028); border:none;">
+            <div style="color:var(--accent-ink); font-family:'Lexend',sans-serif; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; margin-bottom:6px;">Micro-mission</div>
+            <div style="color:#EDE1DC; font-family:'Lexend',sans-serif; font-size:13.5px; line-height:1.55;">Next submission: end each body paragraph with a sentence linking evidence back to your thesis.</div>
           </div>
         </div>
       </div>
@@ -474,18 +448,18 @@
         <div class="tier-panel">
           <div class="mastery-row">
             <span class="mastery-name">Fronted Adverbials</span>
-            <div class="mastery-bar"><i style="width:64%; background:var(--warn,#C2760A)"></i></div>
-            <span class="mastery-tag" style="background:var(--gold-tint); color:var(--gold);">In Progress</span>
+            <div class="mastery-bar"><i style="width:64%; background:var(--gold)"></i></div>
+            <span class="mastery-tag" style="background:var(--gold-tint); color:var(--gold-ink);">In Progress</span>
           </div>
           <div class="mastery-row">
             <span class="mastery-name">Paragraph Structure</span>
-            <div class="mastery-bar"><i style="width:88%; background:#0F9D66"></i></div>
-            <span class="mastery-tag" style="background:color-mix(in srgb, #0F9D66 18%, transparent); color:#0F9D66;">Mastered</span>
+            <div class="mastery-bar"><i style="width:88%; background:var(--good)"></i></div>
+            <span class="mastery-tag" style="background:color-mix(in srgb, var(--good) 18%, transparent); color:var(--good);">Mastered</span>
           </div>
           <div class="mastery-row">
             <span class="mastery-name">Descriptive Adjectives</span>
-            <div class="mastery-bar"><i style="width:41%; background:#D6483C"></i></div>
-            <span class="mastery-tag" style="background:color-mix(in srgb, #D6483C 15%, transparent); color:#D6483C;">Needs Attention</span>
+            <div class="mastery-bar"><i style="width:41%; background:var(--accent)"></i></div>
+            <span class="mastery-tag" style="background:var(--accent-tint); color:var(--accent-ink);">Needs Attention</span>
           </div>
         </div>
       </div>
@@ -538,7 +512,7 @@
   </div>
 </section>
 
-<section class="section-alt" id="faq">
+<section id="faq">
   <div class="wrap">
     <div class="section-head" style="margin-inline:auto; text-align:center;">
       <span class="eyebrow" style="justify-content:center;">FAQ</span>
@@ -555,7 +529,7 @@
       </details>
       <details class="faq-item">
         <summary>How does LiteracyLab AI align with my country's curriculum?<span class="faq-plus"></span></summary>
-        <div class="faq-a">You choose your region — UK, US, Australia, Canada, UAE &amp; GCC (Cambridge/IB), Singapore &amp; SE Asia (Cambridge/IB), or Global ESL Mode (CEFR A1–C2) — and your child's grade, year, or level, and every mastery target, Grow, and vocabulary suggestion is scaled to that curriculum's actual expectations. It's not one generic rubric stretched across every country.</div>
+        <div class="faq-a">You choose your region — UK, US, Australia, Canada, UAE &amp; GCC (Cambridge/IGCSE), Singapore &amp; SE Asia (Cambridge/IB), or Global ESL Mode (CEFR A1–C2) — and your child's grade, year, or level, and every mastery target, Grow, and vocabulary suggestion is scaled to that curriculum's actual expectations. It's not one generic rubric stretched across every country.</div>
       </details>
       <details class="faq-item">
         <summary>Can I cancel my LiteracyLab Pro subscription anytime?<span class="faq-plus"></span></summary>
@@ -570,8 +544,7 @@
 </section>
 
 <section class="final-cta">
-  <div class="hero-glow" style="height:100%;"></div>
-  <div class="wrap" style="position:relative;">
+  <div class="wrap">
     <h2>Give their next story somewhere to grow.</h2>
     <p>Set up a learner profile in under a minute — no credit card, no commitment.</p>
     <div class="hero-ctas">
