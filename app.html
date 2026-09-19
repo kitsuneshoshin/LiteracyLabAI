@@ -1564,6 +1564,7 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
                   <IconLock size={22} style={{ color: "var(--ink-faint)" }} />
                   <div className="font-display font-semibold text-sm" style={{ color: "var(--ink)" }}>Upgrade to Pro for more writing prompts</div>
                   <p className="text-[13px] max-w-[28ch]" style={{ color: "var(--ink-faint)" }}>You've used all your free submissions this month.</p>
+                  <p className="text-[11px]" style={{ color: "var(--ink-faint)" }}>[debug] used={String(used)} total={String(total)} lastError={String(submitError)}</p>
                 </>
               ) : (
                 <>
