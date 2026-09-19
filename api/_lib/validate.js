@@ -185,4 +185,4 @@ function validateWritingPrompt(parsed, { tier }) {
   return { ok: issues.length === 0, issues };
 }
 
-module.exports = { validateFeedback, validatePassage, validateWritingPrompt, resolveTarget };
+module.exports = { validateFeedback, validatePassage, validateWritingPrompt, resolveTarget, MAX_AVG_WORDS_PER_SENTENCE };
