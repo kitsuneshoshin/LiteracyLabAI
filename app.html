@@ -881,7 +881,7 @@ function StatTile({ icon: IconEl, label, value, sub, accent }){
   );
 }
 
-function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests, toggleInterest, confidenceWriting, setConfidenceWriting, confidenceReading, setConfidenceReading, motivation, setMotivation, used, total, setView, history, progress, backendLive, needsOnboarding, onCompleteOnboarding }){
+function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests, toggleInterest, confidenceWriting, setConfidenceWriting, confidenceReading, setConfidenceReading, motivation, setMotivation, used, total, plan, session, setView, history, progress, backendLive, needsOnboarding, onCompleteOnboarding }){
   const grades = GRADE_DATA[country].grades;
   const gradeLabel = grades[gradeIdx];
   const remaining = total - used;
@@ -895,7 +895,28 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
   // regions; with a live backend, api/progress.js now maps every region
   // (see masteryTargets.js), so isMapped there reflects what it returns.
   const isMapped = backendLive ? Boolean(progress && progress.isMapped) : !!MAPPED_TARGETS[country];
-  const [proComingSoon, setProComingSoon] = useState(false);
+  const [billingLoading, setBillingLoading] = useState(false);
+  const [billingError, setBillingError] = useState(null);
+  const isPro = plan === "pro" || plan === "admin";
+
+  // Redirects to Stripe's own hosted page for either starting a Pro
+  // subscription or managing/cancelling an existing one — we never handle
+  // card details ourselves. The actual plan flip happens via the Stripe
+  // webhook (api/stripe-webhook.js), not here; this just gets the user to
+  // the right Stripe page and back.
+  async function handleBilling(){
+    if (!backendLive || billingLoading) return;
+    setBillingLoading(true);
+    setBillingError(null);
+    try {
+      const endpoint = isPro ? "/api/create-portal-session" : "/api/create-checkout-session";
+      const result = await authedFetch(session, endpoint, { method: "POST" });
+      window.location.href = result.url;
+    } catch (err) {
+      setBillingError(err.payload?.error || err.message || "Something went wrong opening billing. Please try again.");
+      setBillingLoading(false);
+    }
+  }
   // With a live backend, real per-skill mastery (computed from this
   // student's own submission history — see api/progress.js) replaces the
   // static demo numbers below, once it's loaded.
@@ -1083,22 +1104,33 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
             <div className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold mb-3" style={{ background: "var(--gold)", color: "#fff" }}>
               <IconCrown size={12} strokeWidth={2.4} /> LITERACYLAB PRO
             </div>
-            <h3 className="font-display font-bold text-lg text-white mb-1.5">{remaining <= 1 ? "Almost at your monthly limit" : "Unlock unlimited submissions"}</h3>
-            <p className="text-[13px] mb-4" style={{ color: "#E4D6D2" }}>
-              You’ve used {used} of {total} free submissions this month. Pro adds unlimited submissions, deeper rhetorical analysis and weekly progress reports for your learner.
-            </p>
-            <ul className="text-[13px] space-y-1.5 mb-5" style={{ color: "#EDE1DC" }}>
-              {["Unlimited monthly submissions","Advanced exam-technique scoring","Weekly progress reports by email"].map(t=>(
-                <li key={t} className="flex items-center gap-2"><IconCheck size={13} strokeWidth={2.4} style={{ color: "var(--gold)" }} />{t}</li>
-              ))}
-            </ul>
-            <button onClick={()=>setProComingSoon(true)} disabled={proComingSoon}
+            {isPro ? (
+              <>
+                <h3 className="font-display font-bold text-lg text-white mb-1.5">You're on Pro</h3>
+                <p className="text-[13px] mb-4" style={{ color: "#E4D6D2" }}>
+                  Unlimited submissions, advanced exam-technique scoring, and weekly progress reports are active on this account.
+                </p>
+              </>
+            ) : (
+              <>
+                <h3 className="font-display font-bold text-lg text-white mb-1.5">{remaining <= 1 ? "Almost at your monthly limit" : "Unlock unlimited submissions"}</h3>
+                <p className="text-[13px] mb-4" style={{ color: "#E4D6D2" }}>
+                  You’ve used {used} of {total} free submissions this month. Pro adds unlimited submissions, deeper rhetorical analysis and weekly progress reports for your learner.
+                </p>
+                <ul className="text-[13px] space-y-1.5 mb-5" style={{ color: "#EDE1DC" }}>
+                  {["Unlimited monthly submissions","Advanced exam-technique scoring","Weekly progress reports by email"].map(t=>(
+                    <li key={t} className="flex items-center gap-2"><IconCheck size={13} strokeWidth={2.4} style={{ color: "var(--gold)" }} />{t}</li>
+                  ))}
+                </ul>
+              </>
+            )}
+            <button onClick={handleBilling} disabled={billingLoading || !backendLive}
               className="focus-ring w-full rounded-xl py-2.5 font-display font-bold text-sm inline-flex items-center justify-center gap-1.5 disabled:opacity-70"
               style={{ background: "var(--gold)", color: "#fff" }}>
-              {proComingSoon ? "Pro isn't available yet" : <>Upgrade to Pro — $14.99/mo <IconArrowRight size={15} strokeWidth={2.3} /></>}
+              {billingLoading ? "Redirecting…" : isPro ? <>Manage subscription <IconArrowRight size={15} strokeWidth={2.3} /></> : <>Upgrade to Pro — $14.99/mo <IconArrowRight size={15} strokeWidth={2.3} /></>}
             </button>
             <div className="text-[11px] text-center mt-2" style={{ color: "#B9A69F" }}>
-              {proComingSoon ? "Billing isn't live yet — check back soon." : "Billed monthly via Stripe · cancel anytime"}
+              {billingError ? billingError : !backendLive ? "Billing isn't available in this demo preview." : "Billed monthly via Stripe · cancel anytime"}
             </div>
           </div>
         </div>
@@ -1866,6 +1898,7 @@ function App({ session }){
   const [motivation, setMotivation] = useState("enjoyment");
   const [used, setUsed] = useState(1);
   const [total, setTotal] = useState(FREE_MONTHLY_CAP);
+  const [plan, setPlan] = useState("free");
   const [profileLoaded, setProfileLoaded] = useState(!backendLive);
   const [history, setHistory] = useState(null);
   const [progress, setProgress] = useState(null);
@@ -1894,6 +1927,7 @@ function App({ session }){
         setMotivation(profile.motivation);
         setUsed(usage.used);
         setTotal(usage.cap === Infinity ? 999 : usage.cap);
+        setPlan(usage.plan || "free");
         if (!profile.onboarded) {
           setNeedsOnboarding(true);
           setView("dashboard");
@@ -1970,10 +2004,25 @@ function App({ session }){
     if (backendLive && usageFromServer) {
       setUsed(usageFromServer.used);
       if (usageFromServer.cap !== Infinity) setTotal(usageFromServer.cap);
+      if (usageFromServer.plan) setPlan(usageFromServer.plan);
     } else {
       setUsed(u => Math.min(total, u+1));
     }
   }
+  // After a Stripe Checkout redirect back with ?upgraded=1, refresh usage
+  // once so the new Pro plan shows immediately instead of waiting for the
+  // next submission — the actual plan flip already happened server-side
+  // via the Stripe webhook by the time the browser gets here.
+  useEffect(()=>{
+    if (!backendLive) return;
+    if (!new URLSearchParams(window.location.search).has("upgraded")) return;
+    authedFetch(session, "/api/usage").then((usage)=>{
+      setUsed(usage.used);
+      setTotal(usage.cap === Infinity ? 999 : usage.cap);
+      setPlan(usage.plan || "free");
+    }).catch((err)=> console.error("Failed to refresh usage after upgrade:", err));
+    window.history.replaceState(null, "", window.location.pathname);
+  }, [backendLive]);
   async function handleSignOut(){
     if (supabaseClient) await supabaseClient.auth.signOut();
   }
@@ -1998,7 +2047,7 @@ function App({ session }){
           confidenceWriting={confidenceWriting} setConfidenceWriting={handleSetConfidenceWriting}
           confidenceReading={confidenceReading} setConfidenceReading={handleSetConfidenceReading}
           motivation={motivation} setMotivation={handleSetMotivation}
-          used={used} total={total} setView={setView} history={history} progress={progress} backendLive={backendLive}
+          used={used} total={total} plan={plan} session={session} setView={setView} history={history} progress={progress} backendLive={backendLive}
           needsOnboarding={needsOnboarding} onCompleteOnboarding={completeOnboarding} />
       ) : (
         <Workspace country={country} gradeIdx={gradeIdx} setGradeIdx={handleGradeChange} tier={tier} setTierOverride={setTierAndSyncGrade}
