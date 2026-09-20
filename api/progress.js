@@ -41,8 +41,9 @@ module.exports = async function handler(req, res) {
       return res.status(405).json({ error: "Method not allowed." });
     }
     const user = await requireUser(req);
-    const { tier, country, gradeLabel } = req.query;
+    const { tier, country, gradeLabel, childId } = req.query;
     if (!tier || !country) return res.status(400).json({ error: "tier and country query params are required." });
+    if (!childId) return res.status(400).json({ error: "childId is required." });
 
     const supabase = getSupabaseAdmin();
     // Filtering by the exact grade (when known) rather than just tier means
@@ -50,8 +51,9 @@ module.exports = async function handler(req, res) {
     // see mastery scored against their own real year's targets, not a
     // blended one. Submissions saved before grade_label existed simply
     // won't match here and drop out of the count — not incorrect, just
-    // not counted yet.
-    let query = supabase.from("submissions").select("feedback").eq("profile_id", user.id).eq("tier", tier).eq("country", country);
+    // not counted yet. Also scoped to one learner, same reasoning as
+    // api/history.js - a sibling's submissions must never blend into this.
+    let query = supabase.from("submissions").select("feedback").eq("profile_id", user.id).eq("child_id", childId).eq("tier", tier).eq("country", country);
     if (gradeLabel) query = query.eq("grade_label", gradeLabel);
     const { data: submissions, error } = await query.order("created_at", { ascending: false }).limit(200);
     if (error) throw error;

@@ -29,11 +29,19 @@ module.exports = async function handler(req, res) {
     }
     const user = await requireUser(req);
     const supabase = getSupabaseAdmin();
+    const { childId } = req.query;
+    if (!childId) return res.status(400).json({ error: "childId is required." });
 
+    // Scoped to one learner - a household with more than one child (see
+    // api/child-profile.js) shouldn't have one kid's history blended into
+    // another's stats. profile_id is still checked too, as a defense-in-depth
+    // ownership check even though child_id alone would already scope this
+    // correctly for a child that really belongs to this account.
     const { data: submissions, error } = await supabase
       .from("submissions")
       .select("id, kind, tier, country, score, total_questions, word_count, feedback, created_at")
       .eq("profile_id", user.id)
+      .eq("child_id", childId)
       .order("created_at", { ascending: false })
       .limit(200);
     if (error) throw error;

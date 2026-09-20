@@ -1,6 +1,7 @@
 const { getSupabaseAdmin } = require("./_lib/supabaseAdmin");
 const { requireUser, sendError } = require("./_lib/auth");
 const { getMonthlyUsage } = require("./_lib/usage");
+const { checkRateLimit } = require("./_lib/rateLimit");
 const { generateFeedbackJSON } = require("./_lib/openai");
 const { buildReadingPassagePrompt, correctiveAddendum } = require("./_lib/prompt");
 const { validatePassage } = require("./_lib/validate");
@@ -41,29 +42,30 @@ module.exports = async function handler(req, res) {
     const user = await requireUser(req);
     const supabase = getSupabaseAdmin();
 
+    // Separate from the monthly cap check below - see the matching comment
+    // in api/writing-prompt.js. Shared bucket across both generation
+    // endpoints and api/submit.js since all three trigger real OpenAI cost.
+    await checkRateLimit(supabase, user.id, "ai_generate", { limit: 10, windowSeconds: 300 });
+
     const usage = await getMonthlyUsage(supabase, user.id);
     if (usage.used >= usage.cap) {
       return res.status(402).json({ error: "Free monthly submission limit reached.", usage });
     }
 
     const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body || {};
-    const { tier, country, gradeLabel, interest } = body;
+    const { tier, country, gradeLabel, interest, childId } = body;
     if (!VALID_TIERS.includes(tier)) return res.status(400).json({ error: `Invalid tier: ${tier}` });
     if (!country || !gradeLabel) return res.status(400).json({ error: "country and gradeLabel are required." });
+    if (!childId) return res.status(400).json({ error: "childId is required." });
 
-    // .maybeSingle() + create-if-missing rather than .single(): a request
-    // reaching here before api/child-profile.js's GET ever ran (which is
-    // what normally creates the default row) would otherwise throw a
-    // confusing "no rows" DB error instead of just working.
-    let { data: childProfile, error: childErr } = await supabase
-      .from("child_profiles").select("id").eq("profile_id", user.id).limit(1).maybeSingle();
+    // A household can have more than one learner now (see
+    // api/child-profile.js) - this must be the specific child the request
+    // is for, not just "the" child, and ownership must be verified rather
+    // than trusted from the client.
+    const { data: childProfile, error: childErr } = await supabase
+      .from("child_profiles").select("id").eq("id", childId).eq("profile_id", user.id).maybeSingle();
     if (childErr) throw childErr;
-    if (!childProfile) {
-      const { data: created, error: createErr } = await supabase
-        .from("child_profiles").insert({ profile_id: user.id }).select("id").single();
-      if (createErr) throw createErr;
-      childProfile = created;
-    }
+    if (!childProfile) return res.status(404).json({ error: "Learner not found for this account." });
 
     // Reserve the slot with a placeholder row BEFORE calling the AI, then
     // re-check the cap - see the matching comment in api/writing-prompt.js

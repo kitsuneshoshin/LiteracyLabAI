@@ -121,3 +121,30 @@ alter table public.commitments enable row level security;
 drop policy if exists "commitments: owner access" on public.commitments;
 create policy "commitments: owner access" on public.commitments
   for all using (auth.uid() = profile_id) with check (auth.uid() = profile_id);
+
+-- ---------------------------------------------------------------------------
+-- Rate limiting: one row per request to a metered endpoint (writing-prompt,
+-- reading-passage, submit), so a sliding-window count can be read back
+-- cheaply per account. Deliberately separate from submissions/usage's
+-- monthly billing count above - this exists purely to stop a single account
+-- (including an "unlimited" Pro one) from hammering the OpenAI-billed
+-- endpoints faster than any real student plausibly would, not to enforce
+-- the free-tier cap. Only ever touched by the service-role key server-side,
+-- so no client RLS policy is needed - just enable RLS with no policy, which
+-- denies all direct client access by default.
+-- ---------------------------------------------------------------------------
+create table if not exists public.rate_limit_hits (
+  id uuid primary key default gen_random_uuid(),
+  profile_id uuid not null references public.profiles(id) on delete cascade,
+  bucket text not null,
+  created_at timestamptz not null default now()
+);
+
+alter table public.rate_limit_hits enable row level security;
+
+create index if not exists rate_limit_hits_profile_bucket_idx
+  on public.rate_limit_hits (profile_id, bucket, created_at desc);
+
+-- Old rows are only ever needed for a few minutes of lookback; without
+-- cleanup this table would otherwise grow forever. Safe to re-run.
+create index if not exists rate_limit_hits_created_at_idx on public.rate_limit_hits (created_at);

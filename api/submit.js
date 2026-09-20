@@ -6,6 +6,7 @@ const { buildWritingPrompt, buildReadingPrompt, correctiveAddendum } = require("
 const { standardsFor } = require("./_lib/curriculum");
 const { targetsForGrade } = require("./_lib/masteryTargets");
 const { validateFeedback, resolveTarget } = require("./_lib/validate");
+const { checkRateLimit } = require("./_lib/rateLimit");
 
 // Server-side character caps, mirroring PROMPTS[tier].maxChars in app.html.
 // Enforced here too since a client-side maxLength is trivially bypassed.
@@ -74,15 +75,20 @@ async function releaseClaim(supabase, submissionId) {
 }
 
 // Looks up the most recent "what will you try next time?" commitment this
-// account made for this exercise kind, excluding the submission being
-// graded right now — used so feedback can genuinely check in on it. Returns
-// null if there isn't one (first submission of this kind, or they never tapped one).
-async function getPreviousCommitment(supabase, profileId, kind, excludeSubmissionId) {
+// CHILD made for this exercise kind, excluding the submission being graded
+// right now — used so feedback can genuinely check in on it. Scoped by
+// child_id, not just profile_id, now that an account can have more than one
+// learner (see api/child-profile.js) - without that, one sibling's
+// commitment could wrongly surface in another sibling's "checking in on
+// last time" feedback. Returns null if there isn't one (first submission of
+// this kind for this child, or they never tapped one).
+async function getPreviousCommitment(supabase, profileId, childId, kind, excludeSubmissionId) {
   const { data } = await supabase
     .from("commitments")
-    .select("chosen_action, submission_id, submissions!inner(kind)")
+    .select("chosen_action, submission_id, submissions!inner(kind, child_id)")
     .eq("profile_id", profileId)
     .eq("submissions.kind", kind)
+    .eq("submissions.child_id", childId)
     .neq("submission_id", excludeSubmissionId)
     .order("created_at", { ascending: false })
     .limit(1)
@@ -99,6 +105,12 @@ module.exports = async function handler(req, res) {
 
     const user = await requireUser(req);
     const supabase = getSupabaseAdmin();
+
+    // Grading a submission calls the AI too (see generateAndValidate below),
+    // so it shares the same rate-limit bucket as the two generation
+    // endpoints - see the matching comment in api/writing-prompt.js.
+    await checkRateLimit(supabase, user.id, "ai_generate", { limit: 10, windowSeconds: 300 });
+
     const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body || {};
     const { kind } = body;
 
@@ -114,7 +126,7 @@ module.exports = async function handler(req, res) {
 
       const { data: existing, error: fetchErr } = await supabase
         .from("submissions")
-        .select("id, tier, country, grade_label, interest, content, feedback")
+        .select("id, child_id, tier, country, grade_label, interest, content, feedback")
         .eq("id", submissionId)
         .eq("profile_id", user.id)
         .single();
@@ -132,7 +144,7 @@ module.exports = async function handler(req, res) {
         return res.status(409).json({ error: "This writing prompt has already been submitted." });
       }
 
-      const previousCommitment = await getPreviousCommitment(supabase, user.id, "writing", submissionId);
+      const previousCommitment = await getPreviousCommitment(supabase, user.id, existing.child_id, "writing", submissionId);
       let result;
       try {
         const llmPrompt = buildWritingPrompt({
@@ -175,7 +187,7 @@ module.exports = async function handler(req, res) {
 
       const { data: existing, error: fetchErr } = await supabase
         .from("submissions")
-        .select("id, tier, country, grade_label, interest, content, feedback")
+        .select("id, child_id, tier, country, grade_label, interest, content, feedback")
         .eq("id", submissionId)
         .eq("profile_id", user.id)
         .single();
@@ -193,7 +205,7 @@ module.exports = async function handler(req, res) {
       bank.questions.forEach((q, i) => { if (answers[i] === q.correct) score += 1; });
       const totalQuestions = bank.questions.length;
 
-      const previousCommitment = await getPreviousCommitment(supabase, user.id, "reading", submissionId);
+      const previousCommitment = await getPreviousCommitment(supabase, user.id, existing.child_id, "reading", submissionId);
       let result;
       try {
         const llmPrompt = buildReadingPrompt({
