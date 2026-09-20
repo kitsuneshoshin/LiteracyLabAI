@@ -47,6 +47,32 @@ async function generateAndValidate(prompt, tier, country, gradeLabel, submittedT
   throw err;
 }
 
+// Atomically claims a submission for grading: the UPDATE only succeeds if
+// feedback is still null, so of two concurrent requests for the same
+// submission, only one gets rows back. A live test confirmed this race is
+// real - two simultaneous submits for the same prompt both slipped past a
+// plain "if (existing.feedback) return 409" read-then-write check, each
+// firing its own full AI generation call, with the DB left holding
+// whichever one happened to write last. Marking feedback with a _pending
+// placeholder (rather than leaving it null) is what makes the update
+// conditional and exclusive; releaseClaim below clears it back to null if
+// generation then fails, so a failed attempt doesn't get permanently
+// stuck looking "already submitted".
+async function claimSubmission(supabase, submissionId, profileId) {
+  const { data, error } = await supabase
+    .from("submissions")
+    .update({ feedback: { _pending: true } })
+    .eq("id", submissionId)
+    .eq("profile_id", profileId)
+    .is("feedback", null)
+    .select("id");
+  if (error) throw error;
+  return data && data.length > 0;
+}
+async function releaseClaim(supabase, submissionId) {
+  await supabase.from("submissions").update({ feedback: null }).eq("id", submissionId);
+}
+
 // Looks up the most recent "what will you try next time?" commitment this
 // account made for this exercise kind, excluding the submission being
 // graded right now — used so feedback can genuinely check in on it. Returns
@@ -102,14 +128,24 @@ module.exports = async function handler(req, res) {
         return res.status(400).json({ error: `Submission exceeds the ${MAX_CHARS[existing.tier]}-character limit for this tier.` });
       }
 
+      if (!(await claimSubmission(supabase, submissionId, user.id))) {
+        return res.status(409).json({ error: "This writing prompt has already been submitted." });
+      }
+
       const previousCommitment = await getPreviousCommitment(supabase, user.id, "writing", submissionId);
-      const llmPrompt = buildWritingPrompt({
-        tier: existing.tier, country: existing.country, gradeLabel: existing.grade_label, interest: existing.interest,
-        confidenceWriting: body.confidenceWriting, motivation: body.motivation,
-        prompt: generated.prompt, text, previousCommitment,
-        targetNames: targetsForGrade(existing.country, existing.grade_label, existing.tier).targets.map((t) => t.name),
-      });
-      const result = await generateAndValidate(llmPrompt, existing.tier, existing.country, existing.grade_label, text);
+      let result;
+      try {
+        const llmPrompt = buildWritingPrompt({
+          tier: existing.tier, country: existing.country, gradeLabel: existing.grade_label, interest: existing.interest,
+          confidenceWriting: body.confidenceWriting, motivation: body.motivation,
+          prompt: generated.prompt, text, previousCommitment,
+          targetNames: targetsForGrade(existing.country, existing.grade_label, existing.tier).targets.map((t) => t.name),
+        });
+        result = await generateAndValidate(llmPrompt, existing.tier, existing.country, existing.grade_label, text);
+      } catch (genErr) {
+        await releaseClaim(supabase, submissionId);
+        throw genErr;
+      }
 
       const wordCount = text.trim().split(/\s+/).filter(Boolean).length;
       const { error: updateErr } = await supabase
@@ -149,19 +185,29 @@ module.exports = async function handler(req, res) {
       const bank = existing.content && existing.content.generatedPassage;
       if (!bank) return res.status(500).json({ error: "This reading passage is missing its answer key." });
 
+      if (!(await claimSubmission(supabase, submissionId, user.id))) {
+        return res.status(409).json({ error: "This reading passage has already been submitted." });
+      }
+
       let score = 0;
       bank.questions.forEach((q, i) => { if (answers[i] === q.correct) score += 1; });
       const totalQuestions = bank.questions.length;
 
       const previousCommitment = await getPreviousCommitment(supabase, user.id, "reading", submissionId);
-      const llmPrompt = buildReadingPrompt({
-        tier: existing.tier, country: existing.country, gradeLabel: existing.grade_label, interest: existing.interest,
-        confidenceReading: body.confidenceReading, motivation: body.motivation,
-        passageTitle: bank.title, passage: bank.passage, questions: bank.questions,
-        answers, score, totalQuestions, previousCommitment,
-        targetNames: targetsForGrade(existing.country, existing.grade_label, existing.tier).targets.map((t) => t.name),
-      });
-      const result = await generateAndValidate(llmPrompt, existing.tier, existing.country, existing.grade_label);
+      let result;
+      try {
+        const llmPrompt = buildReadingPrompt({
+          tier: existing.tier, country: existing.country, gradeLabel: existing.grade_label, interest: existing.interest,
+          confidenceReading: body.confidenceReading, motivation: body.motivation,
+          passageTitle: bank.title, passage: bank.passage, questions: bank.questions,
+          answers, score, totalQuestions, previousCommitment,
+          targetNames: targetsForGrade(existing.country, existing.grade_label, existing.tier).targets.map((t) => t.name),
+        });
+        result = await generateAndValidate(llmPrompt, existing.tier, existing.country, existing.grade_label);
+      } catch (genErr) {
+        await releaseClaim(supabase, submissionId);
+        throw genErr;
+      }
 
       const { error: updateErr } = await supabase
         .from("submissions")
