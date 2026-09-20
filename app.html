@@ -160,6 +160,17 @@ const FREE_MONTHLY_CAP = 3;
 
 // Attaches the signed-in user's access token to a call against our own /api
 // serverless functions. Throws if somehow called without a session.
+// Browser-native text-to-speech (no API cost) for the "Read prompt aloud"
+// button, which matters most for the Early Years tier — pre/early readers
+// who often can't fully read the prompt themselves.
+function speakText(text) {
+  if (!("speechSynthesis" in window)) return;
+  window.speechSynthesis.cancel(); // stop anything already reading
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.rate = 0.9;
+  window.speechSynthesis.speak(utterance);
+}
+
 async function authedFetch(session, path, options = {}) {
   const res = await fetch(path, {
     ...options,
@@ -1950,7 +1961,7 @@ function TierEditor({ tier, meta, text, setText, words, phase, onSubmit, onNew, 
           <h3 className="font-display font-extrabold text-xl" style={{ color: "var(--ink)" }}>{meta.title}</h3>
         </div>
         <p className="font-read text-lg leading-snug mb-4" style={{ color: "var(--ink)" }}>{meta.prompt}</p>
-        <button className="focus-ring inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold mb-3" style={{ background: "var(--cyan-tint)", color: "var(--cyan-ink)" }}>
+        <button onClick={()=>speakText(meta.prompt)} className="focus-ring inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold mb-3" style={{ background: "var(--cyan-tint)", color: "var(--cyan-ink)" }}>
           <IconMic size={14} strokeWidth={2.3} /> Read prompt aloud
         </button>
         <textarea value={text} onChange={(e)=>setText(e.target.value)} rows={9} disabled={disabled} maxLength={meta.maxChars}
