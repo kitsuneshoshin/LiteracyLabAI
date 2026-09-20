@@ -1843,8 +1843,12 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
               <IconFlame size={15} strokeWidth={2.2} />
             </div>
             <div className="flex-1 min-w-0">
-              <div className="text-[13px] font-semibold" style={{ color: "var(--ink)" }}>{used} of {total} Free Monthly Submissions Used</div>
-              <div className="text-[11px]" style={{ color: "var(--ink-faint)" }}>{locked ? "Upgrade to Pro for unlimited submissions." : "Resets automatically at the start of next month."}</div>
+              {/* total is the 999 sentinel for Pro/admin (see App's usage.cap
+                  handling) - a Pro account was seeing "1 of 999 Free Monthly
+                  Submissions Used", leaking that internal number and mislabeling
+                  a paid plan as free. */}
+              <div className="text-[13px] font-semibold" style={{ color: "var(--ink)" }}>{total >= 999 ? "Pro Plan: unlimited submissions" : `${used} of ${total} Free Monthly Submissions Used`}</div>
+              <div className="text-[11px]" style={{ color: "var(--ink-faint)" }}>{total >= 999 ? "Thanks for being a Pro subscriber." : locked ? "Upgrade to Pro for unlimited submissions." : "Resets automatically at the start of next month."}</div>
             </div>
             <button onClick={()=>setBannerDismissed(true)} className="focus-ring w-7 h-7 rounded-full grid place-items-center shrink-0" style={{ color: "var(--ink-faint)" }} aria-label="Dismiss">
               <IconX size={14} />
