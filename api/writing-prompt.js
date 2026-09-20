@@ -63,22 +63,50 @@ module.exports = async function handler(req, res) {
       childProfile = created;
     }
 
-    const llmPrompt = buildWritingPromptGenerator({ tier, country, gradeLabel, interest });
-    const { parsed } = await generateAndValidate(llmPrompt, tier);
-
-    const { data: saved, error: insertErr } = await supabase
+    // Reserve the slot with a placeholder row BEFORE calling the AI, then
+    // re-check the cap. The check above alone has a real race: two requests
+    // fired close together (e.g. a double-tap on a slow connection, or a
+    // scripted client) can both read "under cap" before either's insert
+    // commits, letting a free account slip one generation past its limit -
+    // confirmed live by firing two concurrent requests, which produced two
+    // separate billed submissions. Reserving first and re-checking after
+    // shrinks that window to just the gap between this insert and the
+    // recount, and — since it happens before the OpenAI call — an account
+    // that does lose the race isn't charged for a generation it never gets.
+    const { data: reserved, error: reserveErr } = await supabase
       .from("submissions")
-      .insert({
-        profile_id: user.id, child_id: childProfile.id, kind: "writing", tier, country, grade_label: gradeLabel, interest,
-        content: { generatedPrompt: parsed },
-      })
-      .select("id, created_at")
+      .insert({ profile_id: user.id, child_id: childProfile.id, kind: "writing", tier, country, grade_label: gradeLabel, interest, content: {} })
+      .select("id")
       .single();
-    if (insertErr) throw insertErr;
+    if (reserveErr) throw reserveErr;
+
+    const recheck = await getMonthlyUsage(supabase, user.id);
+    if (recheck.used > recheck.cap) {
+      await supabase.from("submissions").delete().eq("id", reserved.id);
+      return res.status(402).json({ error: "Free monthly submission limit reached.", usage: { ...recheck, used: recheck.used - 1 } });
+    }
+
+    // If generation fails from here, the reserved row must not be left
+    // behind - it would silently sit there as a permanent, uncorrectable
+    // usage charge for a prompt the student never actually received.
+    let parsed;
+    try {
+      const llmPrompt = buildWritingPromptGenerator({ tier, country, gradeLabel, interest });
+      ({ parsed } = await generateAndValidate(llmPrompt, tier));
+    } catch (genErr) {
+      await supabase.from("submissions").delete().eq("id", reserved.id);
+      throw genErr;
+    }
+
+    const { error: updateErr } = await supabase
+      .from("submissions")
+      .update({ content: { generatedPrompt: parsed } })
+      .eq("id", reserved.id);
+    if (updateErr) throw updateErr;
 
     const updatedUsage = await getMonthlyUsage(supabase, user.id);
     return res.status(200).json({
-      submissionId: saved.id,
+      submissionId: reserved.id,
       title: parsed.title,
       prompt: parsed.prompt,
       usage: updatedUsage,

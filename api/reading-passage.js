@@ -65,23 +65,46 @@ module.exports = async function handler(req, res) {
       childProfile = created;
     }
 
-    const llmPrompt = buildReadingPassagePrompt({ tier, country, gradeLabel, interest });
-    const { parsed } = await generateAndValidate(llmPrompt, tier);
-
-    const { data: saved, error: insertErr } = await supabase
+    // Reserve the slot with a placeholder row BEFORE calling the AI, then
+    // re-check the cap - see the matching comment in api/writing-prompt.js
+    // for why: the plain check-then-insert above has a real race between
+    // two concurrent requests that a live test actually reproduced (both
+    // read "under cap" and both got billed). This shrinks that window and
+    // avoids charging for a generation that turns out to lose the race.
+    const { data: reserved, error: reserveErr } = await supabase
       .from("submissions")
-      .insert({
-        profile_id: user.id, child_id: childProfile.id, kind: "reading", tier, country, grade_label: gradeLabel, interest,
-        content: { generatedPassage: parsed },
-        total_questions: parsed.questions.length,
-      })
-      .select("id, created_at")
+      .insert({ profile_id: user.id, child_id: childProfile.id, kind: "reading", tier, country, grade_label: gradeLabel, interest, content: {} })
+      .select("id")
       .single();
-    if (insertErr) throw insertErr;
+    if (reserveErr) throw reserveErr;
+
+    const recheck = await getMonthlyUsage(supabase, user.id);
+    if (recheck.used > recheck.cap) {
+      await supabase.from("submissions").delete().eq("id", reserved.id);
+      return res.status(402).json({ error: "Free monthly submission limit reached.", usage: { ...recheck, used: recheck.used - 1 } });
+    }
+
+    // If generation fails from here, the reserved row must not be left
+    // behind - it would silently sit there as a permanent, uncorrectable
+    // usage charge for a passage the student never actually received.
+    let parsed;
+    try {
+      const llmPrompt = buildReadingPassagePrompt({ tier, country, gradeLabel, interest });
+      ({ parsed } = await generateAndValidate(llmPrompt, tier));
+    } catch (genErr) {
+      await supabase.from("submissions").delete().eq("id", reserved.id);
+      throw genErr;
+    }
+
+    const { error: updateErr } = await supabase
+      .from("submissions")
+      .update({ content: { generatedPassage: parsed }, total_questions: parsed.questions.length })
+      .eq("id", reserved.id);
+    if (updateErr) throw updateErr;
 
     const updatedUsage = await getMonthlyUsage(supabase, user.id);
     return res.status(200).json({
-      submissionId: saved.id,
+      submissionId: reserved.id,
       title: parsed.title,
       skill: parsed.skill,
       passage: parsed.passage,
