@@ -171,7 +171,12 @@ if (SENTRY_DSN && window.Sentry) {
 // this instead, so it's visible in Sentry the same way server errors are
 // (see api/_lib/auth.js's sendError) rather than only in a browser console
 // nobody is watching.
-function reportError(message, err, extra){
+// Named logAppError, not reportError, deliberately: `reportError()` is a
+// native browser global (used by error-monitoring tooling, including
+// Sentry itself, to dispatch an error report) - shadowing it with a
+// same-named function of a different signature risked exactly the kind of
+// silent cross-wiring that's very hard to debug later.
+function logAppError(message, err, extra){
   console.error(message, err);
   if (SENTRY_DSN && window.Sentry) window.Sentry.captureException(err, { extra: { message, ...extra } });
 }
@@ -1250,7 +1255,7 @@ function ThumbsFeedback({ context, session, submissionId, backendLive }){
     setValue(v);
     if (backendLive && submissionId) {
       authedFetch(session, "/api/commit", { method: "POST", body: JSON.stringify({ submissionId, helpfulRating: v }) })
-        .catch((err)=> reportError("Failed to log feedback rating:", err));
+        .catch((err)=> logAppError("Failed to log feedback rating:", err));
     }
   }
   if (value) {
@@ -1286,7 +1291,7 @@ function CommitPrompt({ options, session, submissionId, backendLive }){
     setPicked(opt);
     if (backendLive && submissionId) {
       authedFetch(session, "/api/commit", { method: "POST", body: JSON.stringify({ submissionId, chosenAction: opt }) })
-        .catch((err)=> reportError("Failed to log commitment:", err));
+        .catch((err)=> logAppError("Failed to log commitment:", err));
     }
   }
   if (picked) {
@@ -2261,7 +2266,7 @@ function App({ session }){
         setPlan(usage.plan || "free");
         if (!initial.onboarded) setView("dashboard");
       } catch (err) {
-        reportError("Failed to load learner profile:", err);
+        logAppError("Failed to load learner profile:", err);
       } finally {
         setProfileLoaded(true);
       }
@@ -2270,7 +2275,7 @@ function App({ session }){
 
   useEffect(()=>{
     if (!backendLive || view !== "dashboard" || !activeChildId) return;
-    authedFetch(session, `/api/history?childId=${activeChildId}`).then(setHistory).catch((err)=> reportError("Failed to load history:", err));
+    authedFetch(session, `/api/history?childId=${activeChildId}`).then(setHistory).catch((err)=> logAppError("Failed to load history:", err));
   }, [backendLive, view, used, activeChildId]);
 
   // Fire-and-forget persistence — the UI doesn't wait on this, it just keeps
@@ -2280,7 +2285,7 @@ function App({ session }){
     if (!backendLive || !activeChildId) return;
     setChildren(prev => prev.map(c => c.id === activeChildId ? { ...c, ...patch } : c));
     authedFetch(session, "/api/child-profile", { method: "POST", body: JSON.stringify({ childId: activeChildId, ...patch }) })
-      .catch((err)=> reportError("Failed to save learner setup:", err));
+      .catch((err)=> logAppError("Failed to save learner setup:", err));
   }
 
   async function addChild(){
@@ -2291,7 +2296,7 @@ function App({ session }){
       switchChild(profile.id);
       setView("dashboard"); // the new learner needs onboarding
     } catch (err) {
-      reportError("Failed to add a learner:", err);
+      logAppError("Failed to add a learner:", err);
     }
   }
   async function removeChild(id){
@@ -2302,7 +2307,7 @@ function App({ session }){
       setChildren(next);
       if (activeChildId === id && next.length) switchChild(next[0].id);
     } catch (err) {
-      reportError("Failed to remove learner:", err);
+      logAppError("Failed to remove learner:", err);
     }
   }
 
@@ -2314,7 +2319,7 @@ function App({ session }){
     if (!backendLive || view !== "dashboard" || !activeChildId) return;
     authedFetch(session, `/api/progress?tier=${tier}&country=${encodeURIComponent(country)}&gradeLabel=${encodeURIComponent(gradeLabel)}&childId=${activeChildId}`)
       .then(setProgress)
-      .catch((err)=> reportError("Failed to load mastery progress:", err));
+      .catch((err)=> logAppError("Failed to load mastery progress:", err));
   }, [backendLive, view, tier, country, gradeLabel, used, activeChildId]);
 
   function setTierAndSyncGrade(k){
@@ -2369,7 +2374,7 @@ function App({ session }){
       setUsed(usage.used);
       setTotal(usage.cap == null ? 999 : usage.cap);
       setPlan(usage.plan || "free");
-    }).catch((err)=> reportError("Failed to refresh usage after upgrade:", err));
+    }).catch((err)=> logAppError("Failed to refresh usage after upgrade:", err));
     window.history.replaceState(null, "", window.location.pathname);
   }, [backendLive]);
   async function handleSignOut(){
@@ -2545,7 +2550,7 @@ function AuthGate(){
 class ErrorBoundary extends React.Component {
   constructor(props) { super(props); this.state = { hasError: false }; }
   static getDerivedStateFromError() { return { hasError: true }; }
-  componentDidCatch(err, info) { reportError("Unhandled render error:", err, { componentStack: info?.componentStack }); }
+  componentDidCatch(err, info) { logAppError("Unhandled render error:", err, { componentStack: info?.componentStack }); }
   render() {
     if (!this.state.hasError) return this.props.children;
     return (
