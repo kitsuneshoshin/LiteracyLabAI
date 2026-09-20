@@ -49,7 +49,7 @@ function targetsClause(targetNames) {
 // found live when testing the revision feature across tiers.
 function revisionToneClause(tier) {
   if (tier !== "middle" && tier !== "high") return "";
-  return ` This student writes in a formal, third-person academic register (no "I"/personal asides) - "revision" must match that same formal register exactly. The interest-based analogy belongs ONLY in the separate "grow" field below, which is explicitly asked to use one; never insert a first-person aside like "like how I..." or a casual interest analogy into "revision" itself, since that text is spliced directly into their formal essay and would break its register.`;
+  return ` This student writes in a formal, third-person academic register (no "I"/personal asides) - "revision" must match that same formal register exactly and must NOT contain any interest-based analogy at all, in ANY phrasing ("like how I...", "similar to how...", "just like...", or otherwise) — a retest of this rule caught the model swapping first-person "like how I" for third-person "similar to how [interest]", which still inserts an out-of-place analogy into a formal essay. "revision" should read as pure academic argument/analysis, with zero comparison to the student's stated interest. The interest-based analogy belongs ONLY in the separate "grow" field below, which is explicitly asked to use one.`;
 }
 
 function highlightsClause(tier) {
@@ -101,7 +101,7 @@ function successCriteria(tier) {
 5. Both vocab definitions are one plain sentence each, framed through the student's interest where natural.
 6. glowTarget and growTarget are copied EXACTLY, character-for-character, from the provided list of skill area names — not paraphrased, shortened, or invented.
 7. Every highlight's "quote" is an exact, verbatim substring you can point to in the submitted text above — not a cleaned-up or paraphrased version of it.
-8. Every "grow" highlight has a "revision" that is an actual rewrite of its quote (different wording, applying the fix) — never the same text repeated, and never just advice about the quote instead of a rewrite of it.${(tier === "middle" || tier === "high") ? '\n9. Every "revision" reads as a natural continuation of this student\'s own formal, third-person essay — no first-person aside, no "like [interest]" analogy dropped into the revision text itself. That framing belongs only in the "grow" field.' : ""}`;
+8. Every "grow" highlight has a "revision" that is an actual rewrite of its quote (different wording, applying the fix) — never the same text repeated, and never just advice about the quote instead of a rewrite of it.${(tier === "middle" || tier === "high") ? '\n9. Every "revision" reads as a natural continuation of this student\'s own formal, third-person essay — pure academic argument, with NO interest-based analogy dropped into the revision text itself in any phrasing ("like how I...", "similar to how...", "just like...", etc). That framing belongs only in the "grow" field.' : ""}`;
 }
 
 function buildWritingPrompt({ tier, country, gradeLabel, interest, confidenceWriting, motivation, prompt, text, targetNames, previousCommitment }) {

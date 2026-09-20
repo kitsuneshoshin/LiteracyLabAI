@@ -1352,7 +1352,18 @@ function AnnotatedText({ text, highlights }){
     let pos = 0;
     spans.forEach(f => {
       out += text.slice(pos, f.start);
-      out += (f.type === "grow" && f.revision) ? f.revision : text.slice(f.start, f.end);
+      let piece = (f.type === "grow" && f.revision) ? f.revision : text.slice(f.start, f.end);
+      // A "grow" quote sometimes excludes its own trailing punctuation
+      // while the AI's revision supplies its own closing punctuation -
+      // found live as a real "..double period.." glitch right at the
+      // splice point (e.g. "...space.. This..."). Only trims when the
+      // very next original character is ALSO sentence-ending punctuation,
+      // so a legitimate "..." ellipsis elsewhere in the story is untouched.
+      const nextChar = text[f.end];
+      if (piece && /[.!?]/.test(piece[piece.length - 1]) && nextChar && /[.!?]/.test(nextChar)) {
+        piece = piece.slice(0, -1);
+      }
+      out += piece;
       pos = f.end;
     });
     out += text.slice(pos);

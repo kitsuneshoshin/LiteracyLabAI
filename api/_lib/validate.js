@@ -154,6 +154,13 @@ function validateFeedback(parsed, { tier, standardsList, targetNames, submittedT
             issues.push(`highlights[${i}].revision is identical to its quote — it must actually rewrite the fragment, not repeat it`);
           } else if (checkString(h?.quote, 1, 100000) && revisionDuplicatesExistingText(h.revision, normalizedText, normalizeForMatch(h.quote))) {
             issues.push(`highlights[${i}].revision restates wording that already appears elsewhere in the student's text — since it's spliced in place of the quote only, this would duplicate that text in the final story`);
+          } else if ((tier === "middle" || tier === "high") && /\b(like how|similar to how|just like|much like)\b/i.test(h.revision)) {
+            // Prompt instructions alone weren't enough here - a retest of the
+            // formal-tone fix caught the model swapping first-person "like
+            // how I" for third-person "similar to how [interest]", still an
+            // out-of-place analogy spliced into a formal essay. Enforced
+            // here rather than left to hoping the model follows the prompt.
+            issues.push(`highlights[${i}].revision contains an interest-based analogy ("${h.revision}") - for middle/high tiers, revision must be pure formal academic writing with no analogy of any kind; the analogy belongs only in the "grow" field`);
           }
         }
       });
