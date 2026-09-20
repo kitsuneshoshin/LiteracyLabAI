@@ -1,6 +1,7 @@
 const { getSupabaseAdmin } = require("./_lib/supabaseAdmin");
 const { requireUser, sendError } = require("./_lib/auth");
-const { targetsForGrade, isMappedCountry, curriculumLabel } = require("./_lib/masteryTargets");
+const { targetsForGrade, isMappedCountry } = require("./_lib/masteryTargets");
+const { curriculumLabel } = require("./_lib/curriculum");
 
 // Real per-skill mastery, computed from this student's own submission
 // history rather than the static placeholder numbers the dashboard used to
