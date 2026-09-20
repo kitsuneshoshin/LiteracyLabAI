@@ -35,6 +35,27 @@ function normalizeForMatch(s) {
   return String(s).toLowerCase().replace(/\s+/g, " ").trim();
 }
 
+// Catches a real failure mode found in live testing: the model tries to
+// satisfy a "join these sentences with a conjunction" suggestion by
+// restating the PREVIOUS sentence inside "revision" (e.g. quote "It saw a
+// cat.", revision "The dog ran fast and saw a cat."). Since the app only
+// splices "revision" in place of "quote" - the previous sentence stays
+// exactly where it was - that produces a visible duplicate: "The dog ran
+// fast. The dog ran fast and saw a cat." Flags it when revision's opening
+// words are the same as the words immediately preceding the quote.
+function revisionDuplicatesPrecedingContext(revision, normalizedSubmittedText, normalizedQuote) {
+  const quoteIdx = normalizedSubmittedText.indexOf(normalizedQuote);
+  if (quoteIdx <= 0) return false;
+  const precedingWords = normalizedSubmittedText.slice(0, quoteIdx).trim().split(/\s+/).filter(Boolean);
+  const revisionWords = normalizeForMatch(revision).split(/\s+/).filter(Boolean);
+  for (let n = Math.min(6, precedingWords.length, revisionWords.length); n >= 3; n--) {
+    const tail = precedingWords.slice(-n).join(" ");
+    const head = revisionWords.slice(0, n).join(" ");
+    if (tail && tail === head) return true;
+  }
+  return false;
+}
+
 // glowTarget/growTarget drive the real mastery computation in
 // api/progress.js, which looks the value up as an exact key in a Map keyed
 // by the canonical target names — a paraphrase wouldn't fail loudly, it
@@ -127,6 +148,8 @@ function validateFeedback(parsed, { tier, standardsList, targetNames, submittedT
             issues.push(`highlights[${i}].revision is missing or an unreasonable length (required for type "grow")`);
           } else if (checkString(h?.quote, 1, 100000) && normalizeForMatch(h.revision) === normalizeForMatch(h.quote)) {
             issues.push(`highlights[${i}].revision is identical to its quote — it must actually rewrite the fragment, not repeat it`);
+          } else if (checkString(h?.quote, 1, 100000) && revisionDuplicatesPrecedingContext(h.revision, normalizedText, normalizeForMatch(h.quote))) {
+            issues.push(`highlights[${i}].revision restates wording from the sentence immediately before the quote — since it's spliced in place of the quote only, this would duplicate that text in the final story`);
           }
         }
       });
