@@ -7,6 +7,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.24.7/babel.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@sentry/browser@8/build/bundle.min.js"></script>
 
 <style>
   /* "Trusted Advisor" palette (Soft Stone + Muted Burgundy). The variable
@@ -156,6 +157,25 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const BACKEND_CONFIGURED = SUPABASE_URL.startsWith("http") && SUPABASE_ANON_KEY.length > 20;
 const supabaseClient = BACKEND_CONFIGURED ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
+// Error monitoring (Sentry). DSNs are meant to be public/client-safe, same
+// as the Supabase anon key above — safe to hardcode here rather than needing
+// a build step. Left blank, this is a no-op: no script errors, nothing
+// reported, exactly the previous behavior. Sentry.init only runs once a
+// real DSN is filled in.
+const SENTRY_DSN = "";
+if (SENTRY_DSN && window.Sentry) {
+  window.Sentry.init({ dsn: SENTRY_DSN, environment: BACKEND_CONFIGURED ? "production" : "demo", tracesSampleRate: 0 });
+}
+// Every console.error(...) call site for an unexpected failure (not a
+// normal validation message the UI already surfaces) should go through
+// this instead, so it's visible in Sentry the same way server errors are
+// (see api/_lib/auth.js's sendError) rather than only in a browser console
+// nobody is watching.
+function reportError(message, err, extra){
+  console.error(message, err);
+  if (SENTRY_DSN && window.Sentry) window.Sentry.captureException(err, { extra: { message, ...extra } });
+}
+
 const FREE_MONTHLY_CAP = 3;
 
 // Attaches the signed-in user's access token to a call against our own /api
@@ -203,14 +223,21 @@ function Icon({ children, size = 20, strokeWidth = 1.8, className = "" }) {
 }
 const IconFlask = (p) => <Icon {...p}><path d="M9 3h6M10 3v6.2L4.8 18a2 2 0 0 0 1.7 3h11a2 2 0 0 0 1.7-3L14 9.2V3" /><path d="M7.5 15h9" /></Icon>;
 const IconBook = (p) => <Icon {...p}><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15.5H6.5A2.5 2.5 0 0 0 4 21" /><path d="M4 5.5v15A2.5 2.5 0 0 0 6.5 23" /></Icon>;
-// Brand mark: a quill whose trailing stroke resolves into a rising bar-chart / growth arrow.
-// Brand mark: a fountain pen nib seated inside a laboratory flask silhouette.
+// Brand mark: a quill feather with a rising particle-trail swoosh, sourced
+// by the user. Recolored from its original fixed hex palette (navy/bright
+// cyan/amber) onto this site's actual theme variables, so it matches the
+// Muted Burgundy + Soft Stone palette and adapts correctly in dark mode -
+// the pasted version would otherwise have clashed with every other
+// burgundy-accented element on the page.
 function IconMark({ size = 24 }){
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-      <path d="M9 3h6M10 3v6.2L4.8 18a2 2 0 0 0 1.7 3h11a2 2 0 0 0 1.7-3L14 9.2V3" stroke="var(--cyan)" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M12 10l-2.7 6.4c-.3.8.2 1.6 1.1 1.6h3.2c.9 0 1.4-.8 1.1-1.6L12 10z" fill="var(--gold)" />
-      <path d="M12 12.2v4.4" stroke="var(--ink)" strokeWidth="1" strokeLinecap="round" />
+    <svg width={size} height={size} viewBox="0 0 120 120" fill="none">
+      <path d="M85 15C60 25 40 50 35 70L28 85L43 78C60 70 80 50 85 15Z" fill="var(--ink)" />
+      <path d="M32 80L20 95L35 90L40 82L32 80Z" fill="var(--ink)" />
+      <path d="M20 95C35 102 60 92 80 98" stroke="var(--cyan)" strokeWidth="4" strokeLinecap="round" />
+      <circle cx="88" cy="94" r="3" fill="var(--cyan)" />
+      <circle cx="96" cy="97" r="2" fill="var(--cyan)" />
+      <circle cx="93" cy="89" r="2.5" fill="var(--cyan)" />
     </svg>
   );
 }
@@ -241,6 +268,7 @@ const IconMoon = (p) => <Icon {...p}><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0
 const IconPaw = (p) => <Icon {...p}><circle cx="7" cy="9" r="1.6" /><circle cx="12" cy="6.5" r="1.6" /><circle cx="17" cy="9" r="1.6" /><path d="M8 15c0-2 1.8-3.3 4-3.3s4 1.3 4 3.3-1.8 3.5-4 3.5-4-1.5-4-3.5z" /></Icon>;
 const IconBall = (p) => <Icon {...p}><circle cx="12" cy="12" r="8.5" /><path d="M12 3.5v5M12 15.5v5M4 8.5l7 3.5M20 8.5l-7 3.5M4 15.5l7-3.5M20 15.5l-7-3.5" /></Icon>;
 const IconX = (p) => <Icon {...p}><path d="M6 6l12 12M18 6L6 18" /></Icon>;
+const IconPlus = (p) => <Icon {...p}><path d="M12 5v14M5 12h14" /></Icon>;
 const IconThumbsUp = (p) => <Icon {...p}><path d="M7 11v9H4v-9zM7 11l3.5-7a2 2 0 0 1 2 2.2L11.8 9H18a2 2 0 0 1 1.9 2.7l-2 6A2 2 0 0 1 16 19H7" /></Icon>;
 const IconThumbsDown = (p) => <Icon {...p}><path d="M17 13V4h3v9zM17 13l-3.5 7a2 2 0 0 1-2-2.2l.7-2.8H6a2 2 0 0 1-1.9-2.7l2-6A2 2 0 0 1 8 5h9" /></Icon>;
 const IconBookOpenCheck = (p) => <Icon {...p}><path d="M12 5C10 3.5 6.5 3 4 3.5v14c2.5-.5 6 0 8 1.5V5z" /><path d="M12 5c2-1.5 5.5-2 8-1.5v14c-2.5-.5-6 0-8 1.5V5z" /></Icon>;
@@ -900,7 +928,30 @@ function StatTile({ icon: IconEl, label, value, sub, accent }){
   );
 }
 
-function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests, toggleInterest, confidenceWriting, setConfidenceWriting, confidenceReading, setConfidenceReading, motivation, setMotivation, used, total, plan, session, setView, history, progress, backendLive, needsOnboarding, onCompleteOnboarding }){
+// One pill per learner on the account, plus "+ Add learner". Always shown
+// (even with just one child) so the option to add another is discoverable
+// rather than hidden until you already have two - the cost of showing it
+// for the common single-child case is one small extra row, not clutter.
+function ChildSwitcher({ children_, activeChildId, onSwitchChild, onAddChild, showAdd = true }){
+  return (
+    <div className="flex items-center gap-1.5 rounded-full border p-1 w-fit mb-4 flex-wrap" style={{ borderColor: "var(--border)", background: "var(--surface-2)" }}>
+      {children_.map(c=>(
+        <button key={c.id} onClick={()=>onSwitchChild(c.id)}
+          className="focus-ring rounded-full px-3.5 py-1.5 text-xs font-semibold transition-colors"
+          style={ c.id===activeChildId ? { background: "var(--ink)", color: "white" } : { color: "var(--ink-soft)" } }>
+          {c.display_name || "Learner"}
+        </button>
+      ))}
+      {showAdd && (
+        <button onClick={onAddChild} className="focus-ring inline-flex items-center gap-1 rounded-full px-3.5 py-1.5 text-xs font-semibold" style={{ color: "var(--cyan-ink)" }}>
+          <IconPlus size={13} strokeWidth={2.4} /> Add learner
+        </button>
+      )}
+    </div>
+  );
+}
+
+function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests, toggleInterest, confidenceWriting, setConfidenceWriting, confidenceReading, setConfidenceReading, motivation, setMotivation, displayName, setDisplayName, children_, activeChildId, onSwitchChild, onAddChild, onRemoveChild, used, total, plan, session, setView, history, progress, backendLive, needsOnboarding, onCompleteOnboarding }){
   const grades = GRADE_DATA[country].grades;
   const gradeLabel = grades[gradeIdx];
   const remaining = total - used;
@@ -960,6 +1011,9 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
     )}
     <div className="mx-auto max-w-6xl px-4 sm:px-6 py-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
       <div className="lg:col-span-2 flex flex-col gap-6">
+        {backendLive && (
+          <ChildSwitcher children_={children_} activeChildId={activeChildId} onSwitchChild={onSwitchChild} onAddChild={onAddChild} />
+        )}
         <div className="card p-6">
           <div className="flex items-start justify-between gap-4 flex-wrap mb-5">
             <div>
@@ -971,6 +1025,15 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
               {TIER_META[tier].label} · {TIER_META[tier].ageRange}
             </span>
           </div>
+
+          {backendLive && (
+            <label className="flex flex-col gap-1.5 mb-4">
+              <span className="text-xs font-semibold" style={{ color: "var(--ink-soft)" }}>Learner's name</span>
+              <input type="text" value={displayName} onChange={(e)=>setDisplayName(e.target.value)} placeholder="e.g. Maya"
+                className="focus-ring w-full rounded-xl border px-3.5 py-2.5 text-sm font-medium"
+                style={{ borderColor: "var(--border)", background: "var(--surface)", color: "var(--ink)" }} />
+            </label>
+          )}
 
           <div className="grid sm:grid-cols-2 gap-4 mb-6">
             <label className="flex flex-col gap-1.5">
@@ -1026,6 +1089,13 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
               <Pill key={id} active={motivation===id} onClick={()=>setMotivation(id)}>{label}</Pill>
             ))}
           </div>
+
+          {backendLive && children_.length > 1 && (
+            <button onClick={()=>{ if (window.confirm(`Remove ${displayName || "this learner"}? This deletes all of their submissions and progress history permanently.`)) onRemoveChild(activeChildId); }}
+              className="focus-ring mt-6 pt-4 border-t text-xs font-semibold w-full text-left" style={{ borderColor: "var(--border-soft)", color: "var(--bad)" }}>
+              Remove {displayName || "this learner"} from this account
+            </button>
+          )}
         </div>
 
         <div className="card p-6">
@@ -1180,7 +1250,7 @@ function ThumbsFeedback({ context, session, submissionId, backendLive }){
     setValue(v);
     if (backendLive && submissionId) {
       authedFetch(session, "/api/commit", { method: "POST", body: JSON.stringify({ submissionId, helpfulRating: v }) })
-        .catch((err)=> console.error("Failed to log feedback rating:", err));
+        .catch((err)=> reportError("Failed to log feedback rating:", err));
     }
   }
   if (value) {
@@ -1216,7 +1286,7 @@ function CommitPrompt({ options, session, submissionId, backendLive }){
     setPicked(opt);
     if (backendLive && submissionId) {
       authedFetch(session, "/api/commit", { method: "POST", body: JSON.stringify({ submissionId, chosenAction: opt }) })
-        .catch((err)=> console.error("Failed to log commitment:", err));
+        .catch((err)=> reportError("Failed to log commitment:", err));
     }
   }
   if (picked) {
@@ -1257,7 +1327,7 @@ function AnnotatedText({ text, highlights }){
       if (!h?.quote) return;
       const idx = lowerText.indexOf(String(h.quote).toLowerCase());
       if (idx === -1) return; // defensive: shouldn't happen, server validates this, but never crash the UI over it
-      found.push({ start: idx, end: idx + h.quote.length, type: h.type === "grow" ? "grow" : "glow", note: h.note, key: i });
+      found.push({ start: idx, end: idx + h.quote.length, type: h.type === "grow" ? "grow" : "glow", note: h.note, revision: h.revision, key: i });
     });
     found.sort((a,b)=> a.start - b.start);
     const nonOverlapping = [];
@@ -1293,11 +1363,21 @@ function AnnotatedText({ text, highlights }){
         <span className="inline-flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full" style={{ background: "var(--good)" }} />Glow</span>
         <span className="inline-flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full" style={{ background: "var(--bad)" }} />Grow</span>
       </div>
-      <div className="flex flex-col gap-1.5 mt-3 pt-3 border-t" style={{ borderColor: "var(--border-soft)" }}>
+      <div className="flex flex-col gap-2.5 mt-3 pt-3 border-t" style={{ borderColor: "var(--border-soft)" }}>
         {spans.map((f, i)=>(
-          <div key={i} className="text-[12.5px] leading-snug flex items-start gap-1.5">
-            <span className="font-bold shrink-0" style={{ color: f.type === "glow" ? "var(--good)" : "var(--bad)" }}>{f.type === "glow" ? "✓" : "→"}</span>
-            <span style={{ color: "var(--ink-soft)" }}><strong style={{ color: "var(--ink)" }}>&ldquo;{text.slice(f.start, f.end)}&rdquo;</strong> — {f.note}</span>
+          <div key={i} className="text-[12.5px] leading-snug">
+            <div className="flex items-start gap-1.5">
+              <span className="font-bold shrink-0" style={{ color: f.type === "glow" ? "var(--good)" : "var(--bad)" }}>{f.type === "glow" ? "✓" : "→"}</span>
+              <span style={{ color: "var(--ink-soft)" }}><strong style={{ color: "var(--ink)" }}>&ldquo;{text.slice(f.start, f.end)}&rdquo;</strong> — {f.note}</span>
+            </div>
+            {/* The suggestion applied directly to the student's own sentence,
+                not just described — this is the actual "make it real" part. */}
+            {f.type === "grow" && f.revision && (
+              <div className="mt-1 ml-5 rounded-lg px-3 py-2" style={{ background: "var(--good-tint)" }}>
+                <span className="text-[10.5px] font-bold uppercase tracking-wide block mb-0.5" style={{ color: "var(--good)" }}>Try it like this</span>
+                <span className="font-read" style={{ color: "var(--ink)" }}>{f.revision}</span>
+              </div>
+            )}
           </div>
         ))}
       </div>
@@ -1492,7 +1572,7 @@ function ReadingFeedbackPanel({ tier, country, interest, confidence, motivation,
 /* ---------------------------------------------------------------- */
 /* Student Workspace                                                  */
 /* ---------------------------------------------------------------- */
-function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, interests, confidenceWriting, confidenceReading, motivation, used, total, onSubmit, session, backendLive }){
+function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, interests, confidenceWriting, confidenceReading, motivation, used, total, onSubmit, session, backendLive, childId, children_, onSwitchChild }){
   const grades = GRADE_DATA[country].grades;
   const gradeLabel = grades[gradeIdx];
   const [exerciseType, setExerciseType] = useState("writing"); // writing | reading
@@ -1540,13 +1620,15 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
   // tailored to tier/country/interest, consuming this account's usage
   // credit up front — same reasoning and pattern as requestNewPassage below,
   // so a returning student doesn't see the same prompt every session.
+  const cacheKey = `${childId}:${tier}`; // scoped per learner too, not just tier - a sibling's cached prompt must never leak into another child's tab
+
   async function requestNewWritingPrompt(force){
     if (!backendLive || locked) return;
-    if (!force && pendingWritingRef.current[tier]) {
+    if (!force && pendingWritingRef.current[cacheKey]) {
       // Already have an ungraded prompt for this tier from earlier in the
       // session (e.g. the student tabbed away and back) - reuse it instead
       // of spending another credit on a prompt they haven't answered yet.
-      setWritingPrompt(pendingWritingRef.current[tier]);
+      setWritingPrompt(pendingWritingRef.current[cacheKey]);
       return;
     }
     setWritingLoading(true);
@@ -1555,10 +1637,10 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
     try {
       const result = await authedFetch(session, "/api/writing-prompt", {
         method: "POST",
-        body: JSON.stringify({ tier, country, gradeLabel, interest: activeInterest }),
+        body: JSON.stringify({ tier, country, gradeLabel, interest: activeInterest, childId }),
       });
       const fresh = { submissionId: result.submissionId, title: result.title, prompt: result.prompt };
-      pendingWritingRef.current[tier] = fresh;
+      pendingWritingRef.current[cacheKey] = fresh;
       setWritingPrompt(fresh);
       onSubmit(result.usage);
     } catch (err) {
@@ -1575,10 +1657,10 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
   async function requestNewPassage(force){
     if (!backendLive) { setReadingPassageIdx(pickPassageIndex(tier)); return; }
     if (locked) return;
-    if (!force && pendingReadingRef.current[tier]) {
+    if (!force && pendingReadingRef.current[cacheKey]) {
       // Same reasoning as requestNewWritingPrompt above - reuse an ungraded
       // passage for this tier instead of re-billing a credit for it.
-      setReadingPassage(pendingReadingRef.current[tier]);
+      setReadingPassage(pendingReadingRef.current[cacheKey]);
       return;
     }
     setReadingLoading(true);
@@ -1587,10 +1669,10 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
     try {
       const result = await authedFetch(session, "/api/reading-passage", {
         method: "POST",
-        body: JSON.stringify({ tier, country, gradeLabel, interest: activeInterest }),
+        body: JSON.stringify({ tier, country, gradeLabel, interest: activeInterest, childId }),
       });
       const fresh = { submissionId: result.submissionId, title: result.title, skill: result.skill, passage: result.passage, questions: result.questions };
-      pendingReadingRef.current[tier] = fresh;
+      pendingReadingRef.current[cacheKey] = fresh;
       setReadingPassage(fresh);
       onSubmit(result.usage);
     } catch (err) {
@@ -1619,17 +1701,17 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
         // prompt for free (below), and otherwise leaves it to the explicit
         // "Get my prompt" button in the render, so spending a credit always
         // requires a deliberate tap, on first visit or any later one.
-        const cached = pendingWritingRef.current[tier];
+        const cached = pendingWritingRef.current[cacheKey];
         setWritingPrompt(cached || null);
       } else setText(PROMPTS[tier].sample);
     } else {
       if (backendLive) {
-        setReadingPassage(pendingReadingRef.current[tier] || null);
+        setReadingPassage(pendingReadingRef.current[cacheKey] || null);
       } else {
         requestNewPassage(); // demo mode: free, just rerolls the local static bank
       }
     }
-  }, [tier, exerciseType]);
+  }, [tier, exerciseType, childId]);
   useEffect(()=>{
     // Keeps activeInterest valid as either the child's selected interests or
     // the tier itself changes (e.g. tabbing from High School, where "exam"
@@ -1678,8 +1760,8 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
       // This tier's pending generation is now used up (resubmitting it would
       // 409) - drop it from the cache so tabbing back to this tier later
       // fetches a genuinely new one instead of reusing the completed one.
-      if (exerciseType === "writing") delete pendingWritingRef.current[tier];
-      else delete pendingReadingRef.current[tier];
+      if (exerciseType === "writing") delete pendingWritingRef.current[cacheKey];
+      else delete pendingReadingRef.current[cacheKey];
       if (exerciseType === "reading") {
         setReadingScore(result.score);
         // The answer key was withheld when the passage was generated so it
@@ -1708,6 +1790,9 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
 
   return (
     <div className="mx-auto max-w-6xl px-4 sm:px-6 py-8">
+      {backendLive && children_ && children_.length > 1 && (
+        <ChildSwitcher children_={children_} activeChildId={childId} onSwitchChild={onSwitchChild} showAdd={false} />
+      )}
       <div className="flex items-center justify-between flex-wrap gap-3 mb-4">
         <div>
           <h2 className="font-display font-bold text-2xl" style={{ color: "var(--ink)" }}>Student Workspace</h2>
@@ -2101,25 +2186,43 @@ function TierEditor({ tier, meta, text, setText, words, phase, onSubmit, onNew, 
 /* ---------------------------------------------------------------- */
 /* App                                                                */
 /* ---------------------------------------------------------------- */
+// Fallback used only in demo mode (no backend) — mirrors what the single
+// hardcoded default child used to be, so demo mode's behavior is unchanged.
+const DEMO_CHILD = { id: "demo", display_name: "My Learner", country: "🇬🇧 United Kingdom", grade_idx: 5, interests: ["space","gaming"], confidence_writing: "growing", confidence_reading: "growing", motivation: "enjoyment", onboarded: true };
+
 function App({ session }){
   const backendLive = BACKEND_CONFIGURED && !!session;
 
   const [theme, setTheme] = useState("system");
   const [view, setView] = useState("workspace");
-  const [country, setCountry] = useState("🇬🇧 United Kingdom");
-  const [gradeIdx, setGradeIdx] = useState(5); // Year 5
   const [tierOverride, setTierOverride] = useState(null);
-  const [interests, setInterests] = useState(["space","gaming"]);
-  const [confidenceWriting, setConfidenceWriting] = useState("growing");
-  const [confidenceReading, setConfidenceReading] = useState("growing");
-  const [motivation, setMotivation] = useState("enjoyment");
   const [used, setUsed] = useState(1);
   const [total, setTotal] = useState(FREE_MONTHLY_CAP);
   const [plan, setPlan] = useState("free");
   const [profileLoaded, setProfileLoaded] = useState(!backendLive);
   const [history, setHistory] = useState(null);
   const [progress, setProgress] = useState(null);
-  const [needsOnboarding, setNeedsOnboarding] = useState(false);
+  // A household can have more than one learner (see api/child-profile.js) -
+  // `children` is every learner on this account, `activeChildId` is whichever
+  // one is currently shown. Everything that used to be single "profile"
+  // state (country, gradeIdx, interests, etc.) is now derived from whichever
+  // child is active, rather than its own state, so there's one source of
+  // truth and switching children can't leave stale fields behind.
+  const [children, setChildren] = useState([]);
+  const [activeChildId, setActiveChildId] = useState(null);
+  const activeChild = backendLive ? (children.find(c => c.id === activeChildId) || null) : DEMO_CHILD;
+  const country = activeChild?.country || "🇬🇧 United Kingdom";
+  // gradeIdxOverride exists only so clicking a tier tab (setTierAndSyncGrade
+  // below) can preview a different age tier's content without permanently
+  // changing the child's real stored grade - a local-only override, distinct
+  // from tierOverride's own child in that it never gets persisted.
+  const [gradeIdxOverride, setGradeIdxOverride] = useState(null);
+  const gradeIdx = gradeIdxOverride ?? (activeChild?.grade_idx ?? 5);
+  const interests = activeChild?.interests || [];
+  const confidenceWriting = activeChild?.confidence_writing || "growing";
+  const confidenceReading = activeChild?.confidence_reading || "growing";
+  const motivation = activeChild?.motivation || "enjoyment";
+  const needsOnboarding = backendLive && activeChild ? !activeChild.onboarded : false;
 
   useEffect(()=>{
     const root = document.documentElement;
@@ -2127,30 +2230,38 @@ function App({ session }){
     else root.setAttribute("data-theme", theme);
   }, [theme]);
 
-  // On login: pull the real learner-setup and usage numbers instead of the local defaults.
+  function rememberActiveChild(id){
+    try { localStorage.setItem("ll_active_child_" + session.user.id, id); } catch {}
+  }
+  function switchChild(id){
+    setActiveChildId(id);
+    setTierOverride(null);
+    setGradeIdxOverride(null);
+    rememberActiveChild(id);
+  }
+
+  // On login: pull every learner on this account and the account-wide usage
+  // numbers (the free/Pro cap is shared across a household's children, not
+  // per-child - it's billed per account) instead of the local defaults.
   useEffect(()=>{
-    if (!backendLive) return;
+    if (!backendLive) { setProfileLoaded(true); return; }
     (async ()=>{
       try {
-        const [{ profile }, usage] = await Promise.all([
+        const [{ profiles }, usage] = await Promise.all([
           authedFetch(session, "/api/child-profile"),
           authedFetch(session, "/api/usage"),
         ]);
-        setCountry(profile.country);
-        setGradeIdx(profile.grade_idx);
-        setInterests(profile.interests || []);
-        setConfidenceWriting(profile.confidence_writing);
-        setConfidenceReading(profile.confidence_reading);
-        setMotivation(profile.motivation);
+        setChildren(profiles);
+        let remembered = null;
+        try { remembered = localStorage.getItem("ll_active_child_" + session.user.id); } catch {}
+        const initial = profiles.find(p => p.id === remembered) || profiles[0];
+        setActiveChildId(initial.id);
         setUsed(usage.used);
         setTotal(usage.cap == null ? 999 : usage.cap);
         setPlan(usage.plan || "free");
-        if (!profile.onboarded) {
-          setNeedsOnboarding(true);
-          setView("dashboard");
-        }
+        if (!initial.onboarded) setView("dashboard");
       } catch (err) {
-        console.error("Failed to load learner profile:", err);
+        reportError("Failed to load learner profile:", err);
       } finally {
         setProfileLoaded(true);
       }
@@ -2158,16 +2269,41 @@ function App({ session }){
   }, [backendLive]);
 
   useEffect(()=>{
-    if (!backendLive || view !== "dashboard") return;
-    authedFetch(session, "/api/history").then(setHistory).catch((err)=> console.error("Failed to load history:", err));
-  }, [backendLive, view, used]);
+    if (!backendLive || view !== "dashboard" || !activeChildId) return;
+    authedFetch(session, `/api/history?childId=${activeChildId}`).then(setHistory).catch((err)=> reportError("Failed to load history:", err));
+  }, [backendLive, view, used, activeChildId]);
 
-  // Fire-and-forget persistence — the UI doesn't wait on this, it just keeps the
-  // server's copy of the learner setup in sync with what's shown locally.
+  // Fire-and-forget persistence — the UI doesn't wait on this, it just keeps
+  // the server's copy of the active child's setup in sync with what's shown
+  // locally (updated optimistically here, before the request even resolves).
   function persistProfile(patch){
+    if (!backendLive || !activeChildId) return;
+    setChildren(prev => prev.map(c => c.id === activeChildId ? { ...c, ...patch } : c));
+    authedFetch(session, "/api/child-profile", { method: "POST", body: JSON.stringify({ childId: activeChildId, ...patch }) })
+      .catch((err)=> reportError("Failed to save learner setup:", err));
+  }
+
+  async function addChild(){
     if (!backendLive) return;
-    authedFetch(session, "/api/child-profile", { method: "POST", body: JSON.stringify(patch) })
-      .catch((err)=> console.error("Failed to save learner setup:", err));
+    try {
+      const { profile } = await authedFetch(session, "/api/child-profile", { method: "POST", body: JSON.stringify({}) });
+      setChildren(prev => [...prev, profile]);
+      switchChild(profile.id);
+      setView("dashboard"); // the new learner needs onboarding
+    } catch (err) {
+      reportError("Failed to add a learner:", err);
+    }
+  }
+  async function removeChild(id){
+    if (!backendLive) return;
+    try {
+      await authedFetch(session, "/api/child-profile", { method: "DELETE", body: JSON.stringify({ childId: id }) });
+      const next = children.filter(c => c.id !== id);
+      setChildren(next);
+      if (activeChildId === id && next.length) switchChild(next[0].id);
+    } catch (err) {
+      reportError("Failed to remove learner:", err);
+    }
   }
 
   const naturalTier = tierForGrade(country, gradeIdx);
@@ -2175,38 +2311,34 @@ function App({ session }){
   const gradeLabel = GRADE_DATA[country].grades[gradeIdx];
 
   useEffect(()=>{
-    if (!backendLive || view !== "dashboard") return;
-    authedFetch(session, `/api/progress?tier=${tier}&country=${encodeURIComponent(country)}&gradeLabel=${encodeURIComponent(gradeLabel)}`)
+    if (!backendLive || view !== "dashboard" || !activeChildId) return;
+    authedFetch(session, `/api/progress?tier=${tier}&country=${encodeURIComponent(country)}&gradeLabel=${encodeURIComponent(gradeLabel)}&childId=${activeChildId}`)
       .then(setProgress)
-      .catch((err)=> console.error("Failed to load mastery progress:", err));
-  }, [backendLive, view, tier, country, gradeLabel, used]);
+      .catch((err)=> reportError("Failed to load mastery progress:", err));
+  }, [backendLive, view, tier, country, gradeLabel, used, activeChildId]);
 
   function setTierAndSyncGrade(k){
     setTierOverride(k);
-    setGradeIdx(defaultGradeIndexForTier(country, k));
+    setGradeIdxOverride(defaultGradeIndexForTier(country, k)); // preview only - never persisted
   }
   function handleCountryChange(c){
-    setCountry(c);
-    setGradeIdx(defaultGradeIndexForTier(c, tier));
+    setGradeIdxOverride(null);
     persistProfile({ country: c, grade_idx: defaultGradeIndexForTier(c, tier) });
   }
   function handleGradeChange(idx){
-    setGradeIdx(idx);
     setTierOverride(null);
+    setGradeIdxOverride(null);
     persistProfile({ grade_idx: idx });
   }
   function toggleInterest(id){
-    setInterests(prev => {
-      const next = prev.includes(id) ? prev.filter(x=>x!==id) : [...prev, id];
-      persistProfile({ interests: next });
-      return next;
-    });
+    const next = interests.includes(id) ? interests.filter(x=>x!==id) : [...interests, id];
+    persistProfile({ interests: next });
   }
-  function handleSetConfidenceWriting(v){ setConfidenceWriting(v); persistProfile({ confidence_writing: v }); }
-  function handleSetConfidenceReading(v){ setConfidenceReading(v); persistProfile({ confidence_reading: v }); }
-  function handleSetMotivation(v){ setMotivation(v); persistProfile({ motivation: v }); }
+  function handleSetConfidenceWriting(v){ persistProfile({ confidence_writing: v }); }
+  function handleSetConfidenceReading(v){ persistProfile({ confidence_reading: v }); }
+  function handleSetMotivation(v){ persistProfile({ motivation: v }); }
+  function handleSetDisplayName(v){ persistProfile({ display_name: v }); }
   function completeOnboarding(){
-    setNeedsOnboarding(false);
     persistProfile({ onboarded: true });
     setView("workspace");
   }
@@ -2237,7 +2369,7 @@ function App({ session }){
       setUsed(usage.used);
       setTotal(usage.cap == null ? 999 : usage.cap);
       setPlan(usage.plan || "free");
-    }).catch((err)=> console.error("Failed to refresh usage after upgrade:", err));
+    }).catch((err)=> reportError("Failed to refresh usage after upgrade:", err));
     window.history.replaceState(null, "", window.location.pathname);
   }, [backendLive]);
   async function handleSignOut(){
@@ -2278,12 +2410,15 @@ function App({ session }){
           confidenceWriting={confidenceWriting} setConfidenceWriting={handleSetConfidenceWriting}
           confidenceReading={confidenceReading} setConfidenceReading={handleSetConfidenceReading}
           motivation={motivation} setMotivation={handleSetMotivation}
+          displayName={activeChild?.display_name || ""} setDisplayName={handleSetDisplayName}
+          children_={children} activeChildId={activeChildId} onSwitchChild={switchChild} onAddChild={addChild} onRemoveChild={removeChild}
           used={used} total={total} plan={plan} session={session} setView={setView} history={history} progress={progress} backendLive={backendLive}
           needsOnboarding={needsOnboarding} onCompleteOnboarding={completeOnboarding} />
       ) : (
         <Workspace country={country} gradeIdx={gradeIdx} setGradeIdx={handleGradeChange} tier={tier} setTierOverride={setTierAndSyncGrade}
           interests={interests} confidenceWriting={confidenceWriting} confidenceReading={confidenceReading} motivation={motivation}
-          used={used} total={total} onSubmit={handleSubmit} session={session} backendLive={backendLive} />
+          used={used} total={total} onSubmit={handleSubmit} session={session} backendLive={backendLive}
+          childId={activeChildId} children_={children} onSwitchChild={switchChild} />
       )}
       <footer className="mx-auto max-w-6xl px-4 sm:px-6 py-10 text-center text-xs flex flex-col items-center gap-2" style={{ color: "var(--ink-faint)" }}>
         <div>LiteracyLab AI · {backendLive ? "your account data is private to you" : "interactive prototype — all learner data shown is sample data"}.</div>
@@ -2402,5 +2537,28 @@ function AuthGate(){
   return <App session={session} />;
 }
 
-ReactDOM.createRoot(document.getElementById("root")).render(<AuthGate />);
+// Catches render crashes that would otherwise leave a blank white page (the
+// same failure shape as an earlier real incident this app had, though that
+// one turned out to be a browser extension, not a render error) — reports
+// to Sentry and shows a plain-language fallback with a reload button
+// instead of silence.
+class ErrorBoundary extends React.Component {
+  constructor(props) { super(props); this.state = { hasError: false }; }
+  static getDerivedStateFromError() { return { hasError: true }; }
+  componentDidCatch(err, info) { reportError("Unhandled render error:", err, { componentStack: info?.componentStack }); }
+  render() {
+    if (!this.state.hasError) return this.props.children;
+    return (
+      <div className="min-h-screen grid place-items-center px-4" style={{ background: "var(--bg)" }}>
+        <div className="text-center max-w-sm">
+          <div className="font-display font-bold text-lg mb-2" style={{ color: "var(--ink)" }}>Something went wrong</div>
+          <p className="text-sm mb-4" style={{ color: "var(--ink-soft)" }}>We've been notified. Reloading the page usually fixes this.</p>
+          <button onClick={()=>window.location.reload()} className="focus-ring rounded-full px-4 py-2 text-sm font-bold" style={{ background: "var(--cyan)", color: "#fff" }}>Reload</button>
+        </div>
+      </div>
+    );
+  }
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<ErrorBoundary><AuthGate /></ErrorBoundary>);
 </script>
