@@ -118,6 +118,17 @@ function validateFeedback(parsed, { tier, standardsList, targetNames, submittedT
         }
         if (h?.type !== "glow" && h?.type !== "grow") issues.push(`highlights[${i}].type must be "glow" or "grow"`);
         if (!checkString(h?.note, 5, 200)) issues.push(`highlights[${i}].note is missing or an unreasonable length`);
+        // "grow" highlights must show the fix applied to the student's own
+        // words, not just describe it — the whole point of this field. A
+        // revision identical (ignoring case/whitespace) to the original
+        // quote means the model didn't actually rewrite anything.
+        if (h?.type === "grow") {
+          if (!checkString(h?.revision, 3, 300)) {
+            issues.push(`highlights[${i}].revision is missing or an unreasonable length (required for type "grow")`);
+          } else if (checkString(h?.quote, 1, 100000) && normalizeForMatch(h.revision) === normalizeForMatch(h.quote)) {
+            issues.push(`highlights[${i}].revision is identical to its quote — it must actually rewrite the fragment, not repeat it`);
+          }
+        }
       });
     }
   }

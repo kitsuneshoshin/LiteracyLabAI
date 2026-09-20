@@ -34,9 +34,15 @@ function targetsClause(targetNames) {
 // Tells the model to also return short exact quotes from the student's own
 // text, tagged glow/grow, so the UI can highlight directly in their writing
 // where each point applies — instead of prose feedback the student has to
-// manually map back onto what they wrote.
+// manually map back onto what they wrote. Every "grow" highlight also gets
+// a "revision": the same fragment actually rewritten to apply the
+// suggestion, not just described in the abstract — showing a student
+// exactly what "add more sentence variety" looks like IN THEIR OWN SENTENCE
+// is what makes the advice concrete and actionable rather than generic.
 function highlightsClause() {
-  return `You must also return 2-5 "highlights": short fragments copied EXACTLY, character-for-character (including any spelling or grammar mistakes — do not correct them), from the student's submitted text above. Each one is tagged "glow" (something that worked) or "grow" (something to improve), with a short note explaining why. These must be real substrings that appear verbatim in the submitted text — never paraphrase or reconstruct a quote from memory.`;
+  return `You must also return 2-5 "highlights": short fragments copied EXACTLY, character-for-character (including any spelling or grammar mistakes — do not correct them), from the student's submitted text above. Each one is tagged "glow" (something that worked) or "grow" (something to improve), with a short note explaining why.
+For every "grow" highlight, also include a "revision" field: rewrite that exact fragment to actually apply the suggested improvement, in language this student would plausibly write themselves (same vocabulary level, same voice) — not a generic example, a rewrite of THEIR sentence. Omit "revision" entirely for "glow" highlights (there's nothing to fix).
+Every highlight's "quote" must be a real substring that appears verbatim in the submitted text — never paraphrase or reconstruct a quote from memory.`;
 }
 
 // When the student previously tapped a "what will you try next time?"
@@ -66,10 +72,10 @@ Student text fragment: "...the dark forest was really scary and the trees looked
   "growTarget": "Fronted Adverbials",
   "highlights": [
     { "quote": "the dark forest was really scary", "type": "glow", "note": "Great tense-building detail right here." },
-    { "quote": "the trees looked spooky", "type": "grow", "note": "Try a fronted adverbial to open this instead, e.g. \\"Without warning, the trees looked spooky.\\"" }
+    { "quote": "the trees looked spooky", "type": "grow", "note": "Try opening with a fronted adverbial to build more suspense.", "revision": "Without warning, the trees looked spooky." }
   ]
 }
-Notice: the glow quotes the student's actual words, the standard is named naturally (not bolted on), the analogy is concrete, vocab defs are one plain sentence each, glowTarget/growTarget are copied verbatim from the given list, and each highlight's "quote" is an exact substring of the student's text (typos and all) rather than a paraphrase. Match that bar exactly for the real student below — every claim must be traceable to what they actually wrote/answered.`;
+Notice: the glow quotes the student's actual words, the standard is named naturally (not bolted on), the analogy is concrete, vocab defs are one plain sentence each, glowTarget/growTarget are copied verbatim from the given list, each highlight's "quote" is an exact substring of the student's text (typos and all) rather than a paraphrase, and the "grow" highlight's "revision" is that same fragment actually rewritten — not restated advice, a real rewrite the student could paste straight into their story. Match that bar exactly for the real student below — every claim must be traceable to what they actually wrote/answered.`;
 
 function successCriteria(tier) {
   const cap = MAX_AVG_WORDS_PER_SENTENCE[tier] || 30;
@@ -80,7 +86,8 @@ function successCriteria(tier) {
 4. Count the words per sentence across your glow and grow COMBINED, and average it — it must be UNDER ${cap} words per sentence for this age tier. Short, plain sentences. This is checked mechanically, so if a sentence is running long, split it into two rather than adding a comma clause.
 5. Both vocab definitions are one plain sentence each, framed through the student's interest where natural.
 6. glowTarget and growTarget are copied EXACTLY, character-for-character, from the provided list of skill area names — not paraphrased, shortened, or invented.
-7. Every highlight's "quote" is an exact, verbatim substring you can point to in the submitted text above — not a cleaned-up or paraphrased version of it.`;
+7. Every highlight's "quote" is an exact, verbatim substring you can point to in the submitted text above — not a cleaned-up or paraphrased version of it.
+8. Every "grow" highlight has a "revision" that is an actual rewrite of its quote (different wording, applying the fix) — never the same text repeated, and never just advice about the quote instead of a rewrite of it.`;
 }
 
 function buildWritingPrompt({ tier, country, gradeLabel, interest, confidenceWriting, motivation, prompt, text, targetNames, previousCommitment }) {
@@ -120,7 +127,7 @@ Respond with ONLY a JSON object (no markdown fences, no commentary) with exactly
   "commitOptions": ["3 short first-person action phrases (5-8 words each) the student could tap to commit to trying next time, each directly derived from the grow above — not generic"],
   "glowTarget": "the exact skill area name from the given list that the glow demonstrates",
   "growTarget": "the exact skill area name from the given list that the grow is building towards",
-  "highlights": [{ "quote": "an exact substring copied from the submitted text", "type": "glow or grow", "note": "a short reason" }],
+  "highlights": [{ "quote": "an exact substring copied from the submitted text", "type": "glow or grow", "note": "a short reason", "revision": "ONLY for type=grow: that same fragment actually rewritten to apply the suggestion" }],
   "followUp": ${previousCommitment ? '"a short, honest 1-sentence check-in on the previous commitment noted above"' : "null"}
 }`;
 }
