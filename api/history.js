@@ -39,6 +39,11 @@ module.exports = async function handler(req, res) {
     if (error) throw error;
 
     const wordsWritten = submissions.reduce((sum, s) => sum + (s.word_count || 0), 0);
+    // Counted separately from totalSubmissions (which includes reading rows
+    // too) since the dashboard's "Words Written" stat says "Across N
+    // pieces" - that N needs to mean actual completed writing pieces, not
+    // total writing+reading activity, or the two numbers don't line up.
+    const writingPieces = submissions.filter((s) => s.kind === "writing" && s.word_count != null).length;
     const distinctDates = [...new Set(submissions.map((s) => s.created_at.slice(0, 10)))];
     const activeStreak = computeStreak(distinctDates);
 
@@ -54,8 +59,10 @@ module.exports = async function handler(req, res) {
     return res.status(200).json({
       totalSubmissions: submissions.length,
       wordsWritten,
+      writingPieces,
       activeStreak,
       avgReadingScore,
+      readingSubmissions: readingSubs.length,
       recent: submissions.slice(0, 20).map((s) => ({
         id: s.id, kind: s.kind, tier: s.tier, createdAt: s.created_at,
         score: s.score, totalQuestions: s.total_questions, wordCount: s.word_count,

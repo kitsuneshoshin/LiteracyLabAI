@@ -1084,8 +1084,8 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
         <div className="grid grid-cols-2 gap-4">
           {backendLive ? (
             <>
-              <StatTile icon={IconTrend} label="Reading Accuracy" value={history?.avgReadingScore != null ? `${history.avgReadingScore}%` : "—"} sub={history ? `From ${history.totalSubmissions} submission${history.totalSubmissions===1?"":"s"}` : "Loading…"} accent="var(--good)" />
-              <StatTile icon={IconPen} label="Words Written" value={history ? history.wordsWritten.toLocaleString() : "—"} sub={history ? `Across ${history.totalSubmissions} pieces` : "Loading…"} accent="var(--cyan-ink)" />
+              <StatTile icon={IconTrend} label="Reading Accuracy" value={history?.avgReadingScore != null ? `${history.avgReadingScore}%` : "—"} sub={history ? `From ${history.readingSubmissions} submission${history.readingSubmissions===1?"":"s"}` : "Loading…"} accent="var(--good)" />
+              <StatTile icon={IconPen} label="Words Written" value={history ? history.wordsWritten.toLocaleString() : "—"} sub={history ? `Across ${history.writingPieces} piece${history.writingPieces===1?"":"s"}` : "Loading…"} accent="var(--cyan-ink)" />
               <div className="col-span-2">
                 <StatTile icon={IconFlame} label="Active Streak" value={history ? `${history.activeStreak} day${history.activeStreak===1?"":"s"}` : "—"} sub="Real progress, tracked from your submissions" accent="var(--gold)" />
               </div>
