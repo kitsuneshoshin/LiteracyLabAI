@@ -2251,22 +2251,33 @@ function App({ session }){
   useEffect(()=>{
     if (!backendLive) { setProfileLoaded(true); return; }
     (async ()=>{
+      let step = "start";
       try {
+        step = "fetch";
         const [{ profiles }, usage] = await Promise.all([
           authedFetch(session, "/api/child-profile"),
           authedFetch(session, "/api/usage"),
         ]);
+        step = "setChildren";
         setChildren(profiles);
+        step = "remembered";
         let remembered = null;
         try { remembered = localStorage.getItem("ll_active_child_" + session.user.id); } catch {}
+        step = "initial";
         const initial = profiles.find(p => p.id === remembered) || profiles[0];
+        step = "setActiveChildId";
         setActiveChildId(initial.id);
+        step = "setUsed";
         setUsed(usage.used);
+        step = "setTotal";
         setTotal(usage.cap == null ? 999 : usage.cap);
+        step = "setPlan";
         setPlan(usage.plan || "free");
+        step = "setView";
         if (!initial.onboarded) setView("dashboard");
+        step = "done";
       } catch (err) {
-        logAppError("Failed to load learner profile:", err);
+        logAppError(`Failed to load learner profile (step=${step}):`, err);
       } finally {
         setProfileLoaded(true);
       }
