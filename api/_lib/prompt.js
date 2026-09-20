@@ -39,9 +39,22 @@ function targetsClause(targetNames) {
 // suggestion, not just described in the abstract — showing a student
 // exactly what "add more sentence variety" looks like IN THEIR OWN SENTENCE
 // is what makes the advice concrete and actionable rather than generic.
-function highlightsClause() {
+// Middle/high students write in a formal, third-person academic register
+// for analytical/persuasive work - the interest-analogy instruction
+// elsewhere in this prompt is meant for the separate "grow" EXPLANATION
+// field, not for "revision". Without this, the model was bleeding that
+// same casual first-person analogy into revision text spliced directly
+// into a formal essay (e.g. a Grade 11 essay's "revision" reading "...like
+// how I see trends in technology use among my friends" mid-sentence) -
+// found live when testing the revision feature across tiers.
+function revisionToneClause(tier) {
+  if (tier !== "middle" && tier !== "high") return "";
+  return ` This student writes in a formal, third-person academic register (no "I"/personal asides) - "revision" must match that same formal register exactly. The interest-based analogy belongs ONLY in the separate "grow" field below, which is explicitly asked to use one; never insert a first-person aside like "like how I..." or a casual interest analogy into "revision" itself, since that text is spliced directly into their formal essay and would break its register.`;
+}
+
+function highlightsClause(tier) {
   return `You must also return 2-5 "highlights": short fragments copied EXACTLY, character-for-character (including any spelling or grammar mistakes — do not correct them), from the student's submitted text above. Each one is tagged "glow" (something that worked) or "grow" (something to improve), with a short note explaining why.
-For every "grow" highlight, also include a "revision" field: rewrite that exact fragment to actually apply the suggested improvement, in language this student would plausibly write themselves (same vocabulary level, same voice) — not a generic example, a rewrite of THEIR sentence. Omit "revision" entirely for "glow" highlights (there's nothing to fix).
+For every "grow" highlight, also include a "revision" field: rewrite that exact fragment to actually apply the suggested improvement, in language this student would plausibly write themselves (same vocabulary level, same voice) — not a generic example, a rewrite of THEIR sentence. Omit "revision" entirely for "glow" highlights (there's nothing to fix).${revisionToneClause(tier)}
 IMPORTANT: "revision" is spliced into the story in place of "quote" and NOTHING else — every other sentence in the story, whether right next to the quote or several sentences away, stays exactly as the student wrote it. So "revision" must NEVER repeat or restate wording that already appears ANYWHERE ELSE in the student's text, even if your suggestion is to join two sentences with a conjunction — that other sentence is still there and will now appear twice. Wrong example: story "The dog ran fast. It saw a cat.", quote "It saw a cat.", suggestion "join with 'and'", revision "The dog ran fast and saw a cat." — this restates "The dog ran fast" (a DIFFERENT sentence, already elsewhere in the story), so the final story reads "The dog ran fast. The dog ran fast and saw a cat." (duplicated) once spliced in. Right way to handle a joining suggestion: revise the quote itself to start with the conjunction, e.g. revision "And it saw a cat." — every other sentence stays untouched and the joined feel still comes through.
 Every highlight's "quote" must be a real substring that appears verbatim in the submitted text — never paraphrase or reconstruct a quote from memory.`;
 }
@@ -88,7 +101,7 @@ function successCriteria(tier) {
 5. Both vocab definitions are one plain sentence each, framed through the student's interest where natural.
 6. glowTarget and growTarget are copied EXACTLY, character-for-character, from the provided list of skill area names — not paraphrased, shortened, or invented.
 7. Every highlight's "quote" is an exact, verbatim substring you can point to in the submitted text above — not a cleaned-up or paraphrased version of it.
-8. Every "grow" highlight has a "revision" that is an actual rewrite of its quote (different wording, applying the fix) — never the same text repeated, and never just advice about the quote instead of a rewrite of it.`;
+8. Every "grow" highlight has a "revision" that is an actual rewrite of its quote (different wording, applying the fix) — never the same text repeated, and never just advice about the quote instead of a rewrite of it.${(tier === "middle" || tier === "high") ? '\n9. Every "revision" reads as a natural continuation of this student\'s own formal, third-person essay — no first-person aside, no "like [interest]" analogy dropped into the revision text itself. That framing belongs only in the "grow" field.' : ""}`;
 }
 
 function buildWritingPrompt({ tier, country, gradeLabel, interest, confidenceWriting, motivation, prompt, text, targetNames, previousCommitment }) {
@@ -107,7 +120,7 @@ ${CONFIDENCE_NOTE[confidenceWriting] || ""}
 ${MOTIVATION_NOTE[motivation] || ""}
 ${standardsClause(country, tier, gradeLabel)}
 ${targetsClause(targetNames)}
-${highlightsClause()}
+${highlightsClause(tier)}
 ${followUpClause(previousCommitment)}
 
 Read the actual submitted text closely — every point you make must be traceable to something specifically in it (quote a short fragment where useful), not a generic template response.
