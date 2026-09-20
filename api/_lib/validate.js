@@ -35,23 +35,27 @@ function normalizeForMatch(s) {
   return String(s).toLowerCase().replace(/\s+/g, " ").trim();
 }
 
-// Catches a real failure mode found in live testing: the model tries to
-// satisfy a "join these sentences with a conjunction" suggestion by
-// restating the PREVIOUS sentence inside "revision" (e.g. quote "It saw a
-// cat.", revision "The dog ran fast and saw a cat."). Since the app only
-// splices "revision" in place of "quote" - the previous sentence stays
-// exactly where it was - that produces a visible duplicate: "The dog ran
-// fast. The dog ran fast and saw a cat." Flags it when revision's opening
-// words are the same as the words immediately preceding the quote.
-function revisionDuplicatesPrecedingContext(revision, normalizedSubmittedText, normalizedQuote) {
+// Catches a real failure mode found in live testing (twice, in two shapes):
+// the model tries to satisfy a "join these sentences" suggestion by
+// restating some OTHER sentence from the story inside "revision" - not
+// necessarily the one right before the quote, could be any earlier one
+// (e.g. quote "The cat ran up a tree.", revision "The dog ran fast and the
+// cat ran up a tree." - restating the story's very FIRST sentence, several
+// sentences back). Since the app only splices "revision" in place of
+// "quote" - every other sentence stays exactly where it was - restating any
+// of them produces a visible duplicate once spliced in. Checks any 4-6 word
+// run inside "revision" against the rest of the story (the quote's own
+// span excluded) rather than just the immediately adjacent sentence.
+function revisionDuplicatesExistingText(revision, normalizedSubmittedText, normalizedQuote) {
   const quoteIdx = normalizedSubmittedText.indexOf(normalizedQuote);
-  if (quoteIdx <= 0) return false;
-  const precedingWords = normalizedSubmittedText.slice(0, quoteIdx).trim().split(/\s+/).filter(Boolean);
+  if (quoteIdx === -1) return false;
+  const restOfText = normalizedSubmittedText.slice(0, quoteIdx) + " " + normalizedSubmittedText.slice(quoteIdx + normalizedQuote.length);
   const revisionWords = normalizeForMatch(revision).split(/\s+/).filter(Boolean);
-  for (let n = Math.min(6, precedingWords.length, revisionWords.length); n >= 3; n--) {
-    const tail = precedingWords.slice(-n).join(" ");
-    const head = revisionWords.slice(0, n).join(" ");
-    if (tail && tail === head) return true;
+  for (let n = Math.min(6, revisionWords.length); n >= 4; n--) {
+    for (let start = 0; start + n <= revisionWords.length; start++) {
+      const chunk = revisionWords.slice(start, start + n).join(" ");
+      if (chunk.length >= 12 && restOfText.includes(chunk)) return true;
+    }
   }
   return false;
 }
@@ -148,8 +152,8 @@ function validateFeedback(parsed, { tier, standardsList, targetNames, submittedT
             issues.push(`highlights[${i}].revision is missing or an unreasonable length (required for type "grow")`);
           } else if (checkString(h?.quote, 1, 100000) && normalizeForMatch(h.revision) === normalizeForMatch(h.quote)) {
             issues.push(`highlights[${i}].revision is identical to its quote — it must actually rewrite the fragment, not repeat it`);
-          } else if (checkString(h?.quote, 1, 100000) && revisionDuplicatesPrecedingContext(h.revision, normalizedText, normalizeForMatch(h.quote))) {
-            issues.push(`highlights[${i}].revision restates wording from the sentence immediately before the quote — since it's spliced in place of the quote only, this would duplicate that text in the final story`);
+          } else if (checkString(h?.quote, 1, 100000) && revisionDuplicatesExistingText(h.revision, normalizedText, normalizeForMatch(h.quote))) {
+            issues.push(`highlights[${i}].revision restates wording that already appears elsewhere in the student's text — since it's spliced in place of the quote only, this would duplicate that text in the final story`);
           }
         }
       });
