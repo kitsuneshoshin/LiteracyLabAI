@@ -1,4 +1,5 @@
 const { getSupabaseAdmin } = require("./supabaseAdmin");
+const { captureIfUnexpected } = require("./sentry");
 
 // Verifies the bearer token from the Authorization header against Supabase Auth
 // and returns the authenticated user. Every data-touching endpoint must call
@@ -22,9 +23,13 @@ async function requireUser(req) {
   return data.user;
 }
 
+// Every endpoint's catch block funnels through here, so this is the one
+// place that needs to know about error monitoring — no need to touch each
+// of the dozen api/*.js files individually.
 function sendError(res, err) {
   const status = err.statusCode || 500;
   console.error(err);
+  captureIfUnexpected(err);
   res.status(status).json({ error: err.message || "Internal server error." });
 }
 

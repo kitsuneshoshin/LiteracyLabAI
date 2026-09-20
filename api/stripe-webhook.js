@@ -1,5 +1,6 @@
 const { getSupabaseAdmin } = require("./_lib/supabaseAdmin");
 const { getStripe } = require("./_lib/stripe");
+const { captureIfUnexpected } = require("./_lib/sentry");
 
 // Stripe signs the raw request body, so we must verify against the exact
 // bytes Stripe sent — not Vercel's auto-parsed/re-serialized JSON, which
@@ -82,6 +83,10 @@ module.exports = async function handler(req, res) {
     }
   } catch (err) {
     console.error("Error handling Stripe webhook event:", event.type, err);
+    // A silently failing webhook means a paying customer's plan never
+    // flips to Pro (or never flips back on cancellation) - worth alerting
+    // on immediately rather than waiting for them to notice and complain.
+    captureIfUnexpected(err);
     return res.status(500).json({ error: "Webhook handler failed." });
   }
 
