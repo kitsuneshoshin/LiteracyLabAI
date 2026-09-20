@@ -851,12 +851,17 @@ function Header({ view, setView, used, total, plan, theme, setTheme, backendLive
             <span className="rounded-full px-2 py-1 text-[11px] font-bold" style={{ background: isPro ? "var(--gold-tint)" : "var(--navy-tint)", color: isPro ? "var(--gold-ink)" : "var(--ink)" }}>{isPro ? "PRO" : "FREE"}</span>
           </div>
           <button onClick={()=>setView("dashboard")}
-            className="focus-ring hidden sm:inline-flex items-center gap-1.5 rounded-full px-3.5 py-2 text-[13px] font-bold"
+            className="focus-ring hidden md:inline-flex items-center gap-1.5 rounded-full px-3.5 py-2 text-[13px] font-bold"
             style={{ background: "var(--gold)", color: "#fff" }}>
             <IconCrown size={13} strokeWidth={2.4} /> {isPro ? "Manage Pro" : "Upgrade to Pro"}
           </button>
           {backendLive && (
-            <button onClick={onSignOut} className="focus-ring hidden sm:inline-flex items-center rounded-full px-3 py-2 text-[13px] font-semibold" style={{ color: "var(--ink-faint)" }}>
+            // md, matching the mobile summary banner's own md:hidden cutoff below
+            // (App's render) - without that exact alignment, this button (and
+            // "Upgrade to Pro" above) disappeared entirely on any screen
+            // narrower than the old sm: 640px breakpoint, with no mobile
+            // equivalent anywhere in the app: a phone user could never sign out.
+            <button onClick={onSignOut} className="focus-ring hidden md:inline-flex items-center rounded-full px-3 py-2 text-[13px] font-semibold" style={{ color: "var(--ink-faint)" }}>
               Sign out
             </button>
           )}
@@ -2232,10 +2237,24 @@ function App({ session }){
     <div className="min-h-screen">
       <Header view={view} setView={guardedSetView} used={used} total={total} plan={plan} theme={theme === "system" ? "light" : theme} setTheme={setTheme}
         backendLive={backendLive} onSignOut={handleSignOut} needsOnboarding={needsOnboarding} />
-      <div className="md:hidden mx-auto max-w-6xl px-4 pt-3">
+      <div className="md:hidden mx-auto max-w-6xl px-4 pt-3 flex flex-col gap-2">
         <div className="rounded-xl border px-3 py-2 text-xs font-medium flex items-center justify-between" style={{ borderColor: "var(--border)", background: "var(--surface-2)", color: "var(--ink-soft)" }}>
           <span>{(plan === "pro" || plan === "admin") ? "Pro Plan: unlimited submissions" : <>Free Plan: <b className="tabular" style={{ color: "var(--ink)" }}>{total-used}</b> of {total} remaining</>}</span>
           <span className="rounded-full px-2 py-0.5 text-[10px] font-bold" style={{ background: (plan === "pro" || plan === "admin") ? "var(--gold-tint)" : "var(--navy-tint)", color: (plan === "pro" || plan === "admin") ? "var(--gold-ink)" : "var(--ink)" }}>{(plan === "pro" || plan === "admin") ? "PRO" : "FREE"}</span>
+        </div>
+        {/* Mobile equivalent of the header's Upgrade/Sign out buttons, which
+            are hidden below md - see the note in Header for why this exists. */}
+        <div className="flex items-center gap-2">
+          <button onClick={()=>setView("dashboard")}
+            className="focus-ring flex-1 inline-flex items-center justify-center gap-1.5 rounded-full px-3.5 py-2 text-[13px] font-bold"
+            style={{ background: "var(--gold)", color: "#fff" }}>
+            <IconCrown size={13} strokeWidth={2.4} /> {(plan === "pro" || plan === "admin") ? "Manage Pro" : "Upgrade to Pro"}
+          </button>
+          {backendLive && (
+            <button onClick={handleSignOut} className="focus-ring inline-flex items-center rounded-full px-3 py-2 text-[13px] font-semibold" style={{ color: "var(--ink-faint)" }}>
+              Sign out
+            </button>
+          )}
         </div>
       </div>
       {view === "dashboard" ? (
