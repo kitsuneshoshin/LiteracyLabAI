@@ -1341,6 +1341,24 @@ function AnnotatedText({ text, highlights }){
     return nonOverlapping;
   }, [text, highlights]);
 
+  // The actual whole-text rewrite the user asked for: not a note beside the
+  // original sentence, the student's FULL story with every "grow" fragment
+  // swapped for its revision in place, everything else untouched. Built by
+  // walking the same non-overlapping spans used to highlight the original.
+  const revisedText = useMemo(()=>{
+    if (!spans || spans.length === 0) return null;
+    if (!spans.some(f => f.type === "grow" && f.revision)) return null;
+    let out = "";
+    let pos = 0;
+    spans.forEach(f => {
+      out += text.slice(pos, f.start);
+      out += (f.type === "grow" && f.revision) ? f.revision : text.slice(f.start, f.end);
+      pos = f.end;
+    });
+    out += text.slice(pos);
+    return out;
+  }, [text, spans]);
+
   if (!spans || spans.length === 0) {
     return <p className="whitespace-pre-wrap font-read text-[14.5px] leading-relaxed" style={{ color: "var(--ink)" }}>{text}</p>;
   }
@@ -1368,24 +1386,23 @@ function AnnotatedText({ text, highlights }){
         <span className="inline-flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full" style={{ background: "var(--good)" }} />Glow</span>
         <span className="inline-flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full" style={{ background: "var(--bad)" }} />Grow</span>
       </div>
-      <div className="flex flex-col gap-2.5 mt-3 pt-3 border-t" style={{ borderColor: "var(--border-soft)" }}>
+      <div className="flex flex-col gap-1.5 mt-3 pt-3 border-t" style={{ borderColor: "var(--border-soft)" }}>
         {spans.map((f, i)=>(
-          <div key={i} className="text-[12.5px] leading-snug">
-            <div className="flex items-start gap-1.5">
-              <span className="font-bold shrink-0" style={{ color: f.type === "glow" ? "var(--good)" : "var(--bad)" }}>{f.type === "glow" ? "✓" : "→"}</span>
-              <span style={{ color: "var(--ink-soft)" }}><strong style={{ color: "var(--ink)" }}>&ldquo;{text.slice(f.start, f.end)}&rdquo;</strong> — {f.note}</span>
-            </div>
-            {/* The suggestion applied directly to the student's own sentence,
-                not just described — this is the actual "make it real" part. */}
-            {f.type === "grow" && f.revision && (
-              <div className="mt-1 ml-5 rounded-lg px-3 py-2" style={{ background: "var(--good-tint)" }}>
-                <span className="text-[10.5px] font-bold uppercase tracking-wide block mb-0.5" style={{ color: "var(--good)" }}>Try it like this</span>
-                <span className="font-read" style={{ color: "var(--ink)" }}>{f.revision}</span>
-              </div>
-            )}
+          <div key={i} className="text-[12.5px] leading-snug flex items-start gap-1.5">
+            <span className="font-bold shrink-0" style={{ color: f.type === "glow" ? "var(--good)" : "var(--bad)" }}>{f.type === "glow" ? "✓" : "→"}</span>
+            <span style={{ color: "var(--ink-soft)" }}><strong style={{ color: "var(--ink)" }}>&ldquo;{text.slice(f.start, f.end)}&rdquo;</strong> — {f.note}</span>
           </div>
         ))}
       </div>
+      {revisedText && (
+        <div className="mt-4 pt-4 border-t rounded-b-xl -mx-5 sm:-mx-6 -mb-5 sm:-mb-6 px-5 sm:px-6 pb-5 sm:pb-6" style={{ borderColor: "var(--border-soft)", background: "var(--good-tint)" }}>
+          <div className="flex items-center gap-1.5 mb-2">
+            <IconSparkle size={13} strokeWidth={2.4} style={{ color: "var(--good)" }} />
+            <span className="text-[11px] font-bold uppercase tracking-wide" style={{ color: "var(--good)" }}>Your story, revised</span>
+          </div>
+          <p className="whitespace-pre-wrap font-read text-[14.5px] leading-relaxed" style={{ color: "var(--ink)" }}>{revisedText}</p>
+        </div>
+      )}
     </div>
   );
 }
