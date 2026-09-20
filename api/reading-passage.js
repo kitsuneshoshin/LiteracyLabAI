@@ -45,7 +45,7 @@ module.exports = async function handler(req, res) {
     // Separate from the monthly cap check below - see the matching comment
     // in api/writing-prompt.js. Shared bucket across both generation
     // endpoints and api/submit.js since all three trigger real OpenAI cost.
-    await checkRateLimit(supabase, user.id, "ai_generate", { limit: 10, windowSeconds: 300 });
+    await checkRateLimit(supabase, user.id, "ai_generate");
 
     const usage = await getMonthlyUsage(supabase, user.id);
     if (usage.used >= usage.cap) {

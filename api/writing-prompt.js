@@ -45,7 +45,7 @@ module.exports = async function handler(req, res) {
     // submissions" was never meant to mean "unlimited requests per second".
     // Shared bucket with reading-passage.js and submit.js since all three
     // trigger real OpenAI cost.
-    await checkRateLimit(supabase, user.id, "ai_generate", { limit: 10, windowSeconds: 300 });
+    await checkRateLimit(supabase, user.id, "ai_generate");
 
     const usage = await getMonthlyUsage(supabase, user.id);
     if (usage.used >= usage.cap) {

@@ -13,7 +13,19 @@
 // trade-off here — unlike the usage-cap race fixed in submit.js/
 // writing-prompt.js/reading-passage.js, this only needs to make sustained
 // hammering expensive/annoying, not be billing-exact.
-async function checkRateLimit(supabase, profileId, bucket, { limit, windowSeconds }) {
+// Overridable via Vercel env vars without a code change - RATE_LIMIT_MAX
+// (requests allowed per window) and RATE_LIMIT_WINDOW_SECONDS (window
+// length). Falls back to 10 per 300s (5 min) if unset or not a valid number.
+const DEFAULT_LIMIT = 10;
+const DEFAULT_WINDOW_SECONDS = 300;
+function envInt(name, fallback) {
+  const n = Number(process.env[name]);
+  return Number.isFinite(n) && n > 0 ? n : fallback;
+}
+
+async function checkRateLimit(supabase, profileId, bucket, opts = {}) {
+  const limit = opts.limit ?? envInt("RATE_LIMIT_MAX", DEFAULT_LIMIT);
+  const windowSeconds = opts.windowSeconds ?? envInt("RATE_LIMIT_WINDOW_SECONDS", DEFAULT_WINDOW_SECONDS);
   const windowStart = new Date(Date.now() - windowSeconds * 1000).toISOString();
 
   const { count, error } = await supabase

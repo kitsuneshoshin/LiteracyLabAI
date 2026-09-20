@@ -109,7 +109,7 @@ module.exports = async function handler(req, res) {
     // Grading a submission calls the AI too (see generateAndValidate below),
     // so it shares the same rate-limit bucket as the two generation
     // endpoints - see the matching comment in api/writing-prompt.js.
-    await checkRateLimit(supabase, user.id, "ai_generate", { limit: 10, windowSeconds: 300 });
+    await checkRateLimit(supabase, user.id, "ai_generate");
 
     const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body || {};
     const { kind } = body;
