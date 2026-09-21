@@ -150,6 +150,32 @@ test("validatePassage: rejects duplicate answer options", () => {
   assert.ok(result.issues.some((i) => i.includes("duplicate answer choices")));
 });
 
+// Regression tests for the exact two fabricated glows caught by live
+// testing on a 0/3 reading-comprehension attempt.
+test("regression: a reading glow fabricating comprehension on a 0-score attempt is rejected", () => {
+  const fabricated = [
+    "You captured an interesting moment in the passage when you mentioned the urgency around the missing dagger. It shows you noticed the tension present, which is an important aspect when interpreting the emotions of a story.",
+    "You engaged thoughtfully with complex ideas about coding and its relevance today. This reflects an understanding of how to articulate opinions.",
+  ];
+  for (const glow of fabricated) {
+    const result = validateFeedback(baseFeedback({ glow }), { tier: "middle", standardsList: [], targetNames: [], submittedText: null, readingScore: 0 });
+    assert.equal(result.ok, false, `expected rejection for: "${glow}"`);
+    assert.ok(result.issues.some((i) => i.includes("fabricates comprehension")), `expected a fabrication issue for: "${glow}"`);
+  }
+});
+
+test("regression: the same fabrication check does not fire when the score is not zero", () => {
+  const glow = "You engaged thoughtfully with complex ideas about coding and its relevance today.";
+  const result = validateFeedback(baseFeedback({ glow }), { tier: "middle", standardsList: [], targetNames: [], submittedText: null, readingScore: 2 });
+  assert.equal(result.ok, true, `unexpected issues: ${JSON.stringify(result.issues)}`);
+});
+
+test("regression: an honest, content-free zero-score glow passes", () => {
+  const glow = "You gave this passage a real go, and that's exactly the habit that builds stronger reading over time.";
+  const result = validateFeedback(baseFeedback({ glow }), { tier: "middle", standardsList: [], targetNames: [], submittedText: null, readingScore: 0 });
+  assert.equal(result.ok, true, `unexpected issues: ${JSON.stringify(result.issues)}`);
+});
+
 test("validateWritingPrompt: rejects a missing or too-short prompt", () => {
   const result = validateWritingPrompt({ title: "A Title", prompt: "Too short" }, { tier: "elementary" });
   assert.equal(result.ok, false);

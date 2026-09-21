@@ -20,7 +20,7 @@ const { writingLimitsForGrade } = require("./_lib/writingLimits");
 // child an error instead of feedback.
 const MAX_ATTEMPTS = 3;
 
-async function generateAndValidate(prompt, tier, country, gradeLabel, submittedText) {
+async function generateAndValidate(prompt, tier, country, gradeLabel, submittedText, readingScore) {
   const standardsList = standardsFor(country, tier, gradeLabel);
   const targetNames = targetsForGrade(country, gradeLabel, tier).targets.map((t) => t.name);
   let nextPrompt = prompt;
@@ -28,7 +28,7 @@ async function generateAndValidate(prompt, tier, country, gradeLabel, submittedT
 
   for (let i = 1; i <= MAX_ATTEMPTS; i++) {
     const attempt = await generateFeedbackJSON(nextPrompt);
-    const check = validateFeedback(attempt.parsed, { tier, standardsList, targetNames, submittedText });
+    const check = validateFeedback(attempt.parsed, { tier, standardsList, targetNames, submittedText, readingScore });
     if (check.ok) {
       // Snap glowTarget/growTarget to the exact canonical string so
       // api/progress.js's exact-key Map lookup actually finds them.
@@ -217,7 +217,7 @@ module.exports = async function handler(req, res) {
           answers, score, totalQuestions, previousCommitment,
           targetNames: targetsForGrade(existing.country, existing.grade_label, existing.tier).targets.map((t) => t.name),
         });
-        result = await generateAndValidate(llmPrompt, existing.tier, existing.country, existing.grade_label);
+        result = await generateAndValidate(llmPrompt, existing.tier, existing.country, existing.grade_label, undefined, score);
       } catch (genErr) {
         await releaseClaim(supabase, submissionId);
         throw genErr;

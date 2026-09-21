@@ -152,13 +152,22 @@ Respond with ONLY a JSON object (no markdown fences, no commentary) with exactly
 // about something that never happened, since the prompt only told it what
 // to do "if they got questions right" and left the zero-correct case
 // undefined. Reproduced identically across two different tiers/countries
-// (middle/Australia and high/UK), so this is a systematic gap, not a
-// one-off. The model still has to write SOMETHING for "glow" (it's a
-// required field), so this gives it an honest alternative instead of
-// inventing a correct answer that didn't happen.
+// (middle/Australia and high/UK). A first fix (telling the model to praise
+// "genuine engagement with an interesting detail" instead) was RETESTED and
+// found insufficient - the model just softened the wording ("You engaged
+// thoughtfully with complex ideas about coding", "You captured an
+// interesting moment... noticed the tension present") while still asserting
+// comprehension the student never demonstrated on a 0/3 attempt. So this
+// version is deliberately harder-edged: it forbids referencing the
+// passage's content or claiming ANY engagement/understanding/noticing at
+// all, with a concrete wrong-vs-right example, since the softer framing
+// visibly gave the model room to keep fabricating in different words.
 function zeroScoreClause(score) {
   if (score !== 0) return "";
-  return " This student got EVERY comprehension question wrong on this attempt - there is no correct answer to praise. The glow must NOT claim they demonstrated any comprehension skill correctly; that would be a fabricated, false claim about something that didn't happen. Instead, find something genuinely true to praise - real effort, engaging with an interesting or tricky detail from the passage, or a specific true observation about what they read - without ever claiming an answer was right when it wasn't.";
+  return ` This student got EVERY comprehension question wrong on this attempt - there is no correct answer, insight, or understanding to praise, and you must not invent one. The glow must NOT reference anything specific from the passage's content (no character names, plot points, topics, or ideas from it) and must NOT use any phrasing that claims the student engaged with, noticed, understood, connected with, captured, recognised, or grasped anything in the passage - all of that would be a fabricated claim about something that did not happen on this attempt.
+WRONG (still fabricates comprehension - do not do this): "You engaged thoughtfully with complex ideas about coding" / "You captured an interesting moment when you noticed the tension."
+RIGHT (praises something true without referencing the passage's content): "You gave this passage a real go, and that's exactly the habit that builds stronger reading over time." / "Tackling a tricky passage like this takes real effort, and you stuck with it to the end."
+Keep the glow to one such content-free, honest sentence, then move straight into the grow.`;
 }
 
 function buildReadingPrompt({ tier, country, gradeLabel, interest, confidenceReading, motivation, passageTitle, passage, questions, answers, score, totalQuestions, targetNames, previousCommitment }) {

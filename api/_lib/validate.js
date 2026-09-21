@@ -85,12 +85,27 @@ function matchesATarget(value, targetNames) {
   return resolveTarget(value, targetNames) !== null;
 }
 
-function validateFeedback(parsed, { tier, standardsList, targetNames, submittedText }) {
+// Regression check for a reading-comprehension bug found by live testing:
+// on a 0/3 attempt, the model fabricated a claim that the student had
+// engaged with, noticed, or understood something from the passage - a
+// prompt-only fix ("praise genuine engagement instead") was retested and
+// found insufficient, since the model just softened the wording ("engaged
+// thoughtfully with complex ideas", "noticed the tension present") while
+// still asserting comprehension that never happened on an all-wrong
+// attempt. Enforced here rather than left to hoping the model follows the
+// prompt, same reasoning as the middle/high analogy-phrase check below.
+const ZERO_SCORE_FABRICATION_PATTERN = /\b(you\s+(noticed|recognised|recognized|captured|identified|connected|articulated|grasped|understood|comprehended|engaged)|(an|your)\s+understanding|reflects?\s+(an|your)\s+understanding|demonstrat\w*\s+(an|your)?\s*understanding)\b/i;
+
+function validateFeedback(parsed, { tier, standardsList, targetNames, submittedText, readingScore }) {
   const issues = [];
 
   if (!checkString(parsed?.glow, 20, 600)) issues.push("glow is missing, too short, or too long");
   if (!checkString(parsed?.grow, 20, 600)) issues.push("grow is missing, too short, or too long");
   if (!checkString(parsed?.microMission, 10, 300)) issues.push("microMission is missing, too short, or too long");
+
+  if (readingScore === 0 && checkString(parsed?.glow, 1, 100000) && ZERO_SCORE_FABRICATION_PATTERN.test(parsed.glow)) {
+    issues.push(`glow fabricates comprehension the student didn't demonstrate on a 0-correct attempt ("${parsed.glow}") - it must praise real effort without claiming they engaged with, noticed, or understood anything from the passage`);
+  }
 
   if (!Array.isArray(parsed?.vocab) || parsed.vocab.length !== 2) {
     issues.push("vocab must be an array of exactly 2 items");
