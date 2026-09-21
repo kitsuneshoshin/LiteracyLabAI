@@ -146,6 +146,21 @@ Respond with ONLY a JSON object (no markdown fences, no commentary) with exactly
 }`;
 }
 
+// Live testing found a real fabrication bug: when a student got EVERY
+// question wrong (score 0), the model still wrote a "glow" claiming they'd
+// correctly demonstrated some comprehension skill - a false, invented claim
+// about something that never happened, since the prompt only told it what
+// to do "if they got questions right" and left the zero-correct case
+// undefined. Reproduced identically across two different tiers/countries
+// (middle/Australia and high/UK), so this is a systematic gap, not a
+// one-off. The model still has to write SOMETHING for "glow" (it's a
+// required field), so this gives it an honest alternative instead of
+// inventing a correct answer that didn't happen.
+function zeroScoreClause(score) {
+  if (score !== 0) return "";
+  return " This student got EVERY comprehension question wrong on this attempt - there is no correct answer to praise. The glow must NOT claim they demonstrated any comprehension skill correctly; that would be a fabricated, false claim about something that didn't happen. Instead, find something genuinely true to praise - real effort, engaging with an interesting or tricky detail from the passage, or a specific true observation about what they read - without ever claiming an answer was right when it wasn't.";
+}
+
 function buildReadingPrompt({ tier, country, gradeLabel, interest, confidenceReading, motivation, passageTitle, passage, questions, answers, score, totalQuestions, targetNames, previousCommitment }) {
   const answerLines = questions.map((q, i) => {
     const chosen = answers[i];
@@ -176,7 +191,7 @@ ${successCriteria(tier)}
 
 Respond with ONLY a JSON object (no markdown fences, no commentary) with exactly this shape:
 {
-  "glow": "1-2 sentences of specific praise. If they got questions right, name which comprehension skill they clearly demonstrated (e.g. inference, retrieval) and tie it to the curriculum standard noted above.",
+  "glow": "1-2 sentences of specific praise. If they got questions right, name which comprehension skill they clearly demonstrated (e.g. inference, retrieval) and tie it to the curriculum standard noted above.${zeroScoreClause(score)}",
   "grow": "1-2 sentences on ONE specific, actionable next step. If they missed a question, point them back to the exact idea in the passage they should re-examine, without just giving away the answer outright. Weave in an analogy from their stated interest (${interest}). End with the motivation-appropriate closing line.",
   "vocab": [
     { "term": "a word or phrase from the passage worth upgrading", "definition": "a one-sentence, age-appropriate definition, framed using their interest where natural" },
