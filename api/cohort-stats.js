@@ -96,12 +96,33 @@ module.exports = async function handler(req, res) {
     const countEqual = others.filter((p) => p === yourScore).length;
     const percentile = Math.round(((countBelow + countEqual / 2) / others.length) * 100);
 
+    // League ladder - ranked by score, but every entry except the caller's
+    // own is fully anonymous ("Student N"). A child's display_name is
+    // parent-entered and often a real first name, so it must never cross
+    // into another account's view, even indirectly via a leaderboard - only
+    // rank and score are shown for anyone but the caller. Capped at the top
+    // LADDER_SIZE so the response can't be used to enumerate an entire
+    // cohort; the caller's own row is appended separately if they'd
+    // otherwise fall outside that cap, so they can always see where they
+    // stand even from far down the table.
+    const ranked = [...scoresByChild.entries()].sort((a, b) => b[1] - a[1]);
+    const yourRank = ranked.findIndex(([id]) => id === childId) + 1;
+    const LADDER_SIZE = 20;
+    const ladder = ranked.slice(0, LADDER_SIZE).map(([id, pct], i) => ({
+      rank: i + 1, score: pct, isYou: id === childId,
+    }));
+    if (yourRank > LADDER_SIZE) {
+      ladder.push({ rank: yourRank, score: yourScore, isYou: true });
+    }
+
     return res.status(200).json({
       available: true,
       yourScore,
       cohortAverage,
       percentile,
       cohortSize: others.length + 1,
+      yourRank,
+      ladder,
     });
   } catch (err) {
     sendError(res, err);

@@ -3,6 +3,46 @@ const { requireUser, sendError } = require("./_lib/auth");
 
 // Real progress data for the dashboard — replaces the hardcoded "12 days" /
 // "8,450 words" mock stats with numbers actually derived from submissions.
+// Monday (UTC) of the week containing d, as "YYYY-MM-DD" - the bucket key
+// for the progress timeline below. UTC avoids the bucket a submission lands
+// in shifting with the server's local time zone.
+function weekStartKey(d) {
+  const day = (d.getUTCDay() + 6) % 7; // 0 = Monday
+  const monday = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate() - day));
+  return monday.toISOString().slice(0, 10);
+}
+
+// Weekly time series of this child's progress, oldest first, capped to the
+// last 26 weeks (~6 months) so the chart stays readable and the payload
+// stays small. masteryPct per week uses the same glow/grow-tag ratio as
+// progress.js's scoreTargets, but pooled across all targets that week
+// (rather than per named target) since a week can span a tier/grade change.
+function computeTimeline(submissions) {
+  const byWeek = new Map();
+  for (const s of submissions) {
+    const key = weekStartKey(new Date(s.created_at));
+    if (!byWeek.has(key)) byWeek.set(key, { weekStart: key, submissions: 0, wordsWritten: 0, glow: 0, grow: 0, readingScoreSum: 0, readingCount: 0 });
+    const bucket = byWeek.get(key);
+    bucket.submissions += 1;
+    if (s.kind === "writing" && s.word_count) bucket.wordsWritten += s.word_count;
+    const fb = s.feedback || {};
+    if (fb.glowTarget) bucket.glow += 1;
+    if (fb.growTarget) bucket.grow += 1;
+    if (s.kind === "reading" && s.total_questions && s.score != null) {
+      bucket.readingScoreSum += s.score / s.total_questions;
+      bucket.readingCount += 1;
+    }
+  }
+  const weeks = [...byWeek.values()].sort((a, b) => a.weekStart.localeCompare(b.weekStart));
+  return weeks.slice(-26).map((w) => ({
+    weekStart: w.weekStart,
+    submissions: w.submissions,
+    wordsWritten: w.wordsWritten,
+    masteryPct: (w.glow + w.grow) > 0 ? Math.round((w.glow / (w.glow + w.grow)) * 100) : null,
+    avgReadingScore: w.readingCount > 0 ? Math.round((w.readingScoreSum / w.readingCount) * 100) : null,
+  }));
+}
+
 function computeStreak(dates) {
   // dates: array of "YYYY-MM-DD" strings, most recent first, deduped.
   if (dates.length === 0) return 0;
@@ -43,7 +83,7 @@ module.exports = async function handler(req, res) {
       .eq("profile_id", user.id)
       .eq("child_id", childId)
       .order("created_at", { ascending: false })
-      .limit(200);
+      .limit(500);
     if (error) throw error;
 
     const wordsWritten = submissions.reduce((sum, s) => sum + (s.word_count || 0), 0);
@@ -71,6 +111,7 @@ module.exports = async function handler(req, res) {
       activeStreak,
       avgReadingScore,
       readingSubmissions: readingSubs.length,
+      timeline: computeTimeline(submissions),
       recent: submissions.slice(0, 20).map((s) => ({
         id: s.id, kind: s.kind, tier: s.tier, createdAt: s.created_at,
         score: s.score, totalQuestions: s.total_questions, wordCount: s.word_count,

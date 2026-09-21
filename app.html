@@ -990,6 +990,54 @@ function Header({ view, setView, used, total, plan, theme, setTheme, backendLive
 /* ---------------------------------------------------------------- */
 /* Dashboard                                                          */
 /* ---------------------------------------------------------------- */
+// Hand-rolled SVG line chart rather than pulling in a charting library -
+// this app already draws every icon as inline SVG, and a single mastery
+// line over <=26 weekly points doesn't need more than that. Weeks with no
+// assessed writing that week (masteryPct: null) are skipped when drawing
+// the line/points but still counted for the x-axis, so a quiet week shows
+// as a gap rather than a misleading dip to 0%.
+function ProgressTimeline({ weeks }){
+  const plottable = (weeks || []).filter(w => w.masteryPct != null);
+  if (plottable.length < 2) {
+    return (
+      <div className="text-sm py-6 text-center" style={{ color: "var(--ink-faint)" }}>
+        Keep submitting stories — a trend line appears once there are at least two weeks of assessed writing.
+      </div>
+    );
+  }
+  const W = 640, H = 200, padL = 34, padR = 12, padT = 16, padB = 28;
+  const innerW = W - padL - padR, innerH = H - padT - padB;
+  const n = plottable.length;
+  const x = (i) => padL + (n === 1 ? innerW / 2 : (i / (n - 1)) * innerW);
+  const y = (pct) => padT + innerH - (pct / 100) * innerH;
+  const points = plottable.map((w, i) => ({ ...w, cx: x(i), cy: y(w.masteryPct) }));
+  const path = points.map((p, i) => `${i === 0 ? "M" : "L"} ${p.cx.toFixed(1)} ${p.cy.toFixed(1)}`).join(" ");
+  const areaPath = `${path} L ${points[points.length - 1].cx.toFixed(1)} ${padT + innerH} L ${points[0].cx.toFixed(1)} ${padT + innerH} Z`;
+  const fmtWeek = (iso) => new Date(iso + "T00:00:00Z").toLocaleDateString(undefined, { month: "short", day: "numeric", timeZone: "UTC" });
+  // At most 5 x-axis labels, evenly spaced, so dense histories don't overlap.
+  const labelEvery = Math.max(1, Math.ceil(n / 5));
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} className="w-full" style={{ height: 200 }}>
+      {[0, 50, 100].map(gy => (
+        <g key={gy}>
+          <line x1={padL} x2={W - padR} y1={y(gy)} y2={y(gy)} stroke="var(--border-soft)" strokeWidth="1" />
+          <text x={padL - 8} y={y(gy) + 4} textAnchor="end" fontSize="10" fill="var(--ink-faint)">{gy}%</text>
+        </g>
+      ))}
+      <path d={areaPath} fill="var(--cyan-tint)" opacity="0.6" />
+      <path d={path} fill="none" stroke="var(--cyan-ink)" strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" />
+      {points.map((p, i) => (
+        <circle key={p.weekStart} cx={p.cx} cy={p.cy} r="3.5" fill="var(--cyan-ink)" />
+      ))}
+      {points.map((p, i) => (
+        (i % labelEvery === 0 || i === points.length - 1) && (
+          <text key={"lbl-" + p.weekStart} x={p.cx} y={H - 8} textAnchor="middle" fontSize="10" fill="var(--ink-faint)">{fmtWeek(p.weekStart)}</text>
+        )
+      ))}
+    </svg>
+  );
+}
+
 function StatTile({ icon: IconEl, label, value, sub, accent }){
   return (
     <div className="card p-5 flex flex-col gap-3">
@@ -1245,6 +1293,21 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
         {backendLive && (
           <div className="card p-6">
             <div className="flex items-center justify-between mb-1 flex-wrap gap-2">
+              <h2 className="font-display font-bold text-xl" style={{ color: "var(--ink)" }}>Progress over time</h2>
+            </div>
+            <p className="text-xs mb-4" style={{ color: "var(--ink-faint)" }}>
+              Weekly mastery trend — the same glow/grow ratio behind Target mastery above, tracked week by week from {displayName || "your learner"}'s own submission history.
+            </p>
+            {!history && (
+              <div className="text-sm py-6 text-center" style={{ color: "var(--ink-faint)" }}>Loading…</div>
+            )}
+            {history && <ProgressTimeline weeks={history.timeline} />}
+          </div>
+        )}
+
+        {backendLive && (
+          <div className="card p-6">
+            <div className="flex items-center justify-between mb-1 flex-wrap gap-2">
               <h2 className="font-display font-bold text-xl" style={{ color: "var(--ink)" }}>How {displayName || "your learner"} compares</h2>
               <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold" style={{ background: "var(--surface-2)", color: "var(--ink-faint)" }}>
                 {country} · {gradeLabel}
@@ -1278,6 +1341,32 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
                   <div className="text-[11px] font-semibold uppercase tracking-wide" style={{ color: "var(--good)" }}>Percentile</div>
                   <div className="text-2xl font-display font-bold mt-1" style={{ color: "var(--ink)" }}>{peerStats.percentile}th</div>
                   <div className="text-xs mt-0.5" style={{ color: "var(--ink-faint)" }}>Ahead of {peerStats.percentile}% of peers</div>
+                </div>
+              </div>
+            )}
+            {peerStats && peerStats.available && peerStats.ladder && (
+              <div className="mt-5">
+                <div className="flex items-center justify-between mb-2">
+                  <SectionLabel>League ladder</SectionLabel>
+                  <span className="text-[11px]" style={{ color: "var(--ink-faint)" }}>Rank {peerStats.yourRank} of {peerStats.cohortSize}</span>
+                </div>
+                <p className="text-[11px] mb-3" style={{ color: "var(--ink-faint)" }}>
+                  Every other row is fully anonymous — only rank and score are ever shown, never another family's learner name.
+                </p>
+                <div className="rounded-2xl border overflow-hidden" style={{ borderColor: "var(--border-soft)" }}>
+                  {peerStats.ladder.map((row, i) => (
+                    <div key={row.rank} className="flex items-center justify-between px-4 py-2.5 text-sm"
+                      style={{
+                        background: row.isYou ? "var(--cyan-tint)" : (i % 2 ? "var(--surface)" : "var(--surface-2)"),
+                        borderTop: i === 0 ? "none" : "1px solid var(--border-soft)",
+                      }}>
+                      <div className="flex items-center gap-3">
+                        <span className="font-display font-bold w-6 text-right" style={{ color: row.isYou ? "var(--cyan-ink)" : "var(--ink-faint)" }}>#{row.rank}</span>
+                        <span className="font-medium" style={{ color: "var(--ink)" }}>{row.isYou ? (displayName || "Your learner") : `Student ${row.rank}`}</span>
+                      </div>
+                      <span className="font-semibold tabular" style={{ color: row.isYou ? "var(--cyan-ink)" : "var(--ink-soft)" }}>{row.score}%</span>
+                    </div>
+                  ))}
                 </div>
               </div>
             )}
