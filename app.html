@@ -545,10 +545,76 @@ const PROMPTS = {
     prompt: "“Ambition is always portrayed as a destructive force in literature.” To what extent do you agree? Refer to at least two texts in your response.",
     sample: "Ambition, in much of the literary canon, is rarely presented as a neutral force; it is instead a catalyst that reveals character under pressure. While it is true that unchecked ambition often precipitates downfall — Macbeth's spiralling violence being the most obvious example — to characterise ambition as uniformly destructive overlooks the more nuanced treatment many writers afford it. In several texts, ambition operates as a double-edged mechanism: the same drive that isolates a character from their community is often what permits them to challenge an unjust status quo in the first place. This essay will argue that ambition functions less as a moral verdict and more as a magnifying glass, intensifying whatever qualities — virtuous or otherwise — a character already possesses." },
 };
-// Word-count target and character cap per tier — these are fixed UI limits,
-// not part of the prompt content, so they apply whether the prompt itself
-// comes from PROMPTS (demo mode) or is freshly AI-generated (backendLive).
+// Word-count target and character cap per tier — used as the demo-mode
+// (no backend) limits, and as the fallback for any live grade this session
+// hasn't mapped a real per-grade target for yet.
 const TIER_WRITING_LIMITS = Object.fromEntries(Object.entries(PROMPTS).map(([k,v])=>[k,{ target: v.target, maxChars: v.maxChars }]));
+
+// Per-country, per-grade writing word-count targets for live (backendLive)
+// sessions, grounded in real curriculum/exam-board guidance where it
+// publishes one, and reasoned, monotonically-increasing interpolation
+// elsewhere (most K-12 curricula describe writing qualitatively rather
+// than by word count). Anchor points: AQA GCSE English Language Paper 1
+// Q5 (~450 words, UK Year 11); Cambridge IGCSE First Language English
+// Composition (~350-450 words, IGCSE Year 10/11 and SG O-Level Yr 4/5);
+// PSLE composition minimum (150 words, Singapore Primary 6); IB DP
+// written tasks (800-1000 words, IB Diploma Yr 2); NAPLAN Year 9 writing
+// guidance (~500 words, AU Year 9); Common App/AP essay norms (~650-750
+// words, US Grade 12); DELF/DALF B1/B2/C1 word counts (CEFR track).
+// Mirrored in api/_lib/writingLimits.js — keep both in sync by hand, same
+// pattern as PROMPTS/MAX_CHARS already established in this codebase.
+const GRADE_WORD_TARGETS = {
+  "🇬🇧 United Kingdom": {
+    "Reception": 15, "Year 1": 30, "Year 2": 50, "Year 3": 80, "Year 4": 120,
+    "Year 5": 160, "Year 6": 250, "Year 7": 300, "Year 8": 330, "Year 9": 350,
+    "Year 10": 400, "Year 11": 450, "Year 12": 600, "Year 13": 800,
+  },
+  "🇺🇸 United States": {
+    "Kindergarten": 10, "Grade 1": 30, "Grade 2": 60, "Grade 3": 150, "Grade 4": 200,
+    "Grade 5": 250, "Grade 6": 300, "Grade 7": 350, "Grade 8": 400, "Grade 9": 450,
+    "Grade 10": 500, "Grade 11": 600, "Grade 12": 750,
+  },
+  "🇦🇺 Australia": {
+    "Foundation": 10, "Year 1": 30, "Year 2": 60, "Year 3": 130, "Year 4": 170,
+    "Year 5": 210, "Year 6": 260, "Year 7": 320, "Year 8": 380, "Year 9": 500,
+    "Year 10": 520, "Year 11": 650, "Year 12": 850,
+  },
+  "🇨🇦 Canada": {
+    "Kindergarten": 10, "Grade 1": 30, "Grade 2": 60, "Grade 3": 140, "Grade 4": 190,
+    "Grade 5": 240, "Grade 6": 290, "Grade 7": 340, "Grade 8": 390, "Grade 9": 440,
+    "Grade 10": 490, "Grade 11": 580, "Grade 12": 700,
+  },
+  "🇦🇪 UAE & GCC Hubs": {
+    "Cambridge Primary 1": 15, "Cambridge Primary 2": 30, "Cambridge Primary 3": 50,
+    "Cambridge Primary 4": 80, "Cambridge Primary 5": 110, "Cambridge Primary 6": 150,
+    "Lower Secondary 7": 200, "Lower Secondary 8": 250, "Lower Secondary 9": 300,
+    "IGCSE Year 10": 350, "IGCSE Year 11": 450, "AS Level (Yr 12)": 600, "A Level (Yr 13)": 800,
+  },
+  "🇸🇬 Singapore & SE Asia": {
+    "Primary 1": 15, "Primary 2": 30, "Primary 3": 60, "Primary 4": 90, "Primary 5": 120,
+    "Primary 6": 150, "Secondary 1": 200, "Secondary 2": 250, "Secondary 3": 300,
+    "O-Level / IGCSE Yr 4": 400, "O-Level / IGCSE Yr 5": 450,
+    "IB Diploma Yr 1": 700, "IB Diploma Yr 2": 900,
+  },
+  "🌐 Global ESL Mode": {
+    "A1 Beginner": 50, "A2 Elementary": 80, "B1 Intermediate": 170,
+    "B2 Upper-Intermediate": 280, "C1 Advanced": 350, "C2 Proficient": 500,
+  },
+};
+// No published word-count guidance is specific enough to justify a
+// separate character cap, so it's derived from the word target using a
+// words-to-characters ratio that shrinks as writing matures (younger
+// writing has more short/simple words and spacing overhead per word).
+const CHAR_RATIO_BY_TIER = { early: 13, elementary: 10, middle: 8.5, high: 7.5 };
+function deriveMaxChars(target, tier){
+  return Math.round((target * (CHAR_RATIO_BY_TIER[tier] || 9)) / 10) * 10;
+}
+function writingLimitsFor(country, gradeIdx){
+  const gradeLabel = GRADE_DATA[country].grades[gradeIdx];
+  const tier = tierForGrade(country, gradeIdx);
+  const target = (GRADE_WORD_TARGETS[country] || {})[gradeLabel] ?? TIER_WRITING_LIMITS[tier].target;
+  return { target, maxChars: deriveMaxChars(target, tier) };
+}
 
 // Multiple passages per tier so repeated reading sessions don't show the
 // same text every time — a random one is picked each time an exercise
@@ -1645,7 +1711,7 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
   const [bannerDismissed, setBannerDismissed] = useState(false);
 
   const meta = backendLive
-    ? (writingPrompt ? { ...TIER_WRITING_LIMITS[tier], title: writingPrompt.title, prompt: writingPrompt.prompt } : null)
+    ? (writingPrompt ? { ...writingLimitsFor(country, gradeIdx), title: writingPrompt.title, prompt: writingPrompt.prompt } : null)
     : PROMPTS[tier];
 
   // Generates a brand-new writing prompt. In demo mode the prompt is static

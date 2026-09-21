@@ -7,10 +7,11 @@ const { standardsFor } = require("./_lib/curriculum");
 const { targetsForGrade } = require("./_lib/masteryTargets");
 const { validateFeedback, resolveTarget } = require("./_lib/validate");
 const { checkRateLimit } = require("./_lib/rateLimit");
+const { writingLimitsForGrade } = require("./_lib/writingLimits");
 
-// Server-side character caps, mirroring PROMPTS[tier].maxChars in app.html.
-// Enforced here too since a client-side maxLength is trivially bypassed.
-const MAX_CHARS = { early: 800, elementary: 1500, middle: 3000, high: 6000 };
+// Server-side character caps, derived per country+grade from real syllabus
+// word-count guidance - mirrors GRADE_WORD_TARGETS in app.html. Enforced
+// here too since a client-side maxLength is trivially bypassed.
 
 // Generates feedback, validates it against the deterministic checks, and
 // retries with a corrective note before giving up. Generation is
@@ -136,8 +137,9 @@ module.exports = async function handler(req, res) {
       const generated = existing.content && existing.content.generatedPrompt;
       if (!generated) return res.status(500).json({ error: "This writing prompt is missing its original text." });
 
-      if (text.length > MAX_CHARS[existing.tier]) {
-        return res.status(400).json({ error: `Submission exceeds the ${MAX_CHARS[existing.tier]}-character limit for this tier.` });
+      const { maxChars } = writingLimitsForGrade(existing.country, existing.grade_label, existing.tier);
+      if (text.length > maxChars) {
+        return res.status(400).json({ error: `Submission exceeds the ${maxChars}-character limit for this grade.` });
       }
 
       if (!(await claimSubmission(supabase, submissionId, user.id))) {
