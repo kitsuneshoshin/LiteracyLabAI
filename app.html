@@ -1004,19 +1004,54 @@ function Pill({ active, onClick, icon: IconEl, children, tone = "cyan" }){
   );
 }
 
+const STATUS_TIP = {
+  "Mastered": "80% or more of this skill's mentions in feedback have been a Glow (a strength), not a Grow.",
+  "In Progress": "50-79% of this skill's mentions in feedback have been a Glow so far.",
+  "Needs Attention": "Under 50% of this skill's mentions in feedback have been a Glow so far - more Grows than Glows.",
+  "Not Yet Assessed": "No submission has been tagged against this skill yet - it hasn't come up in feedback.",
+};
 function StatusTag({ status }){
   const s = STATUS_STYLE[status];
   const SIcon = s.icon;
   return (
-    <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold whitespace-nowrap"
-      style={{ background: s.bg, color: s.ink }}>
-      <SIcon size={12} strokeWidth={2.4} />{status}
+    <Tooltip text={STATUS_TIP[status]}>
+      <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold whitespace-nowrap cursor-help"
+        style={{ background: s.bg, color: s.ink }}>
+        <SIcon size={12} strokeWidth={2.4} />{status}
+      </span>
+    </Tooltip>
+  );
+}
+
+// Generic hover/focus tooltip, reused everywhere a label or control needs a
+// short explanation without permanently occupying page space. Keyboard-
+// accessible (shows on focus, not just mouse hover) since a parent using a
+// screen reader or tabbing through the dashboard deserves the same
+// explanations a mouse user gets by hovering.
+function Tooltip({ text, children, position = "top" }){
+  if (!text) return children;
+  const posClasses = position === "bottom" ? "top-full mt-2 origin-top" : "bottom-full mb-2 origin-bottom";
+  return (
+    <span className="group relative inline-flex focus-ring rounded" tabIndex={0}>
+      {children}
+      <span className={`pointer-events-none absolute left-1/2 ${posClasses} w-56 -translate-x-1/2 rounded-xl p-3 text-[12.5px] leading-snug opacity-0 scale-95 transition-all duration-150 group-hover:opacity-100 group-hover:scale-100 group-focus:opacity-100 group-focus:scale-100 z-20`}
+        style={{ background: "var(--ink)", color: "white", boxShadow: "0 10px 30px -12px hsl(var(--shadow) / 0.4)" }}>
+        {text}
+      </span>
     </span>
   );
 }
 
-function SectionLabel({ children }){
-  return <div className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--ink-faint)" }}>{children}</div>;
+function SectionLabel({ children, tip, tipPosition }){
+  const label = <div className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--ink-faint)" }}>{children}</div>;
+  if (!tip) return label;
+  return (
+    <Tooltip text={tip} position={tipPosition}>
+      <span className="inline-flex items-center gap-1 cursor-help" style={{ borderBottom: "1px dashed var(--ink-faint)" }}>
+        {label}
+      </span>
+    </Tooltip>
+  );
 }
 
 /* ---------------------------------------------------------------- */
@@ -1151,11 +1186,11 @@ function ProgressTimeline({ weeks }){
   );
 }
 
-function StatTile({ icon: IconEl, label, value, sub, accent }){
+function StatTile({ icon: IconEl, label, value, sub, accent, tip }){
   return (
     <div className="card p-5 flex flex-col gap-3">
       <div className="flex items-center justify-between">
-        <SectionLabel>{label}</SectionLabel>
+        <SectionLabel tip={tip}>{label}</SectionLabel>
         <div className="w-8 h-8 rounded-lg grid place-items-center" style={{ background: accent + "1A", color: accent }}>
           <IconEl size={16} strokeWidth={2} />
         </div>
@@ -1380,12 +1415,16 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
           )}
           {backendLive && (
             <div className={children_.length > 1 ? "mt-3 flex flex-wrap gap-4" : "mt-6 pt-4 border-t flex flex-wrap gap-4"} style={{ borderColor: "var(--border-soft)" }}>
-              <button onClick={handleExportData} className="focus-ring text-xs font-semibold" style={{ color: "var(--ink-soft)" }}>
-                Export my account data
-              </button>
-              <button onClick={handleDeleteAccount} className="focus-ring text-xs font-semibold" style={{ color: "var(--bad)" }}>
-                Delete my entire account
-              </button>
+              <Tooltip text="Downloads a JSON file with everything this account holds: every learner's profile and their complete writing/reading history. Instant, self-service.">
+                <button onClick={handleExportData} className="focus-ring text-xs font-semibold" style={{ color: "var(--ink-soft)" }}>
+                  Export my account data
+                </button>
+              </Tooltip>
+              <Tooltip text="Permanently deletes every learner profile and all history on this account, and cancels any active subscription. Immediate and cannot be undone.">
+                <button onClick={handleDeleteAccount} className="focus-ring text-xs font-semibold" style={{ color: "var(--bad)" }}>
+                  Delete my entire account
+                </button>
+              </Tooltip>
             </div>
           )}
         </div>
@@ -1495,17 +1534,23 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
             {peerStats && peerStats.available && (
               <div className="grid sm:grid-cols-3 gap-4">
                 <div className="rounded-2xl p-4" style={{ background: "var(--cyan-tint)" }}>
-                  <div className="text-[11px] font-semibold uppercase tracking-wide" style={{ color: "var(--cyan-ink)" }}>{displayName || "Your learner"}</div>
+                  <Tooltip text="This learner's own overall mastery: the share of curriculum-target mentions in their feedback that were a Glow rather than a Grow, averaged across every target they've been assessed on.">
+                    <div className="text-[11px] font-semibold uppercase tracking-wide cursor-help" style={{ color: "var(--cyan-ink)", borderBottom: "1px dashed var(--cyan-ink)" }}>{displayName || "Your learner"}</div>
+                  </Tooltip>
                   <div className="text-2xl font-display font-bold mt-1" style={{ color: "var(--ink)" }}>{peerStats.yourScore}%</div>
                   <div className="text-xs mt-0.5" style={{ color: "var(--ink-faint)" }}>Overall mastery</div>
                 </div>
                 <div className="rounded-2xl p-4" style={{ background: "var(--surface-2)" }}>
-                  <div className="text-[11px] font-semibold uppercase tracking-wide" style={{ color: "var(--ink-faint)" }}>Peer average</div>
+                  <Tooltip text="The average overall mastery score across every OTHER learner in this exact country and grade/year - never this learner's own score.">
+                    <div className="text-[11px] font-semibold uppercase tracking-wide cursor-help" style={{ color: "var(--ink-faint)", borderBottom: "1px dashed var(--ink-faint)" }}>Peer average</div>
+                  </Tooltip>
                   <div className="text-2xl font-display font-bold mt-1" style={{ color: "var(--ink)" }}>{peerStats.cohortAverage}%</div>
                   <div className="text-xs mt-0.5" style={{ color: "var(--ink-faint)" }}>{peerStats.cohortSize} students in this cohort</div>
                 </div>
                 <div className="rounded-2xl p-4" style={{ background: "var(--good-tint)" }}>
-                  <div className="text-[11px] font-semibold uppercase tracking-wide" style={{ color: "var(--good)" }}>Percentile</div>
+                  <Tooltip text="What share of the other students in this cohort this learner is ahead of, based on overall mastery. Ties count as half a step, so being tied with everyone else would land exactly at the 50th percentile.">
+                    <div className="text-[11px] font-semibold uppercase tracking-wide cursor-help" style={{ color: "var(--good)", borderBottom: "1px dashed var(--good)" }}>Percentile</div>
+                  </Tooltip>
                   <div className="text-2xl font-display font-bold mt-1" style={{ color: "var(--ink)" }}>{peerStats.percentile}th</div>
                   <div className="text-xs mt-0.5" style={{ color: "var(--ink-faint)" }}>Ahead of {peerStats.percentile}% of peers</div>
                 </div>
@@ -1514,7 +1559,7 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
             {peerStats && peerStats.available && peerStats.ladder && (
               <div className="mt-5">
                 <div className="flex items-center justify-between mb-2">
-                  <SectionLabel>League ladder</SectionLabel>
+                  <SectionLabel tip="Ranked by overall mastery (the same glow/grow ratio used elsewhere), among every learner sharing this exact country and grade/year. Only shown once at least 5 students share that cohort - below that, revealing rank/average could effectively identify one specific other family.">League ladder</SectionLabel>
                   <span className="text-[11px]" style={{ color: "var(--ink-faint)" }}>Rank {peerStats.yourRank} of {peerStats.cohortSize}</span>
                 </div>
                 <p className="text-[11px] mb-3" style={{ color: "var(--ink-faint)" }}>
@@ -1545,10 +1590,13 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
         <div className="grid grid-cols-2 gap-4">
           {backendLive ? (
             <>
-              <StatTile icon={IconTrend} label="Reading Accuracy" value={history?.avgReadingScore != null ? `${history.avgReadingScore}%` : "—"} sub={history ? `From ${history.readingSubmissions} submission${history.readingSubmissions===1?"":"s"}` : "Loading…"} accent="var(--good)" />
-              <StatTile icon={IconPen} label="Words Written" value={history ? history.wordsWritten.toLocaleString() : "—"} sub={history ? `Across ${history.writingPieces} piece${history.writingPieces===1?"":"s"}` : "Loading…"} accent="var(--cyan-ink)" />
+              <StatTile icon={IconTrend} label="Reading Accuracy" value={history?.avgReadingScore != null ? `${history.avgReadingScore}%` : "—"} sub={history ? `From ${history.readingSubmissions} submission${history.readingSubmissions===1?"":"s"}` : "Loading…"} accent="var(--good)"
+                tip="Average % of comprehension questions answered correctly across every graded reading exercise this learner has completed." />
+              <StatTile icon={IconPen} label="Words Written" value={history ? history.wordsWritten.toLocaleString() : "—"} sub={history ? `Across ${history.writingPieces} piece${history.writingPieces===1?"":"s"}` : "Loading…"} accent="var(--cyan-ink)"
+                tip="Total word count across every completed writing submission - reading exercises aren't counted here." />
               <div className="col-span-2">
-                <StatTile icon={IconFlame} label="Active Streak" value={history ? `${history.activeStreak} day${history.activeStreak===1?"":"s"}` : "—"} sub="Real progress, tracked from your submissions" accent="var(--gold)" />
+                <StatTile icon={IconFlame} label="Active Streak" value={history ? `${history.activeStreak} day${history.activeStreak===1?"":"s"}` : "—"} sub="Real progress, tracked from your submissions" accent="var(--gold)"
+                  tip="Consecutive days with at least one writing or reading submission, ending today or yesterday. Resets to 0 the moment a day is missed - it's a motivational streak, not something that affects mastery scoring." />
               </div>
             </>
           ) : (
@@ -2369,15 +2417,19 @@ function WordMeter({ words, target, chars, maxChars }){
   return (
     <div className="flex flex-col gap-1">
       <div className="flex items-center gap-2.5">
-        <div className="h-1.5 w-24 rounded-full" style={{ background: "var(--surface-2)" }}>
-          <div className="h-1.5 rounded-full transition-all" style={{ width: pct + "%", background: pct >= 100 ? "var(--good)" : "var(--cyan)" }} />
-        </div>
+        <Tooltip text="The word target is a goal, not a limit - writing past it is fine and won't block submitting. It's set for this exact country and grade/year, anchored to real curriculum/exam guidance where one exists.">
+          <div className="h-1.5 w-24 rounded-full cursor-help" style={{ background: "var(--surface-2)" }}>
+            <div className="h-1.5 rounded-full transition-all" style={{ width: pct + "%", background: pct >= 100 ? "var(--good)" : "var(--cyan)" }} />
+          </div>
+        </Tooltip>
         <span className="text-xs font-semibold tabular whitespace-nowrap" style={{ color: "var(--ink-soft)" }}>{words} / {target} words</span>
       </div>
       {maxChars != null && (
-        <span className="text-[11px] tabular" style={{ color: nearCap ? "var(--bad)" : "var(--ink-faint)" }}>
-          {chars.toLocaleString()} / {maxChars.toLocaleString()} characters{nearCap ? " — approaching limit" : ""}
-        </span>
+        <Tooltip text="This IS a hard limit - typing stops here. It's derived from the word target above using a words-to-characters ratio, so it scales with the same real curriculum guidance rather than being a flat number for every age.">
+          <span className="text-[11px] tabular cursor-help" style={{ color: nearCap ? "var(--bad)" : "var(--ink-faint)" }}>
+            {chars.toLocaleString()} / {maxChars.toLocaleString()} characters{nearCap ? " — approaching limit" : ""}
+          </span>
+        </Tooltip>
       )}
     </div>
   );
@@ -2478,9 +2530,9 @@ function TierEditor({ tier, meta, text, setText, words, phase, onSubmit, onNew, 
 
   if (tier === "elementary") {
     const badges = [
-      { label: "Word Wizard", earned: words >= 50 },
-      { label: "Great Opener", earned: /^[A-Z]/.test(text.trim()) },
-      { label: "Mission Ready", earned: words >= meta.target },
+      { label: "Word Wizard", earned: words >= 50, tip: "Earned once the draft reaches 50 words." },
+      { label: "Great Opener", earned: /^[A-Z]/.test(text.trim()), tip: "Earned when the story starts with a capital letter." },
+      { label: "Mission Ready", earned: words >= meta.target, tip: `Earned once the draft reaches the ${meta.target}-word target for this mission.` },
     ];
     return (
       <div className="card p-6 relative overflow-hidden" style={{ borderRadius: 24 }}>
@@ -2490,17 +2542,21 @@ function TierEditor({ tier, meta, text, setText, words, phase, onSubmit, onNew, 
             <span className="w-9 h-9 rounded-xl grid place-items-center" style={{ background: "var(--cyan-tint)", color: "var(--cyan-ink)" }}><IconTarget size={17} /></span>
             <h3 className="font-display font-bold text-lg" style={{ color: "var(--ink)" }}>{meta.title}</h3>
           </div>
-          <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold" style={{ background: "var(--gold-tint)", color: "var(--gold-ink)" }}>
-            <IconFlame size={12} /> +50 XP on submit
-          </span>
+          <Tooltip text="A fun on-screen badge for younger writers - it's not tracked, saved, or added up anywhere, and doesn't affect progress or mastery.">
+            <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold cursor-help" style={{ background: "var(--gold-tint)", color: "var(--gold-ink)" }}>
+              <IconFlame size={12} /> +50 XP on submit
+            </span>
+          </Tooltip>
         </div>
         <p className="text-[15px] mb-4" style={{ color: "var(--ink)" }}>{meta.prompt}</p>
         <div className="flex gap-2 mb-4 flex-wrap">
           {badges.map(b=> (
-            <span key={b.label} className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold"
-              style={{ background: b.earned ? "var(--good-tint)" : "var(--surface-2)", color: b.earned ? "var(--good)" : "var(--ink-faint)" }}>
-              <IconAward size={12} strokeWidth={2.3} /> {b.label}
-            </span>
+            <Tooltip key={b.label} text={b.tip}>
+              <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold cursor-help"
+                style={{ background: b.earned ? "var(--good-tint)" : "var(--surface-2)", color: b.earned ? "var(--good)" : "var(--ink-faint)" }}>
+                <IconAward size={12} strokeWidth={2.3} /> {b.label}
+              </span>
+            </Tooltip>
           ))}
         </div>
         <textarea value={text} onChange={(e)=>setText(e.target.value)} rows={10} disabled={disabled} maxLength={meta.maxChars}
