@@ -1117,11 +1117,12 @@ function ProgressTimeline({ weeks }){
   const path = points.map((p, i) => `${i === 0 ? "M" : "L"} ${p.cx.toFixed(1)} ${p.cy.toFixed(1)}`).join(" ");
   const areaPath = `${path} L ${points[points.length - 1].cx.toFixed(1)} ${padT + innerH} L ${points[0].cx.toFixed(1)} ${padT + innerH} Z`;
   const fmtWeek = (iso) => new Date(iso + "T00:00:00Z").toLocaleDateString(undefined, { month: "short", day: "numeric", timeZone: "UTC" });
+  const fmtWeekLong = (iso) => new Date(iso + "T00:00:00Z").toLocaleDateString(undefined, { month: "long", day: "numeric", year: "numeric", timeZone: "UTC" });
   // At most 5 x-axis labels, evenly spaced, so dense histories don't overlap.
   const labelEvery = Math.max(1, Math.ceil(n / 5));
   return (
     <svg viewBox={`0 0 ${W} ${H}`} className="w-full" style={{ height: 200 }}>
-      {[0, 50, 100].map(gy => (
+      {[0, 25, 50, 75, 100].map(gy => (
         <g key={gy}>
           <line x1={padL} x2={W - padR} y1={y(gy)} y2={y(gy)} stroke="var(--border-soft)" strokeWidth="1" />
           <text x={padL - 8} y={y(gy) + 4} textAnchor="end" fontSize="10" fill="var(--ink-faint)">{gy}%</text>
@@ -1130,7 +1131,14 @@ function ProgressTimeline({ weeks }){
       <path d={areaPath} fill="var(--cyan-tint)" opacity="0.6" />
       <path d={path} fill="none" stroke="var(--cyan-ink)" strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" />
       {points.map((p, i) => (
-        <circle key={p.weekStart} cx={p.cx} cy={p.cy} r="3.5" fill="var(--cyan-ink)" />
+        <g key={p.weekStart} style={{ cursor: "pointer" }}>
+          {/* A transparent, larger circle widens the hover/tap target beyond the
+              tiny 3.5px visible dot, without changing what's drawn. */}
+          <circle cx={p.cx} cy={p.cy} r="10" fill="transparent">
+            <title>{`Week of ${fmtWeekLong(p.weekStart)}: ${p.masteryPct}% mastery, ${p.submissions} submission${p.submissions===1?"":"s"}${p.wordsWritten ? `, ${p.wordsWritten.toLocaleString()} words written` : ""}`}</title>
+          </circle>
+          <circle cx={p.cx} cy={p.cy} r="3.5" fill="var(--cyan-ink)" />
+        </g>
       ))}
       {points.map((p, i) => (
         (i % labelEvery === 0 || i === points.length - 1) && (
