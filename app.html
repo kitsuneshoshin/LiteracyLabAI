@@ -279,6 +279,26 @@ const IconThumbsDown = (p) => <Icon {...p}><path d="M17 13V4h3v9zM17 13l-3.5 7a2
 const IconBookOpenCheck = (p) => <Icon {...p}><path d="M12 5C10 3.5 6.5 3 4 3.5v14c2.5-.5 6 0 8 1.5V5z" /><path d="M12 5c2-1.5 5.5-2 8-1.5v14c-2.5-.5-6 0-8 1.5V5z" /></Icon>;
 const IconSun = (p) => <Icon {...p}><circle cx="12" cy="12" r="4.2" /><path d="M12 2.5v2.3M12 19.2v2.3M4.4 4.4l1.6 1.6M18 18l1.6 1.6M2.5 12h2.3M19.2 12h2.3M4.4 19.6L6 18M18 6l1.6-1.6" /></Icon>;
 
+// Extra icons that only exist for avatar variety (never used elsewhere in the
+// UI) - added so the 50 preset avatars are told apart mainly by SHAPE, not
+// by recycling a handful of icons in different colors.
+const IconStar = (p) => <Icon {...p}><path d="M12 3l2.6 5.8L21 9.5l-4.6 4.3L17.6 21 12 17.6 6.4 21l1.2-7.2L3 9.5l6.4-.7z" /></Icon>;
+const IconHeart = (p) => <Icon {...p}><path d="M12 20.5C5 15.5 3 12 3 8.5A4.5 4.5 0 0 1 12 6.8 4.5 4.5 0 0 1 21 8.5c0 3.5-2 7-9 12z" /></Icon>;
+const IconRocket = (p) => <Icon {...p}><path d="M12 3c3 2 4.5 5.5 4 10l-2.5 2.5h-3L8 13c-.5-4.5 1-8 4-10z" /><path d="M9 15.5L6.5 18M15 15.5L17.5 18" /><circle cx="12" cy="10" r="1.5" fill="currentColor" /></Icon>;
+const IconMusicNote = (p) => <Icon {...p}><circle cx="9" cy="18" r="2.2" /><circle cx="18" cy="16" r="2.2" /><path d="M11.2 18V5.5L20.2 3.7v10.7" /></Icon>;
+const IconPalette = (p) => <Icon {...p}><path d="M12 3a9 9 0 1 0 0 18c1.4 0 2-1 2-2s-.6-1.8-.6-2.6c0-1 .8-1.4 1.8-1.4H17a4 4 0 0 0 4-4 8.9 8.9 0 0 0-9-8z" /><circle cx="7.5" cy="10.5" r="1" fill="currentColor" /><circle cx="9.5" cy="7" r="1" fill="currentColor" /><circle cx="14.5" cy="7" r="1" fill="currentColor" /></Icon>;
+const IconCamera = (p) => <Icon {...p}><path d="M4 8.5h3l1.5-2h7l1.5 2h3v11H4z" /><circle cx="12" cy="14" r="3.5" /></Icon>;
+const IconTrophy = (p) => <Icon {...p}><path d="M7 4h10v5a5 5 0 0 1-10 0z" /><path d="M7 6H4.5A2.5 2.5 0 0 0 7 9M17 6h2.5A2.5 2.5 0 0 1 17 9" /><path d="M10 17v2.5H8V22h8v-2.5h-2V17" /></Icon>;
+const IconCompass = (p) => <Icon {...p}><circle cx="12" cy="12" r="8.5" /><path d="M15 9l-2 5-4 1 2-5z" /></Icon>;
+const IconUmbrella = (p) => <Icon {...p}><path d="M4 12a8 8 0 1 1 16 0z" /><path d="M12 12v7.5a2 2 0 0 1-2.5 2" /><path d="M12 4v1.5" /></Icon>;
+const IconBalloon = (p) => <Icon {...p}><path d="M8 9a4 4 0 1 1 8 0c0 4-2 6.5-3.3 7.3.6.2 1 .7 1 1.4 0 .8-.7 1.3-1.7 1.3s-1.7-.5-1.7-1.3c0-.7.4-1.2 1-1.4C10 15.5 8 13 8 9z" /><path d="M11 21.5h2" /></Icon>;
+const IconGift = (p) => <Icon {...p}><rect x="4" y="9.5" width="16" height="10.5" rx="1.4" /><path d="M4 13h16M12 9.5v10.5" /><path d="M12 9.5c-1-3-3-4-4-3s0 3 4 3zM12 9.5c1-3 3-4 4-3s0 3-4 3z" /></Icon>;
+const IconKey = (p) => <Icon {...p}><circle cx="7" cy="12" r="3.5" /><path d="M10.2 12H20M16.5 12v3M19 12v2.5" /></Icon>;
+const IconLightbulb = (p) => <Icon {...p}><path d="M9 18h6M10 21h4" /><path d="M12 3a6 6 0 0 0-3.2 11.1c.6.4 1.2 1.4 1.2 2.2v.7h4v-.7c0-.8.6-1.8 1.2-2.2A6 6 0 0 0 12 3z" /></Icon>;
+const IconAnchor = (p) => <Icon {...p}><circle cx="12" cy="5" r="1.8" /><path d="M12 7v14M6 13a6 6 0 0 0 12 0M5 13H8M16 13h3" /></Icon>;
+const IconCloud = (p) => <Icon {...p}><path d="M7 18a4.5 4.5 0 1 1 .9-8.9 5.5 5.5 0 0 1 10.6 2A4 4 0 0 1 17.5 18z" /></Icon>;
+const IconLeaf = (p) => <Icon {...p}><path d="M5 19c8 0 14-6 14-14V4c-8 0-14 6-14 14z" /><path d="M5 19c3-3 6-8 6-13" /></Icon>;
+
 /* ---------------------------------------------------------------- */
 /* Domain data                                                       */
 /* ---------------------------------------------------------------- */
@@ -338,11 +358,36 @@ const INTERESTS = [
 // 50 preset avatars — an icon + color pair, never a photo upload. Deliberately
 // not real photos of children: no Storage cost, no moderation queue, and none
 // of the child-safety liability that comes with hosting actual pictures of
-// minors (see the parent conversation this came out of). Every avatar's icon
-// is one of the 9 interest icons above, so a learner recognises them, but the
-// picker below shows all 50 regardless of which interests that learner
-// actually picked at onboarding — a space-mad kid is still free to pick the
-// gold trophy if that's just the one they like.
+// minors (see the parent conversation this came out of). The picker shows
+// all 50 regardless of which interests that learner actually picked at
+// onboarding — a space-mad kid is still free to pick the trophy if that's
+// just the one they like.
+//
+// Told apart mainly by ICON, not color: the 9 interest icons plus 26 more
+// generic, kid-friendly ones (35 distinct shapes total) each get their own
+// slot first; only once every shape has been used once does a second color
+// variant of the more universally-appealing ones kick in to fill the
+// remaining 15 slots up to 50. Color is the tie-breaker, not the main event.
+const AVATAR_ICON_LIST = [
+  { label: "Space", icon: IconOrbit }, { label: "Coding", icon: IconCode },
+  { label: "Gaming", icon: IconGamepad }, { label: "Literature", icon: IconFeather },
+  { label: "History", icon: IconLandmark }, { label: "Pop culture", icon: IconClapper },
+  { label: "Exam prep", icon: IconGrad }, { label: "Animals", icon: IconPaw },
+  { label: "Sports", icon: IconBall },
+  { label: "Star", icon: IconStar }, { label: "Heart", icon: IconHeart },
+  { label: "Rocket", icon: IconRocket }, { label: "Music", icon: IconMusicNote },
+  { label: "Art", icon: IconPalette }, { label: "Camera", icon: IconCamera },
+  { label: "Trophy", icon: IconTrophy }, { label: "Compass", icon: IconCompass },
+  { label: "Umbrella", icon: IconUmbrella }, { label: "Balloon", icon: IconBalloon },
+  { label: "Gift", icon: IconGift }, { label: "Key", icon: IconKey },
+  { label: "Idea", icon: IconLightbulb }, { label: "Anchor", icon: IconAnchor },
+  { label: "Cloud", icon: IconCloud }, { label: "Leaf", icon: IconLeaf },
+  { label: "Fire", icon: IconFlame }, { label: "Crown", icon: IconCrown },
+  { label: "Moon", icon: IconMoon }, { label: "Sun", icon: IconSun },
+  { label: "Microphone", icon: IconMic }, { label: "Sparkle", icon: IconSparkle },
+  { label: "Paper plane", icon: IconSend }, { label: "Book", icon: IconBook },
+  { label: "Medal", icon: IconAward }, { label: "Target", icon: IconTarget },
+];
 const AVATAR_COLORS = [
   { tint: "var(--cyan-tint)", ink: "var(--cyan-ink)" },
   { tint: "var(--gold-tint)", ink: "var(--gold-ink)" },
@@ -352,9 +397,9 @@ const AVATAR_COLORS = [
   { tint: "var(--navy-tint)", ink: "var(--ink)" },
 ];
 const AVATARS = Array.from({ length: 50 }, (_, i) => {
-  const interest = INTERESTS[i % INTERESTS.length];
-  const color = AVATAR_COLORS[Math.floor(i / INTERESTS.length) % AVATAR_COLORS.length];
-  return { id: i, icon: interest.icon, label: interest.label, ...color };
+  const entry = AVATAR_ICON_LIST[i % AVATAR_ICON_LIST.length];
+  const color = AVATAR_COLORS[Math.floor(i / AVATAR_ICON_LIST.length) % AVATAR_COLORS.length];
+  return { id: i, icon: entry.icon, label: entry.label, ...color };
 });
 function avatarFor(avatarId){
   return AVATARS[avatarId] || AVATARS[0];
