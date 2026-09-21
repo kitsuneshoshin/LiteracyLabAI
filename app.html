@@ -1,4 +1,15 @@
-<title>LiteracyLab AI</title>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!-- Without this, a phone falls back to a ~980px virtual viewport and scales
+     the whole app down: every sm:/md: Tailwind breakpoint below then evaluates
+     against 980px and never fires, so the "responsive" layout silently never
+     applies on the devices most likely to use it. Found by a live mobile
+     emulation test reporting a 980px layout viewport at a 375px device width. -->
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LiteracyLab AI — Student Workspace</title>
+<meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700;800&family=Source+Serif+4:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
@@ -138,6 +149,8 @@
 
   input[type="range"]{ accent-color: var(--cyan); }
 </style>
+</head>
+<body>
 
 <div id="root"></div>
 
@@ -3064,3 +3077,6 @@ class ErrorBoundary extends React.Component {
 
 ReactDOM.createRoot(document.getElementById("root")).render(<ErrorBoundary><AuthGate /></ErrorBoundary>);
 </script>
+
+</body>
+</html>
