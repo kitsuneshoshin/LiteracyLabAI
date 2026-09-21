@@ -53,18 +53,25 @@ const GRADE_WORD_TARGETS = {
 
 // No published word-count guidance is specific enough to justify a
 // separate character cap, so it's derived from the word target using a
-// words-to-characters ratio that shrinks as writing matures (younger
-// writing has more short/simple words and spacing overhead per word).
-const RATIO_BY_TIER = { early: 13, elementary: 10, middle: 8.5, high: 7.5 };
+// words-to-characters ratio that shrinks smoothly as the target grows
+// (younger writing has more short/simple words and spacing overhead per
+// word). This must be a continuous function of the target rather than a
+// per-tier constant - a discrete per-tier ratio was tried first and live
+// testing caught it producing a SMALLER cap for an older grade than a
+// younger one right at a tier boundary (e.g. US Grade 9's 450-word target
+// got a tighter cap than Grade 8's 400-word target, because the ratio
+// stepped down from "middle" to "high" faster than the target grew).
+// Mirrors deriveMaxChars in app.html - keep both in sync by hand.
 const DEFAULT_TARGET_BY_TIER = { early: 60, elementary: 150, middle: 350, high: 800 };
 
-function deriveMaxChars(target, tier) {
-  return Math.round((target * (RATIO_BY_TIER[tier] || 9)) / 10) * 10;
+function deriveMaxChars(target) {
+  const ratio = 7.5 + 5.5 * Math.exp(-target / 220);
+  return Math.round((target * ratio) / 10) * 10;
 }
 
 function writingLimitsForGrade(country, gradeLabel, tier) {
   const target = (GRADE_WORD_TARGETS[country] || {})[gradeLabel] ?? DEFAULT_TARGET_BY_TIER[tier] ?? 150;
-  return { target, maxChars: deriveMaxChars(target, tier) };
+  return { target, maxChars: deriveMaxChars(target) };
 }
 
 module.exports = { writingLimitsForGrade, GRADE_WORD_TARGETS, deriveMaxChars };
