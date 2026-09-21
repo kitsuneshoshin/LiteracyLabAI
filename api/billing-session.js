@@ -2,9 +2,18 @@ const { getSupabaseAdmin } = require("./_lib/supabaseAdmin");
 const { requireUser, sendError } = require("./_lib/auth");
 const { getStripe } = require("./_lib/stripe");
 
-// Starts a Stripe-hosted Checkout flow for the Pro subscription. We never
-// touch card details ourselves — Stripe Checkout is a redirect to their
-// page, so no payment data ever passes through our servers or the browser.
+// Merged from what used to be create-checkout-session.js and
+// create-portal-session.js - Vercel's Hobby plan caps a deployment at 12
+// serverless functions, and adding account.js (for account deletion/export)
+// pushed the total over that limit. Both of these were single-purpose,
+// low-traffic Stripe redirect endpoints, so combining them into one file
+// keyed on the account's own plan (rather than trusting a client-chosen
+// path) costs nothing functionally and buys back a function slot.
+//
+// Starts a Stripe-hosted Checkout flow for a free account, or opens the
+// existing Stripe billing portal for a Pro account. We never touch card
+// details ourselves in either case — both are a redirect to Stripe's own
+// page, so no payment data passes through our servers or the browser.
 module.exports = async function handler(req, res) {
   try {
     if (req.method !== "POST") {
@@ -12,12 +21,6 @@ module.exports = async function handler(req, res) {
       return res.status(405).json({ error: "Method not allowed." });
     }
 
-    const priceId = process.env.STRIPE_PRICE_ID;
-    if (!priceId) {
-      const err = new Error("STRIPE_PRICE_ID is not set in Vercel project env vars.");
-      err.statusCode = 503;
-      throw err;
-    }
     const siteUrl = process.env.SITE_URL;
     if (!siteUrl) {
       const err = new Error("SITE_URL is not set in Vercel project env vars.");
@@ -32,8 +35,23 @@ module.exports = async function handler(req, res) {
     const { data: profile, error: profileErr } = await supabase
       .from("profiles").select("plan, stripe_customer_id").eq("id", user.id).single();
     if (profileErr) throw profileErr;
+
     if (profile.plan === "pro") {
-      return res.status(409).json({ error: "This account already has an active Pro subscription." });
+      if (!profile.stripe_customer_id) {
+        return res.status(404).json({ error: "No billing account found for this user yet." });
+      }
+      const session = await stripe.billingPortal.sessions.create({
+        customer: profile.stripe_customer_id,
+        return_url: `${siteUrl}/app.html`,
+      });
+      return res.status(200).json({ url: session.url });
+    }
+
+    const priceId = process.env.STRIPE_PRICE_ID;
+    if (!priceId) {
+      const err = new Error("STRIPE_PRICE_ID is not set in Vercel project env vars.");
+      err.statusCode = 503;
+      throw err;
     }
 
     // Reuse the existing Stripe customer if this account has one (e.g. a

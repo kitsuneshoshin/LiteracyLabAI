@@ -1208,8 +1208,7 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
     setBillingLoading(true);
     setBillingError(null);
     try {
-      const endpoint = isPro ? "/api/create-portal-session" : "/api/create-checkout-session";
-      const result = await authedFetch(session, endpoint, { method: "POST" });
+      const result = await authedFetch(session, "/api/billing-session", { method: "POST" });
       window.location.href = result.url;
     } catch (err) {
       setBillingError(err.payload?.error || err.message || "Something went wrong opening billing. Please try again.");
@@ -1219,15 +1218,15 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
   // Real, working versions of the two rights privacy.html promises parents
   // ("export a copy... in a portable format", "delete the entire account, at
   // any time") - both used to be policy-only promises with no supporting
-  // endpoint. Export downloads everything api/export-data.js returns as one
-  // JSON file; deletion calls api/delete-account.js (which cancels any
-  // Stripe subscription and deletes the auth user, cascading every child
-  // profile and submission) and then signs out locally, since the account
-  // that owned this session no longer exists.
+  // endpoint. Both live in api/account.js (GET = export, DELETE = delete) -
+  // merged into one file to stay within Vercel Hobby's 12-function-per-
+  // deployment cap. Deletion cancels any Stripe subscription and deletes the
+  // auth user, cascading every child profile and submission, then signs out
+  // locally, since the account that owned this session no longer exists.
   async function handleExportData(){
     if (!backendLive) return;
     try {
-      const data = await authedFetch(session, "/api/export-data");
+      const data = await authedFetch(session, "/api/account");
       const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -1243,7 +1242,7 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
     if (!backendLive) return;
     if (!window.confirm("Permanently delete your entire LiteracyLab AI account? This deletes every learner profile, all writing and reading history, and cancels any active subscription. This cannot be undone.")) return;
     try {
-      await authedFetch(session, "/api/delete-account", { method: "POST" });
+      await authedFetch(session, "/api/account", { method: "DELETE" });
       await supabaseClient.auth.signOut();
     } catch (err) {
       logAppError("Failed to delete account:", err);
