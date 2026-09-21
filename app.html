@@ -1134,7 +1134,9 @@ function ProgressTimeline({ weeks }){
       ))}
       {points.map((p, i) => (
         (i % labelEvery === 0 || i === points.length - 1) && (
-          <text key={"lbl-" + p.weekStart} x={p.cx} y={H - 8} textAnchor="middle" fontSize="10" fill="var(--ink-faint)">{fmtWeek(p.weekStart)}</text>
+          <text key={"lbl-" + p.weekStart} x={p.cx} y={H - 8}
+            textAnchor={i === 0 ? "start" : i === points.length - 1 ? "end" : "middle"}
+            fontSize="10" fill="var(--ink-faint)">{fmtWeek(p.weekStart)}</text>
         )
       ))}
     </svg>
