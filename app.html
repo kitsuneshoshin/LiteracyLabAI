@@ -1258,10 +1258,7 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
 
           {backendLive && (
             <div className="flex flex-col gap-1.5 mb-6">
-              <span className="text-xs font-semibold" style={{ color: "var(--ink-soft)" }}>Avatar</span>
-              <p className="text-[11px] -mt-0.5 mb-1" style={{ color: "var(--ink-faint)" }}>
-                A picture, not a photo — pick any of these, not just ones matching your interests above.
-              </p>
+              <span className="text-xs font-semibold" style={{ color: "var(--ink-soft)" }}>Choose an avatar</span>
               <AvatarPicker value={avatarId} onChange={setAvatarId} />
             </div>
           )}
