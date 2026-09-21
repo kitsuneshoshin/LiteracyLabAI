@@ -38,7 +38,7 @@ module.exports = async function handler(req, res) {
 
     if (req.method === "POST") {
       const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body || {};
-      const allowed = ["display_name", "country", "grade_idx", "interests", "confidence_writing", "confidence_reading", "motivation", "onboarded"];
+      const allowed = ["display_name", "country", "grade_idx", "interests", "confidence_writing", "confidence_reading", "motivation", "onboarded", "avatar_id"];
       const patch = {};
       for (const key of allowed) if (key in body) patch[key] = body[key];
 

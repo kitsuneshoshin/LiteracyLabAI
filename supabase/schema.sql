@@ -60,6 +60,11 @@ create table if not exists public.child_profiles (
 -- Safe to re-run against an existing table created before this column existed.
 alter table public.child_profiles add column if not exists onboarded boolean not null default false;
 
+-- Which of the 50 preset avatars (app.html's AVATARS array - an icon/color
+-- pair, never a photo) this learner has chosen. An index rather than a
+-- foreign key since the set is a fixed, code-defined list, not app data.
+alter table public.child_profiles add column if not exists avatar_id int not null default 0;
+
 alter table public.child_profiles enable row level security;
 
 drop policy if exists "child_profiles: owner access" on public.child_profiles;

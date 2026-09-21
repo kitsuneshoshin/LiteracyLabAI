@@ -335,6 +335,53 @@ const INTERESTS = [
   { id: "sports",   label: "Sports",   icon: IconBall },
 ];
 
+// 50 preset avatars — an icon + color pair, never a photo upload. Deliberately
+// not real photos of children: no Storage cost, no moderation queue, and none
+// of the child-safety liability that comes with hosting actual pictures of
+// minors (see the parent conversation this came out of). Every avatar's icon
+// is one of the 9 interest icons above, so a learner recognises them, but the
+// picker below shows all 50 regardless of which interests that learner
+// actually picked at onboarding — a space-mad kid is still free to pick the
+// gold trophy if that's just the one they like.
+const AVATAR_COLORS = [
+  { tint: "var(--cyan-tint)", ink: "var(--cyan-ink)" },
+  { tint: "var(--gold-tint)", ink: "var(--gold-ink)" },
+  { tint: "var(--good-tint)", ink: "var(--good)" },
+  { tint: "var(--warn-tint)", ink: "var(--warn)" },
+  { tint: "var(--bad-tint)",  ink: "var(--bad)" },
+  { tint: "var(--navy-tint)", ink: "var(--ink)" },
+];
+const AVATARS = Array.from({ length: 50 }, (_, i) => {
+  const interest = INTERESTS[i % INTERESTS.length];
+  const color = AVATAR_COLORS[Math.floor(i / INTERESTS.length) % AVATAR_COLORS.length];
+  return { id: i, icon: interest.icon, label: interest.label, ...color };
+});
+function avatarFor(avatarId){
+  return AVATARS[avatarId] || AVATARS[0];
+}
+function Avatar({ avatarId, size = 36 }){
+  const a = avatarFor(avatarId);
+  const Icon = a.icon;
+  return (
+    <span className="inline-flex items-center justify-center rounded-full shrink-0" style={{ width: size, height: size, background: a.tint, color: a.ink }}>
+      <Icon size={Math.round(size * 0.55)} strokeWidth={2.2} />
+    </span>
+  );
+}
+function AvatarPicker({ value, onChange }){
+  return (
+    <div className="grid grid-cols-8 sm:grid-cols-10 gap-2">
+      {AVATARS.map(a => (
+        <button key={a.id} type="button" onClick={()=>onChange(a.id)} title={a.label}
+          className="focus-ring rounded-full p-0.5 transition-transform"
+          style={ a.id === value ? { boxShadow: `0 0 0 2px ${a.ink}` } : {} }>
+          <Avatar avatarId={a.id} size={36} />
+        </button>
+      ))}
+    </div>
+  );
+}
+
 // Which interests are even offered varies by age — developmental-interest
 // research (early-childhood theme surveys, Common Sense Media's tween/teen
 // media-use data) shows a 6-year-old and a 17-year-old don't share a menu.
@@ -1062,8 +1109,9 @@ function ChildSwitcher({ children_, activeChildId, onSwitchChild, onAddChild, sh
     <div className="flex items-center gap-1.5 rounded-full border p-1 w-fit mb-4 flex-wrap" style={{ borderColor: "var(--border)", background: "var(--surface-2)" }}>
       {children_.map(c=>(
         <button key={c.id} onClick={()=>onSwitchChild(c.id)}
-          className="focus-ring rounded-full px-3.5 py-1.5 text-xs font-semibold transition-colors"
+          className="focus-ring inline-flex items-center gap-1.5 rounded-full pl-1 pr-3.5 py-1 text-xs font-semibold transition-colors"
           style={ c.id===activeChildId ? { background: "var(--ink)", color: "white" } : { color: "var(--ink-soft)" } }>
+          <Avatar avatarId={c.avatar_id ?? 0} size={22} />
           {c.display_name || "Learner"}
         </button>
       ))}
@@ -1076,7 +1124,7 @@ function ChildSwitcher({ children_, activeChildId, onSwitchChild, onAddChild, sh
   );
 }
 
-function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests, toggleInterest, confidenceWriting, setConfidenceWriting, confidenceReading, setConfidenceReading, motivation, setMotivation, displayName, setDisplayName, children_, activeChildId, onSwitchChild, onAddChild, onRemoveChild, used, total, plan, session, setView, history, progress, peerStats, backendLive, needsOnboarding, onCompleteOnboarding }){
+function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests, toggleInterest, confidenceWriting, setConfidenceWriting, confidenceReading, setConfidenceReading, motivation, setMotivation, displayName, setDisplayName, avatarId, setAvatarId, children_, activeChildId, onSwitchChild, onAddChild, onRemoveChild, used, total, plan, session, setView, history, progress, peerStats, backendLive, needsOnboarding, onCompleteOnboarding }){
   const grades = GRADE_DATA[country].grades;
   const gradeLabel = grades[gradeIdx];
   const remaining = total - used;
@@ -1154,10 +1202,23 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
           {backendLive && (
             <label className="flex flex-col gap-1.5 mb-4">
               <span className="text-xs font-semibold" style={{ color: "var(--ink-soft)" }}>Learner's name</span>
-              <input type="text" value={displayName} onChange={(e)=>setDisplayName(e.target.value)} placeholder="e.g. Maya"
-                className="focus-ring w-full rounded-xl border px-3.5 py-2.5 text-sm font-medium"
-                style={{ borderColor: "var(--border)", background: "var(--surface)", color: "var(--ink)" }} />
+              <div className="flex items-center gap-3">
+                <Avatar avatarId={avatarId} size={40} />
+                <input type="text" value={displayName} onChange={(e)=>setDisplayName(e.target.value)} placeholder="e.g. Maya"
+                  className="focus-ring w-full rounded-xl border px-3.5 py-2.5 text-sm font-medium"
+                  style={{ borderColor: "var(--border)", background: "var(--surface)", color: "var(--ink)" }} />
+              </div>
             </label>
+          )}
+
+          {backendLive && (
+            <div className="flex flex-col gap-1.5 mb-6">
+              <span className="text-xs font-semibold" style={{ color: "var(--ink-soft)" }}>Avatar</span>
+              <p className="text-[11px] -mt-0.5 mb-1" style={{ color: "var(--ink-faint)" }}>
+                A picture, not a photo — pick any of these, not just ones matching your interests above.
+              </p>
+              <AvatarPicker value={avatarId} onChange={setAvatarId} />
+            </div>
           )}
 
           <div className="grid sm:grid-cols-2 gap-4 mb-6">
@@ -2424,7 +2485,7 @@ function TierEditor({ tier, meta, text, setText, words, phase, onSubmit, onNew, 
 /* ---------------------------------------------------------------- */
 // Fallback used only in demo mode (no backend) — mirrors what the single
 // hardcoded default child used to be, so demo mode's behavior is unchanged.
-const DEMO_CHILD = { id: "demo", display_name: "My Learner", country: "🇬🇧 United Kingdom", grade_idx: 5, interests: ["space","gaming"], confidence_writing: "growing", confidence_reading: "growing", motivation: "enjoyment", onboarded: true };
+const DEMO_CHILD = { id: "demo", display_name: "My Learner", country: "🇬🇧 United Kingdom", grade_idx: 5, interests: ["space","gaming"], confidence_writing: "growing", confidence_reading: "growing", motivation: "enjoyment", onboarded: true, avatar_id: 0 };
 
 function App({ session }){
   const backendLive = BACKEND_CONFIGURED && !!session;
@@ -2459,6 +2520,7 @@ function App({ session }){
   const confidenceWriting = activeChild?.confidence_writing || "growing";
   const confidenceReading = activeChild?.confidence_reading || "growing";
   const motivation = activeChild?.motivation || "enjoyment";
+  const avatarId = activeChild?.avatar_id ?? 0;
   const needsOnboarding = backendLive && activeChild ? !activeChild.onboarded : false;
 
   useEffect(()=>{
@@ -2583,6 +2645,7 @@ function App({ session }){
   function handleSetConfidenceReading(v){ persistProfile({ confidence_reading: v }); }
   function handleSetMotivation(v){ persistProfile({ motivation: v }); }
   function handleSetDisplayName(v){ persistProfile({ display_name: v }); }
+  function handleSetAvatar(id){ persistProfile({ avatar_id: id }); }
   function completeOnboarding(){
     persistProfile({ onboarded: true });
     setView("workspace");
@@ -2656,6 +2719,7 @@ function App({ session }){
           confidenceReading={confidenceReading} setConfidenceReading={handleSetConfidenceReading}
           motivation={motivation} setMotivation={handleSetMotivation}
           displayName={activeChild?.display_name || ""} setDisplayName={handleSetDisplayName}
+          avatarId={avatarId} setAvatarId={handleSetAvatar}
           children_={children} activeChildId={activeChildId} onSwitchChild={switchChild} onAddChild={addChild} onRemoveChild={removeChild}
           used={used} total={total} plan={plan} session={session} setView={setView} history={history} progress={progress} peerStats={peerStats} backendLive={backendLive}
           needsOnboarding={needsOnboarding} onCompleteOnboarding={completeOnboarding} />
