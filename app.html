@@ -1044,33 +1044,20 @@ function StatusTag({ status }){
 function Tooltip({ text, children, position = "top" }){
   if (!text) return children;
   const posClasses = position === "bottom" ? "top-full mt-2 origin-top" : "bottom-full mb-2 origin-bottom";
-  const bubbleRef = useRef(null);
-  const [shift, setShift] = useState(0);
-  // The bubble is centred on its trigger, so a trigger near either screen
-  // edge pushes it off-screen and clips the text - live mobile testing found
-  // the leftmost dashboard tooltips overhanging by ~20px at 375px wide.
-  // Measured on open (not on every render) and nudged back with marginLeft,
-  // deliberately not transform, so Tailwind's scale-in animation still works.
-  function clampIntoViewport(){
-    const el = bubbleRef.current;
-    if (!el) return;
-    const prev = el.style.marginLeft;
-    el.style.marginLeft = "0px";
-    const r = el.getBoundingClientRect();
-    const pad = 12;
-    let next = 0;
-    if (r.left < pad) next = pad - r.left;
-    else if (r.right > window.innerWidth - pad) next = (window.innerWidth - pad) - r.right;
-    el.style.marginLeft = prev;
-    setShift(Math.round(next));
-  }
+  // The bubble is centred on its trigger, so on a narrow screen a trigger
+  // near the left edge pushes it off-screen: live testing at 375px found the
+  // leftmost dashboard tooltips (trigger centred at ~86px) overhanging by
+  // ~20px. A JS measure-and-nudge was tried first and could not be shown to
+  // actually move the element, so it was dropped rather than shipped
+  // unverified. Narrowing the bubble below sm instead fixes it arithmetically:
+  // at w-40 (160px) a trigger centred at 86px puts the left edge at ~6px,
+  // on-screen, and the widest trigger positions stay clear of the right edge.
   return (
-    <span className="group relative inline-flex focus-ring rounded" tabIndex={0}
-      onMouseEnter={clampIntoViewport} onFocus={clampIntoViewport}>
+    <span className="group relative inline-flex focus-ring rounded" tabIndex={0}>
       {children}
-      <span ref={bubbleRef}
-        className={`pointer-events-none absolute left-1/2 ${posClasses} w-56 max-w-[calc(100vw-1.5rem)] -translate-x-1/2 rounded-xl p-3 text-[12.5px] leading-snug opacity-0 scale-95 transition-all duration-150 group-hover:opacity-100 group-hover:scale-100 group-focus:opacity-100 group-focus:scale-100 z-20`}
-        style={{ marginLeft: shift + "px", background: "var(--ink)", color: "white", boxShadow: "0 10px 30px -12px hsl(var(--shadow) / 0.4)" }}>
+      <span
+        className={`pointer-events-none absolute left-1/2 ${posClasses} w-40 sm:w-56 max-w-[calc(100vw-1.5rem)] -translate-x-1/2 rounded-xl p-3 text-[12.5px] leading-snug opacity-0 scale-95 transition-all duration-150 group-hover:opacity-100 group-hover:scale-100 group-focus:opacity-100 group-focus:scale-100 z-20`}
+        style={{ background: "var(--ink)", color: "white", boxShadow: "0 10px 30px -12px hsl(var(--shadow) / 0.4)" }}>
         {text}
       </span>
     </span>
