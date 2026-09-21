@@ -13,11 +13,14 @@ module.exports = async function handler(req, res) {
     const user = await requireUser(req);
     const supabase = getSupabaseAdmin();
     const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body || {};
-    const { submissionId, chosenAction, helpfulRating } = body;
+    const { submissionId, chosenAction, helpfulRating, feedbackText } = body;
 
     if (!submissionId) return res.status(400).json({ error: "submissionId is required." });
     if (helpfulRating && !["up", "down"].includes(helpfulRating)) {
       return res.status(400).json({ error: 'helpfulRating must be "up" or "down".' });
+    }
+    if (feedbackText != null && (typeof feedbackText !== "string" || feedbackText.length > 1000)) {
+      return res.status(400).json({ error: "feedbackText must be a string under 1000 characters." });
     }
 
     // Confirm the submission actually belongs to this user before attaching a commitment to it.
@@ -27,7 +30,7 @@ module.exports = async function handler(req, res) {
 
     const { data, error } = await supabase
       .from("commitments")
-      .insert({ submission_id: submissionId, profile_id: user.id, chosen_action: chosenAction || null, helpful_rating: helpfulRating || null })
+      .insert({ submission_id: submissionId, profile_id: user.id, chosen_action: chosenAction || null, helpful_rating: helpfulRating || null, feedback_text: feedbackText || null })
       .select("*").single();
     if (error) throw error;
 

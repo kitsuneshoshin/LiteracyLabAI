@@ -1667,15 +1667,24 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
 /* ---------------------------------------------------------------- */
 // A short, low-friction "did this land?" check — captured per piece of feedback
 // rather than guessed once at signup, since feedback receptivity shifts over time.
+// A thumbs-down is the one moment a parent/student is already telling us
+// something didn't work - asking "why?" right there, optionally, turns a bare
+// satisfaction score into an actual product-feedback backlog (see
+// commitments.feedback_text). Thumbs-up stays a single tap: there's nothing
+// to elaborate on when something already worked.
 function ThumbsFeedback({ context, session, submissionId, backendLive }){
   const [value, setValue] = useState(null);
-  function pick(v){
+  const [showCommentBox, setShowCommentBox] = useState(false);
+  const [comment, setComment] = useState("");
+
+  function send(v, text){
     setValue(v);
     if (backendLive && submissionId) {
-      authedFetch(session, "/api/commit", { method: "POST", body: JSON.stringify({ submissionId, helpfulRating: v }) })
+      authedFetch(session, "/api/commit", { method: "POST", body: JSON.stringify({ submissionId, helpfulRating: v, feedbackText: text || undefined }) })
         .catch((err)=> logAppError("Failed to log feedback rating:", err));
     }
   }
+
   if (value) {
     return (
       <div className="text-[12.5px] flex items-center gap-1.5" style={{ color: "var(--ink-faint)" }}>
@@ -1684,15 +1693,37 @@ function ThumbsFeedback({ context, session, submissionId, backendLive }){
       </div>
     );
   }
+
+  if (showCommentBox) {
+    return (
+      <div className="flex flex-col gap-2 max-w-md">
+        <span className="text-[12.5px] font-medium" style={{ color: "var(--ink-faint)" }}>Sorry to hear that — want to tell us why? (optional)</span>
+        <textarea value={comment} onChange={(e)=>setComment(e.target.value)} rows={2} maxLength={1000}
+          placeholder="What would have made this more helpful?"
+          className="focus-ring w-full rounded-xl border px-3 py-2 text-[13px]"
+          style={{ borderColor: "var(--border)", background: "var(--surface)", color: "var(--ink)" }} />
+        <div className="flex items-center gap-3">
+          <button onClick={()=>send("down", comment.trim() || null)}
+            className="focus-ring rounded-full px-3.5 py-1.5 text-xs font-semibold" style={{ background: "var(--ink)", color: "white" }}>
+            Send
+          </button>
+          <button onClick={()=>send("down", null)} className="focus-ring text-xs font-semibold" style={{ color: "var(--ink-faint)" }}>
+            Skip
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex items-center gap-2.5 flex-wrap">
       <span className="text-[12.5px] font-medium" style={{ color: "var(--ink-faint)" }}>Did this feedback help?</span>
       <div className="flex items-center gap-1.5">
-        <button onClick={()=>pick("up")} aria-label="Yes, this helped"
+        <button onClick={()=>send("up")} aria-label="Yes, this helped"
           className="focus-ring w-8 h-8 rounded-full grid place-items-center border" style={{ borderColor: "var(--border)", color: "var(--ink-soft)" }}>
           <IconThumbsUp size={14} strokeWidth={2.2} />
         </button>
-        <button onClick={()=>pick("down")} aria-label="No, this didn't help"
+        <button onClick={()=>setShowCommentBox(true)} aria-label="No, this didn't help"
           className="focus-ring w-8 h-8 rounded-full grid place-items-center border" style={{ borderColor: "var(--border)", color: "var(--ink-soft)" }}>
           <IconThumbsDown size={14} strokeWidth={2.2} />
         </button>

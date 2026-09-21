@@ -124,10 +124,24 @@ create table if not exists public.commitments (
   id uuid primary key default gen_random_uuid(),
   submission_id uuid not null references public.submissions(id) on delete cascade,
   profile_id uuid not null references public.profiles(id) on delete cascade,
-  chosen_action text not null,
+  chosen_action text,
   helpful_rating text check (helpful_rating in ('up', 'down')),
   created_at timestamptz not null default now()
 );
+
+-- Was "not null" - broke every ThumbsFeedback rating submitted without a
+-- CommitPrompt choice also made on the same submission (the two widgets are
+-- independent, so this happened constantly): the insert threw a 500 that
+-- the client silently swallowed, showing "Thanks!" while never actually
+-- saving the rating. Found live while checking this table before adding
+-- feedback_text below. Safe to re-run even if the table predates this fix.
+alter table public.commitments alter column chosen_action drop not null;
+
+-- Free-text "tell us more" captured when a parent/student taps thumbs-down
+-- on a piece of AI feedback - the start of a real product-feedback backlog,
+-- not just a satisfaction score. Optional: a thumbs-down with no comment is
+-- still a useful signal on its own.
+alter table public.commitments add column if not exists feedback_text text;
 
 alter table public.commitments enable row level security;
 
