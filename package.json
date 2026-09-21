@@ -3,6 +3,9 @@
   "private": true,
   "version": "1.0.0",
   "description": "LiteracyLab AI — static front-end plus Vercel serverless functions for real AI feedback, auth, and progress history.",
+  "scripts": {
+    "test": "node --test tests/"
+  },
   "dependencies": {
     "@sentry/node": "^8.42.0",
     "@supabase/supabase-js": "^2.45.4",
