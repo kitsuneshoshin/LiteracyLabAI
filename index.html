@@ -196,6 +196,16 @@
   .nav-cta{ display:flex; align-items:center; gap:10px; }
   .theme-toggle{ width:34px; height:34px; border-radius:50%; border:1px solid var(--border); display:grid; place-items:center; background: var(--surface); color: var(--ink-soft); cursor:pointer; }
   @media (max-width: 780px){ .nav-links{ display:none; } }
+  /* At phone widths the brand, theme toggle and CTA no longer fit on one
+     row: the "Launch workspace" button was pushed ~60px past the right edge
+     (found at 375px), taking the page's primary CTA off-screen and forcing
+     the whole page to scroll horizontally. Shrinking the button and letting
+     the row wrap keeps the CTA reachable without truncating its label. */
+  @media (max-width: 460px){
+    .nav-inner{ flex-wrap: wrap; row-gap: 10px; gap: 10px; }
+    .brand{ font-size: 17px; }
+    .nav-cta .btn{ padding: 10px 15px; font-size: 13.5px; }
+  }
 
   /* ---------------- Hero ---------------- */
   .hero{ padding-top: 64px; padding-bottom: 40px; }
