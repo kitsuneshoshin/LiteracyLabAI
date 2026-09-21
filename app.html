@@ -1216,6 +1216,40 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
       setBillingLoading(false);
     }
   }
+  // Real, working versions of the two rights privacy.html promises parents
+  // ("export a copy... in a portable format", "delete the entire account, at
+  // any time") - both used to be policy-only promises with no supporting
+  // endpoint. Export downloads everything api/export-data.js returns as one
+  // JSON file; deletion calls api/delete-account.js (which cancels any
+  // Stripe subscription and deletes the auth user, cascading every child
+  // profile and submission) and then signs out locally, since the account
+  // that owned this session no longer exists.
+  async function handleExportData(){
+    if (!backendLive) return;
+    try {
+      const data = await authedFetch(session, "/api/export-data");
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url; a.download = "literacylab-data-export.json";
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      logAppError("Failed to export account data:", err);
+      window.alert("Something went wrong exporting your data. Please try again or email privacy@literacylab.ai.");
+    }
+  }
+  async function handleDeleteAccount(){
+    if (!backendLive) return;
+    if (!window.confirm("Permanently delete your entire LiteracyLab AI account? This deletes every learner profile, all writing and reading history, and cancels any active subscription. This cannot be undone.")) return;
+    try {
+      await authedFetch(session, "/api/delete-account", { method: "POST" });
+      await supabaseClient.auth.signOut();
+    } catch (err) {
+      logAppError("Failed to delete account:", err);
+      window.alert("Something went wrong deleting your account. Please try again or email privacy@literacylab.ai.");
+    }
+  }
   // With a live backend, real per-skill mastery (computed from this
   // student's own submission history — see api/progress.js) replaces the
   // static demo numbers below, once it's loaded.
@@ -1334,6 +1368,16 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
               className="focus-ring mt-6 pt-4 border-t text-xs font-semibold w-full text-left" style={{ borderColor: "var(--border-soft)", color: "var(--bad)" }}>
               Remove {displayName || "this learner"} from this account
             </button>
+          )}
+          {backendLive && (
+            <div className={children_.length > 1 ? "mt-3 flex flex-wrap gap-4" : "mt-6 pt-4 border-t flex flex-wrap gap-4"} style={{ borderColor: "var(--border-soft)" }}>
+              <button onClick={handleExportData} className="focus-ring text-xs font-semibold" style={{ color: "var(--ink-soft)" }}>
+                Export my account data
+              </button>
+              <button onClick={handleDeleteAccount} className="focus-ring text-xs font-semibold" style={{ color: "var(--bad)" }}>
+                Delete my entire account
+              </button>
+            </div>
           )}
         </div>
 
