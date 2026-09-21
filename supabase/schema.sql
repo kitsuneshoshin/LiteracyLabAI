@@ -102,6 +102,14 @@ create policy "submissions: owner access" on public.submissions
 create index if not exists submissions_profile_month_idx
   on public.submissions (profile_id, created_at desc);
 
+-- Supports api/cohort-stats.js's peer-comparison query, the one place that
+-- deliberately scans across every account (via the service-role key, which
+-- bypasses the owner-only RLS policy above) rather than filtering by
+-- profile_id - it groups every submission for an exact (country, tier,
+-- grade_label) triple to compute an anonymous cohort average/percentile.
+create index if not exists submissions_cohort_idx
+  on public.submissions (country, tier, grade_label);
+
 -- ---------------------------------------------------------------------------
 -- Micro-mission commitments: the "what will you try next time?" taps.
 -- Kept separate from submissions so we can track follow-through over time

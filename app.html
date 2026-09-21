@@ -1028,7 +1028,7 @@ function ChildSwitcher({ children_, activeChildId, onSwitchChild, onAddChild, sh
   );
 }
 
-function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests, toggleInterest, confidenceWriting, setConfidenceWriting, confidenceReading, setConfidenceReading, motivation, setMotivation, displayName, setDisplayName, children_, activeChildId, onSwitchChild, onAddChild, onRemoveChild, used, total, plan, session, setView, history, progress, backendLive, needsOnboarding, onCompleteOnboarding }){
+function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests, toggleInterest, confidenceWriting, setConfidenceWriting, confidenceReading, setConfidenceReading, motivation, setMotivation, displayName, setDisplayName, children_, activeChildId, onSwitchChild, onAddChild, onRemoveChild, used, total, plan, session, setView, history, progress, peerStats, backendLive, needsOnboarding, onCompleteOnboarding }){
   const grades = GRADE_DATA[country].grades;
   const gradeLabel = grades[gradeIdx];
   const remaining = total - used;
@@ -1241,6 +1241,48 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
           </div>
           )}
         </div>
+
+        {backendLive && (
+          <div className="card p-6">
+            <div className="flex items-center justify-between mb-1 flex-wrap gap-2">
+              <h2 className="font-display font-bold text-xl" style={{ color: "var(--ink)" }}>How {displayName || "your learner"} compares</h2>
+              <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold" style={{ background: "var(--surface-2)", color: "var(--ink-faint)" }}>
+                {country} · {gradeLabel}
+              </span>
+            </div>
+            <p className="text-xs mb-4" style={{ color: "var(--ink-faint)" }}>
+              Compared only against other students in this exact country and grade/year — never blended across regions or ages.
+            </p>
+            {!peerStats && (
+              <div className="text-sm py-6 text-center" style={{ color: "var(--ink-faint)" }}>Loading comparison…</div>
+            )}
+            {peerStats && !peerStats.available && peerStats.reason === "no_data_yet" && (
+              <div className="text-sm py-6 text-center" style={{ color: "var(--ink-faint)" }}>Submit a story or reading exercise first to see how {displayName || "your learner"} compares.</div>
+            )}
+            {peerStats && !peerStats.available && peerStats.reason === "not_enough_peers" && (
+              <div className="text-sm py-6 text-center" style={{ color: "var(--ink-faint)" }}>Not enough other students in {country} · {gradeLabel} yet for a fair, anonymous comparison. Check back as more students join.</div>
+            )}
+            {peerStats && peerStats.available && (
+              <div className="grid sm:grid-cols-3 gap-4">
+                <div className="rounded-2xl p-4" style={{ background: "var(--cyan-tint)" }}>
+                  <div className="text-[11px] font-semibold uppercase tracking-wide" style={{ color: "var(--cyan-ink)" }}>{displayName || "Your learner"}</div>
+                  <div className="text-2xl font-display font-bold mt-1" style={{ color: "var(--ink)" }}>{peerStats.yourScore}%</div>
+                  <div className="text-xs mt-0.5" style={{ color: "var(--ink-faint)" }}>Overall mastery</div>
+                </div>
+                <div className="rounded-2xl p-4" style={{ background: "var(--surface-2)" }}>
+                  <div className="text-[11px] font-semibold uppercase tracking-wide" style={{ color: "var(--ink-faint)" }}>Peer average</div>
+                  <div className="text-2xl font-display font-bold mt-1" style={{ color: "var(--ink)" }}>{peerStats.cohortAverage}%</div>
+                  <div className="text-xs mt-0.5" style={{ color: "var(--ink-faint)" }}>{peerStats.cohortSize} students in this cohort</div>
+                </div>
+                <div className="rounded-2xl p-4" style={{ background: "var(--good-tint)" }}>
+                  <div className="text-[11px] font-semibold uppercase tracking-wide" style={{ color: "var(--good)" }}>Percentile</div>
+                  <div className="text-2xl font-display font-bold mt-1" style={{ color: "var(--ink)" }}>{peerStats.percentile}th</div>
+                  <div className="text-xs mt-0.5" style={{ color: "var(--ink-faint)" }}>Ahead of {peerStats.percentile}% of peers</div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       <div className="flex flex-col gap-6">
@@ -2307,6 +2349,7 @@ function App({ session }){
   const [profileLoaded, setProfileLoaded] = useState(!backendLive);
   const [history, setHistory] = useState(null);
   const [progress, setProgress] = useState(null);
+  const [peerStats, setPeerStats] = useState(null);
   // A household can have more than one learner (see api/child-profile.js) -
   // `children` is every learner on this account, `activeChildId` is whichever
   // one is currently shown. Everything that used to be single "profile"
@@ -2422,6 +2465,14 @@ function App({ session }){
       .catch((err)=> logAppError("Failed to load mastery progress:", err));
   }, [backendLive, view, tier, country, gradeLabel, used, activeChildId]);
 
+  useEffect(()=>{
+    if (!backendLive || view !== "dashboard" || !activeChildId) return;
+    setPeerStats(null); // avoid flashing the previous child/grade's numbers while this one loads
+    authedFetch(session, `/api/cohort-stats?tier=${tier}&country=${encodeURIComponent(country)}&gradeLabel=${encodeURIComponent(gradeLabel)}&childId=${activeChildId}`)
+      .then(setPeerStats)
+      .catch((err)=> logAppError("Failed to load peer comparison:", err));
+  }, [backendLive, view, tier, country, gradeLabel, used, activeChildId]);
+
   function setTierAndSyncGrade(k){
     setTierOverride(k);
     setGradeIdxOverride(defaultGradeIndexForTier(country, k)); // preview only - never persisted
@@ -2517,7 +2568,7 @@ function App({ session }){
           motivation={motivation} setMotivation={handleSetMotivation}
           displayName={activeChild?.display_name || ""} setDisplayName={handleSetDisplayName}
           children_={children} activeChildId={activeChildId} onSwitchChild={switchChild} onAddChild={addChild} onRemoveChild={removeChild}
-          used={used} total={total} plan={plan} session={session} setView={setView} history={history} progress={progress} backendLive={backendLive}
+          used={used} total={total} plan={plan} session={session} setView={setView} history={history} progress={progress} peerStats={peerStats} backendLive={backendLive}
           needsOnboarding={needsOnboarding} onCompleteOnboarding={completeOnboarding} />
       ) : (
         <Workspace country={country} gradeIdx={gradeIdx} setGradeIdx={handleGradeChange} tier={tier} setTierOverride={setTierAndSyncGrade}
