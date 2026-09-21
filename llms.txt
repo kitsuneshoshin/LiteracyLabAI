@@ -1,0 +1,33 @@
+# LiteracyLab AI
+
+> LiteracyLab AI is an AI-powered literacy coach for students aged 5-18. It reads a child's writing, or checks their reading comprehension, and returns feedback cited against that child's own country's real school curriculum — not generic writing advice.
+
+## What it does
+
+- Generates an original writing prompt or reading-comprehension passage suited to the student's age tier and stated interests (e.g. space, gaming, history).
+- Grades the submission and returns structured feedback: one "Glow" (a specific strength, tied to a named curriculum standard), one "Grow" (a single actionable next step, explained through the student's own interest), two vocabulary or rhetorical-technique upgrades, and a concrete micro-mission for the next submission.
+- For writing, also shows the student's own story rewritten with the suggested improvement spliced directly into their original text ("Your story, revised"), rather than describing the fix only in the abstract.
+- Tracks mastery over time against real, named curriculum targets on a parent-facing dashboard, including a weekly progress trend and an anonymous comparison against other students in the same country and grade/year.
+
+## Who it's for
+
+Parents and guardians of students aged 5-18, across four age-tiered workspaces (Early Years, Elementary, Middle School, High School). Every account is created and managed by a parent or guardian; children do not register independently.
+
+## Curricula supported
+
+UK National Curriculum / GCSE, US Common Core / AP, Australia ACARA, Canada provincial standards, UAE & GCC (Cambridge/IGCSE), Singapore & SE Asia (Cambridge/IB), and a CEFR-aligned Global ESL mode (A1-C2) for learners anywhere else.
+
+## Pricing
+
+- Free: 3 writing or reading submissions per calendar month, with full feedback (no watered-down free tier).
+- Pro: $14.99/month for unlimited submissions, advanced exam-technique scoring, and weekly progress reports. No lock-in contract; cancel anytime.
+
+## Privacy and safety
+
+Parent-managed accounts by design. Student writing is processed only to generate feedback for that child — never sold, never used to train public AI models. Parents can review, export, or permanently delete a child's data at any time from the dashboard.
+
+## Links
+
+- Homepage: https://literacylab.vercel.app/
+- Privacy Policy: https://literacylab.vercel.app/privacy.html
+- Terms of Use: https://literacylab.vercel.app/terms.html

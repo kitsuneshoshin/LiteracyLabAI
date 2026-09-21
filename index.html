@@ -1,4 +1,79 @@
-<title>LiteracyLab AI</title>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LiteracyLab AI — Curriculum-Aligned Writing &amp; Reading Feedback for Ages 5–18</title>
+<meta name="description" content="AI-powered writing and reading feedback cited against your child's real school curriculum — UK, US, Australia, Canada, UAE, Singapore &amp; Global ESL. Personalised to their interests. Free plan, no credit card required.">
+<link rel="canonical" href="https://literacylab.vercel.app/">
+<meta name="robots" content="index, follow">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="LiteracyLab AI">
+<meta property="og:title" content="LiteracyLab AI — Curriculum-Aligned Writing &amp; Reading Feedback for Ages 5–18">
+<meta property="og:description" content="AI-powered writing and reading feedback cited against your child's real school curriculum — UK, US, Australia, Canada, UAE, Singapore &amp; Global ESL. Personalised to their interests.">
+<meta property="og:url" content="https://literacylab.vercel.app/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="LiteracyLab AI — Curriculum-Aligned Writing &amp; Reading Feedback">
+<meta name="twitter:description" content="AI feedback cited against your child's real school curriculum, personalised to their interests. Free plan, no credit card required.">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "LiteracyLab AI",
+  "url": "https://literacylab.vercel.app/",
+  "description": "LiteracyLab AI gives students aged 5-18 AI-generated writing and reading-comprehension feedback cited against their own country's real school curriculum, personalised to each learner's interests."
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "LiteracyLab AI",
+  "applicationCategory": "EducationalApplication",
+  "operatingSystem": "Web",
+  "description": "An AI literacy coach for ages 5-18 that reads a child's writing or checks their reading comprehension, maps it against their real school curriculum (UK, US, Australia, Canada, UAE & GCC, Singapore, or CEFR-aligned Global ESL), and returns a Glow, a Grow, personalised vocabulary upgrades, and a micro-mission for next time.",
+  "offers": [
+    { "@type": "Offer", "name": "Free", "price": "0", "priceCurrency": "USD", "description": "3 writing or reading submissions per month with full feedback." },
+    { "@type": "Offer", "name": "Pro", "price": "14.99", "priceCurrency": "USD", "description": "Unlimited monthly submissions, advanced exam-technique scoring, and weekly progress reports." }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How does the 3 free monthly submissions work?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Every account gets 3 free submissions each calendar month — writing, reading comprehension, or a mix of both — full Key Takeaways feedback included, no watered-down version. Your count resets automatically at the start of each billing cycle. Once you're using it every week, Pro removes the monthly cap entirely." }
+    },
+    {
+      "@type": "Question",
+      "name": "Is my child's writing safe and private?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Yes. Submissions are processed solely to generate feedback for your child — we never sell or rent writing samples or personal data, and we don't use your child's submissions to train public AI models. Parents can view, export, or permanently delete a child's writing history at any time." }
+    },
+    {
+      "@type": "Question",
+      "name": "How does LiteracyLab AI align with my country's curriculum?",
+      "acceptedAnswer": { "@type": "Answer", "text": "You choose your region — UK, US, Australia, Canada, UAE & GCC (Cambridge/IGCSE), Singapore & SE Asia (Cambridge/IB), or Global ESL Mode (CEFR A1-C2) — and your child's grade, year, or level, and every mastery target, Grow, and vocabulary suggestion is scaled to that curriculum's actual expectations." }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I cancel my LiteracyLab Pro subscription anytime?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Yes — Pro is billed monthly through Stripe with no lock-in contract. Cancel from your account settings in a couple of clicks and you won't be charged again; you'll keep Pro access through the end of the period you already paid for." }
+    },
+    {
+      "@type": "Question",
+      "name": "What happens when my child reaches their 3-story limit?",
+      "acceptedAnswer": { "@type": "Answer", "text": "The workspace clearly shows when they're at the limit and pauses new submissions — nothing is lost, and drafts already in progress stay saved. From there you can either upgrade to Pro for unlimited submissions right away, or wait for the free allowance to reset at the start of next month." }
+    }
+  ]
+}
+</script>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=Lexend:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -262,8 +337,10 @@
 
   @media (prefers-reduced-motion: reduce){ html{ scroll-behavior:auto; } }
 </style>
+</head>
+<body>
 
-<div class="nav">
+<header class="nav">
   <div class="wrap nav-inner">
     <div class="brand">
       <span class="brand-mark">
@@ -291,8 +368,9 @@
       <a class="btn btn-ghost" href="app.html">Launch workspace</a>
     </div>
   </div>
-</div>
+</header>
 
+<main>
 <section class="hero">
   <div class="wrap hero-inner">
     <span class="eyebrow">A literacy coach, not a chatbot · Ages 5–18</span>
@@ -555,6 +633,7 @@
     </div>
   </div>
 </section>
+</main>
 
 <footer>
   <div class="wrap foot-inner">
@@ -619,3 +698,5 @@
     render('early');
   })();
 </script>
+</body>
+</html>
