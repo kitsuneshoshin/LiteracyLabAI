@@ -1,6 +1,7 @@
 const { getSupabaseAdmin } = require("./_lib/supabaseAdmin");
 const { requireUser, sendError } = require("./_lib/auth");
 const { getStripe } = require("./_lib/stripe");
+const { PAID_PLANS, priceIdForPlan } = require("./_lib/plans");
 
 // Merged from what used to be create-checkout-session.js and
 // create-portal-session.js - Vercel's Hobby plan caps a deployment at 12
@@ -36,7 +37,12 @@ module.exports = async function handler(req, res) {
       .from("profiles").select("plan, stripe_customer_id").eq("id", user.id).single();
     if (profileErr) throw profileErr;
 
-    if (profile.plan === "pro") {
+    // An existing subscriber goes to Stripe's portal, where they can change
+    // tier, update their card or cancel - we deliberately don't rebuild any
+    // of that ourselves. Anyone on a paid plan qualifies, not just the
+    // legacy "pro" value.
+    const alreadySubscribed = profile.plan === "core" || profile.plan === "premium" || profile.plan === "pro";
+    if (alreadySubscribed) {
       if (!profile.stripe_customer_id) {
         return res.status(404).json({ error: "No billing account found for this user yet." });
       }
@@ -47,9 +53,14 @@ module.exports = async function handler(req, res) {
       return res.status(200).json({ url: session.url });
     }
 
-    const priceId = process.env.STRIPE_PRICE_ID;
+    const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body || {};
+    const tier = body.tier || "core";
+    if (!PAID_PLANS.includes(tier)) {
+      return res.status(400).json({ error: `Unknown plan: ${tier}` });
+    }
+    const priceId = priceIdForPlan(tier);
     if (!priceId) {
-      const err = new Error("STRIPE_PRICE_ID is not set in Vercel project env vars.");
+      const err = new Error(`No Stripe price configured for the ${tier} plan - set STRIPE_PRICE_ID_${tier.toUpperCase()} in Vercel project env vars.`);
       err.statusCode = 503;
       throw err;
     }

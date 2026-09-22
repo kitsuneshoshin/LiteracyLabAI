@@ -124,6 +124,24 @@ test("resolveTarget: matches exactly, and fuzzily ignoring case/punctuation", ()
   assert.equal(resolveTarget("Something Else Entirely", names), null);
 });
 
+// Writing "and" for "&" is the most likely way a model breaks a "copy this
+// verbatim" instruction, and several real target names contain "&" (see
+// masteryTargets.js). On glowTarget/growTarget this failure is SILENT: the
+// value doesn't match, so api/progress.js's Map lookup misses and that
+// submission just never aggregates into the student's mastery history -
+// no error, no retry, the number is quietly wrong.
+test("regression: a target name's \"&\" still resolves when the model writes it out as \"and\"", () => {
+  const names = ["Viewpoint & Argument Writing", "Summarising & Organising Ideas", "Technical Accuracy"];
+  assert.equal(resolveTarget("Viewpoint and Argument Writing", names), "Viewpoint & Argument Writing");
+  assert.equal(resolveTarget("viewpoint and argument writing", names), "Viewpoint & Argument Writing");
+  assert.equal(resolveTarget("Viewpoint & Argument Writing", names), "Viewpoint & Argument Writing");
+  assert.equal(resolveTarget("Summarising and Organising Ideas", names), "Summarising & Organising Ideas");
+  // Expanding "&" to "and" must not blur two genuinely different targets
+  // into one another.
+  assert.equal(resolveTarget("Technical Accuracy", names), "Technical Accuracy");
+  assert.equal(resolveTarget("Argument Writing", names), null);
+});
+
 test("validatePassage: rejects a passage far outside the expected word-count band for its tier", () => {
   const tooShort = { title: "A Title", skill: "Inference", passage: "This is a short passage that is nowhere near long enough for a high school reading task.", questions: [
     { q: "Question one goes here?", options: ["a", "b", "c", "d"], correct: 0 },

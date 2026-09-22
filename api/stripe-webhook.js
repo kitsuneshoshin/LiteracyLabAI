@@ -1,6 +1,19 @@
 const { getSupabaseAdmin } = require("./_lib/supabaseAdmin");
 const { getStripe } = require("./_lib/stripe");
 const { captureIfUnexpected } = require("./_lib/sentry");
+const { planForPriceId } = require("./_lib/plans");
+
+// Which tier a subscription actually grants is decided by the Price the
+// customer bought, never assumed. Before the tier split this file hardcoded
+// "pro" for any successful checkout, which would now silently hand a Core
+// subscriber every Premium feature. An unrecognised price resolves to null
+// and is treated as a configuration error rather than quietly granting the
+// higher tier.
+function planFromSubscription(subscription) {
+  const priceId = subscription && subscription.items && subscription.items.data[0]
+    && subscription.items.data[0].price && subscription.items.data[0].price.id;
+  return planForPriceId(priceId);
+}
 
 // Stripe signs the raw request body, so we must verify against the exact
 // bytes Stripe sent — not Vercel's auto-parsed/re-serialized JSON, which
@@ -54,8 +67,16 @@ module.exports = async function handler(req, res) {
         if (session.mode === "subscription" && session.subscription) {
           const userId = session.client_reference_id || (session.metadata && session.metadata.supabase_user_id);
           if (userId) {
+            // The session itself doesn't carry the price, so fetch the
+            // subscription to see which tier was actually bought.
+            const stripe = getStripe();
+            const subscription = await stripe.subscriptions.retrieve(session.subscription);
+            const plan = planFromSubscription(subscription);
+            if (!plan) {
+              throw new Error(`Checkout completed for an unrecognised Stripe price - check STRIPE_PRICE_ID_CORE / STRIPE_PRICE_ID_PREMIUM. Subscription: ${session.subscription}`);
+            }
             const { error } = await supabase.from("profiles").update({
-              plan: "pro",
+              plan,
               stripe_customer_id: session.customer,
               stripe_subscription_id: session.subscription,
             }).eq("id", userId);
@@ -71,8 +92,15 @@ module.exports = async function handler(req, res) {
       case "customer.subscription.deleted": {
         const subscription = event.data.object;
         const active = subscription.status === "active" || subscription.status === "trialing";
+        // An upgrade or downgrade between Core and Premium arrives here as a
+        // subscription.updated with a different price, so the tier has to be
+        // re-read every time rather than assumed unchanged.
+        const plan = active ? planFromSubscription(subscription) : "free";
+        if (active && !plan) {
+          throw new Error(`Active subscription on an unrecognised Stripe price - check STRIPE_PRICE_ID_CORE / STRIPE_PRICE_ID_PREMIUM. Subscription: ${subscription.id}`);
+        }
         const { error } = await supabase.from("profiles").update({
-          plan: active ? "pro" : "free",
+          plan,
           stripe_subscription_id: active ? subscription.id : null,
         }).eq("stripe_customer_id", subscription.customer);
         if (error) throw error;

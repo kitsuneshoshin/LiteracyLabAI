@@ -1,3 +1,5 @@
+const { capabilitiesFor } = require("./plans");
+
 const FREE_MONTHLY_CAP = 3;
 
 // A dev/QA bypass, separate from real billing state (profiles.plan). Set
@@ -32,8 +34,9 @@ async function getMonthlyUsage(supabase, profileId) {
   if (profileErr) throw profileErr;
 
   const isAdmin = ADMIN_EMAILS.includes((profile.email || "").toLowerCase());
-  const cap = isAdmin || profile.plan === "pro" ? Infinity : FREE_MONTHLY_CAP;
-  return { used: count || 0, cap, plan: isAdmin ? "admin" : profile.plan };
+  const plan = isAdmin ? "admin" : profile.plan;
+  const caps = capabilitiesFor(plan);
+  return { used: count || 0, cap: caps.monthlyCap, plan, capabilities: caps };
 }
 
 module.exports = { getMonthlyUsage, FREE_MONTHLY_CAP };

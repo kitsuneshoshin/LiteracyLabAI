@@ -59,6 +59,51 @@ IMPORTANT: "revision" is spliced into the story in place of "quote" and NOTHING 
 Every highlight's "quote" must be a real substring that appears verbatim in the submitted text — never paraphrase or reconstruct a quote from memory.`;
 }
 
+// Exam-technique scoring: the Premium tier's headline capability.
+// Deliberately NOT a vague "exam tips" section - it bands the piece against
+// the SAME named assessment objectives already used for mastery tracking
+// (real syllabus criteria from masteryTargets.js, e.g. "AQA GCSE English
+// Language · AO5"), so the score is traceable to a published standard
+// rather than invented. Bands are 1-4 with a plain-English descriptor,
+// because a fabricated raw exam mark ("17/24") would imply a precision no
+// model can honestly deliver on a single unmoderated piece.
+//
+// Gated to middle/high on purpose: banded assessment objectives are not a
+// real thing for a 6-year-old, and pretending otherwise would be the same
+// sell-what-doesn't-exist mistake this tier split was built to fix.
+const EXAM_BANDS = `Band 1 = "Emerging" (the objective is barely attempted), Band 2 = "Developing" (attempted but inconsistent), Band 3 = "Secure" (met clearly and consistently), Band 4 = "Strong" (met with control and deliberate effect).`;
+
+const EXAM_JSON_SHAPE = `  "examTechnique": [
+    { "criterion": "the exact assessment objective name", "band": 3, "descriptor": "Secure", "evidence": "a short quote or the specific question that shows it", "toNextBand": "one specific change that would move this objective up one band" }
+  ],
+  "examSummary": "one sentence naming the single objective worth working on next, and why"`;
+
+function examTechniqueSupported(tier) {
+  return tier === "middle" || tier === "high";
+}
+
+function examTechniqueClause({ tier, targets, kind }) {
+  if (!examTechniqueSupported(tier)) return "";
+  const criteria = targets.map((t) => `"${t.name}" (${t.standard})`).join(", ");
+  const source = kind === "reading"
+    ? "their answers and the reasoning those answers reveal"
+    : "the piece of writing above";
+  return `\n\nEXAM-TECHNIQUE SCORING (required for this student):
+Score ${source} against each of these assessment objectives for their year and region: ${criteria}.
+${EXAM_BANDS}
+For EVERY objective listed, return an entry with: the objective's exact name, the band (1-4), the band's descriptor word, one piece of concrete evidence (a short quote from their own text, or the specific question/answer that shows it), and ONE specific change that would move that objective up exactly one band. Never award a band you cannot point to evidence for - if an objective genuinely isn't attempted at all in this piece, band it 1 and say plainly that it wasn't attempted rather than inflating it. Do not invent a raw exam mark, percentage, or grade letter: bands only.
+Also return "examSummary": one sentence naming the single objective that would gain this student the most marks if they worked on it next, and why.`;
+}
+
+// Deep feedback is the second Premium capability: the same feedback
+// engine, asked for more of it. Core gets one Grow (one step, deliberately
+// - a single actionable step is better coaching than a list); Premium adds a
+// clearly-labelled second, harder step for households that want to push.
+function deepFeedbackClause(deep) {
+  if (!deep) return "";
+  return `\n\nThis student's plan includes extended feedback. In addition to the single main "grow" above, return a "growNext" field: ONE further step, harder than the main grow, that they'd take AFTER mastering it. It must be a genuinely different skill or a clear escalation of the same one - never a restatement of the main grow in other words. Same length and tone rules apply.`;
+}
+
 // When the student previously tapped a "what will you try next time?"
 // commitment, this asks the model to genuinely check whether the new
 // submission shows evidence of it — never fabricated, and omitted if
@@ -104,7 +149,9 @@ function successCriteria(tier) {
 8. Every "grow" highlight has a "revision" that is an actual rewrite of its quote (different wording, applying the fix) — never the same text repeated, and never just advice about the quote instead of a rewrite of it.${(tier === "middle" || tier === "high") ? '\n9. Every "revision" reads as a natural continuation of this student\'s own formal, third-person essay — pure academic argument, with NO interest-based analogy dropped into the revision text itself in any phrasing ("like how I...", "similar to how...", "just like...", etc). That framing belongs only in the "grow" field.' : ""}`;
 }
 
-function buildWritingPrompt({ tier, country, gradeLabel, interest, confidenceWriting, motivation, prompt, text, targetNames, previousCommitment }) {
+function buildWritingPrompt({ tier, country, gradeLabel, interest, confidenceWriting, motivation, prompt, text, targetNames, targets, previousCommitment, capabilities }) {
+  const caps = capabilities || {};
+  const wantsExam = caps.examTechnique && examTechniqueSupported(tier) && Array.isArray(targets) && targets.length > 0;
   return `You are the feedback engine inside LiteracyLab AI, an educational product for a ${TIER_LABEL[tier]} student in ${gradeLabel} (${country}).
 
 A student was given this writing prompt:
@@ -121,6 +168,8 @@ ${MOTIVATION_NOTE[motivation] || ""}
 ${standardsClause(country, tier, gradeLabel)}
 ${targetsClause(targetNames)}
 ${highlightsClause(tier)}
+${deepFeedbackClause(caps.deepFeedback)}
+${wantsExam ? examTechniqueClause({ tier, targets, kind: "writing" }) : ""}
 ${followUpClause(previousCommitment)}
 
 Read the actual submitted text closely — every point you make must be traceable to something specifically in it (quote a short fragment where useful), not a generic template response.
@@ -141,7 +190,7 @@ Respond with ONLY a JSON object (no markdown fences, no commentary) with exactly
   "commitOptions": ["3 short first-person action phrases (5-8 words each) the student could tap to commit to trying next time, each directly derived from the grow above — not generic"],
   "glowTarget": "the exact skill area name from the given list that the glow demonstrates",
   "growTarget": "the exact skill area name from the given list that the grow is building towards",
-  "highlights": [{ "quote": "an exact substring copied from the submitted text", "type": "glow or grow", "note": "a short reason", "revision": "ONLY for type=grow: that same fragment actually rewritten to apply the suggestion" }],
+  "highlights": [{ "quote": "an exact substring copied from the submitted text", "type": "glow or grow", "note": "a short reason", "revision": "ONLY for type=grow: that same fragment actually rewritten to apply the suggestion" }],${caps.deepFeedback ? '\n  "growNext": "ONE further, harder step to take after the main grow is mastered - genuinely different, not a restatement.",' : ""}${wantsExam ? `\n${EXAM_JSON_SHAPE},` : ""}
   "followUp": ${previousCommitment ? '"a short, honest 1-sentence check-in on the previous commitment noted above"' : "null"}
 }`;
 }
@@ -170,7 +219,9 @@ RIGHT (praises something true without referencing the passage's content): "You g
 Keep the glow to one such content-free, honest sentence, then move straight into the grow.`;
 }
 
-function buildReadingPrompt({ tier, country, gradeLabel, interest, confidenceReading, motivation, passageTitle, passage, questions, answers, score, totalQuestions, targetNames, previousCommitment }) {
+function buildReadingPrompt({ tier, country, gradeLabel, interest, confidenceReading, motivation, passageTitle, passage, questions, answers, score, totalQuestions, targetNames, targets, previousCommitment, capabilities }) {
+  const caps = capabilities || {};
+  const wantsExam = caps.examTechnique && examTechniqueSupported(tier) && Array.isArray(targets) && targets.length > 0;
   const answerLines = questions.map((q, i) => {
     const chosen = answers[i];
     const isCorrect = chosen === q.correct;
@@ -192,6 +243,8 @@ ${CONFIDENCE_NOTE[confidenceReading] || ""}
 ${MOTIVATION_NOTE[motivation] || ""}
 ${standardsClause(country, tier, gradeLabel)}
 ${targetsClause(targetNames)}
+${deepFeedbackClause(caps.deepFeedback)}
+${wantsExam ? examTechniqueClause({ tier, targets, kind: "reading" }) : ""}
 ${followUpClause(previousCommitment)}
 
 ${WORKED_EXAMPLE}
@@ -209,7 +262,7 @@ Respond with ONLY a JSON object (no markdown fences, no commentary) with exactly
   "microMission": "One concrete instruction for their next reading passage that follows from the grow above.",
   "commitOptions": ["3 short first-person action phrases (5-8 words each) the student could tap to commit to trying next time, derived from the grow above"],
   "glowTarget": "the exact skill area name from the given list that the glow demonstrates",
-  "growTarget": "the exact skill area name from the given list that the grow is building towards",
+  "growTarget": "the exact skill area name from the given list that the grow is building towards",${caps.deepFeedback ? '\n  "growNext": "ONE further, harder step to take after the main grow is mastered - genuinely different, not a restatement.",' : ""}${wantsExam ? `\n${EXAM_JSON_SHAPE},` : ""}
   "followUp": ${previousCommitment ? '"a short, honest 1-sentence check-in on the previous commitment noted above"' : "null"}
 }`;
 }
@@ -293,4 +346,4 @@ function correctiveAddendum(issues) {
   return `\n\nYour previous attempt failed these checks — fix every one of them in this attempt:\n${issues.map(i => `- ${i}`).join("\n")}`;
 }
 
-module.exports = { buildWritingPrompt, buildReadingPrompt, buildReadingPassagePrompt, buildWritingPromptGenerator, correctiveAddendum };
+module.exports = { buildWritingPrompt, buildReadingPrompt, buildReadingPassagePrompt, buildWritingPromptGenerator, correctiveAddendum, examTechniqueSupported };

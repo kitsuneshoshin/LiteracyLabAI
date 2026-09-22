@@ -1,0 +1,21 @@
+# Dependencies. The test suite deliberately needs none of these to run
+# (every test imports only from api/_lib/), but `npm install` will create
+# this directory the moment anyone runs it, and it must never be committed.
+node_modules/
+
+# Local environment secrets. Real values live in Vercel's project settings
+# (SUPABASE_SERVICE_ROLE_KEY, STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET,
+# OPENAI_API_KEY, STRIPE_PRICE_ID_CORE, STRIPE_PRICE_ID_FAMILY), never here.
+.env
+.env.*
+!.env.example
+
+# Vercel CLI
+.vercel/
+
+# Editor / OS noise
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp

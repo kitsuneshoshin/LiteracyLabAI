@@ -14,6 +14,19 @@ create table if not exists public.profiles (
   created_at timestamptz not null default now()
 );
 
+-- Pricing moved from one paid tier to two (Core and Premium), so the
+-- original two-value constraint has to widen. 'pro' is kept as a permitted
+-- value rather than migrated away: it's what any subscription created
+-- before the split is stamped with, and api/_lib/plans.js treats it as
+-- Premium - which is what those customers were actually sold. The tier was
+-- briefly called "family" during development and renamed to "premium"
+-- before anything using it shipped, so no row anywhere has plan='family' -
+-- this can rename cleanly with no data migration. Safe to re-run; dropping
+-- a constraint that doesn't exist is a no-op with IF EXISTS.
+alter table public.profiles drop constraint if exists profiles_plan_check;
+alter table public.profiles add constraint profiles_plan_check
+  check (plan in ('free', 'core', 'premium', 'pro'));
+
 -- Safe to re-run against an existing table created before these columns existed.
 alter table public.profiles add column if not exists stripe_customer_id text;
 alter table public.profiles add column if not exists stripe_subscription_id text;

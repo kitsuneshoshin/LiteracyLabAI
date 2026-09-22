@@ -2,6 +2,7 @@ const { getSupabaseAdmin } = require("./_lib/supabaseAdmin");
 const { requireUser, sendError } = require("./_lib/auth");
 const { targetsForGrade } = require("./_lib/masteryTargets");
 const { scoreChildTargets, buildCohortResult } = require("./_lib/cohortScoring");
+const { getMonthlyUsage } = require("./_lib/usage");
 
 module.exports = async function handler(req, res) {
   try {
@@ -15,6 +16,17 @@ module.exports = async function handler(req, res) {
     if (!childId) return res.status(400).json({ error: "childId is required." });
 
     const supabase = getSupabaseAdmin();
+
+    // Peer comparison is a paid capability. Gate it here rather than only in
+    // the UI - the endpoint is directly reachable, so hiding the card client
+    // side would not actually withhold the feature.
+    const { capabilities } = await getMonthlyUsage(supabase, user.id);
+    if (!capabilities.peerComparison) {
+      return res.status(402).json({
+        error: "Peer comparison is available on Core and Premium.",
+        upgradeTo: "core",
+      });
+    }
 
     // Ownership check - never compute or reveal anything about a cohort on
     // behalf of a child this account doesn't own.

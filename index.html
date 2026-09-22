@@ -36,7 +36,8 @@
   "description": "An AI literacy coach for ages 5-18 that reads a child's writing or checks their reading comprehension, maps it against their real school curriculum (UK, US, Australia, Canada, UAE & GCC, Singapore, or CEFR-aligned Global ESL), and returns a Glow, a Grow, personalised vocabulary upgrades, and a micro-mission for next time.",
   "offers": [
     { "@type": "Offer", "name": "Free", "price": "0", "priceCurrency": "USD", "description": "3 writing or reading submissions per month with full feedback." },
-    { "@type": "Offer", "name": "Pro", "price": "14.99", "priceCurrency": "USD", "description": "Unlimited monthly submissions, advanced exam-technique scoring, and weekly progress reports." }
+    { "@type": "Offer", "name": "Core", "price": "9.99", "priceCurrency": "USD", "description": "Unlimited monthly submissions for one learner, a 26-week progress trend chart, anonymous ranking within their own year group, and full activity history." },
+    { "@type": "Offer", "name": "Premium", "price": "19.99", "priceCurrency": "USD", "description": "Everything in Core for up to 6 learners, plus extended feedback with a second harder next step, and exam-technique scoring that bands each piece 1-4 against the real assessment objectives for the student's year and region (ages 11+)." }
   ]
 }
 </script>
@@ -48,7 +49,7 @@
     {
       "@type": "Question",
       "name": "How do the 3 free monthly submissions work?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Every account gets 3 free submissions each calendar month — writing, reading comprehension, or a mix of both — full Key Takeaways feedback included, no watered-down version. Your count resets automatically on the 1st of each month. Once you're using it every week, Pro removes the monthly cap entirely." }
+      "acceptedAnswer": { "@type": "Answer", "text": "Every account gets 3 free submissions each calendar month — writing, reading comprehension, or a mix of both — full Key Takeaways feedback included, no watered-down version. Your count resets automatically on the 1st of each month. Once you're using it every week, Core ($9.99/month) removes the monthly cap entirely." }
     },
     {
       "@type": "Question",
@@ -62,13 +63,23 @@
     },
     {
       "@type": "Question",
-      "name": "Can I cancel my LiteracyLab Pro subscription anytime?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Yes — Pro is billed monthly through Stripe with no lock-in contract. Cancel from your account settings in a couple of clicks and you won't be charged again; you'll keep Pro access through the end of the period you already paid for." }
+      "name": "Can I cancel my LiteracyLab subscription anytime?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Yes — both Core and Premium are billed monthly through Stripe with no lock-in contract. Cancel from your account settings in a couple of clicks and you won't be charged again; you'll keep full access through the end of the period you already paid for, then drop back to the free plan rather than losing your account." }
+    },
+    {
+      "@type": "Question",
+      "name": "Which LiteracyLab AI plan should I choose?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Start on Free to see the feedback quality for yourself — 3 submissions a month, nothing held back. Core at $9.99/month is right for one child practising regularly: unlimited submissions, the 26-week progress trend, anonymous ranking within their own year group, and full activity history. Premium at $19.99/month is for households with more than one child (up to 6 learners on one account, cheaper than two Core plans) or a student aged 11+ working towards exams, since it adds exam-technique scoring and a second, harder next step on every piece of feedback." }
+    },
+    {
+      "@type": "Question",
+      "name": "What is exam-technique scoring?",
+      "acceptedAnswer": { "@type": "Answer", "text": "On the Premium plan, a student aged 11 or over gets each piece scored against the real assessment objectives published for their year and region — for example AQA GCSE English Language AO5 and AO6 in the UK, or the relevant Common Core writing standards in the US. Every objective is given a band from 1 (Emerging) to 4 (Strong), with a quote from their own work as the evidence for that band and one specific change that would move it up a band. It deliberately never invents a raw exam mark, percentage, or grade letter: a single unmoderated piece can't support that precision, and a number that looks official but isn't would be worse than no number at all." }
     },
     {
       "@type": "Question",
       "name": "What happens when my child reaches their 3-submission limit?",
-      "acceptedAnswer": { "@type": "Answer", "text": "The workspace clearly shows when they're at the limit and pauses new submissions — nothing is lost, and drafts already in progress stay saved. From there you can either upgrade to Pro for unlimited submissions right away, or wait for the free allowance to reset at the start of next month." }
+      "acceptedAnswer": { "@type": "Answer", "text": "The workspace clearly shows when they're at the limit and pauses new submissions — nothing is lost, and drafts already in progress stay saved. From there you can either upgrade to Core for unlimited submissions right away, or wait for the free allowance to reset at the start of next month." }
     },
     {
       "@type": "Question",
@@ -312,8 +323,8 @@
   .step p{ margin-top:8px; font-family:"Lexend",sans-serif; font-size:13.5px; line-height:1.6; color: var(--ink-soft); }
 
   /* pricing */
-  .pricing{ display:grid; grid-template-columns: 1fr 1fr; gap: 22px; max-width: 780px; margin: 0 auto; }
-  @media (max-width: 640px){ .pricing{ grid-template-columns: 1fr; } }
+  .pricing{ display:grid; grid-template-columns: repeat(3, 1fr); gap: 20px; max-width: 1040px; margin: 0 auto; align-items:start; }
+  @media (max-width: 900px){ .pricing{ grid-template-columns: 1fr; max-width: 460px; } }
   .price-card{ border:1px solid var(--border); border-radius:8px; padding: 30px 26px; background: var(--surface); }
   .price-card.pro{ border-color: var(--gold); position:relative; background: linear-gradient(180deg, var(--gold-tint), var(--surface) 55%); }
   .price-card.pro::before{ content:"MOST POPULAR"; position:absolute; top:-11px; left:26px; background: var(--gold); color:#fff; font-family:"Lexend",sans-serif; font-size:10.5px; font-weight:800; letter-spacing:.06em; padding:4px 10px; border-radius:999px; }
@@ -325,6 +336,26 @@
   .price-list svg{ flex-shrink:0; margin-top:2px; color: var(--accent); }
   .price-card.pro .price-list svg{ color: var(--gold); }
   .price-card .btn{ width:100%; margin-top:24px; }
+  .price-note{ margin-top:10px; font-family:"Lexend",sans-serif; font-size:12px; color:var(--ink-faint); text-align:center; }
+
+  /* plan comparison table — three cards can only carry the headline
+     differences, so this is the full side-by-side for anyone deciding
+     between Core and Premium. It scrolls horizontally rather than
+     collapsing on a phone, so the columns stay directly comparable. */
+  .plan-table-scroll{ max-width:1040px; margin:48px auto 0; overflow-x:auto; -webkit-overflow-scrolling:touch; border:1px solid var(--border); border-radius:8px; background:var(--surface); }
+  .plan-table{ width:100%; min-width:640px; border-collapse:collapse; font-family:"Lexend",sans-serif; }
+  .plan-table th, .plan-table td{ padding:14px 16px; text-align:left; font-size:13.5px; border-top:1px solid var(--border-soft); vertical-align:top; }
+  .plan-table thead th{ border-top:0; background:var(--surface-2); font-size:12.5px; font-weight:700; letter-spacing:.03em; }
+  .plan-table thead th span{ display:block; font-weight:500; font-size:12px; color:var(--ink-faint); margin-top:3px; }
+  .plan-table th[scope="row"]{ font-weight:600; color:var(--ink); width:34%; }
+  .plan-table td{ color:var(--ink-soft); width:22%; }
+  .plan-table .col-best{ background:var(--gold-tint); }
+  .plan-table thead .col-best{ background:var(--gold-tint); color:var(--gold-ink); }
+  .plan-table .yes{ color:var(--ink); font-weight:500; }
+  .plan-table .no{ color:var(--ink-faint); }
+  .plan-table tbody tr.group-head th{ background:var(--surface-2); font-size:11.5px; text-transform:uppercase; letter-spacing:.07em; color:var(--ink-faint); font-weight:700; }
+  .plan-table-hint{ display:none; margin-top:10px; text-align:center; font-family:"Lexend",sans-serif; font-size:12px; color:var(--ink-faint); }
+  @media (max-width: 720px){ .plan-table-hint{ display:block; } }
 
   /* comparison */
   .compare{ border:1px solid var(--border); border-radius:8px; overflow:hidden; background:var(--surface); }
@@ -640,22 +671,154 @@
         <div class="price-amount">$0<span> /month</span></div>
         <div class="price-list">
           <div><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> 3 writing or reading submissions a month</div>
-          <div><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> Full Key Takeaways feedback</div>
+          <div><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> Full Key Takeaways feedback — nothing held back</div>
           <div><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> Parent &amp; student dashboard</div>
         </div>
         <a class="btn btn-ghost" href="app.html">Start free</a>
+        <div class="price-note">No card needed.</div>
       </div>
       <div class="price-card pro">
-        <div class="price-plan">Pro</div>
-        <div class="price-amount">$14.99<span> /month</span></div>
+        <div class="price-plan">Core</div>
+        <div class="price-amount">$9.99<span> /month</span></div>
         <div class="price-list">
-          <div><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> Unlimited monthly submissions</div>
-          <div><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> Advanced exam-technique scoring</div>
-          <div><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> Weekly progress reports by email</div>
+          <div><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> Unlimited writing &amp; reading submissions</div>
+          <div><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> 26-week progress trend, not just today's score</div>
+          <div><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> Anonymous ranking against their own year group</div>
         </div>
-        <a class="btn btn-gold" href="app.html">Upgrade to Pro</a>
+        <a class="btn btn-gold" href="app.html">Choose Core</a>
+        <div class="price-note">One learner. Cancel anytime.</div>
+      </div>
+      <div class="price-card">
+        <div class="price-plan">Premium</div>
+        <div class="price-amount">$19.99<span> /month</span></div>
+        <div class="price-list">
+          <div><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> Everything in Core, for up to 6 learners</div>
+          <div><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> Exam-technique scoring against real assessment objectives</div>
+          <div><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> Extended feedback: a second, harder next step</div>
+        </div>
+        <a class="btn btn-ghost" href="app.html">Choose Premium</a>
+        <div class="price-note">Two children? Cheaper than two Cores.</div>
       </div>
     </div>
+
+    <div class="plan-table-scroll">
+      <table class="plan-table">
+        <thead>
+          <tr>
+            <th scope="col">What you get</th>
+            <th scope="col">Free<span>$0</span></th>
+            <th scope="col" class="col-best">Core<span>$9.99 /mo</span></th>
+            <th scope="col">Premium<span>$19.99 /mo</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="group-head"><th scope="row" colspan="4">Practice</th></tr>
+          <tr>
+            <th scope="row">Submissions per month</th>
+            <td class="no">3</td>
+            <td class="yes col-best">Unlimited</td>
+            <td class="yes">Unlimited</td>
+          </tr>
+          <tr>
+            <th scope="row">Learners on one account</th>
+            <td class="no">1</td>
+            <td class="no col-best">1</td>
+            <td class="yes">Up to 6</td>
+          </tr>
+          <tr>
+            <th scope="row">Writing prompts &amp; reading passages</th>
+            <td class="yes">Generated fresh every time</td>
+            <td class="yes col-best">Generated fresh every time</td>
+            <td class="yes">Generated fresh every time</td>
+          </tr>
+          <tr>
+            <th scope="row">Word targets from their year's curriculum</th>
+            <td class="yes">Yes</td>
+            <td class="yes col-best">Yes</td>
+            <td class="yes">Yes</td>
+          </tr>
+
+          <tr class="group-head"><th scope="row" colspan="4">Feedback</th></tr>
+          <tr>
+            <th scope="row">Key Takeaways: Glow, Grow, vocabulary, mission</th>
+            <td class="yes">Yes</td>
+            <td class="yes col-best">Yes</td>
+            <td class="yes">Yes</td>
+          </tr>
+          <tr>
+            <th scope="row">Highlights in their own writing, with rewrites</th>
+            <td class="yes">Yes</td>
+            <td class="yes col-best">Yes</td>
+            <td class="yes">Yes</td>
+          </tr>
+          <tr>
+            <th scope="row">Feedback themed around their interests</th>
+            <td class="yes">Yes</td>
+            <td class="yes col-best">Yes</td>
+            <td class="yes">Yes</td>
+          </tr>
+          <tr>
+            <th scope="row">Extended feedback: a second, harder next step</th>
+            <td class="no">—</td>
+            <td class="no col-best">—</td>
+            <td class="yes">Yes</td>
+          </tr>
+          <tr>
+            <th scope="row">Exam-technique scoring <span style="font-weight:400; color:var(--ink-faint);">(ages 11+)</span></th>
+            <td class="no">—</td>
+            <td class="no col-best">—</td>
+            <td class="yes">Banded 1–4 against each assessment objective, with the evidence and what moves it up</td>
+          </tr>
+
+          <tr class="group-head"><th scope="row" colspan="4">Progress</th></tr>
+          <tr>
+            <th scope="row">Streak, words written, average score</th>
+            <td class="yes">Yes</td>
+            <td class="yes col-best">Yes</td>
+            <td class="yes">Yes</td>
+          </tr>
+          <tr>
+            <th scope="row">Skill mastery breakdown</th>
+            <td class="yes">Yes</td>
+            <td class="yes col-best">Yes</td>
+            <td class="yes">Yes</td>
+          </tr>
+          <tr>
+            <th scope="row">26-week progress trend chart</th>
+            <td class="no">—</td>
+            <td class="yes col-best">Yes</td>
+            <td class="yes">Yes</td>
+          </tr>
+          <tr>
+            <th scope="row">Anonymous ranking in their year group</th>
+            <td class="no">—</td>
+            <td class="yes col-best">Yes</td>
+            <td class="yes">Yes</td>
+          </tr>
+          <tr>
+            <th scope="row">Full activity history</th>
+            <td class="no">Last 10</td>
+            <td class="yes col-best">Full history</td>
+            <td class="yes">Full history</td>
+          </tr>
+
+          <tr class="group-head"><th scope="row" colspan="4">Account</th></tr>
+          <tr>
+            <th scope="row">Export or delete your data</th>
+            <td class="yes">Yes</td>
+            <td class="yes col-best">Yes</td>
+            <td class="yes">Yes</td>
+          </tr>
+          <tr>
+            <th scope="row">Cancel anytime, no contract</th>
+            <td class="no">Nothing to cancel</td>
+            <td class="yes col-best">Yes</td>
+            <td class="yes">Yes</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="plan-table-hint">Scroll the table sideways to compare plans →</div>
   </div>
 </section>
 
@@ -668,7 +831,7 @@
     <div class="faq-list">
       <details class="faq-item" open>
         <summary>How do the 3 free monthly submissions work?<span class="faq-plus"></span></summary>
-        <div class="faq-a">Every account gets 3 free submissions each calendar month — writing, reading comprehension, or a mix of both — full Key Takeaways feedback included, no watered-down version. Your count resets automatically on the 1st of each month, so there's nothing to remember or manually renew. Once you're using it every week, <a href="#pricing">Pro</a> removes the monthly cap entirely.</div>
+        <div class="faq-a">Every account gets 3 free submissions each calendar month — writing, reading comprehension, or a mix of both — full Key Takeaways feedback included, no watered-down version. Your count resets automatically on the 1st of each month, so there's nothing to remember or manually renew. Once you're using it every week, <a href="#pricing">Core</a> removes the monthly cap entirely.</div>
       </details>
       <details class="faq-item">
         <summary>Is my child's writing safe and private?<span class="faq-plus"></span></summary>
@@ -679,12 +842,20 @@
         <div class="faq-a">You choose your region — UK, US, Australia, Canada, UAE &amp; GCC (Cambridge/IGCSE), Singapore &amp; SE Asia (Cambridge/IB), or Global ESL Mode (CEFR A1–C2) — and your child's grade, year, or level, and every mastery target, Grow, and vocabulary suggestion is scaled to that curriculum's actual expectations. It's not one generic rubric stretched across every country.</div>
       </details>
       <details class="faq-item">
-        <summary>Can I cancel my LiteracyLab Pro subscription anytime?<span class="faq-plus"></span></summary>
-        <div class="faq-a">Yes — Pro is billed monthly through Stripe with no lock-in contract. Cancel from your account settings in a couple of clicks and you won't be charged again; you'll keep Pro access through the end of the period you already paid for.</div>
+        <summary>Can I cancel my LiteracyLab subscription anytime?<span class="faq-plus"></span></summary>
+        <div class="faq-a">Yes — both Core and Premium are billed monthly through Stripe with no lock-in contract. Cancel from your account settings in a couple of clicks and you won't be charged again; you'll keep full access through the end of the period you already paid for, then drop back to the free plan rather than losing your account.</div>
+      </details>
+      <details class="faq-item">
+        <summary>Which plan should I choose?<span class="faq-plus"></span></summary>
+        <div class="faq-a">Start on Free and judge the feedback quality yourself — 3 submissions a month, nothing held back. <strong>Core</strong> ($9.99/month) is right for one child practising regularly: unlimited submissions, the 26-week progress trend, anonymous ranking within their own year group, and full activity history. <strong>Premium</strong> ($19.99/month) is for households with more than one child — up to 6 learners on one account, cheaper than two Core plans — or a student aged 11+ working towards exams, since it adds exam-technique scoring and a second, harder next step on every piece of feedback. You can move between plans at any time from your account settings.</div>
+      </details>
+      <details class="faq-item">
+        <summary>What is exam-technique scoring?<span class="faq-plus"></span></summary>
+        <div class="faq-a">On <a href="#pricing">Premium</a>, a student aged 11 or over gets each piece scored against the real assessment objectives published for their year and region — AQA GCSE English Language AO5 and AO6 in the UK, for instance, or the relevant Common Core writing standards in the US. Every objective gets a band from 1 (Emerging) to 4 (Strong), a quote from their own work as the evidence for that band, and one specific change that would move it up a band. It deliberately never gives a raw exam mark, percentage, or grade letter: one unmoderated piece can't support that precision, and a number that looks official but isn't would be worse than no number at all.</div>
       </details>
       <details class="faq-item">
         <summary>What happens when my child reaches their 3-submission limit?<span class="faq-plus"></span></summary>
-        <div class="faq-a">The workspace clearly shows when they're at the limit and pauses new submissions — nothing is lost, and drafts already in progress stay saved. From there you can either upgrade to Pro for unlimited submissions right away, or simply wait for the free allowance to reset at the start of next month.</div>
+        <div class="faq-a">The workspace clearly shows when they're at the limit and pauses new submissions — nothing is lost, and drafts already in progress stay saved. From there you can either upgrade to Core for unlimited submissions right away, or simply wait for the free allowance to reset at the start of next month.</div>
       </details>
       <details class="faq-item">
         <summary>Will it just write my child's essay for them?<span class="faq-plus"></span></summary>

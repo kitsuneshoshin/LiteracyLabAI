@@ -2,7 +2,7 @@ const { getSupabaseAdmin } = require("./_lib/supabaseAdmin");
 const { requireUser, sendError } = require("./_lib/auth");
 const { getMonthlyUsage } = require("./_lib/usage");
 const { generateFeedbackJSON } = require("./_lib/openai");
-const { buildWritingPrompt, buildReadingPrompt, correctiveAddendum } = require("./_lib/prompt");
+const { buildWritingPrompt, buildReadingPrompt, correctiveAddendum, examTechniqueSupported } = require("./_lib/prompt");
 const { standardsFor } = require("./_lib/curriculum");
 const { targetsForGrade } = require("./_lib/masteryTargets");
 const { validateFeedback, resolveTarget } = require("./_lib/validate");
@@ -20,7 +20,7 @@ const { writingLimitsForGrade } = require("./_lib/writingLimits");
 // child an error instead of feedback.
 const MAX_ATTEMPTS = 3;
 
-async function generateAndValidate(prompt, tier, country, gradeLabel, submittedText, readingScore) {
+async function generateAndValidate(prompt, tier, country, gradeLabel, submittedText, readingScore, capabilities) {
   const standardsList = standardsFor(country, tier, gradeLabel);
   const targetNames = targetsForGrade(country, gradeLabel, tier).targets.map((t) => t.name);
   let nextPrompt = prompt;
@@ -28,7 +28,7 @@ async function generateAndValidate(prompt, tier, country, gradeLabel, submittedT
 
   for (let i = 1; i <= MAX_ATTEMPTS; i++) {
     const attempt = await generateFeedbackJSON(nextPrompt);
-    const check = validateFeedback(attempt.parsed, { tier, standardsList, targetNames, submittedText, readingScore });
+    const check = validateFeedback(attempt.parsed, { tier, standardsList, targetNames, submittedText, readingScore, capabilities });
     if (check.ok) {
       // Snap glowTarget/growTarget to the exact canonical string so
       // api/progress.js's exact-key Map lookup actually finds them.
@@ -112,6 +112,12 @@ module.exports = async function handler(req, res) {
     // endpoints - see the matching comment in api/writing-prompt.js.
     await checkRateLimit(supabase, user.id, "ai_generate");
 
+    // What this account's plan unlocks (deeper feedback, exam-technique
+    // banding) changes the prompt AND the validation, so it's read once up
+    // front rather than inferred client-side - the client never gets to ask
+    // for a paid feedback section it isn't on the plan for.
+    const { capabilities: planCaps } = await getMonthlyUsage(supabase, user.id);
+
     const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body || {};
     const { kind } = body;
 
@@ -147,15 +153,20 @@ module.exports = async function handler(req, res) {
       }
 
       const previousCommitment = await getPreviousCommitment(supabase, user.id, existing.child_id, "writing", submissionId);
+      const targets = targetsForGrade(existing.country, existing.grade_label, existing.tier).targets;
+      // Banded assessment objectives are only a real thing for middle/high,
+      // so the plan's grant is narrowed by tier here, once, and the same
+      // resolved value drives both the prompt and the validator.
+      const caps = { ...planCaps, examTechnique: planCaps.examTechnique && examTechniqueSupported(existing.tier) };
       let result;
       try {
         const llmPrompt = buildWritingPrompt({
           tier: existing.tier, country: existing.country, gradeLabel: existing.grade_label, interest: existing.interest,
           confidenceWriting: body.confidenceWriting, motivation: body.motivation,
-          prompt: generated.prompt, text, previousCommitment,
-          targetNames: targetsForGrade(existing.country, existing.grade_label, existing.tier).targets.map((t) => t.name),
+          prompt: generated.prompt, text, previousCommitment, capabilities: caps, targets,
+          targetNames: targets.map((t) => t.name),
         });
-        result = await generateAndValidate(llmPrompt, existing.tier, existing.country, existing.grade_label, text);
+        result = await generateAndValidate(llmPrompt, existing.tier, existing.country, existing.grade_label, text, undefined, caps);
       } catch (genErr) {
         await releaseClaim(supabase, submissionId);
         throw genErr;
@@ -208,16 +219,18 @@ module.exports = async function handler(req, res) {
       const totalQuestions = bank.questions.length;
 
       const previousCommitment = await getPreviousCommitment(supabase, user.id, existing.child_id, "reading", submissionId);
+      const targets = targetsForGrade(existing.country, existing.grade_label, existing.tier).targets;
+      const caps = { ...planCaps, examTechnique: planCaps.examTechnique && examTechniqueSupported(existing.tier) };
       let result;
       try {
         const llmPrompt = buildReadingPrompt({
           tier: existing.tier, country: existing.country, gradeLabel: existing.grade_label, interest: existing.interest,
           confidenceReading: body.confidenceReading, motivation: body.motivation,
           passageTitle: bank.title, passage: bank.passage, questions: bank.questions,
-          answers, score, totalQuestions, previousCommitment,
-          targetNames: targetsForGrade(existing.country, existing.grade_label, existing.tier).targets.map((t) => t.name),
+          answers, score, totalQuestions, previousCommitment, capabilities: caps, targets,
+          targetNames: targets.map((t) => t.name),
         });
-        result = await generateAndValidate(llmPrompt, existing.tier, existing.country, existing.grade_label, undefined, score);
+        result = await generateAndValidate(llmPrompt, existing.tier, existing.country, existing.grade_label, undefined, score, caps);
       } catch (genErr) {
         await releaseClaim(supabase, submissionId);
         throw genErr;

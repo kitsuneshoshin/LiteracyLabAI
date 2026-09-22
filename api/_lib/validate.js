@@ -67,8 +67,19 @@ function revisionDuplicatesExistingText(revision, normalizedSubmittedText, norma
 // history. So matching is fuzzy (models reliably drop punctuation like "&"
 // even when told to copy verbatim), but a match must still be snapped back
 // to the exact canonical string via resolveTarget before it's saved.
+// "&" is expanded to "and" rather than stripped, because the single most
+// likely way a model breaks "copy this verbatim" is by writing out
+// "Viewpoint and Argument Writing" for "Viewpoint & Argument Writing".
+// Stripping the "&" instead would normalise the canonical name to
+// "viewpoint argument writing" while the model's version stays "viewpoint
+// and argument writing" - no match, so a correct answer gets rejected.
+// Found by a test written for the exam-technique report, but it affects
+// glowTarget/growTarget on every tier: there, the mismatch doesn't fail
+// loudly, it silently drops that submission out of the student's mastery
+// history. Expanding (rather than deleting) keeps both spellings distinct
+// from any other target name, so this can't collide two different targets.
 function normalizeTargetKey(value) {
-  return String(value).toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+  return String(value).toLowerCase().replace(/&/g, " and ").replace(/[^a-z0-9]+/g, " ").trim();
 }
 
 function resolveTarget(value, targetNames) {
@@ -96,8 +107,56 @@ function matchesATarget(value, targetNames) {
 // prompt, same reasoning as the middle/high analogy-phrase check below.
 const ZERO_SCORE_FABRICATION_PATTERN = /\b(you\s+(noticed|recognised|recognized|captured|identified|connected|articulated|grasped|understood|comprehended|engaged)|(an|your)\s+understanding|reflects?\s+(an|your)\s+understanding|demonstrat\w*\s+(an|your)?\s*understanding)\b/i;
 
-function validateFeedback(parsed, { tier, standardsList, targetNames, submittedText, readingScore }) {
+// Exam-technique scoring is sold as "banded against your exam board's real
+// assessment objectives", so the checks here enforce exactly that claim: an
+// entry for EVERY objective the student was scored against (not a
+// cherry-picked subset), criterion names that resolve to the canonical
+// list, bands inside 1-4, and evidence attached to each. It also rejects a
+// raw mark or grade letter, which the prompt forbids - a model volunteering
+// "roughly 17/24" would be inventing a precision no single unmoderated
+// piece can support, and that number would end up in front of a parent.
+const FABRICATED_MARK_PATTERN = /\b(\d{1,3}\s*(\/|out of)\s*\d{1,3}|\d{1,3}\s*%|grade\s*[A-E1-9][*+-]?\b)/i;
+
+function validateExamTechnique(parsed, targetNames, issues) {
+  const entries = parsed?.examTechnique;
+  if (!Array.isArray(entries) || entries.length === 0) {
+    issues.push("examTechnique must be an array with one entry per assessment objective");
+    return;
+  }
+  const seen = new Set();
+  entries.forEach((e, i) => {
+    const resolved = resolveTarget(e?.criterion, targetNames);
+    if (!resolved) {
+      issues.push(`examTechnique[${i}].criterion must exactly match one of the given assessment objective names: ${(targetNames || []).join(", ")}`);
+    } else {
+      if (seen.has(resolved)) issues.push(`examTechnique[${i}].criterion "${resolved}" is scored more than once`);
+      seen.add(resolved);
+      e.criterion = resolved;
+    }
+    if (!Number.isInteger(e?.band) || e.band < 1 || e.band > 4) {
+      issues.push(`examTechnique[${i}].band must be an integer from 1 to 4`);
+    }
+    if (!checkString(e?.descriptor, 3, 40)) issues.push(`examTechnique[${i}].descriptor is missing or an unreasonable length`);
+    if (!checkString(e?.evidence, 5, 400)) issues.push(`examTechnique[${i}].evidence is missing or an unreasonable length`);
+    if (!checkString(e?.toNextBand, 10, 400)) issues.push(`examTechnique[${i}].toNextBand is missing or an unreasonable length`);
+  });
+  // Scoring only some objectives would let the model quietly skip the ones
+  // the piece does badly on, which is the opposite of what an exam report
+  // is for.
+  const missing = (targetNames || []).filter((n) => !seen.has(n));
+  if (missing.length) {
+    issues.push(`examTechnique is missing an entry for: ${missing.join(", ")} - every assessment objective must be banded, including ones the piece didn't attempt`);
+  }
+  if (!checkString(parsed?.examSummary, 15, 400)) {
+    issues.push("examSummary is missing, too short, or too long");
+  } else if (FABRICATED_MARK_PATTERN.test(parsed.examSummary)) {
+    issues.push(`examSummary invents a raw mark, percentage or grade letter ("${parsed.examSummary}") - bands only, never a fabricated exam score`);
+  }
+}
+
+function validateFeedback(parsed, { tier, standardsList, targetNames, submittedText, readingScore, capabilities }) {
   const issues = [];
+  const caps = capabilities || {};
 
   if (!checkString(parsed?.glow, 20, 600)) issues.push("glow is missing, too short, or too long");
   if (!checkString(parsed?.grow, 20, 600)) issues.push("grow is missing, too short, or too long");
@@ -180,6 +239,20 @@ function validateFeedback(parsed, { tier, standardsList, targetNames, submittedT
         }
       });
     }
+  }
+
+  if (caps.deepFeedback) {
+    if (!checkString(parsed?.growNext, 20, 600)) {
+      issues.push("growNext is missing, too short, or too long");
+    } else if (checkString(parsed?.grow, 1, 100000) && normalizeForMatch(parsed.growNext) === normalizeForMatch(parsed.grow)) {
+      issues.push("growNext is identical to grow - it must be a genuinely harder, different next step");
+    }
+  }
+
+  // caps.examTechnique arriving here is already tier-resolved by submit.js -
+  // the plan can grant it while the student's tier has no banded objectives.
+  if (caps.examTechnique) {
+    validateExamTechnique(parsed, targetNames, issues);
   }
 
   return { ok: issues.length === 0, issues };

@@ -371,6 +371,28 @@ const TIER_META = {
   high:       { label: "High School",   ageRange: "Ages 14–18",icon: IconGrad,    blurb: "A sleek, distraction-free editor for thesis strength and exam prep (AP, GCSE, IB)." },
 };
 
+/* ---------------------------------------------------------------- */
+/* Plans                                                              */
+/* ---------------------------------------------------------------- */
+// A deliberate mirror of api/_lib/plans.js, kept in sync by hand — same
+// arrangement as MASTERY_TARGETS and curriculum.js already use, since this
+// page is a single static file with no build step to share modules through.
+// This drives presentation ONLY: what to show, what to label as locked, and
+// what to sell. Every gate that actually withholds a feature is enforced
+// server-side (see api/cohort-stats.js, api/history.js, api/child-profile.js
+// and api/submit.js), so nothing here can grant access by being edited.
+const PLAN_META = {
+  free:    { label: "Free",    badge: "FREE",    price: "$0",     maxLearners: 1, peerComparison: false, progressTrend: false, deepFeedback: false, examTechnique: false },
+  core:    { label: "Core",    badge: "CORE",    price: "$9.99",  maxLearners: 1, peerComparison: true,  progressTrend: true,  deepFeedback: false, examTechnique: false },
+  premium: { label: "Premium", badge: "PREMIUM", price: "$19.99", maxLearners: 6, peerComparison: true,  progressTrend: true,  deepFeedback: true,  examTechnique: true },
+};
+function planMeta(plan){
+  if (plan === "admin")  return { ...PLAN_META.premium, label: "Admin",         badge: "ADMIN" };
+  if (plan === "pro")    return { ...PLAN_META.premium, label: "Pro (legacy)",  badge: "PRO" };
+  return PLAN_META[plan] || PLAN_META.free;
+}
+function isPaidPlan(plan){ return plan === "core" || plan === "premium" || plan === "pro" || plan === "admin"; }
+
 const INTERESTS = [
   { id: "space",    label: "Space",    icon: IconOrbit },
   { id: "coding",   label: "Coding",   icon: IconCode },
@@ -1081,7 +1103,8 @@ function SectionLabel({ children, tip, tipPosition }){
 /* ---------------------------------------------------------------- */
 function Header({ view, setView, used, total, plan, theme, setTheme, backendLive, onSignOut, needsOnboarding }){
   const remaining = total - used;
-  const isPro = plan === "pro" || plan === "admin";
+  const paid = isPaidPlan(plan);
+  const meta = planMeta(plan);
   return (
     <header className="sticky top-0 z-30 border-b backdrop-blur-md" style={{ borderColor: "var(--border)", background: "color-mix(in srgb, var(--surface) 88%, transparent)" }}>
       <div className="mx-auto max-w-6xl px-4 sm:px-6 py-3.5 flex items-center justify-between gap-3 flex-wrap">
@@ -1120,16 +1143,16 @@ function Header({ view, setView, used, total, plan, theme, setTheme, backendLive
           </button>
           <div className="hidden md:flex items-center gap-2 rounded-full border pl-3 pr-1 py-1" style={{ borderColor: "var(--border)", background: "var(--surface-2)" }}>
             <span className="text-xs font-medium" style={{ color: "var(--ink-soft)" }}>
-              {isPro ? "Pro Plan: unlimited submissions" : (
+              {paid ? `${meta.label}: unlimited submissions` : (
                 <>Free Plan: <span className="font-bold tabular" style={{ color: remaining <= 1 ? "var(--bad)" : "var(--ink)" }}>{remaining}</span> of {total} monthly submissions remaining</>
               )}
             </span>
-            <span className="rounded-full px-2 py-1 text-[11px] font-bold" style={{ background: isPro ? "var(--gold-tint)" : "var(--navy-tint)", color: isPro ? "var(--gold-ink)" : "var(--ink)" }}>{isPro ? "PRO" : "FREE"}</span>
+            <span className="rounded-full px-2 py-1 text-[11px] font-bold" style={{ background: paid ? "var(--gold-tint)" : "var(--navy-tint)", color: paid ? "var(--gold-ink)" : "var(--ink)" }}>{meta.badge}</span>
           </div>
           <button onClick={()=>setView("dashboard")}
             className="focus-ring hidden md:inline-flex items-center gap-1.5 rounded-full px-3.5 py-2 text-[13px] font-bold"
             style={{ background: "var(--gold)", color: "#fff" }}>
-            <IconCrown size={13} strokeWidth={2.4} /> {isPro ? "Manage Pro" : "Upgrade to Pro"}
+            <IconCrown size={13} strokeWidth={2.4} /> {paid ? "Manage plan" : "See plans"}
           </button>
           {backendLive && (
             // md, matching the mobile summary banner's own md:hidden cutoff below
@@ -1156,6 +1179,85 @@ function Header({ view, setView, used, total, plan, theme, setTheme, backendLive
 // assessed writing that week (masteryPct: null) are skipped when drawing
 // the line/points but still counted for the x-axis, so a quiet week shows
 // as a gap rather than a misleading dip to 0%.
+// Shown in place of a paid feature on the free plan. Deliberately says what
+// the feature IS rather than just "locked" - a parent deciding whether to
+// pay needs to know what they'd get, and the card is the only place they'd
+// find out inside the app.
+function LockedFeature({ title, blurb, onSeePlans }){
+  return (
+    <div className="rounded-2xl p-6 text-center flex flex-col items-center gap-2" style={{ background: "var(--surface-2)", border: "1px dashed var(--border)" }}>
+      <IconLock size={20} style={{ color: "var(--ink-faint)" }} />
+      <div className="font-display font-semibold text-sm" style={{ color: "var(--ink)" }}>{title}</div>
+      <p className="text-[13px] max-w-[46ch]" style={{ color: "var(--ink-faint)" }}>{blurb}</p>
+      {onSeePlans && (
+        <button onClick={onSeePlans} className="focus-ring mt-1 inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[12.5px] font-bold" style={{ background: "var(--gold)", color: "#fff" }}>
+          <IconCrown size={12} strokeWidth={2.4} /> See plans
+        </button>
+      )}
+    </div>
+  );
+}
+
+// The activity log behind the pricing table's "Full history" row. This used
+// to be computed by api/history.js and returned as `recent` — but nothing
+// on the page ever rendered it, so a differentiator that was being sold
+// didn't visibly exist on ANY plan. Same failure mode as the exam-technique
+// claim: shipped in the payload, absent from the product.
+const HISTORY_PAGE = 10;
+
+function ActivityHistory({ recent, historyLimit, displayName }){
+  const [expanded, setExpanded] = useState(false);
+  const rows = recent || [];
+  if (rows.length === 0) {
+    return (
+      <div className="text-sm py-6 text-center" style={{ color: "var(--ink-faint)" }}>
+        Nothing here yet — {displayName || "your learner"}'s submissions will be listed as they're completed.
+      </div>
+    );
+  }
+  const shown = expanded ? rows : rows.slice(0, HISTORY_PAGE);
+  const fmt = (iso) => new Date(iso).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
+  return (
+    <>
+      <div className="flex flex-col">
+        {shown.map((r, i)=>(
+          <div key={r.id} className="flex items-start gap-3 py-3" style={ i > 0 ? { borderTop: "1px solid var(--border-soft)" } : {} }>
+            <div className="w-7 h-7 rounded-full grid place-items-center shrink-0 mt-0.5"
+              style={{ background: r.kind === "writing" ? "var(--navy-tint)" : "var(--cyan-tint)", color: r.kind === "writing" ? "var(--ink)" : "var(--cyan-ink)" }}>
+              {r.kind === "writing" ? <IconPen size={13} strokeWidth={2.2} /> : <IconBook size={13} strokeWidth={2.2} />}
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-baseline justify-between gap-3 flex-wrap">
+                <span className="text-[13px] font-semibold" style={{ color: "var(--ink)" }}>
+                  {r.kind === "writing" ? "Writing" : "Reading"}
+                  {r.kind === "writing" && r.wordCount != null && <span className="font-normal" style={{ color: "var(--ink-faint)" }}> · {r.wordCount} words</span>}
+                  {r.kind === "reading" && r.score != null && r.totalQuestions != null && <span className="font-normal" style={{ color: "var(--ink-faint)" }}> · {r.score}/{r.totalQuestions} correct</span>}
+                </span>
+                <span className="text-[11px] tabular shrink-0" style={{ color: "var(--ink-faint)" }}>{fmt(r.createdAt)}</span>
+              </div>
+              {r.glowSnippet
+                ? <p className="text-[12.5px] mt-1 leading-snug" style={{ color: "var(--ink-soft)" }}>{r.glowSnippet}</p>
+                : <p className="text-[12.5px] mt-1 italic" style={{ color: "var(--ink-faint)" }}>Started but not submitted.</p>}
+            </div>
+          </div>
+        ))}
+      </div>
+      {rows.length > HISTORY_PAGE && (
+        <button onClick={()=>setExpanded(v=>!v)} className="focus-ring mt-3 pt-3 border-t w-full text-[12.5px] font-semibold text-left" style={{ borderColor: "var(--border-soft)", color: "var(--cyan-ink)" }}>
+          {expanded ? "Show less" : `Show all ${rows.length}`}
+        </button>
+      )}
+      {/* Free accounts get the last 10 only, and are told so plainly rather
+          than being left to wonder why older work vanished. */}
+      {historyLimit <= HISTORY_PAGE && rows.length >= historyLimit && (
+        <div className="mt-3 pt-3 border-t text-[12px]" style={{ borderColor: "var(--border-soft)", color: "var(--ink-faint)" }}>
+          Showing the last {historyLimit} on the free plan. Core and Premium keep the full history.
+        </div>
+      )}
+    </>
+  );
+}
+
 function ProgressTimeline({ weeks }){
   const plottable = (weeks || []).filter(w => w.masteryPct != null);
   if (plottable.length < 2) {
@@ -1263,19 +1365,25 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
   const isMapped = backendLive ? Boolean(progress && progress.isMapped) : !!MAPPED_TARGETS[country];
   const [billingLoading, setBillingLoading] = useState(false);
   const [billingError, setBillingError] = useState(null);
-  const isPro = plan === "pro" || plan === "admin";
+  const paid = isPaidPlan(plan);
+  const meta = planMeta(plan);
 
-  // Redirects to Stripe's own hosted page for either starting a Pro
+  // Redirects to Stripe's own hosted page for either starting a
   // subscription or managing/cancelling an existing one — we never handle
   // card details ourselves. The actual plan flip happens via the Stripe
   // webhook (api/stripe-webhook.js), not here; this just gets the user to
-  // the right Stripe page and back.
-  async function handleBilling(){
+  // the right Stripe page and back. The tier is passed through for a new
+  // subscription; an existing subscriber is sent to Stripe's portal
+  // regardless of what's clicked, since changing tier belongs there.
+  async function handleBilling(tier){
     if (!backendLive || billingLoading) return;
     setBillingLoading(true);
     setBillingError(null);
     try {
-      const result = await authedFetch(session, "/api/billing-session", { method: "POST" });
+      const result = await authedFetch(session, "/api/billing-session", {
+        method: "POST",
+        body: JSON.stringify({ tier: tier || "core" }),
+      });
       window.location.href = result.url;
     } catch (err) {
       setBillingError(err.payload?.error || err.message || "Something went wrong opening billing. Please try again.");
@@ -1529,7 +1637,13 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
             {!history && (
               <div className="text-sm py-6 text-center" style={{ color: "var(--ink-faint)" }}>Loading…</div>
             )}
-            {history && <ProgressTimeline weeks={history.timeline} />}
+            {history && history.timelineLocked && (
+              <LockedFeature
+                title="The 26-week trend chart is on Core and Premium"
+                blurb={`Today's numbers stay free. Core adds the week-by-week trend line, so you can see whether ${displayName || "your learner"} is actually improving over a term rather than judging it one piece at a time.`}
+              />
+            )}
+            {history && !history.timelineLocked && <ProgressTimeline weeks={history.timeline} />}
           </div>
         )}
 
@@ -1546,6 +1660,12 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
             </p>
             {!peerStats && (
               <div className="text-sm py-6 text-center" style={{ color: "var(--ink-faint)" }}>Loading comparison…</div>
+            )}
+            {peerStats && peerStats.locked && (
+              <LockedFeature
+                title="Year-group comparison is on Core and Premium"
+                blurb={`See where ${displayName || "your learner"} sits against other students in ${country} · ${gradeLabel} — anonymously, and never blended across regions or ages.`}
+              />
             )}
             {peerStats && !peerStats.available && peerStats.reason === "no_data_yet" && (
               <div className="text-sm py-6 text-center" style={{ color: "var(--ink-faint)" }}>Submit a story or reading exercise first to see how {displayName || "your learner"} compares.</div>
@@ -1606,6 +1726,21 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
             )}
           </div>
         )}
+
+        {backendLive && (
+          <div className="card p-6">
+            <div className="flex items-center justify-between mb-1 flex-wrap gap-2">
+              <h2 className="font-display font-bold text-xl" style={{ color: "var(--ink)" }}>Activity history</h2>
+              {history && <span className="text-[11px]" style={{ color: "var(--ink-faint)" }}>{history.totalSubmissions} total</span>}
+            </div>
+            <p className="text-xs mb-3" style={{ color: "var(--ink-faint)" }}>
+              Every writing and reading session {displayName || "your learner"} has completed, newest first.
+            </p>
+            {!history
+              ? <div className="text-sm py-6 text-center" style={{ color: "var(--ink-faint)" }}>Loading…</div>
+              : <ActivityHistory recent={history.recent} historyLimit={history.historyLimit} displayName={displayName} />}
+          </div>
+        )}
       </div>
 
       <div className="flex flex-col gap-6">
@@ -1636,33 +1771,58 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
           <div className="absolute -right-6 -top-6 w-28 h-28 rounded-full" style={{ background: "radial-gradient(circle, var(--gold) 0%, transparent 70%)", opacity: .35 }} />
           <div className="relative">
             <div className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold mb-3" style={{ background: "var(--gold)", color: "#fff" }}>
-              <IconCrown size={12} strokeWidth={2.4} /> LITERACYLAB PRO
+              <IconCrown size={12} strokeWidth={2.4} /> LITERACYLAB PLANS
             </div>
-            {isPro ? (
+            {paid ? (
               <>
-                <h3 className="font-display font-bold text-lg text-white mb-1.5">You're on Pro</h3>
+                <h3 className="font-display font-bold text-lg text-white mb-1.5">You're on {meta.label}</h3>
                 <p className="text-[13px] mb-4" style={{ color: "#E4D6D2" }}>
-                  Unlimited submissions, advanced exam-technique scoring, and weekly progress reports are active on this account.
+                  {meta.examTechnique
+                    ? "Unlimited submissions, up to 6 learners, extended feedback, and exam-technique scoring are active on this account."
+                    : "Unlimited submissions, the 26-week progress trend, and year-group ranking are active on this account. Premium adds up to 6 learners, extended feedback, and exam-technique scoring."}
                 </p>
               </>
             ) : (
               <>
                 <h3 className="font-display font-bold text-lg text-white mb-1.5">{remaining <= 1 ? "Almost at your monthly limit" : "Unlock unlimited submissions"}</h3>
                 <p className="text-[13px] mb-4" style={{ color: "#E4D6D2" }}>
-                  You’ve used {used} of {total} free submissions this month. Pro adds unlimited submissions, deeper rhetorical analysis and weekly progress reports for your learner.
+                  You’ve used {used} of {total} free submissions this month. Choose the plan that fits your household.
                 </p>
-                <ul className="text-[13px] space-y-1.5 mb-5" style={{ color: "#EDE1DC" }}>
-                  {["Unlimited monthly submissions","Advanced exam-technique scoring","Weekly progress reports by email"].map(t=>(
-                    <li key={t} className="flex items-center gap-2"><IconCheck size={13} strokeWidth={2.4} style={{ color: "var(--gold)" }} />{t}</li>
+                <div className="space-y-3 mb-4">
+                  {[
+                    { tier: "core", name: "Core", price: "$9.99", sub: "One learner", features: ["Unlimited writing & reading submissions", "26-week progress trend chart", "Anonymous ranking in their year group", "Full activity history"] },
+                    { tier: "premium", name: "Premium", price: "$19.99", sub: "Up to 6 learners", features: ["Everything in Core, for the whole household", "Extended feedback: a second, harder next step", "Exam-technique scoring against real assessment objectives (ages 11+)"] },
+                  ].map(p=>(
+                    <div key={p.tier} className="rounded-xl p-3.5" style={{ background: "rgba(255,255,255,.07)", border: "1px solid rgba(255,255,255,.14)" }}>
+                      <div className="flex items-baseline justify-between gap-2">
+                        <div className="font-display font-bold text-sm text-white">{p.name}</div>
+                        <div className="text-[13px] font-semibold" style={{ color: "var(--gold)" }}>{p.price}<span className="text-[11px] font-normal" style={{ color: "#B9A69F" }}> /mo</span></div>
+                      </div>
+                      <div className="text-[11px] mb-2" style={{ color: "#B9A69F" }}>{p.sub}</div>
+                      <ul className="text-[12.5px] space-y-1" style={{ color: "#EDE1DC" }}>
+                        {p.features.map(t=>(
+                          <li key={t} className="flex items-start gap-2"><IconCheck size={12} strokeWidth={2.4} style={{ color: "var(--gold)", flexShrink: 0, marginTop: 3 }} />{t}</li>
+                        ))}
+                      </ul>
+                      <button onClick={()=>handleBilling(p.tier)} disabled={billingLoading || !backendLive}
+                        className="focus-ring w-full rounded-lg py-2 mt-3 font-display font-bold text-[13px] inline-flex items-center justify-center gap-1.5 disabled:opacity-70"
+                        style={ p.tier === "core"
+                          ? { background: "var(--gold)", color: "#fff" }
+                          : { background: "transparent", color: "#fff", border: "1px solid rgba(255,255,255,.35)" } }>
+                        {billingLoading ? "Redirecting…" : <>Choose {p.name} <IconArrowRight size={14} strokeWidth={2.3} /></>}
+                      </button>
+                    </div>
                   ))}
-                </ul>
+                </div>
               </>
             )}
-            <button onClick={handleBilling} disabled={billingLoading || !backendLive}
-              className="focus-ring w-full rounded-xl py-2.5 font-display font-bold text-sm inline-flex items-center justify-center gap-1.5 disabled:opacity-70"
-              style={{ background: "var(--gold)", color: "#fff" }}>
-              {billingLoading ? "Redirecting…" : isPro ? <>Manage subscription <IconArrowRight size={15} strokeWidth={2.3} /></> : <>Upgrade to Pro — $14.99/mo <IconArrowRight size={15} strokeWidth={2.3} /></>}
-            </button>
+            {paid && (
+              <button onClick={()=>handleBilling()} disabled={billingLoading || !backendLive}
+                className="focus-ring w-full rounded-xl py-2.5 font-display font-bold text-sm inline-flex items-center justify-center gap-1.5 disabled:opacity-70"
+                style={{ background: "var(--gold)", color: "#fff" }}>
+                {billingLoading ? "Redirecting…" : <>Manage subscription <IconArrowRight size={15} strokeWidth={2.3} /></>}
+              </button>
+            )}
             <div className="text-[11px] text-center mt-2" style={{ color: "#B9A69F" }}>
               {billingError ? billingError : !backendLive ? "Billing isn't available in this demo preview." : "Billed monthly via Stripe · cancel anytime"}
             </div>
@@ -1950,11 +2110,14 @@ function FeedbackPanel({ tier, gradeLabel, country, interest, confidence, motiva
             explained through {interestLabel}
           </span>
         </div>
-        <p className="text-[15px] leading-relaxed font-read mb-4" style={{ color: "var(--ink)" }}>{grow}</p>
-        <div className="pt-4 border-t" style={{ borderColor: "var(--border-soft)" }}>
+        <p className="text-[15px] leading-relaxed font-read" style={{ color: "var(--ink)" }}>{grow}</p>
+        <GrowNextBlock feedback={feedback} />
+        <div className="pt-4 mt-4 border-t" style={{ borderColor: "var(--border-soft)" }}>
           <CommitPrompt options={commitOptions} session={session} submissionId={submissionId} backendLive={backendLive} />
         </div>
       </div>
+
+      <ExamTechniquePanel feedback={feedback} />
 
       <div className="card p-5 sm:p-6">
         <div className="flex items-center gap-2 mb-3">
@@ -1989,6 +2152,89 @@ function FeedbackPanel({ tier, gradeLabel, country, interest, confidence, motiva
       </div>
 
       <ThumbsFeedback context="writing feedback" session={session} submissionId={submissionId} backendLive={backendLive} />
+    </div>
+  );
+}
+
+/* ---------------------------------------------------------------- */
+/* Exam-technique report (Premium, ages 11+)                          */
+/* ---------------------------------------------------------------- */
+// Renders whatever api/submit.js actually returned. It is driven entirely
+// by the presence of feedback.examTechnique rather than by the plan the
+// client thinks it's on: the server decides whether this section is
+// generated at all, so there is nothing here to unlock by editing the page.
+const EXAM_BAND_META = {
+  1: { word: "Emerging",   color: "var(--bad)" },
+  2: { word: "Developing", color: "var(--gold-ink)" },
+  3: { word: "Secure",     color: "var(--cyan-ink)" },
+  4: { word: "Strong",     color: "var(--good)" },
+};
+
+function ExamTechniquePanel({ feedback }){
+  const rows = Array.isArray(feedback?.examTechnique) ? feedback.examTechnique : null;
+  if (!rows || rows.length === 0) return null;
+  return (
+    <div className="card p-5 sm:p-6" style={{ borderColor: "var(--gold)", borderWidth: 1.5 }}>
+      <div className="flex items-center gap-2 mb-1">
+        <div className="w-8 h-8 rounded-full grid place-items-center" style={{ background: "var(--gold-tint)", color: "var(--gold-ink)" }}>
+          <IconGrad size={16} strokeWidth={2.2} />
+        </div>
+        <h3 className="font-display font-bold" style={{ color: "var(--ink)" }}>Exam-technique scoring</h3>
+      </div>
+      <p className="text-[12.5px] mb-4" style={{ color: "var(--ink-faint)" }}>
+        Banded against the assessment objectives published for this year group. Bands, not marks — a single piece can't be graded like a moderated exam paper.
+      </p>
+      <div className="flex flex-col gap-3">
+        {rows.map((r, i)=>{
+          const band = EXAM_BAND_META[r.band] || EXAM_BAND_META[1];
+          return (
+            <div key={i} className="rounded-xl p-3.5" style={{ background: "var(--surface-2)" }}>
+              <div className="flex items-start justify-between gap-3 flex-wrap">
+                <div className="font-display font-semibold text-[13.5px]" style={{ color: "var(--ink)" }}>{r.criterion}</div>
+                <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-bold shrink-0"
+                  style={{ background: "var(--surface)", color: band.color, border: `1px solid ${band.color}` }}>
+                  Band {r.band} · {r.descriptor || band.word}
+                </span>
+              </div>
+              {/* A 4-segment bar rather than a percentage: the score IS the
+                  band, and a percentage would imply a precision the model
+                  was explicitly told not to claim. */}
+              <div className="flex gap-1 mt-2.5" aria-hidden="true">
+                {[1,2,3,4].map(n=>(
+                  <div key={n} className="h-1.5 flex-1 rounded-full" style={{ background: n <= r.band ? band.color : "var(--border)" }} />
+                ))}
+              </div>
+              {r.evidence && (
+                <p className="text-[13px] mt-2.5" style={{ color: "var(--ink-soft)" }}>
+                  <span className="font-semibold" style={{ color: "var(--ink)" }}>Why: </span>{r.evidence}
+                </p>
+              )}
+              {r.toNextBand && (
+                <p className="text-[13px] mt-1.5" style={{ color: "var(--ink-soft)" }}>
+                  <span className="font-semibold" style={{ color: "var(--ink)" }}>To reach Band {Math.min(4, (r.band || 1) + 1)}: </span>{r.toNextBand}
+                </p>
+              )}
+            </div>
+          );
+        })}
+      </div>
+      {feedback.examSummary && (
+        <div className="mt-4 pt-4 border-t text-[13.5px] leading-snug" style={{ borderColor: "var(--border-soft)", color: "var(--ink)" }}>
+          <span className="font-semibold">Worth working on next: </span>{feedback.examSummary}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// The Premium "second step" — rendered only when the server actually
+// generated one, same reasoning as the exam panel above.
+function GrowNextBlock({ feedback }){
+  if (!feedback?.growNext) return null;
+  return (
+    <div className="mt-3 pt-3 border-t" style={{ borderColor: "var(--border-soft)" }}>
+      <div className="font-display font-bold text-[12.5px] mb-1" style={{ color: "var(--gold-ink)" }}>Then, once that's second nature</div>
+      <p className="text-[14px] leading-relaxed font-read" style={{ color: "var(--ink-soft)" }}>{feedback.growNext}</p>
     </div>
   );
 }
@@ -2040,11 +2286,14 @@ function ReadingFeedbackPanel({ tier, country, interest, confidence, motivation,
             explained through {interestLabel}
           </span>
         </div>
-        <p className="text-[15px] leading-relaxed font-read mb-4" style={{ color: "var(--ink)" }}>{grow}</p>
-        <div className="pt-4 border-t" style={{ borderColor: "var(--border-soft)" }}>
+        <p className="text-[15px] leading-relaxed font-read" style={{ color: "var(--ink)" }}>{grow}</p>
+        <GrowNextBlock feedback={feedback} />
+        <div className="pt-4 mt-4 border-t" style={{ borderColor: "var(--border-soft)" }}>
           <CommitPrompt options={commitOptions} session={session} submissionId={submissionId} backendLive={backendLive} />
         </div>
       </div>
+
+      <ExamTechniquePanel feedback={feedback} />
 
       <div className="card p-5 sm:p-6">
         <div className="flex items-center gap-2 mb-3">
@@ -2334,7 +2583,7 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
               {locked ? (
                 <>
                   <IconLock size={22} style={{ color: "var(--ink-faint)" }} />
-                  <div className="font-display font-semibold text-sm" style={{ color: "var(--ink)" }}>Upgrade to Pro for more writing prompts</div>
+                  <div className="font-display font-semibold text-sm" style={{ color: "var(--ink)" }}>Upgrade for more writing prompts</div>
                   <p className="text-[13px] max-w-[28ch]" style={{ color: "var(--ink-faint)" }}>You've used all your free submissions this month.</p>
                 </>
               ) : writingLoading ? (
@@ -2366,7 +2615,7 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
               {locked ? (
                 <>
                   <IconLock size={22} style={{ color: "var(--ink-faint)" }} />
-                  <div className="font-display font-semibold text-sm" style={{ color: "var(--ink)" }}>Upgrade to Pro for more reading passages</div>
+                  <div className="font-display font-semibold text-sm" style={{ color: "var(--ink)" }}>Upgrade for more reading passages</div>
                   <p className="text-[13px] max-w-[28ch]" style={{ color: "var(--ink-faint)" }}>You've used all your free submissions this month.</p>
                 </>
               ) : readingLoading ? (
@@ -2433,11 +2682,11 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
             </div>
             <div className="flex-1 min-w-0">
               {/* total is the 999 sentinel for Pro/admin (see App's usage.cap
-                  handling) - a Pro account was seeing "1 of 999 Free Monthly
+                  handling) - a paid account was seeing "1 of 999 Free Monthly
                   Submissions Used", leaking that internal number and mislabeling
                   a paid plan as free. */}
-              <div className="text-[13px] font-semibold" style={{ color: "var(--ink)" }}>{total >= 999 ? "Pro Plan: unlimited submissions" : `${used} of ${total} Free Monthly Submissions Used`}</div>
-              <div className="text-[11px]" style={{ color: "var(--ink-faint)" }}>{total >= 999 ? "Thanks for being a Pro subscriber." : locked ? "Upgrade to Pro for unlimited submissions." : "Resets automatically at the start of next month."}</div>
+              <div className="text-[13px] font-semibold" style={{ color: "var(--ink)" }}>{total >= 999 ? "Unlimited submissions" : `${used} of ${total} Free Monthly Submissions Used`}</div>
+              <div className="text-[11px]" style={{ color: "var(--ink-faint)" }}>{total >= 999 ? "Thanks for subscribing." : locked ? "Upgrade to Core for unlimited submissions." : "Resets automatically at the start of next month."}</div>
             </div>
             <button onClick={()=>setBannerDismissed(true)} className="focus-ring w-7 h-7 rounded-full grid place-items-center shrink-0" style={{ color: "var(--ink-faint)" }} aria-label="Dismiss">
               <IconX size={14} />
@@ -2805,7 +3054,15 @@ function App({ session }){
       switchChild(profile.id);
       setView("dashboard"); // the new learner needs onboarding
     } catch (err) {
+      // 402 is the plan's learner limit, not a bug - without surfacing it,
+      // clicking "Add learner" on a one-learner plan appeared to do nothing
+      // at all, with the reason visible only in the console.
+      if (err.statusCode === 402) {
+        window.alert(err.payload?.error || "Your plan covers one learner. Upgrade to Premium to add up to six.");
+        return;
+      }
       logAppError("Failed to add a learner:", err);
+      window.alert("Something went wrong adding a learner. Please try again.");
     }
   }
   async function removeChild(id){
@@ -2836,7 +3093,12 @@ function App({ session }){
     setPeerStats(null); // avoid flashing the previous child/grade's numbers while this one loads
     authedFetch(session, `/api/cohort-stats?tier=${tier}&country=${encodeURIComponent(country)}&gradeLabel=${encodeURIComponent(gradeLabel)}&childId=${activeChildId}`)
       .then(setPeerStats)
-      .catch((err)=> logAppError("Failed to load peer comparison:", err));
+      .catch((err)=>{
+        // 402 is the plan gate, not a failure - surface it as a locked card
+        // rather than silently showing nothing at all.
+        if (err.statusCode === 402) { setPeerStats({ locked: true }); return; }
+        logAppError("Failed to load peer comparison:", err);
+      });
   }, [backendLive, view, tier, country, gradeLabel, used, activeChildId]);
 
   function setTierAndSyncGrade(k){
@@ -2909,8 +3171,8 @@ function App({ session }){
         backendLive={backendLive} onSignOut={handleSignOut} needsOnboarding={needsOnboarding} />
       <div className="md:hidden mx-auto max-w-6xl px-4 pt-3 flex flex-col gap-2">
         <div className="rounded-xl border px-3 py-2 text-xs font-medium flex items-center justify-between" style={{ borderColor: "var(--border)", background: "var(--surface-2)", color: "var(--ink-soft)" }}>
-          <span>{(plan === "pro" || plan === "admin") ? "Pro Plan: unlimited submissions" : <>Free Plan: <b className="tabular" style={{ color: "var(--ink)" }}>{total-used}</b> of {total} remaining</>}</span>
-          <span className="rounded-full px-2 py-0.5 text-[10px] font-bold" style={{ background: (plan === "pro" || plan === "admin") ? "var(--gold-tint)" : "var(--navy-tint)", color: (plan === "pro" || plan === "admin") ? "var(--gold-ink)" : "var(--ink)" }}>{(plan === "pro" || plan === "admin") ? "PRO" : "FREE"}</span>
+          <span>{isPaidPlan(plan) ? `${planMeta(plan).label}: unlimited submissions` : <>Free Plan: <b className="tabular" style={{ color: "var(--ink)" }}>{total-used}</b> of {total} remaining</>}</span>
+          <span className="rounded-full px-2 py-0.5 text-[10px] font-bold" style={{ background: isPaidPlan(plan) ? "var(--gold-tint)" : "var(--navy-tint)", color: isPaidPlan(plan) ? "var(--gold-ink)" : "var(--ink)" }}>{planMeta(plan).badge}</span>
         </div>
         {/* Mobile equivalent of the header's Upgrade/Sign out buttons, which
             are hidden below md - see the note in Header for why this exists. */}
@@ -2918,7 +3180,7 @@ function App({ session }){
           <button onClick={()=>setView("dashboard")}
             className="focus-ring flex-1 inline-flex items-center justify-center gap-1.5 rounded-full px-3.5 py-2 text-[13px] font-bold"
             style={{ background: "var(--gold)", color: "#fff" }}>
-            <IconCrown size={13} strokeWidth={2.4} /> {(plan === "pro" || plan === "admin") ? "Manage Pro" : "Upgrade to Pro"}
+            <IconCrown size={13} strokeWidth={2.4} /> {isPaidPlan(plan) ? "Manage plan" : "See plans"}
           </button>
           {backendLive && (
             <button onClick={handleSignOut} className="focus-ring inline-flex items-center rounded-full px-3 py-2 text-[13px] font-semibold" style={{ color: "var(--ink-faint)" }}>

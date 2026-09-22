@@ -1,7 +1,6 @@
 const { getSupabaseAdmin } = require("./_lib/supabaseAdmin");
 const { requireUser, sendError } = require("./_lib/auth");
-
-const MAX_CHILDREN_PER_ACCOUNT = 6; // sanity ceiling, not a pricing tier
+const { getMonthlyUsage } = require("./_lib/usage");
 
 // Supports multiple learners per account (a household can have more than
 // one child). GET lists every child profile for this account, creating a
@@ -55,11 +54,19 @@ module.exports = async function handler(req, res) {
       }
 
       // No childId: create a new learner (the "+ Add another learner" flow).
+      // How many learners an account may hold is a plan capability now, so
+      // it's read from the same source of truth every other gate uses.
       const { count, error: countErr } = await supabase
         .from("child_profiles").select("id", { count: "exact", head: true }).eq("profile_id", user.id);
       if (countErr) throw countErr;
-      if ((count || 0) >= MAX_CHILDREN_PER_ACCOUNT) {
-        return res.status(400).json({ error: `You can have up to ${MAX_CHILDREN_PER_ACCOUNT} learners on one account.` });
+      const { capabilities } = await getMonthlyUsage(supabase, user.id);
+      if ((count || 0) >= capabilities.maxLearners) {
+        return res.status(402).json({
+          error: capabilities.maxLearners === 1
+            ? "Your plan covers one learner. Upgrade to Premium to add up to six."
+            : `You can have up to ${capabilities.maxLearners} learners on one account.`,
+          upgradeTo: capabilities.maxLearners === 1 ? "premium" : null,
+        });
       }
 
       const { data, error } = await supabase
