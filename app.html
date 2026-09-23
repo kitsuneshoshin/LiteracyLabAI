@@ -18,7 +18,12 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.24.7/babel.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@sentry/browser@8/build/bundle.min.js"></script>
+<!-- Sentry is optional, so it loads async: the app must never wait on error
+     reporting to start. The previous tag pointed at a jsdelivr path that
+     returns 404 (Sentry doesn't publish a bundle there), and as a blocking
+     script it sat on the app's critical path doing nothing. This is Sentry's
+     own CDN, pinned to an exact version so it can't change under us. -->
+<script async crossorigin="anonymous" src="https://browser.sentry-cdn.com/8.55.0/bundle.min.js"></script>
 
 <style>
   /* "Trusted Advisor" palette (Soft Stone + Muted Burgundy). The variable
@@ -176,9 +181,19 @@ const supabaseClient = BACKEND_CONFIGURED ? window.supabase.createClient(SUPABAS
 // reported, exactly the previous behavior. Sentry.init only runs once a
 // real DSN is filled in.
 const SENTRY_DSN = "";
-if (SENTRY_DSN && window.Sentry) {
+// The Sentry script loads async (see <head>), so it may arrive after this
+// runs. Initialising lazily - here if it's already there, otherwise on the
+// first error reported - means a late arrival still gets set up instead of
+// silently never initialising.
+let sentryInitialised = false;
+function ensureSentry(){
+  if (sentryInitialised) return true;
+  if (!SENTRY_DSN || !window.Sentry) return false;
   window.Sentry.init({ dsn: SENTRY_DSN, environment: BACKEND_CONFIGURED ? "production" : "demo", tracesSampleRate: 0 });
+  sentryInitialised = true;
+  return true;
 }
+ensureSentry();
 // Every console.error(...) call site for an unexpected failure (not a
 // normal validation message the UI already surfaces) should go through
 // this instead, so it's visible in Sentry the same way server errors are
@@ -191,7 +206,7 @@ if (SENTRY_DSN && window.Sentry) {
 // silent cross-wiring that's very hard to debug later.
 function logAppError(message, err, extra){
   console.error(message, err);
-  if (SENTRY_DSN && window.Sentry) window.Sentry.captureException(err, { extra: { message, ...extra } });
+  if (ensureSentry()) window.Sentry.captureException(err, { extra: { message, ...extra } });
 }
 
 const FREE_MONTHLY_CAP = 3;
