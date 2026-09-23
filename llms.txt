@@ -31,6 +31,6 @@ Parent-managed accounts by design. Student writing is processed only to generate
 
 ## Links
 
-- Homepage: https://literacylab.vercel.app/
-- Privacy Policy: https://literacylab.vercel.app/privacy.html
-- Terms of Use: https://literacylab.vercel.app/terms.html
+- Homepage: https://www.literacylabai.com/
+- Privacy Policy: https://www.literacylabai.com/privacy.html
+- Terms of Use: https://www.literacylabai.com/terms.html

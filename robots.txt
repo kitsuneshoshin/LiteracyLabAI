@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 Disallow: /app.html
 
-Sitemap: https://literacylab.vercel.app/sitemap.xml
+Sitemap: https://www.literacylabai.com/sitemap.xml

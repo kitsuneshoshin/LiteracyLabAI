@@ -1425,7 +1425,7 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
       URL.revokeObjectURL(url);
     } catch (err) {
       logAppError("Failed to export account data:", err);
-      window.alert("Something went wrong exporting your data. Please try again or email privacy@literacylab.ai.");
+      window.alert("Something went wrong exporting your data. Please try again or email privacy@literacylabai.com.");
     }
   }
   async function handleDeleteAccount(){
@@ -1436,7 +1436,7 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
       await supabaseClient.auth.signOut();
     } catch (err) {
       logAppError("Failed to delete account:", err);
-      window.alert("Something went wrong deleting your account. Please try again or email privacy@literacylab.ai.");
+      window.alert("Something went wrong deleting your account. Please try again or email privacy@literacylabai.com.");
     }
   }
   // With a live backend, real per-skill mastery (computed from this
