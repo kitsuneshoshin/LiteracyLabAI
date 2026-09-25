@@ -17,6 +17,10 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.24.7/babel.min.js"></script>
+<!-- Shared with index.html: the one definition of display prices and of
+     which currency a visitor sees. Served from this site, so it can't be
+     held up by a third-party CDN. -->
+<script src="pricing.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <!-- Sentry is optional, so it loads async: the app must never wait on error
      reporting to start. The previous tag pointed at a jsdelivr path that
@@ -396,10 +400,18 @@ const TIER_META = {
 // what to sell. Every gate that actually withholds a feature is enforced
 // server-side (see api/cohort-stats.js, api/history.js, api/child-profile.js
 // and api/submit.js), so nothing here can grant access by being edited.
+// Prices come from pricing.js (shared with index.html), in the visitor's
+// local currency. Deliberately based on where they are, not the learner's
+// curriculum: Stripe charges by location, and an expat family following the
+// UK curriculum from Dubai pays in US$, not £.
+function localPrice(tier){
+  if (window.LL_PRICING) return window.LL_PRICING.priceLabel(tier);
+  return tier === "core" ? "$9.99" : "$19.99"; // pricing.js failed to load: still the right number
+}
 const PLAN_META = {
-  free:    { label: "Free",    badge: "FREE",    price: "$0",     maxLearners: 1, peerComparison: false, progressTrend: false, deepFeedback: false, examTechnique: false },
-  core:    { label: "Core",    badge: "CORE",    price: "$9.99",  maxLearners: 1, peerComparison: true,  progressTrend: true,  deepFeedback: false, examTechnique: false },
-  premium: { label: "Premium", badge: "PREMIUM", price: "$19.99", maxLearners: 6, peerComparison: true,  progressTrend: true,  deepFeedback: true,  examTechnique: true },
+  free:    { label: "Free",    badge: "FREE",    price: "$0",                  maxLearners: 1, peerComparison: false, progressTrend: false, deepFeedback: false, examTechnique: false },
+  core:    { label: "Core",    badge: "CORE",    price: localPrice("core"),    maxLearners: 1, peerComparison: true,  progressTrend: true,  deepFeedback: false, examTechnique: false },
+  premium: { label: "Premium", badge: "PREMIUM", price: localPrice("premium"), maxLearners: 6, peerComparison: true,  progressTrend: true,  deepFeedback: true,  examTechnique: true },
 };
 function planMeta(plan){
   if (plan === "admin")  return { ...PLAN_META.premium, label: "Admin",         badge: "ADMIN" };
@@ -1805,8 +1817,8 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
                 </p>
                 <div className="space-y-3 mb-4">
                   {[
-                    { tier: "core", name: "Core", price: "$9.99", sub: "One learner", features: ["Unlimited writing & reading submissions", "26-week progress trend chart", "Anonymous ranking in their year group", "Full activity history"] },
-                    { tier: "premium", name: "Premium", price: "$19.99", sub: "Up to 6 learners", features: ["Everything in Core, for the whole household", "Extended feedback: a second, harder next step", "Exam-technique scoring against real assessment objectives (ages 11+)"] },
+                    { tier: "core", name: "Core", price: PLAN_META.core.price, sub: "One learner", features: ["Unlimited writing & reading submissions", "26-week progress trend chart", "Anonymous ranking in their year group", "Full activity history"] },
+                    { tier: "premium", name: "Premium", price: PLAN_META.premium.price, sub: "Up to 6 learners", features: ["Everything in Core, for the whole household", "Extended feedback: a second, harder next step", "Exam-technique scoring against real assessment objectives (ages 11+)"] },
                   ].map(p=>(
                     <div key={p.tier} className="rounded-xl p-3.5" style={{ background: "rgba(255,255,255,.07)", border: "1px solid rgba(255,255,255,.14)" }}>
                       <div className="flex items-baseline justify-between gap-2">

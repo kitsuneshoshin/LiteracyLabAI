@@ -20,8 +20,8 @@ UK National Curriculum / GCSE, US Common Core / AP, Australia ACARA, Canada prov
 ## Pricing
 
 - Free: 3 writing or reading submissions per calendar month, with full feedback (no watered-down free tier).
-- Core: $9.99/month for one learner — unlimited submissions, a 26-week progress trend chart, anonymous ranking within their own year group, and full activity history.
-- Premium: $19.99/month — everything in Core for up to 6 learners on one account, plus extended feedback (a second, harder next step on every piece) and exam-technique scoring for students aged 11+, which bands each piece 1-4 against the real assessment objectives published for their year and region, with evidence quoted from their own work. It never produces a raw exam mark, percentage or grade letter.
+- Core: 9.99/month in the customer's local currency (A$, US$, £, €, C$ or S$; US$ everywhere else) for one learner — unlimited submissions, a 26-week progress trend chart, anonymous ranking within their own year group, and full activity history.
+- Premium: 19.99/month in the same local currency — everything in Core for up to 6 learners on one account, plus extended feedback (a second, harder next step on every piece) and exam-technique scoring for students aged 11+, which bands each piece 1-4 against the real assessment objectives published for their year and region, with evidence quoted from their own work. It never produces a raw exam mark, percentage or grade letter.
 
 Both paid plans are billed monthly through Stripe with no lock-in contract; cancel anytime and the account drops back to the free plan.
 

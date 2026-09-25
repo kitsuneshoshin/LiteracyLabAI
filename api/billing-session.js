@@ -60,9 +60,15 @@ module.exports = async function handler(req, res) {
     }
     const priceId = priceIdForPlan(tier);
     if (!priceId) {
-      const err = new Error(`No Stripe price configured for the ${tier} plan - set STRIPE_PRICE_ID_${tier.toUpperCase()} in Vercel project env vars.`);
-      err.statusCode = 503;
-      throw err;
+      // A missing price is a setup gap on our side, not something the
+      // customer can act on. The fix-it detail goes to the server log; the
+      // parent gets a plain message instead of an env var name (which is
+      // what the live upgrade buttons were showing before live Stripe
+      // prices existed).
+      console.error(`No Stripe price configured for the ${tier} plan - set STRIPE_PRICE_ID_${tier.toUpperCase()} in Vercel project env vars.`);
+      return res.status(503).json({
+        error: "Paid plans are opening very soon. Your free submissions keep working in the meantime.",
+      });
     }
 
     // Reuse the existing Stripe customer if this account has one (e.g. a

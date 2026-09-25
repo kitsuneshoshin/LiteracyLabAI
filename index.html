@@ -49,7 +49,7 @@
     {
       "@type": "Question",
       "name": "How do the 3 free monthly submissions work?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Every account gets 3 free submissions each calendar month — writing, reading comprehension, or a mix of both — full Key Takeaways feedback included, no watered-down version. Your count resets automatically on the 1st of each month. Once you're using it every week, Core ($9.99/month) removes the monthly cap entirely." }
+      "acceptedAnswer": { "@type": "Answer", "text": "Every account gets 3 free submissions each calendar month — writing, reading comprehension, or a mix of both — full Key Takeaways feedback included, no watered-down version. Your count resets automatically on the 1st of each month. Once you're using it every week, Core (9.99 a month in your local currency) removes the monthly cap entirely." }
     },
     {
       "@type": "Question",
@@ -69,7 +69,7 @@
     {
       "@type": "Question",
       "name": "Which LiteracyLab AI plan should I choose?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Start on Free to see the feedback quality for yourself — 3 submissions a month, nothing held back. Core at $9.99/month is right for one child practising regularly: unlimited submissions, the 26-week progress trend, anonymous ranking within their own year group, and full activity history. Premium at $19.99/month is for households with more than one child (up to 6 learners on one account, cheaper than two Core plans) or a student aged 11+ working towards exams, since it adds exam-technique scoring and a second, harder next step on every piece of feedback." }
+      "acceptedAnswer": { "@type": "Answer", "text": "Start on Free to see the feedback quality for yourself — 3 submissions a month, nothing held back. Core at 9.99 a month in your local currency (A$, US$, £, €, C$ or S$) is right for one child practising regularly: unlimited submissions, the 26-week progress trend, anonymous ranking within their own year group, and full activity history. Premium at 19.99 a month is for households with more than one child (up to 6 learners on one account, cheaper than two Core plans) or a student aged 11+ working towards exams, since it adds exam-technique scoring and a second, harder next step on every piece of feedback." }
     },
     {
       "@type": "Question",
@@ -347,6 +347,9 @@
   .plan-table th, .plan-table td{ padding:14px 16px; text-align:left; font-size:13.5px; border-top:1px solid var(--border-soft); vertical-align:top; }
   .plan-table thead th{ border-top:0; background:var(--surface-2); font-size:12.5px; font-weight:700; letter-spacing:.03em; }
   .plan-table thead th span{ display:block; font-weight:500; font-size:12px; color:var(--ink-faint); margin-top:3px; }
+  /* the price inside that span must stay on the same line as "/mo" */
+  .plan-table thead th .js-price{ display:inline; margin-top:0; }
+  .price-currency-note{ margin:14px auto 0; text-align:center; font-family:"Lexend",sans-serif; font-size:13px; color:var(--ink-faint); }
   .plan-table th[scope="row"]{ font-weight:600; color:var(--ink); width:34%; }
   .plan-table td{ color:var(--ink-soft); width:22%; }
   .plan-table .col-best{ background:var(--gold-tint); }
@@ -664,6 +667,7 @@
     <div class="section-head" style="margin-inline:auto; text-align:center;">
       <span class="eyebrow" style="justify-content:center;">Pricing</span>
       <h2>Start free. Upgrade when they're hooked.</h2>
+      <p class="price-currency-note">Same price in every currency: 9.99 or 19.99 a month in A$, US$, £, €, C$ or S$. Checkout confirms yours before you pay.</p>
     </div>
     <div class="pricing">
       <div class="price-card">
@@ -679,7 +683,7 @@
       </div>
       <div class="price-card pro">
         <div class="price-plan">Core</div>
-        <div class="price-amount">$9.99<span> /month</span></div>
+        <div class="price-amount"><span class="js-price" data-tier="core" style="font:inherit;color:inherit;">$9.99</span><span> /month</span></div>
         <div class="price-list">
           <div><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> Unlimited writing &amp; reading submissions</div>
           <div><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> 26-week progress trend, not just today's score</div>
@@ -690,7 +694,7 @@
       </div>
       <div class="price-card">
         <div class="price-plan">Premium</div>
-        <div class="price-amount">$19.99<span> /month</span></div>
+        <div class="price-amount"><span class="js-price" data-tier="premium" style="font:inherit;color:inherit;">$19.99</span><span> /month</span></div>
         <div class="price-list">
           <div><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> Everything in Core, for up to 6 learners</div>
           <div><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> Exam-technique scoring against real assessment objectives</div>
@@ -707,8 +711,8 @@
           <tr>
             <th scope="col">What you get</th>
             <th scope="col">Free<span>$0</span></th>
-            <th scope="col" class="col-best">Core<span>$9.99 /mo</span></th>
-            <th scope="col">Premium<span>$19.99 /mo</span></th>
+            <th scope="col" class="col-best">Core<span><span class="js-price" data-tier="core">$9.99</span> /mo</span></th>
+            <th scope="col">Premium<span><span class="js-price" data-tier="premium">$19.99</span> /mo</span></th>
           </tr>
         </thead>
         <tbody>
@@ -847,7 +851,7 @@
       </details>
       <details class="faq-item">
         <summary>Which plan should I choose?<span class="faq-plus"></span></summary>
-        <div class="faq-a">Start on Free and judge the feedback quality yourself — 3 submissions a month, nothing held back. <strong>Core</strong> ($9.99/month) is right for one child practising regularly: unlimited submissions, the 26-week progress trend, anonymous ranking within their own year group, and full activity history. <strong>Premium</strong> ($19.99/month) is for households with more than one child — up to 6 learners on one account, cheaper than two Core plans — or a student aged 11+ working towards exams, since it adds exam-technique scoring and a second, harder next step on every piece of feedback. You can move between plans at any time from your account settings.</div>
+        <div class="faq-a">Start on Free and judge the feedback quality yourself — 3 submissions a month, nothing held back. <strong>Core</strong> (9.99 a month in your local currency: A$, US$, £, €, C$ or S$) is right for one child practising regularly: unlimited submissions, the 26-week progress trend, anonymous ranking within their own year group, and full activity history. <strong>Premium</strong> (19.99 a month) is for households with more than one child — up to 6 learners on one account, cheaper than two Core plans — or a student aged 11+ working towards exams, since it adds exam-technique scoring and a second, harder next step on every piece of feedback. You can move between plans at any time from your account settings.</div>
       </details>
       <details class="faq-item">
         <summary>What is exam-technique scoring?<span class="faq-plus"></span></summary>
@@ -901,6 +905,7 @@
   </div>
 </footer>
 
+<script src="pricing.js"></script>
 <script>
   // Theme toggle: cycles system -> dark -> light -> system
   (function(){
@@ -949,6 +954,18 @@
       });
     });
     render('early');
+  })();
+
+  // Local-currency prices. The rules live in pricing.js, shared with the
+  // app, so the two can never quote different prices. If that file fails
+  // to load, the "$9.99" already in the page stays, which is still the
+  // right number.
+  (function(){
+    if (!window.LL_PRICING) return;
+    var currency = window.LL_PRICING.detectCurrency();
+    document.querySelectorAll('.js-price').forEach(function(el){
+      el.textContent = window.LL_PRICING.priceLabel(el.dataset.tier, currency);
+    });
   })();
 </script>
 </body>
