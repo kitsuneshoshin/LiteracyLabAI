@@ -270,10 +270,15 @@ async function authedFetch(session, path, options = {}) {
 /* ---------------------------------------------------------------- */
 /* Minimal line-icon set (lucide-style: 24x24, stroke, round caps)   */
 /* ---------------------------------------------------------------- */
-function Icon({ children, size = 20, strokeWidth = 1.8, className = "" }) {
+// style and other props (aria-label etc.) are forwarded: this used to drop
+// them silently, so every icon given a colour (gold ticks, the burgundy
+// flame) rendered in the surrounding text colour instead, and icons in tight
+// flex rows were squashed. flexShrink 0 keeps an icon at the size asked for.
+function Icon({ children, size = 20, strokeWidth = 1.8, className = "", style, ...rest }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
-      strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className}>
+      strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className}
+      style={{ flexShrink: 0, ...style }} {...rest}>
       {children}
     </svg>
   );
@@ -1305,6 +1310,43 @@ function ActivityHistory({ recent, historyLimit, displayName }){
   );
 }
 
+// Shown when the selected learner is paused: the account holds more learners
+// than its plan covers (after a downgrade), and this isn't the one the parent
+// chose to keep usable. Their work stays visible; only new prompts/passages
+// are blocked, and api/_lib/learnerAccess.js enforces that server-side - this
+// is only the explanation and the way out.
+function PausedLearnerNotice({ child, children_, activeChangeAvailableAt, onMakeUsable, onSeePlans }){
+  if (!child || !child.locked) return null;
+  const name = child.display_name || "This learner";
+  const usable = children_.find(c => !c.locked);
+  const blockedUntil = activeChangeAvailableAt ? new Date(activeChangeAvailableAt) : null;
+  function choose(){
+    const others = usable ? `${usable.display_name || "your other learner"} will be paused instead, and you` : "You";
+    if (window.confirm(`Make ${name} your active learner?\n\n${others} won't be able to change this again for 30 days.`)) onMakeUsable(child.id);
+  }
+  return (
+    <div className="card p-5 mb-5 flex items-start gap-3" style={{ borderColor: "var(--gold)", borderWidth: 1.5, background: "var(--gold-tint)" }}>
+      <IconLock size={18} style={{ color: "var(--gold-ink)", marginTop: 2, flexShrink: 0 }} />
+      <div className="min-w-0">
+        <div className="font-display font-bold text-sm mb-1" style={{ color: "var(--ink)" }}>{name} is paused on your current plan</div>
+        <p className="text-[13px] leading-snug mb-3" style={{ color: "var(--ink-soft)" }}>
+          Your plan covers one learner. {name}'s work is all saved and still visible, but they can't start new writing or reading until they're your active learner{usable ? ` (currently ${usable.display_name || "your other learner"})` : ""}. Premium covers up to six.
+        </p>
+        <div className="flex flex-wrap items-center gap-2">
+          {blockedUntil
+            ? <span className="text-[12px]" style={{ color: "var(--ink-faint)" }}>You can change your active learner again on {blockedUntil.toLocaleDateString(undefined, { day: "numeric", month: "long" })}.</span>
+            : <button onClick={choose} className="focus-ring rounded-full px-3.5 py-1.5 text-[12.5px] font-bold" style={{ background: "var(--ink)", color: "#fff" }}>Make {name} the active learner</button>}
+          {onSeePlans && (
+            <button onClick={onSeePlans} className="focus-ring inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[12.5px] font-bold" style={{ background: "var(--gold)", color: "#fff" }}>
+              <IconCrown size={12} strokeWidth={2.4} /> See plans
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function ProgressTimeline({ weeks }){
   const plottable = (weeks || []).filter(w => w.masteryPct != null);
   if (plottable.length < 2) {
@@ -1385,6 +1427,7 @@ function ChildSwitcher({ children_, activeChildId, onSwitchChild, onAddChild, sh
           style={ c.id===activeChildId ? { background: "var(--ink)", color: "white" } : { color: "var(--ink-soft)" } }>
           <Avatar avatarId={c.avatar_id ?? 0} size={22} />
           {c.display_name || "Learner"}
+          {c.locked && <IconLock size={11} strokeWidth={2.4} aria-label="Paused on your current plan" style={{ opacity: 0.75 }} />}
         </button>
       ))}
       {showAdd && (
@@ -1396,7 +1439,7 @@ function ChildSwitcher({ children_, activeChildId, onSwitchChild, onAddChild, sh
   );
 }
 
-function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests, toggleInterest, confidenceWriting, setConfidenceWriting, confidenceReading, setConfidenceReading, motivation, setMotivation, displayName, setDisplayName, avatarId, setAvatarId, children_, activeChildId, onSwitchChild, onAddChild, onRemoveChild, used, total, plan, session, setView, history, progress, peerStats, backendLive, needsOnboarding, onCompleteOnboarding }){
+function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests, toggleInterest, confidenceWriting, setConfidenceWriting, confidenceReading, setConfidenceReading, motivation, setMotivation, displayName, setDisplayName, avatarId, setAvatarId, children_, activeChildId, onSwitchChild, onAddChild, onRemoveChild, onMakeUsable, activeChangeAvailableAt, used, total, plan, session, setView, history, progress, peerStats, backendLive, needsOnboarding, onCompleteOnboarding }){
   const grades = GRADE_DATA[country].grades;
   const gradeLabel = grades[gradeIdx];
   const remaining = total - used;
@@ -1497,6 +1540,10 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
       <div className="lg:col-span-2 flex flex-col gap-6">
         {backendLive && (
           <ChildSwitcher children_={children_} activeChildId={activeChildId} onSwitchChild={onSwitchChild} onAddChild={onAddChild} />
+        )}
+        {backendLive && (
+          <PausedLearnerNotice child={children_.find(c => c.id === activeChildId)} children_={children_}
+            activeChangeAvailableAt={activeChangeAvailableAt} onMakeUsable={onMakeUsable} />
         )}
         <div className="card p-6">
           <div className="flex items-start justify-between gap-4 flex-wrap mb-5">
@@ -2372,7 +2419,7 @@ function ReadingFeedbackPanel({ tier, country, interest, confidence, motivation,
 /* ---------------------------------------------------------------- */
 /* Student Workspace                                                  */
 /* ---------------------------------------------------------------- */
-function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, interests, confidenceWriting, confidenceReading, motivation, used, total, onSubmit, session, backendLive, childId, children_, onSwitchChild }){
+function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, interests, confidenceWriting, confidenceReading, motivation, used, total, onSubmit, session, backendLive, childId, children_, onSwitchChild, onMakeUsable, activeChangeAvailableAt, onSeePlans }){
   const grades = GRADE_DATA[country].grades;
   const gradeLabel = grades[gradeIdx];
   const [exerciseType, setExerciseType] = useState("writing"); // writing | reading
@@ -2592,6 +2639,10 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
     <div className="mx-auto max-w-6xl px-4 sm:px-6 py-8">
       {backendLive && children_ && children_.length > 1 && (
         <ChildSwitcher children_={children_} activeChildId={childId} onSwitchChild={onSwitchChild} showAdd={false} />
+      )}
+      {backendLive && children_ && (
+        <PausedLearnerNotice child={children_.find(c => c.id === childId)} children_={children_}
+          activeChangeAvailableAt={activeChangeAvailableAt} onMakeUsable={onMakeUsable} onSeePlans={onSeePlans} />
       )}
       <div className="flex items-center justify-between flex-wrap gap-3 mb-4">
         <div>
@@ -3018,6 +3069,7 @@ function App({ session }){
   // child is active, rather than its own state, so there's one source of
   // truth and switching children can't leave stale fields behind.
   const [children, setChildren] = useState([]);
+  const [activeChangeAvailableAt, setActiveChangeAvailableAt] = useState(null);
   const [activeChildId, setActiveChildId] = useState(null);
   const activeChild = backendLive ? (children.find(c => c.id === activeChildId) || null) : DEMO_CHILD;
   const country = activeChild?.country || "🇬🇧 United Kingdom";
@@ -3057,11 +3109,12 @@ function App({ session }){
     if (!backendLive) { setProfileLoaded(true); return; }
     (async ()=>{
       try {
-        const [{ profiles }, usage] = await Promise.all([
+        const [{ profiles, activeChangeAvailableAt: nextChange }, usage] = await Promise.all([
           authedFetch(session, "/api/child-profile"),
           authedFetch(session, "/api/usage"),
         ]);
         setChildren(profiles);
+        setActiveChangeAvailableAt(nextChange || null);
         let remembered = null;
         try { remembered = localStorage.getItem("ll_active_child_" + session.user.id); } catch {}
         const initial = profiles.find(p => p.id === remembered) || profiles[0];
@@ -3091,6 +3144,31 @@ function App({ session }){
     setChildren(prev => prev.map(c => c.id === activeChildId ? { ...c, ...patch } : c));
     authedFetch(session, "/api/child-profile", { method: "POST", body: JSON.stringify({ childId: activeChildId, ...patch }) })
       .catch((err)=> logAppError("Failed to save learner setup:", err));
+  }
+
+  // Re-reads which learners are paused - after choosing a different active
+  // learner, or after the plan changes (an upgrade unpauses everyone).
+  async function refreshLearners(){
+    if (!backendLive) return;
+    try {
+      const { profiles, activeChangeAvailableAt: nextChange } = await authedFetch(session, "/api/child-profile");
+      setChildren(profiles);
+      setActiveChangeAvailableAt(nextChange || null);
+    } catch (err) {
+      logAppError("Failed to refresh learners:", err);
+    }
+  }
+  async function makeLearnerUsable(childId){
+    if (!backendLive) return;
+    try {
+      await authedFetch(session, "/api/child-profile", { method: "POST", body: JSON.stringify({ makeActive: true, childId }) });
+      await refreshLearners();
+    } catch (err) {
+      // 429 is the once-every-30-days limit; its message says when.
+      if (err.statusCode === 429) { window.alert(err.payload?.error || "You can't change your active learner again yet."); await refreshLearners(); return; }
+      logAppError("Failed to change the active learner:", err);
+      window.alert("Something went wrong changing your active learner. Please try again.");
+    }
   }
 
   async function addChild(){
@@ -3202,6 +3280,7 @@ function App({ session }){
       setTotal(usage.cap == null ? 999 : usage.cap);
       setPlan(usage.plan || "free");
     }).catch((err)=> logAppError("Failed to refresh usage after upgrade:", err));
+    refreshLearners(); // an upgrade unpauses any paused learners
     window.history.replaceState(null, "", window.location.pathname);
   }, [backendLive]);
   async function handleSignOut(){
@@ -3244,14 +3323,14 @@ function App({ session }){
           motivation={motivation} setMotivation={handleSetMotivation}
           displayName={activeChild?.display_name || ""} setDisplayName={handleSetDisplayName}
           avatarId={avatarId} setAvatarId={handleSetAvatar}
-          children_={children} activeChildId={activeChildId} onSwitchChild={switchChild} onAddChild={addChild} onRemoveChild={removeChild}
+          children_={children} activeChildId={activeChildId} onSwitchChild={switchChild} onAddChild={addChild} onRemoveChild={removeChild} onMakeUsable={makeLearnerUsable} activeChangeAvailableAt={activeChangeAvailableAt}
           used={used} total={total} plan={plan} session={session} setView={setView} history={history} progress={progress} peerStats={peerStats} backendLive={backendLive}
           needsOnboarding={needsOnboarding} onCompleteOnboarding={completeOnboarding} />
       ) : (
         <Workspace country={country} gradeIdx={gradeIdx} setGradeIdx={handleGradeChange} tier={tier} setTierOverride={setTierAndSyncGrade}
           interests={interests} confidenceWriting={confidenceWriting} confidenceReading={confidenceReading} motivation={motivation}
           used={used} total={total} onSubmit={handleSubmit} session={session} backendLive={backendLive}
-          childId={activeChildId} children_={children} onSwitchChild={switchChild} />
+          childId={activeChildId} children_={children} onSwitchChild={switchChild} onMakeUsable={makeLearnerUsable} activeChangeAvailableAt={activeChangeAvailableAt} onSeePlans={()=>setView("dashboard")} />
       )}
       <footer className="mx-auto max-w-6xl px-4 sm:px-6 py-10 text-center text-xs flex flex-col items-center gap-2" style={{ color: "var(--ink-faint)" }}>
         <div>LiteracyLab AI · {backendLive ? "your account data is private to you" : "interactive prototype — all learner data shown is sample data"}.</div>

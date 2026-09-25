@@ -1,6 +1,7 @@
 const { getSupabaseAdmin } = require("./_lib/supabaseAdmin");
 const { requireUser, sendError } = require("./_lib/auth");
 const { getMonthlyUsage } = require("./_lib/usage");
+const { ACTIVE_CHANGE_DAYS, lockedChildIds, nextActiveChangeAt, loadLearnerState } = require("./_lib/learnerAccess");
 
 // Supports multiple learners per account (a household can have more than
 // one child). GET lists every child profile for this account, creating a
@@ -32,11 +33,47 @@ module.exports = async function handler(req, res) {
         if (insertErr) throw insertErr;
         data = [created];
       }
-      return res.status(200).json({ profiles: data });
+
+      // Tell the app which learners are paused after a downgrade (see
+      // _lib/learnerAccess.js), so it can show it before a child tries.
+      const { capabilities } = await getMonthlyUsage(supabase, user.id);
+      const { activeChildId, activeChildSetAt } = await loadLearnerState(supabase, user.id);
+      const locked = lockedChildIds(data, capabilities.maxLearners, activeChildId);
+      const nextChange = nextActiveChangeAt(activeChildSetAt);
+      return res.status(200).json({
+        profiles: data.map((c) => ({ ...c, locked: locked.has(c.id) })),
+        maxLearners: capabilities.maxLearners,
+        activeChildId: activeChildId || null,
+        activeChangeAvailableAt: nextChange ? nextChange.toISOString() : null,
+      });
     }
 
     if (req.method === "POST") {
       const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body || {};
+
+      // Choose which learner stays usable when the account holds more
+      // learners than the plan covers. Limited to once per ACTIVE_CHANGE_DAYS
+      // so switching back and forth can't stand in for Premium.
+      if (body.makeActive && body.childId) {
+        const { children, activeChildId, activeChildSetAt } = await loadLearnerState(supabase, user.id);
+        if (!children.some((c) => c.id === body.childId)) {
+          return res.status(404).json({ error: "Learner not found for this account." });
+        }
+        if (activeChildId === body.childId) return res.status(200).json({ activeChildId });
+        const next = nextActiveChangeAt(activeChildSetAt);
+        if (next) {
+          return res.status(429).json({
+            error: `You can change your active learner once every ${ACTIVE_CHANGE_DAYS} days. The next change is available on ${next.toLocaleDateString("en-AU", { day: "numeric", month: "long", year: "numeric" })}.`,
+            code: "active_change_cooldown",
+            availableAt: next.toISOString(),
+          });
+        }
+        const { error } = await supabase.from("profiles")
+          .update({ active_child_id: body.childId, active_child_set_at: new Date().toISOString() })
+          .eq("id", user.id);
+        if (error) throw error;
+        return res.status(200).json({ activeChildId: body.childId });
+      }
       const allowed = ["display_name", "country", "grade_idx", "interests", "confidence_writing", "confidence_reading", "motivation", "onboarded", "avatar_id"];
       const patch = {};
       for (const key of allowed) if (key in body) patch[key] = body[key];

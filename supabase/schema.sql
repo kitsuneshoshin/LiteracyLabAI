@@ -3,6 +3,22 @@
 -- Safe to re-run: uses "if not exists" / "or replace" throughout.
 
 -- ---------------------------------------------------------------------------
+-- Direct table access: NONE, on purpose.
+-- The browser uses Supabase only to sign in. Every data read and write goes
+-- through the server API (api/*.js), which uses the service role and is
+-- where plan limits, ownership and billing are enforced. Row Level Security
+-- is enabled on every table with NO policies, so signed-in users cannot
+-- touch rows directly with the public anon key.
+-- This file used to create "owner access" policies (for all using
+-- auth.uid() = ...). Those let any signed-in parent set their own
+-- profiles.plan to 'premium' without paying, add unlimited learners, and
+-- delete their own submissions to reset the free cap. Removed 2026-09-25.
+-- Do not add a policy here without also checking which columns it exposes.
+-- (Each table's old policy is still dropped right after the table is created
+-- below, so re-running this file on an older database removes it.)
+-- ---------------------------------------------------------------------------
+
+-- ---------------------------------------------------------------------------
 -- Profiles: one row per Account Holder (parent/guardian), keyed to auth.users.
 -- ---------------------------------------------------------------------------
 create table if not exists public.profiles (
@@ -34,8 +50,7 @@ alter table public.profiles add column if not exists stripe_subscription_id text
 alter table public.profiles enable row level security;
 
 drop policy if exists "profiles: self access" on public.profiles;
-create policy "profiles: self access" on public.profiles
-  for all using (auth.uid() = id) with check (auth.uid() = id);
+-- No policy on purpose: see "Direct table access" at the top of this file.
 
 -- Auto-create a profile row the moment someone signs up via Supabase Auth.
 create or replace function public.handle_new_user()
@@ -78,11 +93,20 @@ alter table public.child_profiles add column if not exists onboarded boolean not
 -- foreign key since the set is a fixed, code-defined list, not app data.
 alter table public.child_profiles add column if not exists avatar_id int not null default 0;
 
+-- The learner who stays usable when an account holds more learners than its
+-- plan covers (after a downgrade - see api/_lib/learnerAccess.js), and when
+-- that choice was last made (changes are limited to one per 30 days). Lives
+-- on profiles but must be added after child_profiles exists, hence here.
+-- "on delete set null": removing that learner falls back to the default
+-- (oldest learners keep access) rather than blocking the delete.
+alter table public.profiles add column if not exists active_child_id uuid
+  references public.child_profiles(id) on delete set null;
+alter table public.profiles add column if not exists active_child_set_at timestamptz;
+
 alter table public.child_profiles enable row level security;
 
 drop policy if exists "child_profiles: owner access" on public.child_profiles;
-create policy "child_profiles: owner access" on public.child_profiles
-  for all using (auth.uid() = profile_id) with check (auth.uid() = profile_id);
+-- No policy on purpose: see "Direct table access" at the top of this file.
 
 -- ---------------------------------------------------------------------------
 -- Submissions: every writing or reading-comprehension attempt, plus the
@@ -114,8 +138,7 @@ alter table public.submissions add column if not exists grade_label text;
 alter table public.submissions enable row level security;
 
 drop policy if exists "submissions: owner access" on public.submissions;
-create policy "submissions: owner access" on public.submissions
-  for all using (auth.uid() = profile_id) with check (auth.uid() = profile_id);
+-- No policy on purpose: see "Direct table access" at the top of this file.
 
 create index if not exists submissions_profile_month_idx
   on public.submissions (profile_id, created_at desc);
@@ -159,8 +182,7 @@ alter table public.commitments add column if not exists feedback_text text;
 alter table public.commitments enable row level security;
 
 drop policy if exists "commitments: owner access" on public.commitments;
-create policy "commitments: owner access" on public.commitments
-  for all using (auth.uid() = profile_id) with check (auth.uid() = profile_id);
+-- No policy on purpose: see "Direct table access" at the top of this file.
 
 -- ---------------------------------------------------------------------------
 -- Rate limiting: one row per request to a metered endpoint (writing-prompt,

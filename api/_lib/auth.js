@@ -32,7 +32,12 @@ async function sendError(res, err) {
   const status = err.statusCode || 500;
   console.error(err);
   await captureIfUnexpected(err);
-  res.status(status).json({ error: err.message || "Internal server error." });
+  // A machine-readable code (e.g. "learner_locked") lets the app offer the
+  // right fix. Only for deliberate 4xx errors: a 500's `code` would be a
+  // database/library internal, not something the app should act on.
+  const body = { error: err.message || "Internal server error." };
+  if (status < 500 && err.code) body.code = err.code;
+  res.status(status).json(body);
 }
 
 module.exports = { requireUser, sendError };

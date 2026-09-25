@@ -1,6 +1,7 @@
 const { getSupabaseAdmin } = require("./_lib/supabaseAdmin");
 const { requireUser, sendError } = require("./_lib/auth");
 const { getMonthlyUsage } = require("./_lib/usage");
+const { assertLearnerCanStartWork } = require("./_lib/learnerAccess");
 const { checkRateLimit } = require("./_lib/rateLimit");
 const { generateFeedbackJSON } = require("./_lib/openai");
 const { buildWritingPromptGenerator, correctiveAddendum } = require("./_lib/prompt");
@@ -66,6 +67,10 @@ module.exports = async function handler(req, res) {
       .from("child_profiles").select("id").eq("id", childId).eq("profile_id", user.id).maybeSingle();
     if (childErr) throw childErr;
     if (!childProfile) return res.status(404).json({ error: "Learner not found for this account." });
+
+    // After a downgrade an account can hold more learners than its plan
+    // covers; the extras keep their work but can't start new prompts.
+    await assertLearnerCanStartWork(supabase, user.id, childProfile.id, usage.capabilities);
 
     // Reserve the slot with a placeholder row BEFORE calling the AI, then
     // re-check the cap. The check above alone has a real race: two requests

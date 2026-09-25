@@ -55,7 +55,13 @@ function loadHandler(name, { plan = "free", used = 0, db, log, stripe, generate 
   const caps = capabilitiesFor(plan);
   stub(lib("auth.js"), {
     requireUser: async () => ({ id: "user-1", email: "parent@example.com" }),
-    sendError: async (res, err) => res.status(err.statusCode || 500).json({ error: err.message }),
+    // Mirrors the real sendError: deliberate 4xx errors carry their code.
+    sendError: async (res, err) => {
+      const status = err.statusCode || 500;
+      const body = { error: err.message };
+      if (status < 500 && err.code) body.code = err.code;
+      return res.status(status).json(body);
+    },
   });
   stub(lib("usage.js"), {
     getMonthlyUsage: async () => ({ used, cap: caps.monthlyCap, plan, capabilities: caps }),
@@ -339,5 +345,101 @@ test("Cancelling drops the account back to Free", async () => {
 test("A payment for a price we don't sell is refused rather than granting a paid plan", async () => {
   const { res, updates } = await runWebhook({ type: "customer.subscription.updated", data: { object: sub("price_someone_elses") } });
   assert.equal(res.statusCode, 500);
+  assert.equal(updates.length, 0);
+});
+
+// ---------------------------------------------------------------- After a downgrade: extra learners pause, work kept
+
+// A family that had Premium with two learners, now on Core (one learner).
+function downgradedFamilyDb({ activeChildId = null, activeChildSetAt = null, updates = [] } = {}) {
+  const kids = [
+    { id: "kid-older", display_name: "Older", created_at: "2026-09-01T00:00:00Z" },
+    { id: "kid-younger", display_name: "Younger", created_at: "2026-09-02T00:00:00Z" },
+  ];
+  return (q) => {
+    if (did(q, "update")) { updates.push({ table: q.table, set: q.ops.find(([n]) => n === "update")[1] }); return { data: null, error: null }; }
+    if (q.table === "profiles") return { data: { active_child_id: activeChildId, active_child_set_at: activeChildSetAt }, error: null };
+    if (q.table === "child_profiles" && did(q, "maybeSingle")) {
+      const id = (q.ops.find(([n, col]) => n === "eq" && col === "id") || [])[2];
+      return { data: kids.some((k) => k.id === id) ? { id } : null, error: null };
+    }
+    if (q.table === "child_profiles") return { data: kids, error: null };
+    if (q.table === "submissions" && did(q, "insert")) return { data: { id: "reserved-1" }, error: null };
+    return { data: null, error: null };
+  };
+}
+const promptBody = (childId) => ({ tier: "middle", country: "🇬🇧 United Kingdom", gradeLabel: "Year 9", childId });
+
+test("Core after a downgrade: the paused learner can't start new work, and the parent is told why", async () => {
+  const h = loadHandler("writing-prompt.js", { plan: "core", used: 0, db: downgradedFamilyDb({ activeChildId: "kid-older" }) });
+  const res = await call(h, { method: "POST", body: promptBody("kid-younger") });
+  assert.equal(res.statusCode, 402);
+  assert.equal(res.body.code, "learner_locked");
+  assert.match(res.body.error, /still saved/);
+});
+
+test("Core after a downgrade: the active learner carries on as normal", async () => {
+  const h = loadHandler("writing-prompt.js", { plan: "core", used: 0, db: downgradedFamilyDb({ activeChildId: "kid-older" }) });
+  const res = await call(h, { method: "POST", body: promptBody("kid-older") });
+  assert.notEqual(res.body && res.body.code, "learner_locked");
+  assert.notEqual(res.statusCode, 402);
+});
+
+test("Reading passages are paused the same way", async () => {
+  const h = loadHandler("reading-passage.js", { plan: "core", used: 0, db: downgradedFamilyDb({ activeChildId: "kid-older" }) });
+  const res = await call(h, { method: "POST", body: promptBody("kid-younger") });
+  assert.equal(res.statusCode, 402);
+  assert.equal(res.body.code, "learner_locked");
+});
+
+test("Upgrading back to Premium unlocks every learner", async () => {
+  const h = loadHandler("writing-prompt.js", { plan: "premium", used: 0, db: downgradedFamilyDb({ activeChildId: "kid-older" }) });
+  const res = await call(h, { method: "POST", body: promptBody("kid-younger") });
+  assert.notEqual(res.body && res.body.code, "learner_locked");
+});
+
+test("The learner list tells the app which learner is paused, and keeps both learners' work visible", async () => {
+  const h = loadHandler("child-profile.js", { plan: "core", db: downgradedFamilyDb({ activeChildId: "kid-younger" }) });
+  const res = await call(h);
+  assert.equal(res.statusCode, 200);
+  assert.equal(res.body.profiles.length, 2, "a paused learner must still be listed");
+  const byId = Object.fromEntries(res.body.profiles.map((p) => [p.id, p.locked]));
+  assert.deepEqual(byId, { "kid-older": true, "kid-younger": false });
+  assert.equal(res.body.maxLearners, 1);
+});
+
+test("The parent can choose the active learner the first time, any time", async () => {
+  const updates = [];
+  const h = loadHandler("child-profile.js", { plan: "core", db: downgradedFamilyDb({ updates }) });
+  const res = await call(h, { method: "POST", body: { makeActive: true, childId: "kid-younger" } });
+  assert.equal(res.statusCode, 200);
+  assert.equal(updates[0].table, "profiles");
+  assert.equal(updates[0].set.active_child_id, "kid-younger");
+});
+
+test("Switching the active learner again within 30 days is refused, so it can't stand in for Premium", async () => {
+  const updates = [];
+  const recently = new Date(Date.now() - 3 * 86400000).toISOString();
+  const h = loadHandler("child-profile.js", { plan: "core", db: downgradedFamilyDb({ activeChildId: "kid-older", activeChildSetAt: recently, updates }) });
+  const res = await call(h, { method: "POST", body: { makeActive: true, childId: "kid-younger" } });
+  assert.equal(res.statusCode, 429);
+  assert.equal(res.body.code, "active_change_cooldown");
+  assert.equal(updates.length, 0, "the active learner was changed anyway");
+});
+
+test("After 30 days the parent can switch again", async () => {
+  const updates = [];
+  const longAgo = new Date(Date.now() - 31 * 86400000).toISOString();
+  const h = loadHandler("child-profile.js", { plan: "core", db: downgradedFamilyDb({ activeChildId: "kid-older", activeChildSetAt: longAgo, updates }) });
+  const res = await call(h, { method: "POST", body: { makeActive: true, childId: "kid-younger" } });
+  assert.equal(res.statusCode, 200);
+  assert.equal(updates[0].set.active_child_id, "kid-younger");
+});
+
+test("A parent can't make someone else's child their active learner", async () => {
+  const updates = [];
+  const h = loadHandler("child-profile.js", { plan: "core", db: downgradedFamilyDb({ updates }) });
+  const res = await call(h, { method: "POST", body: { makeActive: true, childId: "another-familys-kid" } });
+  assert.equal(res.statusCode, 404);
   assert.equal(updates.length, 0);
 });
