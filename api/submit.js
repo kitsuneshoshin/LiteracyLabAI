@@ -259,6 +259,6 @@ module.exports = async function handler(req, res) {
 
     return res.status(400).json({ error: 'kind must be "writing" or "reading".' });
   } catch (err) {
-    sendError(res, err);
+    await sendError(res, err);
   }
 };

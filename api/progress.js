@@ -67,6 +67,6 @@ module.exports = async function handler(req, res) {
       targets: scoreTargets(targetDefs, submissions),
     });
   } catch (err) {
-    sendError(res, err);
+    await sendError(res, err);
   }
 };

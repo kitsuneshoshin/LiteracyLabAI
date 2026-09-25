@@ -184,7 +184,7 @@ const supabaseClient = BACKEND_CONFIGURED ? window.supabase.createClient(SUPABAS
 // a build step. Left blank, this is a no-op: no script errors, nothing
 // reported, exactly the previous behavior. Sentry.init only runs once a
 // real DSN is filled in.
-const SENTRY_DSN = "";
+const SENTRY_DSN = "https://50faf40824b61c88e66ede8dc91d411d@o4512144324755456.ingest.de.sentry.io/4512144345595984";
 // The Sentry script loads async (see <head>), so it may arrive after this
 // runs. Initialising lazily - here if it's already there, otherwise on the
 // first error reported - means a late arrival still gets set up instead of
@@ -193,7 +193,27 @@ let sentryInitialised = false;
 function ensureSentry(){
   if (sentryInitialised) return true;
   if (!SENTRY_DSN || !window.Sentry) return false;
-  window.Sentry.init({ dsn: SENTRY_DSN, environment: BACKEND_CONFIGURED ? "production" : "demo", tracesSampleRate: 0 });
+  window.Sentry.init({
+    dsn: SENTRY_DSN,
+    // Tagged by where the page is served from, so errors on test previews
+    // and local files never look like live-site problems.
+    environment: !BACKEND_CONFIGURED ? "demo" : location.hostname === "www.literacylabai.com" ? "production" : "preview",
+    tracesSampleRate: 0,
+    sendDefaultPii: false,
+    // Same rule as api/_lib/sentry.js: children's writing never goes to an
+    // error tracker. Error messages from the API can quote AI feedback that
+    // quotes the child, so quoted content is blanked, and console
+    // breadcrumbs (which would carry those same messages) aren't recorded.
+    beforeSend: (event) => {
+      const redact = (t) => typeof t === "string"
+        ? t.replace(/\("[\s\S]*?"\)/g, '("[redacted]")').replace(/"[^"]*"/g, '"[redacted]"')
+        : t;
+      if (event.message) event.message = redact(event.message);
+      for (const ex of (event.exception && event.exception.values) || []) ex.value = redact(ex.value);
+      return event;
+    },
+    beforeBreadcrumb: (crumb) => (crumb.category === "console" ? null : crumb),
+  });
   sentryInitialised = true;
   return true;
 }

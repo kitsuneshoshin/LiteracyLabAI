@@ -77,6 +77,6 @@ module.exports = async function handler(req, res) {
       })),
     });
   } catch (err) {
-    sendError(res, err);
+    await sendError(res, err);
   }
 };

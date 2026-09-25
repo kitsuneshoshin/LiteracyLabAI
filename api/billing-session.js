@@ -98,6 +98,6 @@ module.exports = async function handler(req, res) {
 
     return res.status(200).json({ url: session.url });
   } catch (err) {
-    sendError(res, err);
+    await sendError(res, err);
   }
 };

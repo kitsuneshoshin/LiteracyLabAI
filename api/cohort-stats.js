@@ -61,6 +61,6 @@ module.exports = async function handler(req, res) {
 
     return res.status(200).json(buildCohortResult(scoresByChild, childId));
   } catch (err) {
-    sendError(res, err);
+    await sendError(res, err);
   }
 };

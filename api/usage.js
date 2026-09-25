@@ -13,6 +13,6 @@ module.exports = async function handler(req, res) {
     const usage = await getMonthlyUsage(supabase, user.id);
     return res.status(200).json(usage);
   } catch (err) {
-    sendError(res, err);
+    await sendError(res, err);
   }
 };

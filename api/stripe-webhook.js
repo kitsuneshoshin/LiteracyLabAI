@@ -114,7 +114,7 @@ module.exports = async function handler(req, res) {
     // A silently failing webhook means a paying customer's plan never
     // flips to Pro (or never flips back on cancellation) - worth alerting
     // on immediately rather than waiting for them to notice and complain.
-    captureIfUnexpected(err);
+    await captureIfUnexpected(err);
     return res.status(500).json({ error: "Webhook handler failed." });
   }
 

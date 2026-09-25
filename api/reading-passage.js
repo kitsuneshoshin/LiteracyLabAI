@@ -116,6 +116,6 @@ module.exports = async function handler(req, res) {
       usage: updatedUsage,
     });
   } catch (err) {
-    sendError(res, err);
+    await sendError(res, err);
   }
 };

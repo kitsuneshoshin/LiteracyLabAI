@@ -26,10 +26,12 @@ async function requireUser(req) {
 // Every endpoint's catch block funnels through here, so this is the one
 // place that needs to know about error monitoring — no need to touch each
 // of the dozen api/*.js files individually.
-function sendError(res, err) {
+// Async because the Sentry report has to finish sending before the response
+// goes out - see captureIfUnexpected. Every caller awaits it.
+async function sendError(res, err) {
   const status = err.statusCode || 500;
   console.error(err);
-  captureIfUnexpected(err);
+  await captureIfUnexpected(err);
   res.status(status).json({ error: err.message || "Internal server error." });
 }
 
