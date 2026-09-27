@@ -19,7 +19,6 @@ function baseFeedback(overrides = {}) {
   return {
     glow: "Your opening claim is clear and you commit to it straight away in the first line.",
     grow: "Try adding one counter-argument before your conclusion so the argument feels tested.",
-    microMission: "Next time, add one sentence acknowledging the opposing view.",
     vocab: [
       { term: "concession", definition: "admitting part of the other side's point before answering it.", example: "Her concession that the other team trained hard made her win even sweeter." },
       { term: "rebuttal", definition: "the part where you answer the opposing argument directly.", example: "His rebuttal directly addressed the counter-argument from paragraph two." },

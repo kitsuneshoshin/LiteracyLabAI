@@ -133,6 +133,16 @@ function followUpClause(previousCommitment) {
   return `\n\nLast time, this student committed to trying: "${previousCommitment}" in their next submission. Look for genuine evidence of this in what they submitted now. If you find real evidence, briefly and warmly acknowledge it. If there's no clear evidence, gently note that without scolding — it's still worth trying. Put this 1-sentence check-in in a "followUp" field. Never claim evidence that isn't actually there.`;
 }
 
+// A holistic 1-10 score for the WHOLE piece, not just the one glow/grow
+// pair - "glow"/"grow" are deliberately a single coached-toward highlight
+// each (a wall of criticism is worse coaching for a child than one clear
+// step), but that means neither one is a fair stand-in for how the entire
+// piece actually reads. This is the parent-facing "how did this one
+// actually do" number, scored independently against the whole text.
+function overallScoreClause() {
+  return `\n\nOVERALL SCORE (required): Read the ENTIRE piece above again, as a whole, and score it 1-10 against these four equally-weighted criteria, calibrated to what's realistic for this student's age/grade (a 10 means excellent FOR THIS AGE, not adult-level writing): (1) ideas & content, (2) organisation/structure, (3) language & vocabulary choices, (4) technical accuracy (spelling, grammar, punctuation). Be genuinely critical - do not default to 8-9 out of politeness; a piece with real, frequent technical errors or weak structure should score in the lower half, even if the one "grow" step above only names a single example of it. Put the number in "overallScore" and ONE sentence citing the specific strength/weakness pattern (not just the single "grow" detail) that drove the score in "scoreReason".`;
+}
+
 // A single worked example, shown to every call regardless of the actual
 // student, purely to anchor tone/structure/specificity. Models follow a
 // concrete example far more reliably than an abstract description of one.
@@ -145,17 +155,18 @@ Student text fragment: "...the dark forest was really scary and the trees looked
     { "term": "ominous", "definition": "giving the feeling that something bad is about to happen, like storm clouds before a launch", "example": "The ominous rumble of the engines meant launch was minutes away." },
     { "term": "murmur", "definition": "a soft, low sound, like mission control talking quietly in the background", "example": "A murmur ran through mission control as the countdown began." }
   ],
-  "microMission": "In your next story, start one sentence with a fronted adverbial before you reveal something scary or exciting.",
   "commitOptions": ["Start a sentence with a fronted adverbial", "Reread my scary bit out loud", "Use one of today's new words"],
   "glowTarget": "Fronted Adverbials",
   "growTarget": "Fronted Adverbials",
   "frameworkTip": { "name": "Story Mountain", "example": "Opening: A young astronaut steps onto Mars for the first time. Build-up: strange lights start flickering under the red dust. Climax: the ground gives way beneath her. Resolution: she finds an old rover, still running, and radios home. Ending: mission control finally answers." },
+  "overallScore": 6,
+  "scoreReason": "Vivid imagery and a clear story arc, but frequent missing full stops and a rushed ending hold this back from a higher score.",
   "highlights": [
     { "quote": "the dark forest was really scary", "type": "glow", "note": "Great tense-building detail right here." },
     { "quote": "the trees looked spooky", "type": "grow", "note": "Try opening with a fronted adverbial to build more suspense.", "revision": "Without warning, the trees looked spooky." }
   ]
 }
-Notice: the glow quotes the student's actual words, the standard is named naturally (not bolted on), the analogy is concrete, vocab defs are one plain sentence each, glowTarget/growTarget are copied verbatim from the given list, each highlight's "quote" is an exact substring of the student's text (typos and all) rather than a paraphrase, the "grow" highlight's "revision" is that same fragment actually rewritten — not restated advice, a real rewrite the student could paste straight into their story — and frameworkTip.example is a FRESH mini-demonstration (not the student's own text) with each named part of the framework clearly labelled. Match that bar exactly for the real student below — every claim must be traceable to what they actually wrote/answered.`;
+Notice: the glow quotes the student's actual words, the standard is named naturally (not bolted on), the analogy is concrete, vocab defs are one plain sentence each, glowTarget/growTarget are copied verbatim from the given list, each highlight's "quote" is an exact substring of the student's text (typos and all) rather than a paraphrase, the "grow" highlight's "revision" is that same fragment actually rewritten — not restated advice, a real rewrite the student could paste straight into their story — frameworkTip.example is a FRESH mini-demonstration (not the student's own text) with each named part of the framework clearly labelled, and overallScore/scoreReason judge the WHOLE piece (here, real punctuation gaps pulled the score down even though the single "grow" above only called out one sentence). Match that bar exactly for the real student below — every claim must be traceable to what they actually wrote/answered.`;
 
 function successCriteria(tier, { includeFramework, genre } = {}) {
   const cap = MAX_AVG_WORDS_PER_SENTENCE[tier] || 30;
@@ -168,7 +179,7 @@ function successCriteria(tier, { includeFramework, genre } = {}) {
 5. Both vocab definitions are one plain sentence each, framed through the student's interest where natural, and each has an "example" sentence that actually uses the term correctly (not just repeats the definition).
 6. glowTarget and growTarget are copied EXACTLY, character-for-character, from the provided list of skill area names — not paraphrased, shortened, or invented.
 7. Every highlight's "quote" is an exact, verbatim substring you can point to in the submitted text above — not a cleaned-up or paraphrased version of it.
-8. Every "grow" highlight has a "revision" that is an actual rewrite of its quote (different wording, applying the fix) — never the same text repeated, and never just advice about the quote instead of a rewrite of it.${(tier === "middle" || tier === "high") ? '\n9. Every "revision" reads as a natural continuation of this student\'s own formal, third-person essay — pure academic argument, with NO interest-based analogy dropped into the revision text itself in any phrasing ("like how I...", "similar to how...", "just like...", etc). That framing belongs only in the "grow" field.' : ""}${fw ? `\n10. frameworkTip.name is EXACTLY "${fw.name}", copied verbatim, and frameworkTip.example is a fresh mini-demonstration (not a rewrite of the student's own submission) with each named part of the framework clearly labelled.` : ""}`;
+8. Every "grow" highlight has a "revision" that is an actual rewrite of its quote (different wording, applying the fix) — never the same text repeated, and never just advice about the quote instead of a rewrite of it.${(tier === "middle" || tier === "high") ? '\n9. Every "revision" reads as a natural continuation of this student\'s own formal, third-person essay — pure academic argument, with NO interest-based analogy dropped into the revision text itself in any phrasing ("like how I...", "similar to how...", "just like...", etc). That framing belongs only in the "grow" field.' : ""}${fw ? `\n10. frameworkTip.name is EXACTLY "${fw.name}", copied verbatim, and frameworkTip.example is a fresh mini-demonstration (not a rewrite of the student's own submission) with each named part of the framework clearly labelled.` : ""}${includeFramework ? '\n11. overallScore is an integer 1-10 (never a string, never out of range) judging the WHOLE piece, not just the one glow/grow — if it disagrees with how positive the glow/grow read, that\'s fine and expected, since the score is the more critical, whole-piece judgement. scoreReason names a real pattern across the piece, not just a restatement of the single "grow" detail.' : ""}`;
 }
 
 function buildWritingPrompt({ tier, country, gradeLabel, interest, confidenceWriting, motivation, prompt, text, targetNames, targets, previousCommitment, capabilities, genre }) {
@@ -193,6 +204,7 @@ ${highlightsClause(tier)}
 ${deepFeedbackClause(caps.deepFeedback)}
 ${wantsExam ? examTechniqueClause({ tier, targets, kind: "writing" }) : ""}
 ${frameworkClause({ tier, interest, genre })}
+${overallScoreClause()}
 ${followUpClause(previousCommitment)}
 
 Read the actual submitted text closely — every point you make must be traceable to something specifically in it (quote a short fragment where useful), not a generic template response.
@@ -209,12 +221,13 @@ Respond with ONLY a JSON object (no markdown fences, no commentary) with exactly
     { "term": "a single word or short phrase", "definition": "a one-sentence, age-appropriate definition, framed using their interest where natural", "example": "a fresh sentence using the term correctly, built around their stated interest (${interest})" },
     { "term": "a second word or short phrase", "definition": "a one-sentence, age-appropriate definition, framed using their interest where natural", "example": "a fresh sentence using the term correctly, built around their stated interest (${interest})" }
   ],
-  "microMission": "One concrete, specific instruction for their NEXT submission that directly follows from the grow above.",
   "commitOptions": ["3 short first-person action phrases (5-8 words each) the student could tap to commit to trying next time, each directly derived from the grow above — not generic"],
   "glowTarget": "the exact skill area name from the given list that the glow demonstrates",
   "growTarget": "the exact skill area name from the given list that the grow is building towards",
   "highlights": [{ "quote": "an exact substring copied from the submitted text", "type": "glow or grow", "note": "a short reason", "revision": "ONLY for type=grow: that same fragment actually rewritten to apply the suggestion" }],${caps.deepFeedback ? '\n  "growNext": "ONE further, harder step to take after the main grow is mastered - genuinely different, not a restatement.",' : ""}${wantsExam ? `\n${EXAM_JSON_SHAPE},` : ""}
   "frameworkTip": { "name": "the exact framework name you were given, verbatim", "example": "your fresh 2-4 sentence worked example demonstrating it" },
+  "overallScore": "an integer 1-10 scoring the WHOLE piece against the four criteria above",
+  "scoreReason": "one sentence citing the specific strength/weakness pattern across the whole piece that drove that score",
   "followUp": ${previousCommitment ? '"a short, honest 1-sentence check-in on the previous commitment noted above"' : "null"}
 }`;
 }
@@ -283,7 +296,6 @@ Respond with ONLY a JSON object (no markdown fences, no commentary) with exactly
     { "term": "a word or phrase from the passage worth upgrading", "definition": "a one-sentence, age-appropriate definition, framed using their interest where natural", "example": "a fresh sentence using the term correctly, built around their stated interest (${interest})" },
     { "term": "a second word or phrase from the passage", "definition": "a one-sentence, age-appropriate definition, framed using their interest where natural", "example": "a fresh sentence using the term correctly, built around their stated interest (${interest})" }
   ],
-  "microMission": "One concrete instruction for their next reading passage that follows from the grow above.",
   "commitOptions": ["3 short first-person action phrases (5-8 words each) the student could tap to commit to trying next time, derived from the grow above"],
   "glowTarget": "the exact skill area name from the given list that the glow demonstrates",
   "growTarget": "the exact skill area name from the given list that the grow is building towards",${caps.deepFeedback ? '\n  "growNext": "ONE further, harder step to take after the main grow is mastered - genuinely different, not a restatement.",' : ""}${wantsExam ? `\n${EXAM_JSON_SHAPE},` : ""}

@@ -996,12 +996,6 @@ const GROWTH_TIP_BASE = {
   middle: "Push your argument one step further: add a sentence that directly addresses a counterargument before returning to your main point.",
   high: "To move this from “in progress” to “mastered,” close one body paragraph with a synthesis sentence that links your evidence back to the wider debate, rather than restating your point.",
 };
-const MICRO_MISSION_BASE = {
-  early: "Use 3 describing words (adjectives) to tell us what things look like!",
-  elementary: "Start two sentences with a fronted adverbial, like “Without hesitation,”",
-  middle: "Include one sentence that considers the opposite point of view before you respond to it.",
-  high: "End each body paragraph with a synthesis sentence linking evidence back to your thesis.",
-};
 
 // A one-tap commitment, not just a satisfaction rating: asking "what will you try
 // next time?" makes the student actively choose an action, which research on
@@ -1063,9 +1057,6 @@ function analogyFor(interest, tier, country){
 function growthTipFor(tier, interest, motivation, country, confidence){
   const closer = MOTIVATION_CLOSER[motivation] || MOTIVATION_CLOSER.enjoyment;
   return `${GROWTH_TIP_BASE[tier]} Think of it ${analogyFor(interest, tier, country)}. ${closer}${confidenceStretch(tier, confidence)}`;
-}
-function microMissionFor(tier, interest, country){
-  return `${MICRO_MISSION_BASE[tier]} It works ${analogyFor(interest, tier, country)} — one step earning the next.`;
 }
 
 function readingGlows(tier, score, totalQ, curriculum){
@@ -1422,7 +1413,18 @@ function ActivityHistory({ recent, historyLimit, displayName }){
                   {r.kind === "writing" && r.wordCount != null && <span className="font-normal" style={{ color: "var(--ink-faint)" }}> · {r.wordCount} words</span>}
                   {r.kind === "reading" && r.score != null && r.totalQuestions != null && <span className="font-normal" style={{ color: "var(--ink-faint)" }}> · {r.score}/{r.totalQuestions} correct</span>}
                 </span>
-                <span className="text-[11px] tabular shrink-0" style={{ color: "var(--ink-faint)" }}>{fmt(r.createdAt)}</span>
+                <span className="flex items-center gap-2 shrink-0">
+                  {/* A holistic 1-10 judged against the whole piece - separate
+                      from, and not blended into, the mastery trend chart
+                      above, which tracks per-skill glow/grow direction over
+                      time rather than a single quality score per piece. */}
+                  {r.overallScore != null && (
+                    <span className="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-bold" style={{ background: "var(--gold-tint)", color: "var(--gold-ink)" }}>
+                      {r.overallScore}/10
+                    </span>
+                  )}
+                  <span className="text-[11px] tabular" style={{ color: "var(--ink-faint)" }}>{fmt(r.createdAt)}</span>
+                </span>
               </div>
               {r.glowSnippet
                 ? <p className="text-[12.5px] mt-1 leading-snug" style={{ color: "var(--ink-soft)" }}>{r.glowSnippet}</p>
@@ -2294,7 +2296,6 @@ function FeedbackPanel({ tier, gradeLabel, country, interest, confidence, motiva
   const vocabList = feedback?.vocab
     ? feedback.vocab.map(v=>[v.term, v.definition, v.example])
     : vocabFor(interest, tier, country);
-  const microMission = feedback?.microMission || microMissionFor(tier, interest, country);
   const commitOptions = feedback?.commitOptions || WRITING_COMMIT_OPTIONS[tier];
 
   return (
@@ -2354,25 +2355,11 @@ function FeedbackPanel({ tier, gradeLabel, country, interest, confidence, motiva
 
       <FrameworkTipPanel feedback={feedback} />
 
-      <div className="card p-5 sm:p-6">
-        <div className="flex items-center gap-2 mb-3">
-          <div className="w-8 h-8 rounded-full grid place-items-center" style={{ background: "var(--cyan-tint)", color: "var(--cyan-ink)" }}>
-            <IconSparkle size={16} strokeWidth={2.2} />
-          </div>
-          <h3 className="font-display font-bold" style={{ color: "var(--ink)" }}>Vocabulary Upgrades — {interestLabel} edition</h3>
-        </div>
+      <Collapsible defaultOpen={true} borderColor="var(--border)" iconBg="var(--cyan-tint)" iconColor="var(--cyan-ink)"
+        icon={<IconSparkle size={16} strokeWidth={2.2} />} title={`Vocabulary Upgrades — ${interestLabel} edition`}
+        teaser={vocabList.map(([term])=>term).join(", ")}>
         <VocabList items={vocabList} />
-      </div>
-
-      <div className="card p-5 sm:p-6 flex items-start gap-3" style={{ background: "linear-gradient(135deg, var(--ink), #3E2028)" }}>
-        <div className="w-9 h-9 rounded-full grid place-items-center shrink-0" style={{ background: "var(--cyan)", color: "#fff" }}>
-          <IconFlame size={17} strokeWidth={2.2} />
-        </div>
-        <div>
-          <div className="font-display font-bold text-sm text-white mb-1">Micro-mission for next time</div>
-          <p className="text-[13px]" style={{ color: "#E4D6D2" }}>{microMission}</p>
-        </div>
-      </div>
+      </Collapsible>
 
       <ThumbsFeedback context="writing feedback" session={session} submissionId={submissionId} backendLive={backendLive} />
     </div>
@@ -2393,17 +2380,39 @@ const EXAM_BAND_META = {
   4: { word: "Strong",     color: "var(--good)" },
 };
 
+// Collapsed by default when a submission has a lot going on (Exam
+// technique + Framework spotlight + Vocabulary all at once used to stack as
+// 3 full-weight cards regardless of how many the student already had open,
+// which is what made the feedback screen feel like an undifferentiated
+// wall of boxes) - the student/parent controls what stays open, and each
+// header always shows a one-line teaser so a collapsed section still
+// visibly "does something" rather than looking like it vanished.
+function Collapsible({ icon, iconBg, iconColor, title, teaser, borderColor, defaultOpen, children }){
+  const [open, setOpen] = useState(defaultOpen);
+  return (
+    <div className="card p-5 sm:p-6" style={{ borderColor, borderWidth: 1.5 }}>
+      <button onClick={()=>setOpen(o=>!o)} className="focus-ring w-full flex items-center gap-2 text-left" aria-expanded={open}>
+        <div className="w-8 h-8 rounded-full grid place-items-center shrink-0" style={{ background: iconBg, color: iconColor }}>
+          {icon}
+        </div>
+        <div className="flex-1 min-w-0">
+          <h3 className="font-display font-bold" style={{ color: "var(--ink)" }}>{title}</h3>
+          {!open && teaser && <p className="text-[12px] truncate" style={{ color: "var(--ink-faint)" }}>{teaser}</p>}
+        </div>
+        <IconChevron size={16} strokeWidth={2.2} style={{ color: "var(--ink-faint)", transform: open ? "rotate(180deg)" : "none", transition: "transform 150ms", flexShrink: 0 }} />
+      </button>
+      {open && <div className="mt-3">{children}</div>}
+    </div>
+  );
+}
+
 function ExamTechniquePanel({ feedback }){
   const rows = Array.isArray(feedback?.examTechnique) ? feedback.examTechnique : null;
   if (!rows || rows.length === 0) return null;
   return (
-    <div className="card p-5 sm:p-6" style={{ borderColor: "var(--gold)", borderWidth: 1.5 }}>
-      <div className="flex items-center gap-2 mb-1">
-        <div className="w-8 h-8 rounded-full grid place-items-center" style={{ background: "var(--gold-tint)", color: "var(--gold-ink)" }}>
-          <IconGrad size={16} strokeWidth={2.2} />
-        </div>
-        <h3 className="font-display font-bold" style={{ color: "var(--ink)" }}>Exam-technique scoring</h3>
-      </div>
+    <Collapsible defaultOpen={true} borderColor="var(--gold)" iconBg="var(--gold-tint)" iconColor="var(--gold-ink)"
+      icon={<IconGrad size={16} strokeWidth={2.2} />} title="Exam-technique scoring"
+      teaser={feedback.examSummary || `${rows.length} objective${rows.length === 1 ? "" : "s"} scored`}>
       <p className="text-[12.5px] mb-4" style={{ color: "var(--ink-faint)" }}>
         Banded against the assessment objectives published for this year group. Bands, not marks — a single piece can't be graded like a moderated exam paper.
       </p>
@@ -2446,7 +2455,7 @@ function ExamTechniquePanel({ feedback }){
           <span className="font-semibold">Worth working on next: </span>{feedback.examSummary}
         </div>
       )}
-    </div>
+    </Collapsible>
   );
 }
 
@@ -2477,13 +2486,8 @@ function FrameworkTipPanel({ feedback }){
   const tip = feedback?.frameworkTip;
   if (!tip?.name) return null;
   return (
-    <div className="card p-5 sm:p-6" style={{ borderColor: "var(--navy)", borderWidth: 1.5 }}>
-      <div className="flex items-center gap-2 mb-1">
-        <div className="w-8 h-8 rounded-full grid place-items-center" style={{ background: "var(--navy-tint)", color: "var(--ink)" }}>
-          <IconGrid size={15} strokeWidth={2.2} />
-        </div>
-        <h3 className="font-display font-bold" style={{ color: "var(--ink)" }}>Framework spotlight — {tip.name}</h3>
-      </div>
+    <Collapsible defaultOpen={true} borderColor="var(--navy)" iconBg="var(--navy-tint)" iconColor="var(--ink)"
+      icon={<IconGrid size={15} strokeWidth={2.2} />} title={`Framework spotlight — ${tip.name}`} teaser={tip.description}>
       {tip.description && (
         <p className="text-[13px] mb-3" style={{ color: "var(--ink-faint)" }}>{tip.description}</p>
       )}
@@ -2493,7 +2497,7 @@ function FrameworkTipPanel({ feedback }){
           {tip.example}
         </div>
       )}
-    </div>
+    </Collapsible>
   );
 }
 
@@ -2567,15 +2571,11 @@ function ReadingFeedbackPanel({ tier, country, interest, confidence, motivation,
 
       <FrameworkTipPanel feedback={feedback} />
 
-      <div className="card p-5 sm:p-6">
-        <div className="flex items-center gap-2 mb-3">
-          <div className="w-8 h-8 rounded-full grid place-items-center" style={{ background: "var(--cyan-tint)", color: "var(--cyan-ink)" }}>
-            <IconSparkle size={16} strokeWidth={2.2} />
-          </div>
-          <h3 className="font-display font-bold" style={{ color: "var(--ink)" }}>Vocabulary Upgrades — {interestLabel} edition</h3>
-        </div>
+      <Collapsible defaultOpen={true} borderColor="var(--border)" iconBg="var(--cyan-tint)" iconColor="var(--cyan-ink)"
+        icon={<IconSparkle size={16} strokeWidth={2.2} />} title={`Vocabulary Upgrades — ${interestLabel} edition`}
+        teaser={vocabList.map(([term])=>term).join(", ")}>
         <VocabList items={vocabList} />
-      </div>
+      </Collapsible>
 
       <ThumbsFeedback context="reading feedback" session={session} submissionId={submissionId} backendLive={backendLive} />
     </div>
@@ -2799,8 +2799,6 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
     else if (backendLive) requestNewWritingPrompt(true);
   }
 
-  const tierIcon = TIER_META[tier].icon;
-
   return (
     <div className="mx-auto max-w-6xl px-4 sm:px-6 py-8">
       {backendLive && children_ && children_.length > 1 && (
@@ -2909,12 +2907,6 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
         </div>
 
         <div className="lg:col-span-2 flex flex-col gap-4">
-          <div className="card p-4 flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg grid place-items-center shrink-0" style={{ background: "var(--navy-tint)", color: "var(--ink)" }}>
-              {React.createElement(tierIcon, { size: 15, strokeWidth: 2.2 })}
-            </div>
-            <div className="text-[13px]" style={{ color: "var(--ink-soft)" }}><span className="font-semibold" style={{ color: "var(--ink)" }}>{TIER_META[tier].label}:</span> {TIER_META[tier].blurb}</div>
-          </div>
 
           {phase !== "done" && (
             <div className="card p-6 flex flex-col items-center justify-center text-center gap-3 min-h-[220px]" style={{ borderStyle: submitError ? "solid" : "dashed", borderColor: submitError ? "var(--bad)" : undefined }}>
@@ -3481,7 +3473,13 @@ function App({ session }){
           )}
         </div>
       </div>
-      {view === "dashboard" ? (
+      {/* Both stay mounted, toggled with display rather than a ternary that
+          would unmount whichever one isn't showing - Workspace holds an
+          in-progress or just-finished submission entirely in its own local
+          state (draft text, phase, feedback), so switching to the dashboard
+          and back used to wipe all of it back to a blank "Ready for a
+          prompt?" screen, even for a submission finished seconds earlier. */}
+      <div style={{ display: view === "dashboard" ? "block" : "none" }}>
         <Dashboard country={country} setCountry={handleCountryChange} gradeIdx={gradeIdx} setGradeIdx={handleGradeChange}
           tier={tier} interests={interests} toggleInterest={toggleInterest}
           confidenceWriting={confidenceWriting} setConfidenceWriting={handleSetConfidenceWriting}
@@ -3492,12 +3490,13 @@ function App({ session }){
           children_={children} activeChildId={activeChildId} onSwitchChild={switchChild} onAddChild={addChild} onRemoveChild={removeChild} onMakeUsable={makeLearnerUsable} activeChangeAvailableAt={activeChangeAvailableAt}
           used={used} total={total} plan={plan} session={session} setView={setView} history={history} progress={progress} peerStats={peerStats} backendLive={backendLive}
           needsOnboarding={needsOnboarding} onCompleteOnboarding={completeOnboarding} />
-      ) : (
+      </div>
+      <div style={{ display: view === "dashboard" ? "none" : "block" }}>
         <Workspace country={country} gradeIdx={gradeIdx} setGradeIdx={handleGradeChange} tier={tier} setTierOverride={setTierAndSyncGrade}
           interests={interests} confidenceWriting={confidenceWriting} confidenceReading={confidenceReading} motivation={motivation}
           used={used} total={total} onSubmit={handleSubmit} session={session} backendLive={backendLive}
           childId={activeChildId} children_={children} onSwitchChild={switchChild} onMakeUsable={makeLearnerUsable} activeChangeAvailableAt={activeChangeAvailableAt} onSeePlans={()=>setView("dashboard")} />
-      )}
+      </div>
       <footer className="mx-auto max-w-6xl px-4 sm:px-6 py-10 text-center text-xs flex flex-col items-center gap-2" style={{ color: "var(--ink-faint)" }}>
         <div>LiteracyLab AI · {backendLive ? "your account data is private to you" : "interactive prototype — all learner data shown is sample data"}.</div>
         <div className="flex items-center gap-4">

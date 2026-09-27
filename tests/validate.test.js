@@ -8,7 +8,6 @@ function baseFeedback(overrides = {}) {
   return {
     glow: "This is a solid piece of writing with a clear beginning and end for the story.",
     grow: "Try joining two short sentences together to build a more complex sentence structure.",
-    microMission: "Next time, combine two short sentences into one.",
     vocab: [
       { term: "adjective", definition: "a word that describes a noun, like happy or fast.", example: "\"Fast\" is an adjective in the sentence \"the fast dog ran.\"" },
       { term: "sentence", definition: "a group of words that expresses a complete thought.", example: "\"The dog ran fast\" is a complete sentence." },
@@ -20,6 +19,8 @@ function baseFeedback(overrides = {}) {
     // most tests below use tier: "elementary", so this default keeps them
     // passing without every one needing its own frameworkTip override.
     frameworkTip: { name: "Story Mountain", example: "Opening: a young sailor sets out. Build-up: a storm rolls in. Climax: the mast snaps. Resolution: she rows to shore. Ending: she tells the tale." },
+    overallScore: 6,
+    scoreReason: "Clear structure and a happy ending, but the sentences stay very short throughout.",
     ...overrides,
   };
 }
@@ -253,6 +254,43 @@ test("validateFeedback: a vocab example that never actually uses the term is rej
   const result = validateFeedback(feedback, { tier: "elementary", standardsList: [], targetNames: [], submittedText: null });
   assert.equal(result.ok, false);
   assert.ok(result.issues.some((i) => i.includes("does not actually use the term")));
+});
+
+test("validateFeedback: overallScore must be an integer from 1 to 10", () => {
+  const highlights = [
+    { quote: "It saw a cat", type: "glow", note: "Nice concrete detail here." },
+    { quote: "The dog ran fast.", type: "grow", note: "Needs more variety.", revision: "Suddenly, the dog ran fast." },
+  ];
+  for (const bad of [0, 11, 7.5, "8", null, undefined]) {
+    const result = validateFeedback(baseFeedback({ highlights, overallScore: bad }), {
+      tier: "elementary", standardsList: [], targetNames: [], submittedText: SUBMITTED_TEXT,
+    });
+    assert.equal(result.ok, false, `expected ${JSON.stringify(bad)} to be rejected`);
+    assert.ok(result.issues.some((i) => i.includes("overallScore")));
+  }
+  const ok = validateFeedback(baseFeedback({ highlights, overallScore: 3 }), {
+    tier: "elementary", standardsList: [], targetNames: [], submittedText: SUBMITTED_TEXT,
+  });
+  assert.equal(ok.ok, true, `unexpected issues: ${JSON.stringify(ok.issues)}`);
+});
+
+test("validateFeedback: a missing scoreReason is rejected", () => {
+  const highlights = [
+    { quote: "It saw a cat", type: "glow", note: "Nice concrete detail here." },
+    { quote: "The dog ran fast.", type: "grow", note: "Needs more variety.", revision: "Suddenly, the dog ran fast." },
+  ];
+  const result = validateFeedback(baseFeedback({ highlights, scoreReason: "" }), {
+    tier: "elementary", standardsList: [], targetNames: [], submittedText: SUBMITTED_TEXT,
+  });
+  assert.equal(result.ok, false);
+  assert.ok(result.issues.some((i) => i.includes("scoreReason")));
+});
+
+test("validateFeedback: overallScore is not required for reading (no submittedText)", () => {
+  const result = validateFeedback(baseFeedback({ overallScore: undefined, scoreReason: undefined }), {
+    tier: "elementary", standardsList: [], targetNames: [], submittedText: null,
+  });
+  assert.equal(result.ok, true, `unexpected issues: ${JSON.stringify(result.issues)}`);
 });
 
 test("validateWritingPrompt: rejects a missing or too-short prompt", () => {

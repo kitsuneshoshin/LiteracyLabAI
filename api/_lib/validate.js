@@ -177,13 +177,27 @@ function validateFrameworkTip(parsed, tier, genre, issues) {
   }
 }
 
+// Judges the whole piece, deliberately separate from - and allowed to
+// disagree with - the single glow/grow pair (see overallScoreClause in
+// prompt.js). Shown in Activity History, not blended into the mastery
+// trend line (api/_lib/progressHistory.js), which tracks a different
+// thing: per-skill glow/grow direction over time, not a holistic score.
+function validateOverallScore(parsed, issues) {
+  const score = parsed?.overallScore;
+  if (!Number.isInteger(score) || score < 1 || score > 10) {
+    issues.push("overallScore must be an integer from 1 to 10");
+  }
+  if (!checkString(parsed?.scoreReason, 15, 300)) {
+    issues.push("scoreReason is missing, too short, or too long");
+  }
+}
+
 function validateFeedback(parsed, { tier, standardsList, targetNames, submittedText, readingScore, capabilities, genre }) {
   const issues = [];
   const caps = capabilities || {};
 
   if (!checkString(parsed?.glow, 20, 600)) issues.push("glow is missing, too short, or too long");
   if (!checkString(parsed?.grow, 20, 600)) issues.push("grow is missing, too short, or too long");
-  if (!checkString(parsed?.microMission, 10, 300)) issues.push("microMission is missing, too short, or too long");
 
   if (readingScore === 0 && checkString(parsed?.glow, 1, 100000) && ZERO_SCORE_FABRICATION_PATTERN.test(parsed.glow)) {
     issues.push(`glow fabricates comprehension the student didn't demonstrate on a 0-correct attempt ("${parsed.glow}") - it must praise real effort without claiming they engaged with, noticed, or understood anything from the passage`);
@@ -268,6 +282,7 @@ function validateFeedback(parsed, { tier, standardsList, targetNames, submittedT
       });
     }
     validateFrameworkTip(parsed, tier, genre, issues);
+    validateOverallScore(parsed, issues);
   }
 
   if (caps.deepFeedback) {

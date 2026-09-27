@@ -99,6 +99,13 @@ module.exports = async function handler(req, res) {
         id: s.id, kind: s.kind, tier: s.tier, createdAt: s.created_at,
         score: s.score, totalQuestions: s.total_questions, wordCount: s.word_count,
         glowSnippet: s.feedback?.glow ? String(s.feedback.glow).slice(0, 140) : null,
+        // Writing only (see api/_lib/prompt.js's overallScoreClause) - a
+        // holistic 1-10 judged against the WHOLE piece, deliberately kept
+        // separate from the mastery trend line above (computeTimeline),
+        // which tracks per-skill glow/grow direction over time, not a
+        // single quality score. Null for reading rows and for anything
+        // submitted before this field existed.
+        overallScore: s.kind === "writing" ? (s.feedback?.overallScore ?? null) : null,
       })),
     });
   } catch (err) {
