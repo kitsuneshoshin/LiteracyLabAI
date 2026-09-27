@@ -1675,122 +1675,47 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
         </div>
       </div>
     )}
-    <div className="mx-auto max-w-6xl px-4 sm:px-6 py-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <div className="lg:col-span-2 flex flex-col gap-6">
-        {backendLive && (
-          <ChildSwitcher children_={children_} activeChildId={activeChildId} onSwitchChild={onSwitchChild} onAddChild={onAddChild} />
-        )}
-        {backendLive && (
-          <PausedLearnerNotice child={children_.find(c => c.id === activeChildId)} children_={children_}
-            activeChangeAvailableAt={activeChangeAvailableAt} onMakeUsable={onMakeUsable} />
-        )}
-        <div className="card p-6">
-          <div className="flex items-start justify-between gap-4 flex-wrap mb-5">
-            <div>
-              <h2 className="font-display font-bold text-xl" style={{ color: "var(--ink)" }}>Learner setup</h2>
-              <p className="text-sm mt-0.5" style={{ color: "var(--ink-soft)" }}>Curriculum, year group and interests personalise every prompt and feedback note.</p>
-            </div>
-            <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold" style={{ background: "var(--navy-tint)", color: "var(--ink)" }}>
-              {React.createElement(TIER_META[tier].icon, { size: 13, strokeWidth: 2.3 })}
-              {TIER_META[tier].label} · {TIER_META[tier].ageRange}
-            </span>
-          </div>
+    <div className="mx-auto max-w-6xl px-4 sm:px-6 py-8 flex flex-col gap-8">
+      {backendLive && (
+        <ChildSwitcher children_={children_} activeChildId={activeChildId} onSwitchChild={onSwitchChild} onAddChild={onAddChild} />
+      )}
+      {backendLive && (
+        <PausedLearnerNotice child={children_.find(c => c.id === activeChildId)} children_={children_}
+          activeChangeAvailableAt={activeChangeAvailableAt} onMakeUsable={onMakeUsable} />
+      )}
 
-          {backendLive && (
-            <label className="flex flex-col gap-1.5 mb-4">
-              <span className="text-xs font-semibold" style={{ color: "var(--ink-soft)" }}>Learner's name</span>
-              <div className="flex items-center gap-3">
-                <Avatar avatarId={avatarId} size={40} />
-                <input type="text" value={displayName} onChange={(e)=>setDisplayName(e.target.value)} placeholder="e.g. Maya"
-                  className="focus-ring w-full rounded-xl border px-3.5 py-2.5 text-sm font-medium"
-                  style={{ borderColor: "var(--border)", background: "var(--surface)", color: "var(--ink)" }} />
-              </div>
-            </label>
-          )}
-
-          {backendLive && (
-            <div className="flex flex-col gap-1.5 mb-6">
-              <span className="text-xs font-semibold" style={{ color: "var(--ink-soft)" }}>Choose an avatar</span>
-              <AvatarPicker value={avatarId} onChange={setAvatarId} />
-            </div>
-          )}
-
-          <div className="grid sm:grid-cols-2 gap-4 mb-6">
-            <label className="flex flex-col gap-1.5">
-              <span className="text-xs font-semibold" style={{ color: "var(--ink-soft)" }}>Country curriculum</span>
-              <div className="relative">
-                <select value={country} onChange={(e)=>setCountry(e.target.value)}
-                  className="focus-ring w-full appearance-none rounded-xl border px-3.5 py-2.5 pr-9 text-sm font-medium"
-                  style={{ borderColor: "var(--border)", background: "var(--surface)", color: "var(--ink)" }}>
-                  {COUNTRIES.map(c=> <option key={c} value={c}>{c}</option>)}
-                </select>
-                <IconChevron size={15} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2" style={{ color: "var(--ink-faint)" }} />
-              </div>
-              <span className="text-[11px]" style={{ color: "var(--ink-faint)" }}>{GRADE_DATA[country].curriculum}</span>
-            </label>
-            <label className="flex flex-col gap-1.5">
-              <span className="text-xs font-semibold" style={{ color: "var(--ink-soft)" }}>Grade / year / level</span>
-              <div className="relative">
-                <select value={gradeIdx} onChange={(e)=>setGradeIdx(Number(e.target.value))}
-                  className="focus-ring w-full appearance-none rounded-xl border px-3.5 py-2.5 pr-9 text-sm font-medium"
-                  style={{ borderColor: "var(--border)", background: "var(--surface)", color: "var(--ink)" }}>
-                  {grades.map((g,i)=> <option key={g} value={i}>{g}</option>)}
-                </select>
-                <IconChevron size={15} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2" style={{ color: "var(--ink-faint)" }} />
-              </div>
-            </label>
-          </div>
-
-          <span className="text-xs font-semibold" style={{ color: "var(--ink-soft)" }}>Interests</span>
-          <p className="text-[11px] mt-0.5 mb-2" style={{ color: "var(--ink-faint)" }}>Shown for {TIER_META[tier].label} in {country.replace(/^\S+\s/,"")} — the options change with age and region.</p>
-          <div className="flex flex-wrap gap-2 mb-5">
-            {interestsForTier(tier).map(({id,label,icon})=> (
-              <Pill key={id} active={interests.includes(id)} onClick={()=>toggleInterest(id)} icon={icon}>{labelForInterest(id, label, country)}</Pill>
-            ))}
-          </div>
-
-          <span className="text-xs font-semibold" style={{ color: "var(--ink-soft)" }}>How confident do you feel about writing?</span>
-          <div className="flex flex-wrap gap-2 mt-2 mb-4">
-            {CONFIDENCE_LEVELS.map(({id,label})=> (
-              <Pill key={id} active={confidenceWriting===id} onClick={()=>setConfidenceWriting(id)}>{label}</Pill>
-            ))}
-          </div>
-
-          <span className="text-xs font-semibold" style={{ color: "var(--ink-soft)" }}>How confident do you feel about reading?</span>
-          <div className="flex flex-wrap gap-2 mt-2 mb-5">
-            {CONFIDENCE_LEVELS.map(({id,label})=> (
-              <Pill key={id} active={confidenceReading===id} onClick={()=>setConfidenceReading(id)}>{label}</Pill>
-            ))}
-          </div>
-
-          <span className="text-xs font-semibold" style={{ color: "var(--ink-soft)" }}>What's the main goal right now?</span>
-          <div className="flex flex-wrap gap-2 mt-2">
-            {MOTIVATIONS.map(({id,label})=> (
-              <Pill key={id} active={motivation===id} onClick={()=>setMotivation(id)}>{label}</Pill>
-            ))}
-          </div>
-
-          {backendLive && children_.length > 1 && (
-            <button onClick={()=>{ if (window.confirm(`Remove ${displayName || "this learner"}? This deletes all of their submissions and progress history permanently.`)) onRemoveChild(activeChildId); }}
-              className="focus-ring mt-6 pt-4 border-t text-xs font-semibold w-full text-left" style={{ borderColor: "var(--border-soft)", color: "var(--bad)" }}>
-              Remove {displayName || "this learner"} from this account
-            </button>
-          )}
-          {backendLive && (
-            <div className={children_.length > 1 ? "mt-3 flex flex-wrap gap-4" : "mt-6 pt-4 border-t flex flex-wrap gap-4"} style={{ borderColor: "var(--border-soft)" }}>
-              <Tooltip text="Downloads a JSON file with everything this account holds: every learner's profile and their complete writing/reading history. Instant, self-service.">
-                <button onClick={handleExportData} className="focus-ring text-xs font-semibold" style={{ color: "var(--ink-soft)" }}>
-                  Export my account data
-                </button>
-              </Tooltip>
-              <Tooltip text="Permanently deletes every learner profile and all history on this account, and cancels any active subscription. Immediate and cannot be undone.">
-                <button onClick={handleDeleteAccount} className="focus-ring text-xs font-semibold" style={{ color: "var(--bad)" }}>
-                  Delete my entire account
-                </button>
-              </Tooltip>
-            </div>
+      {/* SNAPSHOT — every quick number, in one glance, before anything
+          else. Used to be a narrow sidebar column next to the first
+          card; now leads the page since it's what a returning parent
+          actually wants first, not buried below a settings form. */}
+      <div className="flex flex-col gap-3">
+        <div className="text-[11px] font-bold uppercase tracking-wide" style={{ color: "var(--ink-faint)" }}>Snapshot</div>
+        <div className="grid sm:grid-cols-3 gap-4">
+          {backendLive ? (
+            <>
+              <StatTile icon={IconTrend} label="Reading Accuracy" value={history?.avgReadingScore != null ? `${history.avgReadingScore}%` : "—"} sub={history ? `From ${history.readingSubmissions} submission${history.readingSubmissions===1?"":"s"}` : "Loading…"} accent="var(--good)"
+                tip="Average % of comprehension questions answered correctly across every graded reading exercise this learner has completed." />
+              <StatTile icon={IconPen} label="Words Written" value={history ? history.wordsWritten.toLocaleString() : "—"} sub={history ? `Across ${history.writingPieces} piece${history.writingPieces===1?"":"s"}` : "Loading…"} accent="var(--cyan-ink)"
+                tip="Total word count across every completed writing submission - reading exercises aren't counted here." />
+              <StatTile icon={IconFlame} label="Active Streak" value={history ? `${history.activeStreak} day${history.activeStreak===1?"":"s"}` : "—"} sub="Real progress, tracked from your submissions" accent="var(--gold)"
+                tip="Consecutive days with at least one writing or reading submission, ending today or yesterday. Resets to 0 the moment a day is missed - it's a motivational streak, not something that affects mastery scoring." />
+            </>
+          ) : (
+            <>
+              <StatTile icon={IconTrend} label="Overall Mastery" value="72%" sub="+6% this month" accent="var(--good)" />
+              <StatTile icon={IconPen} label="Words Written" value="8,450" sub="Across 14 pieces" accent="var(--cyan-ink)" />
+              <StatTile icon={IconFlame} label="Active Streak" value="12 days" sub="Personal best: 19 days" accent="var(--gold)" />
+            </>
           )}
         </div>
+      </div>
+
+      {/* LEARNING ACTIVITY — everything about how the learner is actually
+          doing, grouped together: target mastery, the trend line built
+          from the same glow/grow data, peer comparison, the raw activity
+          log, and the vocabulary bank. */}
+      <div className="flex flex-col gap-6">
+        <div className="text-[11px] font-bold uppercase tracking-wide" style={{ color: "var(--ink-faint)" }}>Learning activity</div>
 
         <div className="card p-6">
           <div className="flex items-center justify-between mb-1 flex-wrap gap-2">
@@ -1978,30 +1903,120 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
         <VocabularyBank vocabWords={history?.vocabWords} session={session} childId={activeChildId} backendLive={backendLive} />
       </div>
 
+      {/* ACCOUNT — identity, settings and billing. Learner setup is
+          collapsed by default once onboarding is done: it's filled in
+          once and rarely revisited, so it no longer has to compete with
+          the content above it every single visit. */}
       <div className="flex flex-col gap-6">
-        <div className="grid grid-cols-2 gap-4">
-          {backendLive ? (
-            <>
-              <StatTile icon={IconTrend} label="Reading Accuracy" value={history?.avgReadingScore != null ? `${history.avgReadingScore}%` : "—"} sub={history ? `From ${history.readingSubmissions} submission${history.readingSubmissions===1?"":"s"}` : "Loading…"} accent="var(--good)"
-                tip="Average % of comprehension questions answered correctly across every graded reading exercise this learner has completed." />
-              <StatTile icon={IconPen} label="Words Written" value={history ? history.wordsWritten.toLocaleString() : "—"} sub={history ? `Across ${history.writingPieces} piece${history.writingPieces===1?"":"s"}` : "Loading…"} accent="var(--cyan-ink)"
-                tip="Total word count across every completed writing submission - reading exercises aren't counted here." />
-              <div className="col-span-2">
-                <StatTile icon={IconFlame} label="Active Streak" value={history ? `${history.activeStreak} day${history.activeStreak===1?"":"s"}` : "—"} sub="Real progress, tracked from your submissions" accent="var(--gold)"
-                  tip="Consecutive days with at least one writing or reading submission, ending today or yesterday. Resets to 0 the moment a day is missed - it's a motivational streak, not something that affects mastery scoring." />
-              </div>
-            </>
-          ) : (
-            <>
-              <StatTile icon={IconTrend} label="Overall Mastery" value="72%" sub="+6% this month" accent="var(--good)" />
-              <StatTile icon={IconPen} label="Words Written" value="8,450" sub="Across 14 pieces" accent="var(--cyan-ink)" />
-              <div className="col-span-2">
-                <StatTile icon={IconFlame} label="Active Streak" value="12 days" sub="Personal best: 19 days" accent="var(--gold)" />
-              </div>
-            </>
-          )}
-        </div>
+        <div className="text-[11px] font-bold uppercase tracking-wide" style={{ color: "var(--ink-faint)" }}>Account</div>
 
+        <Collapsible defaultOpen={needsOnboarding} borderColor="var(--border)" iconBg="var(--navy-tint)" iconColor="var(--ink)"
+          icon={React.createElement(TIER_META[tier].icon, { size: 15, strokeWidth: 2.2 })}
+          title="Learner setup"
+          teaser={`${displayName || "Your learner"} · ${TIER_META[tier].label} · ${country}`}>
+          <div className="flex items-start justify-between gap-4 flex-wrap mb-5">
+            <p className="text-sm" style={{ color: "var(--ink-soft)" }}>Curriculum, year group and interests personalise every prompt and feedback note.</p>
+            <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold" style={{ background: "var(--navy-tint)", color: "var(--ink)" }}>
+              {React.createElement(TIER_META[tier].icon, { size: 13, strokeWidth: 2.3 })}
+              {TIER_META[tier].label} · {TIER_META[tier].ageRange}
+            </span>
+          </div>
+
+          {backendLive && (
+            <label className="flex flex-col gap-1.5 mb-4">
+              <span className="text-xs font-semibold" style={{ color: "var(--ink-soft)" }}>Learner's name</span>
+              <div className="flex items-center gap-3">
+                <Avatar avatarId={avatarId} size={40} />
+                <input type="text" value={displayName} onChange={(e)=>setDisplayName(e.target.value)} placeholder="e.g. Maya"
+                  className="focus-ring w-full rounded-xl border px-3.5 py-2.5 text-sm font-medium"
+                  style={{ borderColor: "var(--border)", background: "var(--surface)", color: "var(--ink)" }} />
+              </div>
+            </label>
+          )}
+
+          {backendLive && (
+            <div className="flex flex-col gap-1.5 mb-6">
+              <span className="text-xs font-semibold" style={{ color: "var(--ink-soft)" }}>Choose an avatar</span>
+              <AvatarPicker value={avatarId} onChange={setAvatarId} />
+            </div>
+          )}
+
+          <div className="grid sm:grid-cols-2 gap-4 mb-6">
+            <label className="flex flex-col gap-1.5">
+              <span className="text-xs font-semibold" style={{ color: "var(--ink-soft)" }}>Country curriculum</span>
+              <div className="relative">
+                <select value={country} onChange={(e)=>setCountry(e.target.value)}
+                  className="focus-ring w-full appearance-none rounded-xl border px-3.5 py-2.5 pr-9 text-sm font-medium"
+                  style={{ borderColor: "var(--border)", background: "var(--surface)", color: "var(--ink)" }}>
+                  {COUNTRIES.map(c=> <option key={c} value={c}>{c}</option>)}
+                </select>
+                <IconChevron size={15} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2" style={{ color: "var(--ink-faint)" }} />
+              </div>
+              <span className="text-[11px]" style={{ color: "var(--ink-faint)" }}>{GRADE_DATA[country].curriculum}</span>
+            </label>
+            <label className="flex flex-col gap-1.5">
+              <span className="text-xs font-semibold" style={{ color: "var(--ink-soft)" }}>Grade / year / level</span>
+              <div className="relative">
+                <select value={gradeIdx} onChange={(e)=>setGradeIdx(Number(e.target.value))}
+                  className="focus-ring w-full appearance-none rounded-xl border px-3.5 py-2.5 pr-9 text-sm font-medium"
+                  style={{ borderColor: "var(--border)", background: "var(--surface)", color: "var(--ink)" }}>
+                  {grades.map((g,i)=> <option key={g} value={i}>{g}</option>)}
+                </select>
+                <IconChevron size={15} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2" style={{ color: "var(--ink-faint)" }} />
+              </div>
+            </label>
+          </div>
+
+          <span className="text-xs font-semibold" style={{ color: "var(--ink-soft)" }}>Interests</span>
+          <p className="text-[11px] mt-0.5 mb-2" style={{ color: "var(--ink-faint)" }}>Shown for {TIER_META[tier].label} in {country.replace(/^\S+\s/,"")} — the options change with age and region.</p>
+          <div className="flex flex-wrap gap-2 mb-5">
+            {interestsForTier(tier).map(({id,label,icon})=> (
+              <Pill key={id} active={interests.includes(id)} onClick={()=>toggleInterest(id)} icon={icon}>{labelForInterest(id, label, country)}</Pill>
+            ))}
+          </div>
+
+          <span className="text-xs font-semibold" style={{ color: "var(--ink-soft)" }}>How confident do you feel about writing?</span>
+          <div className="flex flex-wrap gap-2 mt-2 mb-4">
+            {CONFIDENCE_LEVELS.map(({id,label})=> (
+              <Pill key={id} active={confidenceWriting===id} onClick={()=>setConfidenceWriting(id)}>{label}</Pill>
+            ))}
+          </div>
+
+          <span className="text-xs font-semibold" style={{ color: "var(--ink-soft)" }}>How confident do you feel about reading?</span>
+          <div className="flex flex-wrap gap-2 mt-2 mb-5">
+            {CONFIDENCE_LEVELS.map(({id,label})=> (
+              <Pill key={id} active={confidenceReading===id} onClick={()=>setConfidenceReading(id)}>{label}</Pill>
+            ))}
+          </div>
+
+          <span className="text-xs font-semibold" style={{ color: "var(--ink-soft)" }}>What's the main goal right now?</span>
+          <div className="flex flex-wrap gap-2 mt-2">
+            {MOTIVATIONS.map(({id,label})=> (
+              <Pill key={id} active={motivation===id} onClick={()=>setMotivation(id)}>{label}</Pill>
+            ))}
+          </div>
+
+          {backendLive && children_.length > 1 && (
+            <button onClick={()=>{ if (window.confirm(`Remove ${displayName || "this learner"}? This deletes all of their submissions and progress history permanently.`)) onRemoveChild(activeChildId); }}
+              className="focus-ring mt-6 pt-4 border-t text-xs font-semibold w-full text-left" style={{ borderColor: "var(--border-soft)", color: "var(--bad)" }}>
+              Remove {displayName || "this learner"} from this account
+            </button>
+          )}
+          {backendLive && (
+            <div className={children_.length > 1 ? "mt-3 flex flex-wrap gap-4" : "mt-6 pt-4 border-t flex flex-wrap gap-4"} style={{ borderColor: "var(--border-soft)" }}>
+              <Tooltip text="Downloads a JSON file with everything this account holds: every learner's profile and their complete writing/reading history. Instant, self-service.">
+                <button onClick={handleExportData} className="focus-ring text-xs font-semibold" style={{ color: "var(--ink-soft)" }}>
+                  Export my account data
+                </button>
+              </Tooltip>
+              <Tooltip text="Permanently deletes every learner profile and all history on this account, and cancels any active subscription. Immediate and cannot be undone.">
+                <button onClick={handleDeleteAccount} className="focus-ring text-xs font-semibold" style={{ color: "var(--bad)" }}>
+                  Delete my entire account
+                </button>
+              </Tooltip>
+            </div>
+          )}
+        </Collapsible>
         <div className="card p-6 relative overflow-hidden" style={{ background: "linear-gradient(160deg, var(--ink), #3E2028)" }}>
           <div className="absolute -right-6 -top-6 w-28 h-28 rounded-full" style={{ background: "radial-gradient(circle, var(--gold) 0%, transparent 70%)", opacity: .35 }} />
           <div className="relative">
