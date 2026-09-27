@@ -2,4 +2,30 @@ User-agent: *
 Allow: /
 Disallow: /app.html
 
+# Explicitly welcomed rather than merely un-blocked: these are the crawlers
+# behind AI answer engines and chat assistants (ChatGPT, Perplexity, Google's
+# AI Overviews, Claude) that a parent might actually ask "is there an AI tool
+# that grades my kid's writing against their school curriculum?" - being
+# citable there matters as much as ranking in classic search results now.
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
 Sitemap: https://www.literacylabai.com/sitemap.xml
