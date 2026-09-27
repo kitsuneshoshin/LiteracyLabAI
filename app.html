@@ -2226,6 +2226,8 @@ function FeedbackPanel({ tier, gradeLabel, country, interest, confidence, motiva
 
       <ExamTechniquePanel feedback={feedback} />
 
+      <FrameworkTipPanel feedback={feedback} />
+
       <div className="card p-5 sm:p-6">
         <div className="flex items-center gap-2 mb-3">
           <div className="w-8 h-8 rounded-full grid place-items-center" style={{ background: "var(--cyan-tint)", color: "var(--cyan-ink)" }}>
@@ -2334,6 +2336,34 @@ function ExamTechniquePanel({ feedback }){
   );
 }
 
+// Teaches the named writing framework for this student's tier (see
+// api/_lib/writingFrameworks.js) with a fresh worked example, rather than
+// just leaving "PEEL" as an unexplained mastery-table label. Rendered only
+// when the server actually returned one — never set for reading feedback.
+function FrameworkTipPanel({ feedback }){
+  const tip = feedback?.frameworkTip;
+  if (!tip?.name) return null;
+  return (
+    <div className="card p-5 sm:p-6" style={{ borderColor: "var(--navy)", borderWidth: 1.5 }}>
+      <div className="flex items-center gap-2 mb-1">
+        <div className="w-8 h-8 rounded-full grid place-items-center" style={{ background: "var(--navy-tint)", color: "var(--ink)" }}>
+          <IconGrid size={15} strokeWidth={2.2} />
+        </div>
+        <h3 className="font-display font-bold" style={{ color: "var(--ink)" }}>Framework spotlight — {tip.name}</h3>
+      </div>
+      {tip.description && (
+        <p className="text-[13px] mb-3" style={{ color: "var(--ink-faint)" }}>{tip.description}</p>
+      )}
+      {tip.example && (
+        <div className="rounded-xl p-3.5 text-[13.5px] leading-relaxed font-read" style={{ background: "var(--surface-2)", color: "var(--ink)" }}>
+          <span className="font-display font-bold text-[11px] block mb-1" style={{ color: "var(--ink-faint)" }}>WORKED EXAMPLE</span>
+          {tip.example}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // The Premium "second step" — rendered only when the server actually
 // generated one, same reasoning as the exam panel above.
 function GrowNextBlock({ feedback }){
@@ -2401,6 +2431,8 @@ function ReadingFeedbackPanel({ tier, country, interest, confidence, motivation,
       </div>
 
       <ExamTechniquePanel feedback={feedback} />
+
+      <FrameworkTipPanel feedback={feedback} />
 
       <div className="card p-5 sm:p-6">
         <div className="flex items-center gap-2 mb-3">

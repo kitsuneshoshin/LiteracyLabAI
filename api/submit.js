@@ -5,6 +5,7 @@ const { generateFeedbackJSON } = require("./_lib/openai");
 const { buildWritingPrompt, buildReadingPrompt, correctiveAddendum, examTechniqueSupported } = require("./_lib/prompt");
 const { standardsFor } = require("./_lib/curriculum");
 const { targetsForGrade } = require("./_lib/masteryTargets");
+const { frameworkForTier } = require("./_lib/writingFrameworks");
 const { validateFeedback, resolveTarget } = require("./_lib/validate");
 const { checkRateLimit } = require("./_lib/rateLimit");
 const { writingLimitsForGrade } = require("./_lib/writingLimits");
@@ -170,6 +171,15 @@ module.exports = async function handler(req, res) {
       } catch (genErr) {
         await releaseClaim(supabase, submissionId);
         throw genErr;
+      }
+
+      // The model only writes frameworkTip.name/example (see prompt.js) -
+      // its definition is fixed per tier, not left to the model to
+      // re-explain, so it's attached here from the single source of truth
+      // rather than trusted from validated-but-still-model-written text.
+      if (result.parsed.frameworkTip) {
+        const fw = frameworkForTier(existing.tier);
+        if (fw) result.parsed.frameworkTip.description = fw.description;
       }
 
       const wordCount = text.trim().split(/\s+/).filter(Boolean).length;

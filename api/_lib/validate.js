@@ -5,6 +5,8 @@
 // yourself occasionally (every submission's feedback is saved to
 // submissions.feedback in Supabase for exactly that purpose).
 
+const { frameworkForTier } = require("./writingFrameworks");
+
 const MAX_AVG_WORDS_PER_SENTENCE = { early: 14, elementary: 18, middle: 24, high: 32 };
 const STOPWORDS = new Set(["the","a","an","of","and","or","for","to","in","on","at","statutory","english","app","year","yr","standard","standards","grade","level","aim","aims","programme","study","content","domain"]);
 
@@ -154,6 +156,24 @@ function validateExamTechnique(parsed, targetNames, issues) {
   }
 }
 
+// The name/description are fixed per tier (writingFrameworks.js) - the
+// model can only get the NAME wrong (paraphrasing or swapping it for a
+// different framework), so that's the one thing checked exactly. "example"
+// only gets a length/distinctness check, same depth as other free-text
+// fields, since judging whether an example genuinely demonstrates a
+// framework isn't something a cheap deterministic check can do.
+function validateFrameworkTip(parsed, tier, issues) {
+  const fw = frameworkForTier(tier);
+  if (!fw) return;
+  const tip = parsed?.frameworkTip;
+  if (!tip || tip.name !== fw.name) {
+    issues.push(`frameworkTip.name must be exactly "${fw.name}" for this tier`);
+  }
+  if (!checkString(tip?.example, 20, 700)) {
+    issues.push("frameworkTip.example is missing, too short, or too long");
+  }
+}
+
 function validateFeedback(parsed, { tier, standardsList, targetNames, submittedText, readingScore, capabilities }) {
   const issues = [];
   const caps = capabilities || {};
@@ -239,6 +259,7 @@ function validateFeedback(parsed, { tier, standardsList, targetNames, submittedT
         }
       });
     }
+    validateFrameworkTip(parsed, tier, issues);
   }
 
   if (caps.deepFeedback) {

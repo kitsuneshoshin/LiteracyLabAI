@@ -16,6 +16,10 @@ function baseFeedback(overrides = {}) {
     commitOptions: ["I'll combine two sentences", "I'll add more description", "I'll check my spelling"],
     glowTarget: "",
     growTarget: "",
+    // Matches the "elementary" tier's framework (see writingFrameworks.js) -
+    // most tests below use tier: "elementary", so this default keeps them
+    // passing without every one needing its own frameworkTip override.
+    frameworkTip: { name: "Story Mountain", example: "Opening: a young sailor sets out. Build-up: a storm rolls in. Climax: the mast snaps. Resolution: she rows to shore. Ending: she tells the tale." },
     ...overrides,
   };
 }
@@ -191,6 +195,39 @@ test("regression: the same fabrication check does not fire when the score is not
 test("regression: an honest, content-free zero-score glow passes", () => {
   const glow = "You gave this passage a real go, and that's exactly the habit that builds stronger reading over time.";
   const result = validateFeedback(baseFeedback({ glow }), { tier: "middle", standardsList: [], targetNames: [], submittedText: null, readingScore: 0 });
+  assert.equal(result.ok, true, `unexpected issues: ${JSON.stringify(result.issues)}`);
+});
+
+test("validateFeedback: frameworkTip.name must exactly match this tier's named framework", () => {
+  const feedback = baseFeedback({
+    highlights: [{ quote: "It saw a cat", type: "glow", note: "Nice concrete detail here." }],
+    frameworkTip: { name: "PEEL", example: "Point: cats are great pets. Evidence: they are low-maintenance. Explain: this suits busy families. Link: that is why more people choose cats." },
+  });
+  // "PEEL" is middle's framework, not elementary's ("Story Mountain").
+  const result = validateFeedback(feedback, { tier: "elementary", standardsList: [], targetNames: [], submittedText: SUBMITTED_TEXT });
+  assert.equal(result.ok, false);
+  assert.ok(result.issues.some((i) => i.includes("frameworkTip.name must be exactly \"Story Mountain\"")));
+});
+
+test("validateFeedback: a missing frameworkTip.example is rejected", () => {
+  const feedback = baseFeedback({
+    highlights: [{ quote: "It saw a cat", type: "glow", note: "Nice concrete detail here." }],
+    frameworkTip: { name: "Story Mountain" },
+  });
+  const result = validateFeedback(feedback, { tier: "elementary", standardsList: [], targetNames: [], submittedText: SUBMITTED_TEXT });
+  assert.equal(result.ok, false);
+  assert.ok(result.issues.some((i) => i.includes("frameworkTip.example")));
+});
+
+test("validateFeedback: a correct frameworkTip for the given tier passes", () => {
+  const feedback = baseFeedback({
+    highlights: [
+      { quote: "It saw a cat", type: "glow", note: "Nice concrete detail here." },
+      { quote: "The dog ran fast.", type: "grow", note: "Needs more variety.", revision: "Suddenly, the dog ran fast." },
+    ],
+    frameworkTip: { name: "PEEL", example: "Point: cats are great pets. Evidence: they are low-maintenance. Explain: this suits busy families. Link: that is why more people choose cats." },
+  });
+  const result = validateFeedback(feedback, { tier: "middle", standardsList: [], targetNames: [], submittedText: SUBMITTED_TEXT });
   assert.equal(result.ok, true, `unexpected issues: ${JSON.stringify(result.issues)}`);
 });
 
