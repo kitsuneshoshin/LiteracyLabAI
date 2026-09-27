@@ -192,6 +192,11 @@ function validateFeedback(parsed, { tier, standardsList, targetNames, submittedT
     parsed.vocab.forEach((v, i) => {
       if (!checkString(v?.term, 1, 50)) issues.push(`vocab[${i}].term is missing or too long`);
       if (!checkString(v?.definition, 10, 240)) issues.push(`vocab[${i}].definition is missing, too short, or too long`);
+      if (!checkString(v?.example, 10, 240)) {
+        issues.push(`vocab[${i}].example is missing, too short, or too long`);
+      } else if (checkString(v?.term, 1, 100000) && !new RegExp(v.term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i").test(v.example)) {
+        issues.push(`vocab[${i}].example does not actually use the term "${v.term}"`);
+      }
     });
   }
 

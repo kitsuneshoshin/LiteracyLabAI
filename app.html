@@ -1270,6 +1270,130 @@ function LockedFeature({ title, blurb, onSeePlans }){
 // claim: shipped in the payload, absent from the product.
 const HISTORY_PAGE = 10;
 
+// Every word this learner has ever been taught (built server-side from
+// past submissions' saved feedback - see api/history.js), with a
+// "Test yourself" multiple-choice quiz built from the same list
+// (api/_lib/vocabQuiz.js). Two small internal views (browse/quiz) rather
+// than a separate page, since it's meant to be a quick side activity.
+function VocabularyBank({ vocabWords, session, childId, backendLive }){
+  const [mode, setMode] = useState("browse"); // "browse" | "quiz"
+  const [quiz, setQuiz] = useState(null);
+  const [quizError, setQuizError] = useState("");
+  const [answers, setAnswers] = useState({}); // questionIndex -> chosen option index
+  const [loading, setLoading] = useState(false);
+
+  async function startQuiz(){
+    setLoading(true);
+    setQuizError("");
+    setAnswers({});
+    try {
+      const data = await authedFetch(session, `/api/history?childId=${childId}&quiz=1&count=5`);
+      if (!data.questions || data.questions.length === 0) {
+        setQuizError(`Collect at least ${data.minRequired || 4} different words first — ${wordsLearnedLabel(data.available)} so far.`);
+        setQuiz(null);
+      } else {
+        setQuiz(data);
+      }
+      setMode("quiz");
+    } catch (err) {
+      setQuizError(err.message || "Couldn't load the quiz right now.");
+      setMode("quiz");
+    } finally {
+      setLoading(false);
+    }
+  }
+  function wordsLearnedLabel(n){
+    return n === 1 ? "1 word learned" : `${n || 0} words learned`;
+  }
+
+  if (!backendLive) return null;
+
+  return (
+    <div className="card p-6">
+      <div className="flex items-center justify-between mb-1 flex-wrap gap-2">
+        <h2 className="font-display font-bold text-xl" style={{ color: "var(--ink)" }}>Vocabulary bank</h2>
+        {vocabWords && <span className="text-[11px]" style={{ color: "var(--ink-faint)" }}>{vocabWords.length} word{vocabWords.length === 1 ? "" : "s"} learned</span>}
+      </div>
+      <p className="text-xs mb-3" style={{ color: "var(--ink-faint)" }}>
+        Every vocabulary upgrade from past feedback, in one place.
+      </p>
+
+      {mode === "browse" ? (
+        <>
+          {!vocabWords
+            ? <div className="text-sm py-6 text-center" style={{ color: "var(--ink-faint)" }}>Loading…</div>
+            : vocabWords.length === 0
+            ? <div className="text-sm py-6 text-center" style={{ color: "var(--ink-faint)" }}>No vocabulary yet — it'll appear here after the first submission.</div>
+            : <div className="max-h-72 overflow-y-auto pr-1"><VocabList items={vocabWords.map(v=>[v.term, v.definition, v.example])} /></div>}
+          <button onClick={startQuiz} disabled={loading || !vocabWords || vocabWords.length === 0}
+            className="focus-ring mt-4 w-full rounded-full py-2.5 text-sm font-bold disabled:opacity-40 disabled:cursor-not-allowed"
+            style={{ background: "var(--cyan)", color: "white" }}>
+            {loading ? "Loading…" : "Test yourself"}
+          </button>
+        </>
+      ) : (
+        <VocabQuiz quiz={quiz} error={quizError} answers={answers} setAnswers={setAnswers}
+          onRetry={startQuiz} onBack={()=>setMode("browse")} />
+      )}
+    </div>
+  );
+}
+
+function VocabQuiz({ quiz, error, answers, setAnswers, onRetry, onBack }){
+  if (error) {
+    return (
+      <div>
+        <p className="text-sm py-4 text-center" style={{ color: "var(--ink-faint)" }}>{error}</p>
+        <button onClick={onBack} className="focus-ring w-full rounded-full py-2.5 text-sm font-bold" style={{ background: "var(--surface-2)", color: "var(--ink)" }}>Back</button>
+      </div>
+    );
+  }
+  if (!quiz) return null;
+  const answeredCount = Object.keys(answers).length;
+  const correctCount = quiz.questions.filter((q, i) => answers[i] === q.correctIndex).length;
+  const allAnswered = answeredCount === quiz.questions.length;
+
+  return (
+    <div className="flex flex-col gap-4">
+      {quiz.questions.map((q, qi) => {
+        const chosen = answers[qi];
+        const isAnswered = chosen != null;
+        return (
+          <div key={qi} className="rounded-xl p-3.5" style={{ background: "var(--surface-2)" }}>
+            <div className="font-display font-bold text-sm mb-2" style={{ color: "var(--ink)" }}>Which definition fits "{q.term}"?</div>
+            <div className="flex flex-col gap-1.5">
+              {q.options.map((opt, oi) => {
+                const isCorrect = oi === q.correctIndex;
+                const isChosen = oi === chosen;
+                let style = { borderColor: "var(--border)", color: "var(--ink)" };
+                if (isAnswered && isCorrect) style = { borderColor: "var(--good)", background: "var(--good-tint)", color: "var(--ink)" };
+                else if (isAnswered && isChosen) style = { borderColor: "var(--bad)", background: "var(--bad-tint)", color: "var(--ink)" };
+                return (
+                  <button key={oi} disabled={isAnswered}
+                    onClick={()=>setAnswers(a=>({ ...a, [qi]: oi }))}
+                    className="focus-ring text-left rounded-lg border px-3 py-2 text-[13px] disabled:cursor-default"
+                    style={style}>
+                    {opt}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })}
+      {allAnswered && (
+        <div className="rounded-xl p-3.5 text-center" style={{ background: "var(--cyan-tint)" }}>
+          <span className="font-display font-bold" style={{ color: "var(--cyan-ink)" }}>{correctCount} of {quiz.questions.length} correct</span>
+        </div>
+      )}
+      <div className="flex gap-2">
+        <button onClick={onBack} className="focus-ring flex-1 rounded-full py-2.5 text-sm font-bold" style={{ background: "var(--surface-2)", color: "var(--ink)" }}>Back to word list</button>
+        {allAnswered && <button onClick={onRetry} className="focus-ring flex-1 rounded-full py-2.5 text-sm font-bold" style={{ background: "var(--cyan)", color: "white" }}>New quiz</button>}
+      </div>
+    </div>
+  );
+}
+
 function ActivityHistory({ recent, historyLimit, displayName }){
   const [expanded, setExpanded] = useState(false);
   const rows = recent || [];
@@ -1848,6 +1972,8 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
               : <ActivityHistory recent={history.recent} historyLimit={history.historyLimit} displayName={displayName} />}
           </div>
         )}
+
+        <VocabularyBank vocabWords={history?.vocabWords} session={session} childId={activeChildId} backendLive={backendLive} />
       </div>
 
       <div className="flex flex-col gap-6">
@@ -2166,7 +2292,7 @@ function FeedbackPanel({ tier, gradeLabel, country, interest, confidence, motiva
   const glow = feedback?.glow || `${opener}${PRAISE[tier](gradeLabel, curriculum)}`;
   const grow = feedback?.grow || growthTipFor(tier, interest, motivation, country, confidence);
   const vocabList = feedback?.vocab
-    ? feedback.vocab.map(v=>[v.term, v.definition])
+    ? feedback.vocab.map(v=>[v.term, v.definition, v.example])
     : vocabFor(interest, tier, country);
   const microMission = feedback?.microMission || microMissionFor(tier, interest, country);
   const commitOptions = feedback?.commitOptions || WRITING_COMMIT_OPTIONS[tier];
@@ -2235,19 +2361,7 @@ function FeedbackPanel({ tier, gradeLabel, country, interest, confidence, motiva
           </div>
           <h3 className="font-display font-bold" style={{ color: "var(--ink)" }}>Vocabulary Upgrades — {interestLabel} edition</h3>
         </div>
-        <div className="flex flex-wrap gap-2.5">
-          {vocabList.map(([term,def])=> (
-            <div key={term} tabIndex={0}
-              className="group relative rounded-full pl-3.5 pr-4 py-2 cursor-default focus-ring"
-              style={{ background: "var(--cyan-tint)" }}>
-              <span className="font-display font-bold text-sm" style={{ color: "var(--cyan-ink)" }}>{term}</span>
-              <div className="pointer-events-none absolute left-1/2 bottom-full mb-2 w-56 -translate-x-1/2 rounded-xl p-3 text-[12.5px] leading-snug opacity-0 scale-95 origin-bottom transition-all duration-150 group-hover:opacity-100 group-hover:scale-100 group-focus:opacity-100 group-focus:scale-100 z-10"
-                style={{ background: "var(--ink)", color: "white", boxShadow: "0 10px 30px -12px hsl(var(--shadow) / 0.4)" }}>
-                {def}
-              </div>
-            </div>
-          ))}
-        </div>
+        <VocabList items={vocabList} />
       </div>
 
       <div className="card p-5 sm:p-6 flex items-start gap-3" style={{ background: "linear-gradient(135deg, var(--ink), #3E2028)" }}>
@@ -2336,6 +2450,25 @@ function ExamTechniquePanel({ feedback }){
   );
 }
 
+// Definition + a worked example shown inline under each term, not hidden
+// behind a hover tooltip - a parent reading on a phone can't hover, and a
+// child on a touch device had to tap-and-hold to even see the definition.
+function VocabList({ items }){
+  return (
+    <div className="flex flex-col gap-2.5">
+      {items.map(([term, def, example])=> (
+        <div key={term} className="rounded-xl p-3.5" style={{ background: "var(--cyan-tint)" }}>
+          <span className="font-display font-bold text-sm" style={{ color: "var(--cyan-ink)" }}>{term}</span>
+          <p className="text-[13px] leading-snug mt-1" style={{ color: "var(--ink)" }}>{def}</p>
+          {example && (
+            <p className="text-[13px] leading-snug mt-1.5 italic" style={{ color: "var(--ink-soft)" }}>“{example}”</p>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 // Teaches the named writing framework for this student's tier (see
 // api/_lib/writingFrameworks.js) with a fresh worked example, rather than
 // just leaving "PEEL" as an unexplained mastery-table label. Rendered only
@@ -2385,7 +2518,7 @@ function ReadingFeedbackPanel({ tier, country, interest, confidence, motivation,
   const glow = feedback?.glow || `${opener}${readingGlows(tier, score, totalQ, curriculum)}`;
   const grow = feedback?.grow || readingGrows(tier, score, totalQ, interest, country, motivation, confidence);
   const vocabList = feedback?.vocab
-    ? feedback.vocab.map(v=>[v.term, v.definition])
+    ? feedback.vocab.map(v=>[v.term, v.definition, v.example])
     : vocabFor(interest, tier, country);
   const commitOptions = feedback?.commitOptions || READING_COMMIT_OPTIONS[tier];
 
@@ -2441,19 +2574,7 @@ function ReadingFeedbackPanel({ tier, country, interest, confidence, motivation,
           </div>
           <h3 className="font-display font-bold" style={{ color: "var(--ink)" }}>Vocabulary Upgrades — {interestLabel} edition</h3>
         </div>
-        <div className="flex flex-wrap gap-2.5">
-          {vocabList.map(([term,def])=> (
-            <div key={term} tabIndex={0}
-              className="group relative rounded-full pl-3.5 pr-4 py-2 cursor-default focus-ring"
-              style={{ background: "var(--cyan-tint)" }}>
-              <span className="font-display font-bold text-sm" style={{ color: "var(--cyan-ink)" }}>{term}</span>
-              <div className="pointer-events-none absolute left-1/2 bottom-full mb-2 w-56 -translate-x-1/2 rounded-xl p-3 text-[12.5px] leading-snug opacity-0 scale-95 origin-bottom transition-all duration-150 group-hover:opacity-100 group-hover:scale-100 group-focus:opacity-100 group-focus:scale-100 z-10"
-                style={{ background: "var(--ink)", color: "white", boxShadow: "0 10px 30px -12px hsl(var(--shadow) / 0.4)" }}>
-                {def}
-              </div>
-            </div>
-          ))}
-        </div>
+        <VocabList items={vocabList} />
       </div>
 
       <ThumbsFeedback context="reading feedback" session={session} submissionId={submissionId} backendLive={backendLive} />

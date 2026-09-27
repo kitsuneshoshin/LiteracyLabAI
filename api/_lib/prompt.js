@@ -138,8 +138,8 @@ Student text fragment: "...the dark forest was really scary and the trees looked
   "glow": "You built real tension with \\"the dark forest was really scary.\\" That's exactly the kind of description Year 4 fronted-adverbial work is aiming for.",
   "grow": "Try opening that sentence with a fronted adverbial instead: \\"Without warning, the dark forest grew scary.\\" Think of it like a rocket's countdown. The delay before the reveal makes the moment land harder. That's the kind of detail that makes a story fun to reread.",
   "vocab": [
-    { "term": "ominous", "definition": "giving the feeling that something bad is about to happen, like storm clouds before a launch" },
-    { "term": "murmur", "definition": "a soft, low sound, like mission control talking quietly in the background" }
+    { "term": "ominous", "definition": "giving the feeling that something bad is about to happen, like storm clouds before a launch", "example": "The ominous rumble of the engines meant launch was minutes away." },
+    { "term": "murmur", "definition": "a soft, low sound, like mission control talking quietly in the background", "example": "A murmur ran through mission control as the countdown began." }
   ],
   "microMission": "In your next story, start one sentence with a fronted adverbial before you reveal something scary or exciting.",
   "commitOptions": ["Start a sentence with a fronted adverbial", "Reread my scary bit out loud", "Use one of today's new words"],
@@ -161,7 +161,7 @@ function successCriteria(tier, { includeFramework } = {}) {
 2. The glow's curriculum reference is either the exact standard you were given, or (if none was given) a general curriculum phrase — never an invented code.
 3. The grow names exactly ONE step, uses the student's stated interest as a real, concrete analogy (not just name-dropped), and ends with the motivation-appropriate line.
 4. Count the words per sentence across your glow and grow COMBINED, and average it — it must be UNDER ${cap} words per sentence for this age tier. Short, plain sentences. This is checked mechanically, so if a sentence is running long, split it into two rather than adding a comma clause.
-5. Both vocab definitions are one plain sentence each, framed through the student's interest where natural.
+5. Both vocab definitions are one plain sentence each, framed through the student's interest where natural, and each has an "example" sentence that actually uses the term correctly (not just repeats the definition).
 6. glowTarget and growTarget are copied EXACTLY, character-for-character, from the provided list of skill area names — not paraphrased, shortened, or invented.
 7. Every highlight's "quote" is an exact, verbatim substring you can point to in the submitted text above — not a cleaned-up or paraphrased version of it.
 8. Every "grow" highlight has a "revision" that is an actual rewrite of its quote (different wording, applying the fix) — never the same text repeated, and never just advice about the quote instead of a rewrite of it.${(tier === "middle" || tier === "high") ? '\n9. Every "revision" reads as a natural continuation of this student\'s own formal, third-person essay — pure academic argument, with NO interest-based analogy dropped into the revision text itself in any phrasing ("like how I...", "similar to how...", "just like...", etc). That framing belongs only in the "grow" field.' : ""}${fw ? `\n10. frameworkTip.name is EXACTLY "${fw.name}", copied verbatim, and frameworkTip.example is a fresh mini-demonstration (not a rewrite of the student's own submission) with each named part of the framework clearly labelled.` : ""}`;
@@ -202,8 +202,8 @@ Respond with ONLY a JSON object (no markdown fences, no commentary) with exactly
   "glow": "1-2 sentences of specific, genuine praise tied to something the student actually did in this text and to the curriculum standard noted above.",
   "grow": "1-2 sentences naming ONE specific, actionable next step scaled to this student's zone of proximal development — not a laundry list. Weave in an analogy drawn from their stated interest (${interest}) to make the concept concrete. End with the motivation-appropriate closing line.",
   "vocab": [
-    { "term": "a single word or short phrase", "definition": "a one-sentence, age-appropriate definition, framed using their interest where natural" },
-    { "term": "a second word or short phrase", "definition": "a one-sentence, age-appropriate definition, framed using their interest where natural" }
+    { "term": "a single word or short phrase", "definition": "a one-sentence, age-appropriate definition, framed using their interest where natural", "example": "a fresh sentence using the term correctly, built around their stated interest (${interest})" },
+    { "term": "a second word or short phrase", "definition": "a one-sentence, age-appropriate definition, framed using their interest where natural", "example": "a fresh sentence using the term correctly, built around their stated interest (${interest})" }
   ],
   "microMission": "One concrete, specific instruction for their NEXT submission that directly follows from the grow above.",
   "commitOptions": ["3 short first-person action phrases (5-8 words each) the student could tap to commit to trying next time, each directly derived from the grow above — not generic"],
@@ -276,8 +276,8 @@ Respond with ONLY a JSON object (no markdown fences, no commentary) with exactly
   "glow": "1-2 sentences of specific praise. If they got questions right, name which comprehension skill they clearly demonstrated (e.g. inference, retrieval) and tie it to the curriculum standard noted above.${zeroScoreClause(score)}",
   "grow": "1-2 sentences on ONE specific, actionable next step. If they missed a question, point them back to the exact idea in the passage they should re-examine, without just giving away the answer outright. Weave in an analogy from their stated interest (${interest}). End with the motivation-appropriate closing line.",
   "vocab": [
-    { "term": "a word or phrase from the passage worth upgrading", "definition": "a one-sentence, age-appropriate definition, framed using their interest where natural" },
-    { "term": "a second word or phrase from the passage", "definition": "a one-sentence, age-appropriate definition, framed using their interest where natural" }
+    { "term": "a word or phrase from the passage worth upgrading", "definition": "a one-sentence, age-appropriate definition, framed using their interest where natural", "example": "a fresh sentence using the term correctly, built around their stated interest (${interest})" },
+    { "term": "a second word or phrase from the passage", "definition": "a one-sentence, age-appropriate definition, framed using their interest where natural", "example": "a fresh sentence using the term correctly, built around their stated interest (${interest})" }
   ],
   "microMission": "One concrete instruction for their next reading passage that follows from the grow above.",
   "commitOptions": ["3 short first-person action phrases (5-8 words each) the student could tap to commit to trying next time, derived from the grow above"],

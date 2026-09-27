@@ -2,6 +2,7 @@ const { getSupabaseAdmin } = require("./_lib/supabaseAdmin");
 const { requireUser, sendError } = require("./_lib/auth");
 const { computeTimeline, computeStreak } = require("./_lib/progressHistory");
 const { getMonthlyUsage } = require("./_lib/usage");
+const { dedupeByTerm, buildQuiz } = require("./_lib/vocabQuiz");
 
 // Real progress data for the dashboard — replaces the hardcoded "12 days" /
 // "8,450 words" mock stats with numbers actually derived from submissions.
@@ -14,7 +15,7 @@ module.exports = async function handler(req, res) {
     }
     const user = await requireUser(req);
     const supabase = getSupabaseAdmin();
-    const { childId } = req.query;
+    const { childId, quiz, count } = req.query;
     if (!childId) return res.status(400).json({ error: "childId is required." });
 
     // The headline stats (streak, words, average score) stay on every plan -
@@ -55,7 +56,31 @@ module.exports = async function handler(req, res) {
       ? Math.round((readingSubs.reduce((sum, s) => sum + s.score / s.total_questions, 0) / readingSubs.length) * 100)
       : null;
 
+    // Every vocab word ever taught to this learner - already sitting in
+    // each submission's saved feedback (see api/_lib/prompt.js's "vocab"
+    // field), so no separate table or write path is needed, just a scan
+    // across what's already fetched above. Deduped newest-first so a term
+    // retaught across several submissions only shows once, with its most
+    // recent definition/example. Available on every plan, unlike the
+    // history list above - it's a teaching feature, not a paywalled one, so
+    // it's built from the FULL submissions fetch, not the plan-limited
+    // "recent" slice.
+    const vocabWords = dedupeByTerm(
+      submissions.flatMap((s) => Array.isArray(s.feedback?.vocab)
+        ? s.feedback.vocab.filter((v) => v?.term && v?.definition).map((v) => ({ term: v.term, definition: v.definition, example: v.example, createdAt: s.created_at }))
+        : [])
+    );
+
+    // A separate response shape (not merged into the payload below) so the
+    // quiz screen's fetch stays a single small round-trip rather than
+    // pulling the whole history payload just to throw most of it away.
+    if (quiz) {
+      const n = Math.min(10, Math.max(1, parseInt(count, 10) || 5));
+      return res.status(200).json(buildQuiz(vocabWords, n));
+    }
+
     return res.status(200).json({
+      vocabWords,
       totalSubmissions: submissions.length,
       wordsWritten,
       writingPieces,

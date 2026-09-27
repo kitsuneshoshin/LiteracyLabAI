@@ -10,8 +10,8 @@ function baseFeedback(overrides = {}) {
     grow: "Try joining two short sentences together to build a more complex sentence structure.",
     microMission: "Next time, combine two short sentences into one.",
     vocab: [
-      { term: "adjective", definition: "a word that describes a noun, like happy or fast." },
-      { term: "sentence", definition: "a group of words that expresses a complete thought." },
+      { term: "adjective", definition: "a word that describes a noun, like happy or fast.", example: "\"Fast\" is an adjective in the sentence \"the fast dog ran.\"" },
+      { term: "sentence", definition: "a group of words that expresses a complete thought.", example: "\"The dog ran fast\" is a complete sentence." },
     ],
     commitOptions: ["I'll combine two sentences", "I'll add more description", "I'll check my spelling"],
     glowTarget: "",
@@ -229,6 +229,30 @@ test("validateFeedback: a correct frameworkTip for the given tier passes", () =>
   });
   const result = validateFeedback(feedback, { tier: "middle", standardsList: [], targetNames: [], submittedText: SUBMITTED_TEXT });
   assert.equal(result.ok, true, `unexpected issues: ${JSON.stringify(result.issues)}`);
+});
+
+test("validateFeedback: a missing vocab example is rejected", () => {
+  const feedback = baseFeedback({
+    vocab: [
+      { term: "adjective", definition: "a word that describes a noun, like happy or fast." },
+      { term: "sentence", definition: "a group of words that expresses a complete thought.", example: "\"The dog ran fast\" is a complete sentence." },
+    ],
+  });
+  const result = validateFeedback(feedback, { tier: "elementary", standardsList: [], targetNames: [], submittedText: null });
+  assert.equal(result.ok, false);
+  assert.ok(result.issues.some((i) => i.includes("vocab[0].example")));
+});
+
+test("validateFeedback: a vocab example that never actually uses the term is rejected", () => {
+  const feedback = baseFeedback({
+    vocab: [
+      { term: "adjective", definition: "a word that describes a noun, like happy or fast.", example: "The dog ran across the yard." },
+      { term: "sentence", definition: "a group of words that expresses a complete thought.", example: "\"The dog ran fast\" is a complete sentence." },
+    ],
+  });
+  const result = validateFeedback(feedback, { tier: "elementary", standardsList: [], targetNames: [], submittedText: null });
+  assert.equal(result.ok, false);
+  assert.ok(result.issues.some((i) => i.includes("does not actually use the term")));
 });
 
 test("validateWritingPrompt: rejects a missing or too-short prompt", () => {
