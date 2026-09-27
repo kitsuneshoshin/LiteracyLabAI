@@ -5,7 +5,7 @@ const { generateFeedbackJSON } = require("./_lib/openai");
 const { buildWritingPrompt, buildReadingPrompt, correctiveAddendum, examTechniqueSupported } = require("./_lib/prompt");
 const { standardsFor } = require("./_lib/curriculum");
 const { targetsForGrade } = require("./_lib/masteryTargets");
-const { frameworkForTier } = require("./_lib/writingFrameworks");
+const { frameworkForGenre, resolveGenre } = require("./_lib/writingFrameworks");
 const { validateFeedback, resolveTarget } = require("./_lib/validate");
 const { checkRateLimit } = require("./_lib/rateLimit");
 const { writingLimitsForGrade } = require("./_lib/writingLimits");
@@ -21,7 +21,7 @@ const { writingLimitsForGrade } = require("./_lib/writingLimits");
 // child an error instead of feedback.
 const MAX_ATTEMPTS = 3;
 
-async function generateAndValidate(prompt, tier, country, gradeLabel, submittedText, readingScore, capabilities) {
+async function generateAndValidate(prompt, tier, country, gradeLabel, submittedText, readingScore, capabilities, genre) {
   const standardsList = standardsFor(country, tier, gradeLabel);
   const targetNames = targetsForGrade(country, gradeLabel, tier).targets.map((t) => t.name);
   let nextPrompt = prompt;
@@ -29,7 +29,7 @@ async function generateAndValidate(prompt, tier, country, gradeLabel, submittedT
 
   for (let i = 1; i <= MAX_ATTEMPTS; i++) {
     const attempt = await generateFeedbackJSON(nextPrompt);
-    const check = validateFeedback(attempt.parsed, { tier, standardsList, targetNames, submittedText, readingScore, capabilities });
+    const check = validateFeedback(attempt.parsed, { tier, standardsList, targetNames, submittedText, readingScore, capabilities, genre });
     if (check.ok) {
       // Snap glowTarget/growTarget to the exact canonical string so
       // api/progress.js's exact-key Map lookup actually finds them.
@@ -159,26 +159,32 @@ module.exports = async function handler(req, res) {
       // so the plan's grant is narrowed by tier here, once, and the same
       // resolved value drives both the prompt and the validator.
       const caps = { ...planCaps, examTechnique: planCaps.examTechnique && examTechniqueSupported(existing.tier) };
+      // The genre this specific piece was actually written in (see
+      // buildWritingPromptGenerator's "genre" field), not just an assumption
+      // from the tier - drives which named framework gets taught below.
+      // Falls back to the tier default inside resolveGenre() for a prompt
+      // generated before this field existed.
+      const genre = generated.genre;
       let result;
       try {
         const llmPrompt = buildWritingPrompt({
           tier: existing.tier, country: existing.country, gradeLabel: existing.grade_label, interest: existing.interest,
           confidenceWriting: body.confidenceWriting, motivation: body.motivation,
           prompt: generated.prompt, text, previousCommitment, capabilities: caps, targets,
-          targetNames: targets.map((t) => t.name),
+          targetNames: targets.map((t) => t.name), genre,
         });
-        result = await generateAndValidate(llmPrompt, existing.tier, existing.country, existing.grade_label, text, undefined, caps);
+        result = await generateAndValidate(llmPrompt, existing.tier, existing.country, existing.grade_label, text, undefined, caps, genre);
       } catch (genErr) {
         await releaseClaim(supabase, submissionId);
         throw genErr;
       }
 
       // The model only writes frameworkTip.name/example (see prompt.js) -
-      // its definition is fixed per tier, not left to the model to
+      // its definition is fixed per genre, not left to the model to
       // re-explain, so it's attached here from the single source of truth
       // rather than trusted from validated-but-still-model-written text.
       if (result.parsed.frameworkTip) {
-        const fw = frameworkForTier(existing.tier);
+        const fw = frameworkForGenre(resolveGenre(genre, existing.tier));
         if (fw) result.parsed.frameworkTip.description = fw.description;
       }
 

@@ -1,6 +1,6 @@
 const { curriculumLabel, standardsFor } = require("./curriculum");
 const { MAX_AVG_WORDS_PER_SENTENCE } = require("./validate");
-const { frameworkForTier } = require("./writingFrameworks");
+const { frameworkForGenre, resolveGenre, DEFAULT_GENRE_BY_TIER, VALID_GENRES } = require("./writingFrameworks");
 
 const TIER_LABEL = { early: "Early Years (ages 5-7)", elementary: "Elementary (ages 8-10)", middle: "Middle School (ages 11-13)", high: "High School (ages 14-18)" };
 
@@ -105,18 +105,22 @@ function deepFeedbackClause(deep) {
   return `\n\nThis student's plan includes extended feedback. In addition to the single main "grow" above, return a "growNext" field: ONE further step, harder than the main grow, that they'd take AFTER mastering it. It must be a genuinely different skill or a clear escalation of the same one - never a restatement of the main grow in other words. Same length and tone rules apply.`;
 }
 
-// Names a well-known writing framework for this tier's genre (see
-// writingFrameworks.js) and asks for ONE fresh worked example of it in
-// action — the actual teaching moment, not just a label. The example is
-// deliberately NOT required to reuse the student's own text (unlike
-// "highlights"/"revision"): it needs to show the framework's named parts
-// clearly labelled, which forcing it onto this specific student's sentence
-// wouldn't always allow, so instead it's a fresh mini-demonstration built
-// around the same stated interest as the rest of the feedback.
-function frameworkClause({ tier, interest }) {
-  const fw = frameworkForTier(tier);
+// Names a well-known writing framework for the GENRE this specific piece
+// was actually written in (see writingFrameworks.js) - not the student's
+// age tier, so a persuasive piece from a younger student still gets a
+// persuasive-writing framework rather than one built for stories - and asks
+// for ONE fresh worked example of it in action, the actual teaching moment,
+// not just a label. The example is deliberately NOT required to reuse the
+// student's own text (unlike "highlights"/"revision"): it needs to show the
+// framework's named parts clearly labelled, which forcing it onto this
+// specific student's sentence wouldn't always allow, so instead it's a
+// fresh mini-demonstration built around the same stated interest as the
+// rest of the feedback.
+function frameworkClause({ tier, interest, genre }) {
+  const resolvedGenre = resolveGenre(genre, tier);
+  const fw = frameworkForGenre(resolvedGenre);
   if (!fw) return "";
-  return `\n\nFRAMEWORK SPOTLIGHT (required): Teach the student the "${fw.name}" framework, a genuinely well-known ${fw.genre} writing technique — you are given its exact name and definition, do not alter or re-explain it yourself: "${fw.description}"
+  return `\n\nFRAMEWORK SPOTLIGHT (required): Teach the student the "${fw.name}" framework, a genuinely well-known ${resolvedGenre} writing technique — you are given its exact name and definition, do not alter or re-explain it yourself: "${fw.description}"
 Write ONE fresh worked example (2-4 sentences) that demonstrates "${fw.name}" being applied, built around the student's stated interest (${interest}) as its subject matter — NOT a rewrite of the student's own submission. If the framework has named parts (like PEEL's Point/Evidence/Explain/Link), label each part inline in your example so the structure is visible, e.g. "Point: ... Evidence: ... Explain: ... Link: ...". Put this in a "frameworkTip" field with "name" set to exactly "${fw.name}" and "example" set to your worked example.`;
 }
 
@@ -153,9 +157,9 @@ Student text fragment: "...the dark forest was really scary and the trees looked
 }
 Notice: the glow quotes the student's actual words, the standard is named naturally (not bolted on), the analogy is concrete, vocab defs are one plain sentence each, glowTarget/growTarget are copied verbatim from the given list, each highlight's "quote" is an exact substring of the student's text (typos and all) rather than a paraphrase, the "grow" highlight's "revision" is that same fragment actually rewritten — not restated advice, a real rewrite the student could paste straight into their story — and frameworkTip.example is a FRESH mini-demonstration (not the student's own text) with each named part of the framework clearly labelled. Match that bar exactly for the real student below — every claim must be traceable to what they actually wrote/answered.`;
 
-function successCriteria(tier, { includeFramework } = {}) {
+function successCriteria(tier, { includeFramework, genre } = {}) {
   const cap = MAX_AVG_WORDS_PER_SENTENCE[tier] || 30;
-  const fw = includeFramework ? frameworkForTier(tier) : null;
+  const fw = includeFramework ? frameworkForGenre(resolveGenre(genre, tier)) : null;
   return `Before you respond, check your own draft against these pass/fail criteria — if any fail, revise before sending:
 1. The glow names something concrete the student actually wrote or answered (quote a short fragment) — not a generic compliment that could apply to any submission.
 2. The glow's curriculum reference is either the exact standard you were given, or (if none was given) a general curriculum phrase — never an invented code.
@@ -167,7 +171,7 @@ function successCriteria(tier, { includeFramework } = {}) {
 8. Every "grow" highlight has a "revision" that is an actual rewrite of its quote (different wording, applying the fix) — never the same text repeated, and never just advice about the quote instead of a rewrite of it.${(tier === "middle" || tier === "high") ? '\n9. Every "revision" reads as a natural continuation of this student\'s own formal, third-person essay — pure academic argument, with NO interest-based analogy dropped into the revision text itself in any phrasing ("like how I...", "similar to how...", "just like...", etc). That framing belongs only in the "grow" field.' : ""}${fw ? `\n10. frameworkTip.name is EXACTLY "${fw.name}", copied verbatim, and frameworkTip.example is a fresh mini-demonstration (not a rewrite of the student's own submission) with each named part of the framework clearly labelled.` : ""}`;
 }
 
-function buildWritingPrompt({ tier, country, gradeLabel, interest, confidenceWriting, motivation, prompt, text, targetNames, targets, previousCommitment, capabilities }) {
+function buildWritingPrompt({ tier, country, gradeLabel, interest, confidenceWriting, motivation, prompt, text, targetNames, targets, previousCommitment, capabilities, genre }) {
   const caps = capabilities || {};
   const wantsExam = caps.examTechnique && examTechniqueSupported(tier) && Array.isArray(targets) && targets.length > 0;
   return `You are the feedback engine inside LiteracyLab AI, an educational product for a ${TIER_LABEL[tier]} student in ${gradeLabel} (${country}).
@@ -188,14 +192,14 @@ ${targetsClause(targetNames)}
 ${highlightsClause(tier)}
 ${deepFeedbackClause(caps.deepFeedback)}
 ${wantsExam ? examTechniqueClause({ tier, targets, kind: "writing" }) : ""}
-${frameworkClause({ tier, interest })}
+${frameworkClause({ tier, interest, genre })}
 ${followUpClause(previousCommitment)}
 
 Read the actual submitted text closely — every point you make must be traceable to something specifically in it (quote a short fragment where useful), not a generic template response.
 
 ${WORKED_EXAMPLE}
 
-${successCriteria(tier, { includeFramework: true })}
+${successCriteria(tier, { includeFramework: true, genre })}
 
 Respond with ONLY a JSON object (no markdown fences, no commentary) with exactly this shape:
 {
@@ -352,11 +356,13 @@ Requirements:
 - The prompt must be wholly original — not copied or closely paraphrased from any existing published writing prompt, exam question, or exercise.
 - Do not reuse character names, settings, or specific plots from well-known published works.
 - Keep the prompt itself short (one or two sentences) — the student does the writing, not you.
+- Also classify what this specific prompt is actually asking the student to write, from these exact options: ${VALID_GENRES.join(", ")}. This will typically be "${DEFAULT_GENRE_BY_TIER[tier]}" for a piece written at this tier, but tag whichever one genuinely matches what you wrote — this is used later to decide which writing technique to teach the student, so it must reflect the real exercise, not just default to the usual one.
 
 Respond with ONLY a JSON object (no markdown fences, no commentary) with exactly this shape:
 {
   "title": "a short, punchy title for this writing exercise (a few words)",
-  "prompt": "the one-or-two-sentence writing prompt itself"
+  "prompt": "the one-or-two-sentence writing prompt itself",
+  "genre": "EXACTLY one of: ${VALID_GENRES.join(", ")}"
 }`;
 }
 

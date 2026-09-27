@@ -259,3 +259,37 @@ test("validateWritingPrompt: rejects a missing or too-short prompt", () => {
   const result = validateWritingPrompt({ title: "A Title", prompt: "Too short" }, { tier: "elementary" });
   assert.equal(result.ok, false);
 });
+
+test("validateWritingPrompt: requires a valid genre from the fixed list", () => {
+  const base = { title: "A Title", prompt: "A perfectly reasonable writing prompt of adequate length here." };
+  const missing = validateWritingPrompt(base, { tier: "elementary" });
+  assert.equal(missing.ok, false);
+  assert.ok(missing.issues.some((i) => i.includes("genre must be exactly one of")));
+
+  const invented = validateWritingPrompt({ ...base, genre: "spooky" }, { tier: "elementary" });
+  assert.equal(invented.ok, false);
+
+  const valid = validateWritingPrompt({ ...base, genre: "narrative" }, { tier: "elementary" });
+  assert.equal(valid.ok, true);
+});
+
+test("validateFeedback: frameworkTip is checked against the piece's OWN genre, not the tier's usual one", () => {
+  const feedback = baseFeedback({
+    highlights: [
+      { quote: "It saw a cat", type: "glow", note: "Nice concrete detail here." },
+      { quote: "The dog ran fast.", type: "grow", note: "Needs more variety.", revision: "Suddenly, the dog ran fast." },
+    ],
+    // "PEAL" is the persuasive framework, not elementary's usual "Story
+    // Mountain" - correct here because this specific piece was persuasive.
+    frameworkTip: { name: "PEAL", example: "Point: dogs make loyal pets. Evidence: they protect their families. Analysis: this loyalty is why so many households choose one. Link: that is why dogs remain a top choice." },
+  });
+  const result = validateFeedback(feedback, {
+    tier: "elementary", standardsList: [], targetNames: [], submittedText: SUBMITTED_TEXT, genre: "persuasive",
+  });
+  assert.equal(result.ok, true, `unexpected issues: ${JSON.stringify(result.issues)}`);
+
+  // The same feedback, without telling the validator this was a persuasive
+  // piece, is wrongly checked against elementary's default and rejected.
+  const withoutGenre = validateFeedback(feedback, { tier: "elementary", standardsList: [], targetNames: [], submittedText: SUBMITTED_TEXT });
+  assert.equal(withoutGenre.ok, false);
+});

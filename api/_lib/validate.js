@@ -5,7 +5,7 @@
 // yourself occasionally (every submission's feedback is saved to
 // submissions.feedback in Supabase for exactly that purpose).
 
-const { frameworkForTier } = require("./writingFrameworks");
+const { frameworkForGenre, resolveGenre, VALID_GENRES } = require("./writingFrameworks");
 
 const MAX_AVG_WORDS_PER_SENTENCE = { early: 14, elementary: 18, middle: 24, high: 32 };
 const STOPWORDS = new Set(["the","a","an","of","and","or","for","to","in","on","at","statutory","english","app","year","yr","standard","standards","grade","level","aim","aims","programme","study","content","domain"]);
@@ -156,25 +156,28 @@ function validateExamTechnique(parsed, targetNames, issues) {
   }
 }
 
-// The name/description are fixed per tier (writingFrameworks.js) - the
-// model can only get the NAME wrong (paraphrasing or swapping it for a
-// different framework), so that's the one thing checked exactly. "example"
-// only gets a length/distinctness check, same depth as other free-text
-// fields, since judging whether an example genuinely demonstrates a
-// framework isn't something a cheap deterministic check can do.
-function validateFrameworkTip(parsed, tier, issues) {
-  const fw = frameworkForTier(tier);
+// The name/description are fixed per GENRE (writingFrameworks.js), not
+// tier - the genre comes from the prompt this piece was actually written
+// for (see validateWritingPrompt's genre check above), falling back to the
+// tier's default for a submission from before "genre" existed. The model
+// can only get the NAME wrong (paraphrasing or swapping it for a different
+// framework), so that's the one thing checked exactly. "example" only gets
+// a length/distinctness check, same depth as other free-text fields, since
+// judging whether an example genuinely demonstrates a framework isn't
+// something a cheap deterministic check can do.
+function validateFrameworkTip(parsed, tier, genre, issues) {
+  const fw = frameworkForGenre(resolveGenre(genre, tier));
   if (!fw) return;
   const tip = parsed?.frameworkTip;
   if (!tip || tip.name !== fw.name) {
-    issues.push(`frameworkTip.name must be exactly "${fw.name}" for this tier`);
+    issues.push(`frameworkTip.name must be exactly "${fw.name}" for this piece's genre`);
   }
   if (!checkString(tip?.example, 20, 700)) {
     issues.push("frameworkTip.example is missing, too short, or too long");
   }
 }
 
-function validateFeedback(parsed, { tier, standardsList, targetNames, submittedText, readingScore, capabilities }) {
+function validateFeedback(parsed, { tier, standardsList, targetNames, submittedText, readingScore, capabilities, genre }) {
   const issues = [];
   const caps = capabilities || {};
 
@@ -264,7 +267,7 @@ function validateFeedback(parsed, { tier, standardsList, targetNames, submittedT
         }
       });
     }
-    validateFrameworkTip(parsed, tier, issues);
+    validateFrameworkTip(parsed, tier, genre, issues);
   }
 
   if (caps.deepFeedback) {
@@ -341,6 +344,13 @@ function validateWritingPrompt(parsed, { tier }) {
   const issues = [];
   if (!checkString(parsed?.title, 2, 100)) issues.push("title is missing or an unreasonable length");
   if (!checkString(parsed?.prompt, 10, 400)) issues.push("prompt is missing, too short, or too long");
+  // Drives which named writing framework this piece is later taught with
+  // (see writingFrameworks.js) - must be one of the real, known genres, not
+  // an invented or paraphrased one, or frameworkForGenre() would silently
+  // fail to find it and fall back to the tier default anyway.
+  if (!VALID_GENRES.includes(parsed?.genre)) {
+    issues.push(`genre must be exactly one of: ${VALID_GENRES.join(", ")}`);
+  }
   return { ok: issues.length === 0, issues };
 }
 
