@@ -1749,7 +1749,7 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
 
         <div className="card p-6">
           <div className="flex items-center justify-between mb-1 flex-wrap gap-2">
-            <h2 className="font-display font-bold text-xl" style={{ color: "var(--ink)" }}>Target mastery — {gradeLabel}</h2>
+            <h2 className="font-display font-bold text-xl" style={{ color: "var(--ink)" }}>{displayName ? `${displayName}'s target mastery` : "Target mastery"} — {gradeLabel}</h2>
             {isMapped ? (
               <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold" style={{ background: "var(--good-tint)", color: "var(--good)" }}>
                 <IconCheck size={12} strokeWidth={2.6} /> {MAPPED_BADGE[country]}
@@ -2225,28 +2225,42 @@ function AnnotatedText({ text, highlights }){
   // original sentence, the student's FULL story with every "grow" fragment
   // swapped for its revision in place, everything else untouched. Built by
   // walking the same non-overlapping spans used to highlight the original.
-  const revisedText = useMemo(()=>{
+  // Rendered as parts (not a plain string) so each actually-changed piece
+  // can be marked - otherwise the revised paragraph reads as a wall of text
+  // and a reader has to re-diff it against the original by eye to see what
+  // was even changed.
+  const revisedParts = useMemo(()=>{
     if (!spans || spans.length === 0) return null;
     if (!spans.some(f => f.type === "grow" && f.revision)) return null;
-    let out = "";
+    const out = [];
     let pos = 0;
-    spans.forEach(f => {
-      out += text.slice(pos, f.start);
-      let piece = (f.type === "grow" && f.revision) ? f.revision : text.slice(f.start, f.end);
-      // A "grow" quote sometimes excludes its own trailing punctuation
-      // while the AI's revision supplies its own closing punctuation -
-      // found live as a real "..double period.." glitch right at the
-      // splice point (e.g. "...space.. This..."). Only trims when the
-      // very next original character is ALSO sentence-ending punctuation,
-      // so a legitimate "..." ellipsis elsewhere in the story is untouched.
-      const nextChar = text[f.end];
-      if (piece && /[.!?]/.test(piece[piece.length - 1]) && nextChar && /[.!?]/.test(nextChar)) {
-        piece = piece.slice(0, -1);
+    spans.forEach((f, i) => {
+      if (f.start > pos) out.push(<span key={`rt${i}`}>{text.slice(pos, f.start)}</span>);
+      if (f.type === "grow" && f.revision) {
+        let piece = f.revision;
+        // A "grow" quote sometimes excludes its own trailing punctuation
+        // while the AI's revision supplies its own closing punctuation -
+        // found live as a real "..double period.." glitch right at the
+        // splice point (e.g. "...space.. This..."). Only trims when the
+        // very next original character is ALSO sentence-ending punctuation,
+        // so a legitimate "..." ellipsis elsewhere in the story is untouched.
+        const nextChar = text[f.end];
+        if (piece && /[.!?]/.test(piece[piece.length - 1]) && nextChar && /[.!?]/.test(nextChar)) {
+          piece = piece.slice(0, -1);
+        }
+        out.push(
+          <mark key={`rh${i}`} title="Changed from your original" className="rounded px-0.5" style={{ background: "var(--good)", color: "#fff" }}>
+            {piece}
+          </mark>
+        );
+      } else {
+        // A "glow" fragment is copied as-is (nothing to fix), so it isn't
+        // marked here - only the genuinely changed "grow" pieces are.
+        out.push(<span key={`ro${i}`}>{text.slice(f.start, f.end)}</span>);
       }
-      out += piece;
       pos = f.end;
     });
-    out += text.slice(pos);
+    if (pos < text.length) out.push(<span key="rtail">{text.slice(pos)}</span>);
     return out;
   }, [text, spans]);
 
@@ -2285,15 +2299,53 @@ function AnnotatedText({ text, highlights }){
           </div>
         ))}
       </div>
-      {revisedText && (
+      {revisedParts && (
         <div className="mt-4 pt-4 border-t rounded-b-xl -mx-5 sm:-mx-6 -mb-5 sm:-mb-6 px-5 sm:px-6 pb-5 sm:pb-6" style={{ borderColor: "var(--border-soft)", background: "var(--good-tint)" }}>
-          <div className="flex items-center gap-1.5 mb-2">
-            <IconSparkle size={13} strokeWidth={2.4} style={{ color: "var(--good)" }} />
-            <span className="text-[11px] font-bold uppercase tracking-wide" style={{ color: "var(--good)" }}>Your story, revised</span>
+          <div className="flex items-center justify-between gap-2 mb-2 flex-wrap">
+            <div className="flex items-center gap-1.5">
+              <IconSparkle size={13} strokeWidth={2.4} style={{ color: "var(--good)" }} />
+              <span className="text-[11px] font-bold uppercase tracking-wide" style={{ color: "var(--good)" }}>Your story, revised</span>
+            </div>
+            <span className="inline-flex items-center gap-1 text-[11px] font-semibold" style={{ color: "var(--ink-faint)" }}>
+              <mark className="rounded px-1" style={{ background: "var(--good)", color: "#fff" }}>highlighted</mark> = what changed
+            </span>
           </div>
-          <p className="whitespace-pre-wrap font-read text-[14.5px] leading-relaxed" style={{ color: "var(--ink)" }}>{revisedText}</p>
+          <p className="whitespace-pre-wrap font-read text-[14.5px] leading-relaxed" style={{ color: "var(--ink)" }}>{revisedParts}</p>
         </div>
       )}
+    </div>
+  );
+}
+
+// The whole-piece score (see api/_lib/prompt.js's overallScoreClause) was
+// being generated and validated server-side but never actually rendered
+// anywhere on the feedback screen itself - only buried in the Dashboard's
+// activity history list, so a parent/student reading their Key Takeaways
+// right after submitting never saw it at all. Writing-only: a reading
+// comprehension attempt already has its own natural score (X of Y
+// questions correct), shown as the percentage circle in
+// ReadingFeedbackPanel below.
+function OverallScorePanel({ feedback }){
+  const score = feedback?.overallScore;
+  if (score == null) return null;
+  const color = score >= 8 ? "var(--good)" : score >= 5 ? "var(--gold-ink)" : "var(--bad)";
+  return (
+    <div className="card p-5 sm:p-6 flex items-center gap-4" style={{ borderColor: color, borderWidth: 1.5 }}>
+      <div className="w-16 h-16 rounded-full grid place-items-center shrink-0 font-display font-extrabold" style={{ background: `color-mix(in srgb, ${color} 15%, transparent)`, color }}>
+        <div className="text-center leading-none">
+          <div className="text-xl">{score}</div>
+          <div className="text-[10px] font-semibold opacity-70 mt-0.5">/10</div>
+        </div>
+      </div>
+      <div className="min-w-0">
+        <div className="flex items-center gap-1.5 mb-1">
+          <IconAward size={14} strokeWidth={2.2} style={{ color }} />
+          <h3 className="font-display font-bold text-sm" style={{ color: "var(--ink)" }}>Overall score</h3>
+        </div>
+        {feedback?.scoreReason && (
+          <p className="text-[13.5px] leading-snug" style={{ color: "var(--ink-soft)" }}>{feedback.scoreReason}</p>
+        )}
+      </div>
     </div>
   );
 }
@@ -2313,6 +2365,8 @@ function FeedbackPanel({ tier, gradeLabel, country, interest, confidence, motiva
 
   return (
     <div className="animate-float-in flex flex-col gap-4">
+      <OverallScorePanel feedback={feedback} />
+
       {submittedText && feedback?.highlights && (
         <div className="card p-5 sm:p-6">
           <div className="flex items-center gap-2 mb-3">
@@ -2630,7 +2684,7 @@ function ReadingFeedbackPanel({ tier, country, interest, confidence, motivation,
 /* ---------------------------------------------------------------- */
 /* Student Workspace                                                  */
 /* ---------------------------------------------------------------- */
-function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, interests, confidenceWriting, confidenceReading, motivation, used, total, onSubmit, session, backendLive, childId, children_, onSwitchChild, onMakeUsable, activeChangeAvailableAt, onSeePlans }){
+function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, interests, confidenceWriting, confidenceReading, motivation, used, total, onSubmit, session, backendLive, childId, children_, onSwitchChild, onMakeUsable, activeChangeAvailableAt, onSeePlans, displayName }){
   const grades = GRADE_DATA[country].grades;
   const gradeLabel = grades[gradeIdx];
   const [exerciseType, setExerciseType] = useState("writing"); // writing | reading
@@ -2889,7 +2943,7 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
       )}
       <div className="flex items-center justify-between flex-wrap gap-3 mb-4">
         <div>
-          <h2 className="font-display font-bold text-2xl" style={{ color: "var(--ink)" }}>Student Workspace</h2>
+          <h2 className="font-display font-bold text-2xl" style={{ color: "var(--ink)" }}>{displayName ? `${displayName}'s Workspace` : "Student Workspace"}</h2>
           <p className="text-sm mt-0.5" style={{ color: "var(--ink-soft)" }}>{country} · {gradeLabel}</p>
         </div>
         <div className="flex items-center gap-1.5 rounded-full border p-1 flex-wrap" style={{ borderColor: "var(--border)", background: "var(--surface-2)" }}>
@@ -3012,7 +3066,13 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
             )}
           </div>
 
-          <div className="lg:col-span-2 flex flex-col gap-4">
+          <div className="lg:col-span-2 flex flex-col gap-4 lg:self-start">
+            {/* self-start: without it, this column stretches to match the
+                left column's grid-row height (CSS Grid's default), which is
+                barely noticeable next to the compact writing editor but
+                leaves a huge empty box below this short placeholder card
+                once a reading passage + 5 questions makes the left column
+                much taller. */}
             <div className="card p-6 flex flex-col items-center justify-center text-center gap-3 min-h-[220px]" style={{ borderStyle: submitError ? "solid" : "dashed", borderColor: submitError ? "var(--bad)" : undefined }}>
               <div className="w-11 h-11 rounded-full grid place-items-center" style={{ background: submitError ? "var(--bad-tint)" : "var(--cyan-tint)", color: submitError ? "var(--bad)" : "var(--cyan-ink)" }}>
                 {submitError ? <IconAlert size={20} strokeWidth={2} /> : <IconSparkle size={20} strokeWidth={2} />}
@@ -3657,6 +3717,7 @@ function App({ session }){
         <Workspace country={country} gradeIdx={gradeIdx} setGradeIdx={handleGradeChange} tier={tier} setTierOverride={setTierAndSyncGrade}
           interests={interests} confidenceWriting={confidenceWriting} confidenceReading={confidenceReading} motivation={motivation}
           used={used} total={total} onSubmit={handleSubmit} session={session} backendLive={backendLive}
+          displayName={activeChild?.display_name || ""}
           childId={activeChildId} children_={children} onSwitchChild={switchChild} onMakeUsable={makeLearnerUsable} activeChangeAvailableAt={activeChangeAvailableAt} onSeePlans={()=>setView("dashboard")} />
       </div>
       <footer className="mx-auto max-w-[1400px] px-4 sm:px-6 py-10 text-center text-xs flex flex-col items-center gap-2" style={{ color: "var(--ink-faint)" }}>
