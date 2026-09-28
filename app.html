@@ -2507,16 +2507,29 @@ function SpellingGrammarPanel({ feedback }){
   const items = feedback?.spellingGrammar;
   if (!Array.isArray(items)) return null;
   const clean = items.length === 0;
+  // The model's honest count of the TRUE total, which can be higher than
+  // what's actually listed (capped at 8) - without this, a piece with 15
+  // real errors would show 8 and look like that's everything, which is
+  // worse than not checking at all. Falls back to items.length for a
+  // submission graded before this field existed, so it never claims fewer
+  // errors than are visibly listed right below it.
+  const total = Number.isInteger(feedback?.spellingGrammarTotal) ? feedback.spellingGrammarTotal : items.length;
+  const moreThanShown = total > items.length;
   return (
     <Collapsible defaultOpen={!clean} borderColor="var(--border)"
       iconBg={clean ? "var(--good-tint)" : "var(--gold-tint)"} iconColor={clean ? "var(--good)" : "var(--gold-ink)"}
       icon={clean ? <IconCheck size={15} strokeWidth={2.4} /> : <IconAlert size={15} strokeWidth={2.2} />}
       title="Spelling & grammar check"
-      teaser={clean ? "No issues found — nice and clean!" : `${items.length} thing${items.length === 1 ? "" : "s"} to fix`}>
+      teaser={clean ? "No issues found — nice and clean!" : moreThanShown ? `Showing ${items.length} of ${total} things to fix` : `${items.length} thing${items.length === 1 ? "" : "s"} to fix`}>
       {clean ? (
         <p className="text-[13.5px]" style={{ color: "var(--ink-soft)" }}>No spelling or grammar issues found — nice and clean!</p>
       ) : (
         <div className="flex flex-col gap-2.5">
+          {moreThanShown && (
+            <p className="text-[12.5px]" style={{ color: "var(--ink-faint)" }}>
+              Showing the {items.length} most important of {total} things found — there's no way to edit this piece once it's submitted, so focus on these for next time.
+            </p>
+          )}
           {items.map((item, i) => (
             <div key={i} className="rounded-xl p-3.5" style={{ background: "var(--surface-2)" }}>
               <span className="inline-flex items-center rounded-full px-2 py-0.5 text-[10.5px] font-bold uppercase tracking-wide mb-1.5" style={{ background: "var(--gold-tint)", color: "var(--gold-ink)" }}>

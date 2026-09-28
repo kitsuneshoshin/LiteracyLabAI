@@ -208,6 +208,16 @@ function validateSpellingGrammar(parsed, submittedText, issues) {
   if (items.length > 8) {
     issues.push("spellingGrammar must not have more than 8 items");
   }
+  // The honest total, so a piece with 15 real errors can say "showing 8 of
+  // 15" instead of silently implying the 8 shown are all there is (see
+  // SpellingGrammarPanel in app.html). Must never read as fewer errors than
+  // are actually listed - that would be a worse lie than not counting at all.
+  const total = parsed?.spellingGrammarTotal;
+  if (!Number.isInteger(total) || total < 0) {
+    issues.push("spellingGrammarTotal must be a non-negative integer");
+  } else if (total < items.length) {
+    issues.push("spellingGrammarTotal cannot be smaller than the number of items actually listed");
+  }
   const normalizedText = normalizeForMatch(submittedText);
   items.forEach((item, i) => {
     if (!checkString(item?.quote, 1, 200)) {

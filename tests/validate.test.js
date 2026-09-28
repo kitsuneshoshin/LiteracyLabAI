@@ -21,6 +21,7 @@ function baseFeedback(overrides = {}) {
     frameworkTip: { name: "Story Mountain", example: "Opening: a young sailor sets out. Build-up: a storm rolls in. Climax: the mast snaps. Resolution: she rows to shore. Ending: she tells the tale." },
     overallScore: 6,
     scoreReason: "Clear structure and a happy ending, but the sentences stay very short throughout.",
+    spellingGrammarTotal: 0,
     spellingGrammar: [],
     ...overrides,
   };
@@ -312,6 +313,34 @@ test("validateFeedback: a real spellingGrammar entry passes when its quote is ve
   ];
   const result = validateFeedback(baseFeedback({
     highlights,
+    spellingGrammarTotal: 1,
+    spellingGrammar: [{ quote: "It saw a cat up in a tree", type: "punctuation", correction: "It saw a cat up in a tree." }],
+  }), { tier: "elementary", standardsList: [], targetNames: [], submittedText: SUBMITTED_TEXT });
+  assert.equal(result.ok, true, `unexpected issues: ${JSON.stringify(result.issues)}`);
+});
+
+test("validateFeedback: spellingGrammarTotal must be honest — it can't read as fewer errors than are actually listed", () => {
+  const highlights = [
+    { quote: "It saw a cat", type: "glow", note: "Nice concrete detail here." },
+    { quote: "The dog ran fast.", type: "grow", note: "Needs more variety.", revision: "Suddenly, the dog ran fast." },
+  ];
+  const result = validateFeedback(baseFeedback({
+    highlights,
+    spellingGrammarTotal: 0,
+    spellingGrammar: [{ quote: "It saw a cat up in a tree", type: "punctuation", correction: "It saw a cat up in a tree." }],
+  }), { tier: "elementary", standardsList: [], targetNames: [], submittedText: SUBMITTED_TEXT });
+  assert.equal(result.ok, false);
+  assert.ok(result.issues.some((i) => i.includes("cannot be smaller than the number of items")));
+});
+
+test("validateFeedback: spellingGrammarTotal is allowed to exceed the capped list (more real errors than are shown)", () => {
+  const highlights = [
+    { quote: "It saw a cat", type: "glow", note: "Nice concrete detail here." },
+    { quote: "The dog ran fast.", type: "grow", note: "Needs more variety.", revision: "Suddenly, the dog ran fast." },
+  ];
+  const result = validateFeedback(baseFeedback({
+    highlights,
+    spellingGrammarTotal: 15,
     spellingGrammar: [{ quote: "It saw a cat up in a tree", type: "punctuation", correction: "It saw a cat up in a tree." }],
   }), { tier: "elementary", standardsList: [], targetNames: [], submittedText: SUBMITTED_TEXT });
   assert.equal(result.ok, true, `unexpected issues: ${JSON.stringify(result.issues)}`);
@@ -337,6 +366,7 @@ test("validateFeedback: spellingGrammar rejects an invalid type and a no-op corr
   ];
   const badType = validateFeedback(baseFeedback({
     highlights,
+    spellingGrammarTotal: 1,
     spellingGrammar: [{ quote: "It saw a cat", type: "style", correction: "It saw a kitten" }],
   }), { tier: "elementary", standardsList: [], targetNames: [], submittedText: SUBMITTED_TEXT });
   assert.equal(badType.ok, false);
@@ -344,6 +374,7 @@ test("validateFeedback: spellingGrammar rejects an invalid type and a no-op corr
 
   const noOp = validateFeedback(baseFeedback({
     highlights,
+    spellingGrammarTotal: 1,
     spellingGrammar: [{ quote: "It saw a cat", type: "grammar", correction: "It saw a cat" }],
   }), { tier: "elementary", standardsList: [], targetNames: [], submittedText: SUBMITTED_TEXT });
   assert.equal(noOp.ok, false);
@@ -363,6 +394,7 @@ test("validateFeedback: spellingGrammar must be an array, and caps at 8 items", 
 
   const tooMany = validateFeedback(baseFeedback({
     highlights,
+    spellingGrammarTotal: 9,
     spellingGrammar: Array.from({ length: 9 }, () => ({ quote: "It saw a cat", type: "spelling", correction: "It saw a kat" })),
   }), { tier: "elementary", standardsList: [], targetNames: [], submittedText: SUBMITTED_TEXT });
   assert.equal(tooMany.ok, false);
