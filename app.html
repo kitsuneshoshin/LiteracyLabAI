@@ -2337,6 +2337,8 @@ function FeedbackPanel({ tier, gradeLabel, country, interest, confidence, motiva
         </div>
       )}
 
+      <SpellingGrammarPanel feedback={feedback} />
+
       <div className="card p-5 sm:p-6" style={{ borderColor: "var(--good)", borderWidth: 1.5 }}>
         <div className="flex items-center gap-2 mb-2">
           <div className="w-8 h-8 rounded-full grid place-items-center" style={{ background: "var(--good-tint)", color: "var(--good)" }}>
@@ -2490,6 +2492,46 @@ function VocabList({ items }){
         </div>
       ))}
     </div>
+  );
+}
+
+// A dedicated, always-shown spelling/grammar check - separate from the
+// stylistic "highlights" annotated card above, which deliberately keeps
+// typos IN its quotes rather than fixing them (that card is about voice and
+// craft, not mechanics). Renders only when the server actually returned a
+// spellingGrammar array (never set for reading, or for a submission graded
+// before this field existed) - and even then, always visible, whether that
+// array is empty (says so plainly) or full, per the parent's ask: this
+// needs to be called out, not something that quietly isn't there.
+function SpellingGrammarPanel({ feedback }){
+  const items = feedback?.spellingGrammar;
+  if (!Array.isArray(items)) return null;
+  const clean = items.length === 0;
+  return (
+    <Collapsible defaultOpen={!clean} borderColor="var(--border)"
+      iconBg={clean ? "var(--good-tint)" : "var(--gold-tint)"} iconColor={clean ? "var(--good)" : "var(--gold-ink)"}
+      icon={clean ? <IconCheck size={15} strokeWidth={2.4} /> : <IconAlert size={15} strokeWidth={2.2} />}
+      title="Spelling & grammar check"
+      teaser={clean ? "No issues found — nice and clean!" : `${items.length} thing${items.length === 1 ? "" : "s"} to fix`}>
+      {clean ? (
+        <p className="text-[13.5px]" style={{ color: "var(--ink-soft)" }}>No spelling or grammar issues found — nice and clean!</p>
+      ) : (
+        <div className="flex flex-col gap-2.5">
+          {items.map((item, i) => (
+            <div key={i} className="rounded-xl p-3.5" style={{ background: "var(--surface-2)" }}>
+              <span className="inline-flex items-center rounded-full px-2 py-0.5 text-[10.5px] font-bold uppercase tracking-wide mb-1.5" style={{ background: "var(--gold-tint)", color: "var(--gold-ink)" }}>
+                {item.type}
+              </span>
+              <div className="text-[13.5px] leading-relaxed font-read">
+                <span style={{ color: "var(--bad)", textDecoration: "line-through" }}>{item.quote}</span>
+                {" → "}
+                <span style={{ color: "var(--good)", fontWeight: 600 }}>{item.correction}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </Collapsible>
   );
 }
 

@@ -192,6 +192,40 @@ function validateOverallScore(parsed, issues) {
   }
 }
 
+const SPELLING_GRAMMAR_TYPES = new Set(["spelling", "grammar", "punctuation"]);
+
+// A dedicated, always-present spelling/grammar check (see
+// spellingGrammarClause in prompt.js) - deliberately separate from
+// "highlights", which keep typos IN their quotes on purpose. An empty array
+// is a valid, expected result for a clean piece, so this only checks the
+// SHAPE of whatever was returned, not that it's non-empty.
+function validateSpellingGrammar(parsed, submittedText, issues) {
+  const items = parsed?.spellingGrammar;
+  if (!Array.isArray(items)) {
+    issues.push("spellingGrammar must be an array (empty if the piece has no errors)");
+    return;
+  }
+  if (items.length > 8) {
+    issues.push("spellingGrammar must not have more than 8 items");
+  }
+  const normalizedText = normalizeForMatch(submittedText);
+  items.forEach((item, i) => {
+    if (!checkString(item?.quote, 1, 200)) {
+      issues.push(`spellingGrammar[${i}].quote is missing or an unreasonable length`);
+    } else if (!normalizedText.includes(normalizeForMatch(item.quote))) {
+      issues.push(`spellingGrammar[${i}].quote does not appear verbatim in the student's submitted text`);
+    }
+    if (!SPELLING_GRAMMAR_TYPES.has(item?.type)) {
+      issues.push(`spellingGrammar[${i}].type must be "spelling", "grammar", or "punctuation"`);
+    }
+    if (!checkString(item?.correction, 1, 240)) {
+      issues.push(`spellingGrammar[${i}].correction is missing or an unreasonable length`);
+    } else if (checkString(item?.quote, 1, 100000) && normalizeForMatch(item.correction) === normalizeForMatch(item.quote)) {
+      issues.push(`spellingGrammar[${i}].correction is identical to its quote — it must actually fix something`);
+    }
+  });
+}
+
 function validateFeedback(parsed, { tier, standardsList, targetNames, submittedText, readingScore, capabilities, genre }) {
   const issues = [];
   const caps = capabilities || {};
@@ -283,6 +317,7 @@ function validateFeedback(parsed, { tier, standardsList, targetNames, submittedT
     }
     validateFrameworkTip(parsed, tier, genre, issues);
     validateOverallScore(parsed, issues);
+    validateSpellingGrammar(parsed, submittedText, issues);
   }
 
   if (caps.deepFeedback) {
