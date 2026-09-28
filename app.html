@@ -2680,6 +2680,18 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
   // so a returning student doesn't see the same prompt every session.
   const cacheKey = `${childId}:${tier}`; // scoped per learner too, not just tier - a sibling's cached prompt must never leak into another child's tab
 
+  // Tracks which exercise is actually on screen right now, kept fresh every
+  // render - handleSubmit reads this AFTER its await to tell a genuinely
+  // finished grading call apart from one whose exercise the student has
+  // since left (switched tier, switched child, or flipped the Writing/
+  // Reading toggle while the AI call was still in flight). Found live via
+  // Sentry: a stale "done" landing after the student moved on left
+  // phase="done" pointed at a readingPassage that the effect above had
+  // already nulled out for the new context, crashing ReadingExercise on
+  // `bank.skill` reading off null.
+  const liveContextRef = useRef(null);
+  useEffect(()=>{ liveContextRef.current = `${exerciseType}:${cacheKey}`; });
+
   async function requestNewWritingPrompt(force){
     if (!backendLive || locked) return;
     if (!force && pendingWritingRef.current[cacheKey]) {
@@ -2794,10 +2806,17 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
     if (locked || phase === "analyzing") return;
     setSubmitError(null);
     setPhase("analyzing");
+    // Captured now, compared against liveContextRef's latest value once the
+    // AI call below resolves - see that ref's comment for why.
+    const submittedContext = `${exerciseType}:${cacheKey}`;
 
     if (!backendLive) {
       // Demo mode: no account connected, so this simulates the flow with scripted content.
+      // Same stale-context guard as the real submit path below, since a
+      // demo user can just as easily switch tier/child/exercise during
+      // this 2s delay.
       timerRef.current = setTimeout(()=>{
+        if (liveContextRef.current !== submittedContext) return;
         if (exerciseType === "reading") {
           const score = readingQuestions.reduce((n,q,i)=> n + (answers[i] === q.correct ? 1 : 0), 0);
           setReadingScore(score);
@@ -2813,13 +2832,23 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
         ? { kind: "writing", confidenceWriting, motivation, submissionId: writingPrompt.submissionId, text }
         : { kind: "reading", confidenceReading, motivation, submissionId: readingBankEntry.submissionId, answers: readingQuestions.map((_,i)=> answers[i] ?? null) };
       const result = await authedFetch(session, "/api/submit", { method: "POST", body: JSON.stringify(payload) });
-      setBackendFeedback(result.feedback);
-      setSubmissionId(result.submissionId);
       // This tier's pending generation is now used up (resubmitting it would
       // 409) - drop it from the cache so tabbing back to this tier later
       // fetches a genuinely new one instead of reusing the completed one.
+      // Uses the captured cacheKey (this submission's own), not whatever
+      // tier/child is live now, so this cleanup is correct either way.
       if (exerciseType === "writing") delete pendingWritingRef.current[cacheKey];
       else delete pendingReadingRef.current[cacheKey];
+      onSubmit(result.usage);
+      // The student has since switched tier, child, or exercise type -
+      // applying this result now would show reading/writing feedback for an
+      // exercise no longer on screen, or (for reading) crash outright since
+      // the effect that runs on that switch already nulled readingPassage
+      // for the new context. The credit was still spent (onSubmit above
+      // already reported it) - only the now-irrelevant UI update is skipped.
+      if (liveContextRef.current !== submittedContext) return;
+      setBackendFeedback(result.feedback);
+      setSubmissionId(result.submissionId);
       if (exerciseType === "reading") {
         setReadingScore(result.score);
         // The answer key was withheld when the passage was generated so it
@@ -2828,9 +2857,14 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
         setReadingPassage(prev => prev ? { ...prev, questions: result.questions } : prev);
       }
       setPhase("done");
-      onSubmit(result.usage);
     } catch (err) {
-      setSubmitError(err.payload?.error || err.message || "Something went wrong generating feedback. Please try again.");
+      // Same reasoning as the success path above - don't surface an error
+      // banner for a request the student isn't looking at anymore. setPhase
+      // is left unconditional as a harmless safety net: it's a no-op if the
+      // switch away already reset it, and self-heals it if not.
+      if (liveContextRef.current === submittedContext) {
+        setSubmitError(err.payload?.error || err.message || "Something went wrong generating feedback. Please try again.");
+      }
       setPhase("draft");
     }
   }
@@ -2898,7 +2932,7 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
               <FeedbackPanel tier={tier} gradeLabel={gradeLabel} country={country} interest={activeInterest} confidence={confidenceWriting} motivation={motivation} seed={words}
                 feedback={backendFeedback} submissionId={submissionId} session={session} backendLive={backendLive} submittedText={text} />
             </>
-          ) : (
+          ) : readingBankEntry ? (
             <>
               <ReadingExercise
                 bank={readingBankEntry} answers={answers} setAnswers={setAnswers} allAnswered={allAnswered}
@@ -2907,7 +2941,7 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
               <ReadingFeedbackPanel tier={tier} country={country} interest={activeInterest} confidence={confidenceReading} motivation={motivation} score={readingScore} totalQ={readingQuestions.length}
                 feedback={backendFeedback} submissionId={submissionId} session={session} backendLive={backendLive} />
             </>
-          )}
+          ) : null}
         </div>
       ) : (
         <div className="grid lg:grid-cols-5 gap-6">
