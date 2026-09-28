@@ -233,14 +233,25 @@
     backdrop-filter: blur(10px);
     border-bottom: 1px solid var(--border-soft);
   }
-  .nav-inner{ display:flex; align-items:center; justify-content:space-between; gap:16px; padding-block: 14px; }
+  .nav-inner{ position:relative; display:flex; align-items:center; justify-content:space-between; gap:16px; padding-block: 14px; }
   .brand{ display:flex; align-items:center; gap:10px; font-family:"Fraunces",serif; font-weight:600; font-size:19px; letter-spacing:-0.01em; }
   .brand-mark{ width:28px; height:28px; display:grid; place-items:center; position:relative; flex-shrink:0; }
   .nav-links{ display:flex; align-items:center; gap:28px; font-family:"Lexend",sans-serif; font-size:14px; font-weight:500; color: var(--ink-soft); }
   .nav-links a:hover{ color: var(--ink); }
   .nav-cta{ display:flex; align-items:center; gap:10px; }
   .theme-toggle{ width:34px; height:34px; border-radius:50%; border:1px solid var(--border); display:grid; place-items:center; background: var(--surface); color: var(--ink-soft); cursor:pointer; }
-  @media (max-width: 780px){ .nav-links{ display:none; } }
+  .nav-menu-toggle{ display:none; width:34px; height:34px; border-radius:50%; border:1px solid var(--border); align-items:center; justify-content:center; background: var(--surface); color: var(--ink-soft); cursor:pointer; }
+  /* Below 780px the links used to just disappear with nothing in their
+     place - Product/How it works/Pricing/FAQ became unreachable except by
+     scrolling, on the exact devices (phones) most parents actually browse
+     on. A hamburger toggle keeps every link reachable instead of removing
+     them from mobile entirely. */
+  @media (max-width: 780px){
+    .nav-links{ display:none; position:absolute; top:100%; left:0; right:0; flex-direction:column; align-items:flex-start; gap:2px; padding:10px 24px 16px; background: var(--bg); border-bottom:1px solid var(--border-soft); }
+    .nav-links.open{ display:flex; }
+    .nav-links a{ padding:10px 0; width:100%; }
+    .nav-menu-toggle{ display:grid; }
+  }
   /* At phone widths the brand, theme toggle and CTA no longer fit on one
      row: the "Launch workspace" button was pushed ~60px past the right edge
      (found at 375px), taking the page's primary CTA off-screen and forcing
@@ -260,7 +271,6 @@
   .hero-sub{ max-width: 620px; margin: 20px auto 0; font-size: 17.5px; line-height: 1.6; color: var(--ink-soft); }
   .hero-ctas{ display:flex; align-items:center; justify-content:center; gap:12px; margin-top: 28px; flex-wrap:wrap; }
   .hero-meta{ margin-top: 16px; font-family:"Lexend",sans-serif; font-size: 12.5px; color: var(--ink-faint); }
-  @media (max-width: 640px){ .hide-sm{ display:none; } }
 
   /* ---------------- Product preview panel ---------------- */
   .preview-shell{
@@ -442,7 +452,7 @@
       </span>
       LiteracyLab <span style="color:var(--accent)">AI</span>
     </div>
-    <div class="nav-links">
+    <div class="nav-links" id="navLinks">
       <a href="#product">Product</a>
       <a href="#how">How it works</a>
       <a href="#pricing">Pricing</a>
@@ -451,6 +461,9 @@
     <div class="nav-cta">
       <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
         <svg id="themeIcon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z"/></svg>
+      </button>
+      <button class="nav-menu-toggle" id="navMenuToggle" aria-label="Open menu" aria-expanded="false" aria-controls="navLinks">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
       </button>
       <a class="btn btn-ghost" href="app.html">Launch workspace</a>
     </div>
@@ -465,9 +478,9 @@
     <p class="hero-sub">LiteracyLab AI reads what your child writes — or checks what they understood — maps it against their real school curriculum, and turns it into feedback they'll actually want to act on — explained through the things they already love.</p>
     <div class="hero-ctas">
       <a class="btn btn-primary btn-lg" href="app.html">Start free — 3 submissions a month</a>
-      <a class="btn btn-ghost btn-lg" href="#product">See how it works</a>
+      <a class="btn btn-ghost btn-lg" href="#how">See how it works</a>
     </div>
-    <div class="hero-meta">No credit card required · UK, US, Australia, Canada, UAE, Singapore &amp; Global ESL</div>
+    <div class="hero-meta">No credit card required · Free plan, no time limit</div>
 
     <div class="preview-shell">
       <div class="preview-chrome"><span></span><span></span><span></span></div>
@@ -496,6 +509,10 @@
 
 <section id="product">
   <div class="wrap">
+    <div class="section-head" style="margin-inline:auto; margin-bottom:24px; text-align:center;">
+      <span class="eyebrow" style="justify-content:center;">Curricula supported</span>
+      <h2 style="font-size:20px;">Matched to the real syllabus your child's school actually teaches.</h2>
+    </div>
     <div class="trust">
       <div class="trust-item">🇬🇧 UK National Curriculum</div>
       <div class="trust-item">🇺🇸 Common Core / AP</div>
@@ -504,6 +521,20 @@
       <div class="trust-item">🇦🇪 Cambridge &amp; IGCSE</div>
       <div class="trust-item">🇸🇬 Cambridge &amp; IB Pathway</div>
       <div class="trust-item">🌐 CEFR A1–C2</div>
+    </div>
+  </div>
+</section>
+
+<section id="how">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">How it works</span>
+      <h2>From blank page to actionable feedback in three steps.</h2>
+    </div>
+    <div class="steps">
+      <div class="step"><div class="step-num">01</div><h4>Set up your learner</h4><p>Pick their country curriculum, grade or year, and the interests that make feedback click — space, gaming, history and more.</p></div>
+      <div class="step"><div class="step-num">02</div><h4>Write, or read &amp; answer</h4><p>They either write in a workspace built for their age, with a live word counter and a target drawn from their year group's real curriculum expectations, or read an original passage and answer comprehension questions on it.</p></div>
+      <div class="step"><div class="step-num">03</div><h4>Get Key Takeaways</h4><p>In seconds: a Glow, one Grow, interest-themed vocabulary upgrades, and a mission for next time.</p></div>
     </div>
   </div>
 </section>
@@ -662,20 +693,6 @@
           </div>
         </div>
       </div>
-    </div>
-  </div>
-</section>
-
-<section id="how">
-  <div class="wrap">
-    <div class="section-head">
-      <span class="eyebrow">How it works</span>
-      <h2>From blank page to actionable feedback in three steps.</h2>
-    </div>
-    <div class="steps">
-      <div class="step"><div class="step-num">01</div><h4>Set up your learner</h4><p>Pick their country curriculum, grade or year, and the interests that make feedback click — space, gaming, history and more.</p></div>
-      <div class="step"><div class="step-num">02</div><h4>Write, or read &amp; answer</h4><p>They either write in a workspace built for their age, with a live word counter and a target drawn from their year group's real curriculum expectations, or read an original passage and answer comprehension questions on it.</p></div>
-      <div class="step"><div class="step-num">03</div><h4>Get Key Takeaways</h4><p>In seconds: a Glow, one Grow, interest-themed vocabulary upgrades, and a mission for next time.</p></div>
     </div>
   </div>
 </section>
@@ -944,6 +961,23 @@
       current = current === 'system' ? 'dark' : current === 'dark' ? 'light' : 'system';
       apply(current);
     });
+  })();
+
+  // Mobile nav toggle - the links panel is hidden by default below 780px
+  // (see .nav-links CSS) and shown/hidden by adding/removing "open".
+  (function(){
+    var toggle = document.getElementById('navMenuToggle');
+    var links = document.getElementById('navLinks');
+    if (!toggle || !links) return;
+    function close(){
+      links.classList.remove('open');
+      toggle.setAttribute('aria-expanded', 'false');
+    }
+    toggle.addEventListener('click', function(){
+      var open = links.classList.toggle('open');
+      toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+    links.querySelectorAll('a').forEach(function(a){ a.addEventListener('click', close); });
   })();
 
   // Age-tier preview switcher
