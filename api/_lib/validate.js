@@ -400,8 +400,8 @@ function validatePassage(parsed, { tier }) {
     if (words < min || words > max) issues.push(`passage is ${words} words, expected roughly ${min}-${max} for this age tier`);
   }
 
-  if (!Array.isArray(parsed?.questions) || parsed.questions.length !== 3) {
-    issues.push("questions must be an array of exactly 3 items");
+  if (!Array.isArray(parsed?.questions) || parsed.questions.length !== 5) {
+    issues.push("questions must be an array of exactly 5 items");
   } else {
     parsed.questions.forEach((q, i) => {
       if (!checkString(q?.q, 5, 300)) issues.push(`questions[${i}].q is missing or an unreasonable length`);

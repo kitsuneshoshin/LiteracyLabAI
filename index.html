@@ -47,7 +47,7 @@
   "name": "LiteracyLab AI",
   "applicationCategory": "EducationalApplication",
   "operatingSystem": "Web",
-  "description": "An AI literacy coach for ages 5-18 that reads a child's writing or checks their reading comprehension, maps it against their real school curriculum (UK, US, Australia, Canada, UAE & GCC, Singapore, or CEFR-aligned Global ESL), and returns a Glow, a Grow taught through a named writing framework like PEEL or Story Mountain with a worked example, and personalised vocabulary upgrades with a usage example each.",
+  "description": "An AI literacy coach for ages 5-18 that reads a child's writing or checks their reading comprehension, maps it against their real school curriculum (UK, US, Australia, Canada, UAE & GCC, Singapore, or CEFR-aligned Global ESL), and returns a Glow, a Grow taught through a named writing framework like PEEL or Story Mountain grounded in the child's own writing, and personalised vocabulary upgrades with a usage example each.",
   "offers": [
     { "@type": "Offer", "name": "Free", "price": "0", "priceCurrency": "USD", "description": "3 writing or reading submissions per month with full feedback." },
     { "@type": "Offer", "name": "Core", "price": "9.99", "priceCurrency": "USD", "description": "Unlimited monthly submissions for one learner, a 26-week progress trend chart, anonymous ranking within their own year group, and full activity history." },
@@ -98,7 +98,7 @@
     {
       "@type": "Question",
       "name": "Will it just write my child's essay for them?",
-      "acceptedAnswer": { "@type": "Answer", "text": "No — it never writes their story. LiteracyLab AI only responds to work your child has already done: it names one specific strength, one thing to improve, and lets them tap to commit to trying it in their next piece, which we then genuinely check for. The closest it comes to rewriting is the \"Your story, revised\" panel, which takes a sentence your child actually wrote and shows that same sentence with the suggested fix applied — their words, their voice, one change — so they can see what the advice looks like in practice instead of copying replacement prose. The next draft is still theirs to write." }
+      "acceptedAnswer": { "@type": "Answer", "text": "No — it never writes their story. LiteracyLab AI only responds to work your child has already done: it names one specific strength and one thing to improve. The closest it comes to rewriting is the \"Your story, revised\" panel, which takes a sentence your child actually wrote and shows that same sentence with the suggested fix applied — their words, their voice, one change — so they can see what the advice looks like in practice instead of copying replacement prose. The next draft is still theirs to write." }
     },
     {
       "@type": "Question",
@@ -535,7 +535,7 @@
     <div class="steps">
       <div class="step"><div class="step-num">01</div><h4>Set up your learner</h4><p>Pick their country curriculum, grade or year, and the interests that make feedback click — space, gaming, history and more.</p></div>
       <div class="step"><div class="step-num">02</div><h4>Write, or read &amp; answer</h4><p>They either write in a workspace built for their age, with a live word counter and a target drawn from their year group's real curriculum expectations, or read an original passage and answer comprehension questions on it.</p></div>
-      <div class="step"><div class="step-num">03</div><h4>Get Key Takeaways</h4><p>In seconds: a Glow, one Grow, interest-themed vocabulary upgrades, and a mission for next time.</p></div>
+      <div class="step"><div class="step-num">03</div><h4>Get Key Takeaways</h4><p>In seconds: a Glow, one Grow, and interest-themed vocabulary upgrades.</p></div>
     </div>
   </div>
 </section>
@@ -648,12 +648,12 @@
       <div class="split-copy">
         <span class="eyebrow">Product</span>
         <h3 style="margin-top:10px;">Feedback that teaches, not just grades.</h3>
-        <p>Every submission returns the same things, in the same order: a Glow tied to their curriculum target; one Grow pitched just past what they can already do (their zone of proximal development) and explained through an interest they chose when you set them up, taught alongside a named writing framework — PEEL, Story Mountain and others, matched to the piece — with a fresh worked example; two vocabulary upgrades with a usage example each; and a whole-piece score out of 10, judged separately from that single Grow so it stays honest even when the coaching stays narrow.</p>
+        <p>Every submission returns the same things, in the same order: a Glow tied to their curriculum target; one Grow pitched just past what they can already do (their zone of proximal development) and explained through an interest they chose when you set them up, taught alongside a named writing framework — PEEL, Story Mountain and others, matched to the piece — grounded in a real sentence from their own submission, rewritten to show the technique applied to their own writing; two vocabulary upgrades with a usage example each; a dedicated spelling and grammar check; and a whole-piece score out of 10, judged separately from that single Grow so it stays honest even when the coaching stays narrow.</p>
         <div class="split-list">
           <div><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> Glows tied to real curriculum targets, not generic compliments</div>
           <div><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> Every Grow explained through an interest <em>your child picks</em> — the same writing lesson lands differently for a space obsessive than it does for a footballer</div>
           <div><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> "Your story, revised": their own sentence shown rewritten with the fix applied, so the advice is something they can see, not just read</div>
-          <div><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> A concrete next step for the very next submission — and a check, next time, on whether they actually tried it</div>
+          <div><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> A named framework taught directly from their own writing, not a generic example</div>
         </div>
       </div>
     </div>
@@ -780,13 +780,25 @@
 
           <tr class="group-head"><th scope="row" colspan="4">Feedback</th></tr>
           <tr>
-            <th scope="row">Key Takeaways: Glow, Grow, vocabulary, mission</th>
+            <th scope="row">Key Takeaways: Glow, Grow, vocabulary</th>
             <td class="yes">Yes</td>
             <td class="yes col-best">Yes</td>
             <td class="yes">Yes</td>
           </tr>
           <tr>
             <th scope="row">Highlights in their own writing, with rewrites</th>
+            <td class="yes">Yes</td>
+            <td class="yes col-best">Yes</td>
+            <td class="yes">Yes</td>
+          </tr>
+          <tr>
+            <th scope="row">Named framework taught from their own writing</th>
+            <td class="yes">Yes</td>
+            <td class="yes col-best">Yes</td>
+            <td class="yes">Yes</td>
+          </tr>
+          <tr>
+            <th scope="row">Spelling &amp; grammar check</th>
             <td class="yes">Yes</td>
             <td class="yes col-best">Yes</td>
             <td class="yes">Yes</td>
@@ -899,7 +911,7 @@
       </details>
       <details class="faq-item">
         <summary>Will it just write my child's essay for them?<span class="faq-plus"></span></summary>
-        <div class="faq-a">No — it never writes their story. LiteracyLab AI only responds to work your child has already done: it names one specific strength, one thing to improve, and lets them tap to commit to trying it in their next piece, which we then genuinely check for. The closest it comes to rewriting is the "Your story, revised" panel, which takes a sentence your child actually wrote and shows that same sentence with the suggested fix applied — their words, their voice, one change — so they can see what the advice looks like in practice instead of copying replacement prose. The next draft is still theirs to write.</div>
+        <div class="faq-a">No — it never writes their story. LiteracyLab AI only responds to work your child has already done: it names one specific strength and one thing to improve. The closest it comes to rewriting is the "Your story, revised" panel, which takes a sentence your child actually wrote and shows that same sentence with the suggested fix applied — their words, their voice, one change — so they can see what the advice looks like in practice instead of copying replacement prose. The next draft is still theirs to write.</div>
       </details>
       <details class="faq-item">
         <summary>Can I add more than one child to the same account?<span class="faq-plus"></span></summary>

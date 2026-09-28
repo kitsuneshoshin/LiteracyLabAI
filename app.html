@@ -1139,15 +1139,73 @@ function SectionLabel({ children, tip, tipPosition }){
 }
 
 /* ---------------------------------------------------------------- */
+/* Account menu                                                       */
+/* ---------------------------------------------------------------- */
+// Consolidates what used to be two separate header buttons (Manage
+// plan/See plans, Sign out) plus two destinations that only lived inside
+// the Dashboard (Learner setup, the Stripe billing portal) into one place,
+// so the header doesn't need a growing row of individual buttons for every
+// account-level action.
+function AccountMenu({ plan, backendLive, onGoToProfile, onGoToPlan, onManagePayment, billingPortalLoading, onSignOut, className, align = "right" }){
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+  useEffect(() => {
+    function onDocClick(e){ if (ref.current && !ref.current.contains(e.target)) setOpen(false); }
+    document.addEventListener("mousedown", onDocClick);
+    return () => document.removeEventListener("mousedown", onDocClick);
+  }, []);
+  const paid = isPaidPlan(plan);
+  function pick(fn){ setOpen(false); fn(); }
+  return (
+    <div className={`relative ${className || ""}`} ref={ref}>
+      <button onClick={() => setOpen(o => !o)} aria-expanded={open} aria-haspopup="true"
+        className="focus-ring inline-flex items-center gap-1.5 rounded-full px-3.5 py-2 text-[13px] font-bold"
+        style={{ background: "var(--gold)", color: "#fff" }}>
+        <IconCrown size={13} strokeWidth={2.4} /> Account
+        <IconChevron size={13} strokeWidth={2.2} style={{ transform: open ? "rotate(180deg)" : "none", transition: "transform 150ms" }} />
+      </button>
+      {open && (
+        <div role="menu" className={`absolute ${align === "left" ? "left-0" : "right-0"} mt-2 w-56 max-w-[calc(100vw-2rem)] rounded-xl border py-1.5 z-50`}
+          style={{ borderColor: "var(--border)", background: "var(--surface)", boxShadow: "0 10px 30px rgba(0,0,0,.15)" }}>
+          <button role="menuitem" onClick={() => pick(onGoToProfile)}
+            className="focus-ring w-full text-left px-3.5 py-2 text-[13px] font-medium" style={{ color: "var(--ink)" }}>
+            Manage profile
+          </button>
+          <button role="menuitem" onClick={() => pick(onGoToPlan)}
+            className="focus-ring w-full text-left px-3.5 py-2 text-[13px] font-medium" style={{ color: "var(--ink)" }}>
+            {paid ? "Manage plan" : "See plans"}
+          </button>
+          {paid && (
+            <button role="menuitem" onClick={() => pick(onManagePayment)} disabled={billingPortalLoading}
+              className="focus-ring w-full text-left px-3.5 py-2 text-[13px] font-medium disabled:opacity-60" style={{ color: "var(--ink)" }}>
+              {billingPortalLoading ? "Redirecting…" : "Manage payment details"}
+            </button>
+          )}
+          {backendLive && (
+            <>
+              <div className="my-1 border-t" style={{ borderColor: "var(--border-soft)" }} />
+              <button role="menuitem" onClick={() => pick(onSignOut)}
+                className="focus-ring w-full text-left px-3.5 py-2 text-[13px] font-medium" style={{ color: "var(--bad)" }}>
+                Sign out
+              </button>
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ---------------------------------------------------------------- */
 /* Header                                                             */
 /* ---------------------------------------------------------------- */
-function Header({ view, setView, used, total, plan, theme, setTheme, backendLive, onSignOut, needsOnboarding }){
+function Header({ view, setView, used, total, plan, theme, setTheme, backendLive, onSignOut, needsOnboarding, onGoToProfile, onGoToPlan, onManagePayment, billingPortalLoading }){
   const remaining = total - used;
   const paid = isPaidPlan(plan);
   const meta = planMeta(plan);
   return (
     <header className="sticky top-0 z-30 border-b backdrop-blur-md" style={{ borderColor: "var(--border)", background: "color-mix(in srgb, var(--surface) 88%, transparent)" }}>
-      <div className="mx-auto max-w-6xl px-4 sm:px-6 py-3.5 flex items-center justify-between gap-3 flex-wrap">
+      <div className="mx-auto max-w-[1400px] px-4 sm:px-6 py-3.5 flex items-center justify-between gap-3 flex-wrap">
         <a href="index.html" className="focus-ring flex items-center gap-2.5" style={{ textDecoration: "none" }}>
           <div className="w-9 h-9 grid place-items-center shrink-0">
             <IconMark size={30} />
@@ -1189,21 +1247,9 @@ function Header({ view, setView, used, total, plan, theme, setTheme, backendLive
             </span>
             <span className="rounded-full px-2 py-1 text-[11px] font-bold" style={{ background: paid ? "var(--gold-tint)" : "var(--navy-tint)", color: paid ? "var(--gold-ink)" : "var(--ink)" }}>{meta.badge}</span>
           </div>
-          <button onClick={()=>setView("dashboard")}
-            className="focus-ring hidden md:inline-flex items-center gap-1.5 rounded-full px-3.5 py-2 text-[13px] font-bold"
-            style={{ background: "var(--gold)", color: "#fff" }}>
-            <IconCrown size={13} strokeWidth={2.4} /> {paid ? "Manage plan" : "See plans"}
-          </button>
-          {backendLive && (
-            // md, matching the mobile summary banner's own md:hidden cutoff below
-            // (App's render) - without that exact alignment, this button (and
-            // "Upgrade to Pro" above) disappeared entirely on any screen
-            // narrower than the old sm: 640px breakpoint, with no mobile
-            // equivalent anywhere in the app: a phone user could never sign out.
-            <button onClick={onSignOut} className="focus-ring hidden md:inline-flex items-center rounded-full px-3 py-2 text-[13px] font-semibold" style={{ color: "var(--ink-faint)" }}>
-              Sign out
-            </button>
-          )}
+          <AccountMenu className="hidden md:block" plan={plan} backendLive={backendLive}
+            onGoToProfile={onGoToProfile} onGoToPlan={onGoToPlan} onManagePayment={onManagePayment}
+            billingPortalLoading={billingPortalLoading} onSignOut={onSignOut} />
         </div>
       </div>
     </header>
@@ -1647,7 +1693,7 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
   return (
     <>
     {needsOnboarding && (
-      <div className="mx-auto max-w-6xl px-4 sm:px-6 pt-8">
+      <div className="mx-auto max-w-[1400px] px-4 sm:px-6 pt-8">
         <div className="rounded-2xl px-5 py-4 flex items-center gap-3 flex-wrap" style={{ background: "var(--cyan-tint)", border: "1.5px solid var(--cyan)" }}>
           <div className="w-9 h-9 rounded-full grid place-items-center shrink-0" style={{ background: "var(--cyan)", color: "#fff" }}>
             <IconSparkle size={17} strokeWidth={2.2} />
@@ -1659,7 +1705,7 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
         </div>
       </div>
     )}
-    <div className="mx-auto max-w-6xl px-4 sm:px-6 py-8 flex flex-col gap-8">
+    <div className="mx-auto max-w-[1400px] px-4 sm:px-6 py-8 flex flex-col gap-8">
       {backendLive && (
         <ChildSwitcher children_={children_} activeChildId={activeChildId} onSwitchChild={onSwitchChild} onAddChild={onAddChild} />
       )}
@@ -1894,6 +1940,7 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
       <div className="flex flex-col gap-6">
         <div className="text-[11px] font-bold uppercase tracking-wide" style={{ color: "var(--ink-faint)" }}>Account</div>
 
+        <div id="account-profile-section" className="scroll-mt-24">
         <Collapsible defaultOpen={needsOnboarding} borderColor="var(--border)" iconBg="var(--navy-tint)" iconColor="var(--ink)"
           icon={React.createElement(TIER_META[tier].icon, { size: 15, strokeWidth: 2.2 })}
           title="Learner setup"
@@ -2001,7 +2048,8 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
             </div>
           )}
         </Collapsible>
-        <div className="card p-6 relative overflow-hidden" style={{ background: "linear-gradient(160deg, var(--ink), #3E2028)" }}>
+        </div>
+        <div id="account-plan-section" className="card p-6 relative overflow-hidden scroll-mt-24" style={{ background: "linear-gradient(160deg, var(--ink), #3E2028)" }}>
           <div className="absolute -right-6 -top-6 w-28 h-28 rounded-full" style={{ background: "radial-gradient(circle, var(--gold) 0%, transparent 70%)", opacity: .35 }} />
           <div className="relative">
             <div className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold mb-3" style={{ background: "var(--gold)", color: "#fff" }}>
@@ -2797,7 +2845,7 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
   }
 
   return (
-    <div className="mx-auto max-w-6xl px-4 sm:px-6 py-8">
+    <div className="mx-auto max-w-[1400px] px-4 sm:px-6 py-8">
       {backendLive && children_ && children_.length > 1 && (
         <ChildSwitcher children_={children_} activeChildId={childId} onSwitchChild={onSwitchChild} showAdd={false} />
       )}
@@ -3291,6 +3339,51 @@ function App({ session }){
     else root.setAttribute("data-theme", theme);
   }, [theme]);
 
+  // Lets the header's Account menu jump straight to a specific card inside
+  // the Dashboard (Learner setup, or the plan/billing card) instead of just
+  // dropping the parent at the top of a long page. The Dashboard only
+  // mounts once `view` flips to "dashboard", so the actual scroll has to
+  // wait a tick for that render rather than firing immediately.
+  const [pendingScrollTarget, setPendingScrollTarget] = useState(null);
+  useEffect(()=>{
+    if (view !== "dashboard" || !pendingScrollTarget) return;
+    const id = pendingScrollTarget;
+    // Clearing pendingScrollTarget re-runs this effect (it's a dependency)
+    // and React fires this run's cleanup first - clearing it BEFORE the
+    // timeout fires would cancel the scroll via that same cleanup before it
+    // ever ran. Clearing it inside the timeout callback instead means the
+    // re-run's guard above (`!pendingScrollTarget`) is already true by then,
+    // so it's a no-op rather than a second scroll.
+    const t = setTimeout(()=>{
+      document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+      setPendingScrollTarget(null);
+    }, 50);
+    return () => clearTimeout(t);
+  }, [view, pendingScrollTarget]);
+  function goToAccountSection(id){
+    setView("dashboard");
+    setPendingScrollTarget(id);
+  }
+
+  // A standalone route straight to Stripe's own billing portal (payment
+  // method, invoices, cancel) from the header's Account menu, without first
+  // landing on the Dashboard - Dashboard's own handleBilling does the same
+  // call for the in-page pricing cards, this is just a second caller for a
+  // different entry point. Only meaningful once there's a real subscription
+  // to manage, so the Account menu only offers it on a paid plan.
+  const [billingPortalLoading, setBillingPortalLoading] = useState(false);
+  async function goToBillingPortal(){
+    if (!backendLive || billingPortalLoading) return;
+    setBillingPortalLoading(true);
+    try {
+      const result = await authedFetch(session, "/api/billing-session", { method: "POST", body: JSON.stringify({ tier: "core" }) });
+      window.location.href = result.url;
+    } catch (err) {
+      logAppError("Failed to open billing portal:", err);
+      setBillingPortalLoading(false);
+    }
+  }
+
   function rememberActiveChild(id){
     try { localStorage.setItem("ll_active_child_" + session.user.id, id); } catch {}
   }
@@ -3493,26 +3586,20 @@ function App({ session }){
   return (
     <div className="min-h-screen">
       <Header view={view} setView={guardedSetView} used={used} total={total} plan={plan} theme={theme === "system" ? "light" : theme} setTheme={setTheme}
-        backendLive={backendLive} onSignOut={handleSignOut} needsOnboarding={needsOnboarding} />
-      <div className="md:hidden mx-auto max-w-6xl px-4 pt-3 flex flex-col gap-2">
+        backendLive={backendLive} onSignOut={handleSignOut} needsOnboarding={needsOnboarding}
+        onGoToProfile={()=>goToAccountSection("account-profile-section")} onGoToPlan={()=>goToAccountSection("account-plan-section")}
+        onManagePayment={goToBillingPortal} billingPortalLoading={billingPortalLoading} />
+      <div className="md:hidden mx-auto max-w-[1400px] px-4 pt-3 flex flex-col gap-2">
         <div className="rounded-xl border px-3 py-2 text-xs font-medium flex items-center justify-between" style={{ borderColor: "var(--border)", background: "var(--surface-2)", color: "var(--ink-soft)" }}>
           <span>{isPaidPlan(plan) ? `${planMeta(plan).label}: unlimited submissions` : <>Free Plan: <b className="tabular" style={{ color: "var(--ink)" }}>{total-used}</b> of {total} remaining</>}</span>
           <span className="rounded-full px-2 py-0.5 text-[10px] font-bold" style={{ background: isPaidPlan(plan) ? "var(--gold-tint)" : "var(--navy-tint)", color: isPaidPlan(plan) ? "var(--gold-ink)" : "var(--ink)" }}>{planMeta(plan).badge}</span>
         </div>
-        {/* Mobile equivalent of the header's Upgrade/Sign out buttons, which
-            are hidden below md - see the note in Header for why this exists. */}
-        <div className="flex items-center gap-2">
-          <button onClick={()=>setView("dashboard")}
-            className="focus-ring flex-1 inline-flex items-center justify-center gap-1.5 rounded-full px-3.5 py-2 text-[13px] font-bold"
-            style={{ background: "var(--gold)", color: "#fff" }}>
-            <IconCrown size={13} strokeWidth={2.4} /> {isPaidPlan(plan) ? "Manage plan" : "See plans"}
-          </button>
-          {backendLive && (
-            <button onClick={handleSignOut} className="focus-ring inline-flex items-center rounded-full px-3 py-2 text-[13px] font-semibold" style={{ color: "var(--ink-faint)" }}>
-              Sign out
-            </button>
-          )}
-        </div>
+        {/* Mobile equivalent of the header's Account menu, which is hidden
+            below md - see the note on AccountMenu's usage in Header for why
+            this exists. */}
+        <AccountMenu className="self-start" align="left" plan={plan} backendLive={backendLive}
+          onGoToProfile={()=>goToAccountSection("account-profile-section")} onGoToPlan={()=>goToAccountSection("account-plan-section")}
+          onManagePayment={goToBillingPortal} billingPortalLoading={billingPortalLoading} onSignOut={handleSignOut} />
       </div>
       {/* Both stay mounted, toggled with display rather than a ternary that
           would unmount whichever one isn't showing - Workspace holds an
@@ -3538,7 +3625,7 @@ function App({ session }){
           used={used} total={total} onSubmit={handleSubmit} session={session} backendLive={backendLive}
           childId={activeChildId} children_={children} onSwitchChild={switchChild} onMakeUsable={makeLearnerUsable} activeChangeAvailableAt={activeChangeAvailableAt} onSeePlans={()=>setView("dashboard")} />
       </div>
-      <footer className="mx-auto max-w-6xl px-4 sm:px-6 py-10 text-center text-xs flex flex-col items-center gap-2" style={{ color: "var(--ink-faint)" }}>
+      <footer className="mx-auto max-w-[1400px] px-4 sm:px-6 py-10 text-center text-xs flex flex-col items-center gap-2" style={{ color: "var(--ink-faint)" }}>
         <div>LiteracyLab AI · {backendLive ? "your account data is private to you" : "interactive prototype — all learner data shown is sample data"}.</div>
         <div className="flex items-center gap-4">
           <a href="index.html" className="hover:underline" style={{ color: "var(--ink-faint)" }}>Home</a>

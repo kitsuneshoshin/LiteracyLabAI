@@ -305,11 +305,15 @@ Respond with ONLY a JSON object (no markdown fences, no commentary) with exactly
 }`;
 }
 
+// Bumped up from each tier's original length (early was 3-5 sentences,
+// elementary 6-10, middle 8-12, high 10-15) once the question count went
+// from 3 to 5 - a passage sized for 3 questions doesn't comfortably support
+// 5 genuinely distinct ones without repeating the same detail.
 const PASSAGE_LENGTH = {
-  early: "3-5 short, simple sentences (roughly 40-60 words)",
-  elementary: "6-10 sentences (roughly 100-150 words)",
-  middle: "8-12 sentences (roughly 150-220 words), with some more complex sentence structures",
-  high: "10-15 sentences (roughly 200-300 words), written in a more sophisticated, adult-register style",
+  early: "5-7 short, simple sentences (roughly 60-90 words)",
+  elementary: "9-13 sentences (roughly 140-200 words)",
+  middle: "11-15 sentences (roughly 200-280 words), with some more complex sentence structures",
+  high: "13-18 sentences (roughly 260-360 words), written in a more sophisticated, adult-register style",
 };
 
 const PASSAGE_SKILL = {
@@ -333,12 +337,12 @@ const PASSAGE_SKILL = {
 function buildReadingPassagePrompt({ tier, country, gradeLabel }) {
   return `You are generating an ORIGINAL reading-comprehension exercise for a ${TIER_LABEL[tier]} student in ${gradeLabel} (${country}).
 
-Write a short, wholly original passage — never copied or closely paraphrased from any existing published book, article, or other copyrighted work — appropriate for this age, plus 3 multiple-choice comprehension questions about it.
+Write a short, wholly original passage — never copied or closely paraphrased from any existing published book, article, or other copyrighted work — appropriate for this age, plus 5 multiple-choice comprehension questions about it.
 
 Requirements:
 - Passage length: ${PASSAGE_LENGTH[tier]}.
-- The questions should primarily test this comprehension skill: ${PASSAGE_SKILL[tier]}.
-- Exactly 3 questions, each with exactly 4 answer options and exactly ONE unambiguously correct answer that is clearly supported by the passage. The other 3 options must be clearly wrong to a careful reader, not intentionally tricky or debatable.
+- The questions should primarily test this comprehension skill: ${PASSAGE_SKILL[tier]}, but don't all ask the same thing in different words - cover distinct details, moments, or angles of the passage so the 5 questions feel genuinely different from each other, not five variations of one question.
+- Exactly 5 questions, each with exactly 4 answer options and exactly ONE unambiguously correct answer that is clearly supported by the passage. The other 3 options must be clearly wrong to a careful reader, not intentionally tricky or debatable.
 - Do not reuse character names, settings, or plots from well-known published works.
 
 Respond with ONLY a JSON object (no markdown fences, no commentary) with exactly this shape:
@@ -349,7 +353,9 @@ Respond with ONLY a JSON object (no markdown fences, no commentary) with exactly
   "questions": [
     { "q": "question text", "options": ["option A", "option B", "option C", "option D"], "correct": 0 },
     { "q": "question text", "options": ["option A", "option B", "option C", "option D"], "correct": 1 },
-    { "q": "question text", "options": ["option A", "option B", "option C", "option D"], "correct": 2 }
+    { "q": "question text", "options": ["option A", "option B", "option C", "option D"], "correct": 2 },
+    { "q": "question text", "options": ["option A", "option B", "option C", "option D"], "correct": 0 },
+    { "q": "question text", "options": ["option A", "option B", "option C", "option D"], "correct": 1 }
   ]
 }`;
 }

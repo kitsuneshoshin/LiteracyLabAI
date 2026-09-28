@@ -153,6 +153,8 @@ test("validatePassage: rejects a passage far outside the expected word-count ban
     { q: "Question one goes here?", options: ["a", "b", "c", "d"], correct: 0 },
     { q: "Question two goes here?", options: ["a", "b", "c", "d"], correct: 1 },
     { q: "Question three goes here?", options: ["a", "b", "c", "d"], correct: 2 },
+    { q: "Question four goes here?", options: ["a", "b", "c", "d"], correct: 0 },
+    { q: "Question five goes here?", options: ["a", "b", "c", "d"], correct: 1 },
   ] };
   const result = validatePassage(tooShort, { tier: "high" });
   assert.equal(result.ok, false);
@@ -167,6 +169,8 @@ test("validatePassage: rejects duplicate answer options", () => {
       { q: "Question one goes here?", options: ["same", "same", "c", "d"], correct: 0 },
       { q: "Question two goes here?", options: ["a", "b", "c", "d"], correct: 1 },
       { q: "Question three goes here?", options: ["a", "b", "c", "d"], correct: 2 },
+      { q: "Question four goes here?", options: ["a", "b", "c", "d"], correct: 0 },
+      { q: "Question five goes here?", options: ["a", "b", "c", "d"], correct: 1 },
     ],
   };
   const result = validatePassage(passage, { tier: "high" });
