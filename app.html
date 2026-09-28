@@ -2853,77 +2853,102 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
         ))}
       </div>
 
-      <div className="grid lg:grid-cols-5 gap-6">
-        <div className="lg:col-span-3 flex flex-col gap-4">
-          {(exerciseType === "writing" && backendLive && (writingLoading || !meta)) ? (
-            <div className="card p-10 flex flex-col items-center justify-center text-center gap-3 min-h-[300px]">
-              {locked ? (
-                <>
-                  <IconLock size={22} style={{ color: "var(--ink-faint)" }} />
-                  <div className="font-display font-semibold text-sm" style={{ color: "var(--ink)" }}>Upgrade for more writing prompts</div>
-                  <p className="text-[13px] max-w-[28ch]" style={{ color: "var(--ink-faint)" }}>You've used all your free submissions this month.</p>
-                </>
-              ) : writingLoading ? (
-                <>
-                  <IconSparkle size={24} className="animate-spin-slow" style={{ color: "var(--cyan-ink)" }} />
-                  <div className="font-display font-semibold text-sm" style={{ color: "var(--ink)" }}>Writing you a fresh prompt…</div>
-                </>
-              ) : (
-                <>
-                  <IconSparkle size={22} style={{ color: "var(--cyan-ink)" }} />
-                  <div className="font-display font-semibold text-sm" style={{ color: "var(--ink)" }}>Ready for a {TIER_META[tier].label.toLowerCase()} prompt?</div>
-                  <p className="text-[13px] max-w-[30ch]" style={{ color: "var(--ink-faint)" }}>This uses 1 of your {total === 999 ? "" : `${total - used} remaining `}submissions.</p>
-                  <button onClick={()=>requestNewWritingPrompt()}
-                    className="focus-ring inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-bold mt-1"
-                    style={{ background: "var(--cyan)", color: "#fff" }}>
-                    Get my prompt
-                  </button>
-                </>
-              )}
-            </div>
-          ) : exerciseType === "writing" ? (
-            <TierEditor
-              tier={tier} meta={meta} text={text} setText={setText} words={words}
-              phase={phase} onSubmit={handleSubmit} onNew={handleNew} locked={locked}
-              interests={interests} activeInterest={activeInterest} setActiveInterest={setActiveInterest}
-            />
-          ) : (backendLive && (readingLoading || !readingBankEntry)) ? (
-            <div className="card p-10 flex flex-col items-center justify-center text-center gap-3 min-h-[300px]">
-              {locked ? (
-                <>
-                  <IconLock size={22} style={{ color: "var(--ink-faint)" }} />
-                  <div className="font-display font-semibold text-sm" style={{ color: "var(--ink)" }}>Upgrade for more reading passages</div>
-                  <p className="text-[13px] max-w-[28ch]" style={{ color: "var(--ink-faint)" }}>You've used all your free submissions this month.</p>
-                </>
-              ) : readingLoading ? (
-                <>
-                  <IconSparkle size={24} className="animate-spin-slow" style={{ color: "var(--cyan-ink)" }} />
-                  <div className="font-display font-semibold text-sm" style={{ color: "var(--ink)" }}>Writing you a fresh passage…</div>
-                </>
-              ) : (
-                <>
-                  <IconSparkle size={22} style={{ color: "var(--cyan-ink)" }} />
-                  <div className="font-display font-semibold text-sm" style={{ color: "var(--ink)" }}>Ready for a {TIER_META[tier].label.toLowerCase()} passage?</div>
-                  <p className="text-[13px] max-w-[30ch]" style={{ color: "var(--ink-faint)" }}>This uses 1 of your {total === 999 ? "" : `${total - used} remaining `}submissions.</p>
-                  <button onClick={()=>requestNewPassage()}
-                    className="focus-ring inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-bold mt-1"
-                    style={{ background: "var(--cyan)", color: "#fff" }}>
-                    Get my passage
-                  </button>
-                </>
-              )}
-            </div>
+      {phase === "done" ? (
+        // Once feedback is in, this stops being two things happening side by
+        // side (compose here, watch for results there) and becomes one thing
+        // to read, top to bottom - so it renders as a single column instead
+        // of the compose-time split. Capped at a readable width rather than
+        // stretched full-bleed, same reasoning as a body-text column anywhere
+        // else: a line of prose that runs the full width of a wide screen is
+        // harder to read, not easier.
+        <div className="max-w-3xl mx-auto flex flex-col gap-4">
+          {exerciseType === "writing" ? (
+            <>
+              <SubmissionRecap tier={tier} title={meta?.title || "Your story"} words={words} onNew={handleNew} />
+              <FeedbackPanel tier={tier} gradeLabel={gradeLabel} country={country} interest={activeInterest} confidence={confidenceWriting} motivation={motivation} seed={words}
+                feedback={backendFeedback} submissionId={submissionId} session={session} backendLive={backendLive} submittedText={text} />
+            </>
           ) : (
-            <ReadingExercise
-              bank={readingBankEntry} answers={answers} setAnswers={setAnswers} allAnswered={allAnswered}
-              phase={phase} onSubmit={handleSubmit} onNew={handleNew} locked={locked}
-            />
+            <>
+              <ReadingExercise
+                bank={readingBankEntry} answers={answers} setAnswers={setAnswers} allAnswered={allAnswered}
+                phase={phase} onSubmit={handleSubmit} onNew={handleNew} locked={locked}
+              />
+              <ReadingFeedbackPanel tier={tier} country={country} interest={activeInterest} confidence={confidenceReading} motivation={motivation} score={readingScore} totalQ={readingQuestions.length}
+                feedback={backendFeedback} submissionId={submissionId} session={session} backendLive={backendLive} />
+            </>
           )}
         </div>
+      ) : (
+        <div className="grid lg:grid-cols-5 gap-6">
+          <div className="lg:col-span-3 flex flex-col gap-4">
+            {(exerciseType === "writing" && backendLive && (writingLoading || !meta)) ? (
+              <div className="card p-10 flex flex-col items-center justify-center text-center gap-3 min-h-[300px]">
+                {locked ? (
+                  <>
+                    <IconLock size={22} style={{ color: "var(--ink-faint)" }} />
+                    <div className="font-display font-semibold text-sm" style={{ color: "var(--ink)" }}>Upgrade for more writing prompts</div>
+                    <p className="text-[13px] max-w-[28ch]" style={{ color: "var(--ink-faint)" }}>You've used all your free submissions this month.</p>
+                  </>
+                ) : writingLoading ? (
+                  <>
+                    <IconSparkle size={24} className="animate-spin-slow" style={{ color: "var(--cyan-ink)" }} />
+                    <div className="font-display font-semibold text-sm" style={{ color: "var(--ink)" }}>Writing you a fresh prompt…</div>
+                  </>
+                ) : (
+                  <>
+                    <IconSparkle size={22} style={{ color: "var(--cyan-ink)" }} />
+                    <div className="font-display font-semibold text-sm" style={{ color: "var(--ink)" }}>Ready for a {TIER_META[tier].label.toLowerCase()} prompt?</div>
+                    <p className="text-[13px] max-w-[30ch]" style={{ color: "var(--ink-faint)" }}>This uses 1 of your {total === 999 ? "" : `${total - used} remaining `}submissions.</p>
+                    <button onClick={()=>requestNewWritingPrompt()}
+                      className="focus-ring inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-bold mt-1"
+                      style={{ background: "var(--cyan)", color: "#fff" }}>
+                      Get my prompt
+                    </button>
+                  </>
+                )}
+              </div>
+            ) : exerciseType === "writing" ? (
+              <TierEditor
+                tier={tier} meta={meta} text={text} setText={setText} words={words}
+                phase={phase} onSubmit={handleSubmit} onNew={handleNew} locked={locked}
+                interests={interests} activeInterest={activeInterest} setActiveInterest={setActiveInterest}
+              />
+            ) : (backendLive && (readingLoading || !readingBankEntry)) ? (
+              <div className="card p-10 flex flex-col items-center justify-center text-center gap-3 min-h-[300px]">
+                {locked ? (
+                  <>
+                    <IconLock size={22} style={{ color: "var(--ink-faint)" }} />
+                    <div className="font-display font-semibold text-sm" style={{ color: "var(--ink)" }}>Upgrade for more reading passages</div>
+                    <p className="text-[13px] max-w-[28ch]" style={{ color: "var(--ink-faint)" }}>You've used all your free submissions this month.</p>
+                  </>
+                ) : readingLoading ? (
+                  <>
+                    <IconSparkle size={24} className="animate-spin-slow" style={{ color: "var(--cyan-ink)" }} />
+                    <div className="font-display font-semibold text-sm" style={{ color: "var(--ink)" }}>Writing you a fresh passage…</div>
+                  </>
+                ) : (
+                  <>
+                    <IconSparkle size={22} style={{ color: "var(--cyan-ink)" }} />
+                    <div className="font-display font-semibold text-sm" style={{ color: "var(--ink)" }}>Ready for a {TIER_META[tier].label.toLowerCase()} passage?</div>
+                    <p className="text-[13px] max-w-[30ch]" style={{ color: "var(--ink-faint)" }}>This uses 1 of your {total === 999 ? "" : `${total - used} remaining `}submissions.</p>
+                    <button onClick={()=>requestNewPassage()}
+                      className="focus-ring inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-bold mt-1"
+                      style={{ background: "var(--cyan)", color: "#fff" }}>
+                      Get my passage
+                    </button>
+                  </>
+                )}
+              </div>
+            ) : (
+              <ReadingExercise
+                bank={readingBankEntry} answers={answers} setAnswers={setAnswers} allAnswered={allAnswered}
+                phase={phase} onSubmit={handleSubmit} onNew={handleNew} locked={locked}
+              />
+            )}
+          </div>
 
-        <div className="lg:col-span-2 flex flex-col gap-4">
-
-          {phase !== "done" && (
+          <div className="lg:col-span-2 flex flex-col gap-4">
             <div className="card p-6 flex flex-col items-center justify-center text-center gap-3 min-h-[220px]" style={{ borderStyle: submitError ? "solid" : "dashed", borderColor: submitError ? "var(--bad)" : undefined }}>
               <div className="w-11 h-11 rounded-full grid place-items-center" style={{ background: submitError ? "var(--bad-tint)" : "var(--cyan-tint)", color: submitError ? "var(--bad)" : "var(--cyan-ink)" }}>
                 {submitError ? <IconAlert size={20} strokeWidth={2} /> : <IconSparkle size={20} strokeWidth={2} />}
@@ -2933,17 +2958,9 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
                 {submitError || `${exerciseType === "writing" ? `Submit your ${tier === "high" ? "essay" : "story"}` : "Check your understanding"} to see personalised feedback from LiteracyLab AI.`}
               </p>
             </div>
-          )}
-          {phase === "done" && exerciseType === "writing" && (
-            <FeedbackPanel tier={tier} gradeLabel={gradeLabel} country={country} interest={activeInterest} confidence={confidenceWriting} motivation={motivation} seed={words}
-              feedback={backendFeedback} submissionId={submissionId} session={session} backendLive={backendLive} submittedText={text} />
-          )}
-          {phase === "done" && exerciseType === "reading" && (
-            <ReadingFeedbackPanel tier={tier} country={country} interest={activeInterest} confidence={confidenceReading} motivation={motivation} score={readingScore} totalQ={readingQuestions.length}
-              feedback={backendFeedback} submissionId={submissionId} session={session} backendLive={backendLive} />
-          )}
+          </div>
         </div>
-      </div>
+      )}
 
       {!bannerDismissed && (
         <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 w-[calc(100%-2rem)] max-w-md">
@@ -3004,6 +3021,33 @@ function WordMeter({ words, target, chars, maxChars }){
           </span>
         </Tooltip>
       )}
+    </div>
+  );
+}
+
+// Replaces the full writing editor once feedback is in. The editor's own
+// textarea used to stay on screen (disabled) right next to the feedback
+// panel's "Your submission, annotated" card - the same text shown twice at
+// once, plain on one side and highlighted on the other, which is also what
+// made that screen feel unbalanced (a short, static left column next to a
+// long, growing feedback column). The full text is still fully visible,
+// just once, inside the annotated card below - nothing here is lost.
+const NEW_LABEL_BY_TIER = { early: "New Story", elementary: "New Mission", middle: "New response", high: "New essay" };
+function SubmissionRecap({ tier, title, words, onNew }){
+  return (
+    <div className="card p-5 flex items-center justify-between gap-4 flex-wrap">
+      <div className="flex items-center gap-3 min-w-0">
+        <div className="w-10 h-10 rounded-full grid place-items-center shrink-0" style={{ background: "var(--good-tint)", color: "var(--good)" }}>
+          <IconCheck size={18} strokeWidth={2.4} />
+        </div>
+        <div className="min-w-0">
+          <div className="font-display font-semibold text-sm truncate" style={{ color: "var(--ink)" }}>{title}</div>
+          <div className="text-xs" style={{ color: "var(--ink-faint)" }}>Submitted · {words} word{words === 1 ? "" : "s"}</div>
+        </div>
+      </div>
+      <button onClick={onNew} className="focus-ring inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-bold shrink-0" style={{ background: "var(--navy-tint)", color: "var(--ink)" }}>
+        {NEW_LABEL_BY_TIER[tier] || "New Mission"}
+      </button>
     </div>
   );
 }
