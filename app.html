@@ -998,23 +998,6 @@ const GROWTH_TIP_BASE = {
   high: "To move this from “in progress” to “mastered,” close one body paragraph with a synthesis sentence that links your evidence back to the wider debate, rather than restating your point.",
 };
 
-// A one-tap commitment, not just a satisfaction rating: asking "what will you try
-// next time?" makes the student actively choose an action, which research on
-// feedback effectiveness (Hattie & Timperley) links to far better follow-through
-// than simply rating whether feedback felt helpful.
-const WRITING_COMMIT_OPTIONS = {
-  early: ["Start a sentence with a describing word", "Read my story out loud before I finish", "Use one of today's new words"],
-  elementary: ["Start a sentence with a fronted adverbial", "Check my story has a clear beginning and end", "Use one of today's vocabulary upgrades"],
-  middle: ["Add a sentence considering the other side", "Check every paragraph makes one clear point", "Use one of today's vocabulary upgrades"],
-  high: ["End a paragraph with a synthesis sentence", "Check my thesis directly answers the question", "Use one of today's rhetorical techniques"],
-};
-const READING_COMMIT_OPTIONS = {
-  early: ["Find the exact sentence that answers a question", "Read the passage again before answering", "Use one of today's new words"],
-  elementary: ["Look back at the text before I answer", "Explain my answer using words from the passage", "Use one of today's vocabulary upgrades"],
-  middle: ["Find one detail in the text that supports my answer", "Notice how the setting affects the mood", "Use one of today's vocabulary upgrades"],
-  high: ["Find the strongest evidence for my answer", "Notice one rhetorical technique the writer used", "Use one of today's vocabulary upgrades"],
-};
-
 // Explains the same skill through the lens of the student's chosen interest, so
 // the feedback lands as something they already understand rather than an abstract rule.
 const INTEREST_ANALOGY = {
@@ -2167,39 +2150,6 @@ function ThumbsFeedback({ context, session, submissionId, backendLive }){
 
 // The higher-leverage signal: not "did you like this" but "what will you actually do
 // with it" — a committed action, chosen from options drawn from this piece's own Grow.
-function CommitPrompt({ options, session, submissionId, backendLive }){
-  const [picked, setPicked] = useState(null);
-  function pick(opt){
-    setPicked(opt);
-    if (backendLive && submissionId) {
-      authedFetch(session, "/api/commit", { method: "POST", body: JSON.stringify({ submissionId, chosenAction: opt }) })
-        .catch((err)=> logAppError("Failed to log commitment:", err));
-    }
-  }
-  if (picked) {
-    return (
-      <div className="rounded-xl p-3 flex items-center gap-2" style={{ background: "var(--good-tint)" }}>
-        <IconCheck size={15} strokeWidth={2.4} style={{ color: "var(--good)" }} />
-        <span className="text-[13px] font-medium" style={{ color: "var(--ink)" }}>Locked in: <strong>{picked}</strong> — we'll check in on this next time.</span>
-      </div>
-    );
-  }
-  return (
-    <div>
-      <div className="text-[12.5px] font-semibold mb-2" style={{ color: "var(--ink-soft)" }}>What will you try next time?</div>
-      <div className="flex flex-wrap gap-2">
-        {options.map(opt=>(
-          <button key={opt} onClick={()=>pick(opt)}
-            className="focus-ring text-left rounded-full border px-3.5 py-2 text-[13px] font-medium"
-            style={{ borderColor: "var(--cyan)", color: "var(--cyan-ink)", background: "var(--cyan-tint)" }}>
-            {opt}
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-}
-
 // Renders the student's own submitted text with the AI's highlight quotes
 // picked out inline (green = glow, burgundy = grow), plus a plain-language
 // list below each one — so feedback that's otherwise just prose the student
@@ -2312,20 +2262,9 @@ function FeedbackPanel({ tier, gradeLabel, country, interest, confidence, motiva
   const vocabList = feedback?.vocab
     ? feedback.vocab.map(v=>[v.term, v.definition, v.example])
     : vocabFor(interest, tier, country);
-  const commitOptions = feedback?.commitOptions || WRITING_COMMIT_OPTIONS[tier];
 
   return (
     <div className="animate-float-in flex flex-col gap-4">
-      {feedback?.followUp && (
-        <div className="card p-4 flex items-start gap-2.5" style={{ borderColor: "var(--gold)", borderWidth: 1.5, background: "var(--gold-tint)" }}>
-          <IconFlame size={16} strokeWidth={2.2} style={{ color: "var(--gold-ink)", marginTop: 2 }} />
-          <div>
-            <div className="font-display font-bold text-[12.5px] mb-0.5" style={{ color: "var(--gold-ink)" }}>Checking in on last time</div>
-            <p className="text-[13.5px] leading-snug" style={{ color: "var(--ink)" }}>{feedback.followUp}</p>
-          </div>
-        </div>
-      )}
-
       {submittedText && feedback?.highlights && (
         <div className="card p-5 sm:p-6">
           <div className="flex items-center gap-2 mb-3">
@@ -2364,9 +2303,6 @@ function FeedbackPanel({ tier, gradeLabel, country, interest, confidence, motiva
         </div>
         <p className="text-[15px] leading-relaxed font-read" style={{ color: "var(--ink)" }}>{grow}</p>
         <GrowNextBlock feedback={feedback} />
-        <div className="pt-4 mt-4 border-t" style={{ borderColor: "var(--border-soft)" }}>
-          <CommitPrompt options={commitOptions} session={session} submissionId={submissionId} backendLive={backendLive} />
-        </div>
       </div>
 
       <ExamTechniquePanel feedback={feedback} />
@@ -2599,20 +2535,9 @@ function ReadingFeedbackPanel({ tier, country, interest, confidence, motivation,
   const vocabList = feedback?.vocab
     ? feedback.vocab.map(v=>[v.term, v.definition, v.example])
     : vocabFor(interest, tier, country);
-  const commitOptions = feedback?.commitOptions || READING_COMMIT_OPTIONS[tier];
 
   return (
     <div className="animate-float-in flex flex-col gap-4">
-      {feedback?.followUp && (
-        <div className="card p-4 flex items-start gap-2.5" style={{ borderColor: "var(--gold)", borderWidth: 1.5, background: "var(--gold-tint)" }}>
-          <IconFlame size={16} strokeWidth={2.2} style={{ color: "var(--gold-ink)", marginTop: 2 }} />
-          <div>
-            <div className="font-display font-bold text-[12.5px] mb-0.5" style={{ color: "var(--gold-ink)" }}>Checking in on last time</div>
-            <p className="text-[13.5px] leading-snug" style={{ color: "var(--ink)" }}>{feedback.followUp}</p>
-          </div>
-        </div>
-      )}
-
       <div className="card p-5 sm:p-6 flex items-center gap-4" style={{ borderColor: "var(--good)", borderWidth: 1.5 }}>
         <div className="w-14 h-14 rounded-full grid place-items-center shrink-0 font-display font-extrabold text-lg" style={{ background: "var(--good-tint)", color: "var(--good)" }}>
           {pct}%
@@ -2637,9 +2562,6 @@ function ReadingFeedbackPanel({ tier, country, interest, confidence, motivation,
         </div>
         <p className="text-[15px] leading-relaxed font-read" style={{ color: "var(--ink)" }}>{grow}</p>
         <GrowNextBlock feedback={feedback} />
-        <div className="pt-4 mt-4 border-t" style={{ borderColor: "var(--border-soft)" }}>
-          <CommitPrompt options={commitOptions} session={session} submissionId={submissionId} backendLive={backendLive} />
-        </div>
       </div>
 
       <ExamTechniquePanel feedback={feedback} />

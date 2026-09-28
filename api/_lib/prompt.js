@@ -54,7 +54,7 @@ function revisionToneClause(tier) {
 }
 
 function highlightsClause(tier) {
-  return `You must also return 2-5 "highlights": short fragments copied EXACTLY, character-for-character (including any spelling or grammar mistakes — do not correct them), from the student's submitted text above. Each one is tagged "glow" (something that worked) or "grow" (something to improve), with a short note explaining why.
+  return `You must also return "highlights": short fragments copied EXACTLY, character-for-character (including any spelling or grammar mistakes — do not correct them), from the student's submitted text above. Each one is tagged "glow" (something that worked) or "grow" (something to improve), with a short note explaining why. Return as many genuine highlights as the piece actually supports — a short or thin piece may only have 2-3 real things to point to, but a longer or richer piece should get more, up to 8, so a student with a lot going on in their writing actually sees that reflected rather than being capped at just one or two of each. Never invent a marginal or repetitive highlight just to hit a higher count — only real, distinct things worth pointing out, spread across both glow and grow where the piece genuinely has both.
 For every "grow" highlight, also include a "revision" field: rewrite that exact fragment to actually apply the suggested improvement, in language this student would plausibly write themselves (same vocabulary level, same voice) — not a generic example, a rewrite of THEIR sentence. Omit "revision" entirely for "glow" highlights (there's nothing to fix).${revisionToneClause(tier)}
 IMPORTANT: "revision" is spliced into the story in place of "quote" and NOTHING else — every other sentence in the story, whether right next to the quote or several sentences away, stays exactly as the student wrote it. So "revision" must NEVER repeat or restate wording that already appears ANYWHERE ELSE in the student's text, even if your suggestion is to join two sentences with a conjunction — that other sentence is still there and will now appear twice. Wrong example: story "The dog ran fast. It saw a cat.", quote "It saw a cat.", suggestion "join with 'and'", revision "The dog ran fast and saw a cat." — this restates "The dog ran fast" (a DIFFERENT sentence, already elsewhere in the story), so the final story reads "The dog ran fast. The dog ran fast and saw a cat." (duplicated) once spliced in. Right way to handle a joining suggestion: revise the quote itself to start with the conjunction, e.g. revision "And it saw a cat." — every other sentence stays untouched and the joined feel still comes through.
 Every highlight's "quote" must be a real substring that appears verbatim in the submitted text — never paraphrase or reconstruct a quote from memory.`;
@@ -124,15 +124,6 @@ Find ONE real fragment (a sentence or short passage) FROM THE STUDENT'S OWN SUBM
 Put this in a "frameworkTip" field with "name" set to exactly "${fw.name}", "quote" set to that verbatim fragment, and "revision" set to the rewritten version.`;
 }
 
-// When the student previously tapped a "what will you try next time?"
-// commitment, this asks the model to genuinely check whether the new
-// submission shows evidence of it — never fabricated, and omitted if
-// there's nothing real to say.
-function followUpClause(previousCommitment) {
-  if (!previousCommitment) return "";
-  return `\n\nLast time, this student committed to trying: "${previousCommitment}" in their next submission. Look for genuine evidence of this in what they submitted now. If you find real evidence, briefly and warmly acknowledge it. If there's no clear evidence, gently note that without scolding — it's still worth trying. Put this 1-sentence check-in in a "followUp" field. Never claim evidence that isn't actually there.`;
-}
-
 // A dedicated, always-shown spelling/grammar check - separate from the
 // stylistic "highlights" above (which explicitly keep typos IN the quoted
 // text rather than correcting them, since those are about voice and craft).
@@ -166,7 +157,6 @@ Student text fragment: "...the dark forest was really scary and the trees looked
     { "term": "ominous", "definition": "giving the feeling that something bad is about to happen, like storm clouds before a launch", "example": "The ominous rumble of the engines meant launch was minutes away." },
     { "term": "murmur", "definition": "a soft, low sound, like mission control talking quietly in the background", "example": "A murmur ran through mission control as the countdown began." }
   ],
-  "commitOptions": ["Start a sentence with a fronted adverbial", "Reread my scary bit out loud", "Use one of today's new words"],
   "glowTarget": "Fronted Adverbials",
   "growTarget": "Fronted Adverbials",
   "frameworkTip": { "name": "Story Mountain", "quote": "the trees looked spooky", "revision": "Climax: the trees loomed even spookier, their shadows stretching out like reaching hands." },
@@ -181,7 +171,7 @@ Student text fragment: "...the dark forest was really scary and the trees looked
     { "quote": "the trees looked spooky", "type": "punctuation", "correction": "the trees looked spooky." }
   ]
 }
-Notice: the glow quotes the student's actual words, the standard is named naturally (not bolted on), the analogy is concrete, vocab defs are one plain sentence each, glowTarget/growTarget are copied verbatim from the given list, each highlight's "quote" is an exact substring of the student's text (typos and all) rather than a paraphrase, the "grow" highlight's "revision" is that same fragment actually rewritten — not restated advice, a real rewrite the student could paste straight into their story — frameworkTip.quote is a real, verbatim fragment of the student's OWN submission and frameworkTip.revision is that same fragment actually rewritten to demonstrate the framework, with each named part of the framework clearly labelled where the framework has them, overallScore/scoreReason judge the WHOLE piece (here, real punctuation gaps pulled the score down even though the single "grow" above only called out one sentence), and spellingGrammarTotal/spellingGrammar is a genuinely separate mechanical pass — real errors only, spellingGrammarTotal is the HONEST total even when it's higher than the 8 actually listed, and both are 0/empty when the piece is clean, never invented to pad the list. Match that bar exactly for the real student below — every claim must be traceable to what they actually wrote/answered.`;
+Notice: the glow quotes the student's actual words, the standard is named naturally (not bolted on), the analogy is concrete, vocab defs are one plain sentence each, glowTarget/growTarget are copied verbatim from the given list, each highlight's "quote" is an exact substring of the student's text (typos and all) rather than a paraphrase, the "grow" highlight's "revision" is that same fragment actually rewritten — not restated advice, a real rewrite the student could paste straight into their story (this tiny fragment only genuinely supports 2 highlights — a full-length piece should return more, scaling with how much real material it actually offers, not capped at this example's count) — frameworkTip.quote is a real, verbatim fragment of the student's OWN submission and frameworkTip.revision is that same fragment actually rewritten to demonstrate the framework, with each named part of the framework clearly labelled where the framework has them, overallScore/scoreReason judge the WHOLE piece (here, real punctuation gaps pulled the score down even though the single "grow" above only called out one sentence), and spellingGrammarTotal/spellingGrammar is a genuinely separate mechanical pass — real errors only, spellingGrammarTotal is the HONEST total even when it's higher than the 8 actually listed, and both are 0/empty when the piece is clean, never invented to pad the list. Match that bar exactly for the real student below — every claim must be traceable to what they actually wrote/answered.`;
 
 function successCriteria(tier, { includeFramework, genre } = {}) {
   const cap = MAX_AVG_WORDS_PER_SENTENCE[tier] || 30;
@@ -197,7 +187,7 @@ function successCriteria(tier, { includeFramework, genre } = {}) {
 8. Every "grow" highlight has a "revision" that is an actual rewrite of its quote (different wording, applying the fix) — never the same text repeated, and never just advice about the quote instead of a rewrite of it.${(tier === "middle" || tier === "high") ? '\n9. Every "revision" reads as a natural continuation of this student\'s own formal, third-person essay — pure academic argument, with NO interest-based analogy dropped into the revision text itself in any phrasing ("like how I...", "similar to how...", "just like...", etc). That framing belongs only in the "grow" field.' : ""}${fw ? `\n10. frameworkTip.name is EXACTLY "${fw.name}", copied verbatim; frameworkTip.quote is an exact, verbatim substring of the submitted text above (not a paraphrase); and frameworkTip.revision is a genuine rewrite of that exact quote (different wording, actually applying "${fw.name}") — never the same text repeated, never an unrelated invented example.` : ""}${includeFramework ? '\n11. overallScore is an integer 1-10 (never a string, never out of range) judging the WHOLE piece, not just the one glow/grow — if it disagrees with how positive the glow/grow read, that\'s fine and expected, since the score is the more critical, whole-piece judgement. scoreReason names a real pattern across the piece, not just a restatement of the single "grow" detail.' : ""}${includeFramework ? '\n12. spellingGrammar contains only real errors (each "quote" a verbatim substring, each "correction" that same fragment with just the error fixed) — an empty array if the piece is genuinely clean, never a fabricated error to avoid returning an empty list, and never a stylistic choice mislabelled as a mistake. spellingGrammarTotal is the TRUE count of real errors, never silently capped to match the list length when there are genuinely more than 8.' : ""}`;
 }
 
-function buildWritingPrompt({ tier, country, gradeLabel, interest, confidenceWriting, motivation, prompt, text, targetNames, targets, previousCommitment, capabilities, genre }) {
+function buildWritingPrompt({ tier, country, gradeLabel, interest, confidenceWriting, motivation, prompt, text, targetNames, targets, capabilities, genre }) {
   const caps = capabilities || {};
   const wantsExam = caps.examTechnique && examTechniqueSupported(tier) && Array.isArray(targets) && targets.length > 0;
   return `You are the feedback engine inside LiteracyLab AI, an educational product for a ${TIER_LABEL[tier]} student in ${gradeLabel} (${country}).
@@ -221,7 +211,6 @@ ${wantsExam ? examTechniqueClause({ tier, targets, kind: "writing" }) : ""}
 ${frameworkClause({ tier, genre })}
 ${overallScoreClause()}
 ${spellingGrammarClause()}
-${followUpClause(previousCommitment)}
 
 Read the actual submitted text closely — every point you make must be traceable to something specifically in it (quote a short fragment where useful), not a generic template response.
 
@@ -237,7 +226,6 @@ Respond with ONLY a JSON object (no markdown fences, no commentary) with exactly
     { "term": "a single word or short phrase", "definition": "a one-sentence, age-appropriate definition, framed using their interest where natural", "example": "a fresh sentence using the term correctly, built around their stated interest (${interest})" },
     { "term": "a second word or short phrase", "definition": "a one-sentence, age-appropriate definition, framed using their interest where natural", "example": "a fresh sentence using the term correctly, built around their stated interest (${interest})" }
   ],
-  "commitOptions": ["3 short first-person action phrases (5-8 words each) the student could tap to commit to trying next time, each directly derived from the grow above — not generic"],
   "glowTarget": "the exact skill area name from the given list that the glow demonstrates",
   "growTarget": "the exact skill area name from the given list that the grow is building towards",
   "highlights": [{ "quote": "an exact substring copied from the submitted text", "type": "glow or grow", "note": "a short reason", "revision": "ONLY for type=grow: that same fragment actually rewritten to apply the suggestion" }],${caps.deepFeedback ? '\n  "growNext": "ONE further, harder step to take after the main grow is mastered - genuinely different, not a restatement.",' : ""}${wantsExam ? `\n${EXAM_JSON_SHAPE},` : ""}
@@ -245,8 +233,7 @@ Respond with ONLY a JSON object (no markdown fences, no commentary) with exactly
   "overallScore": "an integer 1-10 scoring the WHOLE piece against the four criteria above",
   "scoreReason": "one sentence citing the specific strength/weakness pattern across the whole piece that drove that score",
   "spellingGrammarTotal": "the TRUE total count of real errors found, honest even if more than 8",
-  "spellingGrammar": [{ "quote": "an exact substring from the submitted text containing a real spelling/grammar/punctuation error", "type": "spelling, grammar, or punctuation", "correction": "that same fragment with just the error fixed" }],
-  "followUp": ${previousCommitment ? '"a short, honest 1-sentence check-in on the previous commitment noted above"' : "null"}
+  "spellingGrammar": [{ "quote": "an exact substring from the submitted text containing a real spelling/grammar/punctuation error", "type": "spelling, grammar, or punctuation", "correction": "that same fragment with just the error fixed" }]
 }`;
 }
 
@@ -274,7 +261,7 @@ RIGHT (praises something true without referencing the passage's content): "You g
 Keep the glow to one such content-free, honest sentence, then move straight into the grow.`;
 }
 
-function buildReadingPrompt({ tier, country, gradeLabel, interest, confidenceReading, motivation, passageTitle, passage, questions, answers, score, totalQuestions, targetNames, targets, previousCommitment, capabilities }) {
+function buildReadingPrompt({ tier, country, gradeLabel, interest, confidenceReading, motivation, passageTitle, passage, questions, answers, score, totalQuestions, targetNames, targets, capabilities }) {
   const caps = capabilities || {};
   const wantsExam = caps.examTechnique && examTechniqueSupported(tier) && Array.isArray(targets) && targets.length > 0;
   const answerLines = questions.map((q, i) => {
@@ -300,7 +287,6 @@ ${standardsClause(country, tier, gradeLabel)}
 ${targetsClause(targetNames)}
 ${deepFeedbackClause(caps.deepFeedback)}
 ${wantsExam ? examTechniqueClause({ tier, targets, kind: "reading" }) : ""}
-${followUpClause(previousCommitment)}
 
 ${WORKED_EXAMPLE}
 
@@ -314,10 +300,8 @@ Respond with ONLY a JSON object (no markdown fences, no commentary) with exactly
     { "term": "a word or phrase from the passage worth upgrading", "definition": "a one-sentence, age-appropriate definition, framed using their interest where natural", "example": "a fresh sentence using the term correctly, built around their stated interest (${interest})" },
     { "term": "a second word or phrase from the passage", "definition": "a one-sentence, age-appropriate definition, framed using their interest where natural", "example": "a fresh sentence using the term correctly, built around their stated interest (${interest})" }
   ],
-  "commitOptions": ["3 short first-person action phrases (5-8 words each) the student could tap to commit to trying next time, derived from the grow above"],
   "glowTarget": "the exact skill area name from the given list that the glow demonstrates",
-  "growTarget": "the exact skill area name from the given list that the grow is building towards",${caps.deepFeedback ? '\n  "growNext": "ONE further, harder step to take after the main grow is mastered - genuinely different, not a restatement.",' : ""}${wantsExam ? `\n${EXAM_JSON_SHAPE},` : ""}
-  "followUp": ${previousCommitment ? '"a short, honest 1-sentence check-in on the previous commitment noted above"' : "null"}
+  "growTarget": "the exact skill area name from the given list that the grow is building towards"${caps.deepFeedback ? ',\n  "growNext": "ONE further, harder step to take after the main grow is mastered - genuinely different, not a restatement."' : ""}${wantsExam ? `,\n${EXAM_JSON_SHAPE}` : ""}
 }`;
 }
 

@@ -23,7 +23,6 @@ function baseFeedback(overrides = {}) {
       { term: "concession", definition: "admitting part of the other side's point before answering it.", example: "Her concession that the other team trained hard made her win even sweeter." },
       { term: "rebuttal", definition: "the part where you answer the opposing argument directly.", example: "His rebuttal directly addressed the counter-argument from paragraph two." },
     ],
-    commitOptions: ["I'll add a counter-argument", "I'll test my claim harder", "I'll vary my sentence openings"],
     glowTarget: "Viewpoint & Argument Writing",
     growTarget: "Technical Accuracy",
     growNext: "Once counter-arguments feel natural, try ordering them so the strongest one lands last.",
@@ -142,7 +141,7 @@ test("the prompt only asks for paid sections when the plan grants them", () => {
   const args = {
     tier: "high", country: "UK", gradeLabel: "Year 11", interest: "football",
     confidenceWriting: "growing", motivation: "grades", prompt: "Agree or disagree.",
-    text: "An essay.", targetNames: TARGET_NAMES, targets: TARGETS, previousCommitment: null,
+    text: "An essay.", targetNames: TARGET_NAMES, targets: TARGETS,
   };
 
   const free = buildWritingPrompt({ ...args, capabilities: { deepFeedback: false, examTechnique: false } });

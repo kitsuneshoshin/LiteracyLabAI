@@ -77,27 +77,6 @@ async function releaseClaim(supabase, submissionId) {
 }
 
 // Looks up the most recent "what will you try next time?" commitment this
-// CHILD made for this exercise kind, excluding the submission being graded
-// right now — used so feedback can genuinely check in on it. Scoped by
-// child_id, not just profile_id, now that an account can have more than one
-// learner (see api/child-profile.js) - without that, one sibling's
-// commitment could wrongly surface in another sibling's "checking in on
-// last time" feedback. Returns null if there isn't one (first submission of
-// this kind for this child, or they never tapped one).
-async function getPreviousCommitment(supabase, profileId, childId, kind, excludeSubmissionId) {
-  const { data } = await supabase
-    .from("commitments")
-    .select("chosen_action, submission_id, submissions!inner(kind, child_id)")
-    .eq("profile_id", profileId)
-    .eq("submissions.kind", kind)
-    .eq("submissions.child_id", childId)
-    .neq("submission_id", excludeSubmissionId)
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
-  return data ? data.chosen_action : null;
-}
-
 module.exports = async function handler(req, res) {
   try {
     if (req.method !== "POST") {
@@ -153,7 +132,6 @@ module.exports = async function handler(req, res) {
         return res.status(409).json({ error: "This writing prompt has already been submitted." });
       }
 
-      const previousCommitment = await getPreviousCommitment(supabase, user.id, existing.child_id, "writing", submissionId);
       const targets = targetsForGrade(existing.country, existing.grade_label, existing.tier).targets;
       // Banded assessment objectives are only a real thing for middle/high,
       // so the plan's grant is narrowed by tier here, once, and the same
@@ -170,7 +148,7 @@ module.exports = async function handler(req, res) {
         const llmPrompt = buildWritingPrompt({
           tier: existing.tier, country: existing.country, gradeLabel: existing.grade_label, interest: existing.interest,
           confidenceWriting: body.confidenceWriting, motivation: body.motivation,
-          prompt: generated.prompt, text, previousCommitment, capabilities: caps, targets,
+          prompt: generated.prompt, text, capabilities: caps, targets,
           targetNames: targets.map((t) => t.name), genre,
         });
         result = await generateAndValidate(llmPrompt, existing.tier, existing.country, existing.grade_label, text, undefined, caps, genre);
@@ -234,7 +212,6 @@ module.exports = async function handler(req, res) {
       bank.questions.forEach((q, i) => { if (answers[i] === q.correct) score += 1; });
       const totalQuestions = bank.questions.length;
 
-      const previousCommitment = await getPreviousCommitment(supabase, user.id, existing.child_id, "reading", submissionId);
       const targets = targetsForGrade(existing.country, existing.grade_label, existing.tier).targets;
       const caps = { ...planCaps, examTechnique: planCaps.examTechnique && examTechniqueSupported(existing.tier) };
       let result;
@@ -243,7 +220,7 @@ module.exports = async function handler(req, res) {
           tier: existing.tier, country: existing.country, gradeLabel: existing.grade_label, interest: existing.interest,
           confidenceReading: body.confidenceReading, motivation: body.motivation,
           passageTitle: bank.title, passage: bank.passage, questions: bank.questions,
-          answers, score, totalQuestions, previousCommitment, capabilities: caps, targets,
+          answers, score, totalQuestions, capabilities: caps, targets,
           targetNames: targets.map((t) => t.name),
         });
         result = await generateAndValidate(llmPrompt, existing.tier, existing.country, existing.grade_label, undefined, score, caps);

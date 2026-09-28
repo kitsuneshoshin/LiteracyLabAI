@@ -295,14 +295,6 @@ function validateFeedback(parsed, { tier, standardsList, targetNames, submittedT
     });
   }
 
-  if (!Array.isArray(parsed?.commitOptions) || parsed.commitOptions.length < 2 || parsed.commitOptions.length > 4) {
-    issues.push("commitOptions must be an array of 2-4 short items");
-  } else {
-    parsed.commitOptions.forEach((opt, i) => {
-      if (!checkString(opt, 5, 120)) issues.push(`commitOptions[${i}] is missing, too short, or too long`);
-    });
-  }
-
   if (checkString(parsed?.glow, 1, 100000) && checkString(parsed?.grow, 1, 100000)) {
     const combined = `${parsed.glow} ${parsed.grow}`;
     const avg = avgWordsPerSentence(combined);
@@ -325,8 +317,8 @@ function validateFeedback(parsed, { tier, standardsList, targetNames, submittedT
   // against — reading has no free-text submission of the student's own to
   // quote from.
   if (submittedText) {
-    if (!Array.isArray(parsed?.highlights) || parsed.highlights.length < 2 || parsed.highlights.length > 6) {
-      issues.push("highlights must be an array of 2-6 items");
+    if (!Array.isArray(parsed?.highlights) || parsed.highlights.length < 2 || parsed.highlights.length > 8) {
+      issues.push("highlights must be an array of 2-8 items");
     } else {
       const normalizedText = normalizeForMatch(submittedText);
       parsed.highlights.forEach((h, i) => {

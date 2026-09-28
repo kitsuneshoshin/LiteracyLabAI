@@ -12,7 +12,6 @@ function baseFeedback(overrides = {}) {
       { term: "adjective", definition: "a word that describes a noun, like happy or fast.", example: "\"Fast\" is an adjective in the sentence \"the fast dog ran.\"" },
       { term: "sentence", definition: "a group of words that expresses a complete thought.", example: "\"The dog ran fast\" is a complete sentence." },
     ],
-    commitOptions: ["I'll combine two sentences", "I'll add more description", "I'll check my spelling"],
     glowTarget: "",
     growTarget: "",
     // Matches the "elementary" tier's framework (see writingFrameworks.js) -
