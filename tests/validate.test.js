@@ -18,7 +18,7 @@ function baseFeedback(overrides = {}) {
     // Matches the "elementary" tier's framework (see writingFrameworks.js) -
     // most tests below use tier: "elementary", so this default keeps them
     // passing without every one needing its own frameworkTip override.
-    frameworkTip: { name: "Story Mountain", example: "Opening: a young sailor sets out. Build-up: a storm rolls in. Climax: the mast snaps. Resolution: she rows to shore. Ending: she tells the tale." },
+    frameworkTip: { name: "Story Mountain", quote: "It saw a cat up in a tree.", revision: "Climax: It suddenly spotted a cat up in a tree, its heart racing with excitement." },
     overallScore: 6,
     scoreReason: "Clear structure and a happy ending, but the sentences stay very short throughout.",
     spellingGrammarTotal: 0,
@@ -204,7 +204,7 @@ test("regression: an honest, content-free zero-score glow passes", () => {
 test("validateFeedback: frameworkTip.name must exactly match this tier's named framework", () => {
   const feedback = baseFeedback({
     highlights: [{ quote: "It saw a cat", type: "glow", note: "Nice concrete detail here." }],
-    frameworkTip: { name: "PEEL", example: "Point: cats are great pets. Evidence: they are low-maintenance. Explain: this suits busy families. Link: that is why more people choose cats." },
+    frameworkTip: { name: "PEEL", quote: "It saw a cat up in a tree.", revision: "Point: the cat's height showed real danger. Evidence: it saw a cat up in a tree. Explain: this raised the stakes. Link: that's what kept the dog running." },
   });
   // "PEEL" is middle's framework, not elementary's ("Story Mountain").
   const result = validateFeedback(feedback, { tier: "elementary", standardsList: [], targetNames: [], submittedText: SUBMITTED_TEXT });
@@ -212,14 +212,50 @@ test("validateFeedback: frameworkTip.name must exactly match this tier's named f
   assert.ok(result.issues.some((i) => i.includes("frameworkTip.name must be exactly \"Story Mountain\"")));
 });
 
-test("validateFeedback: a missing frameworkTip.example is rejected", () => {
+test("validateFeedback: a missing frameworkTip.quote or revision is rejected", () => {
   const feedback = baseFeedback({
     highlights: [{ quote: "It saw a cat", type: "glow", note: "Nice concrete detail here." }],
     frameworkTip: { name: "Story Mountain" },
   });
   const result = validateFeedback(feedback, { tier: "elementary", standardsList: [], targetNames: [], submittedText: SUBMITTED_TEXT });
   assert.equal(result.ok, false);
-  assert.ok(result.issues.some((i) => i.includes("frameworkTip.example")));
+  assert.ok(result.issues.some((i) => i.includes("frameworkTip.quote")));
+  assert.ok(result.issues.some((i) => i.includes("frameworkTip.revision")));
+});
+
+test("validateFeedback: frameworkTip.quote must be verbatim in the submission", () => {
+  const feedback = baseFeedback({
+    highlights: [{ quote: "It saw a cat", type: "glow", note: "Nice concrete detail here." }],
+    frameworkTip: { name: "Story Mountain", quote: "something never written", revision: "Climax: something never written, and it was thrilling." },
+  });
+  const result = validateFeedback(feedback, { tier: "elementary", standardsList: [], targetNames: [], submittedText: SUBMITTED_TEXT });
+  assert.equal(result.ok, false);
+  assert.ok(result.issues.some((i) => i.includes("frameworkTip.quote does not appear verbatim")));
+});
+
+test("validateFeedback: frameworkTip.revision identical to its quote is rejected", () => {
+  const feedback = baseFeedback({
+    highlights: [{ quote: "It saw a cat", type: "glow", note: "Nice concrete detail here." }],
+    frameworkTip: { name: "Story Mountain", quote: "It saw a cat up in a tree.", revision: "It saw a cat up in a tree." },
+  });
+  const result = validateFeedback(feedback, { tier: "elementary", standardsList: [], targetNames: [], submittedText: SUBMITTED_TEXT });
+  assert.equal(result.ok, false);
+  assert.ok(result.issues.some((i) => i.includes("identical to its quote")));
+});
+
+test("regression: frameworkTip.revision that only swaps a look-alike character for its quote is still rejected as a no-op", () => {
+  // A straight apostrophe in the "submission" vs a curly one in the
+  // "revision" - the same word to a human eye, different Unicode code
+  // point, so a plain === check on the raw strings would wrongly treat
+  // this as a genuine rewrite.
+  const text = "The dog's bark scared the cat up in the tree.";
+  const feedback = baseFeedback({
+    highlights: [{ quote: "the cat up in the tree", type: "glow", note: "Nice concrete detail here." }],
+    frameworkTip: { name: "Story Mountain", quote: "The dog's bark scared the cat up in the tree.", revision: "The dog’s bark scared the cat up in the tree." },
+  });
+  const result = validateFeedback(feedback, { tier: "elementary", standardsList: [], targetNames: [], submittedText: text });
+  assert.equal(result.ok, false);
+  assert.ok(result.issues.some((i) => i.includes("identical to its quote")));
 });
 
 test("validateFeedback: a correct frameworkTip for the given tier passes", () => {
@@ -228,7 +264,7 @@ test("validateFeedback: a correct frameworkTip for the given tier passes", () =>
       { quote: "It saw a cat", type: "glow", note: "Nice concrete detail here." },
       { quote: "The dog ran fast.", type: "grow", note: "Needs more variety.", revision: "Suddenly, the dog ran fast." },
     ],
-    frameworkTip: { name: "PEEL", example: "Point: cats are great pets. Evidence: they are low-maintenance. Explain: this suits busy families. Link: that is why more people choose cats." },
+    frameworkTip: { name: "PEEL", quote: "It saw a cat up in a tree.", revision: "Point: cats up trees show real danger. Evidence: it saw a cat up in a tree. Explain: this raised the stakes. Link: that's what kept the dog running." },
   });
   const result = validateFeedback(feedback, { tier: "middle", standardsList: [], targetNames: [], submittedText: SUBMITTED_TEXT });
   assert.equal(result.ok, true, `unexpected issues: ${JSON.stringify(result.issues)}`);
@@ -427,7 +463,7 @@ test("validateFeedback: frameworkTip is checked against the piece's OWN genre, n
     ],
     // "PEAL" is the persuasive framework, not elementary's usual "Story
     // Mountain" - correct here because this specific piece was persuasive.
-    frameworkTip: { name: "PEAL", example: "Point: dogs make loyal pets. Evidence: they protect their families. Analysis: this loyalty is why so many households choose one. Link: that is why dogs remain a top choice." },
+    frameworkTip: { name: "PEAL", quote: "It saw a cat up in a tree.", revision: "Point: dogs are naturally alert. Evidence: it saw a cat up in a tree. Analysis: this shows sharp instincts at work. Link: that's what makes dogs such loyal companions." },
   });
   const result = validateFeedback(feedback, {
     tier: "elementary", standardsList: [], targetNames: [], submittedText: SUBMITTED_TEXT, genre: "persuasive",

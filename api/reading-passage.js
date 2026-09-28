@@ -96,7 +96,7 @@ module.exports = async function handler(req, res) {
     // usage charge for a passage the student never actually received.
     let parsed;
     try {
-      const llmPrompt = buildReadingPassagePrompt({ tier, country, gradeLabel, interest });
+      const llmPrompt = buildReadingPassagePrompt({ tier, country, gradeLabel });
       ({ parsed } = await generateAndValidate(llmPrompt, tier));
     } catch (genErr) {
       await supabase.from("submissions").delete().eq("id", reserved.id);

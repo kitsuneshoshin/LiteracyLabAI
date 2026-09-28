@@ -109,19 +109,19 @@ function deepFeedbackClause(deep) {
 // was actually written in (see writingFrameworks.js) - not the student's
 // age tier, so a persuasive piece from a younger student still gets a
 // persuasive-writing framework rather than one built for stories - and asks
-// for ONE fresh worked example of it in action, the actual teaching moment,
-// not just a label. The example is deliberately NOT required to reuse the
-// student's own text (unlike "highlights"/"revision"): it needs to show the
-// framework's named parts clearly labelled, which forcing it onto this
-// specific student's sentence wouldn't always allow, so instead it's a
-// fresh mini-demonstration built around the same stated interest as the
-// rest of the feedback.
-function frameworkClause({ tier, interest, genre }) {
+// for a real revision GROUNDED IN THE STUDENT'S OWN SUBMISSION, the same
+// "quote a real fragment, then show it rewritten" mechanic "highlights"
+// already uses, rather than an unrelated interest-themed mini-story. A
+// generic demo of "PEEL" a child never wrote doesn't teach them nearly as
+// much as seeing their OWN paragraph restructured to use it - interest
+// stays reserved for the Grow/vocab fields, not this one.
+function frameworkClause({ tier, genre }) {
   const resolvedGenre = resolveGenre(genre, tier);
   const fw = frameworkForGenre(resolvedGenre);
   if (!fw) return "";
   return `\n\nFRAMEWORK SPOTLIGHT (required): Teach the student the "${fw.name}" framework, a genuinely well-known ${resolvedGenre} writing technique — you are given its exact name and definition, do not alter or re-explain it yourself: "${fw.description}"
-Write ONE fresh worked example (2-4 sentences) that demonstrates "${fw.name}" being applied, built around the student's stated interest (${interest}) as its subject matter — NOT a rewrite of the student's own submission. If the framework has named parts (like PEEL's Point/Evidence/Explain/Link), label each part inline in your example so the structure is visible, e.g. "Point: ... Evidence: ... Explain: ... Link: ...". Put this in a "frameworkTip" field with "name" set to exactly "${fw.name}" and "example" set to your worked example.`;
+Find ONE real fragment (a sentence or short passage) FROM THE STUDENT'S OWN SUBMITTED TEXT ABOVE where "${fw.name}" genuinely applies, and quote it EXACTLY, verbatim, in a "quote" field. Then, in a "revision" field, rewrite that exact fragment so it actually demonstrates "${fw.name}" being applied to THEIR writing — a real improvement to something they actually wrote, never an unrelated invented example. If the framework has named parts (like PEEL's Point/Evidence/Explain/Link), label each part inline in the revision so the structure is visible, e.g. "Point: ... Evidence: ... Explain: ... Link: ..."; if it doesn't (like Show, Don't Tell), just apply the technique directly, no labels needed.${revisionToneClause(tier)}
+Put this in a "frameworkTip" field with "name" set to exactly "${fw.name}", "quote" set to that verbatim fragment, and "revision" set to the rewritten version.`;
 }
 
 // When the student previously tapped a "what will you try next time?"
@@ -141,7 +141,7 @@ function followUpClause(previousCommitment) {
 // a clean piece visibly says so and an error-heavy piece doesn't get its
 // spelling glossed over by one Glow/Grow pair that's about something else.
 function spellingGrammarClause() {
-  return `\n\nSPELLING AND GRAMMAR CHECK (required, separate from the glow/grow above): Re-read the submitted text one more time, specifically for spelling, grammar, and punctuation errors only - not style or word choice. First count the TRUE total number of real errors in the whole piece and put it in "spellingGrammarTotal" - this must be the honest count even if it's more than 8, never capped or estimated down. Then list up to 8 of them, worst/most important first, as "spellingGrammar": an array of { "quote": an exact substring from the submitted text containing the error, "type": "spelling", "grammar", or "punctuation", "correction": that same fragment with just the error fixed }. If there are genuinely none, "spellingGrammarTotal" is 0 and "spellingGrammar" is an empty array - do not invent an error to fill the list, and do not flag a stylistic choice (like a sentence fragment used for effect) as if it were a mistake. Every "quote" must be a real, verbatim substring of the submitted text.`;
+  return `\n\nSPELLING AND GRAMMAR CHECK (required, separate from the glow/grow above): Re-read the submitted text one more time, specifically for spelling, grammar, and punctuation errors only - not style or word choice. First count the TRUE total number of real errors in the whole piece and put it in "spellingGrammarTotal" - this must be the honest count even if it's more than 8, never capped or estimated down. Then list up to 8 of them, worst/most important first, as "spellingGrammar": an array of { "quote": an exact substring from the submitted text containing the error, "type": "spelling", "grammar", or "punctuation", "correction": that same fragment with just the error fixed }. If there are genuinely none, "spellingGrammarTotal" is 0 and "spellingGrammar" is an empty array - do not invent an error to fill the list, and do not flag a stylistic choice (like a sentence fragment used for effect) as if it were a mistake. Every "quote" must be a real, verbatim substring of the submitted text, and every "correction" must be VISIBLY, meaningfully different from its own "quote" when a person reads them side by side - never the exact same wording with only a different-looking character swapped in for the same punctuation mark (e.g. a curly apostrophe for a straight one, an em dash for a hyphen). If you can't point to a real, visible difference, it isn't a real error - leave it out.`;
 }
 
 // A holistic 1-10 score for the WHOLE piece, not just the one glow/grow
@@ -169,7 +169,7 @@ Student text fragment: "...the dark forest was really scary and the trees looked
   "commitOptions": ["Start a sentence with a fronted adverbial", "Reread my scary bit out loud", "Use one of today's new words"],
   "glowTarget": "Fronted Adverbials",
   "growTarget": "Fronted Adverbials",
-  "frameworkTip": { "name": "Story Mountain", "example": "Opening: A young astronaut steps onto Mars for the first time. Build-up: strange lights start flickering under the red dust. Climax: the ground gives way beneath her. Resolution: she finds an old rover, still running, and radios home. Ending: mission control finally answers." },
+  "frameworkTip": { "name": "Story Mountain", "quote": "the trees looked spooky", "revision": "Climax: the trees loomed even spookier, their shadows stretching out like reaching hands." },
   "overallScore": 6,
   "scoreReason": "Vivid imagery and a clear story arc, but frequent missing full stops and a rushed ending hold this back from a higher score.",
   "highlights": [
@@ -181,7 +181,7 @@ Student text fragment: "...the dark forest was really scary and the trees looked
     { "quote": "the trees looked spooky", "type": "punctuation", "correction": "the trees looked spooky." }
   ]
 }
-Notice: the glow quotes the student's actual words, the standard is named naturally (not bolted on), the analogy is concrete, vocab defs are one plain sentence each, glowTarget/growTarget are copied verbatim from the given list, each highlight's "quote" is an exact substring of the student's text (typos and all) rather than a paraphrase, the "grow" highlight's "revision" is that same fragment actually rewritten — not restated advice, a real rewrite the student could paste straight into their story — frameworkTip.example is a FRESH mini-demonstration (not the student's own text) with each named part of the framework clearly labelled, overallScore/scoreReason judge the WHOLE piece (here, real punctuation gaps pulled the score down even though the single "grow" above only called out one sentence), and spellingGrammarTotal/spellingGrammar is a genuinely separate mechanical pass — real errors only, spellingGrammarTotal is the HONEST total even when it's higher than the 8 actually listed, and both are 0/empty when the piece is clean, never invented to pad the list. Match that bar exactly for the real student below — every claim must be traceable to what they actually wrote/answered.`;
+Notice: the glow quotes the student's actual words, the standard is named naturally (not bolted on), the analogy is concrete, vocab defs are one plain sentence each, glowTarget/growTarget are copied verbatim from the given list, each highlight's "quote" is an exact substring of the student's text (typos and all) rather than a paraphrase, the "grow" highlight's "revision" is that same fragment actually rewritten — not restated advice, a real rewrite the student could paste straight into their story — frameworkTip.quote is a real, verbatim fragment of the student's OWN submission and frameworkTip.revision is that same fragment actually rewritten to demonstrate the framework, with each named part of the framework clearly labelled where the framework has them, overallScore/scoreReason judge the WHOLE piece (here, real punctuation gaps pulled the score down even though the single "grow" above only called out one sentence), and spellingGrammarTotal/spellingGrammar is a genuinely separate mechanical pass — real errors only, spellingGrammarTotal is the HONEST total even when it's higher than the 8 actually listed, and both are 0/empty when the piece is clean, never invented to pad the list. Match that bar exactly for the real student below — every claim must be traceable to what they actually wrote/answered.`;
 
 function successCriteria(tier, { includeFramework, genre } = {}) {
   const cap = MAX_AVG_WORDS_PER_SENTENCE[tier] || 30;
@@ -194,7 +194,7 @@ function successCriteria(tier, { includeFramework, genre } = {}) {
 5. Both vocab definitions are one plain sentence each, framed through the student's interest where natural, and each has an "example" sentence that actually uses the term correctly (not just repeats the definition).
 6. glowTarget and growTarget are copied EXACTLY, character-for-character, from the provided list of skill area names — not paraphrased, shortened, or invented.
 7. Every highlight's "quote" is an exact, verbatim substring you can point to in the submitted text above — not a cleaned-up or paraphrased version of it.
-8. Every "grow" highlight has a "revision" that is an actual rewrite of its quote (different wording, applying the fix) — never the same text repeated, and never just advice about the quote instead of a rewrite of it.${(tier === "middle" || tier === "high") ? '\n9. Every "revision" reads as a natural continuation of this student\'s own formal, third-person essay — pure academic argument, with NO interest-based analogy dropped into the revision text itself in any phrasing ("like how I...", "similar to how...", "just like...", etc). That framing belongs only in the "grow" field.' : ""}${fw ? `\n10. frameworkTip.name is EXACTLY "${fw.name}", copied verbatim, and frameworkTip.example is a fresh mini-demonstration (not a rewrite of the student's own submission) with each named part of the framework clearly labelled.` : ""}${includeFramework ? '\n11. overallScore is an integer 1-10 (never a string, never out of range) judging the WHOLE piece, not just the one glow/grow — if it disagrees with how positive the glow/grow read, that\'s fine and expected, since the score is the more critical, whole-piece judgement. scoreReason names a real pattern across the piece, not just a restatement of the single "grow" detail.' : ""}${includeFramework ? '\n12. spellingGrammar contains only real errors (each "quote" a verbatim substring, each "correction" that same fragment with just the error fixed) — an empty array if the piece is genuinely clean, never a fabricated error to avoid returning an empty list, and never a stylistic choice mislabelled as a mistake. spellingGrammarTotal is the TRUE count of real errors, never silently capped to match the list length when there are genuinely more than 8.' : ""}`;
+8. Every "grow" highlight has a "revision" that is an actual rewrite of its quote (different wording, applying the fix) — never the same text repeated, and never just advice about the quote instead of a rewrite of it.${(tier === "middle" || tier === "high") ? '\n9. Every "revision" reads as a natural continuation of this student\'s own formal, third-person essay — pure academic argument, with NO interest-based analogy dropped into the revision text itself in any phrasing ("like how I...", "similar to how...", "just like...", etc). That framing belongs only in the "grow" field.' : ""}${fw ? `\n10. frameworkTip.name is EXACTLY "${fw.name}", copied verbatim; frameworkTip.quote is an exact, verbatim substring of the submitted text above (not a paraphrase); and frameworkTip.revision is a genuine rewrite of that exact quote (different wording, actually applying "${fw.name}") — never the same text repeated, never an unrelated invented example.` : ""}${includeFramework ? '\n11. overallScore is an integer 1-10 (never a string, never out of range) judging the WHOLE piece, not just the one glow/grow — if it disagrees with how positive the glow/grow read, that\'s fine and expected, since the score is the more critical, whole-piece judgement. scoreReason names a real pattern across the piece, not just a restatement of the single "grow" detail.' : ""}${includeFramework ? '\n12. spellingGrammar contains only real errors (each "quote" a verbatim substring, each "correction" that same fragment with just the error fixed) — an empty array if the piece is genuinely clean, never a fabricated error to avoid returning an empty list, and never a stylistic choice mislabelled as a mistake. spellingGrammarTotal is the TRUE count of real errors, never silently capped to match the list length when there are genuinely more than 8.' : ""}`;
 }
 
 function buildWritingPrompt({ tier, country, gradeLabel, interest, confidenceWriting, motivation, prompt, text, targetNames, targets, previousCommitment, capabilities, genre }) {
@@ -218,7 +218,7 @@ ${targetsClause(targetNames)}
 ${highlightsClause(tier)}
 ${deepFeedbackClause(caps.deepFeedback)}
 ${wantsExam ? examTechniqueClause({ tier, targets, kind: "writing" }) : ""}
-${frameworkClause({ tier, interest, genre })}
+${frameworkClause({ tier, genre })}
 ${overallScoreClause()}
 ${spellingGrammarClause()}
 ${followUpClause(previousCommitment)}
@@ -241,7 +241,7 @@ Respond with ONLY a JSON object (no markdown fences, no commentary) with exactly
   "glowTarget": "the exact skill area name from the given list that the glow demonstrates",
   "growTarget": "the exact skill area name from the given list that the grow is building towards",
   "highlights": [{ "quote": "an exact substring copied from the submitted text", "type": "glow or grow", "note": "a short reason", "revision": "ONLY for type=grow: that same fragment actually rewritten to apply the suggestion" }],${caps.deepFeedback ? '\n  "growNext": "ONE further, harder step to take after the main grow is mastered - genuinely different, not a restatement.",' : ""}${wantsExam ? `\n${EXAM_JSON_SHAPE},` : ""}
-  "frameworkTip": { "name": "the exact framework name you were given, verbatim", "example": "your fresh 2-4 sentence worked example demonstrating it" },
+  "frameworkTip": { "name": "the exact framework name you were given, verbatim", "quote": "a real, verbatim fragment from the student's own submitted text", "revision": "that exact fragment rewritten to demonstrate the framework applied to THEIR writing" },
   "overallScore": "an integer 1-10 scoring the WHOLE piece against the four criteria above",
   "scoreReason": "one sentence citing the specific strength/weakness pattern across the whole piece that drove that score",
   "spellingGrammarTotal": "the TRUE total count of real errors found, honest even if more than 8",
@@ -339,12 +339,17 @@ const PASSAGE_SKILL = {
 // of picking from a small fixed bank, so a returning student never sees the
 // same text twice. The generated answer key (the "correct" indices) is
 // stripped out before this ever reaches the client — see api/reading-passage.js.
-function buildReadingPassagePrompt({ tier, country, gradeLabel, interest }) {
+// Deliberately NOT themed around the student's stated interest - that
+// stays a feedback-time thing (the Grow's analogy, vocab examples, the
+// framework's worked example). A real exam or classroom prompt isn't
+// written around one specific student's hobbies, so generating the
+// exercise itself that way would make it less realistic, not more
+// engaging - and it meant two students with different interests never saw
+// the same original passage even when everything else about them matched.
+function buildReadingPassagePrompt({ tier, country, gradeLabel }) {
   return `You are generating an ORIGINAL reading-comprehension exercise for a ${TIER_LABEL[tier]} student in ${gradeLabel} (${country}).
 
 Write a short, wholly original passage — never copied or closely paraphrased from any existing published book, article, or other copyrighted work — appropriate for this age, plus 3 multiple-choice comprehension questions about it.
-
-The student's stated interest is: ${interest}. Where it fits naturally, let the passage's subject matter connect to this interest, but the passage must stand alone and be fully understandable without any outside knowledge of that interest.
 
 Requirements:
 - Passage length: ${PASSAGE_LENGTH[tier]}.
@@ -375,12 +380,12 @@ const WRITING_EXERCISE_TYPE = {
 // Generates a brand-new writing prompt on demand instead of reusing one
 // fixed prompt per tier, so a returning student doesn't write to the same
 // prompt every session. Mirrors buildReadingPassagePrompt's reasoning.
-function buildWritingPromptGenerator({ tier, country, gradeLabel, interest }) {
+// Same reasoning as buildReadingPassagePrompt above: interest stays out of
+// the exercise itself, and only shapes the feedback afterward.
+function buildWritingPromptGenerator({ tier, country, gradeLabel }) {
   return `You are generating an ORIGINAL creative-writing or essay prompt for a ${TIER_LABEL[tier]} student in ${gradeLabel} (${country}).
 
 Write ${WRITING_EXERCISE_TYPE[tier]}.
-
-The student's stated interest is: ${interest}. Where it fits naturally, let the prompt's subject matter connect to this interest, but the prompt must stand alone and make sense to any student regardless of that interest.
 
 Requirements:
 - The prompt must be wholly original — not copied or closely paraphrased from any existing published writing prompt, exam question, or exercise.

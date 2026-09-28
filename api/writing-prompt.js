@@ -100,7 +100,7 @@ module.exports = async function handler(req, res) {
     // usage charge for a prompt the student never actually received.
     let parsed;
     try {
-      const llmPrompt = buildWritingPromptGenerator({ tier, country, gradeLabel, interest });
+      const llmPrompt = buildWritingPromptGenerator({ tier, country, gradeLabel });
       ({ parsed } = await generateAndValidate(llmPrompt, tier));
     } catch (genErr) {
       await supabase.from("submissions").delete().eq("id", reserved.id);

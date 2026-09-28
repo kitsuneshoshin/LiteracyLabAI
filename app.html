@@ -2554,19 +2554,23 @@ function SpellingGrammarPanel({ feedback }){
 // when the server actually returned one — never set for reading feedback.
 function FrameworkTipPanel({ feedback }){
   const tip = feedback?.frameworkTip;
-  if (!tip?.name) return null;
+  // "quote"/"revision" ground this in the student's OWN submission (same
+  // mechanic as the "highlights" annotated card) - a generic demo the
+  // child never wrote is far less useful than seeing their own sentence
+  // actually rewritten to apply the framework.
+  if (!tip?.name || !tip?.quote || !tip?.revision) return null;
   return (
     <Collapsible defaultOpen={true} borderColor="var(--navy)" iconBg="var(--navy-tint)" iconColor="var(--ink)"
       icon={<IconGrid size={15} strokeWidth={2.2} />} title={`Framework spotlight — ${tip.name}`} teaser={tip.description}>
       {tip.description && (
         <p className="text-[13px] mb-3" style={{ color: "var(--ink-faint)" }}>{tip.description}</p>
       )}
-      {tip.example && (
-        <div className="rounded-xl p-3.5 text-[13.5px] leading-relaxed font-read" style={{ background: "var(--surface-2)", color: "var(--ink)" }}>
-          <span className="font-display font-bold text-[11px] block mb-1" style={{ color: "var(--ink-faint)" }}>WORKED EXAMPLE</span>
-          {tip.example}
-        </div>
-      )}
+      <div className="rounded-xl p-3.5" style={{ background: "var(--surface-2)" }}>
+        <span className="font-display font-bold text-[11px] block mb-1" style={{ color: "var(--ink-faint)" }}>FROM YOUR STORY</span>
+        <p className="text-[13.5px] leading-relaxed font-read mb-3" style={{ color: "var(--ink-soft)" }}>“{tip.quote}”</p>
+        <span className="font-display font-bold text-[11px] block mb-1" style={{ color: "var(--ink-faint)" }}>APPLYING {tip.name.toUpperCase()}</span>
+        <p className="text-[13.5px] leading-relaxed font-read" style={{ color: "var(--ink)" }}>{tip.revision}</p>
+      </div>
     </Collapsible>
   );
 }

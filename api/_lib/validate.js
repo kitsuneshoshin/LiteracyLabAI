@@ -37,6 +37,30 @@ function normalizeForMatch(s) {
   return String(s).toLowerCase().replace(/\s+/g, " ").trim();
 }
 
+// For "did this actually change anything" checks (a correction vs. its own
+// quote, a revision vs. its own quote) - stricter than normalizeForMatch,
+// which only lowercases and collapses whitespace. A real bug this caught:
+// the model can return a "correction" that's byte-for-byte identical to a
+// human reading it, but uses a different Unicode character for the same
+// punctuation mark (a curly quote "'" vs a straight one "'", an em dash "—"
+// vs a hyphen "-") - normalizeForMatch alone sees those as genuinely
+// different strings and lets a no-op "fix" straight through, which is
+// exactly what it looks like to a parent: the suggested change already
+// exists in their child's submission. Folding look-alikes first means the
+// equality check actually reflects what a human would see as the same text.
+function foldLookalikes(s) {
+  // Only folds same-glyph character variants (smart quotes, dash lengths,
+  // the single ellipsis codepoint) to one canonical form - it deliberately
+  // does NOT strip punctuation outright, since a "punctuation" type fix is
+  // often nothing but a missing period or comma, and that real difference
+  // must still register as a difference.
+  return normalizeForMatch(s)
+    .replace(/[‘’‚‛]/g, "'")
+    .replace(/[“”„‟]/g, '"')
+    .replace(/[–—―]/g, "-")
+    .replace(/…/g, "...");
+}
+
 // Catches a real failure mode found in live testing (twice, in two shapes):
 // the model tries to satisfy a "join these sentences" suggestion by
 // restating some OTHER sentence from the story inside "revision" - not
@@ -165,15 +189,25 @@ function validateExamTechnique(parsed, targetNames, issues) {
 // a length/distinctness check, same depth as other free-text fields, since
 // judging whether an example genuinely demonstrates a framework isn't
 // something a cheap deterministic check can do.
-function validateFrameworkTip(parsed, tier, genre, issues) {
+function validateFrameworkTip(parsed, tier, genre, submittedText, issues) {
   const fw = frameworkForGenre(resolveGenre(genre, tier));
   if (!fw) return;
   const tip = parsed?.frameworkTip;
   if (!tip || tip.name !== fw.name) {
     issues.push(`frameworkTip.name must be exactly "${fw.name}" for this piece's genre`);
   }
-  if (!checkString(tip?.example, 20, 700)) {
-    issues.push("frameworkTip.example is missing, too short, or too long");
+  // Grounded in the student's OWN writing, the same "quote it, then rewrite
+  // it" mechanic "highlights" uses - a generic demo the child never wrote
+  // teaches less than seeing their own sentence actually improved.
+  if (!checkString(tip?.quote, 3, 300)) {
+    issues.push("frameworkTip.quote is missing or an unreasonable length");
+  } else if (!normalizeForMatch(submittedText).includes(normalizeForMatch(tip.quote))) {
+    issues.push("frameworkTip.quote does not appear verbatim in the student's submitted text");
+  }
+  if (!checkString(tip?.revision, 3, 700)) {
+    issues.push("frameworkTip.revision is missing or an unreasonable length");
+  } else if (checkString(tip?.quote, 1, 100000) && foldLookalikes(tip.revision) === foldLookalikes(tip.quote)) {
+    issues.push("frameworkTip.revision is identical to its quote — it must actually rewrite the fragment, not repeat it");
   }
 }
 
@@ -230,7 +264,7 @@ function validateSpellingGrammar(parsed, submittedText, issues) {
     }
     if (!checkString(item?.correction, 1, 240)) {
       issues.push(`spellingGrammar[${i}].correction is missing or an unreasonable length`);
-    } else if (checkString(item?.quote, 1, 100000) && normalizeForMatch(item.correction) === normalizeForMatch(item.quote)) {
+    } else if (checkString(item?.quote, 1, 100000) && foldLookalikes(item.correction) === foldLookalikes(item.quote)) {
       issues.push(`spellingGrammar[${i}].correction is identical to its quote — it must actually fix something`);
     }
   });
@@ -310,7 +344,7 @@ function validateFeedback(parsed, { tier, standardsList, targetNames, submittedT
         if (h?.type === "grow") {
           if (!checkString(h?.revision, 3, 300)) {
             issues.push(`highlights[${i}].revision is missing or an unreasonable length (required for type "grow")`);
-          } else if (checkString(h?.quote, 1, 100000) && normalizeForMatch(h.revision) === normalizeForMatch(h.quote)) {
+          } else if (checkString(h?.quote, 1, 100000) && foldLookalikes(h.revision) === foldLookalikes(h.quote)) {
             issues.push(`highlights[${i}].revision is identical to its quote — it must actually rewrite the fragment, not repeat it`);
           } else if (checkString(h?.quote, 1, 100000) && revisionDuplicatesExistingText(h.revision, normalizedText, normalizeForMatch(h.quote))) {
             issues.push(`highlights[${i}].revision restates wording that already appears elsewhere in the student's text — since it's spliced in place of the quote only, this would duplicate that text in the final story`);
@@ -325,7 +359,7 @@ function validateFeedback(parsed, { tier, standardsList, targetNames, submittedT
         }
       });
     }
-    validateFrameworkTip(parsed, tier, genre, issues);
+    validateFrameworkTip(parsed, tier, genre, submittedText, issues);
     validateOverallScore(parsed, issues);
     validateSpellingGrammar(parsed, submittedText, issues);
   }
