@@ -6,7 +6,7 @@ const { buildWritingPrompt, buildReadingPrompt, correctiveAddendum, examTechniqu
 const { standardsFor } = require("./_lib/curriculum");
 const { targetsForGrade } = require("./_lib/masteryTargets");
 const { frameworkForGenre, resolveGenre } = require("./_lib/writingFrameworks");
-const { validateFeedback, resolveTarget } = require("./_lib/validate");
+const { validateFeedback, resolveTarget, dropInvalidSpellingGrammar } = require("./_lib/validate");
 const { checkRateLimit } = require("./_lib/rateLimit");
 const { writingLimitsForGrade } = require("./_lib/writingLimits");
 
@@ -29,6 +29,7 @@ async function generateAndValidate(prompt, tier, country, gradeLabel, submittedT
 
   for (let i = 1; i <= MAX_ATTEMPTS; i++) {
     const attempt = await generateFeedbackJSON(nextPrompt);
+    dropInvalidSpellingGrammar(attempt.parsed, submittedText);
     const check = validateFeedback(attempt.parsed, { tier, standardsList, targetNames, submittedText, readingScore, capabilities, genre });
     if (check.ok) {
       // Snap glowTarget/growTarget to the exact canonical string so

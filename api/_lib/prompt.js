@@ -74,10 +74,20 @@ Every highlight's "quote" must be a real substring that appears verbatim in the 
 // sell-what-doesn't-exist mistake this tier split was built to fix.
 const EXAM_BANDS = `Band 1 = "Emerging" (the objective is barely attempted), Band 2 = "Developing" (attempted but inconsistent), Band 3 = "Secure" (met clearly and consistently), Band 4 = "Strong" (met with control and deliberate effect).`;
 
-const EXAM_JSON_SHAPE = `  "examTechnique": [
-    { "criterion": "the exact assessment objective name", "band": 3, "descriptor": "Secure", "evidence": "a short quote or the specific question that shows it", "toNextBand": "one specific change that would move this objective up one band" }
-  ],
-  "examSummary": "one sentence naming the single objective worth working on next, and why"`;
+// One pre-named entry PER objective, not a single generic example. The old
+// shape showed one { "criterion": "the exact assessment objective name" ... }
+// object, and the model copied that shape literally - returning a one-item
+// examTechnique array (only the objective it judged most relevant) on real
+// Middle and High School submissions, failing validation 3 times running
+// ("missing an entry for: ..." the other three of four). Pre-filling every
+// criterion name leaves the model only the band/evidence to fill in, and
+// makes a short array look wrong against its own template.
+function examJsonShape(targets) {
+  const entries = targets.map((t) =>
+    `    { "criterion": ${JSON.stringify(t.name)}, "band": "an integer 1-4 for this objective", "descriptor": "that band's descriptor word", "evidence": "a short quote or the specific question that shows it - or say plainly it wasn't attempted", "toNextBand": "one specific change that would move this objective up one band" }`
+  ).join(",\n");
+  return `  "examTechnique": [\n${entries}\n  ],\n  "examSummary": "one sentence naming the single objective worth working on next, and why"`;
+}
 
 function examTechniqueSupported(tier) {
   return tier === "middle" || tier === "high";
@@ -240,7 +250,7 @@ Respond with ONLY a JSON object (no markdown fences, no commentary) with exactly
   ],
   "glowTarget": "the exact skill area name from the given list that the glow demonstrates",
   "growTarget": "the exact skill area name from the given list that the grow is building towards",
-  "highlights": [{ "quote": "an exact substring copied from the submitted text", "type": "glow or grow", "note": "a short reason", "revision": "ONLY for type=grow: that same fragment actually rewritten to apply the suggestion" }],${caps.deepFeedback ? '\n  "growNext": "ONE further, harder step to take after the main grow is mastered - genuinely different, not a restatement.",' : ""}${wantsExam ? `\n${EXAM_JSON_SHAPE},` : ""}
+  "highlights": [{ "quote": "an exact substring copied from the submitted text", "type": "glow or grow", "note": "a short reason", "revision": "ONLY for type=grow: that same fragment actually rewritten to apply the suggestion" }],${caps.deepFeedback ? '\n  "growNext": "ONE further, harder step to take after the main grow is mastered - genuinely different, not a restatement.",' : ""}${wantsExam ? `\n${examJsonShape(targets)},` : ""}
   "frameworkTip": { "name": "the exact framework name you were given, verbatim", "quote": "a real, verbatim fragment from the student's own submitted text", "revision": "that exact fragment rewritten to demonstrate the framework applied to THEIR writing" },
   "overallScore": "an integer 1-10 scoring the WHOLE piece against the four criteria above",
   "scoreReason": "one sentence citing the specific strength/weakness pattern across the whole piece that drove that score",
@@ -313,7 +323,7 @@ Respond with ONLY a JSON object (no markdown fences, no commentary) with exactly
     { "term": "a second word or phrase from the passage", "definition": "a one-sentence, age-appropriate definition, framed using their interest where natural", "example": "a fresh sentence using the term correctly, built around their stated interest (${interest})" }
   ],
   "glowTarget": "the exact skill area name from the given list that the glow demonstrates",
-  "growTarget": "the exact skill area name from the given list that the grow is building towards"${caps.deepFeedback ? ',\n  "growNext": "ONE further, harder step to take after the main grow is mastered - genuinely different, not a restatement."' : ""}${wantsExam ? `,\n${EXAM_JSON_SHAPE}` : ""}
+  "growTarget": "the exact skill area name from the given list that the grow is building towards"${caps.deepFeedback ? ',\n  "growNext": "ONE further, harder step to take after the main grow is mastered - genuinely different, not a restatement."' : ""}${wantsExam ? `,\n${examJsonShape(targets)}` : ""}
 }`;
 }
 

@@ -270,6 +270,32 @@ function validateSpellingGrammar(parsed, submittedText, issues) {
   });
 }
 
+// The spelling/grammar list is a secondary, mechanical section - one entry
+// whose "quote" the model paraphrased instead of copying used to fail the
+// ENTIRE feedback response (found live: a High School essay rejected 3 times
+// running, "spellingGrammar[1].quote does not appear verbatim", alongside the
+// exam-technique failure), leaving the student with nothing. An entry that
+// can't be shown truthfully (its quote isn't in the text, or its "correction"
+// changes nothing) is dropped instead, and the honest total is reduced by
+// the same count, since a dropped entry was never a real error to count.
+// validateSpellingGrammar still runs afterwards as a backstop.
+function dropInvalidSpellingGrammar(parsed, submittedText) {
+  if (!parsed || !Array.isArray(parsed.spellingGrammar) || !submittedText) return parsed;
+  const normalizedText = normalizeForMatch(submittedText);
+  const kept = parsed.spellingGrammar.filter((item) =>
+    checkString(item?.quote, 1, 200) && checkString(item?.correction, 1, 240) &&
+    normalizedText.includes(normalizeForMatch(item.quote)) &&
+    foldLookalikes(item.correction) !== foldLookalikes(item.quote));
+  const dropped = parsed.spellingGrammar.length - kept.length;
+  if (dropped > 0) {
+    parsed.spellingGrammar = kept;
+    if (Number.isInteger(parsed.spellingGrammarTotal)) {
+      parsed.spellingGrammarTotal = Math.max(kept.length, parsed.spellingGrammarTotal - dropped);
+    }
+  }
+  return parsed;
+}
+
 function validateFeedback(parsed, { tier, standardsList, targetNames, submittedText, readingScore, capabilities, genre }) {
   const issues = [];
   const caps = capabilities || {};
@@ -440,4 +466,4 @@ function validateWritingPrompt(parsed, { tier }) {
   return { ok: issues.length === 0, issues };
 }
 
-module.exports = { validateFeedback, validatePassage, validateWritingPrompt, resolveTarget, MAX_AVG_WORDS_PER_SENTENCE };
+module.exports = { validateFeedback, validatePassage, validateWritingPrompt, resolveTarget, dropInvalidSpellingGrammar, MAX_AVG_WORDS_PER_SENTENCE };

@@ -478,3 +478,36 @@ test("validateFeedback: frameworkTip is checked against the piece's OWN genre, n
   const withoutGenre = validateFeedback(feedback, { tier: "elementary", standardsList: [], targetNames: [], submittedText: SUBMITTED_TEXT });
   assert.equal(withoutGenre.ok, false);
 });
+
+// Regression: one spellingGrammar entry whose quote the model paraphrased
+// used to fail the whole feedback response (a real High School essay was
+// rejected 3 times running). Bad entries are now dropped, not fatal.
+test("dropInvalidSpellingGrammar: drops entries that can't be shown truthfully and lowers the honest total to match", () => {
+  const { dropInvalidSpellingGrammar } = require("../api/_lib/validate");
+  const parsed = {
+    spellingGrammarTotal: 3,
+    spellingGrammar: [
+      { quote: "The dog ran fast", type: "punctuation", correction: "The dog ran fast." },
+      { quote: "a sentence the student never wrote", type: "grammar", correction: "a fixed sentence" },
+      { quote: "It saw a cat", type: "spelling", correction: "It saw a cat" },
+    ],
+  };
+  dropInvalidSpellingGrammar(parsed, SUBMITTED_TEXT);
+  assert.equal(parsed.spellingGrammar.length, 1);
+  assert.equal(parsed.spellingGrammar[0].quote, "The dog ran fast");
+  assert.equal(parsed.spellingGrammarTotal, 1);
+});
+
+test("dropInvalidSpellingGrammar: keeps a total larger than the list when the model reported more errors than it listed", () => {
+  const { dropInvalidSpellingGrammar } = require("../api/_lib/validate");
+  const parsed = {
+    spellingGrammarTotal: 15,
+    spellingGrammar: [
+      { quote: "The dog ran fast", type: "punctuation", correction: "The dog ran fast." },
+      { quote: "made up quote", type: "grammar", correction: "made up fix" },
+    ],
+  };
+  dropInvalidSpellingGrammar(parsed, SUBMITTED_TEXT);
+  assert.equal(parsed.spellingGrammar.length, 1);
+  assert.equal(parsed.spellingGrammarTotal, 14);
+});

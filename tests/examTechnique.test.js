@@ -178,3 +178,20 @@ test("exam-technique objectives are repeated as an explicit numbered checklist t
     assert.ok(premium.includes(`${i + 1}. "${t.name}"`), `missing checklist line for "${t.name}"`);
   });
 });
+
+// Regression: the JSON template shown to the model used to contain ONE
+// generic example entry, and the model copied that shape - returning a
+// one-item examTechnique array on real Middle/High School submissions. The
+// template must now carry one pre-named entry per objective.
+test("the exam-technique JSON template has one pre-named entry per objective, not a single generic one", () => {
+  const prompt = buildWritingPrompt({
+    tier: "high", country: "UK", gradeLabel: "Year 11", interest: "football",
+    confidenceWriting: "growing", motivation: "grades", prompt: "Agree or disagree.",
+    text: "An essay.", targetNames: TARGET_NAMES, targets: TARGETS,
+    capabilities: { deepFeedback: true, examTechnique: true },
+  });
+  TARGETS.forEach((t) => {
+    assert.ok(prompt.includes(`"criterion": ${JSON.stringify(t.name)}`), `template missing criterion entry for "${t.name}"`);
+  });
+  assert.ok(!prompt.includes("the exact assessment objective name"), "old single generic template entry is still present");
+});
