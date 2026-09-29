@@ -6,7 +6,7 @@ const { buildWritingPrompt, buildReadingPrompt, correctiveAddendum, examTechniqu
 const { standardsFor } = require("./_lib/curriculum");
 const { targetsForGrade } = require("./_lib/masteryTargets");
 const { frameworkForGenre, resolveGenre } = require("./_lib/writingFrameworks");
-const { validateFeedback, resolveTarget, dropInvalidSpellingGrammar, sanitizeQuestionReview } = require("./_lib/validate");
+const { validateFeedback, resolveTarget, dropInvalidSpellingGrammar, sanitizeQuestionReview, stripUngrantedSections } = require("./_lib/validate");
 const { checkRateLimit } = require("./_lib/rateLimit");
 const { writingLimitsForGrade } = require("./_lib/writingLimits");
 
@@ -78,7 +78,6 @@ async function releaseClaim(supabase, submissionId) {
   await supabase.from("submissions").update({ feedback: null }).eq("id", submissionId);
 }
 
-// Looks up the most recent "what will you try next time?" commitment this
 module.exports = async function handler(req, res) {
   try {
     if (req.method !== "POST") {
@@ -159,6 +158,8 @@ module.exports = async function handler(req, res) {
         throw genErr;
       }
 
+      stripUngrantedSections(result.parsed, { capabilities: caps, kind: "writing" });
+
       // The model only writes frameworkTip.name/example (see prompt.js) -
       // its definition is fixed per genre, not left to the model to
       // re-explain, so it's attached here from the single source of truth
@@ -230,6 +231,8 @@ module.exports = async function handler(req, res) {
         await releaseClaim(supabase, submissionId);
         throw genErr;
       }
+
+      stripUngrantedSections(result.parsed, { capabilities: caps, kind: "reading" });
 
       const { error: updateErr } = await supabase
         .from("submissions")

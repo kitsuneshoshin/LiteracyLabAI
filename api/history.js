@@ -103,9 +103,12 @@ module.exports = async function handler(req, res) {
         // holistic 1-10 judged against the WHOLE piece, deliberately kept
         // separate from the mastery trend line above (computeTimeline),
         // which tracks per-skill glow/grow direction over time, not a
-        // single quality score. Null for reading rows and for anything
-        // submitted before this field existed.
-        overallScore: s.kind === "writing" ? (s.feedback?.overallScore ?? null) : null,
+        // single quality score. Null for reading rows, for anything
+        // submitted before this field existed, and - since the score became
+        // Premium-only - for any plan without it: pieces written back when
+        // every plan generated a score still have one stored, and must not
+        // show it on a Free or Core account's activity list.
+        overallScore: s.kind === "writing" && capabilities.overallScore !== false ? (s.feedback?.overallScore ?? null) : null,
       })),
     });
   } catch (err) {

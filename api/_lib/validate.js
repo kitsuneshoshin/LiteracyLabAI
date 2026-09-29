@@ -345,6 +345,36 @@ function sanitizeQuestionReview(parsed, passageText, questionCount) {
   return parsed;
 }
 
+// The last line of defence for what a plan is sold: after validation and
+// before the feedback is stored or sent, delete every section this plan (or
+// this kind of exercise) doesn't include. The prompt already doesn't ask for
+// them, but a model can over-deliver anyway - and every panel in the app is
+// driven by whether its data is PRESENT, so a stray overallScore on a Core
+// account, an examTechnique block on Free, or a framework spotlight on a
+// reading attempt would just render. Which sections exist is the server's
+// decision, not the model's.
+function stripUngrantedSections(parsed, { capabilities, kind }) {
+  if (!parsed || typeof parsed !== "object") return parsed;
+  const caps = capabilities || {};
+  const drop = (...keys) => keys.forEach((k) => { delete parsed[k]; });
+
+  // Retired features; nothing renders them any more.
+  drop("commitOptions", "followUp");
+
+  if (!caps.deepFeedback) drop("growNext");
+  if (!caps.examTechnique) drop("examTechnique", "examSummary");
+
+  if (kind === "reading") {
+    // Reading has no free-text submission of the student's own to quote from.
+    drop("highlights", "frameworkTip", "overallScore", "scoreReason", "spellingGrammar", "spellingGrammarTotal");
+  } else {
+    drop("questionReview");
+    if (caps.overallScore === false) drop("overallScore", "scoreReason");
+    if (caps.spellingGrammar === false) drop("spellingGrammar", "spellingGrammarTotal");
+  }
+  return parsed;
+}
+
 function validateFeedback(parsed, { tier, standardsList, targetNames, submittedText, readingScore, capabilities, genre }) {
   const issues = [];
   const caps = capabilities || {};
@@ -520,4 +550,4 @@ function validateWritingPrompt(parsed, { tier }) {
   return { ok: issues.length === 0, issues };
 }
 
-module.exports = { validateFeedback, validatePassage, validateWritingPrompt, resolveTarget, dropInvalidSpellingGrammar, sanitizeQuestionReview, MAX_AVG_WORDS_PER_SENTENCE };
+module.exports = { validateFeedback, validatePassage, validateWritingPrompt, resolveTarget, dropInvalidSpellingGrammar, sanitizeQuestionReview, stripUngrantedSections, MAX_AVG_WORDS_PER_SENTENCE };
