@@ -71,16 +71,24 @@ module.exports = async function handler(req, res) {
         : [])
     );
 
+    // The vocabulary bank and its self-test quiz are a Core/Premium feature.
+    // Free still gets new vocabulary in each piece's feedback; only the
+    // collected bank is paid, so the payload itself changes rather than the
+    // UI merely hiding it.
+    const vocabLocked = capabilities.vocabBank === false;
+
     // A separate response shape (not merged into the payload below) so the
     // quiz screen's fetch stays a single small round-trip rather than
     // pulling the whole history payload just to throw most of it away.
     if (quiz) {
+      if (vocabLocked) return res.status(403).json({ error: "The vocabulary bank is part of Core and Premium.", vocabLocked: true });
       const n = Math.min(10, Math.max(1, parseInt(count, 10) || 5));
       return res.status(200).json(buildQuiz(vocabWords, n));
     }
 
     return res.status(200).json({
-      vocabWords,
+      vocabWords: vocabLocked ? [] : vocabWords,
+      vocabLocked,
       totalSubmissions: submissions.length,
       wordsWritten,
       writingPieces,

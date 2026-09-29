@@ -489,9 +489,9 @@ function localPrice(tier){
   return tier === "core" ? "$9.99" : "$19.99"; // pricing.js failed to load: still the right number
 }
 const PLAN_META = {
-  free:    { label: "Free",    badge: "FREE",    price: "$0",                  maxLearners: 1, peerComparison: false, progressTrend: false, deepFeedback: false, examTechnique: false, spellingGrammar: false, overallScore: false },
-  core:    { label: "Core",    badge: "CORE",    price: localPrice("core"),    maxLearners: 1, peerComparison: true,  progressTrend: true,  deepFeedback: false, examTechnique: false, spellingGrammar: false, overallScore: false },
-  premium: { label: "Premium", badge: "PREMIUM", price: localPrice("premium"), maxLearners: 6, peerComparison: true,  progressTrend: true,  deepFeedback: true,  examTechnique: true, spellingGrammar: true, overallScore: true },
+  free:    { label: "Free",    badge: "FREE",    price: "$0",                  maxLearners: 1, peerComparison: false, progressTrend: false, deepFeedback: false, examTechnique: false, spellingGrammar: false, overallScore: false, vocabBank: false },
+  core:    { label: "Core",    badge: "CORE",    price: localPrice("core"),    maxLearners: 1, peerComparison: true,  progressTrend: true,  deepFeedback: false, examTechnique: false, spellingGrammar: false, overallScore: false, vocabBank: true },
+  premium: { label: "Premium", badge: "PREMIUM", price: localPrice("premium"), maxLearners: 6, peerComparison: true,  progressTrend: true,  deepFeedback: true,  examTechnique: true, spellingGrammar: true, overallScore: true, vocabBank: true },
 };
 function planMeta(plan){
   if (plan === "admin")  return { ...PLAN_META.premium, label: "Admin",         badge: "ADMIN" };
@@ -1337,12 +1337,29 @@ const HISTORY_PAGE = 10;
 // "Test yourself" multiple-choice quiz built from the same list
 // (api/_lib/vocabQuiz.js). Two small internal views (browse/quiz) rather
 // than a separate page, since it's meant to be a quick side activity.
-function VocabularyBank({ vocabWords, session, childId, backendLive }){
+function VocabularyBank({ session, childId, backendLive, onSeePlans, displayName }){
+  const [words, setWords] = useState(null); // null = still loading
+  const [locked, setLocked] = useState(false); // Free plan: the bank is Core/Premium
+  const [loadError, setLoadError] = useState("");
   const [mode, setMode] = useState("browse"); // "browse" | "quiz"
   const [quiz, setQuiz] = useState(null);
   const [quizError, setQuizError] = useState("");
   const [answers, setAnswers] = useState({}); // questionIndex -> chosen option index
   const [loading, setLoading] = useState(false);
+
+  // Fetched here (rather than passed in) because the bank is its own tab in
+  // the workspace now and opens straight after a submission - it always wants
+  // the latest words, not whatever the dashboard loaded earlier.
+  useEffect(()=>{
+    setMode("browse"); setQuiz(null); setQuizError(""); setLoadError(""); setLocked(false);
+    if (!backendLive || !childId) { setWords([]); return; }
+    let cancelled = false;
+    setWords(null);
+    authedFetch(session, `/api/history?childId=${childId}`)
+      .then(d => { if (!cancelled) { setLocked(!!d.vocabLocked); setWords(d.vocabWords || []); } })
+      .catch(err => { if (!cancelled) { setLoadError(err.message || "Couldn't load your vocabulary right now."); setWords([]); } });
+    return ()=>{ cancelled = true; };
+  }, [childId, backendLive]);
 
   async function startQuiz(){
     setLoading(true);
@@ -1358,7 +1375,7 @@ function VocabularyBank({ vocabWords, session, childId, backendLive }){
       }
       setMode("quiz");
     } catch (err) {
-      setQuizError(err.message || "Couldn't load the quiz right now.");
+      setQuizError(err.payload?.error || err.message || "Couldn't load the quiz right now.");
       setMode("quiz");
     } finally {
       setLoading(false);
@@ -1368,13 +1385,26 @@ function VocabularyBank({ vocabWords, session, childId, backendLive }){
     return n === 1 ? "1 word learned" : `${n || 0} words learned`;
   }
 
-  if (!backendLive) return null;
+  const who = displayName ? `${displayName}'s` : "Your";
+
+  if (locked) {
+    return (
+      <div className="card p-10 flex flex-col items-center justify-center text-center gap-3 min-h-[300px] max-w-3xl mx-auto">
+        <IconLock size={22} style={{ color: "var(--ink-faint)" }} />
+        <div className="font-display font-semibold text-base" style={{ color: "var(--ink)" }}>The vocabulary bank is part of Core and Premium</div>
+        <p className="text-[13px] max-w-[46ch]" style={{ color: "var(--ink-faint)" }}>
+          Every word from your feedback is still taught on each piece. Upgrade to collect them all in one place and test yourself with a quick quiz.
+        </p>
+        <button onClick={onSeePlans} className="focus-ring inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-bold mt-1" style={{ background: "var(--gold)", color: "#fff" }}>See plans</button>
+      </div>
+    );
+  }
 
   return (
-    <div className="card p-6">
+    <div className="card p-6 max-w-3xl mx-auto">
       <div className="flex items-center justify-between mb-1 flex-wrap gap-2">
-        <h2 className="font-display font-bold text-xl" style={{ color: "var(--ink)" }}>Vocabulary bank</h2>
-        {vocabWords && <span className="text-[11px]" style={{ color: "var(--ink-faint)" }}>{vocabWords.length} word{vocabWords.length === 1 ? "" : "s"} learned</span>}
+        <h2 className="font-display font-bold text-xl" style={{ color: "var(--ink)" }}>{who} vocabulary bank</h2>
+        {words && words.length > 0 && <span className="text-[11px]" style={{ color: "var(--ink-faint)" }}>{words.length} word{words.length === 1 ? "" : "s"} learned</span>}
       </div>
       <p className="text-xs mb-3" style={{ color: "var(--ink-faint)" }}>
         Every vocabulary upgrade from past feedback, in one place.
@@ -1382,12 +1412,24 @@ function VocabularyBank({ vocabWords, session, childId, backendLive }){
 
       {mode === "browse" ? (
         <>
-          {!vocabWords
+          {!words
             ? <div className="text-sm py-6 text-center" style={{ color: "var(--ink-faint)" }}>Loading…</div>
-            : vocabWords.length === 0
-            ? <div className="text-sm py-6 text-center" style={{ color: "var(--ink-faint)" }}>No vocabulary yet — it'll appear here after the first submission.</div>
-            : <div className="max-h-72 overflow-y-auto pr-1"><VocabList items={vocabWords.map(v=>[v.term, v.definition, v.example])} /></div>}
-          <button onClick={startQuiz} disabled={loading || !vocabWords || vocabWords.length === 0}
+            : loadError
+            ? <div className="text-sm py-6 text-center" style={{ color: "var(--bad)" }}>{loadError}</div>
+            : words.length === 0
+            ? (
+              <div className="py-8 text-center flex flex-col items-center gap-2">
+                <IconBookOpenCheck size={24} style={{ color: "var(--ink-faint)" }} />
+                <div className="font-display font-semibold text-sm" style={{ color: "var(--ink)" }}>No words collected yet</div>
+                <p className="text-[13px] max-w-[42ch]" style={{ color: "var(--ink-faint)" }}>
+                  {backendLive
+                    ? "Every writing or reading piece you submit teaches a few new words. They'll collect here, and once you have 4 you can test yourself."
+                    : "Sign in and submit a piece to start building a vocabulary bank."}
+                </p>
+              </div>
+            )
+            : <div className="max-h-[28rem] overflow-y-auto pr-1"><VocabList items={words.map(v=>[v.term, v.definition, v.example])} /></div>}
+          <button onClick={startQuiz} disabled={loading || !words || words.length === 0}
             className="focus-ring mt-4 w-full rounded-full py-2.5 text-sm font-bold disabled:opacity-40 disabled:cursor-not-allowed"
             style={{ background: "var(--cyan)", color: "white" }}>
             {loading ? "Loading…" : "Test yourself"}
@@ -1679,7 +1721,7 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
   // (it used to get only a sentence about Premium and no way to act on it),
   // Premium/Pro/Admin have nothing left to upgrade to.
   const PLAN_CARDS = [
-                    { tier: "core", name: "Core", price: PLAN_META.core.price, sub: "One learner", features: ["Unlimited writing & reading submissions", "26-week progress trend chart", "Anonymous ranking in their year group", "Full activity history"] },
+                    { tier: "core", name: "Core", price: PLAN_META.core.price, sub: "One learner", features: ["Unlimited writing & reading submissions", "26-week progress trend chart", "Anonymous ranking in their year group", "Full activity history", "Vocabulary bank with a self-test quiz"] },
                     { tier: "premium", name: "Premium", price: PLAN_META.premium.price, sub: "Up to 6 learners", features: ["Everything in Core, for the whole household", "Extended feedback: a second, harder next step", "Spelling & grammar check and a score out of 10 on every piece", "Exam-technique scoring against real assessment objectives (ages 11+)"] },
   ];
   const upsellCards = plan === "free" ? PLAN_CARDS : plan === "core" ? PLAN_CARDS.filter(c => c.tier === "premium") : [];
@@ -1988,7 +2030,6 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
           </div>
         )}
 
-        <VocabularyBank vocabWords={history?.vocabWords} session={session} childId={activeChildId} backendLive={backendLive} />
       </div>
       </>)}
 
@@ -2867,7 +2908,7 @@ function ReadingFeedbackPanel({ tier, country, interest, confidence, motivation,
 function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, interests, confidenceWriting, confidenceReading, motivation, used, total, onSubmit, session, backendLive, childId, children_, onSwitchChild, onMakeUsable, activeChangeAvailableAt, onSeePlans, displayName }){
   const grades = GRADE_DATA[country].grades;
   const gradeLabel = grades[gradeIdx];
-  const [exerciseType, setExerciseType] = useState("writing"); // writing | reading
+  const [exerciseType, setExerciseType] = useState("writing"); // writing | reading | vocab
   const [text, setText] = useState(()=> (backendLive ? "" : PROMPTS[tier].sample));
   const [answers, setAnswers] = useState({});
   const [readingScore, setReadingScore] = useState(0);
@@ -3028,7 +3069,7 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
         const cached = pendingWritingRef.current[cacheKey];
         setWritingPrompt(cached || null);
       } else setText(PROMPTS[tier].sample);
-    } else {
+    } else if (exerciseType === "reading") {
       if (backendLive) {
         setReadingPassage(pendingReadingRef.current[cacheKey] || null);
       } else {
@@ -3165,7 +3206,7 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
       </div>
 
       <div className="flex items-center gap-1.5 rounded-full border p-1 w-fit mb-6" style={{ borderColor: "var(--border)", background: "var(--surface-2)" }}>
-        {[["writing","Writing",IconPen],["reading","Reading Comprehension",IconBookOpenCheck]].map(([key,label,IconEl])=>(
+        {[["writing","Writing",IconPen],["reading","Reading Comprehension",IconBookOpenCheck],["vocab","Vocabulary",IconBook]].map(([key,label,IconEl])=>(
           <button key={key} onClick={()=>setExerciseType(key)}
             className="focus-ring flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold transition-colors"
             style={ exerciseType===key ? { background: "var(--cyan)", color: "#fff" } : { color: "var(--ink-soft)" } }>
@@ -3174,7 +3215,9 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
         ))}
       </div>
 
-      {phase === "done" ? (
+      {exerciseType === "vocab" ? (
+        <VocabularyBank session={session} childId={childId} backendLive={backendLive} onSeePlans={onSeePlans} displayName={displayName} />
+      ) : phase === "done" ? (
         // Once feedback is in, this stops being two things happening side by
         // side (compose here, watch for results there) and becomes one thing
         // to read, top to bottom - so it renders as a single column instead

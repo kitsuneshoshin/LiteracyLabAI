@@ -42,6 +42,7 @@ const BOOLEAN_ROWS = [
   ["Exam-technique scoring", "examTechnique"],
   ["Spelling & grammar check", "spellingGrammar"],
   ["Overall score out of 10", "overallScore"],
+  ["Vocabulary bank", "vocabBank"],
   ["26-week progress trend chart", "progressTrend"],
   ["Anonymous ranking", "peerComparison"],
 ];
@@ -107,7 +108,7 @@ test("app.html PLAN_META agrees with plans.js for every plan", () => {
     const line = APP.split("\n").find((l) => l.trim().startsWith(`${tier}:`) && l.includes("badge:") && l.includes("maxLearners"));
     assert.ok(line, `PLAN_META line for ${tier} not found`);
     const flags = Object.fromEntries([...line.matchAll(/(\w+):\s*(true|false)/g)].map((m) => [m[1], m[2] === "true"]));
-    for (const flag of ["peerComparison", "progressTrend", "deepFeedback", "examTechnique", "spellingGrammar", "overallScore"]) {
+    for (const flag of ["peerComparison", "progressTrend", "deepFeedback", "examTechnique", "spellingGrammar", "overallScore", "vocabBank"]) {
       assert.equal(flags[flag], !!PLANS[tier][flag], `${tier}.${flag}: app.html says ${flags[flag]}, plans.js says ${PLANS[tier][flag]}`);
     }
     assert.equal(Number(line.match(/maxLearners:\s*(\d+)/)[1]), PLANS[tier].maxLearners, `${tier}.maxLearners`);

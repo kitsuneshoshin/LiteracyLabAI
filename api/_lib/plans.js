@@ -20,6 +20,7 @@ const PLANS = {
     examTechnique: false,
     spellingGrammar: false,
     overallScore: false,
+    vocabBank: false,
   },
   core: {
     label: "Core",
@@ -32,6 +33,7 @@ const PLANS = {
     examTechnique: false,
     spellingGrammar: false,
     overallScore: false,
+    vocabBank: true,
   },
   premium: {
     label: "Premium",
@@ -44,6 +46,7 @@ const PLANS = {
     examTechnique: true,
     spellingGrammar: true,
     overallScore: true,
+    vocabBank: true,
   },
 };
 

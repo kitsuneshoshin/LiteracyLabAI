@@ -155,19 +155,28 @@ const vocabRows = Array.from({ length: 8 }, (_, i) => ({
 }));
 
 for (const plan of PLANS) {
-  test(`vocabulary: ${plan} - the self-test quiz is available (it is a teaching feature on every plan)`, async () => {
+  const hasBank = capabilitiesFor(plan).vocabBank !== false;
+
+  test(`vocabulary: ${plan} - the self-test quiz is ${hasBank ? "available" : "refused (the bank is Core and Premium)"}`, async () => {
     const h = loadHandler("history.js", { plan, db: (q) => (q.table === "submissions" ? { data: vocabRows, error: null } : { data: null }) });
     const res = await call(h, { query: { childId: "c1", quiz: "1", count: "5" } });
-    assert.equal(res.statusCode, 200);
-    assert.equal(res.body.questions.length, 5);
-    for (const q of res.body.questions) assert.ok(q.options.length >= 2 && q.options.length <= 4);
+    if (hasBank) {
+      assert.equal(res.statusCode, 200);
+      assert.equal(res.body.questions.length, 5);
+      for (const q of res.body.questions) assert.ok(q.options.length >= 2 && q.options.length <= 4);
+    } else {
+      assert.equal(res.statusCode, 403);
+      assert.equal(res.body.vocabLocked, true);
+      assert.equal(res.body.questions, undefined);
+    }
   });
 
-  test(`vocabulary: ${plan} - the vocabulary bank is returned with the dashboard data`, async () => {
+  test(`vocabulary: ${plan} - the vocabulary bank is ${hasBank ? "returned" : "withheld"} with the dashboard data`, async () => {
     const h = loadHandler("history.js", { plan, db: (q) => (q.table === "submissions" ? { data: vocabRows, error: null } : { data: null }) });
     const res = await call(h, { query: { childId: "c1" } });
     assert.equal(res.statusCode, 200);
-    assert.equal(res.body.vocabWords.length, 16);
+    assert.equal(res.body.vocabWords.length, hasBank ? 16 : 0);
+    assert.equal(res.body.vocabLocked, !hasBank);
   });
 
   test(`skill breakdown: ${plan} - mastery is served on every plan, scoped to the learner`, async () => {
