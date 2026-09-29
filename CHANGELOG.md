@@ -2,8 +2,19 @@
 
 Internal engineering changelog, not linked from the site. One entry per shipped commit, newest first, grouped by day. Generated from git history — run `git log --format="%ad|%h|%s" --date=short` in the repo to regenerate or extend.
 
+## 2026-09-29
+
+- `4a0652e` Make Premium worth the upgrade, rotate interests, add a per-question reading review
+- `93b5df2` Make Manage profile and Manage plan their own pages; make the essay timer real
+- `50e7147` Fix exam-technique failures at the root and stop one bad spelling entry sinking feedback
+- `c068ddb` Replace flag emoji with real flag images so they render on Windows
+- `6876538` Stop the model silently skipping exam-technique objectives
+
 ## 2026-09-28
 
+- `3267d7f` Fix reading-exercise white space, show the missing overall score, personalise titles, highlight what changed in "revised" text
+- `dc692ba` Fix a production crash: stale grading result landing after the student switched exercises
+- `79d60f7` Add an internal CHANGELOG.md, generated from git history
 - `2b2c776` Widen Workspace layout, add an Account menu, grow reading passages to 5 questions, and fix stale marketing copy
 - `39ebb61` Show more glow/grow highlights where the piece supports it; remove the "what will you try next time?" prompt
 - `79c441d` Add Google Analytics (GA4) with a consent-gated cookie banner
