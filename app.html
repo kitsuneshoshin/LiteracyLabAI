@@ -2147,7 +2147,7 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
                 <div className="grid gap-3 mb-4 md:grid-cols-2">
                   {[
                     { tier: "core", name: "Core", price: PLAN_META.core.price, sub: "One learner", features: ["Unlimited writing & reading submissions", "26-week progress trend chart", "Anonymous ranking in their year group", "Full activity history"] },
-                    { tier: "premium", name: "Premium", price: PLAN_META.premium.price, sub: "Up to 6 learners", features: ["Everything in Core, for the whole household", "Extended feedback: a second, harder next step", "Exam-technique scoring against real assessment objectives (ages 11+)"] },
+                    { tier: "premium", name: "Premium", price: PLAN_META.premium.price, sub: "Up to 6 learners", features: ["Everything in Core, for the whole household", "Extended feedback: a second, harder next step", "Spelling & grammar check and a score out of 10 on every piece", "Exam-technique scoring against real assessment objectives (ages 11+)"] },
                   ].map(p=>(
                     <div key={p.tier} className="rounded-xl p-3.5" style={{ background: "rgba(255,255,255,.07)", border: "1px solid rgba(255,255,255,.14)" }}>
                       <div className="flex items-baseline justify-between gap-2">
@@ -2427,7 +2427,13 @@ function OverallScorePanel({ feedback }){
   );
 }
 
-function FeedbackPanel({ tier, gradeLabel, country, interest, confidence, motivation, seed, feedback, submissionId, session, backendLive, submittedText }){
+function FeedbackPanel({ tier, gradeLabel, country, interest, confidence, motivation, seed, feedback, submissionId, session, backendLive, submittedText, onSeePlans }){
+  // Real feedback from a plan without the spelling check / overall score
+  // simply doesn't contain them (the server never generates them - see
+  // api/_lib/plans.js), so their absence, on feedback that exists at all, is
+  // what tells us to show the upgrade card. Demo mode has no feedback object
+  // and falls back to scripted content, so it shows neither panel nor card.
+  const premiumSectionsLocked = !!feedback && feedback.overallScore == null && !Array.isArray(feedback.spellingGrammar);
   const interestLabel = (INTERESTS.find(i=>i.id===interest) || INTERESTS[0]).label;
   const curriculum = GRADE_DATA[country].curriculum;
   const opener = CONFIDENCE_OPENER[confidence] || "";
@@ -2457,6 +2463,12 @@ function FeedbackPanel({ tier, gradeLabel, country, interest, confidence, motiva
       )}
 
       <SpellingGrammarPanel feedback={feedback} />
+
+      {premiumSectionsLocked && (
+        <LockedFeature title="Spelling & grammar check and overall score are on Premium"
+          blurb="Premium adds a dedicated spelling and grammar check for every piece, plus a whole-piece score out of 10 with the reason behind it."
+          onSeePlans={onSeePlans} />
+      )}
 
       <div className="card p-5 sm:p-6" style={{ borderColor: "var(--good)", borderWidth: 1.5 }}>
         <div className="flex items-center gap-2 mb-2">
@@ -2717,7 +2729,61 @@ function GrowNextBlock({ feedback }){
   );
 }
 
-function ReadingFeedbackPanel({ tier, country, interest, confidence, motivation, score, totalQ, feedback, submissionId, session, backendLive }){
+// One card per question after a graded reading attempt: what they chose, the
+// right answer, and a short explanation pointing back into the passage. The
+// single Glow and single Grow for a whole attempt used to be ALL the feedback
+// a reader got, which at 1 right out of 5 was very little to learn from.
+// Answers are already graded and revealed by the time this renders, so
+// explaining the correct one gives nothing away. Driven by
+// feedback.questionReview; entries the model omitted just show the result
+// without an explanation.
+function QuestionReviewPanel({ feedback, questions, answers }){
+  const review = Array.isArray(feedback?.questionReview) ? feedback.questionReview : null;
+  if (!review || review.length === 0 || !Array.isArray(questions) || questions.length === 0) return null;
+  const byNumber = new Map(review.map(r => [r.n, r]));
+  const rightCount = questions.filter((q, i) => answers?.[i] === q.correct).length;
+  return (
+    <Collapsible defaultOpen={true} borderColor="var(--border)" iconBg="var(--good-tint)" iconColor="var(--good)"
+      icon={<IconBookOpenCheck size={16} strokeWidth={2.2} />} title="Question by question"
+      teaser={`${rightCount} of ${questions.length} right`}>
+      <div className="flex flex-col gap-3">
+        {questions.map((q, i) => {
+          const r = byNumber.get(i + 1);
+          const chosen = answers?.[i];
+          const isRight = chosen === q.correct;
+          return (
+            <div key={i} className="rounded-xl p-3.5" style={{ background: "var(--surface-2)" }}>
+              <div className="flex items-start gap-2">
+                <span className="mt-0.5 shrink-0" style={{ color: isRight ? "var(--good)" : "var(--bad)" }}>
+                  {isRight ? <IconCheck size={15} strokeWidth={2.6} /> : <IconX size={15} strokeWidth={2.6} />}
+                </span>
+                <div className="min-w-0">
+                  <div className="text-[13.5px] font-semibold" style={{ color: "var(--ink)" }}>{i + 1}. {q.q}</div>
+                  <div className="text-[13px] mt-1" style={{ color: "var(--ink-soft)" }}>
+                    You chose: <strong style={{ color: "var(--ink)" }}>{chosen != null ? q.options[chosen] : "no answer"}</strong>
+                  </div>
+                  {!isRight && q.correct != null && q.options?.[q.correct] && (
+                    <div className="text-[13px]" style={{ color: "var(--ink-soft)" }}>
+                      Right answer: <strong style={{ color: "var(--good)" }}>{q.options[q.correct]}</strong>
+                    </div>
+                  )}
+                  {r?.explanation && <p className="text-[13.5px] leading-snug mt-1.5 font-read" style={{ color: "var(--ink)" }}>{r.explanation}</p>}
+                  {r?.evidence && (
+                    <p className="text-[12.5px] leading-snug mt-1.5 font-read" style={{ color: "var(--ink-faint)" }}>
+                      From the passage: “{r.evidence}”
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </Collapsible>
+  );
+}
+
+function ReadingFeedbackPanel({ tier, country, interest, confidence, motivation, score, totalQ, feedback, submissionId, session, backendLive, questions, answers }){
   const interestLabel = (INTERESTS.find(i=>i.id===interest) || INTERESTS[0]).label;
   const curriculum = GRADE_DATA[country].curriculum;
   const pct = Math.round((score/totalQ)*100);
@@ -2756,6 +2822,8 @@ function ReadingFeedbackPanel({ tier, country, interest, confidence, motivation,
         <p className="text-[15px] leading-relaxed font-read" style={{ color: "var(--ink)" }}>{grow}</p>
         <GrowNextBlock feedback={feedback} />
       </div>
+
+      <QuestionReviewPanel feedback={feedback} questions={questions} answers={answers} />
 
       <ExamTechniquePanel feedback={feedback} />
 
@@ -2837,6 +2905,27 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
   const liveContextRef = useRef(null);
   useEffect(()=>{ liveContextRef.current = `${exerciseType}:${cacheKey}`; });
 
+  // A learner can pick several interests, but every piece is explained
+  // through ONE (the Grow's analogy, vocab examples). It used to be whichever
+  // came first in the saved list, every time, so the others never appeared.
+  // Now each NEW piece rotates: a random one of the learner's interests that
+  // suit this age tier, never the same as the previous piece (remembered per
+  // learner across reloads). The choice is made once, when the piece is
+  // generated, and travels with it - the server stores it on the submission
+  // and uses that same interest when the feedback is written.
+  function chooseInterestForNewPiece(){
+    const validForTier = interestsForTier(tier).map(i=>i.id);
+    const suited = interests.filter(id => validForTier.includes(id));
+    const pool = suited.length ? suited : (interests.length ? interests : [activeInterest]);
+    let last = null;
+    try { last = localStorage.getItem("ll_last_interest_" + childId); } catch {}
+    const options = pool.length > 1 ? pool.filter(id => id !== last) : pool;
+    const chosen = options[Math.floor(Math.random() * options.length)] || activeInterest;
+    try { localStorage.setItem("ll_last_interest_" + childId, chosen); } catch {}
+    setActiveInterest(chosen);
+    return chosen;
+  }
+
   async function requestNewWritingPrompt(force){
     if (!backendLive || locked) return;
     if (!force && pendingWritingRef.current[cacheKey]) {
@@ -2849,12 +2938,13 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
     setWritingLoading(true);
     setWritingPrompt(null);
     setSubmitError(null);
+    const interestForPiece = chooseInterestForNewPiece();
     try {
       const result = await authedFetch(session, "/api/writing-prompt", {
         method: "POST",
-        body: JSON.stringify({ tier, country, gradeLabel, interest: activeInterest, childId }),
+        body: JSON.stringify({ tier, country, gradeLabel, interest: interestForPiece, childId }),
       });
-      const fresh = { submissionId: result.submissionId, title: result.title, prompt: result.prompt };
+      const fresh = { submissionId: result.submissionId, title: result.title, prompt: result.prompt, interest: interestForPiece };
       pendingWritingRef.current[cacheKey] = fresh;
       setWritingPrompt(fresh);
       onSubmit(result.usage);
@@ -2881,12 +2971,13 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
     setReadingLoading(true);
     setReadingPassage(null);
     setSubmitError(null);
+    const interestForPiece = chooseInterestForNewPiece();
     try {
       const result = await authedFetch(session, "/api/reading-passage", {
         method: "POST",
-        body: JSON.stringify({ tier, country, gradeLabel, interest: activeInterest, childId }),
+        body: JSON.stringify({ tier, country, gradeLabel, interest: interestForPiece, childId }),
       });
-      const fresh = { submissionId: result.submissionId, title: result.title, skill: result.skill, passage: result.passage, questions: result.questions };
+      const fresh = { submissionId: result.submissionId, title: result.title, skill: result.skill, passage: result.passage, questions: result.questions, interest: interestForPiece };
       pendingReadingRef.current[cacheKey] = fresh;
       setReadingPassage(fresh);
       onSubmit(result.usage);
@@ -2944,6 +3035,9 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
 
   const words = useMemo(()=> text.trim().length ? text.trim().split(/\s+/).length : 0, [text]);
   const readingBankEntry = backendLive ? readingPassage : READING_BANK[tier][readingPassageIdx];
+  // The interest THIS piece was generated with (not whatever is selected
+  // now - a cached, still-ungraded piece can outlive a later rotation).
+  const feedbackInterest = (exerciseType === "writing" ? writingPrompt?.interest : readingPassage?.interest) || activeInterest;
   const readingQuestions = readingBankEntry ? readingBankEntry.questions : [];
   const allAnswered = readingQuestions.length > 0 && readingQuestions.every((_,i)=> answers[i] != null);
 
@@ -3074,8 +3168,8 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
           {exerciseType === "writing" ? (
             <>
               <SubmissionRecap tier={tier} title={meta?.title || "Your story"} words={words} onNew={handleNew} />
-              <FeedbackPanel tier={tier} gradeLabel={gradeLabel} country={country} interest={activeInterest} confidence={confidenceWriting} motivation={motivation} seed={words}
-                feedback={backendFeedback} submissionId={submissionId} session={session} backendLive={backendLive} submittedText={text} />
+              <FeedbackPanel tier={tier} gradeLabel={gradeLabel} country={country} interest={feedbackInterest} confidence={confidenceWriting} motivation={motivation} seed={words}
+                feedback={backendFeedback} submissionId={submissionId} session={session} backendLive={backendLive} submittedText={text} onSeePlans={onSeePlans} />
             </>
           ) : readingBankEntry ? (
             <>
@@ -3083,8 +3177,9 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
                 bank={readingBankEntry} answers={answers} setAnswers={setAnswers} allAnswered={allAnswered}
                 phase={phase} onSubmit={handleSubmit} onNew={handleNew} locked={locked}
               />
-              <ReadingFeedbackPanel tier={tier} country={country} interest={activeInterest} confidence={confidenceReading} motivation={motivation} score={readingScore} totalQ={readingQuestions.length}
-                feedback={backendFeedback} submissionId={submissionId} session={session} backendLive={backendLive} />
+              <ReadingFeedbackPanel tier={tier} country={country} interest={feedbackInterest} confidence={confidenceReading} motivation={motivation} score={readingScore} totalQ={readingQuestions.length}
+                feedback={backendFeedback} submissionId={submissionId} session={session} backendLive={backendLive}
+                questions={readingQuestions} answers={answers} />
             </>
           ) : null}
         </div>

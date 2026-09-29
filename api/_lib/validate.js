@@ -296,6 +296,55 @@ function dropInvalidSpellingGrammar(parsed, submittedText) {
   return parsed;
 }
 
+// The per-question explanations on a graded reading attempt (see
+// questionReviewClause in prompt.js). Deliberately lenient about COUNT: the
+// UI simply shows an explanation for each question that has one, and a
+// missing entry shouldn't reject feedback that is otherwise good (the same
+// "one gap sinks everything" failure the exam-technique and spelling
+// sections both hit) - the pre-numbered template in the prompt is what keeps
+// the array complete in practice.
+function validateQuestionReview(parsed, issues) {
+  const items = parsed?.questionReview;
+  if (!Array.isArray(items) || items.length < 1 || items.length > 10) {
+    issues.push("questionReview must be an array with one explanation per question");
+    return;
+  }
+  const seen = new Set();
+  items.forEach((item, i) => {
+    if (!Number.isInteger(item?.n) || item.n < 1 || item.n > 10) {
+      issues.push(`questionReview[${i}].n must be the question number (an integer)`);
+    } else if (seen.has(item.n)) {
+      issues.push(`questionReview[${i}].n repeats question ${item.n}`);
+    } else {
+      seen.add(item.n);
+    }
+    if (!checkString(item?.explanation, 10, 400)) issues.push(`questionReview[${i}].explanation is missing, too short, or too long`);
+  });
+}
+
+// Runs before validation on reading feedback: keeps only entries that refer
+// to a real question (once each), and drops an "evidence" quote that is not
+// actually in the passage. Presenting a paraphrase as a quote from the text
+// would be misleading, but that's not worth failing the whole response for -
+// the explanation next to it can still stand on its own.
+function sanitizeQuestionReview(parsed, passageText, questionCount) {
+  if (!parsed || !Array.isArray(parsed.questionReview)) return parsed;
+  const normalizedPassage = passageText ? normalizeForMatch(passageText) : null;
+  const seen = new Set();
+  parsed.questionReview = parsed.questionReview.filter((item) => {
+    if (!Number.isInteger(item?.n) || item.n < 1 || (questionCount && item.n > questionCount) || seen.has(item.n)) return false;
+    seen.add(item.n);
+    return true;
+  }).map((item) => {
+    if (typeof item.evidence === "string" && normalizedPassage && !normalizedPassage.includes(normalizeForMatch(item.evidence))) {
+      const { evidence, ...rest } = item;
+      return rest;
+    }
+    return item;
+  });
+  return parsed;
+}
+
 function validateFeedback(parsed, { tier, standardsList, targetNames, submittedText, readingScore, capabilities, genre }) {
   const issues = [];
   const caps = capabilities || {};
@@ -378,8 +427,10 @@ function validateFeedback(parsed, { tier, standardsList, targetNames, submittedT
       });
     }
     validateFrameworkTip(parsed, tier, genre, submittedText, issues);
-    validateOverallScore(parsed, issues);
-    validateSpellingGrammar(parsed, submittedText, issues);
+    // Premium-only (api/_lib/plans.js). Skipped only when the plan explicitly
+    // says false; callers with no plan info keep the full checks.
+    if (caps.overallScore !== false) validateOverallScore(parsed, issues);
+    if (caps.spellingGrammar !== false) validateSpellingGrammar(parsed, submittedText, issues);
   }
 
   if (caps.deepFeedback) {
@@ -395,6 +446,9 @@ function validateFeedback(parsed, { tier, standardsList, targetNames, submittedT
   if (caps.examTechnique) {
     validateExamTechnique(parsed, targetNames, issues);
   }
+
+  // Reading feedback only (readingScore is undefined for writing).
+  if (readingScore !== undefined) validateQuestionReview(parsed, issues);
 
   return { ok: issues.length === 0, issues };
 }
@@ -466,4 +520,4 @@ function validateWritingPrompt(parsed, { tier }) {
   return { ok: issues.length === 0, issues };
 }
 
-module.exports = { validateFeedback, validatePassage, validateWritingPrompt, resolveTarget, dropInvalidSpellingGrammar, MAX_AVG_WORDS_PER_SENTENCE };
+module.exports = { validateFeedback, validatePassage, validateWritingPrompt, resolveTarget, dropInvalidSpellingGrammar, sanitizeQuestionReview, MAX_AVG_WORDS_PER_SENTENCE };

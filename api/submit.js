@@ -6,7 +6,7 @@ const { buildWritingPrompt, buildReadingPrompt, correctiveAddendum, examTechniqu
 const { standardsFor } = require("./_lib/curriculum");
 const { targetsForGrade } = require("./_lib/masteryTargets");
 const { frameworkForGenre, resolveGenre } = require("./_lib/writingFrameworks");
-const { validateFeedback, resolveTarget, dropInvalidSpellingGrammar } = require("./_lib/validate");
+const { validateFeedback, resolveTarget, dropInvalidSpellingGrammar, sanitizeQuestionReview } = require("./_lib/validate");
 const { checkRateLimit } = require("./_lib/rateLimit");
 const { writingLimitsForGrade } = require("./_lib/writingLimits");
 
@@ -21,7 +21,7 @@ const { writingLimitsForGrade } = require("./_lib/writingLimits");
 // child an error instead of feedback.
 const MAX_ATTEMPTS = 3;
 
-async function generateAndValidate(prompt, tier, country, gradeLabel, submittedText, readingScore, capabilities, genre) {
+async function generateAndValidate(prompt, tier, country, gradeLabel, submittedText, readingScore, capabilities, genre, readingContext) {
   const standardsList = standardsFor(country, tier, gradeLabel);
   const targetNames = targetsForGrade(country, gradeLabel, tier).targets.map((t) => t.name);
   let nextPrompt = prompt;
@@ -29,7 +29,8 @@ async function generateAndValidate(prompt, tier, country, gradeLabel, submittedT
 
   for (let i = 1; i <= MAX_ATTEMPTS; i++) {
     const attempt = await generateFeedbackJSON(nextPrompt);
-    dropInvalidSpellingGrammar(attempt.parsed, submittedText);
+    if (capabilities?.spellingGrammar !== false) dropInvalidSpellingGrammar(attempt.parsed, submittedText);
+    if (readingContext) sanitizeQuestionReview(attempt.parsed, readingContext.passage, readingContext.questionCount);
     const check = validateFeedback(attempt.parsed, { tier, standardsList, targetNames, submittedText, readingScore, capabilities, genre });
     if (check.ok) {
       // Snap glowTarget/growTarget to the exact canonical string so
@@ -224,7 +225,7 @@ module.exports = async function handler(req, res) {
           answers, score, totalQuestions, capabilities: caps, targets,
           targetNames: targets.map((t) => t.name),
         });
-        result = await generateAndValidate(llmPrompt, existing.tier, existing.country, existing.grade_label, undefined, score, caps);
+        result = await generateAndValidate(llmPrompt, existing.tier, existing.country, existing.grade_label, undefined, score, caps, undefined, { passage: bank.passage, questionCount: totalQuestions });
       } catch (genErr) {
         await releaseClaim(supabase, submissionId);
         throw genErr;

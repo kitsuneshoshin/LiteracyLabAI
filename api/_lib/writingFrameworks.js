@@ -24,7 +24,7 @@ const FRAMEWORK_BY_GENRE = {
   },
   persuasive: {
     name: "PEAL",
-    description: "PEEL's more advanced sibling for extended essays: Point, Evidence, Analysis (not just what the evidence shows, but why the writer chose it and what effect it creates), Link.",
+    description: "A paragraph that argues a case: Point (state your argument), Evidence (a quote, fact or example that backs it up), Analysis (explain why that evidence matters and the effect it has - not just what it shows), Link (tie it back to the question or your overall argument).",
   },
 };
 

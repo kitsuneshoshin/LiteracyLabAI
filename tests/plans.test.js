@@ -16,7 +16,7 @@ test("free is strictly the most limited tier", () => {
 
 test("each tier up is a superset - no capability is ever lost by paying more", () => {
   const order = ["free", "core", "premium"];
-  const flags = ["peerComparison", "progressTrend", "deepFeedback", "examTechnique"];
+  const flags = ["peerComparison", "progressTrend", "deepFeedback", "examTechnique", "spellingGrammar", "overallScore"];
   for (let i = 1; i < order.length; i++) {
     const lower = PLANS[order[i - 1]];
     const higher = PLANS[order[i]];
@@ -95,4 +95,15 @@ test("priceIdForPlan never returns a price for a non-purchasable plan", () => {
   assert.equal(priceIdForPlan("free"), null);
   assert.equal(priceIdForPlan("admin"), null);
   assert.equal(priceIdForPlan("nonsense"), null);
+});
+
+test("spelling & grammar check and the overall score are Premium-only", () => {
+  for (const flag of ["spellingGrammar", "overallScore"]) {
+    assert.equal(PLANS.free[flag], false, "free has " + flag);
+    assert.equal(PLANS.core[flag], false, "core has " + flag);
+    assert.equal(PLANS.premium[flag], true, "premium lacks " + flag);
+  }
+  // Legacy and admin accounts inherit Premium's set, so they keep both.
+  assert.equal(capabilitiesFor("pro").spellingGrammar, true);
+  assert.equal(capabilitiesFor("admin").overallScore, true);
 });

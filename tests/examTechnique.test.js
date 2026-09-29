@@ -195,3 +195,34 @@ test("the exam-technique JSON template has one pre-named entry per objective, no
   });
   assert.ok(!prompt.includes("the exact assessment objective name"), "old single generic template entry is still present");
 });
+
+// Premium-only features must not even be REQUESTED on a plan without them:
+// asking Free/Core for a spelling list and a score would spend tokens on
+// content we then couldn't show, and validating for it would fail feedback
+// over a section that plan doesn't get.
+test("the writing prompt only asks for the spelling check and overall score when the plan includes them", () => {
+  const args = {
+    tier: "middle", country: "UK", gradeLabel: "Year 7", interest: "gaming",
+    confidenceWriting: "growing", motivation: "grades", prompt: "Analyse a character.",
+    text: "An essay.", targetNames: ["Rhetorical Awareness"], targets: [{ name: "Rhetorical Awareness", standard: "KS3" }], genre: "analytical",
+  };
+  const core = buildWritingPrompt({ ...args, capabilities: { spellingGrammar: false, overallScore: false } });
+  for (const marker of ["SPELLING AND GRAMMAR CHECK", "OVERALL SCORE (required", '"overallScore"', '"spellingGrammarTotal"', '"spellingGrammar"']) {
+    assert.ok(!core.includes(marker), "Core prompt still contains: " + marker);
+  }
+  const premium = buildWritingPrompt({ ...args, capabilities: { spellingGrammar: true, overallScore: true } });
+  for (const marker of ["SPELLING AND GRAMMAR CHECK", "OVERALL SCORE (required", '"overallScore"', '"spellingGrammarTotal"']) {
+    assert.ok(premium.includes(marker), "Premium prompt is missing: " + marker);
+  }
+});
+
+test("feedback without a score or spelling list validates for a plan that doesn't include them, and fails for one that does", () => {
+  const fb = baseFeedback({});
+  delete fb.overallScore; delete fb.scoreReason; delete fb.spellingGrammar; delete fb.spellingGrammarTotal;
+  const ctx = { tier: "high", standardsList: [], targetNames: TARGET_NAMES, submittedText: "An essay of some length here.", genre: "persuasive" };
+  const core = validateFeedback(fb, { ...ctx, capabilities: { spellingGrammar: false, overallScore: false } });
+  assert.ok(!core.issues.some((i) => /overallScore|scoreReason|spellingGrammar/.test(i)), "Core was held to Premium-only fields: " + core.issues.join("; "));
+  const premium = validateFeedback(fb, { ...ctx, capabilities: { spellingGrammar: true, overallScore: true } });
+  assert.ok(premium.issues.some((i) => /overallScore/.test(i)));
+  assert.ok(premium.issues.some((i) => /spellingGrammar/.test(i)));
+});

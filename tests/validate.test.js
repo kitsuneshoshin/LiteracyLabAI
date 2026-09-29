@@ -12,6 +12,8 @@ function baseFeedback(overrides = {}) {
       { term: "adjective", definition: "a word that describes a noun, like happy or fast.", example: "\"Fast\" is an adjective in the sentence \"the fast dog ran.\"" },
       { term: "sentence", definition: "a group of words that expresses a complete thought.", example: "\"The dog ran fast\" is a complete sentence." },
     ],
+    // Reading feedback carries one explanation per question (ignored for writing).
+    questionReview: [{ n: 1, explanation: "You spotted the detail that shows how the character felt.", evidence: "The dog ran fast." }],
     glowTarget: "",
     growTarget: "",
     // Matches the "elementary" tier's framework (see writingFrameworks.js) -
@@ -510,4 +512,37 @@ test("dropInvalidSpellingGrammar: keeps a total larger than the list when the mo
   dropInvalidSpellingGrammar(parsed, SUBMITTED_TEXT);
   assert.equal(parsed.spellingGrammar.length, 1);
   assert.equal(parsed.spellingGrammarTotal, 14);
+});
+
+test("validateFeedback: reading feedback needs a questionReview with real explanations", () => {
+  const ctx = { tier: "elementary", standardsList: [], targetNames: [], submittedText: null, readingScore: 3 };
+  const missing = baseFeedback(); delete missing.questionReview;
+  assert.ok(validateFeedback(missing, ctx).issues.some((i) => i.includes("questionReview")));
+  const shortText = validateFeedback(baseFeedback({ questionReview: [{ n: 1, explanation: "Yes." }] }), ctx);
+  assert.ok(shortText.issues.some((i) => i.includes("explanation")));
+  const repeated = validateFeedback(baseFeedback({ questionReview: [{ n: 1, explanation: "A proper sentence here." }, { n: 1, explanation: "Another proper sentence." }] }), ctx);
+  assert.ok(repeated.issues.some((i) => i.includes("repeats question")));
+  assert.equal(validateFeedback(baseFeedback(), ctx).ok, true);
+});
+
+test("validateFeedback: writing feedback is not asked for a questionReview", () => {
+  const fb = baseFeedback(); delete fb.questionReview;
+  const r = validateFeedback(fb, { tier: "elementary", standardsList: [], targetNames: [], submittedText: null });
+  assert.ok(!r.issues.some((i) => i.includes("questionReview")));
+});
+
+test("sanitizeQuestionReview: drops made-up quotes, out-of-range and repeated questions, keeps honest explanations", () => {
+  const { sanitizeQuestionReview } = require("../api/_lib/validate");
+  const passage = "Maya rebuilt her volcano with her dad until midnight.";
+  const parsed = { questionReview: [
+    { n: 1, explanation: "She kept going.", evidence: "Maya rebuilt her volcano" },
+    { n: 2, explanation: "Not in the passage.", evidence: "a line the passage never contains" },
+    { n: 2, explanation: "Duplicate of two.", evidence: "" },
+    { n: 9, explanation: "There is no question nine." },
+  ] };
+  sanitizeQuestionReview(parsed, passage, 5);
+  assert.deepEqual(parsed.questionReview.map((r) => r.n), [1, 2]);
+  assert.equal(parsed.questionReview[0].evidence, "Maya rebuilt her volcano");
+  assert.equal(parsed.questionReview[1].evidence, undefined);
+  assert.equal(parsed.questionReview[1].explanation, "Not in the passage.");
 });

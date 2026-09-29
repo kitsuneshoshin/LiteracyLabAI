@@ -18,6 +18,8 @@ const PLANS = {
     recentHistoryLimit: 10,
     deepFeedback: false,
     examTechnique: false,
+    spellingGrammar: false,
+    overallScore: false,
   },
   core: {
     label: "Core",
@@ -28,6 +30,8 @@ const PLANS = {
     recentHistoryLimit: 500,
     deepFeedback: false,
     examTechnique: false,
+    spellingGrammar: false,
+    overallScore: false,
   },
   premium: {
     label: "Premium",
@@ -38,6 +42,8 @@ const PLANS = {
     recentHistoryLimit: 500,
     deepFeedback: true,
     examTechnique: true,
+    spellingGrammar: true,
+    overallScore: true,
   },
 };
 
