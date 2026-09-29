@@ -12,20 +12,47 @@ function weekStartKey(d) {
 
 // Weekly time series of a child's progress, oldest first, capped to the
 // last 26 weeks (~6 months) so the chart stays readable and the payload
-// stays small. masteryPct per week uses the same glow/grow-tag ratio as
-// progress.js's scoreTargets, but pooled across all targets that week
-// (rather than per named target) since a week can span a tier/grade change.
+// stays small.
+//
+// masteryPct is the AVERAGE TARGET MASTERY as it stood at the end of that week:
+// for every skill area the learner has been given feedback on so far, the same
+// glow / (glow + grow) ratio progress.js's scoreTargets uses, averaged across
+// those skills. An earlier version pooled every glow and grow in the week into
+// one ratio - but each piece of feedback contributes exactly one glow and one
+// grow, so that was 50% for every learner in every week, forever, and the
+// trend chart could never move. Averaging per skill lets it rise as strengths
+// build up and fall when a skill keeps being the thing to work on.
+// A week with no tagged feedback stays null (a gap), not a carried-forward or
+// fabricated value.
 function computeTimeline(submissions) {
   const byWeek = new Map();
-  for (const s of submissions) {
+  const skills = new Map(); // skill name -> { glow, grow }, cumulative up to the current week
+  const ascending = [...submissions].sort((a, b) => String(a.created_at).localeCompare(String(b.created_at)));
+  for (const s of ascending) {
     const key = weekStartKey(new Date(s.created_at));
     if (!byWeek.has(key)) byWeek.set(key, { weekStart: key, submissions: 0, wordsWritten: 0, glow: 0, grow: 0, readingScoreSum: 0, readingCount: 0 });
     const bucket = byWeek.get(key);
     bucket.submissions += 1;
     if (s.kind === "writing" && s.word_count) bucket.wordsWritten += s.word_count;
     const fb = s.feedback || {};
-    if (fb.glowTarget) bucket.glow += 1;
-    if (fb.growTarget) bucket.grow += 1;
+    if (fb.glowTarget) {
+      bucket.glow += 1;
+      const c = skills.get(fb.glowTarget) || { glow: 0, grow: 0 };
+      c.glow += 1;
+      skills.set(fb.glowTarget, c);
+    }
+    if (fb.growTarget) {
+      bucket.grow += 1;
+      const c = skills.get(fb.growTarget) || { glow: 0, grow: 0 };
+      c.grow += 1;
+      skills.set(fb.growTarget, c);
+    }
+    // Snapshot after every submission; the last one in a week is the week's value.
+    if (skills.size > 0) {
+      let sum = 0;
+      for (const c of skills.values()) sum += c.glow / (c.glow + c.grow);
+      bucket.endMastery = Math.round((sum / skills.size) * 100);
+    }
     if (s.kind === "reading" && s.total_questions && s.score != null) {
       bucket.readingScoreSum += s.score / s.total_questions;
       bucket.readingCount += 1;
@@ -36,7 +63,7 @@ function computeTimeline(submissions) {
     weekStart: w.weekStart,
     submissions: w.submissions,
     wordsWritten: w.wordsWritten,
-    masteryPct: (w.glow + w.grow) > 0 ? Math.round((w.glow / (w.glow + w.grow)) * 100) : null,
+    masteryPct: (w.glow + w.grow) > 0 && w.endMastery != null ? w.endMastery : null,
     avgReadingScore: w.readingCount > 0 ? Math.round((w.readingScoreSum / w.readingCount) * 100) : null,
   }));
 }

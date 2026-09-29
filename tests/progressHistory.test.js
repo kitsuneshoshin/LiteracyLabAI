@@ -74,3 +74,46 @@ test("computeStreak: a gap stops the count instead of continuing past it", () =>
   const longAgo = new Date(Date.now() - 10 * 86400000).toISOString().slice(0, 10);
   assert.equal(computeStreak([today, yesterday, longAgo]), 2);
 });
+
+// ------------------------------------------------------------------ the trend must be able to move
+
+// Every piece of feedback names exactly one glow skill and one grow skill.
+const fbk = (glowTarget, growTarget) => ({ glowTarget, growTarget });
+const sub = (date, glow, grow) => ({ created_at: date, kind: "writing", word_count: 100, feedback: fbk(glow, grow) });
+
+test("computeTimeline: a realistic learner does NOT get a flat 50% line", () => {
+  // Week 1: weak on Spelling. Week 2: strong on Spelling, working on Structure. Week 3: strong on both.
+  const subs = [
+    sub("2026-09-14T10:00:00Z", "Structure", "Spelling"),
+    sub("2026-09-21T10:00:00Z", "Spelling", "Structure"),
+    sub("2026-09-21T11:00:00Z", "Spelling", "Ideas"),
+    sub("2026-09-28T10:00:00Z", "Structure", "Ideas"),
+    sub("2026-09-28T11:00:00Z", "Ideas", "Ideas"),
+  ];
+  const values = computeTimeline(subs).map((w) => w.masteryPct);
+  assert.equal(new Set(values).size, values.length, `expected different values each week, got ${values.join(", ")}`);
+});
+
+test("computeTimeline: a learner whose weaker skill improves sees the line rise", () => {
+  // Week 1: A strong, B weak (50%). Later weeks: B is now the glow more often.
+  const subs = [
+    sub("2026-09-07T10:00:00Z", "A", "B"),
+    sub("2026-09-14T10:00:00Z", "B", "B"),
+    sub("2026-09-21T10:00:00Z", "B", "B"),
+  ];
+  const v = computeTimeline(subs).map((w) => w.masteryPct);
+  assert.deepEqual(v, [50, 67, 70]); // week 2: A 100%, B 1 of 3 = 33% -> 67. Week 3: B 2 of 5 = 40% -> 70
+});
+
+test("computeTimeline: the last week is the average of per-skill mastery, the same ratio as Target mastery", () => {
+  const subs = [sub("2026-09-14T10:00:00Z", "A", "B"), sub("2026-09-21T10:00:00Z", "A", "B"), sub("2026-09-21T11:00:00Z", "B", "A")];
+  // A: 2 glow, 1 grow = 67%. B: 1 glow, 2 grow = 33%. Average = 50%.
+  assert.equal(computeTimeline(subs).at(-1).masteryPct, 50);
+});
+
+test("computeTimeline: input order does not matter (history is returned newest first)", () => {
+  const subs = [sub("2026-09-14T10:00:00Z", "A", "B"), sub("2026-09-21T10:00:00Z", "A", "A"), sub("2026-09-28T10:00:00Z", "B", "A")];
+  const forward = computeTimeline(subs).map((w) => w.masteryPct);
+  const backward = computeTimeline([...subs].reverse()).map((w) => w.masteryPct);
+  assert.deepEqual(forward, backward);
+});
