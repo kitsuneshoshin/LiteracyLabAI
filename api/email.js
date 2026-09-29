@@ -60,7 +60,10 @@ async function handleCron(req, res) {
     maxPerRun: Number(process.env.EMAIL_MAX_PER_RUN) || 50,
     adminEmails,
   });
-  return res.status(200).json({ mode: live ? "live" : "dry-run", missingSettings: missing, emailLiveFlag: process.env.EMAIL_LIVE === "true", ...summary });
+  const report = { mode: live ? "live" : "dry-run", missingSettings: missing, emailLiveFlag: process.env.EMAIL_LIVE === "true", ...summary };
+  // In the deployment logs too, so a dry run can be checked without calling the endpoint.
+  console.log("free-email-run", JSON.stringify(report));
+  return res.status(200).json(report);
 }
 
 // ------------------------------------------------------------------ unsubscribe
