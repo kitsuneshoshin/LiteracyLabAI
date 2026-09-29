@@ -86,6 +86,16 @@ function examTechniqueSupported(tier) {
 function examTechniqueClause({ tier, targets, kind }) {
   if (!examTechniqueSupported(tier)) return "";
   const criteria = targets.map((t) => `"${t.name}" (${t.standard})`).join(", ");
+  // A checklist the model must tick off one by one, not just a comma-separated
+  // list folded into a paragraph - live testing found the model silently
+  // banding only the objective(s) it judged "directly relevant" to the piece
+  // (e.g. only "Rhetorical Awareness" for a literary-analysis essay) and
+  // dropping the rest, even though the prose instruction below already says
+  // EVERY objective must be banded including ones not attempted. Repeating
+  // each name as its own numbered line, right before the JSON shape, is
+  // measurably harder for the model to silently skip than the same names
+  // buried mid-sentence.
+  const checklist = targets.map((t, i) => `${i + 1}. "${t.name}"`).join("\n");
   const source = kind === "reading"
     ? "their answers and the reasoning those answers reveal"
     : "the piece of writing above";
@@ -93,6 +103,8 @@ function examTechniqueClause({ tier, targets, kind }) {
 Score ${source} against each of these assessment objectives for their year and region: ${criteria}.
 ${EXAM_BANDS}
 For EVERY objective listed, return an entry with: the objective's exact name, the band (1-4), the band's descriptor word, one piece of concrete evidence (a short quote from their own text, or the specific question/answer that shows it), and ONE specific change that would move that objective up exactly one band. Never award a band you cannot point to evidence for - if an objective genuinely isn't attempted at all in this piece, band it 1 and say plainly that it wasn't attempted rather than inflating it. Do not invent a raw exam mark, percentage, or grade letter: bands only.
+"examTechnique" MUST have exactly ${targets.length} entries - one for EACH objective below, even ones this piece doesn't touch on at all. Do not skip an objective just because it feels less relevant to this specific piece than the others - "not attempted, banded 1" is a valid, required entry, an entry silently missing is not:
+${checklist}
 Also return "examSummary": one sentence naming the single objective that would gain this student the most marks if they worked on it next, and why.`;
 }
 

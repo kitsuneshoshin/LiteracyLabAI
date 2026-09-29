@@ -156,3 +156,25 @@ test("the prompt only asks for paid sections when the plan grants them", () => {
   assert.ok(premium.includes("AQA GCSE English Language · AO5"));
   assert.ok(premium.includes("Viewpoint & Argument Writing"));
 });
+
+// Regression: live testing (via a real submission that failed validation 3
+// times in a row) found the model consistently banding only the objective
+// it judged "relevant" to the piece and silently dropping the rest, even
+// though the prose instruction already said every objective must be
+// banded. Every target must appear as its own numbered checklist line, and
+// the "exactly N entries" line must name the real count, not a vague "every
+// objective" - both are what should make skipping one harder to do by
+// accident.
+test("exam-technique objectives are repeated as an explicit numbered checklist the model can't silently skip", () => {
+  const args = {
+    tier: "high", country: "UK", gradeLabel: "Year 11", interest: "football",
+    confidenceWriting: "growing", motivation: "grades", prompt: "Agree or disagree.",
+    text: "An essay.", targetNames: TARGET_NAMES, targets: TARGETS,
+    capabilities: { deepFeedback: true, examTechnique: true },
+  };
+  const premium = buildWritingPrompt(args);
+  assert.ok(premium.includes(`exactly ${TARGETS.length} entries`));
+  TARGETS.forEach((t, i) => {
+    assert.ok(premium.includes(`${i + 1}. "${t.name}"`), `missing checklist line for "${t.name}"`);
+  });
+});
