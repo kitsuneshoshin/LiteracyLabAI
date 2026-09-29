@@ -2244,7 +2244,7 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
               </button>
             )}
             <div className="text-[11px] text-center mt-2" style={{ color: "#B9A69F" }}>
-              {billingError ? billingError : !backendLive ? "Billing isn't available in this demo preview." : "Billed monthly via Stripe · cancel anytime"}
+              {billingError ? billingError : !backendLive ? "Billing isn't available in this demo preview." : plan === "admin" ? "Admin is a testing account, not a paid plan, so there is nothing to manage here." : "Billed monthly via Stripe · cancel anytime"}
             </div>
           </div>
         </div>
