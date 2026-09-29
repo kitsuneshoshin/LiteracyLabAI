@@ -486,7 +486,7 @@ function validateFeedback(parsed, { tier, standardsList, targetNames, submittedT
 // Approximate word-count bounds per tier for an AI-generated reading
 // passage — wide enough to allow natural variation, tight enough to catch
 // the model producing something wildly too short/long for the age group.
-const PASSAGE_WORD_BOUNDS = { early: [20, 100], elementary: [60, 220], middle: [100, 320], high: [140, 450] };
+const PASSAGE_WORD_BOUNDS = { early: [40, 160], elementary: [100, 290], middle: [160, 400], high: [220, 520] };
 
 function wordCount(text) {
   return text.trim().split(/\s+/).filter(Boolean).length;

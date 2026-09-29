@@ -362,17 +362,17 @@ ${questionReviewShape(questions.length)}
 // from 3 to 5 - a passage sized for 3 questions doesn't comfortably support
 // 5 genuinely distinct ones without repeating the same detail.
 const PASSAGE_LENGTH = {
-  early: "5-7 short, simple sentences (roughly 60-90 words)",
-  elementary: "9-13 sentences (roughly 140-200 words)",
-  middle: "11-15 sentences (roughly 200-280 words), with some more complex sentence structures",
-  high: "13-18 sentences (roughly 260-360 words), written in a more sophisticated, adult-register style",
+  early: "7-9 sentences (roughly 90-130 words), mostly simple but with a few longer sentences and at least one less common word a child can work out from context",
+  elementary: "11-15 sentences (roughly 180-240 words), with varied sentence lengths and some richer vocabulary that can be worked out from context",
+  middle: "13-18 sentences (roughly 250-330 words), with complex and compound sentence structures, figurative language and some implied meaning",
+  high: "15-20 sentences (roughly 320-420 words), written in a sophisticated, adult-register style with dense vocabulary and nuanced or layered ideas",
 };
 
 const PASSAGE_SKILL = {
-  early: "recalling key details stated directly in the text",
-  elementary: "making inferences that go slightly beyond what's stated directly",
-  middle: "inferring mood, tone, or an author's implied purpose",
-  high: "analysing an argument's claim, structure, and rhetorical technique",
+  early: "recalling key details and making simple inferences about how a character feels or why something happened",
+  elementary: "making inferences, working out word meanings from context, and understanding cause and effect",
+  middle: "inferring mood, tone, or an author's implied purpose, and judging how word choice shapes meaning",
+  high: "evaluating an argument's claim, structure and rhetorical technique, and weighing how well evidence supports it",
 };
 
 // Generates a brand-new passage + comprehension questions on demand instead
@@ -396,6 +396,7 @@ Requirements:
 - The questions should primarily test this comprehension skill: ${PASSAGE_SKILL[tier]}, but don't all ask the same thing in different words - cover distinct details, moments, or angles of the passage so the 5 questions feel genuinely different from each other, not five variations of one question.
 - Exactly 5 questions, each with exactly 4 answer options and exactly ONE unambiguously correct answer that is clearly supported by the passage. The other 3 options must be clearly wrong to a careful reader, not intentionally tricky or debatable.
 - Do not reuse character names, settings, or plots from well-known published works.
+- Pitch it as a real stretch for this age: at least two of the five questions must need inference or interpretation rather than finding a stated fact, and the wrong options should be plausible to a careless reader (but still clearly wrong to a careful one).
 
 Respond with ONLY a JSON object (no markdown fences, no commentary) with exactly this shape:
 {
@@ -432,6 +433,7 @@ Write ${WRITING_EXERCISE_TYPE[tier]}.
 Requirements:
 - The prompt must be wholly original — not copied or closely paraphrased from any existing published writing prompt, exam question, or exercise.
 - Do not reuse character names, settings, or specific plots from well-known published works.
+- Pitch it as a real stretch for this age: it should ask the student to make choices, take a perspective or develop an idea, not just describe or retell something simple.
 - Keep the prompt itself short (one or two sentences) — the student does the writing, not you.
 - Also classify what this specific prompt is actually asking the student to write, from these exact options: ${VALID_GENRES.join(", ")}. This will typically be "${DEFAULT_GENRE_BY_TIER[tier]}" for a piece written at this tier, but tag whichever one genuinely matches what you wrote — this is used later to decide which writing technique to teach the student, so it must reflect the real exercise, not just default to the usual one.
 
