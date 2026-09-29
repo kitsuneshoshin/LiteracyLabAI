@@ -4,6 +4,9 @@ Internal engineering changelog, not linked from the site. One entry per shipped 
 
 ## 2026-09-29
 
+- `d29e92c` Fix plan dead ends in the app and guard the pricing copy against drift
+- `d0e387a` Stop plan leaks on the server and add a full plan-by-plan test matrix
+- `48bb238` Refresh CHANGELOG.md with the latest commits
 - `4a0652e` Make Premium worth the upgrade, rotate interests, add a per-question reading review
 - `93b5df2` Make Manage profile and Manage plan their own pages; make the essay timer real
 - `50e7147` Fix exam-technique failures at the root and stop one bad spelling entry sinking feedback
