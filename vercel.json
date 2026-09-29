@@ -1,0 +1,18 @@
+{
+  "rewrites": [
+    {
+      "source": "/unsubscribe",
+      "destination": "/unsubscribe.html"
+    },
+    {
+      "source": "/feedback",
+      "destination": "/feedback.html"
+    }
+  ],
+  "crons": [
+    {
+      "path": "/api/email?action=cron",
+      "schedule": "0 22 * * *"
+    }
+  ]
+}

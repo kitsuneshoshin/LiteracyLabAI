@@ -210,3 +210,58 @@ create index if not exists rate_limit_hits_profile_bucket_idx
 -- Old rows are only ever needed for a few minutes of lookback; without
 -- cleanup this table would otherwise grow forever. Safe to re-run.
 create index if not exists rate_limit_hits_created_at_idx on public.rate_limit_hits (created_at);
+
+-- ---------------------------------------------------------------------------
+-- Email: preferences, send log, and customer feedback (the product backlog).
+-- Like every table here, only the service-role key touches these (RLS on, no
+-- policy), so nothing is readable or writable from the browser.
+-- ---------------------------------------------------------------------------
+
+-- One row per parent, created the first time we email them. The token is what
+-- an unsubscribe or feedback link carries instead of anything identifying.
+create table if not exists public.email_preferences (
+  profile_id uuid primary key references public.profiles(id) on delete cascade,
+  unsubscribe_token uuid not null default gen_random_uuid() unique,
+  marketing_opt_out boolean not null default false,
+  unsubscribed_at timestamptz,
+  created_at timestamptz not null default now()
+);
+alter table public.email_preferences enable row level security;
+
+-- Every email sent. dedupe_key makes "send once" a database guarantee: a
+-- one-off email uses its own key (free-welcome), a monthly one adds the month
+-- (free-limit:2026-10), so a re-run of the daily job can never double-send.
+create table if not exists public.email_log (
+  id uuid primary key default gen_random_uuid(),
+  profile_id uuid not null references public.profiles(id) on delete cascade,
+  email_key text not null,
+  dedupe_key text not null,
+  resend_id text,
+  sent_at timestamptz not null default now(),
+  unique (profile_id, dedupe_key)
+);
+alter table public.email_log enable row level security;
+create index if not exists email_log_profile_sent_idx on public.email_log (profile_id, sent_at desc);
+
+-- What customers tell us, from the email feedback page. Status and priority
+-- turn it into a backlog. Deleted with the account (profile_id cascades) so
+-- the deletion promise in the privacy policy holds; anonymous rows have no
+-- profile_id. ip_hash is a one-way hash used only to rate-limit anonymous posts.
+create table if not exists public.feedback (
+  id uuid primary key default gen_random_uuid(),
+  created_at timestamptz not null default now(),
+  profile_id uuid references public.profiles(id) on delete cascade,
+  source text not null default 'email',
+  email_key text,
+  rating text check (rating in ('up', 'down')),
+  category text not null default 'other' check (category in ('bug', 'idea', 'praise', 'question', 'other')),
+  message text check (char_length(message) <= 2000),
+  contact_ok boolean not null default false,
+  ip_hash text,
+  status text not null default 'new' check (status in ('new', 'triaged', 'planned', 'done', 'wont_do')),
+  priority text check (priority in ('low', 'medium', 'high')),
+  owner_notes text
+);
+alter table public.feedback enable row level security;
+create index if not exists feedback_status_created_idx on public.feedback (status, created_at desc);
+create index if not exists feedback_ip_created_idx on public.feedback (ip_hash, created_at desc);

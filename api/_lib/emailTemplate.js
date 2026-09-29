@@ -69,6 +69,15 @@ function noteBox(text) {
   return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:20px 0 4px;"><tr><td class="ll-tint" style="background:${BRAND.wineTint};border-radius:10px;padding:14px 18px;font-family:${FONT_SANS};font-size:14px;line-height:1.6;color:${BRAND.wineInk};">${esc(text)}</td></tr></table>`;
 }
 
+// "Was this email useful?" row: one click records a thumbs up or down, and
+// "Tell us more" opens the full feedback form. The feedback page reads the
+// email and the rating from the link, so nothing is asked twice.
+function feedbackRow(baseUrl) {
+  const join = baseUrl.indexOf("?") === -1 ? "?" : "&";
+  const link = (label, extra) => `<a href="${esc(baseUrl + join + extra)}" class="ll-ai" style="color:${BRAND.wineInk};font-weight:600;text-decoration:none;">${label}</a>`;
+  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:24px 0 0;"><tr><td class="ll-soft ll-rule" style="border-top:1px solid ${BRAND.border};padding-top:16px;font-family:${FONT_SANS};font-size:14px;line-height:1.6;color:${BRAND.inkSoft};">Was this email useful? ${link("Yes", "r=up")} &nbsp;·&nbsp; ${link("No", "r=down")} &nbsp;·&nbsp; ${link("Tell us more", "r=more")}</td></tr></table>`;
+}
+
 /**
  * @param {object} c
  * @param {string} c.subject        the subject line (also the <title>)
@@ -82,6 +91,7 @@ function noteBox(text) {
  * @param {string} c.reason         why they are receiving it (footer)
  * @param {string} [c.unsubscribeUrl]  required for anything that is not an account/billing email
  * @param {string} [c.address]      the postal address line for the footer
+ * @param {string} [c.feedbackUrl]  the feedback page link for this email; adds a "Was this email useful?" row
  */
 function buildEmail(c) {
   const ctaUrl = c.cta ? tagLink(c.cta.url, c.campaign) : null;
@@ -91,6 +101,7 @@ function buildEmail(c) {
     c.steps ? stepsBlock(c.steps) : "",
     c.cta ? button(c.cta.label, ctaUrl) : "",
     c.note ? noteBox(c.note) : "",
+    c.feedbackUrl ? feedbackRow(c.feedbackUrl) : "",
   ].join("\n");
 
   const footerLinks = [
@@ -118,6 +129,7 @@ function buildEmail(c) {
     .ll-tint { background: ${BRAND.dark.wineTint} !important; color: ${BRAND.dark.wineInk} !important; }
     .ll-num { background: ${BRAND.dark.wineTint} !important; color: ${BRAND.dark.wineInk} !important; }
     .ll-btn { background: ${BRAND.dark.wine} !important; }
+    .ll-rule { border-color: ${BRAND.dark.border} !important; }
     .ll-ai { color: ${BRAND.dark.wineInk} !important; }
     .ll-bar { background: ${BRAND.dark.wine} !important; }
   }
@@ -162,6 +174,7 @@ ${body}
     ...(c.steps ? c.steps.flatMap((s, i) => [`${i + 1}. ${s.title} - ${s.text}`]).concat([""]) : []),
     ...(c.cta ? [`${c.cta.label}: ${ctaUrl}`, ""] : []),
     ...(c.note ? [c.note, ""] : []),
+    ...(c.feedbackUrl ? [`Was this email useful? Yes: ${c.feedbackUrl}${c.feedbackUrl.indexOf("?") === -1 ? "?" : "&"}r=up | No: ${c.feedbackUrl}${c.feedbackUrl.indexOf("?") === -1 ? "?" : "&"}r=down`, ""] : []),
     "--",
     c.reason,
     ...(c.unsubscribeUrl ? [`Unsubscribe: ${c.unsubscribeUrl}`] : []),

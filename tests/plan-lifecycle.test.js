@@ -114,8 +114,8 @@ function ratingDb({ owns = true, inserted = [] } = {}) {
 for (const plan of PLANS) {
   test(`rating: ${plan} - a thumbs-down with a comment is saved against the learner's own submission`, async () => {
     const inserted = [];
-    const h = loadHandler("commit.js", { plan, db: ratingDb({ inserted }) });
-    const res = await call(h, { method: "POST", body: { submissionId: "sub1", helpfulRating: "down", feedbackText: "It missed the point." } });
+    const h = loadHandler("email.js", { plan, db: ratingDb({ inserted }) });
+    const res = await call(h, { method: "POST", query: { action: "rating" }, body: { submissionId: "sub1", helpfulRating: "down", feedbackText: "It missed the point." } });
     assert.equal(res.statusCode, 200);
     assert.equal(inserted[0].helpful_rating, "down");
     assert.equal(inserted[0].feedback_text, "It missed the point.");
@@ -124,25 +124,25 @@ for (const plan of PLANS) {
 }
 
 test("rating: only up or down is accepted, comments are length-limited, and a missing submission id is refused", async () => {
-  const h = loadHandler("commit.js", { plan: "free", db: ratingDb() });
-  assert.equal((await call(h, { method: "POST", body: { submissionId: "sub1", helpfulRating: "meh" } })).statusCode, 400);
-  assert.equal((await call(h, { method: "POST", body: { submissionId: "sub1", helpfulRating: "up", feedbackText: "x".repeat(1001) } })).statusCode, 400);
-  assert.equal((await call(h, { method: "POST", body: { helpfulRating: "up" } })).statusCode, 400);
-  assert.equal((await call(h, { method: "GET" })).statusCode, 405);
+  const h = loadHandler("email.js", { plan: "free", db: ratingDb() });
+  assert.equal((await call(h, { method: "POST", query: { action: "rating" }, body: { submissionId: "sub1", helpfulRating: "meh" } })).statusCode, 400);
+  assert.equal((await call(h, { method: "POST", query: { action: "rating" }, body: { submissionId: "sub1", helpfulRating: "up", feedbackText: "x".repeat(1001) } })).statusCode, 400);
+  assert.equal((await call(h, { method: "POST", query: { action: "rating" }, body: { helpfulRating: "up" } })).statusCode, 400);
+  assert.equal((await call(h, { method: "GET", query: { action: "rating" } })).statusCode, 405);
 });
 
 test("rating: you can't rate someone else's submission", async () => {
   const inserted = [];
-  const h = loadHandler("commit.js", { plan: "premium", db: ratingDb({ owns: false, inserted }) });
-  const res = await call(h, { method: "POST", body: { submissionId: "not-mine", helpfulRating: "up" } });
+  const h = loadHandler("email.js", { plan: "premium", db: ratingDb({ owns: false, inserted }) });
+  const res = await call(h, { method: "POST", query: { action: "rating" }, body: { submissionId: "not-mine", helpfulRating: "up" } });
   assert.equal(res.statusCode, 404);
   assert.equal(inserted.length, 0);
 });
 
 test("rating: the retired 'what will you try next time' action is no longer stored, even if a stale page sends it", async () => {
   const inserted = [];
-  const h = loadHandler("commit.js", { plan: "core", db: ratingDb({ inserted }) });
-  await call(h, { method: "POST", body: { submissionId: "sub1", helpfulRating: "up", chosenAction: "Use a fronted adverbial" } });
+  const h = loadHandler("email.js", { plan: "core", db: ratingDb({ inserted }) });
+  await call(h, { method: "POST", query: { action: "rating" }, body: { submissionId: "sub1", helpfulRating: "up", chosenAction: "Use a fronted adverbial" } });
   assert.equal(inserted[0].chosen_action, undefined);
 });
 

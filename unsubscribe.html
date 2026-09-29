@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Unsubscribe — LiteracyLab AI</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F1F1EF; --surface:#FFFFFF; --border:#D3D3CF; --ink:#212121; --ink-soft:#5A5A56;
+    --wine:#7A3B45; --wine-ink:#552830; --bad:#A63A3A;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --bg:#161513; --surface:#1E1B18; --border:#37322B; --ink:#EDE9E2; --ink-soft:#B3AB9C; --wine:#C4776E; --wine-ink:#E3A79F; --bad:#E58B84; }
+  }
+  *{ box-sizing:border-box; }
+  body{ margin:0; background:var(--bg); color:var(--ink); font-family:"Lexend", "Segoe UI", Helvetica, Arial, sans-serif; line-height:1.6; border-top:4px solid var(--wine); min-height:100vh; }
+  .wrap{ max-width:520px; margin:0 auto; padding:20px 16px 56px; }
+  .brand{ display:flex; align-items:center; gap:12px; text-decoration:none; color:var(--ink); padding:8px 0 20px; }
+  .brand img{ width:44px; height:44px; border-radius:10px; }
+  .brand span{ font-weight:700; font-size:22px; letter-spacing:-.2px; }
+  .brand b{ color:var(--wine-ink); }
+  .card{ background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:28px; }
+  h1{ font-size:24px; line-height:1.25; margin:0 0 8px; }
+  p{ margin:0 0 16px; color:var(--ink-soft); }
+  button{ font:inherit; font-weight:600; font-size:16px; padding:13px 26px; border:0; border-radius:999px; background:var(--wine); color:#fff; cursor:pointer; }
+  button.quiet{ background:transparent; color:var(--wine-ink); padding:8px 0; }
+  button[disabled]{ opacity:.6; cursor:default; }
+  button:focus-visible, a:focus-visible{ outline:2px solid var(--wine); outline-offset:2px; }
+  .err{ color:var(--bad); }
+  a{ color:var(--wine-ink); }
+</style>
+<script src="analytics.js"></script>
+</head>
+<body>
+<div class="wrap">
+  <a class="brand" href="index.html"><img src="apple-touch-icon.png" alt="" width="44" height="44"><span>LiteracyLab <b>AI</b></span></a>
+  <div class="card" id="card">
+    <h1 id="title">Unsubscribe from our emails?</h1>
+    <p id="lede">You'll stop getting tips, reminders and weekly summaries. Emails about your account, such as sign-in and billing, will still be sent when needed.</p>
+    <button id="go" type="button">Unsubscribe</button>
+    <p id="msg" role="status" aria-live="polite" style="margin-top:14px;"></p>
+  </div>
+</div>
+<script>
+(function () {
+  var token = new URLSearchParams(location.search).get("t") || "";
+  var $ = function (id) { return document.getElementById(id); };
+  function call(resubscribe) {
+    return fetch("/api/email?action=unsubscribe&t=" + encodeURIComponent(token), {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(resubscribe ? { resubscribe: true } : {})
+    }).then(function (r) { return r.json().then(function (d) { if (!r.ok) throw new Error(d.error || "Something went wrong."); return d; }); });
+  }
+  function done() {
+    $("title").textContent = "You're unsubscribed";
+    $("lede").innerHTML = 'We won\'t send you tips, reminders or summaries any more. If that was a mistake you can <button id="undo" type="button" class="quiet">resubscribe</button>. Tell us why you left on the <a href="feedback.html">feedback page</a>: it helps us improve.';
+    $("go").hidden = true;
+    $("msg").textContent = "";
+    $("undo").addEventListener("click", function () {
+      $("undo").disabled = true;
+      call(true).then(function () {
+        $("title").textContent = "You're subscribed again";
+        $("lede").textContent = "Welcome back. You'll get our emails again.";
+      }).catch(function (e) { $("msg").className = "err"; $("msg").textContent = e.message; });
+    });
+  }
+  if (!token) {
+    $("title").textContent = "This link isn't valid";
+    $("lede").innerHTML = 'Open the unsubscribe link in one of our emails, or write to <a href="mailto:support@literacylabai.com">support@literacylabai.com</a> and we\'ll do it for you.';
+    $("go").hidden = true;
+    return;
+  }
+  $("go").addEventListener("click", function () {
+    $("go").disabled = true;
+    $("msg").className = ""; $("msg").textContent = "One moment…";
+    call(false).then(done).catch(function (e) { $("go").disabled = false; $("msg").className = "err"; $("msg").textContent = e.message; });
+  });
+})();
+</script>
+</body>
+</html>
