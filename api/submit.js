@@ -6,7 +6,7 @@ const { buildWritingPrompt, buildReadingPrompt, correctiveAddendum, examTechniqu
 const { standardsFor } = require("./_lib/curriculum");
 const { targetsForGrade } = require("./_lib/masteryTargets");
 const { frameworkForGenre, resolveGenre } = require("./_lib/writingFrameworks");
-const { validateFeedback, resolveTarget, dropInvalidSpellingGrammar, sanitizeQuestionReview, stripUngrantedSections } = require("./_lib/validate");
+const { validateFeedback, resolveTarget, dropInvalidSpellingGrammar, sanitizeQuestionReview, repairZeroScoreGlow, stripUngrantedSections } = require("./_lib/validate");
 const { checkRateLimit } = require("./_lib/rateLimit");
 const { writingLimitsForGrade } = require("./_lib/writingLimits");
 
@@ -30,6 +30,7 @@ async function generateAndValidate(prompt, tier, country, gradeLabel, submittedT
   for (let i = 1; i <= MAX_ATTEMPTS; i++) {
     const attempt = await generateFeedbackJSON(nextPrompt);
     if (capabilities?.spellingGrammar !== false) dropInvalidSpellingGrammar(attempt.parsed, submittedText);
+    if (readingScore === 0) repairZeroScoreGlow(attempt.parsed);
     if (readingContext) sanitizeQuestionReview(attempt.parsed, readingContext.passage, readingContext.questionCount);
     const check = validateFeedback(attempt.parsed, { tier, standardsList, targetNames, submittedText, readingScore, capabilities, genre });
     if (check.ok) {

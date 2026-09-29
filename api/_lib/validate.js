@@ -143,6 +143,29 @@ const ZERO_SCORE_FABRICATION_PATTERN = /\b(you\s+(noticed|recognised|recognized|
 // piece can support, and that number would end up in front of a parent.
 const FABRICATED_MARK_PATTERN = /\b(\d{1,3}\s*(\/|out of)\s*\d{1,3}|\d{1,3}\s*%|grade\s*[A-E1-9][*+-]?\b)/i;
 
+function coerceBand(band) {
+  if (typeof band === "string") {
+    const m = band.match(/^\D*([0-4])\D*$/);
+    if (m) band = Number(m[1]);
+  }
+  if (band === 0) return 1; // the prompt defines "not attempted" as band 1
+  return band;
+}
+
+// On an all-wrong reading attempt the glow has nothing true to praise except
+// effort (see zeroScoreClause), so a model that instead claims understanding
+// the student never showed is not worth failing three attempts over - the
+// glow is swapped for a safe, honest sentence.
+const ZERO_SCORE_SAFE_GLOW = "You gave this passage a real go, and sticking with a tricky text to the end is exactly the habit that builds stronger reading.";
+function repairZeroScoreGlow(parsed) {
+  if (!parsed || typeof parsed !== "object") return parsed;
+  const g = parsed.glow;
+  if (typeof g !== "string" || g.trim().length < 20 || g.trim().length > 600 || ZERO_SCORE_FABRICATION_PATTERN.test(g)) {
+    parsed.glow = ZERO_SCORE_SAFE_GLOW;
+  }
+  return parsed;
+}
+
 function validateExamTechnique(parsed, targetNames, issues) {
   const entries = parsed?.examTechnique;
   if (!Array.isArray(entries) || entries.length === 0) {
@@ -151,6 +174,11 @@ function validateExamTechnique(parsed, targetNames, issues) {
   }
   const seen = new Set();
   entries.forEach((e, i) => {
+    // The JSON template shows band as a quoted placeholder, so models often
+    // answer with a string ("2", "Band 2") or 0 for "not attempted". Those
+    // are unambiguous, so they are normalised rather than failing the whole
+    // response three times running.
+    if (e && typeof e === "object") e.band = coerceBand(e.band);
     const resolved = resolveTarget(e?.criterion, targetNames);
     if (!resolved) {
       issues.push(`examTechnique[${i}].criterion must exactly match one of the given assessment objective names: ${(targetNames || []).join(", ")}`);
@@ -406,7 +434,9 @@ function validateFeedback(parsed, { tier, standardsList, targetNames, submittedT
     const cap = MAX_AVG_WORDS_PER_SENTENCE[tier] || 30;
     if (avg > cap) issues.push(`sentences are too long for this age tier (avg ${avg.toFixed(1)} words/sentence, expected under ${cap})`);
 
-    if (!mentionsAStandard(parsed.glow, standardsList)) {
+    // A 0-correct glow can only honestly praise effort, so it cannot also tie
+    // to a comprehension standard the student did not demonstrate.
+    if (readingScore !== 0 && !mentionsAStandard(parsed.glow, standardsList)) {
       issues.push("glow does not appear to reference the specific curriculum standard it was given");
     }
   }
@@ -550,4 +580,4 @@ function validateWritingPrompt(parsed, { tier }) {
   return { ok: issues.length === 0, issues };
 }
 
-module.exports = { validateFeedback, validatePassage, validateWritingPrompt, resolveTarget, dropInvalidSpellingGrammar, sanitizeQuestionReview, stripUngrantedSections, MAX_AVG_WORDS_PER_SENTENCE };
+module.exports = { repairZeroScoreGlow, validateFeedback, validatePassage, validateWritingPrompt, resolveTarget, dropInvalidSpellingGrammar, sanitizeQuestionReview, stripUngrantedSections, MAX_AVG_WORDS_PER_SENTENCE };

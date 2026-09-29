@@ -53,7 +53,9 @@ test("every assessment objective must be banded - a model can't skip the weak on
 });
 
 test("a band outside 1-4 is rejected", () => {
-  for (const band of [0, 5, 3.5, "3", null, undefined]) {
+  // Numeric strings ("3") and 0 are normalised rather than rejected - see
+  // coerceBand in validate.js and tests/reading-zero-score.test.js.
+  for (const band of [5, 3.5, "3.5", "high", null, undefined]) {
     const entries = baseFeedback().examTechnique;
     entries[1].band = band;
     const result = validateFeedback(baseFeedback({ examTechnique: entries }), CTX);

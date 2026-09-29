@@ -3438,7 +3438,7 @@ function ReadingExercise({ bank, answers, setAnswers, allAnswered, phase, onSubm
         <SectionLabel>Reading comprehension · {bank.skill}</SectionLabel>
         <h3 className="font-display font-semibold text-lg mt-0.5" style={{ color: "var(--ink)" }}>{bank.title}</h3>
       </div>
-      <p className="font-read text-[15px] px-6 pt-4 pb-2 leading-relaxed" style={{ color: "var(--ink)" }}>{bank.passage}</p>
+      <div className="font-read text-[15px] px-6 pt-4 pb-2 leading-relaxed flex flex-col gap-3" style={{ color: "var(--ink)" }}>{String(bank.passage).split(/\n\s*\n/).map((para, i) => <p key={i}>{para}</p>)}</div>
       <div className="px-6 pb-5 pt-3 flex flex-col gap-5">
         {bank.questions.map((q,qi)=>(
           <div key={qi}>

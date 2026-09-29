@@ -292,7 +292,7 @@ function zeroScoreClause(score) {
   return ` This student got EVERY comprehension question wrong on this attempt - there is no correct answer, insight, or understanding to praise, and you must not invent one. The glow must NOT reference anything specific from the passage's content (no character names, plot points, topics, or ideas from it) and must NOT use any phrasing that claims the student engaged with, noticed, understood, connected with, captured, recognised, or grasped anything in the passage - all of that would be a fabricated claim about something that did not happen on this attempt.
 WRONG (still fabricates comprehension - do not do this): "You engaged thoughtfully with complex ideas about coding" / "You captured an interesting moment when you noticed the tension."
 RIGHT (praises something true without referencing the passage's content): "You gave this passage a real go, and that's exactly the habit that builds stronger reading over time." / "Tackling a tricky passage like this takes real effort, and you stuck with it to the end."
-Keep the glow to one such content-free, honest sentence, then move straight into the grow.`;
+Keep the glow to ONE such content-free, honest sentence (never use the words "understanding" or "understand" in it), then move straight into the grow.`;
 }
 
 // A short explanation for EVERY question, not just the one Glow and one Grow
@@ -368,6 +368,13 @@ const PASSAGE_LENGTH = {
   high: "15-20 sentences (roughly 320-420 words), written in a sophisticated, adult-register style with dense vocabulary and nuanced or layered ideas",
 };
 
+const PASSAGE_PARAGRAPHS = {
+  early: "2 short paragraphs",
+  elementary: "2-3 short paragraphs",
+  middle: "3-4 paragraphs",
+  high: "4-5 paragraphs",
+};
+
 const PASSAGE_SKILL = {
   early: "recalling key details and making simple inferences about how a character feels or why something happened",
   elementary: "making inferences, working out word meanings from context, and understanding cause and effect",
@@ -393,6 +400,7 @@ Write a short, wholly original passage — never copied or closely paraphrased f
 
 Requirements:
 - Passage length: ${PASSAGE_LENGTH[tier]}.
+- Layout: write it as ${PASSAGE_PARAGRAPHS[tier]}, with a blank line between paragraphs (in the JSON string, separate paragraphs with \\n\\n). Each paragraph should hold one idea, moment or step in the argument - never one dense block of text.
 - The questions should primarily test this comprehension skill: ${PASSAGE_SKILL[tier]}, but don't all ask the same thing in different words - cover distinct details, moments, or angles of the passage so the 5 questions feel genuinely different from each other, not five variations of one question.
 - Exactly 5 questions, each with exactly 4 answer options and exactly ONE unambiguously correct answer that is clearly supported by the passage. The other 3 options must be clearly wrong to a careful reader, not intentionally tricky or debatable.
 - Do not reuse character names, settings, or plots from well-known published works.

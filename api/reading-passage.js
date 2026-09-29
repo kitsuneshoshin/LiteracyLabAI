@@ -6,6 +6,7 @@ const { checkRateLimit } = require("./_lib/rateLimit");
 const { generateFeedbackJSON } = require("./_lib/openai");
 const { buildReadingPassagePrompt, correctiveAddendum } = require("./_lib/prompt");
 const { validatePassage } = require("./_lib/validate");
+const { paragraphise } = require("./_lib/passageFormat");
 
 const VALID_TIERS = ["early", "elementary", "middle", "high"];
 
@@ -98,6 +99,7 @@ module.exports = async function handler(req, res) {
     try {
       const llmPrompt = buildReadingPassagePrompt({ tier, country, gradeLabel });
       ({ parsed } = await generateAndValidate(llmPrompt, tier));
+      parsed.passage = paragraphise(parsed.passage);
     } catch (genErr) {
       await supabase.from("submissions").delete().eq("id", reserved.id);
       throw genErr;
