@@ -32,6 +32,22 @@
   gtag("js", new Date());
   gtag("config", GA_ID);
 
+  // Custom events. Only ever pass non-personal values (a plan name, a kind of
+  // exercise) - never names, emails, or anything a learner wrote.
+  window.llTrack = function (name, params) {
+    try { gtag("event", name, params || {}); } catch (e) {}
+  };
+
+  // Every link into the app from the marketing pages counts as a CTA click.
+  document.addEventListener("click", function (e) {
+    var a = e.target && e.target.closest ? e.target.closest("a") : null;
+    if (!a) return;
+    var href = a.getAttribute("href") || "";
+    if (href.indexOf("app.html") === 0) {
+      window.llTrack("cta_click", { cta_text: (a.textContent || "").trim().slice(0, 40), page: location.pathname });
+    }
+  });
+
   if (saved) return; // already answered - no banner
 
   function showBanner() {

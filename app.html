@@ -1745,6 +1745,7 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
         method: "POST",
         body: JSON.stringify({ tier: tier || "core" }),
       });
+      window.llTrack && window.llTrack("begin_checkout", { plan: tier || "core" });
       window.location.href = result.url;
     } catch (err) {
       setBillingError(err.payload?.error || err.message || "Something went wrong opening billing. Please try again.");
@@ -3141,6 +3142,16 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
       if (exerciseType === "writing") delete pendingWritingRef.current[cacheKey];
       else delete pendingReadingRef.current[cacheKey];
       onSubmit(result.usage);
+      if (window.llTrack) {
+        window.llTrack("submission_complete", { kind: exerciseType, tier });
+        // The first ever completed piece on this browser - the moment someone becomes an active user.
+        try {
+          if (!localStorage.getItem("ll_first_submission")) {
+            localStorage.setItem("ll_first_submission", "1");
+            window.llTrack("first_submission", { kind: exerciseType, tier });
+          }
+        } catch (e) {}
+      }
       // The student has since switched tier, child, or exercise type -
       // applying this result now would show reading/writing feedback for an
       // exercise no longer on screen, or (for reading) crash outright since
@@ -3714,6 +3725,7 @@ function App({ session }){
   // starts at the top instead of inheriting wherever the last page was
   // scrolled to (the Dashboard is long; the new pages are short).
   useEffect(()=>{ window.scrollTo({ top: 0 }); }, [view]);
+  useEffect(()=>{ if (view === "plan" && window.llTrack) window.llTrack("view_plans"); }, [view]);
 
   // A standalone route straight to Stripe's own billing portal (payment
   // method, invoices, cancel) from the header's Account menu, without first
@@ -4009,10 +4021,12 @@ function AuthScreen(){
       if (mode === "signup") {
         const { error } = await supabaseClient.auth.signUp({ email, password });
         if (error) throw error;
+        window.llTrack && window.llTrack("sign_up", { method: "email" });
         setStatus("check-email");
       } else {
         const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
         if (error) throw error;
+        window.llTrack && window.llTrack("login", { method: "email" });
         // onAuthStateChange in AuthGate picks up the new session automatically.
       }
     } catch (err) {
