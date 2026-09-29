@@ -155,3 +155,36 @@ test("question review: with no interest the prompt carries no interest instructi
   assert.ok(!/short comparison or example/.test(readingPrompt("")));
   assert.match(readingPrompt("gaming"), /short comparison or example/);
 });
+
+// ------------------------------------------------------------------ exam scoring on a reading task
+
+test("reading exam scoring: 'not attempted' evidence is replaced with the real facts, since every question was answered", async () => {
+  const out = modelOutput(1, GOOD_GLOW);
+  out.examTechnique.forEach((e) => { e.evidence = "not attempted"; });
+  const { res } = await submit(out);
+  assert.equal(res.statusCode, 200, JSON.stringify(res.body));
+  for (const e of res.body.feedback.examTechnique) assert.equal(e.evidence, "All 5 questions were answered incorrectly.");
+});
+
+test("reading exam scoring: evidence that names real questions is left alone", async () => {
+  const out = modelOutput(1, GOOD_GLOW);
+  out.examTechnique.forEach((e) => { e.evidence = "Q2 and Q4 answered incorrectly"; });
+  const { res } = await submit(out);
+  for (const e of res.body.feedback.examTechnique) assert.equal(e.evidence, "Q2 and Q4 answered incorrectly");
+});
+
+test("reading exam scoring: the prompt forbids 'not attempted' and writing advice on a reading task", () => {
+  const targets = targetsForGrade(COUNTRY, GRADE, "high").targets;
+  const p = buildReadingPrompt({
+    tier: "high", country: COUNTRY, gradeLabel: GRADE, interest: "pop", confidenceReading: "growing", motivation: "grades",
+    passageTitle: "The Volcano", passage: PASSAGE, questions: QUESTIONS, answers: ALL_WRONG, score: 0, totalQuestions: 5,
+    targets, targetNames: targets.map((t) => t.name), capabilities: { examTechnique: true },
+  });
+  assert.match(p, /never say an objective was "not attempted"/);
+  assert.match(p, /advice for READING practice/);
+  const w = require("../api/_lib/prompt").buildWritingPrompt({
+    tier: "high", country: COUNTRY, gradeLabel: GRADE, interest: "pop", prompt: "Write.", text: "Some text here.",
+    targets, targetNames: targets.map((t) => t.name), capabilities: { examTechnique: true }, genre: "persuasive",
+  });
+  assert.ok(!/READING task/.test(w), "the writing prompt must not carry the reading note");
+});

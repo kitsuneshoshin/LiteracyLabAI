@@ -166,6 +166,24 @@ function repairZeroScoreGlow(parsed) {
   return parsed;
 }
 
+// On a reading task the student always attempted every question, so an exam
+// entry saying "not attempted" is false and off-task however the AI got there.
+// Rather than failing three generations over wording, the evidence is replaced
+// with the real, checkable facts: which questions were answered wrongly.
+function repairReadingExamEvidence(parsed, questions, answers) {
+  if (!parsed || !Array.isArray(parsed.examTechnique) || !Array.isArray(questions)) return parsed;
+  const wrong = questions.map((q, i) => (answers && answers[i] === q.correct ? null : i + 1)).filter(Boolean);
+  const fact = wrong.length === 0
+    ? "Every question was answered correctly."
+    : wrong.length === questions.length
+      ? "All " + questions.length + " questions were answered incorrectly."
+      : "Question" + (wrong.length > 1 ? "s " : " ") + wrong.join(", ") + " answered incorrectly.";
+  for (const e of parsed.examTechnique) {
+    if (e && typeof e.evidence === "string" && /not\s+attempted|wasn'?t\s+attempted|did\s+not\s+attempt/i.test(e.evidence)) e.evidence = fact;
+  }
+  return parsed;
+}
+
 function validateExamTechnique(parsed, targetNames, issues) {
   const entries = parsed?.examTechnique;
   if (!Array.isArray(entries) || entries.length === 0) {
@@ -580,4 +598,4 @@ function validateWritingPrompt(parsed, { tier }) {
   return { ok: issues.length === 0, issues };
 }
 
-module.exports = { repairZeroScoreGlow, validateFeedback, validatePassage, validateWritingPrompt, resolveTarget, dropInvalidSpellingGrammar, sanitizeQuestionReview, stripUngrantedSections, MAX_AVG_WORDS_PER_SENTENCE };
+module.exports = { repairZeroScoreGlow, repairReadingExamEvidence, validateFeedback, validatePassage, validateWritingPrompt, resolveTarget, dropInvalidSpellingGrammar, sanitizeQuestionReview, stripUngrantedSections, MAX_AVG_WORDS_PER_SENTENCE };

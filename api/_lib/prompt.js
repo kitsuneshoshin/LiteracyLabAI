@@ -109,7 +109,16 @@ function examTechniqueClause({ tier, targets, kind }) {
   const source = kind === "reading"
     ? "their answers and the reasoning those answers reveal"
     : "the piece of writing above";
-  return `\n\nEXAM-TECHNIQUE SCORING (required for this student):
+  // Reading has no essay to judge, and the objective list is shared with
+  // writing (e.g. "Evaluating Sentence Structure"). Live output banded every
+  // objective 1 with "Why: not attempted" and told the student to "include
+  // varied sentence lengths in your writing" after they had answered all five
+  // questions - untrue and off-task. So the reading version is told exactly
+  // what counts as evidence.
+  const readingNote = kind === "reading"
+    ? `\nThis was a READING task and the student answered every question, so never say an objective was "not attempted". Judge each objective only from what their answers show (which questions they got right or wrong and what that suggests). For "evidence", name specific questions, for example "Q2 and Q4 answered incorrectly". If an objective is mostly about writing craft and the questions give little evidence of it, say "The reading questions give limited evidence for this" and band conservatively. Every "toNextBand" must be advice for READING practice (for example how to find and weigh evidence in a text), never advice about "your writing".`
+    : "";
+  return `\n\nEXAM-TECHNIQUE SCORING (required for this student):${readingNote}
 Score ${source} against each of these assessment objectives for their year and region: ${criteria}.
 ${EXAM_BANDS}
 For EVERY objective listed, return an entry with: the objective's exact name, the band (1-4), the band's descriptor word, one piece of concrete evidence (a short quote from their own text, or the specific question/answer that shows it), and ONE specific change that would move that objective up exactly one band. Never award a band you cannot point to evidence for - if an objective genuinely isn't attempted at all in this piece, band it 1 and say plainly that it wasn't attempted rather than inflating it. Do not invent a raw exam mark, percentage, or grade letter: bands only.

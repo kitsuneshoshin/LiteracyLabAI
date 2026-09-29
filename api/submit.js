@@ -6,7 +6,7 @@ const { buildWritingPrompt, buildReadingPrompt, correctiveAddendum, examTechniqu
 const { standardsFor } = require("./_lib/curriculum");
 const { targetsForGrade } = require("./_lib/masteryTargets");
 const { frameworkForGenre, resolveGenre } = require("./_lib/writingFrameworks");
-const { validateFeedback, resolveTarget, dropInvalidSpellingGrammar, sanitizeQuestionReview, repairZeroScoreGlow, stripUngrantedSections } = require("./_lib/validate");
+const { validateFeedback, resolveTarget, dropInvalidSpellingGrammar, sanitizeQuestionReview, repairZeroScoreGlow, repairReadingExamEvidence, stripUngrantedSections } = require("./_lib/validate");
 const { checkRateLimit } = require("./_lib/rateLimit");
 const { writingLimitsForGrade } = require("./_lib/writingLimits");
 
@@ -31,6 +31,7 @@ async function generateAndValidate(prompt, tier, country, gradeLabel, submittedT
     const attempt = await generateFeedbackJSON(nextPrompt);
     if (capabilities?.spellingGrammar !== false) dropInvalidSpellingGrammar(attempt.parsed, submittedText);
     if (readingScore === 0) repairZeroScoreGlow(attempt.parsed);
+    if (readingContext) repairReadingExamEvidence(attempt.parsed, readingContext.questions, readingContext.answers);
     if (readingContext) sanitizeQuestionReview(attempt.parsed, readingContext.passage, readingContext.questionCount);
     const check = validateFeedback(attempt.parsed, { tier, standardsList, targetNames, submittedText, readingScore, capabilities, genre });
     if (check.ok) {
@@ -227,7 +228,7 @@ module.exports = async function handler(req, res) {
           answers, score, totalQuestions, capabilities: caps, targets,
           targetNames: targets.map((t) => t.name),
         });
-        result = await generateAndValidate(llmPrompt, existing.tier, existing.country, existing.grade_label, undefined, score, caps, undefined, { passage: bank.passage, questionCount: totalQuestions });
+        result = await generateAndValidate(llmPrompt, existing.tier, existing.country, existing.grade_label, undefined, score, caps, undefined, { passage: bank.passage, questionCount: totalQuestions, questions: bank.questions, answers });
       } catch (genErr) {
         await releaseClaim(supabase, submissionId);
         throw genErr;
