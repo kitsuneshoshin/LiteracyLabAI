@@ -1638,7 +1638,15 @@ function ChildSwitcher({ children_, activeChildId, onSwitchChild, onAddChild, sh
   );
 }
 
-function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests, toggleInterest, confidenceWriting, setConfidenceWriting, confidenceReading, setConfidenceReading, motivation, setMotivation, displayName, setDisplayName, avatarId, setAvatarId, children_, activeChildId, onSwitchChild, onAddChild, onRemoveChild, onMakeUsable, activeChangeAvailableAt, used, total, plan, session, setView, history, progress, peerStats, backendLive, needsOnboarding, onCompleteOnboarding }){
+// One component, three pages (page = "overview" | "profile" | "plan"):
+// Manage profile and Manage plan used to be cards at the bottom of one very
+// long Dashboard scroll. They're now their own pages, reached from the
+// header's Account menu, so the overview stays about progress and the
+// settings/billing forms get a screen to themselves.
+function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests, toggleInterest, confidenceWriting, setConfidenceWriting, confidenceReading, setConfidenceReading, motivation, setMotivation, displayName, setDisplayName, avatarId, setAvatarId, children_, activeChildId, onSwitchChild, onAddChild, onRemoveChild, onMakeUsable, activeChangeAvailableAt, used, total, plan, session, setView, history, progress, peerStats, backendLive, needsOnboarding, onCompleteOnboarding, page = "overview" }){
+  const showOverview = page === "overview";
+  const showProfile = page === "profile";
+  const showPlan = page === "plan";
   const grades = GRADE_DATA[country].grades;
   const gradeLabel = grades[gradeIdx];
   const remaining = total - used;
@@ -1722,7 +1730,7 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
 
   return (
     <>
-    {needsOnboarding && (
+    {needsOnboarding && !showPlan && (
       <div className="mx-auto max-w-[1400px] px-4 sm:px-6 pt-8">
         <div className="rounded-2xl px-5 py-4 flex items-center gap-3 flex-wrap" style={{ background: "var(--cyan-tint)", border: "1.5px solid var(--cyan)" }}>
           <div className="w-9 h-9 rounded-full grid place-items-center shrink-0" style={{ background: "var(--cyan)", color: "#fff" }}>
@@ -1736,14 +1744,15 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
       </div>
     )}
     <div className="mx-auto max-w-[1400px] px-4 sm:px-6 py-8 flex flex-col gap-8">
-      {backendLive && (
+      {backendLive && !showPlan && (
         <ChildSwitcher children_={children_} activeChildId={activeChildId} onSwitchChild={onSwitchChild} onAddChild={onAddChild} />
       )}
-      {backendLive && (
+      {backendLive && !showPlan && (
         <PausedLearnerNotice child={children_.find(c => c.id === activeChildId)} children_={children_}
           activeChangeAvailableAt={activeChangeAvailableAt} onMakeUsable={onMakeUsable} />
       )}
 
+      {showOverview && (<>
       {/* SNAPSHOT — every quick number, in one glance, before anything
           else. Used to be a narrow sidebar column next to the first
           card; now leads the page since it's what a returning parent
@@ -1962,16 +1971,44 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
 
         <VocabularyBank vocabWords={history?.vocabWords} session={session} childId={activeChildId} backendLive={backendLive} />
       </div>
+      </>)}
 
-      {/* ACCOUNT — identity, settings and billing. Learner setup is
-          collapsed by default once onboarding is done: it's filled in
-          once and rarely revisited, so it no longer has to compete with
-          the content above it every single visit. */}
-      <div className="flex flex-col gap-6">
-        <div className="text-[11px] font-bold uppercase tracking-wide" style={{ color: "var(--ink-faint)" }}>Account</div>
+      {/* ACCOUNT pages - Manage profile (learner setup) and Manage plan
+          (billing) are their own pages now rather than cards at the
+          bottom of the overview; the overview just links to them. */}
+      <div className={`flex flex-col gap-6 ${showOverview ? "" : "w-full mx-auto " + (showPlan ? "max-w-4xl" : "max-w-5xl")}`}>
+        {!showOverview && (
+          <div>
+            <button onClick={()=>setView("dashboard")} className="focus-ring inline-flex items-center gap-1.5 text-[13px] font-semibold mb-3" style={{ color: "var(--ink-soft)" }}>
+              <IconArrowRight size={14} style={{ transform: "rotate(180deg)" }} /> Back to dashboard
+            </button>
+            <h1 className="font-display font-bold text-2xl" style={{ color: "var(--ink)" }}>
+              {showPlan ? "Manage plan" : (displayName ? `Manage ${displayName}'s profile` : "Manage profile")}
+            </h1>
+            <p className="text-sm mt-0.5" style={{ color: "var(--ink-soft)" }}>
+              {showPlan ? "Your subscription and what each plan includes." : "Curriculum, year group, interests and account settings."}
+            </p>
+          </div>
+        )}
 
-        <div id="account-profile-section" className="scroll-mt-24">
-        <Collapsible defaultOpen={needsOnboarding} borderColor="var(--border)" iconBg="var(--navy-tint)" iconColor="var(--ink)"
+        {showOverview && (
+          <div className="grid sm:grid-cols-2 gap-4">
+            {[["profile", "Manage profile", `${displayName || "Your learner"}'s name, year group, interests and account settings`], ["plan", "Manage plan", "Your subscription and what each plan includes"]].map(([target, label, sub]) => (
+              <button key={target} onClick={()=>setView(target)}
+                className="focus-ring card p-5 flex items-center justify-between text-left transition-colors">
+                <div>
+                  <div className="font-display font-semibold text-sm" style={{ color: "var(--ink)" }}>{label}</div>
+                  <div className="text-xs mt-0.5" style={{ color: "var(--ink-soft)" }}>{sub}</div>
+                </div>
+                <IconArrowRight size={18} style={{ color: "var(--cyan-ink)" }} />
+              </button>
+            ))}
+          </div>
+        )}
+
+        {showProfile && (
+        <div id="account-profile-section">
+        <Collapsible staticOpen defaultOpen={true} borderColor="var(--border)" iconBg="var(--navy-tint)" iconColor="var(--ink)"
           icon={React.createElement(TIER_META[tier].icon, { size: 15, strokeWidth: 2.2 })}
           title="Learner setup"
           teaser={`${displayName || "Your learner"} · ${TIER_META[tier].label} · ${stripFlag(country)}`}>
@@ -2084,7 +2121,9 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
           )}
         </Collapsible>
         </div>
-        <div id="account-plan-section" className="card p-6 relative overflow-hidden scroll-mt-24" style={{ background: "linear-gradient(160deg, var(--ink), #3E2028)" }}>
+        )}
+        {showPlan && (
+        <div id="account-plan-section" className="card p-6 relative overflow-hidden" style={{ background: "linear-gradient(160deg, var(--ink), #3E2028)" }}>
           <div className="absolute -right-6 -top-6 w-28 h-28 rounded-full" style={{ background: "radial-gradient(circle, var(--gold) 0%, transparent 70%)", opacity: .35 }} />
           <div className="relative">
             <div className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold mb-3" style={{ background: "var(--gold)", color: "#fff" }}>
@@ -2105,7 +2144,7 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
                 <p className="text-[13px] mb-4" style={{ color: "#E4D6D2" }}>
                   You’ve used {used} of {total} free submissions this month. Choose the plan that fits your household.
                 </p>
-                <div className="space-y-3 mb-4">
+                <div className="grid gap-3 mb-4 md:grid-cols-2">
                   {[
                     { tier: "core", name: "Core", price: PLAN_META.core.price, sub: "One learner", features: ["Unlimited writing & reading submissions", "26-week progress trend chart", "Anonymous ranking in their year group", "Full activity history"] },
                     { tier: "premium", name: "Premium", price: PLAN_META.premium.price, sub: "Up to 6 learners", features: ["Everything in Core, for the whole household", "Extended feedback: a second, harder next step", "Exam-technique scoring against real assessment objectives (ages 11+)"] },
@@ -2145,7 +2184,9 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
             </div>
           </div>
         </div>
+        )}
 
+        {!showPlan && (
         <button onClick={needsOnboarding ? onCompleteOnboarding : ()=>setView("workspace")}
           className="focus-ring card p-5 flex items-center justify-between text-left transition-colors"
           style={ needsOnboarding ? { borderColor: "var(--cyan)", borderWidth: 1.5, background: "var(--cyan-tint)" } : {} }>
@@ -2155,6 +2196,7 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
           </div>
           <IconArrowRight size={18} style={{ color: "var(--cyan-ink)" }} />
         </button>
+        )}
       </div>
     </div>
     </>
@@ -2478,8 +2520,22 @@ const EXAM_BAND_META = {
 // wall of boxes) - the student/parent controls what stays open, and each
 // header always shows a one-line teaser so a collapsed section still
 // visibly "does something" rather than looking like it vanished.
-function Collapsible({ icon, iconBg, iconColor, title, teaser, borderColor, defaultOpen, children }){
-  const [open, setOpen] = useState(defaultOpen);
+function Collapsible({ icon, iconBg, iconColor, title, teaser, borderColor, defaultOpen, staticOpen, children }){
+  const [openState, setOpen] = useState(defaultOpen);
+  // staticOpen: a page whose whole content IS this card (Manage profile) has
+  // no reason to let the header collapse it away - always open, no toggle.
+  const open = staticOpen || openState;
+  if (staticOpen) {
+    return (
+      <div className="card p-5 sm:p-6" style={{ borderColor, borderWidth: 1.5 }}>
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-full grid place-items-center shrink-0" style={{ background: iconBg, color: iconColor }}>{icon}</div>
+          <h3 className="font-display font-bold" style={{ color: "var(--ink)" }}>{title}</h3>
+        </div>
+        <div className="mt-3">{children}</div>
+      </div>
+    );
+  }
   return (
     <div className="card p-5 sm:p-6" style={{ borderColor, borderWidth: 1.5 }}>
       <button onClick={()=>setOpen(o=>!o)} className="focus-ring w-full flex items-center gap-2 text-left" aria-expanded={open}>
@@ -3192,6 +3248,7 @@ function WordMeter({ words, target, chars, maxChars }){
 // long, growing feedback column). The full text is still fully visible,
 // just once, inside the annotated card below - nothing here is lost.
 const NEW_LABEL_BY_TIER = { early: "New Story", elementary: "New Mission", middle: "New response", high: "New essay" };
+const ESSAY_TIME_LIMIT_SECONDS = 40 * 60;
 function SubmissionRecap({ tier, title, words, onNew }){
   return (
     <div className="card p-5 flex items-center justify-between gap-4 flex-wrap">
@@ -3271,6 +3328,26 @@ function TierEditor({ tier, meta, text, setText, words, phase, onSubmit, onNew, 
   // view (which highlights quotes against this same live text) from what
   // was actually graded.
   const disabled = phase === "analyzing" || phase === "done" || locked;
+
+  // The high-school "timed essay" badge used to be a hard-coded "40:00
+  // remaining" string with nothing behind it - it never moved. Starts on the
+  // first keystroke (not on page load, so reading the prompt is free),
+  // freezes once submitted, and resets when the box is emptied for a new
+  // essay. Deliberately doesn't lock the textarea or auto-submit at zero: a
+  // practice timer shouldn't throw away a student's half-finished essay.
+  const [essaySecondsUsed, setEssaySecondsUsed] = useState(0);
+  const [essayStarted, setEssayStarted] = useState(false);
+  const essayTimerRunning = tier === "high" && phase === "draft" && essayStarted;
+  useEffect(()=>{
+    if (!essayTimerRunning) return;
+    const id = setInterval(()=> setEssaySecondsUsed(s => s + 1), 1000);
+    return () => clearInterval(id);
+  }, [essayTimerRunning]);
+  useEffect(()=>{
+    if (text.length === 0 && phase === "draft") { setEssaySecondsUsed(0); setEssayStarted(false); }
+  }, [text.length, phase]);
+  const essaySecondsLeft = Math.max(0, ESSAY_TIME_LIMIT_SECONDS - essaySecondsUsed);
+  const essayClock = `${String(Math.floor(essaySecondsLeft / 60)).padStart(2, "0")}:${String(essaySecondsLeft % 60).padStart(2, "0")}`;
 
   if (tier === "early") {
     return (
@@ -3393,12 +3470,13 @@ function TierEditor({ tier, meta, text, setText, words, phase, onSubmit, onNew, 
           <SectionLabel>Timed essay practice</SectionLabel>
           <h3 className="font-display font-semibold text-lg mt-0.5" style={{ color: "var(--ink)" }}>{meta.title}</h3>
         </div>
-        <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold shrink-0" style={{ background: "var(--surface)", color: "var(--ink-soft)", border: "1px solid var(--border)" }}>
-          <IconClock size={13} /> 40:00 remaining
+        <span title="The timer starts when you begin typing" className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold shrink-0 tabular"
+          style={{ background: "var(--surface)", color: essaySecondsLeft === 0 || (essayTimerRunning && essaySecondsLeft <= 300) ? "var(--bad)" : "var(--ink-soft)", border: "1px solid var(--border)" }}>
+          <IconClock size={13} /> {essaySecondsLeft === 0 ? "Time's up" : `${essayClock} remaining`}
         </span>
       </div>
       <p className="font-read text-[15px] px-6 pt-4 pb-2 leading-relaxed" style={{ color: "var(--ink)" }}>{meta.prompt}</p>
-      <textarea value={text} onChange={(e)=>setText(e.target.value)} rows={16} disabled={disabled} maxLength={meta.maxChars}
+      <textarea value={text} onChange={(e)=>{ setText(e.target.value); setEssayStarted(true); }} rows={16} disabled={disabled} maxLength={meta.maxChars}
         className="focus-ring w-full px-6 py-4 font-read text-[15.5px] leading-[1.8] resize-none border-0"
         style={{ background: "var(--surface)", color: "var(--ink)" }}
         placeholder="Begin your response here…" />
@@ -3468,31 +3546,10 @@ function App({ session }){
     else root.setAttribute("data-theme", theme);
   }, [theme]);
 
-  // Lets the header's Account menu jump straight to a specific card inside
-  // the Dashboard (Learner setup, or the plan/billing card) instead of just
-  // dropping the parent at the top of a long page. The Dashboard only
-  // mounts once `view` flips to "dashboard", so the actual scroll has to
-  // wait a tick for that render rather than firing immediately.
-  const [pendingScrollTarget, setPendingScrollTarget] = useState(null);
-  useEffect(()=>{
-    if (view !== "dashboard" || !pendingScrollTarget) return;
-    const id = pendingScrollTarget;
-    // Clearing pendingScrollTarget re-runs this effect (it's a dependency)
-    // and React fires this run's cleanup first - clearing it BEFORE the
-    // timeout fires would cancel the scroll via that same cleanup before it
-    // ever ran. Clearing it inside the timeout callback instead means the
-    // re-run's guard above (`!pendingScrollTarget`) is already true by then,
-    // so it's a no-op rather than a second scroll.
-    const t = setTimeout(()=>{
-      document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
-      setPendingScrollTarget(null);
-    }, 50);
-    return () => clearTimeout(t);
-  }, [view, pendingScrollTarget]);
-  function goToAccountSection(id){
-    setView("dashboard");
-    setPendingScrollTarget(id);
-  }
+  // Profile and Plan are real pages now, so moving between any two views
+  // starts at the top instead of inheriting wherever the last page was
+  // scrolled to (the Dashboard is long; the new pages are short).
+  useEffect(()=>{ window.scrollTo({ top: 0 }); }, [view]);
 
   // A standalone route straight to Stripe's own billing portal (payment
   // method, invoices, cancel) from the header's Account menu, without first
@@ -3543,7 +3600,7 @@ function App({ session }){
         setUsed(usage.used);
         setTotal(usage.cap == null ? 999 : usage.cap);
         setPlan(usage.plan || "free");
-        if (!initial.onboarded) setView("dashboard");
+        if (!initial.onboarded) setView("profile");
       } catch (err) {
         logAppError("Failed to load learner profile:", err);
       } finally {
@@ -3598,7 +3655,7 @@ function App({ session }){
       const { profile } = await authedFetch(session, "/api/child-profile", { method: "POST", body: JSON.stringify({}) });
       setChildren(prev => [...prev, profile]);
       switchChild(profile.id);
-      setView("dashboard"); // the new learner needs onboarding
+      setView("profile"); // the new learner needs onboarding
     } catch (err) {
       // 402 is the plan's learner limit, not a bug - without surfacing it,
       // clicking "Add learner" on a one-learner plan appeared to do nothing
@@ -3716,7 +3773,7 @@ function App({ session }){
     <div className="min-h-screen">
       <Header view={view} setView={guardedSetView} used={used} total={total} plan={plan} theme={theme === "system" ? "light" : theme} setTheme={setTheme}
         backendLive={backendLive} onSignOut={handleSignOut} needsOnboarding={needsOnboarding}
-        onGoToProfile={()=>goToAccountSection("account-profile-section")} onGoToPlan={()=>goToAccountSection("account-plan-section")}
+        onGoToProfile={()=>setView("profile")} onGoToPlan={()=>setView("plan")}
         onManagePayment={goToBillingPortal} billingPortalLoading={billingPortalLoading} />
       <div className="md:hidden mx-auto max-w-[1400px] px-4 pt-3 flex flex-col gap-2">
         <div className="rounded-xl border px-3 py-2 text-xs font-medium flex items-center justify-between" style={{ borderColor: "var(--border)", background: "var(--surface-2)", color: "var(--ink-soft)" }}>
@@ -3727,7 +3784,7 @@ function App({ session }){
             below md - see the note on AccountMenu's usage in Header for why
             this exists. */}
         <AccountMenu className="self-start" align="left" plan={plan} backendLive={backendLive}
-          onGoToProfile={()=>goToAccountSection("account-profile-section")} onGoToPlan={()=>goToAccountSection("account-plan-section")}
+          onGoToProfile={()=>setView("profile")} onGoToPlan={()=>setView("plan")}
           onManagePayment={goToBillingPortal} billingPortalLoading={billingPortalLoading} onSignOut={handleSignOut} />
       </div>
       {/* Both stay mounted, toggled with display rather than a ternary that
@@ -3736,7 +3793,7 @@ function App({ session }){
           state (draft text, phase, feedback), so switching to the dashboard
           and back used to wipe all of it back to a blank "Ready for a
           prompt?" screen, even for a submission finished seconds earlier. */}
-      <div style={{ display: view === "dashboard" ? "block" : "none" }}>
+      <div style={{ display: view === "workspace" ? "none" : "block" }}>
         <Dashboard country={country} setCountry={handleCountryChange} gradeIdx={gradeIdx} setGradeIdx={handleGradeChange}
           tier={tier} interests={interests} toggleInterest={toggleInterest}
           confidenceWriting={confidenceWriting} setConfidenceWriting={handleSetConfidenceWriting}
@@ -3746,14 +3803,15 @@ function App({ session }){
           avatarId={avatarId} setAvatarId={handleSetAvatar}
           children_={children} activeChildId={activeChildId} onSwitchChild={switchChild} onAddChild={addChild} onRemoveChild={removeChild} onMakeUsable={makeLearnerUsable} activeChangeAvailableAt={activeChangeAvailableAt}
           used={used} total={total} plan={plan} session={session} setView={setView} history={history} progress={progress} peerStats={peerStats} backendLive={backendLive}
-          needsOnboarding={needsOnboarding} onCompleteOnboarding={completeOnboarding} />
+          needsOnboarding={needsOnboarding} onCompleteOnboarding={completeOnboarding}
+          page={view === "profile" || view === "plan" ? view : "overview"} />
       </div>
-      <div style={{ display: view === "dashboard" ? "none" : "block" }}>
+      <div style={{ display: view === "workspace" ? "block" : "none" }}>
         <Workspace country={country} gradeIdx={gradeIdx} setGradeIdx={handleGradeChange} tier={tier} setTierOverride={setTierAndSyncGrade}
           interests={interests} confidenceWriting={confidenceWriting} confidenceReading={confidenceReading} motivation={motivation}
           used={used} total={total} onSubmit={handleSubmit} session={session} backendLive={backendLive}
           displayName={activeChild?.display_name || ""}
-          childId={activeChildId} children_={children} onSwitchChild={switchChild} onMakeUsable={makeLearnerUsable} activeChangeAvailableAt={activeChangeAvailableAt} onSeePlans={()=>setView("dashboard")} />
+          childId={activeChildId} children_={children} onSwitchChild={switchChild} onMakeUsable={makeLearnerUsable} activeChangeAvailableAt={activeChangeAvailableAt} onSeePlans={()=>setView("plan")} />
       </div>
       <footer className="mx-auto max-w-[1400px] px-4 sm:px-6 py-10 text-center text-xs flex flex-col items-center gap-2" style={{ color: "var(--ink-faint)" }}>
         <div>LiteracyLab AI · {backendLive ? "your account data is private to you" : "interactive prototype — all learner data shown is sample data"}.</div>
