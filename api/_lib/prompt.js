@@ -133,7 +133,8 @@ Also return "examSummary": one sentence naming the single objective that would g
 // clearly-labelled second, harder step for households that want to push.
 function deepFeedbackClause(deep) {
   if (!deep) return "";
-  return `\n\nThis student's plan includes extended feedback. In addition to the single main "grow" above, return a "growNext" field: ONE further step, harder than the main grow, that they'd take AFTER mastering it. It must be a genuinely different skill or a clear escalation of the same one - never a restatement of the main grow in other words. Same length and tone rules apply.`;
+  return `\n\nThis student's plan includes extended feedback. In addition to the single main "grow" above, return a "growNext" field: ONE further step, harder than the main grow, that they'd take AFTER mastering it.
+It must be the next level of the SAME writing skill (for example from adding a detail to choosing the single most powerful detail), or the very next skill in the natural sequence. Make it a concrete action the student can do in their next piece, and refer to their own piece or its subject where you can. It must be genuinely harder and different from the main grow - never a restatement in other words, and never a different kind of activity (no games, points, challenges or projects). If you use their interest, keep it to a short comparison that explains the technique; the interest must never BE the task. Same length and tone rules apply.`;
 }
 
 // Names a well-known writing framework for the GENRE this specific piece
@@ -271,7 +272,7 @@ Respond with ONLY a JSON object (no markdown fences, no commentary) with exactly
   ],
   "glowTarget": "the exact skill area name from the given list that the glow demonstrates",
   "growTarget": "the exact skill area name from the given list that the grow is building towards",
-  "highlights": [{ "quote": "an exact substring copied from the submitted text", "type": "glow or grow", "note": "a short reason", "revision": "ONLY for type=grow: that same fragment actually rewritten to apply the suggestion" }],${caps.deepFeedback ? '\n  "growNext": "ONE further, harder step to take after the main grow is mastered - genuinely different, not a restatement.",' : ""}${wantsExam ? `\n${examJsonShape(targets)},` : ""}
+  "highlights": [{ "quote": "an exact substring copied from the submitted text", "type": "glow or grow", "note": "a short reason", "revision": "ONLY for type=grow: that same fragment actually rewritten to apply the suggestion" }],${caps.deepFeedback ? '\n  "growNext": "ONE further, harder step: the next level of the same skill as the main grow (or the very next skill), as a concrete action for their next piece - no games or projects, not a restatement.",' : ""}${wantsExam ? `\n${examJsonShape(targets)},` : ""}
   "frameworkTip": { "name": "the exact framework name you were given, verbatim", "quote": "a real, verbatim fragment from the student's own submitted text", "revision": "that exact fragment rewritten to demonstrate the framework applied to THEIR writing" }${wantsScore ? `,
   "overallScore": "an integer 1-10 scoring the WHOLE piece against the four criteria above",
   "scoreReason": "one sentence citing the specific strength/weakness pattern across the whole piece that drove that score"` : ""}${wantsSpelling ? `,
@@ -368,7 +369,7 @@ Respond with ONLY a JSON object (no markdown fences, no commentary) with exactly
     { "term": "a second word or phrase from the passage", "definition": "a one-sentence, age-appropriate definition, framed using their interest where natural", "example": "a fresh sentence using the term correctly, built around their stated interest (${interest})" }
   ],
   "glowTarget": "the exact skill area name from the given list that the glow demonstrates",
-  "growTarget": "the exact skill area name from the given list that the grow is building towards"${caps.deepFeedback ? ',\n  "growNext": "ONE further, harder step to take after the main grow is mastered - genuinely different, not a restatement."' : ""}${wantsExam ? `,\n${examJsonShape(targets)}` : ""},
+  "growTarget": "the exact skill area name from the given list that the grow is building towards"${caps.deepFeedback ? ',\n  "growNext": "ONE further, harder step: the next level of the same skill as the main grow (or the very next skill), as a concrete action for their next piece - no games or projects, not a restatement."' : ""}${wantsExam ? `,\n${examJsonShape(targets)}` : ""},
 ${questionReviewShape(questions.length)}
 }`;
 }

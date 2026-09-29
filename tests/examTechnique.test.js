@@ -228,3 +228,28 @@ test("feedback without a score or spelling list validates for a plan that doesn'
   assert.ok(premium.issues.some((i) => /overallScore/.test(i)));
   assert.ok(premium.issues.some((i) => /spellingGrammar/.test(i)));
 });
+
+// ------------------------------------------------------------------ the second, harder step (growNext)
+
+test("growNext: a reworded copy of the main grow is rejected", () => {
+  const grow = "Try adding one counter-argument before your conclusion so the argument feels tested.";
+  const result = validateFeedback(baseFeedback({ grow, growNext: "Add one counter-argument before your conclusion so your argument feels properly tested." }), CTX);
+  assert.equal(result.ok, false);
+  assert.ok(result.issues.some((i) => /mostly the same words as grow/.test(i)), result.issues.join("; "));
+});
+
+test("growNext: a real next level of the same skill passes", () => {
+  const result = validateFeedback(baseFeedback({ growNext: "Once counter-arguments feel natural, order them so the strongest one lands last and your conclusion answers it." }), CTX);
+  assert.equal(result.ok, true, result.issues.join("; "));
+});
+
+test("growNext: the prompt asks for a concrete next level, ties it to the piece, and keeps the interest as a comparison only", () => {
+  const p = buildWritingPrompt({
+    tier: "high", country: "🇬🇧 United Kingdom", gradeLabel: "Year 11", interest: "gaming", prompt: "Write.", text: "Some text.",
+    targets: TARGETS, targetNames: TARGET_NAMES, capabilities: { deepFeedback: true }, genre: "persuasive",
+  });
+  assert.match(p, /next level of the SAME writing skill/);
+  assert.match(p, /concrete action the student can do in their next piece/);
+  assert.match(p, /no games, points, challenges or projects/);
+  assert.match(p, /the interest must never BE the task/);
+});

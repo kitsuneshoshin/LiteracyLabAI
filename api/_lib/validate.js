@@ -184,6 +184,23 @@ function repairReadingExamEvidence(parsed, questions, answers) {
   return parsed;
 }
 
+// Share of the shorter text's meaningful words that also appear in the other -
+// catches a "next step" that just rewords the main Grow.
+const OVERLAP_STOPWORDS = new Set(["the","and","you","your","that","this","with","for","are","can","try","then","once","more","how","into","from","about","their","them","when","what","will","has","have","its","but","not","use","one"]);
+function meaningfulWords(text) {
+  return new Set(String(text).toLowerCase().replace(/[^a-z0-9 ]/g, " ").split(" ").filter((w) => w.length > 3 && !OVERLAP_STOPWORDS.has(w)));
+}
+function wordOverlap(a, b) {
+  const A = meaningfulWords(a);
+  const B = meaningfulWords(b);
+  const smaller = A.size <= B.size ? A : B;
+  const larger = smaller === A ? B : A;
+  if (smaller.size < 4) return 0; // too short to judge
+  let shared = 0;
+  for (const w of smaller) if (larger.has(w)) shared++;
+  return shared / smaller.size;
+}
+
 function validateExamTechnique(parsed, targetNames, issues) {
   const entries = parsed?.examTechnique;
   if (!Array.isArray(entries) || entries.length === 0) {
@@ -516,6 +533,8 @@ function validateFeedback(parsed, { tier, standardsList, targetNames, submittedT
       issues.push("growNext is missing, too short, or too long");
     } else if (checkString(parsed?.grow, 1, 100000) && normalizeForMatch(parsed.growNext) === normalizeForMatch(parsed.grow)) {
       issues.push("growNext is identical to grow - it must be a genuinely harder, different next step");
+    } else if (checkString(parsed?.grow, 1, 100000) && wordOverlap(parsed.growNext, parsed.grow) >= 0.7) {
+      issues.push("growNext is mostly the same words as grow - it must be a genuinely harder next step, not a rewording of the main grow");
     }
   }
 
