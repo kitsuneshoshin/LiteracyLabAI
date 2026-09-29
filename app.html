@@ -398,6 +398,17 @@ const COUNTRIES = [
   "🌐 Global ESL Mode",
 ];
 
+// Which of a learner's interests a NEW piece is explained through. Pure (no
+// state, no storage) so tests/interest-rotation.test.js can run the real code:
+// only interests that suit the age tier, never the same as the previous
+// piece unless it's the only choice, and a safe fallback when none are set.
+function pickInterestForNewPiece({ interests, validForTier, last, fallback, random = Math.random }){
+  const suited = interests.filter(id => validForTier.includes(id));
+  const pool = suited.length ? suited : (interests.length ? interests : [fallback]);
+  const options = pool.length > 1 ? pool.filter(id => id !== last) : pool;
+  return options[Math.floor(random() * options.length)] || fallback;
+}
+
 // Flag EMOJI (as opposed to the globe glyph above) don't reliably render as
 // flags on Windows - many configurations fall back to showing the raw
 // two-letter regional-indicator text ("GB United Kingdom") instead of a
@@ -478,9 +489,9 @@ function localPrice(tier){
   return tier === "core" ? "$9.99" : "$19.99"; // pricing.js failed to load: still the right number
 }
 const PLAN_META = {
-  free:    { label: "Free",    badge: "FREE",    price: "$0",                  maxLearners: 1, peerComparison: false, progressTrend: false, deepFeedback: false, examTechnique: false },
-  core:    { label: "Core",    badge: "CORE",    price: localPrice("core"),    maxLearners: 1, peerComparison: true,  progressTrend: true,  deepFeedback: false, examTechnique: false },
-  premium: { label: "Premium", badge: "PREMIUM", price: localPrice("premium"), maxLearners: 6, peerComparison: true,  progressTrend: true,  deepFeedback: true,  examTechnique: true },
+  free:    { label: "Free",    badge: "FREE",    price: "$0",                  maxLearners: 1, peerComparison: false, progressTrend: false, deepFeedback: false, examTechnique: false, spellingGrammar: false, overallScore: false },
+  core:    { label: "Core",    badge: "CORE",    price: localPrice("core"),    maxLearners: 1, peerComparison: true,  progressTrend: true,  deepFeedback: false, examTechnique: false, spellingGrammar: false, overallScore: false },
+  premium: { label: "Premium", badge: "PREMIUM", price: localPrice("premium"), maxLearners: 6, peerComparison: true,  progressTrend: true,  deepFeedback: true,  examTechnique: true, spellingGrammar: true, overallScore: true },
 };
 function planMeta(plan){
   if (plan === "admin")  return { ...PLAN_META.premium, label: "Admin",         badge: "ADMIN" };
@@ -1205,7 +1216,7 @@ function AccountMenu({ plan, backendLive, onGoToProfile, onGoToPlan, onManagePay
             className="focus-ring w-full text-left px-3.5 py-2 text-[13px] font-medium" style={{ color: "var(--ink)" }}>
             {paid ? "Manage plan" : "See plans"}
           </button>
-          {paid && (
+          {paid && plan !== "admin" && (
             <button role="menuitem" onClick={() => pick(onManagePayment)} disabled={billingPortalLoading}
               className="focus-ring w-full text-left px-3.5 py-2 text-[13px] font-medium disabled:opacity-60" style={{ color: "var(--ink)" }}>
               {billingPortalLoading ? "Redirecting…" : "Manage payment details"}
@@ -1664,6 +1675,14 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
   const [billingError, setBillingError] = useState(null);
   const paid = isPaidPlan(plan);
   const meta = planMeta(plan);
+  // What this account can still buy: Free sees both plans, Core sees Premium
+  // (it used to get only a sentence about Premium and no way to act on it),
+  // Premium/Pro/Admin have nothing left to upgrade to.
+  const PLAN_CARDS = [
+                    { tier: "core", name: "Core", price: PLAN_META.core.price, sub: "One learner", features: ["Unlimited writing & reading submissions", "26-week progress trend chart", "Anonymous ranking in their year group", "Full activity history"] },
+                    { tier: "premium", name: "Premium", price: PLAN_META.premium.price, sub: "Up to 6 learners", features: ["Everything in Core, for the whole household", "Extended feedback: a second, harder next step", "Spelling & grammar check and a score out of 10 on every piece", "Exam-technique scoring against real assessment objectives (ages 11+)"] },
+  ];
+  const upsellCards = plan === "free" ? PLAN_CARDS : plan === "core" ? PLAN_CARDS.filter(c => c.tier === "premium") : [];
 
   // Redirects to Stripe's own hosted page for either starting a
   // subscription or managing/cancelling an existing one — we never handle
@@ -2133,9 +2152,11 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
               <>
                 <h3 className="font-display font-bold text-lg text-white mb-1.5">You're on {meta.label}</h3>
                 <p className="text-[13px] mb-4" style={{ color: "#E4D6D2" }}>
-                  {meta.examTechnique
-                    ? "Unlimited submissions, up to 6 learners, extended feedback, and exam-technique scoring are active on this account."
-                    : "Unlimited submissions, the 26-week progress trend, and year-group ranking are active on this account. Premium adds up to 6 learners, extended feedback, and exam-technique scoring."}
+                  {plan === "admin"
+                    ? "Admin account: every feature is unlocked and nothing is billed."
+                    : meta.examTechnique
+                      ? "Unlimited submissions, up to 6 learners, extended feedback, a spelling & grammar check, an overall score and exam-technique scoring are active on this account."
+                      : "Unlimited submissions, the 26-week progress trend and year-group ranking are active on this account."}
                 </p>
               </>
             ) : (
@@ -2144,11 +2165,11 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
                 <p className="text-[13px] mb-4" style={{ color: "#E4D6D2" }}>
                   You’ve used {used} of {total} free submissions this month. Choose the plan that fits your household.
                 </p>
-                <div className="grid gap-3 mb-4 md:grid-cols-2">
-                  {[
-                    { tier: "core", name: "Core", price: PLAN_META.core.price, sub: "One learner", features: ["Unlimited writing & reading submissions", "26-week progress trend chart", "Anonymous ranking in their year group", "Full activity history"] },
-                    { tier: "premium", name: "Premium", price: PLAN_META.premium.price, sub: "Up to 6 learners", features: ["Everything in Core, for the whole household", "Extended feedback: a second, harder next step", "Spelling & grammar check and a score out of 10 on every piece", "Exam-technique scoring against real assessment objectives (ages 11+)"] },
-                  ].map(p=>(
+              </>
+            )}
+            {upsellCards.length > 0 && (
+                <div className={`grid gap-3 mb-4 ${upsellCards.length > 1 ? "md:grid-cols-2" : ""}`}>
+                  {upsellCards.map(p=>(
                     <div key={p.tier} className="rounded-xl p-3.5" style={{ background: "rgba(255,255,255,.07)", border: "1px solid rgba(255,255,255,.14)" }}>
                       <div className="flex items-baseline justify-between gap-2">
                         <div className="font-display font-bold text-sm text-white">{p.name}</div>
@@ -2162,17 +2183,16 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
                       </ul>
                       <button onClick={()=>handleBilling(p.tier)} disabled={billingLoading || !backendLive}
                         className="focus-ring w-full rounded-lg py-2 mt-3 font-display font-bold text-[13px] inline-flex items-center justify-center gap-1.5 disabled:opacity-70"
-                        style={ p.tier === "core"
+                        style={ p.tier === "core" || plan === "core"
                           ? { background: "var(--gold)", color: "#fff" }
                           : { background: "transparent", color: "#fff", border: "1px solid rgba(255,255,255,.35)" } }>
-                        {billingLoading ? "Redirecting…" : <>Choose {p.name} <IconArrowRight size={14} strokeWidth={2.3} /></>}
+                        {billingLoading ? "Redirecting…" : <>{plan === "core" ? "Upgrade to" : "Choose"} {p.name} <IconArrowRight size={14} strokeWidth={2.3} /></>}
                       </button>
                     </div>
                   ))}
                 </div>
-              </>
             )}
-            {paid && (
+            {paid && plan !== "admin" && (
               <button onClick={()=>handleBilling()} disabled={billingLoading || !backendLive}
                 className="focus-ring w-full rounded-xl py-2.5 font-display font-bold text-sm inline-flex items-center justify-center gap-1.5 disabled:opacity-70"
                 style={{ background: "var(--gold)", color: "#fff" }}>
@@ -2690,10 +2710,11 @@ function SpellingGrammarPanel({ feedback }){
   );
 }
 
-// Teaches the named writing framework for this student's tier (see
-// api/_lib/writingFrameworks.js) with a fresh worked example, rather than
-// just leaving "PEEL" as an unexplained mastery-table label. Rendered only
-// when the server actually returned one — never set for reading feedback.
+// Teaches the named writing framework for this piece's genre (see
+// api/_lib/writingFrameworks.js) by rewriting a sentence the student actually
+// wrote, rather than just leaving "PEEL" as an unexplained mastery-table
+// label. Rendered only when the server actually returned one — never set for
+// reading feedback.
 function FrameworkTipPanel({ feedback }){
   const tip = feedback?.frameworkTip;
   // "quote"/"revision" ground this in the student's OWN submission (same
@@ -2915,12 +2936,9 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
   // and uses that same interest when the feedback is written.
   function chooseInterestForNewPiece(){
     const validForTier = interestsForTier(tier).map(i=>i.id);
-    const suited = interests.filter(id => validForTier.includes(id));
-    const pool = suited.length ? suited : (interests.length ? interests : [activeInterest]);
     let last = null;
     try { last = localStorage.getItem("ll_last_interest_" + childId); } catch {}
-    const options = pool.length > 1 ? pool.filter(id => id !== last) : pool;
-    const chosen = options[Math.floor(Math.random() * options.length)] || activeInterest;
+    const chosen = pickInterestForNewPiece({ interests, validForTier, last, fallback: activeInterest });
     try { localStorage.setItem("ll_last_interest_" + childId, chosen); } catch {}
     setActiveInterest(chosen);
     return chosen;
@@ -3175,7 +3193,7 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
             <>
               <ReadingExercise
                 bank={readingBankEntry} answers={answers} setAnswers={setAnswers} allAnswered={allAnswered}
-                phase={phase} onSubmit={handleSubmit} onNew={handleNew} locked={locked}
+                phase={phase} onSubmit={handleSubmit} onNew={handleNew} locked={locked} onSeePlans={onSeePlans}
               />
               <ReadingFeedbackPanel tier={tier} country={country} interest={feedbackInterest} confidence={confidenceReading} motivation={motivation} score={readingScore} totalQ={readingQuestions.length}
                 feedback={backendFeedback} submissionId={submissionId} session={session} backendLive={backendLive}
@@ -3193,6 +3211,7 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
                     <IconLock size={22} style={{ color: "var(--ink-faint)" }} />
                     <div className="font-display font-semibold text-sm" style={{ color: "var(--ink)" }}>Upgrade for more writing prompts</div>
                     <p className="text-[13px] max-w-[28ch]" style={{ color: "var(--ink-faint)" }}>You've used all your free submissions this month.</p>
+                    <button onClick={onSeePlans} className="focus-ring inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-bold mt-1" style={{ background: "var(--gold)", color: "#fff" }}>See plans</button>
                   </>
                 ) : writingLoading ? (
                   <>
@@ -3215,7 +3234,7 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
             ) : exerciseType === "writing" ? (
               <TierEditor
                 tier={tier} meta={meta} text={text} setText={setText} words={words}
-                phase={phase} onSubmit={handleSubmit} onNew={handleNew} locked={locked}
+                phase={phase} onSubmit={handleSubmit} onNew={handleNew} locked={locked} onSeePlans={onSeePlans}
                 interests={interests} activeInterest={activeInterest} setActiveInterest={setActiveInterest}
               />
             ) : (backendLive && (readingLoading || !readingBankEntry)) ? (
@@ -3225,6 +3244,7 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
                     <IconLock size={22} style={{ color: "var(--ink-faint)" }} />
                     <div className="font-display font-semibold text-sm" style={{ color: "var(--ink)" }}>Upgrade for more reading passages</div>
                     <p className="text-[13px] max-w-[28ch]" style={{ color: "var(--ink-faint)" }}>You've used all your free submissions this month.</p>
+                    <button onClick={onSeePlans} className="focus-ring inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-bold mt-1" style={{ background: "var(--gold)", color: "#fff" }}>See plans</button>
                   </>
                 ) : readingLoading ? (
                   <>
@@ -3247,7 +3267,7 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
             ) : (
               <ReadingExercise
                 bank={readingBankEntry} answers={answers} setAnswers={setAnswers} allAnswered={allAnswered}
-                phase={phase} onSubmit={handleSubmit} onNew={handleNew} locked={locked}
+                phase={phase} onSubmit={handleSubmit} onNew={handleNew} locked={locked} onSeePlans={onSeePlans}
               />
             )}
           </div>
@@ -3286,6 +3306,9 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
               <div className="text-[13px] font-semibold" style={{ color: "var(--ink)" }}>{total >= 999 ? "Unlimited submissions" : `${used} of ${total} Free Monthly Submissions Used`}</div>
               <div className="text-[11px]" style={{ color: "var(--ink-faint)" }}>{total >= 999 ? "Thanks for subscribing." : locked ? "Upgrade to Core for unlimited submissions." : "Resets automatically at the start of next month."}</div>
             </div>
+            {locked && (
+              <button onClick={onSeePlans} className="focus-ring shrink-0 rounded-full px-3 py-1.5 text-[12px] font-bold" style={{ background: "var(--gold)", color: "#fff" }}>See plans</button>
+            )}
             <button onClick={()=>setBannerDismissed(true)} className="focus-ring w-7 h-7 rounded-full grid place-items-center shrink-0" style={{ color: "var(--ink-faint)" }} aria-label="Dismiss">
               <IconX size={14} />
             </button>
@@ -3363,7 +3386,7 @@ function SubmissionRecap({ tier, title, words, onNew }){
   );
 }
 
-function ReadingExercise({ bank, answers, setAnswers, allAnswered, phase, onSubmit, onNew, locked }){
+function ReadingExercise({ bank, answers, setAnswers, allAnswered, phase, onSubmit, onNew, locked, onSeePlans }){
   const disabled = phase === "analyzing" || locked;
   return (
     <div className="card p-0 relative overflow-hidden">
@@ -3402,7 +3425,7 @@ function ReadingExercise({ bank, answers, setAnswers, allAnswered, phase, onSubm
       <div className="flex items-center justify-between px-6 py-4 border-t flex-wrap gap-3" style={{ borderColor: "var(--border-soft)" }}>
         <span className="text-xs font-semibold tabular" style={{ color: "var(--ink-soft)" }}>{Object.keys(answers).length} / {bank.questions.length} answered</span>
         {phase !== "done" ? (
-          <button onClick={onSubmit} disabled={disabled || !allAnswered}
+          <button onClick={locked ? onSeePlans : onSubmit} disabled={locked ? false : (disabled || !allAnswered)}
             className="focus-ring inline-flex items-center gap-2 rounded-lg px-4 py-2 font-display font-semibold text-sm disabled:opacity-60"
             style={{ background: "var(--ink)", color: "white" }}>
             {locked ? <><IconLock size={15} /> Upgrade to Continue</> : <>Check My Understanding <IconSend size={14} /></>}
@@ -3415,7 +3438,7 @@ function ReadingExercise({ bank, answers, setAnswers, allAnswered, phase, onSubm
   );
 }
 
-function TierEditor({ tier, meta, text, setText, words, phase, onSubmit, onNew, locked, interests, activeInterest, setActiveInterest }){
+function TierEditor({ tier, meta, text, setText, words, phase, onSubmit, onNew, locked, interests, activeInterest, setActiveInterest, onSeePlans }){
   const submitLabel = tier === "high" ? "Submit Essay" : "Submit Story";
   // Without the phase==="done" check, the textarea stayed editable after
   // feedback was shown even though there was no way to resubmit those edits
@@ -3463,7 +3486,7 @@ function TierEditor({ tier, meta, text, setText, words, phase, onSubmit, onNew, 
         <div className="flex items-center justify-between mt-4 flex-wrap gap-3">
           <WordMeter words={words} target={meta.target} chars={text.length} maxChars={meta.maxChars} />
           {phase !== "done" ? (
-            <button onClick={onSubmit} disabled={disabled}
+            <button onClick={locked ? onSeePlans : onSubmit} disabled={locked ? false : disabled}
               className="focus-ring inline-flex items-center gap-2 rounded-full px-5 py-2.5 font-display font-extrabold text-sm disabled:opacity-60"
               style={{ background: "var(--cyan)", color: "#fff" }}>
               {locked ? <><IconLock size={15} /> Upgrade to Continue</> : <>{submitLabel} <IconSend size={15} /></>}
@@ -3514,7 +3537,7 @@ function TierEditor({ tier, meta, text, setText, words, phase, onSubmit, onNew, 
         <div className="flex items-center justify-between mt-4 flex-wrap gap-3">
           <WordMeter words={words} target={meta.target} chars={text.length} maxChars={meta.maxChars} />
           {phase !== "done" ? (
-            <button onClick={onSubmit} disabled={disabled}
+            <button onClick={locked ? onSeePlans : onSubmit} disabled={locked ? false : disabled}
               className="focus-ring inline-flex items-center gap-2 rounded-full px-5 py-2.5 font-display font-bold text-sm disabled:opacity-60"
               style={{ background: "var(--cyan)", color: "#fff" }}>
               {locked ? <><IconLock size={15} /> Upgrade to Continue</> : <>{submitLabel} <IconSend size={15} /></>}
@@ -3543,7 +3566,7 @@ function TierEditor({ tier, meta, text, setText, words, phase, onSubmit, onNew, 
         <div className="flex items-center justify-between px-6 py-4 border-t flex-wrap gap-3" style={{ borderColor: "var(--border-soft)" }}>
           <WordMeter words={words} target={meta.target} chars={text.length} maxChars={meta.maxChars} />
           {phase !== "done" ? (
-            <button onClick={onSubmit} disabled={disabled}
+            <button onClick={locked ? onSeePlans : onSubmit} disabled={locked ? false : disabled}
               className="focus-ring inline-flex items-center gap-2 rounded-lg px-4 py-2 font-display font-semibold text-sm disabled:opacity-60"
               style={{ background: "var(--ink)", color: "white" }}>
               {locked ? <><IconLock size={15} /> Upgrade to Continue</> : <>{submitLabel} <IconSend size={14} /></>}
@@ -3578,7 +3601,7 @@ function TierEditor({ tier, meta, text, setText, words, phase, onSubmit, onNew, 
       <div className="flex items-center justify-between px-6 py-4 border-t flex-wrap gap-3" style={{ borderColor: "var(--border-soft)" }}>
         <WordMeter words={words} target={meta.target} chars={text.length} maxChars={meta.maxChars} />
         {phase !== "done" ? (
-          <button onClick={onSubmit} disabled={disabled}
+          <button onClick={locked ? onSeePlans : onSubmit} disabled={locked ? false : disabled}
             className="focus-ring inline-flex items-center gap-2 rounded-lg px-5 py-2.5 font-display font-semibold text-sm disabled:opacity-60"
             style={{ background: "var(--ink)", color: "white" }}>
             {locked ? <><IconLock size={15} /> Upgrade to Continue</> : <>{submitLabel} <IconSend size={14} /></>}
@@ -3756,7 +3779,9 @@ function App({ session }){
       // clicking "Add learner" on a one-learner plan appeared to do nothing
       // at all, with the reason visible only in the console.
       if (err.statusCode === 402) {
-        window.alert(err.payload?.error || "Your plan covers one learner. Upgrade to Premium to add up to six.");
+        const limitMsg = err.payload?.error || "Your plan covers one learner. Upgrade to Premium to add up to six.";
+        if (err.payload?.upgradeTo === "premium") { if (window.confirm(limitMsg + "\n\nSee the plans?")) setView("plan"); }
+        else window.alert(limitMsg);
         return;
       }
       logAppError("Failed to add a learner:", err);
