@@ -35,13 +35,20 @@ function dedupeByTerm(words) {
 // { available, questions } - "available" is the distinct-term count, so the
 // caller can explain why fewer than `count` questions came back (or none at
 // all, below MIN_TERMS_TO_QUIZ) rather than the UI just looking broken.
-function buildQuiz(words, count = 5, rng = Math.random) {
+// `exclude` is the terms the learner was just quizzed on. A new quiz draws from
+// the words NOT in it first, and only reuses them when there are too few other
+// words to fill the quiz - so tapping "New quiz" gives fresh words whenever the
+// bank has them, instead of a random draw that can repeat the same handful.
+function buildQuiz(words, count = 5, rng = Math.random, exclude = []) {
   const distinct = dedupeByTerm(words || []);
   if (distinct.length < MIN_TERMS_TO_QUIZ) {
     return { available: distinct.length, minRequired: MIN_TERMS_TO_QUIZ, questions: [] };
   }
 
-  const pool = shuffle(distinct, rng).slice(0, Math.min(count, distinct.length));
+  const skip = new Set((exclude || []).map((t) => String(t).trim().toLowerCase()));
+  const fresh = distinct.filter((w) => !skip.has(w.term.trim().toLowerCase()));
+  const seen = distinct.filter((w) => skip.has(w.term.trim().toLowerCase()));
+  const pool = [...shuffle(fresh, rng), ...shuffle(seen, rng)].slice(0, Math.min(count, distinct.length));
   const questions = pool.map((correct) => {
     const distractorPool = shuffle(distinct.filter((w) => w !== correct), rng)
       .slice(0, OPTIONS_PER_QUESTION - 1);

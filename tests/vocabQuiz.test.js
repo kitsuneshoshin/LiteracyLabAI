@@ -68,3 +68,34 @@ test("buildQuiz: the same rng sequence produces the same quiz every time", () =>
   const second = buildQuiz(words, 3, makeRng());
   assert.deepEqual(first, second);
 });
+
+// ------------------------------------------------------------------ a new quiz gives new words
+
+const bank = (n) => Array.from({ length: n }, (_, i) => ({ term: `word${i}`, definition: `definition of word ${i}` }));
+
+test("a new quiz avoids the words from the previous quiz when the bank has enough others", () => {
+  const words = bank(12);
+  for (let run = 0; run < 100; run++) {
+    const first = buildQuiz(words, 5).questions.map((q) => q.term);
+    const second = buildQuiz(words, 5, Math.random, first).questions.map((q) => q.term);
+    assert.equal(second.length, 5);
+    for (const t of second) assert.ok(!first.includes(t), `${t} was repeated straight away`);
+  }
+});
+
+test("when there are too few other words, the previous ones fill the gap but new words come first", () => {
+  const words = bank(7);
+  const first = ["word0", "word1", "word2", "word3", "word4"];
+  for (let run = 0; run < 50; run++) {
+    const terms = buildQuiz(words, 5, Math.random, first).questions.map((q) => q.term);
+    assert.equal(terms.length, 5);
+    assert.ok(terms.includes("word5") && terms.includes("word6"), "both unseen words must be used");
+    assert.equal(new Set(terms).size, 5, "no word twice in one quiz");
+  }
+});
+
+test("with no exclusions the quiz behaves as before", () => {
+  const q = buildQuiz(bank(10), 5);
+  assert.equal(q.questions.length, 5);
+  for (const item of q.questions) assert.equal(item.options.length, OPTIONS_PER_QUESTION);
+});

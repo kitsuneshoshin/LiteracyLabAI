@@ -1366,7 +1366,10 @@ function VocabularyBank({ session, childId, backendLive, onSeePlans, displayName
     setQuizError("");
     setAnswers({});
     try {
-      const data = await authedFetch(session, `/api/history?childId=${childId}&quiz=1&count=5`);
+      // Tells the server which words the last quiz used so a new quiz picks
+      // different ones (when the bank has enough).
+      const exclude = (quiz?.questions || []).map(q => q.term).join("|");
+      const data = await authedFetch(session, `/api/history?childId=${childId}&quiz=1&count=5${exclude ? `&exclude=${encodeURIComponent(exclude)}` : ""}`, { cache: "no-store" });
       if (!data.questions || data.questions.length === 0) {
         setQuizError(`Collect at least ${data.minRequired || 4} different words first — ${wordsLearnedLabel(data.available)} so far.`);
         setQuiz(null);

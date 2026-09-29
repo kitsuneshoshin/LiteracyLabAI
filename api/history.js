@@ -83,7 +83,10 @@ module.exports = async function handler(req, res) {
     if (quiz) {
       if (vocabLocked) return res.status(403).json({ error: "The vocabulary bank is part of Core and Premium.", vocabLocked: true });
       const n = Math.min(10, Math.max(1, parseInt(count, 10) || 5));
-      return res.status(200).json(buildQuiz(vocabWords, n));
+      // Every quiz is a fresh draw, so it must never be served from a cache.
+      res.setHeader("Cache-Control", "no-store");
+      const exclude = String(req.query.exclude || "").split("|").map((t) => t.trim()).filter(Boolean).slice(0, 30);
+      return res.status(200).json(buildQuiz(vocabWords, n, Math.random, exclude));
     }
 
     return res.status(200).json({
