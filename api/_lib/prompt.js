@@ -302,12 +302,19 @@ Keep the glow to ONE such content-free, honest sentence (never use the words "un
 // gives nothing away. Like examJsonShape, the JSON template carries one
 // pre-numbered entry per question rather than a single generic example, so a
 // short array looks wrong against its own template.
-function questionReviewClause(count) {
-  return `\n\nQUESTION-BY-QUESTION REVIEW (required): "questionReview" must have exactly ${count} entries, one per question, in order. For each: "explanation" - 1 or 2 plain, age-appropriate sentences. If the student got it RIGHT, say what in the passage they correctly picked up on. If they got it WRONG, gently explain why the correct answer is right and where in the passage that shows - never mock the answer they chose, and never claim understanding they did not show. "evidence" - a short quote copied EXACTLY, word for word, from the passage above that supports the correct answer.`;
+function questionReviewClause(count, interest) {
+  // Speak TO the learner ("you") - an earlier version wrote "the student
+  // chose..." and read like a report about them. The interest link is
+  // "where it fits" on purpose: a forced analogy on a question about, say, a
+  // tone word is worse than none, and accuracy always comes first.
+  const interestRule = interest
+    ? ` Where it genuinely helps, explain the idea through the student's interest (${interest}) with a short comparison or example - for instance likening an author's skeptical tone to how a fan reacts to hype. Do this for as many of the ${count} explanations as it fits naturally, but never force it, never let it replace the reason the answer is right, and keep the passage evidence as the proof.`
+    : "";
+  return `\n\nQUESTION-BY-QUESTION REVIEW (required): "questionReview" must have exactly ${count} entries, one per question, in order. For each: "explanation" - 1 or 2 plain, age-appropriate sentences, written directly to the student as "you" (never "the student"). If they got it RIGHT, say what in the passage you picked up on. If they got it WRONG, gently explain why the correct answer is right and where in the passage that shows - never mock the answer they chose, and never claim understanding they did not show.${interestRule} "evidence" - a short quote copied EXACTLY, word for word, from the passage above that supports the correct answer.`;
 }
 function questionReviewShape(count) {
   const entries = Array.from({ length: count }, (_, i) =>
-    `    { "n": ${i + 1}, "explanation": "1-2 plain sentences for question ${i + 1}: why the correct answer is right, and what the student did or missed", "evidence": "a short EXACT quote from the passage that supports the correct answer to question ${i + 1}" }`
+    `    { "n": ${i + 1}, "explanation": "1-2 plain sentences for question ${i + 1}: why the correct answer is right, and what you did or missed (say 'you', explain via the student's interest where it fits naturally)", "evidence": "a short EXACT quote from the passage that supports the correct answer to question ${i + 1}" }`
   ).join(",\n");
   return `  "questionReview": [\n${entries}\n  ]`;
 }
@@ -337,7 +344,7 @@ ${MOTIVATION_NOTE[motivation] || ""}
 ${standardsClause(country, tier, gradeLabel)}
 ${targetsClause(targetNames)}
 ${deepFeedbackClause(caps.deepFeedback)}
-${wantsExam ? examTechniqueClause({ tier, targets, kind: "reading" }) : ""}${questionReviewClause(questions.length)}
+${wantsExam ? examTechniqueClause({ tier, targets, kind: "reading" }) : ""}${questionReviewClause(questions.length, interest)}
 
 ${workedExample({ score: false, spelling: false })}
 

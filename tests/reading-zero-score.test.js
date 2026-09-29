@@ -126,3 +126,32 @@ test("app.html renders passage paragraphs as separate blocks", () => {
   const app = fs.readFileSync(path.join(__dirname, "..", "app.html"), "utf8");
   assert.ok(app.includes("String(bank.passage).split(/\\n\\s*\\n/)"), "the passage is split on blank lines");
 });
+
+// ------------------------------------------------------------------ question review voice and interest
+
+const { buildReadingPrompt } = require("../api/_lib/prompt");
+function readingPrompt(interest) {
+  const targets = targetsForGrade(COUNTRY, GRADE, "high").targets;
+  return buildReadingPrompt({
+    tier: "high", country: COUNTRY, gradeLabel: GRADE, interest, confidenceReading: "growing", motivation: "grades",
+    passageTitle: "The Volcano", passage: PASSAGE, questions: QUESTIONS, answers: ALL_WRONG, score: 0, totalQuestions: 5,
+    targets, targetNames: targets.map((t) => t.name), capabilities: {},
+  });
+}
+
+test("question review: explanations are tied to the learner's interest where it fits, and never forced", () => {
+  const p = readingPrompt("gaming");
+  assert.match(p, /through the student's interest \(gaming\)/);
+  assert.match(p, /never force it/);
+  assert.match(p, /never let it replace the reason the answer is right/);
+});
+
+test("question review: explanations speak to the learner as 'you', not about 'the student'", () => {
+  const p = readingPrompt("gaming");
+  assert.match(p, /written directly to the student as "you" \(never "the student"\)/);
+});
+
+test("question review: with no interest the prompt carries no interest instruction", () => {
+  assert.ok(!/short comparison or example/.test(readingPrompt("")));
+  assert.match(readingPrompt("gaming"), /short comparison or example/);
+});
