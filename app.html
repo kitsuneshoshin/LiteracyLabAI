@@ -398,6 +398,36 @@ const COUNTRIES = [
   "🌐 Global ESL Mode",
 ];
 
+// Flag EMOJI (as opposed to the globe glyph above) don't reliably render as
+// flags on Windows - many configurations fall back to showing the raw
+// two-letter regional-indicator text ("GB United Kingdom") instead of a
+// flag, since Windows' font stack has historically had spotty support for
+// the flag sequences specifically. `country` itself stays exactly as-is
+// everywhere (it's the real stored value: DB column, API params, object
+// keys below) - these are display-only helpers, used only where a country
+// is actually shown to someone, never where it's read back as data.
+const COUNTRY_FLAG_CODE = {
+  "🇬🇧 United Kingdom": "gb", "🇺🇸 United States": "us", "🇦🇺 Australia": "au",
+  "🇨🇦 Canada": "ca", "🇦🇪 UAE & GCC Hubs": "ae", "🇸🇬 Singapore & SE Asia": "sg",
+};
+function stripFlag(country) {
+  return (country || "").replace(/^\S+\s/, "");
+}
+function CountryLabel({ country, className }) {
+  const code = COUNTRY_FLAG_CODE[country];
+  return (
+    <span className={`inline-flex items-center gap-1.5 ${className || ""}`}>
+      {code ? (
+        <img src={`https://flagcdn.com/16x12/${code}.png`} srcSet={`https://flagcdn.com/32x24/${code}.png 2x`}
+          width="16" height="12" alt="" style={{ borderRadius: 2, flexShrink: 0 }} />
+      ) : (
+        <span aria-hidden="true">🌐</span>
+      )}
+      {stripFlag(country)}
+    </span>
+  );
+}
+
 const GRADE_DATA = {
   "🇬🇧 United Kingdom": { curriculum: "UK National Curriculum / GCSE", grades: ["Reception","Year 1","Year 2","Year 3","Year 4","Year 5","Year 6","Year 7","Year 8","Year 9","Year 10","Year 11","Year 12","Year 13"], tiers: [3,7,10,14] },
   "🇺🇸 United States":  { curriculum: "Common Core State Standards / AP", grades: ["Kindergarten","Grade 1","Grade 2","Grade 3","Grade 4","Grade 5","Grade 6","Grade 7","Grade 8","Grade 9","Grade 10","Grade 11","Grade 12"], tiers: [3,6,9,13] },
@@ -1764,10 +1794,10 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
             {backendLive
               ? (isMapped
                   ? "Each target cites the exact standard it's drawn from. Progress below is computed from your own submission history, not a demo number."
-                  : `${country} isn't individually mapped to a national standard yet, so target names are illustrative — but the progress shown is still computed from your own submission history.`)
+                  : `${stripFlag(country)} isn't individually mapped to a national standard yet, so target names are illustrative — but the progress shown is still computed from your own submission history.`)
               : (isMapped
                   ? "Each target cites the exact standard, content domain, or Assessment Objective it's drawn from."
-                  : `Targets for ${country} are placeholders modelled on the mapped regions until a full ${country} syllabus mapping is completed.`)}
+                  : `Targets for ${stripFlag(country)} are placeholders modelled on the mapped regions until a full ${stripFlag(country)} syllabus mapping is completed.`)}
           </p>
           {backendLive && progress?.approximatedFrom && (
             <p className="text-xs mb-4 -mt-2" style={{ color: "var(--ink-faint)" }}>
@@ -1840,7 +1870,7 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
             <div className="flex items-center justify-between mb-1 flex-wrap gap-2">
               <h2 className="font-display font-bold text-xl" style={{ color: "var(--ink)" }}>How {displayName || "your learner"} compares</h2>
               <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold" style={{ background: "var(--surface-2)", color: "var(--ink-faint)" }}>
-                {country} · {gradeLabel}
+                <CountryLabel country={country} /> · {gradeLabel}
               </span>
             </div>
             <p className="text-xs mb-4" style={{ color: "var(--ink-faint)" }}>
@@ -1852,14 +1882,14 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
             {peerStats && peerStats.locked && (
               <LockedFeature
                 title="Year-group comparison is on Core and Premium"
-                blurb={`See where ${displayName || "your learner"} sits against other students in ${country} · ${gradeLabel} — anonymously, and never blended across regions or ages.`}
+                blurb={`See where ${displayName || "your learner"} sits against other students in ${stripFlag(country)} · ${gradeLabel} — anonymously, and never blended across regions or ages.`}
               />
             )}
             {peerStats && !peerStats.available && peerStats.reason === "no_data_yet" && (
               <div className="text-sm py-6 text-center" style={{ color: "var(--ink-faint)" }}>Submit a story or reading exercise first to see how {displayName || "your learner"} compares.</div>
             )}
             {peerStats && !peerStats.available && peerStats.reason === "not_enough_peers" && (
-              <div className="text-sm py-6 text-center" style={{ color: "var(--ink-faint)" }}>Not enough other students in {country} · {gradeLabel} yet for a fair, anonymous comparison. Check back as more students join.</div>
+              <div className="text-sm py-6 text-center" style={{ color: "var(--ink-faint)" }}>Not enough other students in {stripFlag(country)} · {gradeLabel} yet for a fair, anonymous comparison. Check back as more students join.</div>
             )}
             {peerStats && peerStats.available && (
               <div className="grid sm:grid-cols-3 gap-4">
@@ -1944,7 +1974,7 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
         <Collapsible defaultOpen={needsOnboarding} borderColor="var(--border)" iconBg="var(--navy-tint)" iconColor="var(--ink)"
           icon={React.createElement(TIER_META[tier].icon, { size: 15, strokeWidth: 2.2 })}
           title="Learner setup"
-          teaser={`${displayName || "Your learner"} · ${TIER_META[tier].label} · ${country}`}>
+          teaser={`${displayName || "Your learner"} · ${TIER_META[tier].label} · ${stripFlag(country)}`}>
           <div className="flex items-start justify-between gap-4 flex-wrap mb-5">
             <p className="text-sm" style={{ color: "var(--ink-soft)" }}>Curriculum, year group and interests personalise every prompt and feedback note.</p>
             <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold" style={{ background: "var(--navy-tint)", color: "var(--ink)" }}>
@@ -1979,7 +2009,12 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
                 <select value={country} onChange={(e)=>setCountry(e.target.value)}
                   className="focus-ring w-full appearance-none rounded-xl border px-3.5 py-2.5 pr-9 text-sm font-medium"
                   style={{ borderColor: "var(--border)", background: "var(--surface)", color: "var(--ink)" }}>
-                  {COUNTRIES.map(c=> <option key={c} value={c}>{c}</option>)}
+                  {/* A native <option> can't hold an <img>, so this is the
+                      one spot the flag is dropped entirely rather than
+                      shown broken - plain "United Kingdom" reads better
+                      than a stray "GB" prefix Windows can't render as a
+                      flag. value stays the real emoji-prefixed string. */}
+                  {COUNTRIES.map(c=> <option key={c} value={c}>{stripFlag(c)}</option>)}
                 </select>
                 <IconChevron size={15} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2" style={{ color: "var(--ink-faint)" }} />
               </div>
@@ -2944,7 +2979,7 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
       <div className="flex items-center justify-between flex-wrap gap-3 mb-4">
         <div>
           <h2 className="font-display font-bold text-2xl" style={{ color: "var(--ink)" }}>{displayName ? `${displayName}'s Workspace` : "Student Workspace"}</h2>
-          <p className="text-sm mt-0.5" style={{ color: "var(--ink-soft)" }}>{country} · {gradeLabel}</p>
+          <p className="text-sm mt-0.5" style={{ color: "var(--ink-soft)" }}><CountryLabel country={country} /> · {gradeLabel}</p>
         </div>
         <div className="flex items-center gap-1.5 rounded-full border p-1 flex-wrap" style={{ borderColor: "var(--border)", background: "var(--surface-2)" }}>
           {TIER_KEYS.map(k=>{
