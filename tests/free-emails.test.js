@@ -634,3 +634,19 @@ test("job: the weekly summary is filled from the week's own feedback (the most c
   assert.ok(!r.sent[0].html.includes("Old Skill"), "last month's feedback is not reported as this week's");
   assert.deepEqual(r.sent[0].bcc, ["support@literacylabai.com"]);
 });
+
+test("cron: addresses in EMAIL_SKIP are left out of the run, without gaining admin powers", async () => {
+  const rows = [
+    { id: "p1", email: "Skip.Me@Example.com", plan: "free", created_at: new Date(Date.now() - 4 * 86400000).toISOString() },
+    { id: "p2", email: "keep@example.com", plan: "free", created_at: new Date(Date.now() - 4 * 86400000).toISOString() },
+  ];
+  await withEnv({ CRON_SECRET: "s3cret", EMAIL_LIVE: undefined, RESEND_API_KEY: "k", EMAIL_POSTAL_ADDRESS: "1 St", ADMIN_EMAILS: "owner@example.com", EMAIL_SKIP: "skip.me@example.com" }, async () => {
+    const h = loadHandler("email.js", { db: (q) => (q.table === "profiles" ? { data: rows, error: null } : { data: [], error: null }) });
+    const out = await callWith(h, { query: { action: "cron" }, headers: { authorization: "Bearer s3cret" } });
+    assert.equal(out.statusCode, 200);
+    assert.equal(out.body.considered, 1, "only the address not on the skip list is considered");
+    // and being on the skip list does not make an address a valid target for test copies
+    const t = await callWith(h, { query: { action: "test", to: "skip.me@example.com" }, headers: { authorization: "Bearer s3cret" } });
+    assert.equal(t.statusCode, 403);
+  });
+});

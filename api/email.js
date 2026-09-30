@@ -52,7 +52,10 @@ async function handleCron(req, res) {
   // Real sending needs every one of these; anything missing means a dry run.
   const missing = ["RESEND_API_KEY", "EMAIL_POSTAL_ADDRESS"].filter((k) => !process.env[k]);
   const live = process.env.EMAIL_LIVE === "true" && missing.length === 0 && !(req.query && req.query.dry === "1");
-  const adminEmails = (process.env.ADMIN_EMAILS || "").split(",").map((e) => e.trim().toLowerCase()).filter(Boolean);
+  // Admin addresses are never emailed. EMAIL_SKIP is a second list of addresses to
+  // leave out (test accounts, anyone who asked not to be emailed) that does NOT
+  // carry admin powers, unlike ADMIN_EMAILS.
+  const adminEmails = [process.env.ADMIN_EMAILS || "", process.env.EMAIL_SKIP || ""].join(",").split(",").map((e) => e.trim().toLowerCase()).filter(Boolean);
 
   const summary = await runFreeEmailJob({
     supabase: getSupabaseAdmin(),
