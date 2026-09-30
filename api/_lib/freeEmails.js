@@ -150,6 +150,9 @@ const CONTENT = {
     heading: "This week's learning",
     paragraphs: [
       `This week: ${stats.pieces} ${s(stats.pieces, "piece", "pieces")} completed${stats.words ? `, ${stats.words} words written` : ""}.`,
+      // The skill names come from the curriculum, never from what the child wrote.
+      ...(stats.glow ? [`What went well: ${stats.glow}.`] : []),
+      ...(stats.grow ? [`Next skill to work on: ${stats.grow}.`] : []),
       "Regular practice makes the biggest difference, and you're building it.",
     ],
     cta: { label: "Keep it going", url: SITE + "/app.html" },

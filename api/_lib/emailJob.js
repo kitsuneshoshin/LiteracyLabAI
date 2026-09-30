@@ -20,6 +20,17 @@ const DAY = 86400000;
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
+// The value that appears most often; on a tie, the one seen last (the most
+// recent piece). Empty values are ignored. Used to name the week's focus skill.
+function mostCommon(values) {
+  const counts = new Map();
+  values.forEach((v) => { if (v) counts.set(v, (counts.get(v) || 0) + 1); });
+  let best = null;
+  let bestN = 0;
+  counts.forEach((n, v) => { if (n >= bestN) { best = v; bestN = n; } });
+  return best;
+}
+
 async function runFreeEmailJob({ supabase, now = new Date(), send, address, dryRun = true, maxPerRun = 40, adminEmails = [], pauseMs = 0 }) {
   const summary = { dryRun, considered: 0, optedOut: 0, eligible: 0, sent: 0, errors: 0, plan: [] };
 
@@ -35,7 +46,7 @@ async function runFreeEmailJob({ supabase, now = new Date(), send, address, dryR
     supabase.from("email_log").select("profile_id, dedupe_key, sent_at").in("profile_id", ids),
     // Completed pieces only: a row is created (and a free credit spent) when a
     // prompt is generated, but feedback is null (or _pending) until it is graded.
-    supabase.from("submissions").select("profile_id, created_at, word_count, pending:feedback->>_pending").in("profile_id", ids).not("feedback", "is", null).order("created_at", { ascending: true }).limit(5000),
+    supabase.from("submissions").select("profile_id, created_at, word_count, pending:feedback->>_pending, glow:feedback->>glowTarget, grow:feedback->>growTarget").in("profile_id", ids).not("feedback", "is", null).order("created_at", { ascending: true }).limit(5000),
     supabase.from("submissions").select("profile_id, created_at").in("profile_id", ids).gte("created_at", new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)).toISOString()),
   ]);
   for (const r of [prefsRes, logRes, doneRes, usedRes]) if (r.error) throw r.error;
@@ -50,7 +61,7 @@ async function runFreeEmailJob({ supabase, now = new Date(), send, address, dryR
   for (const r of doneRes.data || []) {
     if (r.pending) continue;
     if (!doneBy.has(r.profile_id)) doneBy.set(r.profile_id, []);
-    doneBy.get(r.profile_id).push({ at: new Date(r.created_at), words: r.word_count || 0 });
+    doneBy.get(r.profile_id).push({ at: new Date(r.created_at), words: r.word_count || 0, glow: r.glow || null, grow: r.grow || null });
   }
   const usedBy = new Map();
   for (const r of usedRes.data || []) usedBy.set(r.profile_id, (usedBy.get(r.profile_id) || 0) + 1);
@@ -90,7 +101,13 @@ async function runFreeEmailJob({ supabase, now = new Date(), send, address, dryR
       continue;
     }
     try {
-      const built = buildFreeEmail(pick.key, { token, address, stats: { pieces: week.length, words: week.reduce((n, d) => n + d.words, 0) } });
+      const stats = {
+        pieces: week.length,
+        words: week.reduce((n, d) => n + d.words, 0),
+        glow: mostCommon(week.map((d) => d.glow)),
+        grow: mostCommon(week.map((d) => d.grow)),
+      };
+      const built = buildFreeEmail(pick.key, { token, address, stats });
       const r = await send({
         to: p.email, subject: built.subject, html: built.html, text: built.text, bcc: built.bcc,
         oneClickUrl: `${SITE}/api/email?action=unsubscribe&t=${token}`,

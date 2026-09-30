@@ -103,7 +103,7 @@ async function handleTest(req, res) {
   const order = ["free-welcome", "free-nudge", "free-first-followup", "free-2-of-3", "free-limit", "free-reset", "free-weekly-lite"];
   const sent = [];
   for (let i = 0; i < order.length; i++) {
-    const e = buildFreeEmail(order[i], { token, address: process.env.EMAIL_POSTAL_ADDRESS, stats: { pieces: 3, words: 420 } });
+    const e = buildFreeEmail(order[i], { token, address: process.env.EMAIL_POSTAL_ADDRESS, stats: { pieces: 3, words: 420, glow: "Fronted Adverbials", grow: "Modal Verbs" } });
     const r = await sendEmail({
       to, subject: `[TEST ${i + 1}/${order.length}] ${e.subject}`, html: e.html, text: e.text,
       oneClickUrl: `${SITE}/api/email?action=unsubscribe&t=${token}`,

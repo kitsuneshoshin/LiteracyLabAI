@@ -589,3 +589,39 @@ test("job: a pause between sends is applied only when asked for", async () => {
   assert.ok(Date.now() - t0 >= 150, "three sends with a 60ms pause take at least ~180ms");
   assert.equal(r.sent.length, 3);
 });
+
+// ------------------------------------------------------------------ the weekly summary names the week's focus skills
+
+test("weekly summary: names the skill that went well and the next one to work on, when known", () => {
+  const e = buildFreeEmail("free-weekly-lite", { token: TOKEN, address: "x", stats: { pieces: 3, words: 420, glow: "Fronted Adverbials", grow: "Modal Verbs" } });
+  assert.match(e.html, /What went well: Fronted Adverbials\./);
+  assert.match(e.html, /Next skill to work on: Modal Verbs\./);
+  assert.match(e.text, /What went well: Fronted Adverbials\./);
+  const bare = buildFreeEmail("free-weekly-lite", { token: TOKEN, address: "x", stats: { pieces: 1, words: 50 } });
+  assert.ok(!/What went well|Next skill to work on/.test(bare.html), "no focus lines when the skills are unknown");
+});
+
+test("job: the weekly summary is filled from the week's own feedback (the most common skills)", async () => {
+  // A Monday at the very start of a month, so the week's pieces do not also count against this month's 3 free pieces.
+  const NOV2 = new Date("2026-11-02T22:00:00Z");
+  const rows = (glow, grow, days) => ({ profile_id: "p-act", created_at: ago(days, NOV2).toISOString(), word_count: 100, feedback: {}, glow, grow });
+  const tables = {
+    profiles: [{ id: "p-act", email: "act@example.com", plan: "free", created_at: ago(40, NOV2).toISOString() }],
+    email_preferences: [], email_log: [],
+    submissions: [
+      rows("Old Skill", "Old Next", 20), // before this week: ignored for the focus
+      rows("Fronted Adverbials", "Modal Verbs", 6),
+      rows("Fronted Adverbials", "Commas", 4),
+      rows("Similes", "Modal Verbs", 1),
+    ],
+  };
+  const r = recorder();
+  const s = await runFreeEmailJob({ supabase: fakeDb(tables), now: NOV2, send: r.send, address: "x", dryRun: false });
+  assert.equal(s.sent, 1);
+  assert.match(r.sent[0].subject, /This week on LiteracyLab AI/);
+  assert.match(r.sent[0].html, /This week: 3 pieces completed, 300 words written\./);
+  assert.match(r.sent[0].html, /What went well: Fronted Adverbials\./, "the skill that went well most often");
+  assert.match(r.sent[0].html, /Next skill to work on: Modal Verbs\./, "the next skill that came up most often");
+  assert.ok(!r.sent[0].html.includes("Old Skill"), "last month's feedback is not reported as this week's");
+  assert.deepEqual(r.sent[0].bcc, ["support@literacylabai.com"]);
+});
