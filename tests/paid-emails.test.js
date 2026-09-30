@@ -87,8 +87,13 @@ for (const key of PAID_EMAIL_KEYS) {
     assert.ok(e.html.includes("LiteracyLab <span class=\"ll-ai\""), "header wordmark");
     assert.ok(e.html.includes("#7A3B45"), "brand wine");
     assert.ok(e.html.includes("1 Example St"), "postal address");
-    assert.ok(e.html.includes(`${SITE}/feedback?e=${key}&amp;t=${TOKEN}&amp;r=more`), "quiet feedback line");
-    assert.ok(e.text.includes("Something missing or confusing? Tell us:"), "plain-text feedback line");
+    if (isTransactional(key)) {
+      assert.ok(!e.html.includes("Something missing or confusing?"), "a payment, welcome or account notice has no feedback line");
+      assert.ok(!e.html.includes("Was this email useful?"));
+    } else {
+      assert.ok(e.html.includes(`${SITE}/feedback?e=${key}&amp;t=${TOKEN}&amp;r=more`), "quiet feedback line");
+      assert.ok(e.text.includes("Something missing or confusing? Tell us:"), "plain-text feedback line");
+    }
     assert.ok(!/undefined|NaN|\[object/.test(e.html), "no broken placeholders in the page");
     if (isTransactional(key)) {
       assert.equal(e.transactional, true);
@@ -154,10 +159,25 @@ test("learners-paused email states how many are covered and paused", () => {
   assert.match(two.html, /so 1 learner is paused/);
 });
 
-test("the payment-failed email never promises the plan stays on, because access follows Stripe's status", () => {
+test("the payment-failed email says the plan is off now (no grace period) and how to switch it back on", () => {
   const e = buildPaidEmail("bill-failed", { token: TOKEN, address: "x" });
-  assert.ok(!/stays active|remain active|keep your plan while/i.test(e.html));
-  assert.match(e.html, /Manage payment details/);
+  assert.ok(!/stays active|remain active|keep your plan while|to keep your plan/i.test(e.text), "no promise that the plan stays on");
+  assert.match(e.text, /moved to the Free plan/);
+  assert.match(e.text, /choose See plans and pick your plan again/);
+  assert.match(e.text, /All of your learners' work is safe/);
+});
+
+test("feedback is asked for only where it is relevant: the rating row on four emails, the footer line on optional emails, never on payment or account emails", () => {
+  const rated = [], footer = [], none = [];
+  for (const key of ALL_EMAIL_KEYS) {
+    const e = buildAnyEmail(key, { token: TOKEN, address: "x", ...sampleContext(key) });
+    if (e.html.includes("Was this email useful?")) rated.push(key);
+    else if (e.html.includes("Something missing or confusing?")) footer.push(key);
+    else none.push(key);
+  }
+  assert.deepEqual(rated.sort(), ["core-weekly", "free-weekly-lite", "free-welcome", "prem-digest"]);
+  assert.deepEqual(none.sort(), ["bill-cancel", "bill-failed", "core-welcome", "prem-paused", "prem-welcome"], "the account emails: the cancellation asks through its own button");
+  assert.equal(footer.length + rated.length + none.length, ALL_EMAIL_KEYS.length);
 });
 
 test("every email in the catalogue is covered by the owner's test-copies action", () => {

@@ -7,6 +7,7 @@ const { buildEmail, SITE } = require("./emailTemplate");
 
 const DAY = 86400000;
 const NEXT_STEP_CAP_DAYS = 2; // no two non-essential emails within 2 days
+const MIN_GAP_MS = 20 * 3600000; // and never two emails of any kind within 20 hours
 
 const RATED_EMAILS = ["free-welcome", "free-weekly-lite"];
 const FREE_EMAIL_KEYS =["free-welcome", "free-limit", "free-2-of-3", "free-reset", "free-first-followup", "free-nudge", "free-weekly-lite"];
@@ -38,6 +39,9 @@ function pickEmail(facts, now) {
   const ageDays = (now - facts.createdAt) / DAY;
   const lastSent = Object.values(sent).reduce((max, d) => (d > max ? d : max), new Date(0));
   const quiet = now - lastSent < NEXT_STEP_CAP_DAYS * DAY;
+  // At most one email a day to anyone, even the essential ones: a second run the
+  // same day (a retry, a manual check) must never send a second email.
+  if (now - lastSent < MIN_GAP_MS) return null;
 
   // Essential: welcome (only for genuinely new accounts, never a back-fill)
   if (!has("free-welcome") && ageDays <= 3) return { key: "free-welcome", dedupeKey: "free-welcome" };

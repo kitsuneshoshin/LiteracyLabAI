@@ -61,7 +61,7 @@ function stepsBlock(steps) {
 
 function button(label, url) {
   return `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:8px 0 8px;"><tr><td class="ll-btn" style="border-radius:999px;background:${BRAND.wine};">
-    <a href="${esc(url)}" style="display:inline-block;padding:14px 28px;font-family:${FONT_SANS};font-size:16px;font-weight:600;color:#FFFFFF;text-decoration:none;border-radius:999px;">${esc(label)}</a>
+    <a href="${esc(url)}" class="ll-btn-a" style="display:inline-block;padding:14px 28px;font-family:${FONT_SANS};font-size:16px;font-weight:600;color:#FFFFFF;text-decoration:none;border-radius:999px;">${esc(label)}</a>
   </td></tr></table>`;
 }
 
@@ -121,7 +121,7 @@ function buildEmail(c) {
 <meta name="color-scheme" content="light dark">
 <meta name="supported-color-schemes" content="light dark">
 <title>${esc(c.subject)}</title>
-<link href="${GOOGLE_FONTS}" rel="stylesheet">
+<link href="${esc(GOOGLE_FONTS)}" rel="stylesheet">
 <style>
   @media (max-width: 620px) { .ll-wrap { width: 100% !important; } .ll-pad { padding: 24px 20px !important; } }
   @media (prefers-color-scheme: dark) {
@@ -132,6 +132,7 @@ function buildEmail(c) {
     .ll-tint { background: ${BRAND.dark.wineTint} !important; color: ${BRAND.dark.wineInk} !important; }
     .ll-num { background: ${BRAND.dark.wineTint} !important; color: ${BRAND.dark.wineInk} !important; }
     .ll-btn { background: ${BRAND.dark.wine} !important; }
+    .ll-btn-a { color: ${BRAND.dark.bg} !important; }
     .ll-rule { border-color: ${BRAND.dark.border} !important; }
     .ll-ai { color: ${BRAND.dark.wineInk} !important; }
     .ll-bar { background: ${BRAND.dark.wine} !important; }

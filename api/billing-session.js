@@ -53,6 +53,23 @@ module.exports = async function handler(req, res) {
       return res.status(200).json({ url: session.url });
     }
 
+    // A failed payment moves the account to Free straight away (no grace period),
+    // but the failing subscription still exists in Stripe. Sending that parent to a
+    // fresh checkout would start a SECOND subscription, so anyone whose old one is
+    // past due or unpaid goes to the billing portal to fix their card instead; the
+    // plan comes back automatically once the payment goes through.
+    if (profile.stripe_customer_id) {
+      const existing = await stripe.subscriptions.list({ customer: profile.stripe_customer_id, limit: 10 });
+      const failing = (existing.data || []).find((s) => s.status === "past_due" || s.status === "unpaid");
+      if (failing) {
+        const session = await stripe.billingPortal.sessions.create({
+          customer: profile.stripe_customer_id,
+          return_url: `${siteUrl}/app.html`,
+        });
+        return res.status(200).json({ url: session.url });
+      }
+    }
+
     const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body || {};
     const tier = body.tier || "core";
     if (!PAID_PLANS.includes(tier)) {

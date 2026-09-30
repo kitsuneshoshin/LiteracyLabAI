@@ -205,11 +205,11 @@ const CONTENT = {
   }),
   "bill-failed": () => ({
     subject: "We couldn't take your LiteracyLab AI payment",
-    preheader: "Please update your payment details to keep your plan.",
+    preheader: "Your plan is off until the payment is fixed. Your learners' work is safe.",
     heading: "Your payment didn't go through",
     paragraphs: [
-      "We tried to take your latest LiteracyLab AI payment, but your card was declined or has expired.",
-      "To keep your plan, please update your payment details: open the Account menu in the app and choose Manage payment details. It takes a minute.",
+      "We tried to take your latest LiteracyLab AI payment, but it didn't go through, so your account has moved to the Free plan for now. All of your learners' work is safe.",
+      "To switch your plan back on, open the app, go to the Account menu, choose See plans and pick your plan again. You'll be taken to a secure page to update your card, and your plan comes back as soon as the payment goes through.",
     ],
     cta: { label: "Open the app", url: SITE + "/app.html" },
     note: "If you've just updated your card, you can ignore this email.",
@@ -279,7 +279,10 @@ function buildPaidEmail(key, ctx) {
     campaign: key.replace(/-/g, "_"),
     reason: c.reason,
     unsubscribeUrl: c.transactional ? undefined : `${SITE}/unsubscribe?t=${ctx.token}`,
-    feedbackUrl,
+    // Feedback is only asked for where it makes sense: optional lifecycle emails.
+    // A payment, welcome or account notice has no feedback line (the cancellation
+    // email asks through its own "Tell us why" button instead).
+    feedbackUrl: c.transactional ? undefined : feedbackUrl,
     feedbackStyle: c.rated ? "row" : undefined,
     address: ctx.address,
   });
