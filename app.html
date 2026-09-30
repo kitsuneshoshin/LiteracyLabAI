@@ -4007,10 +4007,10 @@ function App({ session }){
 /* Auth                                                                */
 /* ---------------------------------------------------------------- */
 function AuthScreen(){
-  const [mode, setMode] = useState("signup"); // signup | login
+  const [mode, setMode] = useState("signup"); // signup | login | forgot
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [status, setStatus] = useState("idle"); // idle | loading | check-email | error
+  const [status, setStatus] = useState("idle"); // idle | loading | check-email | reset-sent | error
   const [errorMsg, setErrorMsg] = useState("");
 
   async function handleSubmit(e){
@@ -4018,6 +4018,15 @@ function AuthScreen(){
     setStatus("loading");
     setErrorMsg("");
     try {
+      if (mode === "forgot") {
+        // The link in the email brings them back here; AuthGate then shows the
+        // "choose a new password" screen (see SetNewPassword). The message that
+        // follows never says whether the address has an account.
+        const { error } = await supabaseClient.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin + "/app.html" });
+        if (error) throw error;
+        setStatus("reset-sent");
+        return;
+      }
       if (mode === "signup") {
         const { error } = await supabaseClient.auth.signUp({ email, password });
         if (error) throw error;
@@ -4043,7 +4052,16 @@ function AuthScreen(){
           <span className="font-display font-bold text-lg" style={{ color: "var(--ink)" }}>LiteracyLab <span style={{ color: "var(--cyan-ink)" }}>AI</span></span>
         </div>
         <div className="card p-6">
-          {status === "check-email" ? (
+          {status === "reset-sent" ? (
+            <div className="text-center py-4">
+              <div className="w-11 h-11 rounded-full grid place-items-center mx-auto mb-3" style={{ background: "var(--good-tint)", color: "var(--good)" }}>
+                <IconCheck size={20} strokeWidth={2.4} />
+              </div>
+              <h2 className="font-display font-bold mb-1.5" style={{ color: "var(--ink)" }}>Check your email</h2>
+              <p className="text-sm" style={{ color: "var(--ink-soft)" }}>If there's a LiteracyLab AI account for <strong>{email}</strong>, we've sent a link to choose a new password. It can take a minute to arrive.</p>
+              <button onClick={()=>{ setStatus("idle"); setMode("login"); }} className="focus-ring mt-4 text-sm font-semibold" style={{ color: "var(--cyan-ink)" }}>Back to log in</button>
+            </div>
+          ) : status === "check-email" ? (
             <div className="text-center py-4">
               <div className="w-11 h-11 rounded-full grid place-items-center mx-auto mb-3" style={{ background: "var(--good-tint)", color: "var(--good)" }}>
                 <IconCheck size={20} strokeWidth={2.4} />
@@ -4054,30 +4072,37 @@ function AuthScreen(){
             </div>
           ) : (
             <>
-              <h2 className="font-display font-bold text-lg mb-1" style={{ color: "var(--ink)" }}>{mode === "signup" ? "Create your account" : "Welcome back"}</h2>
-              <p className="text-sm mb-5" style={{ color: "var(--ink-soft)" }}>{mode === "signup" ? "One account per household — set up your learner after signing up." : "Log in to see your learner's dashboard."}</p>
+              <h2 className="font-display font-bold text-lg mb-1" style={{ color: "var(--ink)" }}>{mode === "signup" ? "Create your account" : mode === "forgot" ? "Reset your password" : "Welcome back"}</h2>
+              <p className="text-sm mb-5" style={{ color: "var(--ink-soft)" }}>{mode === "signup" ? "One account per household — set up your learner after signing up." : mode === "forgot" ? "Enter your email and we'll send you a link to choose a new password." : "Log in to see your learner's dashboard."}</p>
               <form onSubmit={handleSubmit} className="flex flex-col gap-3">
                 <label className="flex flex-col gap-1.5">
                   <span className="text-xs font-semibold" style={{ color: "var(--ink-soft)" }}>Email</span>
                   <input type="email" required value={email} onChange={(e)=>setEmail(e.target.value)}
                     className="focus-ring w-full rounded-xl border px-3.5 py-2.5 text-sm" style={{ borderColor: "var(--border)", background: "var(--surface)", color: "var(--ink)" }} placeholder="parent@email.com" />
                 </label>
+                {mode !== "forgot" && (
                 <label className="flex flex-col gap-1.5">
                   <span className="text-xs font-semibold" style={{ color: "var(--ink-soft)" }}>Password</span>
                   <input type="password" required minLength={8} value={password} onChange={(e)=>setPassword(e.target.value)}
                     className="focus-ring w-full rounded-xl border px-3.5 py-2.5 text-sm" style={{ borderColor: "var(--border)", background: "var(--surface)", color: "var(--ink)" }} placeholder="At least 8 characters" />
                 </label>
+                )}
                 {status === "error" && (
                   <div className="text-[13px] rounded-lg px-3 py-2" style={{ background: "var(--bad-tint)", color: "var(--bad)" }}>{errorMsg}</div>
                 )}
                 <button type="submit" disabled={status === "loading"}
                   className="focus-ring w-full rounded-xl py-2.5 font-display font-bold text-sm disabled:opacity-60"
                   style={{ background: "var(--cyan)", color: "#fff" }}>
-                  {status === "loading" ? "Please wait…" : mode === "signup" ? "Create account" : "Log in"}
+                  {status === "loading" ? "Please wait…" : mode === "signup" ? "Create account" : mode === "forgot" ? "Send me a link" : "Log in"}
                 </button>
               </form>
-              <button onClick={()=>setMode(mode === "signup" ? "login" : "signup")} className="focus-ring w-full text-center text-sm font-semibold mt-4" style={{ color: "var(--cyan-ink)" }}>
-                {mode === "signup" ? "Already have an account? Log in" : "New here? Create an account"}
+              {mode === "login" && (
+                <button onClick={()=>{ setStatus("idle"); setErrorMsg(""); setMode("forgot"); }} className="focus-ring w-full text-center text-sm font-semibold mt-4" style={{ color: "var(--ink-soft)" }}>
+                  Forgot your password?
+                </button>
+              )}
+              <button onClick={()=>{ setStatus("idle"); setErrorMsg(""); setMode(mode === "signup" ? "login" : mode === "forgot" ? "login" : "signup"); }} className="focus-ring w-full text-center text-sm font-semibold mt-3" style={{ color: "var(--cyan-ink)" }}>
+                {mode === "signup" ? "Already have an account? Log in" : mode === "forgot" ? "Back to log in" : "New here? Create an account"}
               </button>
             </>
           )}
@@ -4088,13 +4113,96 @@ function AuthScreen(){
   );
 }
 
+// Shown after someone follows the link in a password-reset email. Supabase has
+// already signed them in with a one-time session, so the only thing left is to
+// let them choose the new password before they go anywhere else.
+function SetNewPassword({ onDone }){
+  const [password, setPassword] = useState("");
+  const [again, setAgain] = useState("");
+  const [status, setStatus] = useState("idle"); // idle | loading | done | error
+  const [errorMsg, setErrorMsg] = useState("");
+
+  async function handleSubmit(e){
+    e.preventDefault();
+    if (password.length < 8) { setStatus("error"); setErrorMsg("Please use at least 8 characters."); return; }
+    if (password !== again) { setStatus("error"); setErrorMsg("The two passwords don't match."); return; }
+    setStatus("loading");
+    setErrorMsg("");
+    try {
+      const { error } = await supabaseClient.auth.updateUser({ password });
+      if (error) throw error;
+      // Remove the one-time token from the address bar so it can't be reused or shared.
+      try { window.history.replaceState(null, "", window.location.pathname); } catch (err) {}
+      setStatus("done");
+    } catch (err) {
+      setStatus("error");
+      setErrorMsg(err.message || "Something went wrong. Please ask for a new link.");
+    }
+  }
+
+  return (
+    <div className="min-h-screen flex items-center justify-center px-4" style={{ background: "var(--bg)" }}>
+      <div className="w-full max-w-sm">
+        <div className="flex items-center gap-2.5 justify-center mb-6">
+          <IconMark size={30} />
+          <span className="font-display font-bold text-lg" style={{ color: "var(--ink)" }}>LiteracyLab <span style={{ color: "var(--cyan-ink)" }}>AI</span></span>
+        </div>
+        <div className="card p-6">
+          {status === "done" ? (
+            <div className="text-center py-4">
+              <div className="w-11 h-11 rounded-full grid place-items-center mx-auto mb-3" style={{ background: "var(--good-tint)", color: "var(--good)" }}>
+                <IconCheck size={20} strokeWidth={2.4} />
+              </div>
+              <h2 className="font-display font-bold mb-1.5" style={{ color: "var(--ink)" }}>Password updated</h2>
+              <p className="text-sm" style={{ color: "var(--ink-soft)" }}>You're signed in with your new password.</p>
+              <button onClick={onDone} className="focus-ring mt-4 w-full rounded-xl py-2.5 font-display font-bold text-sm" style={{ background: "var(--cyan)", color: "#fff" }}>Continue to LiteracyLab AI</button>
+            </div>
+          ) : (
+            <>
+              <h2 className="font-display font-bold text-lg mb-1" style={{ color: "var(--ink)" }}>Choose a new password</h2>
+              <p className="text-sm mb-5" style={{ color: "var(--ink-soft)" }}>Pick something you haven't used elsewhere. At least 8 characters.</p>
+              <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+                <label className="flex flex-col gap-1.5">
+                  <span className="text-xs font-semibold" style={{ color: "var(--ink-soft)" }}>New password</span>
+                  <input id="new-password" type="password" required minLength={8} autoComplete="new-password" value={password} onChange={(e)=>setPassword(e.target.value)}
+                    className="focus-ring w-full rounded-xl border px-3.5 py-2.5 text-sm" style={{ borderColor: "var(--border)", background: "var(--surface)", color: "var(--ink)" }} />
+                </label>
+                <label className="flex flex-col gap-1.5">
+                  <span className="text-xs font-semibold" style={{ color: "var(--ink-soft)" }}>Type it again</span>
+                  <input id="new-password-again" type="password" required minLength={8} autoComplete="new-password" value={again} onChange={(e)=>setAgain(e.target.value)}
+                    className="focus-ring w-full rounded-xl border px-3.5 py-2.5 text-sm" style={{ borderColor: "var(--border)", background: "var(--surface)", color: "var(--ink)" }} />
+                </label>
+                {status === "error" && (
+                  <div className="text-[13px] rounded-lg px-3 py-2" style={{ background: "var(--bad-tint)", color: "var(--bad)" }}>{errorMsg}</div>
+                )}
+                <button type="submit" disabled={status === "loading"}
+                  className="focus-ring w-full rounded-xl py-2.5 font-display font-bold text-sm disabled:opacity-60"
+                  style={{ background: "var(--cyan)", color: "#fff" }}>
+                  {status === "loading" ? "Please wait…" : "Save new password"}
+                </button>
+              </form>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function AuthGate(){
   const [session, setSession] = useState(undefined); // undefined = loading, null = signed out
+  // A password-reset link lands here with "type=recovery" in the address. It is
+  // read up front (not only from the sign-in event) so the app can never flash
+  // up as if the person had just logged in normally.
+  const [recovering, setRecovering] = useState(()=> /(^|[#&?])type=recovery\b/.test(window.location.hash + window.location.search));
 
   useEffect(()=>{
     if (!BACKEND_CONFIGURED) return;
     supabaseClient.auth.getSession().then(({ data })=> setSession(data.session));
-    const { data: sub } = supabaseClient.auth.onAuthStateChange((_event, newSession)=> setSession(newSession));
+    const { data: sub } = supabaseClient.auth.onAuthStateChange((event, newSession)=> {
+      if (event === "PASSWORD_RECOVERY") setRecovering(true);
+      setSession(newSession);
+    });
     return ()=> sub.subscription.unsubscribe();
   }, []);
 
@@ -4106,6 +4214,9 @@ function AuthGate(){
   }
   if (session === null) {
     return <AuthScreen />;
+  }
+  if (recovering) {
+    return <SetNewPassword onDone={()=> setRecovering(false)} />;
   }
   return <App session={session} />;
 }

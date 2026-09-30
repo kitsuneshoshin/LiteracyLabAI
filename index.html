@@ -6,6 +6,16 @@
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <script>
+  // A password-reset or sign-up confirmation link can land on the homepage (the
+  // sign-in service falls back to the site address when a redirect is not on its
+  // allowed list). The links are passed straight on to the app, which knows what
+  // to do with them.
+  (function () {
+    var h = location.hash || "";
+    if (/(^|[#&])type=(recovery|signup)($|&)/.test(h) && h.indexOf("access_token=") !== -1) location.replace("/app.html" + h);
+  })();
+</script>
+<script>
   // An old copy of this site is also served from GitHub Pages. Send anyone
   // who lands there to the real site, keeping the page they asked for.
   if (/\.github\.io$/.test(location.hostname)) {
