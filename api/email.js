@@ -4,7 +4,7 @@ const { requireUser, sendError } = require("./_lib/auth");
 const { sendEmail, REPLY_TO } = require("./_lib/emailSend");
 const { runFreeEmailJob } = require("./_lib/emailJob");
 const { buildEmail, SITE } = require("./_lib/emailTemplate");
-const { buildFreeEmail } = require("./_lib/freeEmails");
+const { buildAnyEmail, ALL_EMAIL_KEYS, sampleContext } = require("./_lib/emailAny");
 
 // One function for everything email- and feedback-related, because the host
 // caps a project at 12 serverless functions (api/account.js is merged
@@ -100,15 +100,18 @@ async function handleTest(req, res) {
     if (pref && pref.unsubscribe_token) token = pref.unsubscribe_token;
   }
 
-  const order = ["free-welcome", "free-nudge", "free-first-followup", "free-2-of-3", "free-limit", "free-reset", "free-weekly-lite"];
+  const pauseMs = process.env.EMAIL_TEST_PAUSE_MS === undefined ? 550 : Number(process.env.EMAIL_TEST_PAUSE_MS);
   const sent = [];
-  for (let i = 0; i < order.length; i++) {
-    const e = buildFreeEmail(order[i], { token, address: process.env.EMAIL_POSTAL_ADDRESS, stats: { pieces: 3, words: 420, glow: "Fronted Adverbials", grow: "Modal Verbs" } });
+  for (let i = 0; i < ALL_EMAIL_KEYS.length; i++) {
+    const key = ALL_EMAIL_KEYS[i];
+    const e = buildAnyEmail(key, { token, address: process.env.EMAIL_POSTAL_ADDRESS, ...sampleContext(key) });
     const r = await sendEmail({
-      to, subject: `[TEST ${i + 1}/${order.length}] ${e.subject}`, html: e.html, text: e.text,
-      oneClickUrl: `${SITE}/api/email?action=unsubscribe&t=${token}`,
+      to, subject: `[TEST ${i + 1}/${ALL_EMAIL_KEYS.length}] ${e.subject}`, html: e.html, text: e.text,
+      // Account emails have no unsubscribe link, so no one-click header either.
+      oneClickUrl: e.transactional ? undefined : `${SITE}/api/email?action=unsubscribe&t=${token}`,
     });
-    sent.push({ email: order[i], id: r.id });
+    sent.push({ email: key, id: r.id });
+    await new Promise((resolve) => setTimeout(resolve, pauseMs)); // stay under the sender's rate limit
   }
   return res.status(200).json({ sent });
 }

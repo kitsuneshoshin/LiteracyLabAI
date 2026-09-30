@@ -137,7 +137,7 @@ function fakeDb(tables, { blindSelect = [] } = {}) {
       then(ok, bad) { try { ok(run()); } catch (e) { bad(e); } },
     };
     function run() {
-      const rows = tables[table];
+      const rows = tables[table] || [];
       const match = rows.filter((r) => q.filters.every((f) => f(r)));
       const one = (data) => (q.single ? (data[0] ? { data: data[0], error: null } : q.maybe ? { data: null, error: null } : { data: null, error: { message: "no rows" } }) : { data, error: null });
       if (q.op === "select") return one(blindSelect.includes(table) ? [] : match.map((r) => ({ ...r })));
@@ -545,12 +545,15 @@ test("test copies: refuse to run when the key or postal address is missing", asy
   });
 });
 
-test("test copies: all seven Free emails are sent to the admin, marked TEST, with working unsubscribe links", async () => {
+test("test copies: every email (Free, Core, Premium and billing) is sent to the admin, marked TEST, with working links", async () => {
+  const { ALL_EMAIL_KEYS } = require("../api/_lib/emailAny");
+  const { isTransactional } = require("../api/_lib/paidEmails");
+  const N = ALL_EMAIL_KEYS.length;
   const realFetch = globalThis.fetch;
   try {
     const calls = [];
     globalThis.fetch = async (url, opts) => { calls.push(JSON.parse(opts.body)); return { ok: true, json: async () => ({ id: "re_" + calls.length }) }; };
-    await withEnv({ CRON_SECRET: "s3cret", ADMIN_EMAILS: "owner@example.com", RESEND_API_KEY: "k", EMAIL_POSTAL_ADDRESS: "PO Box 1, Town" }, async () => {
+    await withEnv({ CRON_SECRET: "s3cret", ADMIN_EMAILS: "owner@example.com", RESEND_API_KEY: "k", EMAIL_POSTAL_ADDRESS: "PO Box 1, Town", EMAIL_TEST_PAUSE_MS: "0" }, async () => {
       const h = loadHandler("email.js", { db: (q) => {
         if (q.table === "profiles") return { data: { id: "p1" }, error: null };
         if (q.table === "email_preferences") return { data: { unsubscribe_token: UUID }, error: null };
@@ -558,14 +561,20 @@ test("test copies: all seven Free emails are sent to the admin, marked TEST, wit
       } });
       const res = await callWith(h, { query: { action: "test", to: "Owner@Example.com" }, headers: { authorization: "Bearer s3cret" } });
       assert.equal(res.statusCode, 200, JSON.stringify(res.body));
-      assert.equal(res.body.sent.length, 7);
-      assert.equal(calls.length, 7);
+      assert.equal(res.body.sent.length, N);
+      assert.equal(calls.length, N);
+      assert.ok(N >= 19, `expected every email to be covered, got ${N}`);
       calls.forEach((c, i) => {
         assert.deepEqual(c.to, ["owner@example.com"]);
-        assert.ok(c.subject.startsWith(`[TEST ${i + 1}/7] `), c.subject);
+        assert.ok(c.subject.startsWith(`[TEST ${i + 1}/${N}] `), c.subject);
         assert.ok(c.html.includes("PO Box 1, Town"), "postal address in the footer");
-        assert.ok(c.html.includes(`${SITE}/unsubscribe?t=${UUID}`), "the admin's own unsubscribe token");
-        assert.match(c.headers["List-Unsubscribe"], new RegExp(UUID));
+        if (isTransactional(ALL_EMAIL_KEYS[i])) {
+          assert.ok(!c.html.includes("/unsubscribe?t="), `${ALL_EMAIL_KEYS[i]} is an account email, so no unsubscribe link`);
+          assert.equal(c.headers["List-Unsubscribe"], undefined);
+        } else {
+          assert.ok(c.html.includes(`${SITE}/unsubscribe?t=${UUID}`), "the admin's own unsubscribe token");
+          assert.match(c.headers["List-Unsubscribe"], new RegExp(UUID));
+        }
         assert.equal(c.bcc, undefined, "test copies never BCC anyone");
       });
     });

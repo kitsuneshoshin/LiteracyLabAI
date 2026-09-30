@@ -2,6 +2,7 @@ const { getSupabaseAdmin } = require("./_lib/supabaseAdmin");
 const { getStripe } = require("./_lib/stripe");
 const { captureIfUnexpected } = require("./_lib/sentry");
 const { planForPriceId } = require("./_lib/plans");
+const { notifyBillingEvent } = require("./_lib/billingNotify");
 
 // Which tier a subscription actually grants is decided by the Price the
 // customer bought, never assumed. Before the tier split this file hardcoded
@@ -57,6 +58,9 @@ module.exports = async function handler(req, res) {
   }
 
   const supabase = getSupabaseAdmin();
+  // What the customer should be emailed about once their plan is updated. Sending
+  // happens after the update, and a failure there never fails the webhook.
+  let notice = null;
 
   try {
     switch (event.type) {
@@ -81,6 +85,7 @@ module.exports = async function handler(req, res) {
               stripe_subscription_id: session.subscription,
             }).eq("id", userId);
             if (error) throw error;
+            notice = { after: { profileId: userId, plan }, before: null };
           }
         }
         break;
@@ -99,11 +104,15 @@ module.exports = async function handler(req, res) {
         if (active && !plan) {
           throw new Error(`Active subscription on an unrecognised Stripe price - check STRIPE_PRICE_ID_CORE / STRIPE_PRICE_ID_PREMIUM. Subscription: ${subscription.id}`);
         }
+        // The plan as it was before this event, so the emails can tell a
+        // downgrade or a cancellation from a renewal.
+        const { data: before } = await supabase.from("profiles").select("id, email, plan").eq("stripe_customer_id", subscription.customer).maybeSingle();
         const { error } = await supabase.from("profiles").update({
           plan,
           stripe_subscription_id: active ? subscription.id : null,
         }).eq("stripe_customer_id", subscription.customer);
         if (error) throw error;
+        notice = { after: { plan }, before: before || null };
         break;
       }
       default:
@@ -116,6 +125,14 @@ module.exports = async function handler(req, res) {
     // on immediately rather than waiting for them to notice and complain.
     await captureIfUnexpected(err);
     return res.status(500).json({ error: "Webhook handler failed." });
+  }
+
+  if (notice) {
+    try {
+      await notifyBillingEvent({ event, supabase, after: notice.after, before: notice.before });
+    } catch (err) {
+      console.error("Billing emails failed (the plan was still updated):", event.type, err.message);
+    }
   }
 
   return res.status(200).json({ received: true });
