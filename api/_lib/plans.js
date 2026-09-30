@@ -78,7 +78,7 @@ function planForPriceId(priceId) {
 // old subscription must keep resolving to a tier), but wrong here: this
 // picks the price a NEW checkout is charged at, and the legacy price is the
 // old $14.99 single-tier one. Falling back would quietly sell Premium at
-// $14.99 while the pricing page advertises $19.99 - a real customer charged
+// $14.99 while the pricing page advertises $15.99 - a real customer charged
 // a real, wrong amount. Returning null instead makes billing-session.js
 // fail loudly with "set STRIPE_PRICE_ID_PREMIUM", which is a far better
 // outcome than a silent mispricing nobody notices for weeks.

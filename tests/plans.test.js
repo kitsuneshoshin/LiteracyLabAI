@@ -83,7 +83,7 @@ test("the pre-split STRIPE_PRICE_ID still resolves, so existing subscribers don'
     assert.equal(planForPriceId("price_legacy"), "premium");
     // ...but a NEW checkout must never be charged at the legacy price. That
     // price is the old $14.99 single tier; selling Premium at it while the
-    // page says $19.99 would charge a real customer a real, wrong amount.
+    // page says $15.99 would charge a real customer a real, wrong amount.
     // Failing loudly is the correct outcome here.
     assert.equal(priceIdForPlan("premium"), undefined);
   } finally {

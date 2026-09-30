@@ -486,7 +486,7 @@ const TIER_META = {
 // UK curriculum from Dubai pays in US$, not £.
 function localPrice(tier){
   if (window.LL_PRICING) return window.LL_PRICING.priceLabel(tier);
-  return tier === "core" ? "$9.99" : "$19.99"; // pricing.js failed to load: still the right number
+  return tier === "core" ? "$9.99" : "$15.99"; // pricing.js failed to load: still the right number
 }
 const PLAN_META = {
   free:    { label: "Free",    badge: "FREE",    price: "$0",                  maxLearners: 1, peerComparison: false, progressTrend: false, deepFeedback: false, examTechnique: false, spellingGrammar: false, overallScore: false, vocabBank: false },

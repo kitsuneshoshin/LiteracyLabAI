@@ -5,12 +5,12 @@ const { AMOUNTS, SYMBOLS, currencyForTimeZone, priceLabel } = require("../pricin
 // pricing.js has to guess the currency Stripe will charge. Stripe charges
 // the customer's local currency if the price has it, and USD otherwise, so
 // every case below mirrors that rule. A wrong guess never changes the
-// amount (it's 9.99 / 19.99 everywhere), but it would show a parent the
+// amount (it's 9.99 / 15.99 everywhere), but it would show a parent the
 // wrong symbol right before checkout.
 
 test("every currency uses the same two numbers", () => {
   assert.equal(AMOUNTS.core, "9.99");
-  assert.equal(AMOUNTS.premium, "19.99");
+  assert.equal(AMOUNTS.premium, "15.99");
   assert.deepEqual(Object.keys(SYMBOLS).sort(), ["AUD", "CAD", "EUR", "GBP", "SGD", "USD"]);
 });
 
@@ -61,7 +61,26 @@ test("a missing or unreadable time zone falls back to US$ rather than crashing",
 
 test("labels combine the symbol with the shared amount", () => {
   assert.equal(priceLabel("core", "AUD"), "A$9.99");
-  assert.equal(priceLabel("premium", "GBP"), "£19.99");
+  assert.equal(priceLabel("premium", "GBP"), "£15.99");
   assert.equal(priceLabel("core", "USD"), "US$9.99");
-  assert.equal(priceLabel("premium", "EUR"), "€19.99");
+  assert.equal(priceLabel("premium", "EUR"), "€15.99");
+});
+
+// ------------------------------------------------------------------ claims the site makes about its own prices
+
+const fs = require("node:fs");
+const path = require("node:path");
+const INDEX = fs.readFileSync(path.join(__dirname, "..", "index.html"), "utf8");
+const APP = fs.readFileSync(path.join(__dirname, "..", "app.html"), "utf8");
+
+test("the homepage claim 'Two children? Cheaper than two Cores' is true at the current prices", () => {
+  assert.ok(INDEX.includes("Cheaper than two Cores"), "the claim is on the page");
+  assert.ok(Number(AMOUNTS.premium) < 2 * Number(AMOUNTS.core), `Premium ${AMOUNTS.premium} must cost less than two Cores (${(2 * Number(AMOUNTS.core)).toFixed(2)})`);
+});
+
+test("the homepage and the app show both current prices and never the old Premium price", () => {
+  for (const [name, text] of [["index.html", INDEX], ["app.html", APP]]) {
+    assert.ok(!text.includes("19.99"), name + " still shows the old Premium price 19.99");
+    assert.ok(text.includes(AMOUNTS.premium) && text.includes(AMOUNTS.core), name + " shows both current prices");
+  }
 });

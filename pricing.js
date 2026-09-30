@@ -2,7 +2,7 @@
 // and app.html so the landing page and the in-app upgrade card can never
 // quote different numbers.
 //
-// Every currency deliberately uses the same number (9.99 / 19.99). What a
+// Every currency deliberately uses the same number (9.99 / 15.99). What a
 // customer is actually CHARGED is decided by Stripe, not by this file:
 // each Stripe Price carries one amount per currency below, with USD as the
 // price's default. At checkout Stripe charges the customer's local currency
@@ -17,7 +17,7 @@
 // the amount, and Stripe's checkout page always shows the exact currency
 // before anyone pays.
 (function (global) {
-  var AMOUNTS = { core: "9.99", premium: "19.99" };
+  var AMOUNTS = { core: "9.99", premium: "15.99" };
 
   var SYMBOLS = { USD: "US$", AUD: "A$", GBP: "£", EUR: "€", CAD: "C$", SGD: "S$" };
 
