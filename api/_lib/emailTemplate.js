@@ -91,7 +91,8 @@ function feedbackRow(baseUrl) {
  * @param {string} c.reason         why they are receiving it (footer)
  * @param {string} [c.unsubscribeUrl]  required for anything that is not an account/billing email
  * @param {string} [c.address]      the postal address line for the footer
- * @param {string} [c.feedbackUrl]  the feedback page link for this email; adds a "Was this email useful?" row
+ * @param {string} [c.feedbackUrl]  the feedback page link for this email; adds a quiet "Something missing or confusing? Tell us" line to the footer
+ * @param {"row"} [c.feedbackStyle] set to "row" to also add the "Was this email useful? Yes / No" row above the footer
  */
 function buildEmail(c) {
   const ctaUrl = c.cta ? tagLink(c.cta.url, c.campaign) : null;
@@ -101,8 +102,10 @@ function buildEmail(c) {
     c.steps ? stepsBlock(c.steps) : "",
     c.cta ? button(c.cta.label, ctaUrl) : "",
     c.note ? noteBox(c.note) : "",
-    c.feedbackUrl ? feedbackRow(c.feedbackUrl) : "",
+    c.feedbackUrl && c.feedbackStyle === "row" ? feedbackRow(c.feedbackUrl) : "",
   ].join("\n");
+  // Every email gets the quiet footer line; only the ones that ask for it get the rating row above.
+  const feedbackHref = c.feedbackUrl ? c.feedbackUrl + (c.feedbackUrl.indexOf("?") === -1 ? "?" : "&") + "r=more" : null;
 
   const footerLinks = [
     c.unsubscribeUrl ? `<a href="${esc(c.unsubscribeUrl)}" style="color:${BRAND.inkSoft};">Unsubscribe</a>` : "",
@@ -154,7 +157,8 @@ ${body}
       </td></tr>
       <!-- Footer -->
       <tr><td style="padding:20px 8px 0;font-family:${FONT_SANS};font-size:12px;line-height:1.7;color:${BRAND.inkSoft};" class="ll-soft">
-        <div>${esc(c.reason)}</div>
+        <div>${esc(c.reason)}</div>${feedbackHref ? `
+        <div style="margin-top:6px;">Something missing or confusing? <a href="${esc(feedbackHref)}" style="color:${BRAND.inkSoft};">Tell us</a></div>` : ""}
         <div style="margin-top:6px;">${footerLinks}</div>
         <div style="margin-top:6px;">${esc(BRAND.name)}${c.address ? " · " + esc(c.address) : ""}</div>
       </td></tr>
@@ -174,9 +178,10 @@ ${body}
     ...(c.steps ? c.steps.flatMap((s, i) => [`${i + 1}. ${s.title} - ${s.text}`]).concat([""]) : []),
     ...(c.cta ? [`${c.cta.label}: ${ctaUrl}`, ""] : []),
     ...(c.note ? [c.note, ""] : []),
-    ...(c.feedbackUrl ? [`Was this email useful? Yes: ${c.feedbackUrl}${c.feedbackUrl.indexOf("?") === -1 ? "?" : "&"}r=up | No: ${c.feedbackUrl}${c.feedbackUrl.indexOf("?") === -1 ? "?" : "&"}r=down`, ""] : []),
+    ...(c.feedbackUrl && c.feedbackStyle === "row" ? [`Was this email useful? Yes: ${c.feedbackUrl}${c.feedbackUrl.indexOf("?") === -1 ? "?" : "&"}r=up | No: ${c.feedbackUrl}${c.feedbackUrl.indexOf("?") === -1 ? "?" : "&"}r=down`, ""] : []),
     "--",
     c.reason,
+    ...(feedbackHref ? [`Something missing or confusing? Tell us: ${feedbackHref}`] : []),
     ...(c.unsubscribeUrl ? [`Unsubscribe: ${c.unsubscribeUrl}`] : []),
     `Privacy: ${SITE}/privacy.html`,
     `Terms: ${SITE}/terms.html`,

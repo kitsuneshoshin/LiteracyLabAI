@@ -86,11 +86,16 @@ for (const key of FREE_EMAIL_KEYS) {
     assert.ok(e.html.includes(`LiteracyLab <span class="ll-ai"`), "header wordmark");
     assert.ok(e.html.includes("#7A3B45"), "brand wine");
     assert.ok(e.html.includes(`${SITE}/unsubscribe?t=${TOKEN}`), "unsubscribe link");
-    assert.ok(e.html.includes(`${SITE}/feedback?e=${key}&amp;t=${TOKEN}&amp;r=up`) || e.html.includes(`${SITE}/feedback?e=${key}&t=${TOKEN}&r=up`), "feedback link carries the email and token");
+    assert.ok(e.html.includes(`${SITE}/feedback?e=${key}&amp;t=${TOKEN}&amp;r=more`), "every email links to the feedback page, carrying the email and token");
+    const rated = key === "free-welcome" || key === "free-weekly-lite";
+    assert.equal(e.html.includes("Was this email useful?"), rated, rated ? "the rating row belongs on the welcome and the weekly summary" : "the other emails only have the quiet footer line");
+    assert.equal(e.html.includes(`${SITE}/feedback?e=${key}&amp;t=${TOKEN}&amp;r=up`), rated, "thumbs links only where the row is");
+    assert.ok(e.html.includes("Something missing or confusing?"), "every email has the quiet feedback line in the footer");
     assert.ok(e.html.includes("1 Example St"), "postal address");
     assert.ok(e.html.includes("utm_campaign=" + key.replace(/-/g, "_")), "analytics tag");
     assert.match(e.text, /Unsubscribe:/);
-    assert.match(e.text, /Was this email useful\?/);
+    assert.match(e.text, /Something missing or confusing\? Tell us: /);
+    assert.equal(e.text.includes("Was this email useful?"), rated);
   });
 }
 

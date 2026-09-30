@@ -8,7 +8,8 @@ const { buildEmail, SITE } = require("./emailTemplate");
 const DAY = 86400000;
 const NEXT_STEP_CAP_DAYS = 2; // no two non-essential emails within 2 days
 
-const FREE_EMAIL_KEYS = ["free-welcome", "free-limit", "free-2-of-3", "free-reset", "free-first-followup", "free-nudge", "free-weekly-lite"];
+const RATED_EMAILS = ["free-welcome", "free-weekly-lite"];
+const FREE_EMAIL_KEYS =["free-welcome", "free-limit", "free-2-of-3", "free-reset", "free-first-followup", "free-nudge", "free-weekly-lite"];
 
 const pad = (n) => String(n).padStart(2, "0");
 function monthKey(d) { return `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}`; }
@@ -178,6 +179,9 @@ function buildFreeEmail(key, ctx) {
     reason: c.reason,
     unsubscribeUrl: `${SITE}/unsubscribe?t=${ctx.token}`,
     feedbackUrl: `${SITE}/feedback?e=${encodeURIComponent(key)}&t=${ctx.token}`,
+    // Only the welcome and the weekly summary ask "Was this email useful?"; on the
+    // rest, a rating row would feel like a survey, so they only carry the footer line.
+    feedbackStyle: RATED_EMAILS.includes(key) ? "row" : undefined,
     address: ctx.address,
   });
   return { subject: built.subject, html: built.html, text: built.text, bcc: c.bcc };
