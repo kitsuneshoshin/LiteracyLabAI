@@ -15,7 +15,8 @@ const { loadHandler, fakeRes, did } = require("./harness");
 // up against thousands of random situations and a real Stripe signature.
 
 const TOKEN = "11111111-2222-3333-4444-555555555555";
-const ADDRESS = "PO Box 456, Austin, TX 78767, USA";
+const { AUTH_EMAIL_ADDRESS } = require("../api/_lib/authEmails");
+const ADDRESS = AUTH_EMAIL_ADDRESS;
 const all = ALL_EMAIL_KEYS.map((key) => ({ key, ...buildAnyEmail(key, { token: TOKEN, address: ADDRESS, ...sampleContext(key) }) }));
 const auth = buildAuthEmails(ADDRESS);
 const everything = [...all.map((e) => ({ name: e.key, html: e.html, text: e.text, subject: e.subject })), { name: "confirm-signup", ...auth.confirm }, { name: "reset-password", ...auth.reset }];

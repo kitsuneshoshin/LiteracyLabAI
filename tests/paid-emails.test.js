@@ -506,9 +506,9 @@ test("webhook: with emails switched off, billing behaves exactly as before and s
 
 const fs = require("node:fs");
 const path = require("node:path");
-const { buildAuthEmails, LINK } = require("../api/_lib/authEmails");
+const { buildAuthEmails, LINK, AUTH_EMAIL_ADDRESS } = require("../api/_lib/authEmails");
 const TEMPLATE_DIR = path.join(__dirname, "..", "supabase", "email-templates");
-const ADDRESS = "PO Box 456, Austin, TX 78767, USA";
+const ADDRESS = AUTH_EMAIL_ADDRESS;
 
 test("auth emails: the confirm and reset templates carry Supabase's link placeholder exactly once, on the button", () => {
   const { confirm, reset } = buildAuthEmails(ADDRESS);

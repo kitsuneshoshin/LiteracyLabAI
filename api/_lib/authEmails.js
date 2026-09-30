@@ -11,6 +11,11 @@ const { buildEmail } = require("./emailTemplate");
 
 const LINK = "{{ .ConfirmationURL }}";
 
+// Supabase sends these two emails itself, so the postal address in their footer
+// is typed into the templates rather than read from settings. It must be the same
+// address as the EMAIL_POSTAL_ADDRESS setting used by every other email.
+const AUTH_EMAIL_ADDRESS = "PO Box 123, Tokyo Central Post Office, Chiyoda-ku, Tokyo 100-8994, Japan";
+
 function buildAuthEmails(address) {
   const confirm = buildEmail({
     subject: "Confirm your LiteracyLab AI email",
@@ -41,4 +46,4 @@ function buildAuthEmails(address) {
   return { confirm, reset };
 }
 
-module.exports = { buildAuthEmails, LINK };
+module.exports = { buildAuthEmails, LINK, AUTH_EMAIL_ADDRESS };
