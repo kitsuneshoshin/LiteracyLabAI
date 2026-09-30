@@ -518,3 +518,51 @@ test("the feedback and unsubscribe pages carry the brand and the analytics banne
     assert.ok(h.includes('name="robots" content="noindex"'), `${f} stays out of search results`);
   }
 });
+
+// ------------------------------------------------------------------ test copies to the owner
+
+test("test copies: need the secret, and only ever go to an admin address", async () => {
+  await withEnv({ CRON_SECRET: "s3cret", ADMIN_EMAILS: "owner@example.com", RESEND_API_KEY: "k", EMAIL_POSTAL_ADDRESS: "1 St" }, async () => {
+    const h = loadHandler("email.js", { db: () => ({ data: null, error: null }) });
+    const auth = { authorization: "Bearer s3cret" };
+    assert.equal((await callWith(h, { query: { action: "test", to: "owner@example.com" } })).statusCode, 401, "no secret");
+    assert.equal((await callWith(h, { query: { action: "test", to: "stranger@example.com" }, headers: auth })).statusCode, 403, "not an admin address");
+    assert.equal((await callWith(h, { query: { action: "test" }, headers: auth })).statusCode, 403, "no address given");
+  });
+});
+
+test("test copies: refuse to run when the key or postal address is missing", async () => {
+  await withEnv({ CRON_SECRET: "s3cret", ADMIN_EMAILS: "owner@example.com", RESEND_API_KEY: undefined, EMAIL_POSTAL_ADDRESS: undefined }, async () => {
+    const h = loadHandler("email.js", { db: () => ({ data: null, error: null }) });
+    const res = await callWith(h, { query: { action: "test", to: "owner@example.com" }, headers: { authorization: "Bearer s3cret" } });
+    assert.equal(res.statusCode, 400);
+    assert.deepEqual(res.body.missingSettings, ["RESEND_API_KEY", "EMAIL_POSTAL_ADDRESS"]);
+  });
+});
+
+test("test copies: all seven Free emails are sent to the admin, marked TEST, with working unsubscribe links", async () => {
+  const realFetch = globalThis.fetch;
+  try {
+    const calls = [];
+    globalThis.fetch = async (url, opts) => { calls.push(JSON.parse(opts.body)); return { ok: true, json: async () => ({ id: "re_" + calls.length }) }; };
+    await withEnv({ CRON_SECRET: "s3cret", ADMIN_EMAILS: "owner@example.com", RESEND_API_KEY: "k", EMAIL_POSTAL_ADDRESS: "PO Box 1, Town" }, async () => {
+      const h = loadHandler("email.js", { db: (q) => {
+        if (q.table === "profiles") return { data: { id: "p1" }, error: null };
+        if (q.table === "email_preferences") return { data: { unsubscribe_token: UUID }, error: null };
+        return { data: null, error: null };
+      } });
+      const res = await callWith(h, { query: { action: "test", to: "Owner@Example.com" }, headers: { authorization: "Bearer s3cret" } });
+      assert.equal(res.statusCode, 200, JSON.stringify(res.body));
+      assert.equal(res.body.sent.length, 7);
+      assert.equal(calls.length, 7);
+      calls.forEach((c, i) => {
+        assert.deepEqual(c.to, ["owner@example.com"]);
+        assert.ok(c.subject.startsWith(`[TEST ${i + 1}/7] `), c.subject);
+        assert.ok(c.html.includes("PO Box 1, Town"), "postal address in the footer");
+        assert.ok(c.html.includes(`${SITE}/unsubscribe?t=${UUID}`), "the admin's own unsubscribe token");
+        assert.match(c.headers["List-Unsubscribe"], new RegExp(UUID));
+        assert.equal(c.bcc, undefined, "test copies never BCC anyone");
+      });
+    });
+  } finally { globalThis.fetch = realFetch; }
+});

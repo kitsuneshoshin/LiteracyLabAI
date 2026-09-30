@@ -3,12 +3,14 @@ const { getSupabaseAdmin } = require("./_lib/supabaseAdmin");
 const { requireUser, sendError } = require("./_lib/auth");
 const { sendEmail, REPLY_TO } = require("./_lib/emailSend");
 const { runFreeEmailJob } = require("./_lib/emailJob");
-const { buildEmail } = require("./_lib/emailTemplate");
+const { buildEmail, SITE } = require("./_lib/emailTemplate");
+const { buildFreeEmail } = require("./_lib/freeEmails");
 
 // One function for everything email- and feedback-related, because the host
 // caps a project at 12 serverless functions (api/account.js is merged
 // for the same reason). The action is chosen with ?action=:
 //   cron         GET   the daily Free-plan email run (called by Vercel Cron)
+//   test         GET   send one copy of every Free email to an admin address
 //   unsubscribe  POST  stop (or, with resubscribe:true, restart) lifecycle emails
 //   feedback     POST  save what a customer tells us: the product backlog
 //   rating       POST  a thumbs up/down on a piece of feedback (was api/commit.js)
@@ -64,6 +66,50 @@ async function handleCron(req, res) {
   // In the deployment logs too, so a dry run can be checked without calling the endpoint.
   console.log("free-email-run", JSON.stringify(report));
   return res.status(200).json(report);
+}
+
+// ------------------------------------------------------------------ test copies
+// Sends one copy of every Free email to an ADMIN address, so the owner can see
+// exactly what customers will get in a real inbox, through the real sending
+// route. Protected by the cron secret and limited to ADMIN_EMAILS, so it can
+// never be used to email anyone else.
+async function handleTest(req, res) {
+  if (req.method !== "GET" && req.method !== "POST") {
+    res.setHeader("Allow", "GET, POST");
+    return res.status(405).json({ error: "Method not allowed." });
+  }
+  const secret = process.env.CRON_SECRET;
+  if (!secret) return res.status(500).json({ error: "CRON_SECRET is not set." });
+  if ((req.headers && req.headers.authorization) !== `Bearer ${secret}`) return res.status(401).json({ error: "Unauthorized." });
+
+  const to = String((req.query && req.query.to) || "").trim().toLowerCase();
+  const adminEmails = (process.env.ADMIN_EMAILS || "").split(",").map((e) => e.trim().toLowerCase()).filter(Boolean);
+  if (!to || !adminEmails.includes(to)) return res.status(403).json({ error: "Test emails can only be sent to an admin address." });
+  const missing = ["RESEND_API_KEY", "EMAIL_POSTAL_ADDRESS"].filter((k) => !process.env[k]);
+  if (missing.length) return res.status(400).json({ error: "Missing settings.", missingSettings: missing });
+
+  // Use this admin's own token when they have an account, so the unsubscribe
+  // and feedback links in the test copies really work.
+  const supabase = getSupabaseAdmin();
+  let token = "00000000-0000-0000-0000-000000000000";
+  const { data: profile } = await supabase.from("profiles").select("id").eq("email", to).maybeSingle();
+  if (profile) {
+    await supabase.from("email_preferences").upsert({ profile_id: profile.id }, { onConflict: "profile_id", ignoreDuplicates: true });
+    const { data: pref } = await supabase.from("email_preferences").select("unsubscribe_token").eq("profile_id", profile.id).maybeSingle();
+    if (pref && pref.unsubscribe_token) token = pref.unsubscribe_token;
+  }
+
+  const order = ["free-welcome", "free-nudge", "free-first-followup", "free-2-of-3", "free-limit", "free-reset", "free-weekly-lite"];
+  const sent = [];
+  for (let i = 0; i < order.length; i++) {
+    const e = buildFreeEmail(order[i], { token, address: process.env.EMAIL_POSTAL_ADDRESS, stats: { pieces: 3, words: 420 } });
+    const r = await sendEmail({
+      to, subject: `[TEST ${i + 1}/${order.length}] ${e.subject}`, html: e.html, text: e.text,
+      oneClickUrl: `${SITE}/api/email?action=unsubscribe&t=${token}`,
+    });
+    sent.push({ email: order[i], id: r.id });
+  }
+  return res.status(200).json({ sent });
 }
 
 // ------------------------------------------------------------------ unsubscribe
@@ -197,6 +243,7 @@ module.exports = async function handler(req, res) {
   try {
     const action = String((req.query && req.query.action) || "");
     if (action === "cron") return await handleCron(req, res);
+    if (action === "test") return await handleTest(req, res);
     if (action === "unsubscribe") return await handleUnsubscribe(req, res);
     if (action === "feedback") return await handleFeedback(req, res);
     if (action === "rating") return await handleRating(req, res);
