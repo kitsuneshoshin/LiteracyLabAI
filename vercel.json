@@ -9,6 +9,11 @@
       "destination": "/feedback.html"
     }
   ],
+  "functions": {
+    "api/email.js": {
+      "maxDuration": 60
+    }
+  },
   "crons": [
     {
       "path": "/api/email?action=cron",

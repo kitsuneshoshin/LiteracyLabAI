@@ -59,7 +59,8 @@ async function handleCron(req, res) {
     send: sendEmail,
     address: process.env.EMAIL_POSTAL_ADDRESS || "",
     dryRun: !live,
-    maxPerRun: Number(process.env.EMAIL_MAX_PER_RUN) || 50,
+    maxPerRun: Number(process.env.EMAIL_MAX_PER_RUN) || 40,
+    pauseMs: 550,
     adminEmails,
   });
   const report = { mode: live ? "live" : "dry-run", missingSettings: missing, emailLiveFlag: process.env.EMAIL_LIVE === "true", ...summary };

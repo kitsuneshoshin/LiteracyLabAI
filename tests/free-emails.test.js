@@ -566,3 +566,21 @@ test("test copies: all seven Free emails are sent to the admin, marked TEST, wit
     });
   } finally { globalThis.fetch = realFetch; }
 });
+
+test("the email function is allowed to run long enough for a paced batch, and the job paces itself", () => {
+  const cfg = JSON.parse(fs.readFileSync(path.join(ROOT, "vercel.json"), "utf8"));
+  assert.equal(cfg.functions["api/email.js"].maxDuration, 60, "the default 10 seconds would cut a run of 40 paced emails short");
+  const src = fs.readFileSync(path.join(ROOT, "api", "email.js"), "utf8");
+  assert.match(src, /pauseMs: 550/);
+  assert.match(src, /EMAIL_MAX_PER_RUN\) \|\| 40/);
+});
+
+test("job: a pause between sends is applied only when asked for", async () => {
+  const profiles = Array.from({ length: 3 }, (_, i) => ({ id: `q${i}`, email: `q${i}@example.com`, plan: "free", created_at: ago(0.5).toISOString() }));
+  const tables = { profiles, email_preferences: [], email_log: [], submissions: [] };
+  const r = recorder();
+  const t0 = Date.now();
+  await runFreeEmailJob({ supabase: fakeDb(tables), now: MON, send: r.send, address: "x", dryRun: false, pauseMs: 60 });
+  assert.ok(Date.now() - t0 >= 150, "three sends with a 60ms pause take at least ~180ms");
+  assert.equal(r.sent.length, 3);
+});

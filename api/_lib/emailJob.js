@@ -10,14 +10,17 @@
 //    is released so tomorrow's run retries.
 //  - Parents who unsubscribed are never emailed, and admin/test accounts are
 //    skipped.
-//  - At most maxPerRun emails per run (a provider's daily limit is real).
+//  - At most maxPerRun emails per run (a provider's daily limit is real), paced
+//    with pauseMs between sends to stay under the provider's rate limit.
 
 const { pickEmail, buildFreeEmail } = require("./freeEmails");
 const { SITE } = require("./emailTemplate");
 
 const DAY = 86400000;
 
-async function runFreeEmailJob({ supabase, now = new Date(), send, address, dryRun = true, maxPerRun = 50, adminEmails = [] }) {
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+async function runFreeEmailJob({ supabase, now = new Date(), send, address, dryRun = true, maxPerRun = 40, adminEmails = [], pauseMs = 0 }) {
   const summary = { dryRun, considered: 0, optedOut: 0, eligible: 0, sent: 0, errors: 0, plan: [] };
 
   const { data: profiles, error: pErr } = await supabase.from("profiles").select("id, email, created_at").eq("plan", "free").limit(1000);
@@ -95,6 +98,8 @@ async function runFreeEmailJob({ supabase, now = new Date(), send, address, dryR
       });
       await supabase.from("email_log").update({ resend_id: r && r.id }).eq("id", claim.data.id);
       summary.sent++;
+      // Resend accepts about 2 requests a second; a short pause keeps a bigger run under that.
+      if (pauseMs) await sleep(pauseMs);
     } catch (err) {
       await supabase.from("email_log").delete().eq("id", claim.data.id);
       summary.errors++;
