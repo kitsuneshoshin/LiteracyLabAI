@@ -36,6 +36,7 @@ function expectedSections(plan, tier, kind) {
     examTechnique: !!caps.examTechnique && EXAM_TIERS.has(tier),
     overallScore: kind === "writing" && caps.overallScore !== false,
     spellingGrammar: kind === "writing" && caps.spellingGrammar !== false,
+    revisedStory: kind === "writing" && caps.spellingGrammar !== false,
     frameworkTip: kind === "writing",
     highlights: kind === "writing",
     questionReview: kind === "reading",
@@ -47,6 +48,7 @@ function sectionsPresent(fb) {
     examTechnique: fb.examTechnique != null,
     overallScore: fb.overallScore != null,
     spellingGrammar: fb.spellingGrammar != null,
+    revisedStory: fb.revisedStory != null,
     frameworkTip: fb.frameworkTip != null,
     highlights: fb.highlights != null,
     questionReview: fb.questionReview != null,
@@ -90,6 +92,7 @@ function writingExtras(tier, caps) {
   };
   if (caps.overallScore !== false) { out.overallScore = 6; out.scoreReason = "Clear structure but very short sentences throughout."; }
   if (caps.spellingGrammar !== false) {
+    out.revisedStory = "The dog ran fast. It spotted a tiny grey cat high up in a tree. The end of the story was happy.";
     out.spellingGrammarTotal = 1;
     out.spellingGrammar = [{ quote: "The end of the story was happy", type: "punctuation", correction: "The end of the story was happy." }];
   }
@@ -328,6 +331,29 @@ test("second step: a different problem on the last attempt still fails the respo
     return f;
   });
   assert.equal(res.statusCode, 502);
+});
+
+test("full rewrite: if it can't be made correct through every retry, only the rewrite is dropped and the rest of the feedback is still delivered", async () => {
+  const { res, prompts } = await runSubmit("premium", "high", "writing", () => {
+    const f = obedient("premium", "high", "writing");
+    f.revisedStory = TEXT; // handed back unchanged every time
+    return f;
+  });
+  assert.equal(res.statusCode, 200, "the student still gets their feedback");
+  assert.equal(prompts.length, 3, "all three attempts were made first");
+  assert.equal(res.body.feedback.revisedStory, undefined, "the unusable rewrite is not shown");
+  assert.ok(res.body.feedback.highlights.length >= 2 && res.body.feedback.spellingGrammar, "everything else is intact");
+});
+
+test("full rewrite: a missing rewrite is retried, and if it never arrives the rest is still delivered", async () => {
+  const { res, prompts } = await runSubmit("premium", "middle", "writing", () => {
+    const f = obedient("premium", "middle", "writing");
+    delete f.revisedStory;
+    return f;
+  });
+  assert.equal(res.statusCode, 200);
+  assert.equal(prompts.length, 3);
+  assert.match(prompts[1], /revisedStory/, "the retry names the missing rewrite");
 });
 
 test("spelling: one made-up quote is dropped and the honest total lowered, instead of failing the whole response", async () => {

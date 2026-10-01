@@ -2345,7 +2345,55 @@ function ThumbsFeedback({ context, session, submissionId, backendLive }){
 // list below each one — so feedback that's otherwise just prose the student
 // has to mentally map back onto their story is instead pinned directly to
 // the words it's about.
-function AnnotatedText({ text, highlights }){
+// Premium full rewrite: shows the corrected story with every word that differs
+// from the student's own text marked, so they can see exactly what changed
+// (a fixed capital, a new full stop, a reworded phrase) instead of re-reading
+// the whole thing against the original. A plain word-by-word diff (longest
+// common subsequence); a very long text skips the marking rather than stall.
+function diffWordsToParts(original, revised){
+  const split = (s)=> String(s).split(/(\s+)/).filter(t => t !== "");
+  const isSpace = (t)=> /^\s+$/.test(t);
+  const bt = split(revised);
+  const bw = bt.filter(t => !isSpace(t));
+  const aw = split(original).filter(t => !isSpace(t));
+  const n = aw.length, m = bw.length;
+  const matched = new Array(m).fill(false);
+  if (n * m <= 2500000) {
+    const w = m + 1;
+    const dp = new Int32Array((n + 1) * w);
+    for (let i = n - 1; i >= 0; i--) {
+      for (let j = m - 1; j >= 0; j--) {
+        dp[i * w + j] = aw[i] === bw[j] ? dp[(i + 1) * w + j + 1] + 1 : Math.max(dp[(i + 1) * w + j], dp[i * w + j + 1]);
+      }
+    }
+    let i = 0, j = 0;
+    while (i < n && j < m) {
+      if (aw[i] === bw[j]) { matched[j] = true; i++; j++; }
+      else if (dp[(i + 1) * w + j] >= dp[i * w + j + 1]) i++;
+      else j++;
+    }
+  } else {
+    matched.fill(true);
+  }
+  const items = [];
+  let wi = 0;
+  bt.forEach(t => { items.push(isSpace(t) ? { t, c: null } : { t, c: !matched[wi++] }); });
+  items.forEach((it, k) => {
+    if (it.c !== null) return;
+    const prev = items[k - 1], next = items[k + 1];
+    it.c = !!(prev && next && prev.c === true && next.c === true);
+  });
+  const runs = [];
+  items.forEach(it => {
+    const last = runs[runs.length - 1];
+    if (last && last.c === it.c) last.t += it.t; else runs.push({ t: it.t, c: it.c });
+  });
+  return runs.map((r, k) => r.c
+    ? <mark key={`dv${k}`} title="Changed from your original" className="rounded px-0.5" style={{ background: "var(--good)", color: "#fff" }}>{r.t}</mark>
+    : <span key={`dv${k}`}>{r.t}</span>);
+}
+
+function AnnotatedText({ text, highlights, revisedStory }){
   const spans = useMemo(()=>{
     if (!text || !Array.isArray(highlights) || highlights.length === 0) return null;
     const lowerText = text.toLowerCase();
@@ -2372,6 +2420,8 @@ function AnnotatedText({ text, highlights }){
   // and a reader has to re-diff it against the original by eye to see what
   // was even changed.
   const revisedParts = useMemo(()=>{
+    // Premium: the whole piece, corrected and improved, marked word by word.
+    if (typeof revisedStory === "string" && revisedStory.trim() && text) return diffWordsToParts(text, revisedStory.trim());
     if (!spans || spans.length === 0) return null;
     if (!spans.some(f => f.type === "grow" && f.revision)) return null;
     const out = [];
@@ -2404,7 +2454,7 @@ function AnnotatedText({ text, highlights }){
     });
     if (pos < text.length) out.push(<span key="rtail">{text.slice(pos)}</span>);
     return out;
-  }, [text, spans]);
+  }, [text, spans, revisedStory]);
 
   if (!spans || spans.length === 0) {
     return <p className="whitespace-pre-wrap font-read text-[14.5px] leading-relaxed" style={{ color: "var(--ink)" }}>{text}</p>;
@@ -2446,7 +2496,7 @@ function AnnotatedText({ text, highlights }){
           <div className="flex items-center justify-between gap-2 mb-2 flex-wrap">
             <div className="flex items-center gap-1.5">
               <IconSparkle size={13} strokeWidth={2.4} style={{ color: "var(--good)" }} />
-              <span className="text-[11px] font-bold uppercase tracking-wide" style={{ color: "var(--good)" }}>Your story, revised</span>
+              <span className="text-[11px] font-bold uppercase tracking-wide" style={{ color: "var(--good)" }}>{typeof revisedStory === "string" && revisedStory.trim() ? "Your story, corrected and improved" : "Your story, revised"}</span>
             </div>
             <span className="inline-flex items-center gap-1 text-[11px] font-semibold" style={{ color: "var(--ink-faint)" }}>
               <mark className="rounded px-1" style={{ background: "var(--good)", color: "#fff" }}>highlighted</mark> = what changed
@@ -2523,7 +2573,7 @@ function FeedbackPanel({ tier, gradeLabel, country, interest, confidence, motiva
             </div>
             <h3 className="font-display font-bold" style={{ color: "var(--ink)" }}>Your submission, annotated</h3>
           </div>
-          <AnnotatedText text={submittedText} highlights={feedback.highlights} />
+          <AnnotatedText text={submittedText} highlights={feedback.highlights} revisedStory={feedback.revisedStory} />
         </div>
       )}
 

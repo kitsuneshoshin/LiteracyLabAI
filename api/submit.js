@@ -45,8 +45,13 @@ async function generateAndValidate(prompt, tier, country, gradeLabel, submittedT
     // The Premium "second step" is a bonus. If it is the ONLY thing still wrong
     // on the last attempt, drop just that section rather than failing a whole,
     // otherwise good piece of feedback (the app simply doesn't show it).
-    if (i === MAX_ATTEMPTS && attempt.parsed && attempt.parsed.growNext && check.issues.length > 0 && check.issues.every((issue) => /^growNext\b/.test(issue))) {
-      delete attempt.parsed.growNext;
+    // The same goes for the Premium full rewrite ("revisedStory"): the app falls
+    // back to the fragment-by-fragment revision when it is absent.
+    const bonusOnly = check.issues.length > 0 && check.issues.every((issue) => /^(growNext|revisedStory)\b/.test(issue));
+    const growNextBad = check.issues.some((issue) => /^growNext\b/.test(issue));
+    if (i === MAX_ATTEMPTS && attempt.parsed && bonusOnly && (!growNextBad || attempt.parsed.growNext)) {
+      if (growNextBad) delete attempt.parsed.growNext;
+      if (check.issues.some((issue) => /^revisedStory\b/.test(issue))) delete attempt.parsed.revisedStory;
       attempt.parsed.glowTarget = resolveTarget(attempt.parsed.glowTarget, targetNames) || attempt.parsed.glowTarget;
       attempt.parsed.growTarget = resolveTarget(attempt.parsed.growTarget, targetNames) || attempt.parsed.growTarget;
       return attempt;

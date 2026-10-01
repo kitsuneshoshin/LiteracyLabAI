@@ -24,6 +24,7 @@ function baseFeedback(overrides = {}) {
     scoreReason: "Clear structure and a happy ending, but the sentences stay very short throughout.",
     spellingGrammarTotal: 0,
     spellingGrammar: [],
+    revisedStory: "The dog ran fast. It spotted a cat up in a tree. The end of the story was happy.",
     ...overrides,
   };
 }

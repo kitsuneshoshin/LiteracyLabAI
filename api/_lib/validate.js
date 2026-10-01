@@ -335,6 +335,49 @@ function validateSpellingGrammar(parsed, submittedText, issues) {
   });
 }
 
+// Premium "revisedStory" (see revisedStoryClause in prompt.js): the student's
+// whole piece rewritten, corrected and improved. The checks are deliberately the
+// mechanical ones a rewrite can fail visibly: it must really differ, keep the
+// student's length (so it is still THEIR piece, not a new one), be properly
+// capitalised and punctuated, and must not still contain a misspelling the
+// spelling check itself listed.
+const wordsOf = (t) => String(t).toLowerCase().match(/[a-z0-9À-ɏ']+/g) || [];
+function validateRevisedStory(parsed, submittedText, issues) {
+  const story = parsed?.revisedStory;
+  if (!checkString(story, 5, 20000)) {
+    issues.push("revisedStory is missing or an unreasonable length");
+    return;
+  }
+  const original = String(submittedText || "");
+  const origCount = wordsOf(original).length;
+  const count = wordsOf(story).length;
+  if (count < Math.max(4, Math.floor(origCount * 0.6)) || count > Math.ceil(origCount * 1.6) + 10) {
+    issues.push("revisedStory must keep roughly the student's own length (about 60% to 160% of their word count) and their own ideas, not become a different piece");
+  }
+  if (foldLookalikes(story) === foldLookalikes(original)) {
+    issues.push("revisedStory is identical to the student's text - it must be a corrected, improved version");
+  }
+  const trimmed = story.trim();
+  if (/(^|[\s"“(])i(?=[\s',.!?;:)”"]|$)/.test(trimmed)) {
+    issues.push('revisedStory still has a lowercase "i" - the pronoun must be capital I');
+  }
+  if (!/^["“'‘(]*[A-Z0-9À-Þ]/.test(trimmed)) {
+    issues.push("revisedStory must start with a capital letter");
+  }
+  if (!/[.!?…"”')]$/.test(trimmed)) {
+    issues.push("revisedStory must end with proper end punctuation");
+  }
+  // A misspelling the spelling check named must not survive in the rewrite.
+  const storyWords = new Set(wordsOf(story));
+  const items = Array.isArray(parsed?.spellingGrammar) ? parsed.spellingGrammar : [];
+  items.forEach((item) => {
+    if (item?.type !== "spelling" || !checkString(item?.quote, 1, 200) || !checkString(item?.correction, 1, 240)) return;
+    const fixed = new Set(wordsOf(item.correction));
+    const stillThere = wordsOf(item.quote).filter((w) => w.length > 2 && !fixed.has(w) && storyWords.has(w));
+    if (stillThere.length) issues.push(`revisedStory still contains the misspelling "${stillThere[0]}" that the spelling check lists - every error must be fixed in the rewrite`);
+  });
+}
+
 // The spelling/grammar list is a secondary, mechanical section - one entry
 // whose "quote" the model paraphrased instead of copying used to fail the
 // ENTIRE feedback response (found live: a High School essay rejected 3 times
@@ -431,11 +474,11 @@ function stripUngrantedSections(parsed, { capabilities, kind }) {
 
   if (kind === "reading") {
     // Reading has no free-text submission of the student's own to quote from.
-    drop("highlights", "frameworkTip", "overallScore", "scoreReason", "spellingGrammar", "spellingGrammarTotal");
+    drop("highlights", "frameworkTip", "overallScore", "scoreReason", "spellingGrammar", "spellingGrammarTotal", "revisedStory");
   } else {
     drop("questionReview");
     if (caps.overallScore === false) drop("overallScore", "scoreReason");
-    if (caps.spellingGrammar === false) drop("spellingGrammar", "spellingGrammarTotal");
+    if (caps.spellingGrammar === false) drop("spellingGrammar", "spellingGrammarTotal", "revisedStory");
   }
   return parsed;
 }
@@ -489,8 +532,8 @@ function validateFeedback(parsed, { tier, standardsList, targetNames, submittedT
   // against — reading has no free-text submission of the student's own to
   // quote from.
   if (submittedText) {
-    if (!Array.isArray(parsed?.highlights) || parsed.highlights.length < 2 || parsed.highlights.length > 8) {
-      issues.push("highlights must be an array of 2-8 items");
+    if (!Array.isArray(parsed?.highlights) || parsed.highlights.length < 2 || parsed.highlights.length > 10) {
+      issues.push("highlights must be an array of 2-10 items");
     } else {
       const normalizedText = normalizeForMatch(submittedText);
       parsed.highlights.forEach((h, i) => {
@@ -527,7 +570,10 @@ function validateFeedback(parsed, { tier, standardsList, targetNames, submittedT
     // Premium-only (api/_lib/plans.js). Skipped only when the plan explicitly
     // says false; callers with no plan info keep the full checks.
     if (caps.overallScore !== false) validateOverallScore(parsed, issues);
-    if (caps.spellingGrammar !== false) validateSpellingGrammar(parsed, submittedText, issues);
+    if (caps.spellingGrammar !== false) {
+      validateSpellingGrammar(parsed, submittedText, issues);
+      validateRevisedStory(parsed, submittedText, issues);
+    }
   }
 
   if (caps.deepFeedback) {

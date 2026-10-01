@@ -54,7 +54,7 @@ function revisionToneClause(tier) {
 }
 
 function highlightsClause(tier) {
-  return `You must also return "highlights": short fragments copied EXACTLY, character-for-character (including any spelling or grammar mistakes — do not correct them), from the student's submitted text above. Each one is tagged "glow" (something that worked) or "grow" (something to improve), with a short note explaining why. Return as many genuine highlights as the piece actually supports — a short or thin piece may only have 2-3 real things to point to, but a longer or richer piece should get more, up to 8, so a student with a lot going on in their writing actually sees that reflected rather than being capped at just one or two of each. Never invent a marginal or repetitive highlight just to hit a higher count — only real, distinct things worth pointing out, spread across both glow and grow where the piece genuinely has both.
+  return `You must also return "highlights": short fragments copied EXACTLY, character-for-character (including any spelling or grammar mistakes — do not correct them), from the student's submitted text above. Each one is tagged "glow" (something that worked) or "grow" (something to improve), with a short note explaining why. Return as many genuine highlights as the piece actually supports — a short or thin piece (under about 60 words) may only have 2-3 real things to point to, but a longer or richer piece should get more: as a guide, about one genuine highlight for every 30-40 words, up to 10, with BOTH glows and grows wherever the piece honestly has both, so a student with a lot going on in their writing actually sees that reflected rather than being capped at just one or two of each. Never invent a marginal or repetitive highlight just to hit a higher count — only real, distinct things worth pointing out, spread across both glow and grow where the piece genuinely has both.
 For every "grow" highlight, also include a "revision" field: rewrite that exact fragment to actually apply the suggested improvement, in language this student would plausibly write themselves (same vocabulary level, same voice) — not a generic example, a rewrite of THEIR sentence. Omit "revision" entirely for "glow" highlights (there's nothing to fix).${revisionToneClause(tier)}
 IMPORTANT: "revision" is spliced into the story in place of "quote" and NOTHING else — every other sentence in the story, whether right next to the quote or several sentences away, stays exactly as the student wrote it. So "revision" must NEVER repeat or restate wording that already appears ANYWHERE ELSE in the student's text, even if your suggestion is to join two sentences with a conjunction — that other sentence is still there and will now appear twice. Wrong example: story "The dog ran fast. It saw a cat.", quote "It saw a cat.", suggestion "join with 'and'", revision "The dog ran fast and saw a cat." — this restates "The dog ran fast" (a DIFFERENT sentence, already elsewhere in the story), so the final story reads "The dog ran fast. The dog ran fast and saw a cat." (duplicated) once spliced in. Right way to handle a joining suggestion: revise the quote itself to start with the conjunction, e.g. revision "And it saw a cat." — every other sentence stays untouched and the joined feel still comes through.
 Every highlight's "quote" must be a real substring that appears verbatim in the submitted text — never paraphrase or reconstruct a quote from memory.`;
@@ -156,6 +156,23 @@ Find ONE real fragment (a sentence or short passage) FROM THE STUDENT'S OWN SUBM
 Put this in a "frameworkTip" field with "name" set to exactly "${fw.name}", "quote" set to that verbatim fragment, and "revision" set to the rewritten version.`;
 }
 
+// Premium: the student's WHOLE piece, rewritten as a polished version of the
+// same piece. The per-fragment "revision" fields in highlights are spliced into
+// the student's original text, which leaves every other error untouched; this
+// is the complete, corrected version beside it. It must stay THEIR piece (same
+// ideas, order and voice), because a rewrite that invents new content stops
+// being coaching and starts being someone else's work.
+function revisedStoryClause(tier) {
+  const register = (tier === "middle" || tier === "high")
+    ? " Keep a formal, third-person academic register with no personal asides and no analogies."
+    : tier === "early"
+      ? " Keep the sentences short and simple, at the level a child this age could write themselves."
+      : " Keep the vocabulary and sentence length at a level this student could plausibly write.";
+  return `
+
+REVISED STORY (required): Return "revisedStory": the student's WHOLE piece rewritten as a polished, corrected version of the SAME piece. It must (1) fix EVERY spelling, grammar, capitalisation and punctuation error, including each one you list in the spelling and grammar check below; (2) apply your "grow" suggestions and improve flow, sentence structure and word choice so it reads clearly better than the original; and (3) stay THEIR piece: the same ideas, events and arguments in the same order, and roughly the same length (within about 25% of their word count). Do NOT add facts, characters, events, arguments or opinions the student did not write, and do not explain or comment on the changes. Keep their paragraph breaks.${register} Return plain text only.`;
+}
+
 // A dedicated, always-shown spelling/grammar check - separate from the
 // stylistic "highlights" above (which explicitly keep typos IN the quoted
 // text rather than correcting them, since those are about voice and craft).
@@ -254,6 +271,7 @@ ${deepFeedbackClause(caps.deepFeedback)}
 ${wantsExam ? examTechniqueClause({ tier, targets, kind: "writing" }) : ""}
 ${frameworkClause({ tier, genre })}
 ${wantsScore ? overallScoreClause() : ""}
+${wantsSpelling ? revisedStoryClause(tier) : ""}
 ${wantsSpelling ? spellingGrammarClause() : ""}
 
 Read the actual submitted text closely — every point you make must be traceable to something specifically in it (quote a short fragment where useful), not a generic template response.
@@ -276,6 +294,7 @@ Respond with ONLY a JSON object (no markdown fences, no commentary) with exactly
   "frameworkTip": { "name": "the exact framework name you were given, verbatim", "quote": "a real, verbatim fragment from the student's own submitted text", "revision": "that exact fragment rewritten to demonstrate the framework applied to THEIR writing" }${wantsScore ? `,
   "overallScore": "an integer 1-10 scoring the WHOLE piece against the four criteria above",
   "scoreReason": "one sentence citing the specific strength/weakness pattern across the whole piece that drove that score"` : ""}${wantsSpelling ? `,
+  "revisedStory": "the student's WHOLE piece rewritten as a corrected, improved version of the same piece: every error fixed, same ideas and order, roughly the same length, nothing new added",
   "spellingGrammarTotal": "the TRUE total count of real errors found, honest even if more than 8",
   "spellingGrammar": [{ "quote": "an exact substring from the submitted text containing a real spelling/grammar/punctuation error", "type": "spelling, grammar, or punctuation", "correction": "that same fragment with just the error fixed" }]` : ""}
 }`;
