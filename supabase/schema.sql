@@ -265,3 +265,18 @@ create table if not exists public.feedback (
 alter table public.feedback enable row level security;
 create index if not exists feedback_status_created_idx on public.feedback (status, created_at desc);
 create index if not exists feedback_ip_created_idx on public.feedback (ip_hash, created_at desc);
+
+-- ---------------------------------------------------------------------------
+-- Weekly marking-quality check: one summary row per run (api/_lib/qaRun.js,
+-- called by Vercel Cron). Holds only made-up sample pieces and their results,
+-- never anything from a customer. RLS on with no policy, like every table here.
+-- ---------------------------------------------------------------------------
+create table if not exists public.qa_runs (
+  id uuid primary key default gen_random_uuid(),
+  created_at timestamptz not null default now(),
+  passed integer not null,
+  total integer not null,
+  summary jsonb not null
+);
+alter table public.qa_runs enable row level security;
+create index if not exists qa_runs_created_idx on public.qa_runs (created_at desc);

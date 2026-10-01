@@ -14,6 +14,7 @@ const { buildAnyEmail, ALL_EMAIL_KEYS, sampleContext } = require("./_lib/emailAn
 //   unsubscribe  POST  stop (or, with resubscribe:true, restart) lifecycle emails
 //   feedback     POST  save what a customer tells us: the product backlog
 //   rating       POST  a thumbs up/down on a piece of feedback (was api/commit.js)
+//   qa           GET   the weekly marking-quality check (called by Vercel Cron)
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const CATEGORIES = ["bug", "idea", "praise", "question", "other"];
@@ -70,6 +71,32 @@ async function handleCron(req, res) {
   // In the deployment logs too, so a dry run can be checked without calling the endpoint.
   console.log("free-email-run", JSON.stringify(report));
   return res.status(200).json(report);
+}
+
+// ------------------------------------------------------------------ weekly marking-quality check
+// Runs a fixed set of sample pieces through the real prompt and validator (see
+// api/_lib/qaRun.js) and saves one summary row in qa_runs. Called weekly by
+// Vercel Cron, which sends the CRON_SECRET; ?save=0 runs it without saving.
+async function handleQa(req, res) {
+  if (req.method !== "GET" && req.method !== "POST") {
+    res.setHeader("Allow", "GET, POST");
+    return res.status(405).json({ error: "Method not allowed." });
+  }
+  const secret = process.env.CRON_SECRET;
+  if (!secret) return res.status(500).json({ error: "CRON_SECRET is not set." });
+  if ((req.headers && req.headers.authorization) !== `Bearer ${secret}`) return res.status(401).json({ error: "Unauthorized." });
+
+  const { runQa } = require("./_lib/qaRun");
+  const { generateFeedbackJSON } = require("./_lib/openai");
+  const summary = await runQa({ generate: generateFeedbackJSON });
+  let saved = false;
+  if (!(req.query && req.query.save === "0")) {
+    const { error } = await getSupabaseAdmin().from("qa_runs").insert({ passed: summary.passed, total: summary.total, summary });
+    if (error) console.error("Saving the quality run failed:", error.message);
+    else saved = true;
+  }
+  console.log("qa-run", JSON.stringify({ passed: summary.passed, total: summary.total, avgMs: summary.avgMs, saved }));
+  return res.status(200).json({ saved, passed: summary.passed, total: summary.total, passRate: summary.passRate, avgMs: summary.avgMs, results: summary.results.map((r) => ({ name: r.name, ok: r.ok, ms: r.ms, issues: r.issues })) });
 }
 
 // ------------------------------------------------------------------ test copies
@@ -267,6 +294,7 @@ module.exports = async function handler(req, res) {
   try {
     const action = String((req.query && req.query.action) || "");
     if (action === "cron") return await handleCron(req, res);
+    if (action === "qa") return await handleQa(req, res);
     if (action === "test") return await handleTest(req, res);
     if (action === "unsubscribe") return await handleUnsubscribe(req, res);
     if (action === "feedback") return await handleFeedback(req, res);
