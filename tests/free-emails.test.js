@@ -490,9 +490,15 @@ test("vercel.json serves the unsubscribe and feedback pages and runs the daily j
   assert.equal(dest["/unsubscribe"], "/unsubscribe.html");
   assert.equal(dest["/feedback"], "/feedback.html");
   for (const p of ["unsubscribe.html", "feedback.html"]) assert.ok(fs.existsSync(path.join(ROOT, p)), p);
-  assert.equal(cfg.crons.length, 1);
-  assert.equal(cfg.crons[0].path, "/api/email?action=cron");
-  assert.match(cfg.crons[0].schedule, /^\d+ \d+ \* \* \*$/, "once a day, which is all the free hosting plan allows");
+  // Two scheduled jobs: the daily email run and the weekly marking-quality check
+  // (the free hosting plan allows two, each at most once a day).
+  assert.equal(cfg.crons.length, 2);
+  const daily = cfg.crons.find((c) => c.path === "/api/email?action=cron");
+  assert.ok(daily, "the daily email run is scheduled");
+  assert.match(daily.schedule, /^\d+ \d+ \* \* \*$/, "once a day, which is all the free hosting plan allows");
+  const weekly = cfg.crons.find((c) => c.path === "/api/email?action=qa");
+  assert.ok(weekly, "the weekly quality check is scheduled");
+  assert.match(weekly.schedule, /^\d+ \d+ \* \* \d$/, "once a week");
 });
 
 test("the new email tables exist in the schema file with row-level security and no policies", () => {
