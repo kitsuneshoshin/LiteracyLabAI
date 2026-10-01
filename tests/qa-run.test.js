@@ -22,28 +22,34 @@ test("the sample set covers every age tier, a Free, a Core and a Premium piece, 
   assert.ok(WRITING.some((s) => /cryponite/.test(s.text)));
 });
 
-test("every sample builds a real prompt (so a broken prompt shows up here, not in a customer's feedback)", async () => {
+test("every sample builds a real prompt, and a failing sample is retried like a customer's: up to three attempts, each told what was wrong", async () => {
   const prompts = [];
   await runQa({ generate: async (p) => { prompts.push(p); return { parsed: {}, modelUsed: "stub" }; } });
-  assert.equal(prompts.length, 8);
-  assert.ok(prompts.every((p) => p.length > 1500), "each prompt is a full prompt");
-  assert.ok(prompts.filter((p) => /REVISED STORY \(required\)/.test(p)).length === 6, "all six writing samples ask for the corrected story");
+  const first = prompts.filter((p) => !p.includes("Your previous attempt failed these checks"));
+  const retries = prompts.filter((p) => p.includes("Your previous attempt failed these checks"));
+  assert.equal(first.length, 8, "one first attempt per sample");
+  assert.equal(retries.length, 16, "two retries for each of the eight failing samples");
+  assert.ok(first.every((p) => p.length > 1500), "each prompt is a full prompt");
+  assert.ok(first.filter((p) => /REVISED STORY \(required\)/.test(p)).length === 6, "all six writing samples ask for the corrected story");
 });
 
-test("a model that returns nothing usable fails every sample cleanly: no crash, a plain reason each, and the numbers add up", async () => {
+test("a model that returns nothing usable fails every sample cleanly after three attempts: no crash, a plain reason each, and the numbers add up", async () => {
   const summary = await runQa({ generate: async () => ({ parsed: {}, modelUsed: "stub" }) });
   assert.equal(summary.total, 8);
-  assert.equal(summary.passed, 0);
+  assert.equal(summary.passed, 0, "none right first time");
+  assert.equal(summary.delivered, 0, "and none would reach a customer");
   assert.equal(summary.passRate, 0);
-  assert.ok(summary.results.every((r) => !r.ok && r.issues.length > 0));
+  assert.equal(summary.deliveredRate, 0);
+  assert.equal(summary.avgAttempts, 3);
+  assert.ok(summary.results.every((r) => !r.ok && !r.firstTry && r.attempts === 3 && r.outcome === "failed" && r.issues.length > 0 && r.lastIssues.length > 0));
 });
 
-test("a model call that throws is recorded as a failed sample, and the other samples still run", async () => {
-  let n = 0;
-  const summary = await runQa({ generate: async () => { n += 1; if (n % 2 === 0) throw new Error("rate limited"); return { parsed: {}, modelUsed: "stub" }; } });
+test("a model call that throws is recorded as a failed sample, and the other samples still run all their attempts", async () => {
+  const summary = await runQa({ generate: async (p) => { if (p.includes("Year 11")) throw new Error("rate limited"); return { parsed: {}, modelUsed: "stub" }; } });
   assert.equal(summary.total, 8);
   const failed = summary.results.filter((r) => r.issues.some((i) => /model call failed: rate limited/.test(i)));
-  assert.equal(failed.length, 4);
+  assert.equal(failed.length, 3, "the three Year 11 samples");
+  assert.ok(summary.results.filter((r) => !failed.includes(r)).every((r) => r.attempts === 3), "the rest were unaffected");
 });
 
 // ---- the protected endpoint
@@ -81,8 +87,11 @@ test("endpoint: with the secret it runs all eight samples, saves one summary row
   assert.equal(log.length, 1, "exactly one row saved");
   assert.equal(log[0].total, 8);
   assert.equal(log[0].passed, 0);
+  assert.equal(log[0].summary.delivered, 0);
   assert.equal(log[0].summary.results.length, 8);
-  assert.ok(res.body.results.every((r) => typeof r.name === "string" && "ok" in r), "the report names each sample");
+  assert.equal(res.body.passedFirstTry, 0);
+  assert.equal(res.body.delivered, 0);
+  assert.ok(res.body.results.every((r) => typeof r.name === "string" && "firstTry" in r && "outcome" in r && "attempts" in r), "the report names each sample with both numbers");
 });
 
 test("endpoint: ?save=0 runs it without writing anything", async () => {

@@ -7,7 +7,7 @@
 // stored against any account, and only a summary row is written.
 
 const { capabilitiesFor } = require("./plans");
-const { buildWritingPrompt, buildReadingPrompt, examTechniqueSupported } = require("./prompt");
+const { buildWritingPrompt, buildReadingPrompt, examTechniqueSupported, correctiveAddendum } = require("./prompt");
 const { standardsFor } = require("./curriculum");
 const { targetsForGrade } = require("./masteryTargets");
 const { DEFAULT_GENRE_BY_TIER } = require("./writingFrameworks");
@@ -61,40 +61,68 @@ function buildSample(s, kind) {
   };
 }
 
-// One sample, one attempt. Never throws: a failure is a result, not a crash.
+// One sample, run the way a customer's piece is: up to three attempts, each retry
+// told what the last one got wrong (the same rules as api/submit.js, including
+// leaving out the Premium bonus sections instead of failing a whole piece). It
+// records BOTH whether the first attempt was right and what the customer would
+// actually have been given. Never throws: a failure is a result, not a crash.
+const MAX_ATTEMPTS = 3;
+const BONUS_ISSUE = /^(growNext|revisedStory)/;
+
 async function runOne(s, kind, generate) {
   const started = Date.now();
-  const out = { name: s.name, kind, plan: s.plan, tier: s.tier, ok: false, issues: [], ms: 0 };
+  const out = { name: s.name, kind, plan: s.plan, tier: s.tier, ok: false, firstTry: false, attempts: 0, outcome: "failed", issues: [], ms: 0 };
   try {
     const built = buildSample(s, kind);
-    const attempt = await generate(built.prompt);
-    const parsed = attempt.parsed;
     const grade = GRADES[s.tier];
     const standardsList = standardsFor(COUNTRY, s.tier, grade);
     const targetNames = targetsForGrade(COUNTRY, grade, s.tier).targets.map((t) => t.name);
-    if (kind === "writing") {
-      if (built.caps.spellingGrammar !== false) dropInvalidSpellingGrammar(parsed, s.text);
-    } else {
-      if (built.score === 0) repairZeroScoreGlow(parsed);
-      repairReadingExamEvidence(parsed, QUESTIONS, s.answers);
-      sanitizeQuestionReview(parsed, PASSAGE, QUESTIONS.length);
+    let prompt = built.prompt;
+    for (let i = 1; i <= MAX_ATTEMPTS; i++) {
+      const attempt = await generate(prompt);
+      const parsed = attempt.parsed;
+      out.attempts = i;
+      if (kind === "writing") {
+        if (built.caps.spellingGrammar !== false) dropInvalidSpellingGrammar(parsed, s.text);
+      } else {
+        if (built.score === 0) repairZeroScoreGlow(parsed);
+        repairReadingExamEvidence(parsed, QUESTIONS, s.answers);
+        sanitizeQuestionReview(parsed, PASSAGE, QUESTIONS.length);
+      }
+      const check = validateFeedback(parsed, {
+        tier: s.tier, standardsList, targetNames, submittedText: kind === "writing" ? s.text : undefined,
+        readingScore: kind === "reading" ? built.score : undefined, capabilities: built.caps, genre: built.genre,
+      });
+      if (i === 1) { out.firstTry = check.ok; out.issues = check.issues.slice(0, 6).map((x) => String(x).slice(0, 200)); }
+      let delivered = check.ok;
+      let withoutBonus = false;
+      if (!delivered && i === MAX_ATTEMPTS && check.issues.length > 0 && check.issues.every((x) => BONUS_ISSUE.test(x))) {
+        const growNextBad = check.issues.some((x) => /^growNext/.test(x));
+        if (!growNextBad || parsed.growNext) {
+          if (growNextBad) delete parsed.growNext;
+          if (check.issues.some((x) => /^revisedStory/.test(x))) delete parsed.revisedStory;
+          delivered = true;
+          withoutBonus = true;
+        }
+      }
+      if (delivered) {
+        out.ok = true;
+        out.outcome = withoutBonus ? "delivered without a bonus section" : "delivered";
+        stripUngrantedSections(parsed, { capabilities: built.caps, kind });
+        out.sections = {
+          highlights: Array.isArray(parsed.highlights) ? parsed.highlights.length : 0,
+          glows: Array.isArray(parsed.highlights) ? parsed.highlights.filter((h) => h.type === "glow").length : 0,
+          grows: Array.isArray(parsed.highlights) ? parsed.highlights.filter((h) => h.type === "grow").length : 0,
+          revisedStory: typeof parsed.revisedStory === "string" && parsed.revisedStory.length > 0,
+          growNext: typeof parsed.growNext === "string" && parsed.growNext.length > 0,
+          overallScore: Number.isInteger(parsed.overallScore) ? parsed.overallScore : null,
+        };
+        out.model = attempt.modelUsed || null;
+        break;
+      }
+      out.lastIssues = check.issues.slice(0, 6).map((x) => String(x).slice(0, 200));
+      prompt = built.prompt + correctiveAddendum(check.issues);
     }
-    const check = validateFeedback(parsed, {
-      tier: s.tier, standardsList, targetNames, submittedText: kind === "writing" ? s.text : undefined,
-      readingScore: kind === "reading" ? built.score : undefined, capabilities: built.caps, genre: built.genre,
-    });
-    out.ok = check.ok;
-    out.issues = check.issues.slice(0, 6).map((i) => String(i).slice(0, 200));
-    stripUngrantedSections(parsed, { capabilities: built.caps, kind });
-    out.sections = {
-      highlights: Array.isArray(parsed.highlights) ? parsed.highlights.length : 0,
-      glows: Array.isArray(parsed.highlights) ? parsed.highlights.filter((h) => h.type === "glow").length : 0,
-      grows: Array.isArray(parsed.highlights) ? parsed.highlights.filter((h) => h.type === "grow").length : 0,
-      revisedStory: typeof parsed.revisedStory === "string" && parsed.revisedStory.length > 0,
-      growNext: typeof parsed.growNext === "string" && parsed.growNext.length > 0,
-      overallScore: Number.isInteger(parsed.overallScore) ? parsed.overallScore : null,
-    };
-    out.model = attempt.modelUsed || null;
   } catch (err) {
     out.issues = [`The model call failed: ${String(err && err.message).slice(0, 160)}`];
   }
@@ -107,14 +135,18 @@ async function runOne(s, kind, generate) {
 async function runQa({ generate }) {
   const jobs = [...WRITING.map((s) => runOne(s, "writing", generate)), ...READING.map((s) => runOne(s, "reading", generate))];
   const results = await Promise.all(jobs);
-  const passed = results.filter((r) => r.ok).length;
-  const withRewrite = results.filter((r) => r.kind === "writing");
+  const total = results.length;
+  const passed = results.filter((r) => r.firstTry).length;      // right on the first attempt
+  const delivered = results.filter((r) => r.ok).length;          // what a customer would actually receive
+  const writing = results.filter((r) => r.kind === "writing");
   return {
-    passed, total: results.length,
-    passRate: results.length ? Math.round((passed / results.length) * 100) : 0,
-    avgMs: results.length ? Math.round(results.reduce((a, r) => a + r.ms, 0) / results.length) : 0,
-    rewriteDelivered: withRewrite.filter((r) => r.sections && r.sections.revisedStory).length,
-    rewriteExpected: withRewrite.length,
+    passed, total, delivered,
+    passRate: total ? Math.round((passed / total) * 100) : 0,
+    deliveredRate: total ? Math.round((delivered / total) * 100) : 0,
+    avgMs: total ? Math.round(results.reduce((a, r) => a + r.ms, 0) / total) : 0,
+    avgAttempts: total ? Math.round((results.reduce((a, r) => a + r.attempts, 0) / total) * 10) / 10 : 0,
+    rewriteDelivered: writing.filter((r) => r.sections && r.sections.revisedStory).length,
+    rewriteExpected: writing.length,
     results,
   };
 }

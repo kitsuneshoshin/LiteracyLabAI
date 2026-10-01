@@ -95,8 +95,8 @@ async function handleQa(req, res) {
     if (error) console.error("Saving the quality run failed:", error.message);
     else saved = true;
   }
-  console.log("qa-run", JSON.stringify({ passed: summary.passed, total: summary.total, avgMs: summary.avgMs, saved }));
-  return res.status(200).json({ saved, passed: summary.passed, total: summary.total, passRate: summary.passRate, avgMs: summary.avgMs, results: summary.results.map((r) => ({ name: r.name, ok: r.ok, ms: r.ms, issues: r.issues })) });
+  console.log("qa-run", JSON.stringify({ passed: summary.passed, delivered: summary.delivered, total: summary.total, avgMs: summary.avgMs, saved }));
+  return res.status(200).json({ saved, passedFirstTry: summary.passed, delivered: summary.delivered, total: summary.total, passRate: summary.passRate, deliveredRate: summary.deliveredRate, avgAttempts: summary.avgAttempts, avgMs: summary.avgMs, results: summary.results.map((r) => ({ name: r.name, firstTry: r.firstTry, outcome: r.outcome, attempts: r.attempts, ms: r.ms, issues: r.issues })) });
 }
 
 // ------------------------------------------------------------------ test copies
