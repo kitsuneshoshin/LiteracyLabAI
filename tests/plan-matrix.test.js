@@ -98,7 +98,7 @@ function writingExtras(tier, caps) {
 
 function planExtras(tier, caps, targets) {
   const out = {};
-  if (caps.deepFeedback) out.growNext = "Once that feels natural, try opening a sentence with where or when.";
+  if (caps.deepFeedback) out.growNext = "Once that feels natural, rework \"The dog ran fast\" so it opens with where or when.";
   if (caps.examTechnique && EXAM_TIERS.has(tier)) {
     out.examTechnique = targets.map((t) => ({ criterion: t.name, band: 2, descriptor: "Developing", evidence: "The dog ran fast", toNextBand: "Add one more developed sentence to show this clearly." }));
     out.examSummary = "Accurate, fluent writing would gain the most marks next.";
@@ -306,6 +306,28 @@ test("retry: a bad first answer is corrected on the second attempt and the fix i
   assert.equal(res.statusCode, 200);
   assert.equal(prompts.length, 2);
   assert.match(prompts[1], /Your previous attempt failed these checks[\s\S]*overallScore/);
+});
+
+test("second step: if it stays vague through every retry, only that section is dropped and the rest of the feedback is still delivered", async () => {
+  const { res, prompts } = await runSubmit("premium", "high", "writing", () => {
+    const f = obedient("premium", "high", "writing");
+    f.growNext = "Next, think of it like how animals in a pack follow their leader and look for deeper meanings.";
+    return f;
+  });
+  assert.equal(res.statusCode, 200, "the student still gets their feedback");
+  assert.equal(prompts.length, 3, "all three attempts were made first");
+  assert.equal(res.body.feedback.growNext, undefined, "the unusable bonus step is not shown");
+  assert.ok(res.body.feedback.grow && res.body.feedback.glow, "the main Glow and Grow are intact");
+});
+
+test("second step: a different problem on the last attempt still fails the response, it is not hidden by the drop", async () => {
+  const { res } = await runSubmit("premium", "high", "writing", () => {
+    const f = obedient("premium", "high", "writing");
+    f.growNext = "Think of it like a chess game.";
+    delete f.overallScore; delete f.scoreReason;
+    return f;
+  });
+  assert.equal(res.statusCode, 502);
 });
 
 test("spelling: one made-up quote is dropped and the honest total lowered, instead of failing the whole response", async () => {

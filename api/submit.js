@@ -42,6 +42,15 @@ async function generateAndValidate(prompt, tier, country, gradeLabel, submittedT
       return attempt;
     }
     console.warn(`Feedback validation failed on attempt ${i}:`, check.issues);
+    // The Premium "second step" is a bonus. If it is the ONLY thing still wrong
+    // on the last attempt, drop just that section rather than failing a whole,
+    // otherwise good piece of feedback (the app simply doesn't show it).
+    if (i === MAX_ATTEMPTS && attempt.parsed && attempt.parsed.growNext && check.issues.length > 0 && check.issues.every((issue) => /^growNext\b/.test(issue))) {
+      delete attempt.parsed.growNext;
+      attempt.parsed.glowTarget = resolveTarget(attempt.parsed.glowTarget, targetNames) || attempt.parsed.glowTarget;
+      attempt.parsed.growTarget = resolveTarget(attempt.parsed.growTarget, targetNames) || attempt.parsed.growTarget;
+      return attempt;
+    }
     lastIssues = check.issues;
     nextPrompt = prompt + correctiveAddendum(check.issues);
   }

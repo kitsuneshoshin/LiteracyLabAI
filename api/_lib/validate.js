@@ -190,6 +190,8 @@ const OVERLAP_STOPWORDS = new Set(["the","and","you","your","that","this","with"
 function meaningfulWords(text) {
   return new Set(String(text).toLowerCase().replace(/[^a-z0-9 ]/g, " ").split(" ").filter((w) => w.length > 3 && !OVERLAP_STOPWORDS.has(w)));
 }
+const GROW_NEXT_ANALOGY = /\b(like how|similar to how|just like|much like|think of it (as|like)|imagine|as if|the way (a|an|the) )\b/i;
+
 function wordOverlap(a, b) {
   const A = meaningfulWords(a);
   const B = meaningfulWords(b);
@@ -535,6 +537,23 @@ function validateFeedback(parsed, { tier, standardsList, targetNames, submittedT
       issues.push("growNext is identical to grow - it must be a genuinely harder, different next step");
     } else if (checkString(parsed?.grow, 1, 100000) && wordOverlap(parsed.growNext, parsed.grow) >= 0.7) {
       issues.push("growNext is mostly the same words as grow - it must be a genuinely harder next step, not a rewording of the main grow");
+    } else if (GROW_NEXT_ANALOGY.test(parsed.growNext)) {
+      // A forced comparison ("like how animals in a pack...") made a real
+      // step read as filler, so this field never carries one.
+      issues.push("growNext contains an analogy or comparison - it must be a plain, concrete action with no analogy of any kind");
+    } else {
+      // A step is only useful if the student can see where to apply it, so it
+      // must point at their own work: a verbatim quote for writing, or a quote
+      // / a named question, paragraph or sentence for reading.
+      const quotes = [...parsed.growNext.matchAll(/["“]([^"”]{4,160})["”]/g)].map((m) => m[1]);
+      if (submittedText) {
+        const haystack = normalizeForMatch(submittedText);
+        if (!quotes.some((q) => haystack.includes(normalizeForMatch(q)))) {
+          issues.push("growNext must quote a short fragment (3 to 10 words) exactly as it appears in the student's own text, and say what to do with it");
+        }
+      } else if (!quotes.length && !/\b(question|paragraph|passage|sentence)\b/i.test(parsed.growNext)) {
+        issues.push("growNext must point to something specific in the student's work (a quoted phrase, or a named question, paragraph or sentence)");
+      }
     }
   }
 

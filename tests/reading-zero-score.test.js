@@ -43,7 +43,7 @@ function modelOutput(bandValue, glow) {
       { term: "duality", definition: "having two different sides at once.", example: "Progress has a duality of benefit and harm." },
       { term: "juxtaposition", definition: "placing two things side by side to compare them.", example: "The juxtaposition of rich and poor was striking." },
     ],
-    growNext: "Once that feels natural, try weighing how well the writer's evidence supports the main claim.",
+    growNext: "Once that feels natural, pick the next question and write which sentence in the passage best supports the main claim.",
     glowTarget: targets[0].name,
     growTarget: targets[1] ? targets[1].name : targets[0].name,
     examTechnique: targets.map((t) => ({ criterion: t.name, band: bandValue, descriptor: "Emerging", evidence: "Question 1 was answered incorrectly", toNextBand: "Re-read the passage and find the sentence that supports the answer." })),

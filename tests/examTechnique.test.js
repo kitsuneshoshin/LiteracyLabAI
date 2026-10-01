@@ -25,7 +25,7 @@ function baseFeedback(overrides = {}) {
     ],
     glowTarget: "Viewpoint & Argument Writing",
     growTarget: "Technical Accuracy",
-    growNext: "Once counter-arguments feel natural, try ordering them so the strongest one lands last.",
+    growNext: "Once counter-arguments feel natural, reorder them so the strongest one lands last, starting from your sentence \"this proves the point\".",
     examTechnique: [
       { criterion: "Viewpoint & Argument Writing", band: 3, descriptor: "Secure", evidence: "your opening claim", toNextBand: "Sustain the same viewpoint through every paragraph, not just the opening." },
       { criterion: "Technical Accuracy", band: 2, descriptor: "Developing", evidence: "two comma splices in the third paragraph", toNextBand: "Split comma-spliced sentences into two full sentences." },
@@ -239,8 +239,38 @@ test("growNext: a reworded copy of the main grow is rejected", () => {
 });
 
 test("growNext: a real next level of the same skill passes", () => {
-  const result = validateFeedback(baseFeedback({ growNext: "Once counter-arguments feel natural, order them so the strongest one lands last and your conclusion answers it." }), CTX);
+  const result = validateFeedback(baseFeedback({ growNext: "Once counter-arguments feel natural, order them so the strongest one lands last, then rewrite \"this proves the point\" so your conclusion answers it." }), CTX);
   assert.equal(result.ok, true, result.issues.join("; "));
+});
+
+test("growNext: an analogy is rejected - a forced comparison makes the step read as filler", () => {
+  for (const growNext of [
+    "Next time, focus on how choices reflect values, like how animals in a pack follow their leader, and rewrite \"this proves the point\".",
+    "Think of it like a chess game and rewrite \"this proves the point\" so each move counts.",
+    "Imagine you are a lawyer, then rewrite \"this proves the point\" with a clearer reason.",
+  ]) {
+    const result = validateFeedback(baseFeedback({ growNext }), CTX);
+    assert.equal(result.ok, false, growNext);
+    assert.ok(result.issues.some((i) => /analogy/.test(i)), result.issues.join("; "));
+  }
+});
+
+test("growNext (writing): it must quote the student's own words exactly, and a made-up or missing quote is rejected", () => {
+  const ctx = { ...CTX, submittedText: "I think homework helps. This proves the point because teachers say so." };
+  const good = validateFeedback(baseFeedback({ growNext: "Once reasons feel natural, replace \"teachers say so\" with a reason that comes from your own experience of homework." }), ctx);
+  const about = (r) => r.issues.filter((i) => /growNext/.test(i));
+  assert.deepEqual(about(good), [], "a real quote passes");
+  const invented = validateFeedback(baseFeedback({ growNext: "Once reasons feel natural, replace \"everyone knows this\" with a reason from your own experience of homework." }), ctx);
+  assert.ok(about(invented).some((i) => /quote a short fragment/.test(i)), "an invented quote is refused");
+  const vague = validateFeedback(baseFeedback({ growNext: "Once that is second nature, work on comparing multiple ideas and exploring deeper meanings in your writing." }), ctx);
+  assert.ok(about(vague).length > 0, "the vague step from the real example is refused");
+});
+
+test("growNext (reading): it must point at something specific, not just talk about 'deeper meanings'", () => {
+  const vague = validateFeedback(baseFeedback({ growNext: "After mastering deeper meanings, work on comparing multiple ideas in the text and exploring different values." }), CTX);
+  assert.equal(vague.ok, false);
+  const specific = validateFeedback(baseFeedback({ growNext: "Once that is steady, answer the next inference question by naming the sentence in the passage that proves your choice." }), CTX);
+  assert.equal(specific.ok, true, specific.issues.join("; "));
 });
 
 test("growNext: the prompt asks for a concrete next level, ties it to the piece, and keeps the interest as a comparison only", () => {
