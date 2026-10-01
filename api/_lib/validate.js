@@ -335,7 +335,7 @@ function validateSpellingGrammar(parsed, submittedText, issues) {
   });
 }
 
-// Premium "revisedStory" (see revisedStoryClause in prompt.js): the student's
+// "revisedStory", on every plan (see revisedStoryClause in prompt.js): the student's
 // whole piece rewritten, corrected and improved. The checks are deliberately the
 // mechanical ones a rewrite can fail visibly: it must really differ, keep the
 // student's length (so it is still THEIR piece, not a new one), be properly
@@ -478,7 +478,7 @@ function stripUngrantedSections(parsed, { capabilities, kind }) {
   } else {
     drop("questionReview");
     if (caps.overallScore === false) drop("overallScore", "scoreReason");
-    if (caps.spellingGrammar === false) drop("spellingGrammar", "spellingGrammarTotal", "revisedStory");
+    if (caps.spellingGrammar === false) drop("spellingGrammar", "spellingGrammarTotal");
   }
   return parsed;
 }
@@ -570,9 +570,10 @@ function validateFeedback(parsed, { tier, standardsList, targetNames, submittedT
     // Premium-only (api/_lib/plans.js). Skipped only when the plan explicitly
     // says false; callers with no plan info keep the full checks.
     if (caps.overallScore !== false) validateOverallScore(parsed, issues);
+    // Every plan gets the corrected rewrite of the student's piece.
+    validateRevisedStory(parsed, submittedText, issues);
     if (caps.spellingGrammar !== false) {
       validateSpellingGrammar(parsed, submittedText, issues);
-      validateRevisedStory(parsed, submittedText, issues);
     }
   }
 

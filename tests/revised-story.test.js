@@ -71,11 +71,17 @@ test("revised story: it must stay THEIR piece - a much longer or much shorter re
   assert.ok(about(validateFeedback(feedback({ revisedStory: "Superman is brave." }), ctx)).some((i) => /length/.test(i)));
 });
 
-test("revised story: only plans with the spelling check get it - Free and Core are never held to it, and a stray one is stripped", () => {
-  const noSpelling = validateFeedback(feedback({ revisedStory: undefined, spellingGrammar: undefined, spellingGrammarTotal: undefined }), { ...ctx, capabilities: { spellingGrammar: false, overallScore: true } });
-  assert.deepEqual(about(noSpelling), []);
-  const stripped = stripUngrantedSections(feedback(), { capabilities: { spellingGrammar: false }, kind: "writing" });
-  assert.equal(stripped.revisedStory, undefined);
+test("revised story: every plan gets it for writing (Free and Core included), and it is never kept for a reading attempt", () => {
+  for (const [name, caps] of [["free/core", { spellingGrammar: false, overallScore: false }], ["premium", { spellingGrammar: true, overallScore: true }]]) {
+    const missing = feedback(); delete missing.revisedStory;
+    if (name === "free/core") { delete missing.spellingGrammar; delete missing.spellingGrammarTotal; delete missing.overallScore; delete missing.scoreReason; }
+    assert.ok(about(validateFeedback(missing, { ...ctx, capabilities: caps })).some((i) => /missing/.test(i)), `${name}: a missing rewrite is flagged`);
+    const ok = feedback();
+    if (name === "free/core") { delete ok.spellingGrammar; delete ok.spellingGrammarTotal; delete ok.overallScore; delete ok.scoreReason; }
+    assert.deepEqual(about(validateFeedback(ok, { ...ctx, capabilities: caps })), [], `${name}: a good rewrite passes`);
+  }
+  const kept = stripUngrantedSections(feedback(), { capabilities: { spellingGrammar: false }, kind: "writing" });
+  assert.equal(kept.revisedStory, GOOD, "Free and Core keep the rewrite");
   const reading = stripUngrantedSections(feedback(), { capabilities: { spellingGrammar: true }, kind: "reading" });
   assert.equal(reading.revisedStory, undefined, "reading has no student text to rewrite");
 });
@@ -88,16 +94,21 @@ test("highlights: up to 10 are accepted for a long piece, 11 are refused, and fe
   assert.equal(issuesFor(1).length, 1);
 });
 
-test("prompt: Premium asks for the full rewrite and more highlights scaled to length; Free and Core ask for neither the rewrite", () => {
+test("prompt: every plan asks for the full rewrite; only Premium ties it to the spelling list and gets the length-scaled highlights wording on top", () => {
   const args = { tier: "elementary", country: "x", gradeLabel: "Year 5", interest: "football", prompt: "Write.", text: ORIGINAL, targets: [], targetNames: ["A"], genre: "narrative" };
   const premium = buildWritingPrompt({ ...args, capabilities: { spellingGrammar: true, overallScore: true } });
   assert.match(premium, /REVISED STORY \(required\)/);
-  assert.match(premium, /fix EVERY spelling, grammar, capitalisation and punctuation error/);
+  assert.match(premium, /fix EVERY spelling, grammar, capitalisation and punctuation error, including each one you list in the spelling and grammar check below/);
   assert.match(premium, /Do NOT add facts, characters, events, arguments or opinions the student did not write/);
   assert.match(premium, /about one genuine highlight for every 30-40 words, up to 10/);
   assert.match(premium, /"revisedStory":/);
-  const core = buildWritingPrompt({ ...args, capabilities: { spellingGrammar: false, overallScore: false } });
-  assert.ok(!core.includes("revisedStory") && !core.includes("REVISED STORY"));
+  for (const caps of [{ spellingGrammar: false, overallScore: false }, { spellingGrammar: false, overallScore: false, deepFeedback: false }]) {
+    const core = buildWritingPrompt({ ...args, capabilities: caps });
+    assert.match(core, /REVISED STORY \(required\)/);
+    assert.match(core, /"revisedStory":/);
+    assert.ok(!core.includes("spelling and grammar check below"), "Core and Free are not pointed at a list they do not get");
+    assert.ok(!core.includes("SPELLING AND GRAMMAR CHECK"), "the itemised spelling list stays Premium");
+  }
 });
 
 test("prompt: older learners are told to keep a formal register and the youngest to keep it simple", () => {

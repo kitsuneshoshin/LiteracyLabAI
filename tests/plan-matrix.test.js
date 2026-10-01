@@ -36,7 +36,7 @@ function expectedSections(plan, tier, kind) {
     examTechnique: !!caps.examTechnique && EXAM_TIERS.has(tier),
     overallScore: kind === "writing" && caps.overallScore !== false,
     spellingGrammar: kind === "writing" && caps.spellingGrammar !== false,
-    revisedStory: kind === "writing" && caps.spellingGrammar !== false,
+    revisedStory: kind === "writing",
     frameworkTip: kind === "writing",
     highlights: kind === "writing",
     questionReview: kind === "reading",
@@ -91,8 +91,8 @@ function writingExtras(tier, caps) {
     frameworkTip: { name: fw.name, quote: "The end of the story was happy", revision: "Ending: everyone smiled as the story settled into a happy close." },
   };
   if (caps.overallScore !== false) { out.overallScore = 6; out.scoreReason = "Clear structure but very short sentences throughout."; }
+  out.revisedStory = "The dog ran fast. It spotted a tiny grey cat high up in a tree. The end of the story was happy.";
   if (caps.spellingGrammar !== false) {
-    out.revisedStory = "The dog ran fast. It spotted a tiny grey cat high up in a tree. The end of the story was happy.";
     out.spellingGrammarTotal = 1;
     out.spellingGrammar = [{ quote: "The end of the story was happy", type: "punctuation", correction: "The end of the story was happy." }];
   }

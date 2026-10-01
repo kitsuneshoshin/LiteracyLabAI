@@ -162,7 +162,7 @@ Put this in a "frameworkTip" field with "name" set to exactly "${fw.name}", "quo
 // is the complete, corrected version beside it. It must stay THEIR piece (same
 // ideas, order and voice), because a rewrite that invents new content stops
 // being coaching and starts being someone else's work.
-function revisedStoryClause(tier) {
+function revisedStoryClause(tier, withSpellingList) {
   const register = (tier === "middle" || tier === "high")
     ? " Keep a formal, third-person academic register with no personal asides and no analogies."
     : tier === "early"
@@ -170,7 +170,7 @@ function revisedStoryClause(tier) {
       : " Keep the vocabulary and sentence length at a level this student could plausibly write.";
   return `
 
-REVISED STORY (required): Return "revisedStory": the student's WHOLE piece rewritten as a polished, corrected version of the SAME piece. It must (1) fix EVERY spelling, grammar, capitalisation and punctuation error, including each one you list in the spelling and grammar check below; (2) apply your "grow" suggestions and improve flow, sentence structure and word choice so it reads clearly better than the original; and (3) stay THEIR piece: the same ideas, events and arguments in the same order, and roughly the same length (within about 25% of their word count). Do NOT add facts, characters, events, arguments or opinions the student did not write, and do not explain or comment on the changes. Keep their paragraph breaks.${register} Return plain text only.`;
+REVISED STORY (required): Return "revisedStory": the student's WHOLE piece rewritten as a polished, corrected version of the SAME piece. It must (1) fix EVERY spelling, grammar, capitalisation and punctuation error${withSpellingList ? ", including each one you list in the spelling and grammar check below" : ""}; (2) apply your "grow" suggestions and improve flow, sentence structure and word choice so it reads clearly better than the original; and (3) stay THEIR piece: the same ideas, events and arguments in the same order, and roughly the same length (within about 25% of their word count). Do NOT add facts, characters, events, arguments or opinions the student did not write, and do not explain or comment on the changes. Keep their paragraph breaks.${register} Return plain text only.`;
 }
 
 // A dedicated, always-shown spelling/grammar check - separate from the
@@ -271,7 +271,7 @@ ${deepFeedbackClause(caps.deepFeedback)}
 ${wantsExam ? examTechniqueClause({ tier, targets, kind: "writing" }) : ""}
 ${frameworkClause({ tier, genre })}
 ${wantsScore ? overallScoreClause() : ""}
-${wantsSpelling ? revisedStoryClause(tier) : ""}
+${revisedStoryClause(tier, wantsSpelling)}
 ${wantsSpelling ? spellingGrammarClause() : ""}
 
 Read the actual submitted text closely — every point you make must be traceable to something specifically in it (quote a short fragment where useful), not a generic template response.
@@ -293,8 +293,8 @@ Respond with ONLY a JSON object (no markdown fences, no commentary) with exactly
   "highlights": [{ "quote": "an exact substring copied from the submitted text", "type": "glow or grow", "note": "a short reason", "revision": "ONLY for type=grow: that same fragment actually rewritten to apply the suggestion" }],${caps.deepFeedback ? '\n  "growNext": "ONE further, harder step: the next level of the same skill as the main grow (or the very next skill), as a concrete action for their next piece that quotes a short verbatim fragment of their own work in quotation marks - no analogy, no games or projects, not a restatement.",' : ""}${wantsExam ? `\n${examJsonShape(targets)},` : ""}
   "frameworkTip": { "name": "the exact framework name you were given, verbatim", "quote": "a real, verbatim fragment from the student's own submitted text", "revision": "that exact fragment rewritten to demonstrate the framework applied to THEIR writing" }${wantsScore ? `,
   "overallScore": "an integer 1-10 scoring the WHOLE piece against the four criteria above",
-  "scoreReason": "one sentence citing the specific strength/weakness pattern across the whole piece that drove that score"` : ""}${wantsSpelling ? `,
-  "revisedStory": "the student's WHOLE piece rewritten as a corrected, improved version of the same piece: every error fixed, same ideas and order, roughly the same length, nothing new added",
+  "scoreReason": "one sentence citing the specific strength/weakness pattern across the whole piece that drove that score"` : ""},
+  "revisedStory": "the student's WHOLE piece rewritten as a corrected, improved version of the same piece: every error fixed, same ideas and order, roughly the same length, nothing new added"${wantsSpelling ? `,
   "spellingGrammarTotal": "the TRUE total count of real errors found, honest even if more than 8",
   "spellingGrammar": [{ "quote": "an exact substring from the submitted text containing a real spelling/grammar/punctuation error", "type": "spelling, grammar, or punctuation", "correction": "that same fragment with just the error fixed" }]` : ""}
 }`;
