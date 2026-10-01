@@ -372,8 +372,13 @@ function validateRevisedStory(parsed, submittedText, issues) {
   const items = Array.isArray(parsed?.spellingGrammar) ? parsed.spellingGrammar : [];
   items.forEach((item) => {
     if (item?.type !== "spelling" || !checkString(item?.quote, 1, 200) || !checkString(item?.correction, 1, 240)) return;
-    const fixed = new Set(wordsOf(item.correction));
-    const stillThere = wordsOf(item.quote).filter((w) => w.length > 2 && !fixed.has(w) && storyWords.has(w));
+    const fixedWords = wordsOf(item.correction);
+    const fixed = new Set(fixedWords);
+    // A word that only gained or lost an ending (outweigh/outweighs, struggle/
+    // struggled) is a grammar change, not a misspelling, and the same word can
+    // legitimately stay in a rewrite that fixes the grammar another way.
+    const inflection = (w) => fixedWords.some((f) => f !== w && (f.startsWith(w) || w.startsWith(f)) && Math.abs(f.length - w.length) <= 3);
+    const stillThere = wordsOf(item.quote).filter((w) => w.length > 2 && !fixed.has(w) && !inflection(w) && storyWords.has(w));
     if (stillThere.length) issues.push(`revisedStory still contains the misspelling "${stillThere[0]}" that the spelling check lists - every error must be fixed in the rewrite`);
   });
 }

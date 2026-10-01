@@ -150,3 +150,29 @@ test("screen: an identical story marks nothing, and an empty or huge one does no
   const big = Array.from({ length: 3000 }, (_, i) => "w" + i).join(" ");
   assert.doesNotThrow(() => diff(big, big + " extra"));
 });
+
+// ---- found by the first real weekly quality run
+
+test("revised story: a grammar fix that keeps the same word (outweigh / outweighs) is not mistaken for a leftover misspelling", () => {
+  const text = "In conclusion the harm outweigh the benefits and schools should teach students to use it carefully.";
+  const f = feedback({
+    spellingGrammar: [{ quote: "the harm outweigh", type: "spelling", correction: "the harm outweighs" }],
+    revisedStory: "In conclusion, the harms outweigh the benefits, and schools should teach students to use it carefully.",
+  });
+  assert.deepEqual(about(validateFeedback(f, { ...ctx, submittedText: text })), []);
+  // A real misspelling that survives is still caught.
+  const still = feedback({
+    spellingGrammar: [{ quote: "teh benefits", type: "spelling", correction: "the benefits" }],
+    revisedStory: "In conclusion, the harms outweigh teh benefits, and schools should teach students to use it carefully.",
+  });
+  assert.ok(about(validateFeedback(still, { ...ctx, submittedText: text.replace("the benefits", "teh benefits") })).some((i) => /teh/.test(i)));
+});
+
+test("prompt: Premium's worked example shows a second step that quotes the student's own words; Free and Core are not shown one", () => {
+  const args = { tier: "elementary", country: "x", gradeLabel: "Year 5", interest: "football", prompt: "Write.", text: ORIGINAL, targets: [], targetNames: ["A"], genre: "narrative" };
+  const premium = buildWritingPrompt({ ...args, capabilities: { deepFeedback: true, spellingGrammar: true, overallScore: true } });
+  assert.match(premium, /"growNext": "Once that feels natural, take /);
+  assert.ok(premium.includes("the trees looked spooky"), "the example quotes the example student's own words");
+  const core = buildWritingPrompt({ ...args, capabilities: { deepFeedback: false, spellingGrammar: false, overallScore: false } });
+  assert.ok(!core.includes("growNext"), "Free and Core never see the second step");
+});

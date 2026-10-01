@@ -203,7 +203,7 @@ function overallScoreClause() {
 // never requests, inviting it to return them anyway. Features are ON unless
 // the plan explicitly turns them off (score/spelling === false), so callers
 // without plan info keep the full example.
-function workedExample({ score = true, spelling = true } = {}) {
+function workedExample({ score = true, spelling = true, deep = false } = {}) {
   return `Example of the required tone and specificity (a different student, shown only so you can match the STYLE — do not reuse this content):
 Student text fragment: "...the dark forest was really scary and the trees looked spooky..."
 {
@@ -214,7 +214,8 @@ Student text fragment: "...the dark forest was really scary and the trees looked
     { "term": "murmur", "definition": "a soft, low sound, like mission control talking quietly in the background", "example": "A murmur ran through mission control as the countdown began." }
   ],
   "glowTarget": "Fronted Adverbials",
-  "growTarget": "Fronted Adverbials",
+  "growTarget": "Fronted Adverbials",${deep ? `
+  "growNext": "Once that feels natural, take \\"the trees looked spooky\\" and tell the reader where or when it happens, so they can picture the scene.",` : ""}
   "frameworkTip": { "name": "Story Mountain", "quote": "the trees looked spooky", "revision": "Climax: the trees loomed even spookier, their shadows stretching out like reaching hands." },
 ${score ? `  "overallScore": 6,
   "scoreReason": "Vivid imagery and a clear story arc, but frequent missing full stops and a rushed ending hold this back from a higher score.",
@@ -276,7 +277,7 @@ ${wantsSpelling ? spellingGrammarClause() : ""}
 
 Read the actual submitted text closely — every point you make must be traceable to something specifically in it (quote a short fragment where useful), not a generic template response.
 
-${workedExample({ score: wantsScore, spelling: wantsSpelling })}
+${workedExample({ score: wantsScore, spelling: wantsSpelling, deep: !!caps.deepFeedback })}
 
 ${successCriteria(tier, { includeFramework: true, includeScore: wantsScore, includeSpelling: wantsSpelling, genre })}
 
