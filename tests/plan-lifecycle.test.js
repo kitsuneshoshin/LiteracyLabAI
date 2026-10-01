@@ -139,6 +139,60 @@ test("rating: you can't rate someone else's submission", async () => {
   assert.equal(inserted.length, 0);
 });
 
+function feedbackCapture({ kind = "writing", failInsert = false } = {}) {
+  const saved = [];
+  const db = (q) => {
+    if (q.table === "submissions") return { data: { id: "sub1", kind }, error: null };
+    if (q.table === "commitments" && did(q, "insert")) return { data: { id: "r1" }, error: null };
+    if (q.table === "feedback" && did(q, "insert")) {
+      if (failInsert) return { data: null, error: { message: "db down" } };
+      saved.push(q.ops.find(([n]) => n === "insert")[1]);
+    }
+    return { data: null, error: null };
+  };
+  return { db, saved };
+}
+
+for (const plan of PLANS) {
+  test(`rating: ${plan} - a worded comment, thumbs up or down, also lands in the feedback backlog tagged with where it came from`, async () => {
+    for (const [rating, text] of [["up", "Loved the corrected story."], ["down", "It missed the point."]]) {
+      const { db, saved } = feedbackCapture({ kind: "writing" });
+      const h = loadHandler("email.js", { plan, db });
+      const res = await call(h, { method: "POST", query: { action: "rating" }, body: { submissionId: "sub1", helpfulRating: rating, feedbackText: `  ${text}  ` } });
+      assert.equal(res.statusCode, 200);
+      assert.equal(saved.length, 1, rating);
+      assert.deepEqual({ ...saved[0] }, { profile_id: "user-1", source: "app", email_key: "app-writing", rating, category: "other", message: text, contact_ok: false });
+    }
+  });
+}
+
+test("rating: reading feedback is tagged app-reading, a bare thumbs-down is still a backlog signal, and a bare thumbs-up with no words is not", async () => {
+  let c = feedbackCapture({ kind: "reading" });
+  await call(loadHandler("email.js", { plan: "core", db: c.db }), { method: "POST", query: { action: "rating" }, body: { submissionId: "sub1", helpfulRating: "down" } });
+  assert.equal(c.saved.length, 1);
+  assert.equal(c.saved[0].email_key, "app-reading");
+  assert.equal(c.saved[0].message, null);
+  c = feedbackCapture();
+  await call(loadHandler("email.js", { plan: "core", db: c.db }), { method: "POST", query: { action: "rating" }, body: { submissionId: "sub1", helpfulRating: "up" } });
+  assert.equal(c.saved.length, 0, "an empty thumbs-up is just a rating, not a backlog item");
+});
+
+test("rating: if saving to the feedback backlog fails, the rating itself still succeeds", async () => {
+  const { db } = feedbackCapture({ failInsert: true });
+  const res = await call(loadHandler("email.js", { plan: "premium", db }), { method: "POST", query: { action: "rating" }, body: { submissionId: "sub1", helpfulRating: "down", feedbackText: "x" } });
+  assert.equal(res.statusCode, 200);
+});
+
+test("screen: both thumbs open the optional comment box, and the overview shows three cards in a row", () => {
+  const app = require("node:fs").readFileSync(require("node:path").join(__dirname, "..", "app.html"), "utf8");
+  assert.ok(app.includes('setShowCommentBox("up")') && app.includes('setShowCommentBox("down")'));
+  assert.ok(app.includes("Glad it helped"), "the thumbs-up comment prompt exists");
+  assert.ok(app.includes('<div className="grid sm:grid-cols-3 gap-4">'), "three across on the overview");
+  const grid = app.slice(app.indexOf('<div className="grid sm:grid-cols-3 gap-4">'), app.indexOf("showProfile && ("));
+  for (const label of ["Manage profile", "Manage plan", "Go to Student Workspace"]) assert.ok(grid.includes(label), `${label} is in the row`);
+  assert.ok(app.includes("{!showPlan && !showOverview && ("), "the workspace card is not repeated underneath");
+});
+
 test("rating: the retired 'what will you try next time' action is no longer stored, even if a stale page sends it", async () => {
   const inserted = [];
   const h = loadHandler("email.js", { plan: "core", db: ratingDb({ inserted }) });

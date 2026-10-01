@@ -234,7 +234,7 @@ async function handleRating(req, res) {
 
   // Confirm the submission actually belongs to this user before attaching a rating to it.
   const { data: submission, error: subErr } = await supabase
-    .from("submissions").select("id").eq("id", submissionId).eq("profile_id", user.id).single();
+    .from("submissions").select("id, kind").eq("id", submissionId).eq("profile_id", user.id).single();
   if (subErr || !submission) return res.status(404).json({ error: "Submission not found." });
 
   const { data, error } = await supabase
@@ -242,6 +242,23 @@ async function handleRating(req, res) {
     .insert({ submission_id: submissionId, profile_id: user.id, helpful_rating: helpfulRating || null, feedback_text: feedbackText || null })
     .select("*").single();
   if (error) throw error;
+
+  // A worded comment (or any thumbs-down) is also a piece of product feedback, so
+  // it goes into the same backlog table as the email feedback page, where it is
+  // triaged and shows up in the owner's Backlog. Never allowed to fail the
+  // rating itself: the commitment row above is what the app relies on.
+  const text = typeof feedbackText === "string" ? feedbackText.trim() : "";
+  if (text || helpfulRating === "down") {
+    try {
+      const { error: fbErr } = await supabase.from("feedback").insert({
+        profile_id: user.id, source: "app", email_key: `app-${submission.kind === "reading" ? "reading" : "writing"}`,
+        rating: helpfulRating || null, category: "other", message: text || null, contact_ok: false,
+      });
+      if (fbErr) console.error("Saving in-app feedback to the backlog failed:", fbErr.message);
+    } catch (err) {
+      console.error("Saving in-app feedback to the backlog failed:", err.message);
+    }
+  }
 
   return res.status(200).json({ commitment: data });
 }

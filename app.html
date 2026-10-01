@@ -2056,17 +2056,26 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
         )}
 
         {showOverview && (
-          <div className="grid sm:grid-cols-2 gap-4">
+          <div className="grid sm:grid-cols-3 gap-4">
             {[["profile", "Manage profile", `${displayName || "Your learner"}'s name, year group, interests and account settings`], ["plan", "Manage plan", "Your subscription and what each plan includes"]].map(([target, label, sub]) => (
               <button key={target} onClick={()=>setView(target)}
-                className="focus-ring card p-5 flex items-center justify-between text-left transition-colors">
+                className="focus-ring card p-5 flex items-center justify-between gap-3 text-left transition-colors">
                 <div>
                   <div className="font-display font-semibold text-sm" style={{ color: "var(--ink)" }}>{label}</div>
                   <div className="text-xs mt-0.5" style={{ color: "var(--ink-soft)" }}>{sub}</div>
                 </div>
-                <IconArrowRight size={18} style={{ color: "var(--cyan-ink)" }} />
+                <IconArrowRight size={18} style={{ color: "var(--cyan-ink)" }} className="shrink-0" />
               </button>
             ))}
+            <button onClick={needsOnboarding ? onCompleteOnboarding : ()=>setView("workspace")}
+              className="focus-ring card p-5 flex items-center justify-between gap-3 text-left transition-colors"
+              style={ needsOnboarding ? { borderColor: "var(--cyan)", borderWidth: 1.5, background: "var(--cyan-tint)" } : {} }>
+              <div>
+                <div className="font-display font-semibold text-sm" style={{ color: "var(--ink)" }}>{needsOnboarding ? "Start Writing" : "Go to Student Workspace"}</div>
+                <div className="text-xs mt-0.5" style={{ color: "var(--ink-soft)" }}>{needsOnboarding ? "Setup saved — begin your first session" : `Start today’s ${TIER_META[tier].label.toLowerCase()} writing or reading session`}</div>
+              </div>
+              <IconArrowRight size={18} style={{ color: "var(--cyan-ink)" }} className="shrink-0" />
+            </button>
           </div>
         )}
 
@@ -2251,7 +2260,7 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
         </div>
         )}
 
-        {!showPlan && (
+        {!showPlan && !showOverview && (
         <button onClick={needsOnboarding ? onCompleteOnboarding : ()=>setView("workspace")}
           className="focus-ring card p-5 flex items-center justify-between text-left transition-colors"
           style={ needsOnboarding ? { borderColor: "var(--cyan)", borderWidth: 1.5, background: "var(--cyan-tint)" } : {} }>
@@ -2301,19 +2310,20 @@ function ThumbsFeedback({ context, session, submissionId, backendLive }){
   }
 
   if (showCommentBox) {
+    const good = showCommentBox === "up";
     return (
       <div className="flex flex-col gap-2 max-w-md">
-        <span className="text-[12.5px] font-medium" style={{ color: "var(--ink-faint)" }}>Sorry to hear that — want to tell us why? (optional)</span>
+        <span className="text-[12.5px] font-medium" style={{ color: "var(--ink-faint)" }}>{good ? "Glad it helped — anything we should keep doing, or do better? (optional)" : "Sorry to hear that — want to tell us why? (optional)"}</span>
         <textarea value={comment} onChange={(e)=>setComment(e.target.value)} rows={2} maxLength={1000}
-          placeholder="What would have made this more helpful?"
+          placeholder={good ? "What worked well, or what would make it even better?" : "What would have made this more helpful?"}
           className="focus-ring w-full rounded-xl border px-3 py-2 text-[13px]"
           style={{ borderColor: "var(--border)", background: "var(--surface)", color: "var(--ink)" }} />
         <div className="flex items-center gap-3">
-          <button onClick={()=>send("down", comment.trim() || null)}
+          <button onClick={()=>send(good ? "up" : "down", comment.trim() || null)}
             className="focus-ring rounded-full px-3.5 py-1.5 text-xs font-semibold" style={{ background: "var(--ink)", color: "white" }}>
             Send
           </button>
-          <button onClick={()=>send("down", null)} className="focus-ring text-xs font-semibold" style={{ color: "var(--ink-faint)" }}>
+          <button onClick={()=>send(good ? "up" : "down", null)} className="focus-ring text-xs font-semibold" style={{ color: "var(--ink-faint)" }}>
             Skip
           </button>
         </div>
@@ -2325,11 +2335,11 @@ function ThumbsFeedback({ context, session, submissionId, backendLive }){
     <div className="flex items-center gap-2.5 flex-wrap">
       <span className="text-[12.5px] font-medium" style={{ color: "var(--ink-faint)" }}>Did this feedback help?</span>
       <div className="flex items-center gap-1.5">
-        <button onClick={()=>send("up")} aria-label="Yes, this helped"
+        <button onClick={()=>setShowCommentBox("up")} aria-label="Yes, this helped"
           className="focus-ring w-8 h-8 rounded-full grid place-items-center border" style={{ borderColor: "var(--border)", color: "var(--ink-soft)" }}>
           <IconThumbsUp size={14} strokeWidth={2.2} />
         </button>
-        <button onClick={()=>setShowCommentBox(true)} aria-label="No, this didn't help"
+        <button onClick={()=>setShowCommentBox("down")} aria-label="No, this didn't help"
           className="focus-ring w-8 h-8 rounded-full grid place-items-center border" style={{ borderColor: "var(--border)", color: "var(--ink-soft)" }}>
           <IconThumbsDown size={14} strokeWidth={2.2} />
         </button>
