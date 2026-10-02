@@ -251,3 +251,9 @@ test("prompt generator: formal letters (to a headteacher, a council, a newspaper
   }
   assert.ok(formalSeen > 1000, "formal letters do get picked");
 });
+
+test("the homepage carries the Google Search Console verification tag in its head (so the site stays verified)", () => {
+  const index = fs.readFileSync(path.join(ROOT, "index.html"), "utf8");
+  const head = index.slice(0, index.indexOf("</head>"));
+  assert.match(head, /<meta name="google-site-verification" content="[A-Za-z0-9_-]{30,}" \/>/);
+});
