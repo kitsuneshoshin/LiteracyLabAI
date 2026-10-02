@@ -87,6 +87,15 @@ const REGIONS = [
   },
 ];
 
+// Flag emoji show as two letters (GB, US...) on Windows, so countries use small flag
+// images, the same ones the homepage uses. The globe is a plain symbol and renders everywhere.
+const FLAG_CC = { uk: "gb", us: "us", australia: "au", canada: "ca", "uae-gcc": "ae", singapore: "sg" };
+function flagHtml(r) {
+  const cc = FLAG_CC[r.slug];
+  if (!cc) return `<span class="flag-globe" aria-hidden="true">${r.flag}</span> `;
+  return `<img class="flag" src="https://flagcdn.com/20x15/${cc}.png" srcset="https://flagcdn.com/40x30/${cc}.png 2x" width="20" height="15" alt="" loading="lazy"> `;
+}
+
 const slugify = (s) => String(s).toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
 const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 function hash(s) { let h = 0; for (const c of s) h = (h * 31 + c.charCodeAt(0)) >>> 0; return h; }
@@ -176,6 +185,8 @@ const CSS = `
   .grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); gap:10px; padding:0; list-style:none; }
   .grid li{ margin:0; }
   .grid a{ display:block; background:var(--surface); border:1px solid var(--border-soft); border-radius:12px; padding:12px 14px; text-decoration:none; color:var(--ink); font-family:"Lexend",sans-serif; font-size:14px; font-weight:600; }
+  .flag{ vertical-align:-1px; margin-right:6px; border-radius:2px; }
+  .flag-globe{ margin-right:2px; }
   .grid a small{ display:block; font-weight:400; color:var(--ink-faint); font-size:12.5px; margin-top:2px; }
   a{ color:var(--cyan); }
   .tool{ background:var(--surface); border:1px solid var(--border-soft); border-radius:16px; padding:20px; margin:18px 0 8px; }
@@ -341,7 +352,7 @@ function buildRegion(r, groups) {
   ] };
   const items = groups.map((g) => `<li><a href="/learn/${r.slug}/${g.slug}/">${esc(g.label)}<small>${esc(ageText(g) ? ageText(g).replace(/^a/, "A") : g.targets[0].name)}</small></a></li>`).join("\n");
   const body = `<div class="crumbs"><a href="/">Home</a> › <a href="/learn/">Guides</a> › ${esc(r.short)}</div>
-<h1>${esc(r.short)}: English guides by ${r.slug === "english-learners" ? "level" : "year"}</h1>
+<h1>${flagHtml(r)}${esc(r.short)}: English guides by ${r.slug === "english-learners" ? "level" : "year"}</h1>
 <p class="lead">${r.slug === "english-learners" ? "Choose a CEFR level" : `Choose a year for a plain-English guide to the reading and writing skills children work on in ${esc(r.name)}`}, based on ${esc(r.curriculum)}.</p>
 <ul class="grid">
 ${items}
@@ -358,7 +369,7 @@ function buildHub(regionGroups) {
     { "@type": "CollectionPage", name: title, description, url: urlFor.hub(), inLanguage: "en", dateModified: LASTMOD },
     breadcrumbLd([["Home", `${SITE}/`], ["Guides", urlFor.hub()]]),
   ] };
-  const items = regionGroups.map(({ region: r, groups }) => `<li><a href="/learn/${r.slug}/">${r.flag} ${esc(r.short)}<small>${groups.length} guides</small></a></li>`).join("\n");
+  const items = regionGroups.map(({ region: r, groups }) => `<li><a href="/learn/${r.slug}/">${flagHtml(r)}${esc(r.short)}<small>${groups.length} guides</small></a></li>`).join("\n");
   const body = `<div class="crumbs"><a href="/">Home</a> › Guides</div>
 <h1>English guides for parents, by country and year</h1>
 <p class="lead">What is my child expected to learn in reading and writing this year, and how can I help at home? Pick your country to find a plain-English guide for every year, built from the published curriculum.</p>

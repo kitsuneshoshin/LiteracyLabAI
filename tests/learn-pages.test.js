@@ -257,3 +257,15 @@ test("the homepage carries the Google Search Console verification tag in its hea
   const head = index.slice(0, index.indexOf("</head>"));
   assert.match(head, /<meta name="google-site-verification" content="[A-Za-z0-9_-]{30,}" \/>/);
 });
+
+test("country flags on the guides are small images (flag emoji show as two letters, like GB and US, on Windows), and no flag emoji is left in a guide page", () => {
+  for (const [rel, html] of pageFiles) {
+    assert.ok(!/[\u{1F1E6}-\u{1F1FF}]/u.test(html), `${rel}: still contains a flag emoji`);
+  }
+  const hub = built.files["learn/index.html"];
+  const flags = [...hub.matchAll(/<img class="flag" src="https:\/\/flagcdn\.com\/20x15\/([a-z]{2})\.png"/g)].map((m) => m[1]);
+  assert.deepEqual(flags.sort(), ["ae", "au", "ca", "gb", "sg", "us"]);
+  assert.ok(hub.includes("flag-globe"), "English learners keep the globe");
+  assert.match(built.files["learn/uk/index.html"], /<h1><img class="flag" src="https:\/\/flagcdn\.com\/20x15\/gb\.png"/);
+  for (const m of hub.matchAll(/<img class="flag"[^>]*>/g)) assert.ok(/alt=""/.test(m[0]) && /width="20" height="15"/.test(m[0]), "decorative, sized, no layout shift");
+});
