@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Free writing prompt generator for kids and teens (no sign-up)</title>
+<meta name="description" content="Free writing prompts for ages 5 to 18: choose an age group, a topic and a kind of writing, and get a prompt to try. No sign-up, and nothing is stored.">
+<link rel="canonical" href="https://www.literacylabai.com/learn/prompts/">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="LiteracyLab AI">
+<meta property="og:title" content="Free writing prompt generator for kids and teens (no sign-up)">
+<meta property="og:description" content="Free writing prompts for ages 5 to 18: choose an age group, a topic and a kind of writing, and get a prompt to try. No sign-up, and nothing is stored.">
+<meta property="og:url" content="https://www.literacylabai.com/learn/prompts/">
+<meta property="og:image" content="https://www.literacylabai.com/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700;800&amp;family=Source+Serif+4:ital,wght@0,400;0,600;1,400&amp;display=swap" rel="stylesheet">
+<style>
+  :root{ --bg:#F1F1EF; --surface:#FFFFFF; --surface-2:#E5E5E2; --border:#D3D3CF; --border-soft:#DEDEDB; --ink:#212121; --ink-soft:#5A5A56; --ink-faint:#6B6B66; --cyan:#7A3B45; --gold:#8C7040; --btn-ink:#FFFFFF; }
+  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){ --bg:#161513; --surface:#1E1B18; --surface-2:#26221D; --border:#37322B; --border-soft:#2C2721; --ink:#EDE9E2; --ink-soft:#B3AB9C; --ink-faint:#9A9284; --cyan:#C4776E; --gold:#C9A050; --btn-ink:#161513; } }
+  *{ box-sizing:border-box; }
+  body{ margin:0; background:var(--bg); color:var(--ink); font-family:"Lexend", ui-sans-serif, system-ui, sans-serif; -webkit-font-smoothing:antialiased; }
+  .nav{ position:sticky; top:0; z-index:10; background:color-mix(in srgb, var(--bg) 85%, transparent); backdrop-filter:blur(8px); border-bottom:1px solid var(--border-soft); }
+  .nav-inner{ max-width:820px; margin:0 auto; padding:14px 24px; display:flex; align-items:center; justify-content:space-between; gap:12px; }
+  .brand{ font-weight:700; font-size:15px; text-decoration:none; color:var(--ink); }
+  .brand span{ color:var(--cyan); }
+  .nav a.try{ font-size:13.5px; font-weight:700; text-decoration:none; background:var(--cyan); color:var(--btn-ink); padding:8px 14px; border-radius:999px; white-space:nowrap; }
+  .doc{ max-width:760px; margin:0 auto; padding:36px 24px 72px; }
+  .crumbs{ font-size:13px; color:var(--ink-faint); margin-bottom:14px; }
+  .crumbs a{ color:var(--ink-soft); }
+  h1{ font-size:30px; line-height:1.2; font-weight:800; letter-spacing:-0.01em; margin:0 0 10px; }
+  h2{ font-size:20px; font-weight:700; margin:34px 0 10px; letter-spacing:-0.01em; }
+  h3{ font-size:16px; font-weight:700; margin:0 0 6px; }
+  p, li{ font-family:"Source Serif 4", Georgia, serif; font-size:16px; line-height:1.7; }
+  p{ margin:0 0 14px; }
+  ul, ol{ padding-left:22px; margin:0 0 14px; }
+  li{ margin-bottom:6px; }
+  .lead{ font-size:17.5px; color:var(--ink-soft); }
+  .card{ background:var(--surface); border:1px solid var(--border-soft); border-radius:14px; padding:18px 20px; margin:0 0 14px; }
+  .card .ref{ font-family:"Lexend",sans-serif; font-size:12px; color:var(--ink-faint); margin:0 0 8px; }
+  .card p{ margin:0 0 8px; }
+  .card .home{ margin:0; color:var(--ink-soft); }
+  .card .home b{ font-family:"Lexend",sans-serif; font-size:12px; letter-spacing:.04em; text-transform:uppercase; color:var(--gold); }
+  .cta{ background:var(--surface); border:1.5px solid var(--cyan); border-radius:16px; padding:22px 24px; margin:36px 0 8px; }
+  .cta h2{ margin:0 0 8px; }
+  .btn{ display:inline-block; background:var(--cyan); color:var(--btn-ink); font-weight:700; font-size:15px; padding:12px 20px; border-radius:999px; text-decoration:none; }
+  .small{ font-size:13.5px; color:var(--ink-faint); font-family:"Lexend",sans-serif; line-height:1.55; }
+  .grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); gap:10px; padding:0; list-style:none; }
+  .grid li{ margin:0; }
+  .grid a{ display:block; background:var(--surface); border:1px solid var(--border-soft); border-radius:12px; padding:12px 14px; text-decoration:none; color:var(--ink); font-family:"Lexend",sans-serif; font-size:14px; font-weight:600; }
+  .grid a small{ display:block; font-weight:400; color:var(--ink-faint); font-size:12.5px; margin-top:2px; }
+  a{ color:var(--cyan); }
+  .tool{ background:var(--surface); border:1px solid var(--border-soft); border-radius:16px; padding:20px; margin:18px 0 8px; }
+  .tool .row{ display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px; margin-bottom:16px; }
+  .tool label{ display:block; font-family:"Lexend",sans-serif; font-size:12.5px; font-weight:600; color:var(--ink-soft); margin-bottom:5px; }
+  .tool select{ width:100%; font:inherit; font-family:"Lexend",sans-serif; font-size:14px; padding:10px 12px; border-radius:10px; border:1px solid var(--border); background:var(--bg); color:var(--ink); }
+  .tool select:focus-visible, .tool button:focus-visible, .btn:focus-visible, a:focus-visible{ outline:2px solid var(--cyan); outline-offset:2px; }
+  .pg-prompt{ font-family:"Source Serif 4", Georgia, serif; font-size:22px; line-height:1.45; margin:6px 0 8px; min-height:3.2em; }
+  .tool .acts{ display:flex; flex-wrap:wrap; gap:10px; margin-top:14px; }
+  .tool button{ font:inherit; font-family:"Lexend",sans-serif; font-size:14px; font-weight:700; padding:10px 18px; border-radius:999px; cursor:pointer; border:1.5px solid var(--cyan); }
+  .tool .primary{ background:var(--cyan); color:var(--btn-ink); }
+  .tool .ghost{ background:transparent; color:var(--cyan); }
+  .pn{ display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; margin:22px 0 0; font-family:"Lexend",sans-serif; font-size:14px; }
+  footer{ max-width:760px; margin:0 auto; padding:0 24px 48px; font-size:13px; color:var(--ink-faint); font-family:"Lexend",sans-serif; }
+  footer a{ color:var(--ink-soft); }
+</style>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebApplication","name":"Free writing prompt generator","url":"https://www.literacylabai.com/learn/prompts/","applicationCategory":"EducationalApplication","operatingSystem":"Any","inLanguage":"en","description":"Free writing prompts for ages 5 to 18: choose an age group, a topic and a kind of writing, and get a prompt to try. No sign-up, and nothing is stored.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"publisher":{"@type":"Organization","name":"LiteracyLab AI","url":"https://www.literacylabai.com"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://www.literacylabai.com/"},{"@type":"ListItem","position":2,"name":"Guides","item":"https://www.literacylabai.com/learn/"},{"@type":"ListItem","position":3,"name":"Writing prompts","item":"https://www.literacylabai.com/learn/prompts/"}]}]}</script>
+<script src="/analytics.js"></script>
+</head>
+<body>
+<div class="nav"><div class="nav-inner">
+  <a class="brand" href="/">LiteracyLab <span>AI</span></a>
+  <a class="try" href="/app.html?utm_source=learn&amp;utm_medium=seo&amp;utm_campaign=nav">Try it free</a>
+</div></div>
+<main class="doc">
+<div class="crumbs"><a href="/">Home</a> › <a href="/learn/">Guides</a> › Writing prompts</div>
+<h1>Free writing prompt generator</h1>
+<p class="lead">Stuck for something to write about? Choose an age group, a topic your child likes and a kind of writing, and get a prompt to try. It is free, needs no sign-up, and nothing you choose is stored.</p>
+<section class="tool" aria-label="Prompt generator">
+  <div class="row">
+    <div><label for="pg-stage">Age group</label><select id="pg-stage"></select></div>
+    <div><label for="pg-type">Kind of writing</label><select id="pg-type"></select></div>
+    <div><label for="pg-interest">Topic they like</label><select id="pg-interest"></select></div>
+  </div>
+  <p class="pg-prompt" id="pg-prompt" aria-live="polite">Loading a prompt…</p>
+  <p class="small" id="pg-meta"></p>
+  <div class="acts">
+    <button type="button" class="primary" id="pg-new">Give me another</button>
+    <button type="button" class="ghost" id="pg-copy">Copy prompt</button>
+  </div>
+  <p class="small" id="pg-status" role="status"></p>
+</section>
+<noscript><p>The generator needs JavaScript. Here are some prompts to try instead.</p><h3>Ages 5–7 (early years)</h3>
+<ul><li>Draw your favourite animal and write two sentences about it.</li><li>What did you do at the weekend? Write three things you did.</li><li>Write a sentence about something that makes you happy.</li><li>Describe your best toy using three describing words.</li><li>Write a short message to someone you love.</li><li>What is the weather like today? Write two sentences.</li></ul>
+<h3>Ages 8–10 (primary)</h3>
+<ul><li>Write a story about a day when everything went wrong, and how it ended.</li><li>Describe your favourite place without using the word 'nice'.</li><li>Write a letter to a character from your favourite book.</li><li>Should children have a longer lunch break? Give two reasons.</li><li>Write the first paragraph of an adventure story that starts with a surprise.</li><li>Explain how to make your favourite snack so a friend could follow it.</li></ul>
+<h3>Ages 11–13 (middle years)</h3>
+<ul><li>Write a short story that begins with a character finding something that should not be there.</li><li>Should schools start later in the morning? Give your view and support it.</li><li>Describe a place that is special to you so well that a reader could picture it.</li><li>Write a speech persuading your school to try one new idea.</li><li>Explain how a piece of technology has changed the way people live.</li><li>Write a diary entry from a character at the most important moment of a book you have read.</li></ul>
+<h3>Ages 14–18 (senior years)</h3>
+<ul><li>Social media does more harm than good. Discuss.</li><li>Write the opening of a story in which the setting plays a central role.</li><li>Analyse how a writer creates tension in a passage you have studied.</li><li>Should the voting age be lowered? Argue your case.</li><li>Describe a moment of change in a character's life through a vivid scene.</li><li>Write a formal letter to a local council proposing a change in your area.</li></ul></noscript>
+<h2>How to use a prompt</h2>
+<ul>
+  <li>Let your child read the prompt aloud and say what they would write before they start.</li>
+  <li>Keep it short and regular. One carefully improved piece teaches more than three rushed ones.</li>
+  <li>Praise one specific thing they did well, then pick one thing to improve next time.</li>
+</ul>
+<h2>Make it count</h2>
+<p>A prompt is the start. The real learning comes from feedback on what a child actually wrote. Our <a href="/learn/">year-by-year guides</a> explain what children are working on at each age, so you know what to look for.</p>
+<section class="cta">
+  <h2>Get feedback on what they write</h2>
+  <p>LiteracyLab AI reads a child's own writing and gives specific feedback: what worked, one thing to try next, and a corrected version, matched to their year and curriculum. The Free plan includes 3 pieces a month and needs no card.</p>
+  <p><a class="btn" href="/app.html?utm_source=learn&amp;utm_medium=seo&amp;utm_campaign=prompt-tool">Try it free</a></p>
+</section>
+<p class="small">Prompts are picked from a fixed list of ideas written by us. Nothing a visitor chooses is saved, and no writing is collected on this page.</p>
+</main>
+<footer>
+  <p class="small">LiteracyLab AI gives children curriculum-aligned writing and reading feedback. <a href="/">Home</a> · <a href="/learn/">All guides</a> · <a href="/privacy.html">Privacy</a> · <a href="/terms.html">Terms</a></p>
+  <p class="small">These guides are general information based on published curriculum documents. They are not a substitute for your school's own guidance, and LiteracyLab AI is not affiliated with any exam board or curriculum body.</p>
+</footer>
+<script>
+// The free writing-prompt generator at /learn/prompts/. No AI, no network, nothing
+// stored: it picks from the banks below. This file runs in the browser (the page
+// build embeds it) and in tests (node), so it must stay free of anything but plain
+// JavaScript. The export block at the bottom is stripped for the browser.
+
+var PG_STAGES = {
+  early: "Ages 5–7 (early years)",
+  elementary: "Ages 8–10 (primary)",
+  middle: "Ages 11–13 (middle years)",
+  high: "Ages 14–18 (senior years)",
+};
+var PG_TYPES = {
+  story: "A story",
+  describe: "A description",
+  opinion: "An opinion or argument",
+  explain: "An explanation",
+  letter: "A letter or message",
+};
+var PG_INTERESTS = {
+  space: "Space",
+  coding: "Coding and technology",
+  gaming: "Gaming",
+  lit: "Books and stories",
+  history: "History",
+  pop: "Music, film and pop culture",
+  animals: "Animals",
+  sports: "Sports",
+};
+// How long a good piece is at each stage (matches the guide pages).
+var PG_LENGTH = {
+  early: "just a few short sentences",
+  elementary: "one or two short paragraphs",
+  middle: "several paragraphs",
+  high: "a structured piece of several well-developed paragraphs",
+};
+
+// Topics are short noun phrases that read correctly in the templates below. A topic starting with ~ is imaginary (a magic library, a talking computer): it is only offered for stories, descriptions and letters, never for facts or opinions.
+var PG_TOPICS = {
+  space: {
+    early: ["the Moon", "a rocket", "stars at night", "an astronaut", "~a friendly alien"],
+    elementary: ["exploring other planets", "living on a space station", "the surface of the Moon", "a rocket launch", "~meeting an alien"],
+    middle: ["space exploration", "living on another planet", "the first journey to Mars", "the dangers astronauts face", "the study of the stars"],
+    high: ["the cost and value of space exploration", "humans settling on other planets", "private companies in space", "the search for life beyond Earth", "the role of science in space travel"],
+  },
+  coding: {
+    early: ["~a robot helper", "a computer game you make", "~a talking computer", "computers", "~a button that does magic"],
+    elementary: ["building your own game", "~a robot that tidies your room", "learning to code", "~a computer that could think", "an app you would invent"],
+    middle: ["learning to code", "robots in everyday life", "a useful app you would create", "technology at school", "the making of video games"],
+    high: ["artificial intelligence in everyday life", "the role of technology in education", "the limits of screen time", "automation and the future of work", "privacy in a digital world"],
+  },
+  gaming: {
+    early: ["your favourite game", "~a game with a dragon", "playing with friends", "a board game", "a game with no screen"],
+    elementary: ["a video game you would design", "your favourite game character", "~a game that comes to life", "fair play", "a level that is very hard"],
+    middle: ["video games", "designing your own game", "gaming with friends online", "games as a way to learn", "the things that make a game fun"],
+    high: ["the influence of video games on young people", "the rise of competitive gaming", "the educational value of video games", "storytelling in games", "the ethics of in-game spending"],
+  },
+  lit: {
+    early: ["your favourite book", "~a magic book", "a bedtime story", "a book character", "a visit to the library"],
+    elementary: ["a book you could not put down", "a character from a story", "~a magic library", "a story with a surprise ending", "reading for fun"],
+    middle: ["reading for pleasure", "a character you admire from a book", "a story with a twist", "the importance of stories", "your favourite author"],
+    high: ["the lasting appeal of novels", "the creation of memorable characters", "the power of stories to change minds", "a book that changed the way you think", "the role of libraries"],
+  },
+  history: {
+    early: ["castles", "knights long ago", "dinosaurs", "a visit to a museum", "life long ago"],
+    elementary: ["life long ago", "a day in the life of a child in the past", "a famous explorer", "an old castle", "an invention that changed the world"],
+    middle: ["an event from the past that interests you", "a day in the life of someone in history", "an invention that changed the world", "the study of history", "a historical figure you admire"],
+    high: ["the lessons of history", "the way past events shaped today's world", "the role of ordinary people in historical change", "who gets to write history", "a turning point in history"],
+  },
+  pop: {
+    early: ["your favourite song", "a funny film", "dancing", "a cartoon character", "a party"],
+    elementary: ["your favourite song or show", "a film you would make", "being in a band", "~a cartoon character who comes to life", "a favourite performer"],
+    middle: ["your favourite music", "a film you would direct", "social media", "celebrities and fame", "a show everyone is talking about"],
+    high: ["the influence of social media on teenagers", "the influence of music on culture", "celebrity culture", "the effect of streaming on entertainment", "the power of film"],
+  },
+  animals: {
+    early: ["a pet", "a puppy", "a lion", "a farm animal", "a bird in the garden"],
+    elementary: ["a pet you would love to have", "an endangered animal", "life in the jungle", "~an animal with a superpower", "a visit to the zoo"],
+    middle: ["keeping pets", "protecting endangered animals", "a wild animal in danger", "zoos", "animal communication"],
+    high: ["the role of zoos today", "the effects of climate change on wildlife", "animal testing", "the relationship between humans and animals", "protecting endangered species"],
+  },
+  sports: {
+    early: ["your favourite sport", "running a race", "a football game", "sports day", "a team"],
+    elementary: ["winning and losing", "your favourite sport", "~a team that wins against the odds", "sports day", "a champion"],
+    middle: ["team sports", "a sports match you will never forget", "fairness in sport", "the qualities of a good team", "a sporting hero"],
+    high: ["the role of sport in young people's lives", "the pay of professional athletes", "the importance of teamwork", "sportsmanship", "the pressure on young athletes"],
+  },
+};
+
+var PG_TEMPLATES = {
+  early: {
+    story: ["Write a short story that has {topic} in it.", "Write a story about {topic} with a beginning, a middle and an end.", "Tell a short story about {topic}. Start with the words 'One day'."],
+    describe: ["Write three sentences about {topic}. Use a describing word in each one.", "Draw a picture about {topic}, then write two sentences about your picture.", "Describe {topic}. What can you see, hear or feel?"],
+    opinion: ["Write two sentences about what you think of {topic}.", "Say what you think about {topic} and give one reason.", "Write what you like or do not like about {topic}."],
+    explain: ["Tell someone about {topic}. Write two things you know.", "Write what you know about {topic}. Use the word 'because' once.", "Write two facts about {topic}."],
+    letter: ["Write a short message to a friend about {topic}.", "Write a note to someone you love about {topic}. Start with 'Dear'.", "Write a postcard that mentions {topic}."],
+  },
+  elementary: {
+    story: ["Write a story that involves {topic}. Start with something surprising.", "Write the opening paragraph of an adventure story about {topic}.", "Write a story about {topic} in which a problem is solved in an unexpected way."],
+    describe: ["Describe {topic} so well that a reader could picture it. Use at least three of your senses.", "Write a paragraph describing {topic} without using the word 'nice'.", "Describe {topic} using a simile and a strong verb."],
+    opinion: ["What do you think about {topic}? Give your opinion and at least two reasons.", "Write a short persuasive paragraph about {topic}. Use 'because' and 'for example'.", "Write a paragraph giving your opinion on {topic}. Explain your reasons clearly."],
+    explain: ["Explain {topic} to a younger child in a short paragraph.", "Write a short information text about {topic} with a title and two paragraphs.", "Write five facts about {topic} in your own words, then say which one is most interesting."],
+    letter: ["Write a letter to a friend telling them about {topic}.", "Write a letter to someone you admire about {topic}.", "Write an email inviting someone to join you in something to do with {topic}."],
+  },
+  middle: {
+    story: ["Write a short story that begins with a character discovering something connected to {topic}.", "Write a story involving {topic} that ends with a twist.", "Write the opening of a story in which {topic} plays an important part. Focus on the setting and a hint of tension."],
+    describe: ["Describe {topic} in so much detail that the reader feels they are there. Use figurative language.", "Write a vivid description linked to {topic}, using at least three different sentence openers.", "Describe a moment connected to {topic} when time seemed to slow down."],
+    opinion: ["Write a persuasive paragraph about {topic}. Include a reason, evidence and a counter-argument.", "What is your view on {topic}? Write an argument that would convince a sceptical reader.", "Write a speech to your class giving your opinion on {topic}."],
+    explain: ["Explain {topic} clearly to someone who has never come across it. Organise your answer in paragraphs.", "Write an information article about {topic} with a heading, an introduction and a conclusion.", "Compare two different views of {topic} and say which one you find more convincing."],
+    letter: ["Write a formal letter to your headteacher about {topic}.", "Write a letter to your future self about {topic}.", "Write an email to a local newspaper giving your view on {topic}."],
+  },
+  high: {
+    story: ["Write the opening of a story in which {topic} is central, using a distinctive voice and a vivid setting.", "Write a short story that explores {topic} from an unusual point of view.", "Write a scene that shows a moment of change in a character's life, linked to {topic}. Show, don't tell."],
+    describe: ["Write a descriptive piece inspired by {topic}. Use imagery and varied sentence structure to create atmosphere.", "Describe a place connected to {topic} so that the setting reveals a mood.", "Write a reflective description of a memory related to {topic}."],
+    opinion: ["Write an argument on {topic}. Use evidence, address a counter-argument and finish with a clear conclusion.", "To what extent do you agree that {topic} matters? Argue your case.", "Write a persuasive speech on {topic} for a school assembly."],
+    explain: ["Analyse the importance of {topic}. Organise your ideas into clear paragraphs with evidence.", "Write an article for a school magazine that explains {topic} and its impact.", "Evaluate the arguments for and against {topic}. Reach a reasoned conclusion."],
+    letter: ["Write a formal letter to a local council about {topic}. Use an appropriate register.", "Write an open letter to your peers about {topic}.", "Write a letter of application connected to {topic}, explaining why you would be a good choice."],
+  },
+};
+
+// opts: { stage, type, interest } where type and interest may be "any" or omitted.
+// rand: a function returning a number in [0, 1) (Math.random in the browser).
+// Returns { prompt, stage, type, interest, topic, length }.
+function buildPrompt(opts, rand) {
+  var r = rand || Math.random;
+  var pick = function (arr) { return arr[Math.min(arr.length - 1, Math.floor(r() * arr.length))]; };
+  var stage = PG_STAGES[opts && opts.stage] ? opts.stage : "elementary";
+  var type = PG_TYPES[opts && opts.type] ? opts.type : pick(Object.keys(PG_TYPES));
+  var interest = PG_INTERESTS[opts && opts.interest] ? opts.interest : pick(Object.keys(PG_INTERESTS));
+  var all = PG_TOPICS[interest][stage];
+  var factual = type === "explain" || type === "opinion";
+  var pool = factual ? all.filter(function (t) { return t.charAt(0) !== "~"; }) : all;
+  var topic = pick(pool).replace(/^~/, "");
+  var template = pick(PG_TEMPLATES[stage][type]);
+  return { prompt: template.split("{topic}").join(topic), stage: stage, type: type, interest: interest, topic: topic, length: PG_LENGTH[stage] };
+}
+
+
+// Browser code for the free prompt generator page. Runs after prompt-generator.js
+// (the build puts that file's code first, so buildPrompt and the PG_* tables exist).
+// Nothing typed or chosen here is sent or stored; the only thing recorded is an
+// analytics event carrying the three menu choices, and only after the visitor has
+// accepted analytics cookies (see analytics.js).
+(function () {
+  var stageEl = document.getElementById("pg-stage");
+  var typeEl = document.getElementById("pg-type");
+  var interestEl = document.getElementById("pg-interest");
+  var out = document.getElementById("pg-prompt");
+  var meta = document.getElementById("pg-meta");
+  var btnNew = document.getElementById("pg-new");
+  var btnCopy = document.getElementById("pg-copy");
+  var status = document.getElementById("pg-status");
+  if (!stageEl || !out) return;
+
+  function fill(select, map, anyLabel) {
+    if (anyLabel) select.appendChild(new Option(anyLabel, "any"));
+    Object.keys(map).forEach(function (k) { select.appendChild(new Option(map[k], k)); });
+  }
+  fill(stageEl, PG_STAGES);
+  fill(typeEl, PG_TYPES, "Any kind of writing");
+  fill(interestEl, PG_INTERESTS, "Anything");
+
+  // Links from the guide pages arrive with ?stage=elementary and so on.
+  var params = new URLSearchParams(window.location.search);
+  [["stage", stageEl, PG_STAGES], ["type", typeEl, PG_TYPES], ["interest", interestEl, PG_INTERESTS]].forEach(function (p) {
+    var v = params.get(p[0]);
+    if (v && p[2][v]) p[1].value = v;
+  });
+  if (!params.get("stage")) stageEl.value = "elementary";
+
+  var last = null;
+  function generate(track) {
+    last = buildPrompt({ stage: stageEl.value, type: typeEl.value, interest: interestEl.value });
+    out.textContent = last.prompt;
+    meta.textContent = "A good length: " + last.length + ".";
+    status.textContent = "";
+    if (track && window.llTrack) window.llTrack("prompt_generated", { stage: last.stage, type: last.type, interest: last.interest });
+  }
+
+  btnNew.addEventListener("click", function () { generate(true); });
+  [stageEl, typeEl, interestEl].forEach(function (el) { el.addEventListener("change", function () { generate(true); }); });
+
+  btnCopy.addEventListener("click", function () {
+    if (!last) return;
+    function done(ok) { status.textContent = ok ? "Copied. Paste it into a document or straight into LiteracyLab AI." : "Select the prompt above and copy it."; }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(last.prompt).then(function () { done(true); }, function () { done(false); });
+    } else {
+      done(false);
+    }
+    if (window.llTrack) window.llTrack("prompt_copied", { stage: last.stage, type: last.type });
+  });
+
+  generate(false);
+})();
+
+</script>
+</body>
+</html>

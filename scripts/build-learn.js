@@ -128,11 +128,13 @@ function groupsFor(region) {
 
 const urlFor = {
   hub: () => `${SITE}/learn/`,
+  prompts: () => `${SITE}/learn/prompts/`,
   region: (r) => `${SITE}/learn/${r.slug}/`,
   page: (g) => `${SITE}/learn/${g.region.slug}/${g.slug}/`,
 };
 const pathFor = {
   hub: () => "learn/index.html",
+  prompts: () => "learn/prompts/index.html",
   region: (r) => `learn/${r.slug}/index.html`,
   page: (g) => `learn/${g.region.slug}/${g.slug}/index.html`,
 };
@@ -176,12 +178,22 @@ const CSS = `
   .grid a{ display:block; background:var(--surface); border:1px solid var(--border-soft); border-radius:12px; padding:12px 14px; text-decoration:none; color:var(--ink); font-family:"Lexend",sans-serif; font-size:14px; font-weight:600; }
   .grid a small{ display:block; font-weight:400; color:var(--ink-faint); font-size:12.5px; margin-top:2px; }
   a{ color:var(--cyan); }
+  .tool{ background:var(--surface); border:1px solid var(--border-soft); border-radius:16px; padding:20px; margin:18px 0 8px; }
+  .tool .row{ display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px; margin-bottom:16px; }
+  .tool label{ display:block; font-family:"Lexend",sans-serif; font-size:12.5px; font-weight:600; color:var(--ink-soft); margin-bottom:5px; }
+  .tool select{ width:100%; font:inherit; font-family:"Lexend",sans-serif; font-size:14px; padding:10px 12px; border-radius:10px; border:1px solid var(--border); background:var(--bg); color:var(--ink); }
+  .tool select:focus-visible, .tool button:focus-visible, .btn:focus-visible, a:focus-visible{ outline:2px solid var(--cyan); outline-offset:2px; }
+  .pg-prompt{ font-family:"Source Serif 4", Georgia, serif; font-size:22px; line-height:1.45; margin:6px 0 8px; min-height:3.2em; }
+  .tool .acts{ display:flex; flex-wrap:wrap; gap:10px; margin-top:14px; }
+  .tool button{ font:inherit; font-family:"Lexend",sans-serif; font-size:14px; font-weight:700; padding:10px 18px; border-radius:999px; cursor:pointer; border:1.5px solid var(--cyan); }
+  .tool .primary{ background:var(--cyan); color:var(--btn-ink); }
+  .tool .ghost{ background:transparent; color:var(--cyan); }
   .pn{ display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; margin:22px 0 0; font-family:"Lexend",sans-serif; font-size:14px; }
   footer{ max-width:760px; margin:0 auto; padding:0 24px 48px; font-size:13px; color:var(--ink-faint); font-family:"Lexend",sans-serif; }
   footer a{ color:var(--ink-soft); }
 `;
 
-function layout({ title, description, canonical, jsonld, body }) {
+function layout({ title, description, canonical, jsonld, body, script }) {
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -218,7 +230,10 @@ ${body}
   <p class="small">LiteracyLab AI gives children curriculum-aligned writing and reading feedback. <a href="/">Home</a> · <a href="/learn/">All guides</a> · <a href="/privacy.html">Privacy</a> · <a href="/terms.html">Terms</a></p>
   <p class="small">These guides are general information based on published curriculum documents. They are not a substitute for your school's own guidance, and LiteracyLab AI is not affiliated with any exam board or curriculum body.</p>
 </footer>
-</body>
+${script ? `<script>
+${script}
+</script>
+` : ""}</body>
 </html>
 `;
 }
@@ -291,6 +306,7 @@ ${cards}
 ${length}
 <h2>Three practice prompts to try this week</h2>
 <ol>${prompts.map((p) => `<li>${esc(p)}</li>`).join("")}</ol>
+<p class="small">Want more? <a href="/learn/prompts/?stage=${g.tier}">Try the free prompt generator</a> for this age group.</p>
 <h2>Common questions</h2>
 ${faq}
 <h2>How to give feedback at home</h2>
@@ -338,16 +354,64 @@ function buildHub(regionGroups) {
 <ul class="grid">
 ${items}
 </ul>
+<p>Looking for something to write about? Try the <a href="/learn/prompts/">free writing prompt generator</a>: choose an age group, a topic and a kind of writing.</p>
 ${ctaBlock("hub", "Get feedback on your child's writing")}
 <p class="small">General information based on published curriculum documents. Always check your school's own guidance.</p>`;
   return layout({ title, description, canonical: urlFor.hub(), jsonld, body });
 }
 
+function buildPromptsPage() {
+  const gen = fs.readFileSync(path.join(__dirname, "prompt-generator.js"), "utf8").replace(/\r\n/g, "\n");
+  const pageJs = fs.readFileSync(path.join(__dirname, "prompt-page.js"), "utf8").replace(/\r\n/g, "\n");
+  // The browser does not need the node export block.
+  const genForBrowser = gen.slice(0, gen.indexOf("if (typeof module"));
+  const title = "Free writing prompt generator for kids and teens (no sign-up)";
+  const description = "Free writing prompts for ages 5 to 18: choose an age group, a topic and a kind of writing, and get a prompt to try. No sign-up, and nothing is stored.";
+  const crumbs = [["Home", `${SITE}/`], ["Guides", urlFor.hub()], ["Writing prompts", urlFor.prompts()]];
+  const jsonld = { "@context": "https://schema.org", "@graph": [
+    { "@type": "WebApplication", name: "Free writing prompt generator", url: urlFor.prompts(), applicationCategory: "EducationalApplication", operatingSystem: "Any", inLanguage: "en", description, offers: { "@type": "Offer", price: "0", priceCurrency: "USD" }, publisher: { "@type": "Organization", name: "LiteracyLab AI", url: SITE } },
+    breadcrumbLd(crumbs),
+  ] };
+  const fallback = ["early", "elementary", "middle", "high"].map((k) => `<h3>${esc(PG_STAGE_LABEL[k])}</h3>
+<ul>${TIER_INFO[k].prompts.map((p) => `<li>${esc(p)}</li>`).join("")}</ul>`).join("\n");
+  const body = `<div class="crumbs"><a href="/">Home</a> › <a href="/learn/">Guides</a> › Writing prompts</div>
+<h1>Free writing prompt generator</h1>
+<p class="lead">Stuck for something to write about? Choose an age group, a topic your child likes and a kind of writing, and get a prompt to try. It is free, needs no sign-up, and nothing you choose is stored.</p>
+<section class="tool" aria-label="Prompt generator">
+  <div class="row">
+    <div><label for="pg-stage">Age group</label><select id="pg-stage"></select></div>
+    <div><label for="pg-type">Kind of writing</label><select id="pg-type"></select></div>
+    <div><label for="pg-interest">Topic they like</label><select id="pg-interest"></select></div>
+  </div>
+  <p class="pg-prompt" id="pg-prompt" aria-live="polite">Loading a prompt…</p>
+  <p class="small" id="pg-meta"></p>
+  <div class="acts">
+    <button type="button" class="primary" id="pg-new">Give me another</button>
+    <button type="button" class="ghost" id="pg-copy">Copy prompt</button>
+  </div>
+  <p class="small" id="pg-status" role="status"></p>
+</section>
+<noscript><p>The generator needs JavaScript. Here are some prompts to try instead.</p>${fallback}</noscript>
+<h2>How to use a prompt</h2>
+<ul>
+  <li>Let your child read the prompt aloud and say what they would write before they start.</li>
+  <li>Keep it short and regular. One carefully improved piece teaches more than three rushed ones.</li>
+  <li>Praise one specific thing they did well, then pick one thing to improve next time.</li>
+</ul>
+<h2>Make it count</h2>
+<p>A prompt is the start. The real learning comes from feedback on what a child actually wrote. Our <a href="/learn/">year-by-year guides</a> explain what children are working on at each age, so you know what to look for.</p>
+${ctaBlock("prompt-tool", "Get feedback on what they write")}
+<p class="small">Prompts are picked from a fixed list of ideas written by us. Nothing a visitor chooses is saved, and no writing is collected on this page.</p>`;
+  return layout({ title, description, canonical: urlFor.prompts(), jsonld, body, script: genForBrowser + "\n" + pageJs });
+}
+const PG_STAGE_LABEL = { early: "Ages 5–7 (early years)", elementary: "Ages 8–10 (primary)", middle: "Ages 11–13 (middle years)", high: "Ages 14–18 (senior years)" };
+
 function buildAll() {
   const files = {};
   const regionGroups = REGIONS.map((r) => ({ region: r, groups: groupsFor(r) }));
   files[pathFor.hub()] = buildHub(regionGroups);
-  const urls = [urlFor.hub()];
+  files[pathFor.prompts()] = buildPromptsPage();
+  const urls = [urlFor.hub(), urlFor.prompts()];
   regionGroups.forEach(({ region, groups }) => {
     files[pathFor.region(region)] = buildRegion(region, groups);
     urls.push(urlFor.region(region));
@@ -361,7 +425,7 @@ function buildSitemap(learnUrls) {
   const entry = (loc, lastmod, freq, pri) => `  <url>\n    <loc>${loc}</loc>\n    <lastmod>${lastmod}</lastmod>\n    <changefreq>${freq}</changefreq>\n    <priority>${pri}</priority>\n  </url>`;
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` + [
     entry(`${SITE}/`, "2026-09-28", "weekly", "1.0"),
-    ...learnUrls.map((u) => entry(u, LASTMOD, "monthly", u === urlFor.hub() ? "0.8" : u.split("/").length <= 6 ? "0.7" : "0.6")),
+    ...learnUrls.map((u) => entry(u, LASTMOD, "monthly", u === urlFor.hub() ? "0.8" : u === urlFor.prompts() ? "0.8" : u.split("/").length <= 6 ? "0.7" : "0.6")),
     entry(`${SITE}/privacy.html`, "2026-09-26", "monthly", "0.3"),
     entry(`${SITE}/terms.html`, "2026-09-26", "monthly", "0.3"),
   ].join("\n") + "\n</urlset>\n";

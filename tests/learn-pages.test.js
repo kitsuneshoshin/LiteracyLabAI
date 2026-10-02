@@ -34,7 +34,7 @@ test("every year group the app supports a mapped curriculum for has a page, and 
   }
   const uk = groupsFor(REGIONS.find((r) => r.slug === "uk")).map((g) => g.label);
   assert.ok(uk.includes("Years 7–9") && uk.includes("Years 10–11"), "England's shared years are one page each");
-  assert.equal(pageFiles.length, 1 + REGIONS.length + REGIONS.reduce((n, r) => n + groupsFor(r).length, 0));
+  assert.equal(pageFiles.length, 2 + REGIONS.length + REGIONS.reduce((n, r) => n + groupsFor(r).length, 0), "hub, prompt generator, regions and year groups");
 });
 
 test("every focus area in the curriculum data has a plain-English explanation and something to try at home", () => {
@@ -155,4 +155,86 @@ test("the homepage links to the guides, the app links from guides count as call-
   assert.ok(/Disallow: \/app\.html/.test(fs.readFileSync(path.join(ROOT, "robots.txt"), "utf8")));
   assert.ok(!/Disallow: \/learn/.test(fs.readFileSync(path.join(ROOT, "robots.txt"), "utf8")), "guides are open to search engines");
   assert.ok(fs.readFileSync(path.join(ROOT, "llms.txt"), "utf8").includes("/learn/"));
+});
+
+// ---- the free writing-prompt generator (/learn/prompts/)
+
+const pg = require("../scripts/prompt-generator");
+const promptsPage = built.files["learn/prompts/index.html"];
+
+test("prompt generator: every age group, kind of writing and topic gives a clean, complete prompt", () => {
+  let seed = 1;
+  const rand = () => { seed = (seed * 1664525 + 1013904223) % 4294967296; return seed / 4294967296; };
+  const seen = new Set();
+  for (const stage of Object.keys(pg.PG_STAGES)) {
+    for (const type of Object.keys(pg.PG_TYPES)) {
+      for (const interest of Object.keys(pg.PG_INTERESTS)) {
+        for (let i = 0; i < 12; i++) {
+          const o = pg.buildPrompt({ stage, type, interest }, rand);
+          assert.equal(o.stage, stage); assert.equal(o.type, type); assert.equal(o.interest, interest);
+          assert.ok(o.prompt.length >= 25 && o.prompt.length <= 260, `length ${o.prompt.length}: ${o.prompt}`);
+          assert.ok(/[.?'"]$/.test(o.prompt), `ends properly: ${o.prompt}`);
+          assert.ok(!/[{}~]|undefined|\s{2,}|\bnull\b/.test(o.prompt), `clean: ${o.prompt}`);
+          assert.ok(/^[A-Z'"]/.test(o.prompt), `starts with a capital: ${o.prompt}`);
+          seen.add(o.prompt);
+        }
+      }
+    }
+  }
+  assert.ok(seen.size > 600, `plenty of variety: ${seen.size} different prompts`);
+});
+
+test("prompt generator: imaginary topics (a magic library) are only used for stories, descriptions and letters, never facts or opinions", () => {
+  for (const interest of Object.keys(pg.PG_TOPICS)) for (const stage of Object.keys(pg.PG_STAGES)) {
+    const real = pg.PG_TOPICS[interest][stage].filter((t) => t[0] !== "~");
+    assert.ok(real.length >= 2, `${interest}/${stage} needs at least two real topics`);
+    assert.equal(pg.PG_TOPICS[interest][stage].length, 5);
+  }
+  const imaginary = [];
+  for (const interest of Object.keys(pg.PG_TOPICS)) for (const stage of Object.keys(pg.PG_STAGES)) pg.PG_TOPICS[interest][stage].filter((t) => t[0] === "~").forEach((t) => imaginary.push(t.slice(1)));
+  assert.ok(imaginary.length >= 8);
+  for (let i = 0; i < 3000; i++) {
+    for (const type of ["explain", "opinion"]) {
+      const o = pg.buildPrompt({ stage: ["early", "elementary", "middle", "high"][i % 4], type, interest: Object.keys(pg.PG_INTERESTS)[i % 8] });
+      assert.ok(!imaginary.includes(o.topic), `${type} used the imaginary topic "${o.topic}"`);
+    }
+  }
+});
+
+test("prompt generator: unknown or missing choices fall back safely and a fixed random source gives a fixed result", () => {
+  const a = pg.buildPrompt({ stage: "nonsense", type: "???", interest: "x" }, () => 0);
+  assert.equal(a.stage, "elementary");
+  assert.ok(a.prompt.length > 20);
+  const b = pg.buildPrompt({ stage: "high", type: "opinion", interest: "space" }, () => 0.5);
+  const c = pg.buildPrompt({ stage: "high", type: "opinion", interest: "space" }, () => 0.5);
+  assert.equal(b.prompt, c.prompt);
+  assert.ok(b.length.length > 10);
+});
+
+test("the prompt page: has the tool, works without scripts, embeds the same generator, and collects nothing", () => {
+  assert.ok(promptsPage.includes('id="pg-prompt"') && promptsPage.includes('id="pg-new"') && promptsPage.includes('id="pg-copy"'));
+  assert.ok(/<noscript>[\s\S]*<li>/.test(promptsPage), "a visitor without JavaScript still sees prompts");
+  const script = promptsPage.match(/<script>\n([\s\S]*?)\n<\/script>\n<\/body>/)[1];
+  assert.ok(script.includes("function buildPrompt") && !script.includes("module.exports"), "the same generator, without the node export");
+  assert.doesNotThrow(() => new Function(script.replace(/document\.getElementById/g, "(function(){return null;})")), "the page script is valid JavaScript");
+  for (const banned of ["localStorage", "sessionStorage", "document.cookie", "fetch(", "XMLHttpRequest", "sendBeacon", "indexedDB"]) {
+    assert.ok(!script.includes(banned), `the page script must not use ${banned}`);
+  }
+  // The only thing it reports is the three menu choices, through the existing consent-aware analytics.
+  const events = [...script.matchAll(/llTrack\("([a-z_]+)"/g)].map((m) => m[1]).sort();
+  assert.deepEqual(events, ["prompt_copied", "prompt_generated"]);
+  assert.ok(/Nothing a visitor chooses is saved/.test(promptsPage));
+});
+
+test("the prompt page is linked from the hub and from every year page (with the right age group), and is in the sitemap", () => {
+  assert.ok(built.files["learn/index.html"].includes('href="/learn/prompts/"'));
+  for (const [rel, html] of pageFiles) {
+    if (!/^learn\/[^/]+\/[^/]+\/index\.html$/.test(rel) || rel.startsWith("learn/prompts/")) continue;
+    const m = html.match(/href="\/learn\/prompts\/\?stage=(early|elementary|middle|high)"/);
+    assert.ok(m, `${rel}: links to the generator`);
+  }
+  assert.ok(built.urls.includes("https://www.literacylabai.com/learn/prompts/"));
+  const uk5 = built.files["learn/uk/year-5/index.html"];
+  assert.ok(uk5.includes("/learn/prompts/?stage=elementary"));
+  assert.ok(built.files["learn/uk/year-8/index.html"] === undefined && built.files["learn/uk/year-7-to-year-9/index.html"].includes("?stage=middle"));
 });
