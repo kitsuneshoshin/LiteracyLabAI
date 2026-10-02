@@ -238,3 +238,16 @@ test("the prompt page is linked from the hub and from every year page (with the 
   assert.ok(uk5.includes("/learn/prompts/?stage=elementary"));
   assert.ok(built.files["learn/uk/year-8/index.html"] === undefined && built.files["learn/uk/year-7-to-year-9/index.html"].includes("?stage=middle"));
 });
+
+test("prompt generator: formal letters (to a headteacher, a council, a newspaper) only ever use real subjects, and no marker leaks into a prompt", () => {
+  const imaginary = [];
+  for (const interest of Object.keys(pg.PG_TOPICS)) for (const stage of Object.keys(pg.PG_STAGES)) pg.PG_TOPICS[interest][stage].filter((t) => t[0] === "~").forEach((t) => imaginary.push(t.slice(1)));
+  const formal = /^(Write a formal letter|Write an open letter|Write an email to a local newspaper|Write a letter of application)/;
+  let formalSeen = 0;
+  for (let i = 0; i < 4000; i++) {
+    const o = pg.buildPrompt({ stage: ["middle", "high"][i % 2], type: "letter", interest: Object.keys(pg.PG_INTERESTS)[i % 8] });
+    assert.ok(!/^!|!Write/.test(o.prompt), `marker leaked: ${o.prompt}`);
+    if (formal.test(o.prompt)) { formalSeen++; assert.ok(!imaginary.includes(o.topic), `formal letter about "${o.topic}"`); }
+  }
+  assert.ok(formalSeen > 1000, "formal letters do get picked");
+});
