@@ -8,6 +8,7 @@
 const { frameworkForGenre, resolveGenre, VALID_GENRES } = require("./writingFrameworks");
 
 const MAX_AVG_WORDS_PER_SENTENCE = { early: 14, elementary: 18, middle: 24, high: 32 };
+const SENTENCE_LENGTH_TOLERANCE = 2;
 const STOPWORDS = new Set(["the","a","an","of","and","or","for","to","in","on","at","statutory","english","app","year","yr","standard","standards","grade","level","aim","aims","programme","study","content","domain"]);
 
 function avgWordsPerSentence(text) {
@@ -351,8 +352,10 @@ function validateRevisedStory(parsed, submittedText, issues) {
   const original = String(submittedText || "");
   const origCount = wordsOf(original).length;
   const count = wordsOf(story).length;
-  if (count < Math.max(4, Math.floor(origCount * 0.6)) || count > Math.ceil(origCount * 1.6) + 10) {
-    issues.push("revisedStory must keep roughly the student's own length (about 60% to 160% of their word count) and their own ideas, not become a different piece");
+  // A very short original (a few sentences) naturally grows a little when every error is
+  // fixed and a sentence is completed, so the upper limit has some give.
+  if (count < Math.max(4, Math.floor(origCount * 0.6)) || count > Math.ceil(origCount * 1.8) + 12) {
+    issues.push("revisedStory must keep roughly the student's own length (about 60% to 180% of their word count) and their own ideas, not become a different piece");
   }
   if (foldLookalikes(story) === foldLookalikes(original)) {
     issues.push("revisedStory is identical to the student's text - it must be a corrected, improved version");
@@ -517,7 +520,10 @@ function validateFeedback(parsed, { tier, standardsList, targetNames, submittedT
     const combined = `${parsed.glow} ${parsed.grow}`;
     const avg = avgWordsPerSentence(combined);
     const cap = MAX_AVG_WORDS_PER_SENTENCE[tier] || 30;
-    if (avg > cap) issues.push(`sentences are too long for this age tier (avg ${avg.toFixed(1)} words/sentence, expected under ${cap})`);
+    // The model is told to stay under the cap; the check allows a small overshoot,
+    // because a piece a couple of words over is still age-appropriate and a retry for
+    // it just costs time (the first quality runs showed 15 to 20 words against 14 and 18).
+    if (avg > cap + SENTENCE_LENGTH_TOLERANCE) issues.push(`sentences are too long for this age tier (avg ${avg.toFixed(1)} words/sentence, expected under ${cap})`);
 
     // A 0-correct glow can only honestly praise effort, so it cannot also tie
     // to a comprehension standard the student did not demonstrate.

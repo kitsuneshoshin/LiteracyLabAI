@@ -176,3 +176,13 @@ test("prompt: Premium's worked example shows a second step that quotes the stude
   const core = buildWritingPrompt({ ...args, capabilities: { deepFeedback: false, spellingGrammar: false, overallScore: false } });
   assert.ok(!core.includes("growNext"), "Free and Core never see the second step");
 });
+
+test("revised story: a very short piece may grow by up to about 80% plus a dozen words when its errors are fixed, but not become a different piece", () => {
+  const original = ORIGINAL; // 20 words
+  const words = (n) => Array.from({ length: n }, (_, i) => ["The", "hero", "named", "Superman", "faced", "villains", "and", "kryptonite", "bravely", "every", "single", "day", "because", "he", "cared", "about", "people", "everywhere"][i % 18]).join(" ") + ".";
+  const issuesFor = (n) => about(validateFeedback(feedback({ revisedStory: words(n), spellingGrammar: [] }), { ...ctx, submittedText: original })).filter((i) => /length/.test(i));
+  assert.deepEqual(issuesFor(20), []);
+  assert.deepEqual(issuesFor(40), [], "more than double the words is still accepted for a tiny piece");
+  assert.equal(issuesFor(50).length, 1, "but a very different length is refused");
+  assert.equal(issuesFor(5).length, 1, "and so is a much shorter one");
+});

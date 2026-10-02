@@ -547,3 +547,16 @@ test("sanitizeQuestionReview: drops made-up quotes, out-of-range and repeated qu
   assert.equal(parsed.questionReview[1].evidence, undefined);
   assert.equal(parsed.questionReview[1].explanation, "Not in the passage.");
 });
+
+// ---- the sentence-length rule allows a small overshoot (a piece a couple of words over is still fine)
+
+test("sentence length: up to two words over the age cap is accepted, more than that is refused, for every age tier", () => {
+  const sentence = (n) => Array.from({ length: n }, (_, i) => (i === 0 ? "You" : "word" + i)).join(" ").replace(/word(\d+)/g, (m, d) => ["clearly", "show", "real", "care", "in", "this", "piece", "of", "work", "today", "again", "and", "we", "can", "see", "that", "your", "voice", "grows", "stronger", "with", "each", "page", "you", "write", "so", "keep", "going", "strong", "now", "friend", "always", "truly"][d % 33]) + ".";
+  const caps = { early: 14, elementary: 18, middle: 24, high: 32 };
+  for (const [tier, cap] of Object.entries(caps)) {
+    const lengthIssue = (n) => validateFeedback(baseFeedback({ glow: sentence(n), grow: sentence(n) }), { tier, standardsList: [], targetNames: [], submittedText: null }).issues.filter((i) => /too long for this age tier/.test(i));
+    assert.deepEqual(lengthIssue(cap), [], `${tier}: at the cap`);
+    assert.deepEqual(lengthIssue(cap + 2), [], `${tier}: two over the cap is allowed`);
+    assert.equal(lengthIssue(cap + 3).length, 1, `${tier}: three over the cap is refused`);
+  }
+});
