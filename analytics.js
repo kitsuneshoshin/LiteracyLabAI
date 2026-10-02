@@ -43,7 +43,7 @@
     var a = e.target && e.target.closest ? e.target.closest("a") : null;
     if (!a) return;
     var href = a.getAttribute("href") || "";
-    if (href.indexOf("app.html") === 0) {
+    if (/^\/?app\.html/.test(href)) {
       window.llTrack("cta_click", { cta_text: (a.textContent || "").trim().slice(0, 40), page: location.pathname });
     }
   });

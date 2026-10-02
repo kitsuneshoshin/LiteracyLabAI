@@ -20,6 +20,10 @@ Parents and guardians of students aged 5-18, across four age-tiered workspaces (
 
 UK National Curriculum / GCSE, US Common Core / AP, Australia ACARA, Canada provincial standards, UAE & GCC (Cambridge/IGCSE), Singapore & SE Asia (Cambridge/IB), and a CEFR-aligned Global ESL mode (A1-C2) for learners anywhere else.
 
+## Parent guides
+
+Plain-English guides to what children learn in reading and writing, year by year, for each supported region (UK, US, Australia, Canada, UAE & Gulf, Singapore & South-East Asia, and CEFR levels for English learners): https://www.literacylabai.com/learn/
+
 ## Pricing
 
 - Free: 3 writing or reading submissions per calendar month, with full feedback (no watered-down free tier).
