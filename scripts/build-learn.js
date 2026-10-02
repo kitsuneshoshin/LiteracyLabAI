@@ -189,6 +189,17 @@ const CSS = `
   .tool .primary{ background:var(--cyan); color:var(--btn-ink); }
   .tool .ghost{ background:transparent; color:var(--cyan); }
   .pn{ display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; margin:22px 0 0; font-family:"Lexend",sans-serif; font-size:14px; }
+  /* Touch targets: at least 44px tall for anything tappable on a phone. */
+  @media (pointer:coarse), (max-width:640px){
+    .nav-inner{ padding-block:8px; }
+    .brand{ display:inline-block; padding:12px 0; }
+    .nav a.try{ display:inline-flex; align-items:center; min-height:44px; padding:0 18px; }
+    .crumbs a{ display:inline-block; padding:14px 4px; margin:-14px 0; }
+    .pn a{ display:inline-block; padding:13px 4px; }
+    .tool select, .tool button{ min-height:48px; }
+    .grid a{ min-height:48px; }
+    footer a{ display:inline-block; padding:12px 4px; }
+  }
   footer{ max-width:760px; margin:0 auto; padding:0 24px 48px; font-size:13px; color:var(--ink-faint); font-family:"Lexend",sans-serif; }
   footer a{ color:var(--ink-soft); }
 `;

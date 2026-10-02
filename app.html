@@ -1885,35 +1885,31 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
             <div className="text-sm py-6 text-center" style={{ color: "var(--ink-faint)" }}>Submit a story or a reading exercise to start tracking mastery against these targets.</div>
           )}
           {targets && !(backendLive && targets.every(t=>t.assessedCount === 0)) && (
-          <div className="overflow-x-auto -mx-2 px-2">
-            <table className="w-full text-sm border-collapse min-w-[420px]">
-              <thead>
-                <tr className="text-left" style={{ color: "var(--ink-faint)" }}>
-                  <th className="font-semibold text-xs uppercase tracking-wider pb-2.5 pr-3">Curriculum target</th>
-                  <th className="font-semibold text-xs uppercase tracking-wider pb-2.5 pr-3">Progress</th>
-                  <th className="font-semibold text-xs uppercase tracking-wider pb-2.5">Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {targets.map((row,i)=>(
-                  <tr key={row.name} className="border-t" style={{ borderColor: "var(--border-soft)" }}>
-                    <td className="py-3 pr-3">
-                      <div className="font-medium" style={{ color: "var(--ink)" }}>{row.name}</div>
-                      {row.standard && <div className="text-[11px] mt-0.5" style={{ color: "var(--ink-faint)" }}>{row.standard}</div>}
-                    </td>
-                    <td className="py-3 pr-3 w-40">
-                      <div className="flex items-center gap-2">
-                        <div className="h-2 rounded-full flex-1" style={{ background: "var(--surface-2)" }}>
-                          <div className="h-2 rounded-full" style={{ width: (row.pct ?? 0) + "%", background: STATUS_STYLE[row.status].ink }} />
-                        </div>
-                        <span className="text-xs font-semibold tabular w-8" style={{ color: "var(--ink-soft)" }}>{row.pct != null ? `${row.pct}%` : "—"}</span>
-                      </div>
-                    </td>
-                    <td className="py-3"><StatusTag status={row.status} /></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div role="table" aria-label="Curriculum target progress" className="text-sm">
+            {/* A list, not a table: three columns do not fit a phone, and a table that
+                scrolls sideways hides the status. On a phone each target is a small
+                block (name, then progress and status); from sm up it is the familiar
+                three-column row with a heading line. */}
+            <div role="row" className="hidden sm:grid grid-cols-[1fr_10rem_7.5rem] gap-x-3 pb-2.5 text-left" style={{ color: "var(--ink-faint)" }}>
+              <div role="columnheader" className="font-semibold text-xs uppercase tracking-wider">Curriculum target</div>
+              <div role="columnheader" className="font-semibold text-xs uppercase tracking-wider">Progress</div>
+              <div role="columnheader" className="font-semibold text-xs uppercase tracking-wider">Status</div>
+            </div>
+            {targets.map((row,i)=>(
+              <div role="row" key={row.name} className="border-t py-3 grid grid-cols-1 sm:grid-cols-[1fr_10rem_7.5rem] gap-x-3 gap-y-2 sm:items-center" style={{ borderColor: "var(--border-soft)" }}>
+                <div role="cell">
+                  <div className="font-medium" style={{ color: "var(--ink)" }}>{row.name}</div>
+                  {row.standard && <div className="text-[11px] mt-0.5" style={{ color: "var(--ink-faint)" }}>{row.standard}</div>}
+                </div>
+                <div role="cell" className="flex items-center gap-2" aria-label={"Progress " + (row.pct != null ? row.pct + " percent" : "not yet assessed")}>
+                  <div className="h-2 rounded-full flex-1" style={{ background: "var(--surface-2)" }}>
+                    <div className="h-2 rounded-full" style={{ width: (row.pct ?? 0) + "%", background: STATUS_STYLE[row.status].ink }} />
+                  </div>
+                  <span className="text-xs font-semibold tabular w-10 text-right" style={{ color: "var(--ink-soft)" }}>{row.pct != null ? `${row.pct}%` : "—"}</span>
+                </div>
+                <div role="cell"><StatusTag status={row.status} /></div>
+              </div>
+            ))}
           </div>
           )}
         </div>

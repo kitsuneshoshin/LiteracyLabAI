@@ -16,15 +16,17 @@ const APP = fs.readFileSync(path.join(ROOT, "app.html"), "utf8");
 
 // ---- the comparison table on the homepage, parsed into rows of [free, core, premium]
 function tableRows() {
-  const start = INDEX.indexOf("<tbody>", INDEX.indexOf("What you get"));
+  const start = INDEX.indexOf("<tbody", INDEX.indexOf("What you get"));
   const end = INDEX.indexOf("</tbody>", start);
   const body = INDEX.slice(start, end);
   const rows = {};
-  for (const tr of body.split("<tr>").slice(1)) {
-    const th = tr.match(/<th scope="row"[^>]*>([\s\S]*?)<\/th>/);
+  // Rows and cells carry accessibility roles and per-plan labels (for the phone
+  // layout), so match them by tag and by the attributes that matter.
+  for (const tr of body.split(/<tr\b[^>]*>/).slice(1)) {
+    const th = tr.match(/<th\b[^>]*scope="row"[^>]*>([\s\S]*?)<\/th>/);
     if (!th) continue;
     const label = th[1].replace(/<[^>]+>/g, "").replace(/&amp;/g, "&").replace(/\s+/g, " ").trim();
-    const cells = [...tr.matchAll(/<td class="(yes|no)[^"]*"[^>]*>([\s\S]*?)<\/td>/g)].map((m) => ({ yes: m[1] === "yes", text: m[2].replace(/<[^>]+>/g, "").trim() }));
+    const cells = [...tr.matchAll(/<td\b[^>]*class="(yes|no)[^"]*"[^>]*>([\s\S]*?)<\/td>/g)].map((m) => ({ yes: m[1] === "yes", text: m[2].replace(/<[^>]+>/g, "").trim() }));
     if (cells.length === 3) rows[label] = cells;
   }
   return rows;

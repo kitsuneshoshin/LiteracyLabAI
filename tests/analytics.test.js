@@ -93,5 +93,5 @@ test("the privacy policy describes analytics: consent, what is collected, and th
   assert.match(p, /Analytics and cookies\./);
   assert.match(p, /analytics cookies are not set/i);
   assert.match(p, /no submission content, names or email addresses/);
-  assert.match(p, /<td>Analytics data<\/td>/);
+  assert.match(p, /<td[^>]*>Analytics data<\/td>/);
 });

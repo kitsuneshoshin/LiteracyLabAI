@@ -514,7 +514,7 @@ test("the new email tables exist in the schema file with row-level security and 
 
 test("the privacy policy describes the emails we send, the unsubscribe, feedback, and its deletion", () => {
   const p = fs.readFileSync(path.join(ROOT, "privacy.html"), "utf8");
-  assert.match(p, /<td>Email and feedback<\/td>/);
+  assert.match(p, /<td[^>]*>Email and feedback<\/td>/);
   assert.match(p, /Emails and feedback\./);
   assert.match(p, /Account Holder only, never to a Child User/);
   assert.match(p, /Every one of them has an unsubscribe link/);

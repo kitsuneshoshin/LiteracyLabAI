@@ -267,10 +267,19 @@
      (found at 375px), taking the page's primary CTA off-screen and forcing
      the whole page to scroll horizontally. Shrinking the button and letting
      the row wrap keeps the CTA reachable without truncating its label. */
+  .theme-toggle-menu{ display:none; }
+  .nav-short{ display:none; }
   @media (max-width: 460px){
-    .nav-inner{ flex-wrap: wrap; row-gap: 10px; gap: 10px; }
+    /* One slim row on a phone (brand, menu, short button): a two-row sticky
+       header ate a fifth of the screen. The theme toggle moves into the menu. */
+    .nav-inner{ flex-wrap: wrap; row-gap: 10px; gap: 10px; padding-block: 10px; }
     .brand{ font-size: 17px; }
-    .nav-cta .btn{ padding: 10px 15px; font-size: 13.5px; }
+    .nav-cta{ gap: 8px; }
+    .nav-cta .theme-toggle{ display:none; }
+    .nav-cta .btn{ padding: 10px 14px; font-size: 13.5px; }
+    .nav-long{ display:none; }
+    .nav-short{ display:inline; }
+    .nav-links .theme-toggle-menu{ display:inline-grid; margin-top:6px; }
   }
 
   /* ---------------- Hero ---------------- */
@@ -374,8 +383,8 @@
 
   /* plan comparison table — three cards can only carry the headline
      differences, so this is the full side-by-side for anyone deciding
-     between Core and Premium. It scrolls horizontally rather than
-     collapsing on a phone, so the columns stay directly comparable. */
+     between Core and Premium. On a phone it becomes
+     compact cards (see the media query below) instead of scrolling sideways. */
   .plan-table-scroll{ max-width:1040px; margin:48px auto 0; overflow-x:auto; -webkit-overflow-scrolling:touch; border:1px solid var(--border); border-radius:8px; background:var(--surface); }
   .plan-table{ width:100%; min-width:640px; border-collapse:collapse; font-family:"Lexend",sans-serif; }
   .plan-table th, .plan-table td{ padding:14px 16px; text-align:left; font-size:13.5px; border-top:1px solid var(--border-soft); vertical-align:top; }
@@ -391,8 +400,41 @@
   .plan-table .yes{ color:var(--ink); font-weight:500; }
   .plan-table .no{ color:var(--ink-faint); }
   .plan-table tbody tr.group-head th{ background:var(--surface-2); font-size:11.5px; text-transform:uppercase; letter-spacing:.07em; color:var(--ink-faint); font-weight:700; }
-  .plan-table-hint{ display:none; margin-top:10px; text-align:center; font-family:"Lexend",sans-serif; font-size:12px; color:var(--ink-faint); }
-  @media (max-width: 720px){ .plan-table-hint{ display:block; } }
+  /* Phones: a three-column table that has to be swiped sideways hides Core and
+     Premium off-screen, which is exactly the comparison a parent came for. Below
+     720px every feature becomes a compact card: the feature name on top and the
+     Free, Core and Premium answers side by side underneath, each labelled, so all
+     three plans are visible at once with no sideways scrolling. */
+  @media (max-width: 720px){
+    .plan-table-scroll{ overflow:visible; border:0; background:transparent; margin-top:36px; }
+    .plan-table, .plan-table tbody{ display:block; min-width:0; }
+    .plan-table thead{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
+    .plan-table tr{ display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); border:1px solid var(--border-soft); border-radius:10px; background:var(--surface); margin-bottom:10px; overflow:hidden; }
+    .plan-table tbody tr.group-head{ display:block; border:0; background:transparent; margin:24px 0 8px; border-radius:0; }
+    .plan-table tbody tr.group-head th{ display:block; background:transparent; border:0; padding:0 2px; font-size:12px; }
+    .plan-table th[scope="row"]{ grid-column:1 / -1; width:auto; padding:12px 14px 6px; border-top:0; font-size:14.5px; line-height:1.4; }
+    .plan-table td{ width:auto; padding:6px 12px 12px; border-top:0; border-left:1px solid var(--border-soft); font-size:14px; line-height:1.4; overflow-wrap:anywhere; }
+    .plan-table td:first-of-type{ border-left:0; }
+    .plan-table td::before{ content:attr(data-label); display:block; margin-bottom:4px; font-size:11.5px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--ink-faint); }
+    .plan-table td.col-best::before{ color:var(--gold-ink); }
+    /* Rows whose answers are whole sentences stack, one plan per line, so a long
+       Premium answer is not squeezed into a narrow third of the screen. */
+    .plan-table tr.wide{ grid-template-columns:1fr; }
+    .plan-table tr.wide td{ display:flex; gap:10px; align-items:baseline; border-left:0; border-top:1px solid var(--border-soft); padding:9px 14px; }
+    .plan-table tr.wide td::before{ flex:0 0 74px; margin-bottom:0; }
+  }
+
+  /* Touch targets: at least 44px tall for anything tappable (Apple and Google
+     guidance), without changing how the desktop site looks. */
+  @media (pointer:coarse), (max-width: 640px){
+    .theme-toggle, .nav-menu-toggle{ width:44px; height:44px; }
+    .btn, .nav-cta .btn{ min-height:44px; }
+    .tier-tabs button{ min-height:44px; padding:10px 16px; }
+    .nav-links a{ padding:13px 0; }
+    .foot-links{ flex-wrap:wrap; gap:0 10px; }
+    .foot-links a{ display:inline-block; padding:14px 6px; }
+    .faq-item summary{ min-height:48px; }
+  }
 
   /* comparison */
   .compare{ border:1px solid var(--border); border-radius:8px; overflow:hidden; background:var(--surface); }
@@ -468,15 +510,16 @@
       <a href="#how">How it works</a>
       <a href="#pricing">Pricing</a>
       <a href="#faq">FAQ</a>
+      <button class="theme-toggle theme-toggle-menu" type="button" aria-label="Toggle theme"><svg class="theme-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z"/></svg></button>
     </div>
     <div class="nav-cta">
       <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
-        <svg id="themeIcon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z"/></svg>
+        <svg id="themeIcon" class="theme-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z"/></svg>
       </button>
       <button class="nav-menu-toggle" id="navMenuToggle" aria-label="Open menu" aria-expanded="false" aria-controls="navLinks">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
       </button>
-      <a class="btn btn-ghost" href="app.html">Launch workspace</a>
+      <a class="btn btn-ghost" href="app.html"><span class="nav-long">Launch workspace</span><span class="nav-short">Launch</span></a>
     </div>
   </div>
 </header>
@@ -754,147 +797,146 @@
     </div>
 
     <div class="plan-table-scroll">
-      <table class="plan-table">
-        <thead>
-          <tr>
-            <th scope="col">What you get</th>
-            <th scope="col">Free<span>$0</span></th>
-            <th scope="col" class="col-best">Core<span><span class="js-price" data-tier="core">$9.99</span> /mo</span></th>
-            <th scope="col">Premium<span><span class="js-price" data-tier="premium">$15.99</span> /mo</span></th>
+      <table class="plan-table" role="table" aria-label="Free, Core and Premium compared">
+        <thead role="rowgroup">
+          <tr role="row">
+            <th role="columnheader" scope="col">What you get</th>
+            <th role="columnheader" scope="col">Free<span>$0</span></th>
+            <th role="columnheader" scope="col" class="col-best">Core<span><span class="js-price" data-tier="core">$9.99</span> /mo</span></th>
+            <th role="columnheader" scope="col">Premium<span><span class="js-price" data-tier="premium">$15.99</span> /mo</span></th>
           </tr>
         </thead>
-        <tbody>
-          <tr class="group-head"><th scope="row" colspan="4">Practice</th></tr>
-          <tr>
-            <th scope="row">Submissions per month</th>
-            <td class="no">3</td>
-            <td class="yes col-best">Unlimited</td>
-            <td class="yes">Unlimited</td>
+        <tbody role="rowgroup">
+          <tr class="group-head" role="row"><th role="rowheader" scope="row" colspan="4">Practice</th></tr>
+          <tr role="row">
+            <th role="rowheader" scope="row">Submissions per month</th>
+            <td role="cell" data-label="Free" class="no">3</td>
+            <td role="cell" data-label="Core" class="yes col-best">Unlimited</td>
+            <td role="cell" data-label="Premium" class="yes">Unlimited</td>
           </tr>
-          <tr>
-            <th scope="row">Learners on one account</th>
-            <td class="no">1</td>
-            <td class="no col-best">1</td>
-            <td class="yes">Up to 6</td>
+          <tr role="row">
+            <th role="rowheader" scope="row">Learners on one account</th>
+            <td role="cell" data-label="Free" class="no">1</td>
+            <td role="cell" data-label="Core" class="no col-best">1</td>
+            <td role="cell" data-label="Premium" class="yes">Up to 6</td>
           </tr>
-          <tr>
-            <th scope="row">Writing prompts &amp; reading passages</th>
-            <td class="yes">Generated fresh every time</td>
-            <td class="yes col-best">Generated fresh every time</td>
-            <td class="yes">Generated fresh every time</td>
+          <tr role="row">
+            <th role="rowheader" scope="row">Writing prompts &amp; reading passages</th>
+            <td role="cell" data-label="Free" class="yes">Generated fresh every time</td>
+            <td role="cell" data-label="Core" class="yes col-best">Generated fresh every time</td>
+            <td role="cell" data-label="Premium" class="yes">Generated fresh every time</td>
           </tr>
-          <tr>
-            <th scope="row">Word targets from their year's curriculum</th>
-            <td class="yes">Yes</td>
-            <td class="yes col-best">Yes</td>
-            <td class="yes">Yes</td>
-          </tr>
-
-          <tr class="group-head"><th scope="row" colspan="4">Feedback</th></tr>
-          <tr>
-            <th scope="row">Key Takeaways: Glow, Grow, vocabulary</th>
-            <td class="yes">Yes</td>
-            <td class="yes col-best">Yes</td>
-            <td class="yes">Yes</td>
-          </tr>
-          <tr>
-            <th scope="row">Highlights in their own writing, with rewrites</th>
-            <td class="yes">Yes</td>
-            <td class="yes col-best">Yes</td>
-            <td class="yes">Yes</td>
-          </tr>
-          <tr>
-            <th scope="row">Named framework taught from their own writing</th>
-            <td class="yes">Yes</td>
-            <td class="yes col-best">Yes</td>
-            <td class="yes">Yes</td>
-          </tr>
-          <tr>
-            <th scope="row">Spelling &amp; grammar check</th>
-            <td class="no">—</td>
-            <td class="no col-best">—</td>
-            <td class="yes">Yes</td>
-          </tr>
-          <tr>
-            <th scope="row">Overall score out of 10, with the reason</th>
-            <td class="no">—</td>
-            <td class="no col-best">—</td>
-            <td class="yes">Yes</td>
-          </tr>
-          <tr>
-            <th scope="row">Feedback themed around their interests</th>
-            <td class="yes">Yes</td>
-            <td class="yes col-best">Yes</td>
-            <td class="yes">Yes</td>
-          </tr>
-          <tr>
-            <th scope="row">Extended feedback: a second, harder next step</th>
-            <td class="no">—</td>
-            <td class="no col-best">—</td>
-            <td class="yes">Yes</td>
-          </tr>
-          <tr>
-            <th scope="row">Exam-technique scoring <span style="font-weight:400; color:var(--ink-faint);">(ages 11+)</span></th>
-            <td class="no">—</td>
-            <td class="no col-best">—</td>
-            <td class="yes">Banded 1–4 against each assessment objective, with the evidence and what moves it up</td>
+          <tr role="row">
+            <th role="rowheader" scope="row">Word targets from their year's curriculum</th>
+            <td role="cell" data-label="Free" class="yes">Yes</td>
+            <td role="cell" data-label="Core" class="yes col-best">Yes</td>
+            <td role="cell" data-label="Premium" class="yes">Yes</td>
           </tr>
 
-          <tr class="group-head"><th scope="row" colspan="4">Progress</th></tr>
-          <tr>
-            <th scope="row">Streak, words written, average score</th>
-            <td class="yes">Yes</td>
-            <td class="yes col-best">Yes</td>
-            <td class="yes">Yes</td>
+          <tr class="group-head" role="row"><th role="rowheader" scope="row" colspan="4">Feedback</th></tr>
+          <tr role="row">
+            <th role="rowheader" scope="row">Key Takeaways: Glow, Grow, vocabulary</th>
+            <td role="cell" data-label="Free" class="yes">Yes</td>
+            <td role="cell" data-label="Core" class="yes col-best">Yes</td>
+            <td role="cell" data-label="Premium" class="yes">Yes</td>
           </tr>
-          <tr>
-            <th scope="row">Skill mastery breakdown</th>
-            <td class="yes">Yes</td>
-            <td class="yes col-best">Yes</td>
-            <td class="yes">Yes</td>
+          <tr role="row">
+            <th role="rowheader" scope="row">Highlights in their own writing, with rewrites</th>
+            <td role="cell" data-label="Free" class="yes">Yes</td>
+            <td role="cell" data-label="Core" class="yes col-best">Yes</td>
+            <td role="cell" data-label="Premium" class="yes">Yes</td>
           </tr>
-          <tr>
-            <th scope="row">26-week progress trend chart</th>
-            <td class="no">—</td>
-            <td class="yes col-best">Yes</td>
-            <td class="yes">Yes</td>
+          <tr role="row">
+            <th role="rowheader" scope="row">Named framework taught from their own writing</th>
+            <td role="cell" data-label="Free" class="yes">Yes</td>
+            <td role="cell" data-label="Core" class="yes col-best">Yes</td>
+            <td role="cell" data-label="Premium" class="yes">Yes</td>
           </tr>
-          <tr>
-            <th scope="row">Anonymous ranking in their year group</th>
-            <td class="no">—</td>
-            <td class="yes col-best">Yes</td>
-            <td class="yes">Yes</td>
+          <tr role="row">
+            <th role="rowheader" scope="row">Spelling &amp; grammar check</th>
+            <td role="cell" data-label="Free" class="no">—</td>
+            <td role="cell" data-label="Core" class="no col-best">—</td>
+            <td role="cell" data-label="Premium" class="yes">Yes</td>
           </tr>
-          <tr>
-            <th scope="row">Full activity history</th>
-            <td class="no">Last 10</td>
-            <td class="yes col-best">Full history</td>
-            <td class="yes">Full history</td>
+          <tr role="row">
+            <th role="rowheader" scope="row">Overall score out of 10, with the reason</th>
+            <td role="cell" data-label="Free" class="no">—</td>
+            <td role="cell" data-label="Core" class="no col-best">—</td>
+            <td role="cell" data-label="Premium" class="yes">Yes</td>
           </tr>
-          <tr>
-            <th scope="row">Vocabulary bank &amp; self-test quiz</th>
-            <td class="no">—</td>
-            <td class="yes col-best">Yes</td>
-            <td class="yes">Yes</td>
+          <tr role="row">
+            <th role="rowheader" scope="row">Feedback themed around their interests</th>
+            <td role="cell" data-label="Free" class="yes">Yes</td>
+            <td role="cell" data-label="Core" class="yes col-best">Yes</td>
+            <td role="cell" data-label="Premium" class="yes">Yes</td>
+          </tr>
+          <tr role="row">
+            <th role="rowheader" scope="row">Extended feedback: a second, harder next step</th>
+            <td role="cell" data-label="Free" class="no">—</td>
+            <td role="cell" data-label="Core" class="no col-best">—</td>
+            <td role="cell" data-label="Premium" class="yes">Yes</td>
+          </tr>
+          <tr role="row" class="wide">
+            <th role="rowheader" scope="row">Exam-technique scoring <span style="font-weight:400; color:var(--ink-faint);">(ages 11+)</span></th>
+            <td role="cell" data-label="Free" class="no">—</td>
+            <td role="cell" data-label="Core" class="no col-best">—</td>
+            <td role="cell" data-label="Premium" class="yes">Banded 1–4 against each assessment objective, with the evidence and what moves it up</td>
           </tr>
 
-          <tr class="group-head"><th scope="row" colspan="4">Account</th></tr>
-          <tr>
-            <th scope="row">Export or delete your data</th>
-            <td class="yes">Yes</td>
-            <td class="yes col-best">Yes</td>
-            <td class="yes">Yes</td>
+          <tr class="group-head" role="row"><th role="rowheader" scope="row" colspan="4">Progress</th></tr>
+          <tr role="row">
+            <th role="rowheader" scope="row">Streak, words written, average score</th>
+            <td role="cell" data-label="Free" class="yes">Yes</td>
+            <td role="cell" data-label="Core" class="yes col-best">Yes</td>
+            <td role="cell" data-label="Premium" class="yes">Yes</td>
           </tr>
-          <tr>
-            <th scope="row">Cancel anytime, no contract</th>
-            <td class="no">Nothing to cancel</td>
-            <td class="yes col-best">Yes</td>
-            <td class="yes">Yes</td>
+          <tr role="row">
+            <th role="rowheader" scope="row">Skill mastery breakdown</th>
+            <td role="cell" data-label="Free" class="yes">Yes</td>
+            <td role="cell" data-label="Core" class="yes col-best">Yes</td>
+            <td role="cell" data-label="Premium" class="yes">Yes</td>
+          </tr>
+          <tr role="row">
+            <th role="rowheader" scope="row">26-week progress trend chart</th>
+            <td role="cell" data-label="Free" class="no">—</td>
+            <td role="cell" data-label="Core" class="yes col-best">Yes</td>
+            <td role="cell" data-label="Premium" class="yes">Yes</td>
+          </tr>
+          <tr role="row">
+            <th role="rowheader" scope="row">Anonymous ranking in their year group</th>
+            <td role="cell" data-label="Free" class="no">—</td>
+            <td role="cell" data-label="Core" class="yes col-best">Yes</td>
+            <td role="cell" data-label="Premium" class="yes">Yes</td>
+          </tr>
+          <tr role="row">
+            <th role="rowheader" scope="row">Full activity history</th>
+            <td role="cell" data-label="Free" class="no">Last 10</td>
+            <td role="cell" data-label="Core" class="yes col-best">Full history</td>
+            <td role="cell" data-label="Premium" class="yes">Full history</td>
+          </tr>
+          <tr role="row">
+            <th role="rowheader" scope="row">Vocabulary bank &amp; self-test quiz</th>
+            <td role="cell" data-label="Free" class="no">—</td>
+            <td role="cell" data-label="Core" class="yes col-best">Yes</td>
+            <td role="cell" data-label="Premium" class="yes">Yes</td>
+          </tr>
+
+          <tr class="group-head" role="row"><th role="rowheader" scope="row" colspan="4">Account</th></tr>
+          <tr role="row">
+            <th role="rowheader" scope="row">Export or delete your data</th>
+            <td role="cell" data-label="Free" class="yes">Yes</td>
+            <td role="cell" data-label="Core" class="yes col-best">Yes</td>
+            <td role="cell" data-label="Premium" class="yes">Yes</td>
+          </tr>
+          <tr role="row">
+            <th role="rowheader" scope="row">Cancel anytime, no contract</th>
+            <td role="cell" data-label="Free" class="no">Nothing to cancel</td>
+            <td role="cell" data-label="Core" class="yes col-best">Yes</td>
+            <td role="cell" data-label="Premium" class="yes">Yes</td>
           </tr>
         </tbody>
       </table>
     </div>
-    <div class="plan-table-hint">Scroll the table sideways to compare plans →</div>
   </div>
 </section>
 
@@ -983,22 +1025,22 @@
   // Theme toggle: cycles system -> dark -> light -> system
   (function(){
     var root = document.documentElement;
-    var btn = document.getElementById('themeToggle');
-    var icon = document.getElementById('themeIcon');
+    var btns = document.querySelectorAll('.theme-toggle');
+    var icons = document.querySelectorAll('.theme-icon');
     var SUN = '<path d="M12 2.5v2.3M12 19.2v2.3M4.4 4.4l1.6 1.6M18 18l1.6 1.6M2.5 12h2.3M19.2 12h2.3M4.4 19.6L6 18M18 6l1.6-1.6"/><circle cx="12" cy="12" r="4.2"/>';
     var MOON = '<path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z"/>';
     function apply(mode){
       if(mode === 'system'){ root.removeAttribute('data-theme'); }
       else{ root.setAttribute('data-theme', mode); }
       var isDark = mode === 'dark' || (mode === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
-      icon.innerHTML = isDark ? SUN : MOON;
+      icons.forEach(function(i){ i.innerHTML = isDark ? SUN : MOON; });
     }
     var current = 'system';
     apply(current);
-    btn.addEventListener('click', function(){
+    btns.forEach(function(b){ b.addEventListener('click', function(){
       current = current === 'system' ? 'dark' : current === 'dark' ? 'light' : 'system';
       apply(current);
-    });
+    }); });
   })();
 
   // Mobile nav toggle - the links panel is hidden by default below 780px

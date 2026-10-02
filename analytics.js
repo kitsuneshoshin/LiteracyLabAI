@@ -62,9 +62,9 @@
       + 'You can accept or decline analytics cookies.</span>'
       + '<span style="display:flex;gap:8px">'
       + '<button type="button" id="ll-cookie-decline" style="background:transparent;color:#fff;border:1px solid #666;'
-      + 'border-radius:6px;padding:7px 14px;cursor:pointer;font:inherit">Decline</button>'
+      + 'border-radius:6px;padding:12px 18px;cursor:pointer;font:inherit">Decline</button>'
       + '<button type="button" id="ll-cookie-accept" style="background:#fff;color:#1a1a1a;border:none;'
-      + 'border-radius:6px;padding:7px 14px;cursor:pointer;font:inherit;font-weight:600">Accept</button>'
+      + 'border-radius:6px;padding:12px 18px;cursor:pointer;font:inherit;font-weight:600">Accept</button>'
       + '</span>';
     document.body.appendChild(bar);
 

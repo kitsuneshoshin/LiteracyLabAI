@@ -54,6 +54,18 @@
   .doc th, .doc td{ text-align:left; padding:9px 10px; border-bottom:1px solid var(--border-soft); vertical-align:top; }
   .doc th{ color:var(--ink-faint); font-weight:700; text-transform:uppercase; letter-spacing:.04em; font-size:11px; }
   a{ color:var(--cyan); }
+  /* Phones: stack each row of the data table as a small card instead of letting a
+     three-column table push the page sideways. */
+  @media (max-width: 640px){
+    .doc table, .doc tbody, .doc tr, .doc td{ display:block; width:100%; }
+    .doc thead{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
+    /* this table's heading row is a plain row of headings, not a thead: hide it visually (each cell carries its own label) but keep it for screen readers */
+    .doc tr:first-child{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; border:0; padding:0; margin:0; }
+    .doc tr{ border:1px solid var(--border-soft); border-radius:10px; background:var(--surface); margin:0 0 10px; padding:4px 0; }
+    .doc td{ border-bottom:0; padding:6px 14px; }
+    .doc td::before{ content:attr(data-label); display:block; font-size:11px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--ink-faint); margin-bottom:2px; }
+    .doc td:first-child{ font-weight:600; }
+  }
   footer{ max-width:720px; margin:0 auto; padding: 0 24px 48px; font-size:13px; color:var(--ink-faint); }
 </style>
 <script src="analytics.js"></script>
@@ -81,12 +93,12 @@
   <h2>2. Information we collect</h2>
   <table>
     <tr><th>Category</th><th>What we collect</th><th>From whom</th></tr>
-    <tr><td>Account information</td><td>Parent/guardian email address, password (hashed), subscription/billing status</td><td>Account Holder</td></tr>
-    <tr><td>Child profile</td><td>Student display name (a nickname or first name only is sufficient — a full legal name is never required), grade or year level, country curriculum, selected interest tags</td><td>Account Holder, on behalf of the Child User</td></tr>
-    <tr><td>Learning content</td><td>Story and essay submissions, reading-comprehension responses, associated word/character counts, generated feedback, and mastery/progress history</td><td>Child User, via the workspace</td></tr>
-    <tr><td>Analytics data</td><td>Pages visited, approximate location (country or region), device and browser type, and whether key actions happen (such as creating an account, completing a piece of work, or viewing the plans). Never the content of a submission, a name, or an email address.</td><td>Automatically, only after you accept analytics cookies</td></tr>
-    <tr><td>Email and feedback</td><td>Which of our emails we have sent you and whether you have unsubscribed, plus anything you choose to send us through the feedback page (a rating, a message, and whether we may contact you)</td><td>Account Holder</td></tr>
-    <tr><td>Technical data</td><td>Basic device and usage logs (e.g. timestamps, error logs) used only to operate and secure the Service</td><td>Automatically, from the browser/device</td></tr>
+    <tr><td data-label="Category">Account information</td><td data-label="What we collect">Parent/guardian email address, password (hashed), subscription/billing status</td><td data-label="From whom">Account Holder</td></tr>
+    <tr><td data-label="Category">Child profile</td><td data-label="What we collect">Student display name (a nickname or first name only is sufficient — a full legal name is never required), grade or year level, country curriculum, selected interest tags</td><td data-label="From whom">Account Holder, on behalf of the Child User</td></tr>
+    <tr><td data-label="Category">Learning content</td><td data-label="What we collect">Story and essay submissions, reading-comprehension responses, associated word/character counts, generated feedback, and mastery/progress history</td><td data-label="From whom">Child User, via the workspace</td></tr>
+    <tr><td data-label="Category">Analytics data</td><td data-label="What we collect">Pages visited, approximate location (country or region), device and browser type, and whether key actions happen (such as creating an account, completing a piece of work, or viewing the plans). Never the content of a submission, a name, or an email address.</td><td data-label="From whom">Automatically, only after you accept analytics cookies</td></tr>
+    <tr><td data-label="Category">Email and feedback</td><td data-label="What we collect">Which of our emails we have sent you and whether you have unsubscribed, plus anything you choose to send us through the feedback page (a rating, a message, and whether we may contact you)</td><td data-label="From whom">Account Holder</td></tr>
+    <tr><td data-label="Category">Technical data</td><td data-label="What we collect">Basic device and usage logs (e.g. timestamps, error logs) used only to operate and secure the Service</td><td data-label="From whom">Automatically, from the browser/device</td></tr>
   </table>
   <p>We do <strong>not</strong> knowingly collect a Child User's precise geolocation, contact information (email, phone), government identifiers, or biometric data, and we do not require any of this to use the Service.</p>
 
