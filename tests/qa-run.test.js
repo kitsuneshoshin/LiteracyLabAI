@@ -124,3 +124,31 @@ test("wiring: the sample prompts match what the real writing prompt builder prod
   const p = buildWritingPrompt({ tier: s.tier, country: "🇬🇧 United Kingdom", gradeLabel: "Year 5", interest: "football", prompt: s.prompt, text: s.text, targets: [], targetNames: ["A"], genre: "narrative", capabilities: {} });
   assert.ok(p.includes(s.text));
 });
+
+// ---- a run can never be killed by the host's 60-second limit: it has a time budget
+
+test("time budget: slow model calls cannot run past the deadline, every sample is still reported, and the summary is still produced", async () => {
+  const started = Date.now();
+  const summary = await runQa({ generate: () => new Promise((r) => setTimeout(() => r({ parsed: {}, modelUsed: "slow" }), 60)), budgetMs: 150 });
+  assert.ok(Date.now() - started < 1500, "it came back promptly");
+  assert.equal(summary.total, 8);
+  assert.equal(summary.results.length, 8);
+  assert.ok(summary.results.every((r) => r.attempts >= 1 && r.attempts <= 3 && !r.ok));
+});
+
+test("time budget: a model call that never answers is cut off at the deadline and recorded, not waited for", async () => {
+  const started = Date.now();
+  const summary = await runQa({ generate: () => new Promise(() => {}), budgetMs: 120 });
+  assert.ok(Date.now() - started < 1500, "it did not hang");
+  assert.equal(summary.total, 8);
+  assert.ok(summary.results.every((r) => r.issues.some((i) => /timed out waiting for the model/.test(i))));
+  assert.equal(summary.timedOut, 8);
+});
+
+test("time budget: with no pressure nothing is cut short, and the endpoint reports how many ran out of time", async () => {
+  const summary = await runQa({ generate: async () => ({ parsed: {}, modelUsed: "stub" }) });
+  assert.equal(summary.timedOut, 0);
+  assert.ok(summary.results.every((r) => r.attempts === 3 && !r.timedOut));
+  const res = await hit({ auth: "Bearer s3cret", query: { action: "qa", save: "0" } });
+  assert.equal(res.body.timedOut, 0);
+});

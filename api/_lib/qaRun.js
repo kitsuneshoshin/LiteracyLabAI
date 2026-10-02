@@ -69,7 +69,18 @@ function buildSample(s, kind) {
 const MAX_ATTEMPTS = 3;
 const BONUS_ISSUE = /^(growNext|revisedStory)/;
 
-async function runOne(s, kind, generate) {
+// A run has a time budget (the host stops a function after 60 seconds, and a run that is
+// killed saves nothing). A sample that cannot finish another attempt in time stops and is
+// recorded as "ran out of time" instead of taking the whole run down with it.
+const ATTEMPT_MS = 14000; // about the longest one marking call takes
+function withTimeout(promise, ms) {
+  return new Promise((resolve, reject) => {
+    const t = setTimeout(() => reject(new Error("timed out waiting for the model")), Math.max(1, ms));
+    promise.then((v) => { clearTimeout(t); resolve(v); }, (e) => { clearTimeout(t); reject(e); });
+  });
+}
+
+async function runOne(s, kind, generate, deadline = Infinity) {
   const started = Date.now();
   const out = { name: s.name, kind, plan: s.plan, tier: s.tier, ok: false, firstTry: false, attempts: 0, outcome: "failed", issues: [], ms: 0 };
   try {
@@ -79,7 +90,8 @@ async function runOne(s, kind, generate) {
     const targetNames = targetsForGrade(COUNTRY, grade, s.tier).targets.map((t) => t.name);
     let prompt = built.prompt;
     for (let i = 1; i <= MAX_ATTEMPTS; i++) {
-      const attempt = await generate(prompt);
+      if (i > 1 && Date.now() + ATTEMPT_MS > deadline) { out.timedOut = true; out.outcome = "ran out of time"; break; }
+      const attempt = await withTimeout(Promise.resolve(generate(prompt)), deadline - Date.now());
       const parsed = attempt.parsed;
       out.attempts = i;
       if (kind === "writing") {
@@ -132,8 +144,9 @@ async function runOne(s, kind, generate) {
 
 // Runs every sample at once (they are independent, and a serial run would not fit
 // in the function's time limit), then builds the summary.
-async function runQa({ generate }) {
-  const jobs = [...WRITING.map((s) => runOne(s, "writing", generate)), ...READING.map((s) => runOne(s, "reading", generate))];
+async function runQa({ generate, budgetMs = 48000 }) {
+  const deadline = Date.now() + budgetMs;
+  const jobs = [...WRITING.map((s) => runOne(s, "writing", generate, deadline)), ...READING.map((s) => runOne(s, "reading", generate, deadline))];
   const results = await Promise.all(jobs);
   const total = results.length;
   const passed = results.filter((r) => r.firstTry).length;      // right on the first attempt
@@ -144,6 +157,7 @@ async function runQa({ generate }) {
     passRate: total ? Math.round((passed / total) * 100) : 0,
     deliveredRate: total ? Math.round((delivered / total) * 100) : 0,
     avgMs: total ? Math.round(results.reduce((a, r) => a + r.ms, 0) / total) : 0,
+    timedOut: results.filter((r) => r.timedOut || (r.issues || []).some((i) => /timed out/.test(i))).length,
     avgAttempts: total ? Math.round((results.reduce((a, r) => a + r.attempts, 0) / total) * 10) / 10 : 0,
     rewriteDelivered: writing.filter((r) => r.sections && r.sections.revisedStory).length,
     rewriteExpected: writing.length,
