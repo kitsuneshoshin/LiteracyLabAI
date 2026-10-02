@@ -99,3 +99,10 @@ test("the guide pages and prompt generator use 44px touch targets and the in-app
   assert.match(app, /hidden sm:grid grid-cols-\[1fr_10rem_7\.5rem\]/);
   assert.match(app, /grid grid-cols-1 sm:grid-cols-\[1fr_10rem_7\.5rem\]/, "rows stack on a phone and become columns from sm up");
 });
+
+test("the main menu links to the parent guides (desktop and phone menu), as well as the footer", () => {
+  const nav = INDEX.slice(INDEX.indexOf('<div class="nav-links" id="navLinks">'), INDEX.indexOf('<div class="nav-cta">'));
+  assert.match(nav, /<a href="learn\/">Guides<\/a>/);
+  assert.ok(nav.indexOf('href="#pricing"') < nav.indexOf('href="learn/"') && nav.indexOf('href="learn/"') < nav.indexOf('href="#faq"'), "between Pricing and FAQ");
+  assert.match(INDEX, /<div class="foot-links">[\s\S]*<a href="learn\/">Guides<\/a>/);
+});
