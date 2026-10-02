@@ -152,3 +152,52 @@ test("time budget: with no pressure nothing is cut short, and the endpoint repor
   const res = await hit({ auth: "Bearer s3cret", query: { action: "qa", save: "0" } });
   assert.equal(res.body.timedOut, 0);
 });
+
+// ---- found when the first retry-aware run reported a piece as failed that a customer would have received
+
+const { runOne: runSample } = require("../api/_lib/qaRun");
+const stubValidate = (issues) => () => ({ ok: issues.length === 0, issues });
+const gen = async () => ({ parsed: { growNext: "Next, try something harder with your writing and think about it.", revisedStory: "A story.", glow: "x" }, modelUsed: "stub" });
+
+test("a piece whose only remaining problem is a bonus section (the second step or the corrected story) is delivered without it, exactly as a customer's would be", async () => {
+  const growNextQuote = "growNext must quote a short fragment (3 to 10 words) exactly as it appears in the student's own text, and say what to do with it";
+  let r = await runSample(WRITING[1], "writing", gen, Infinity, stubValidate([growNextQuote]));
+  assert.equal(r.ok, true);
+  assert.equal(r.outcome, "delivered without a bonus section");
+  assert.equal(r.attempts, 3);
+  assert.equal(r.firstTry, false);
+  assert.equal(r.sections.growNext, false, "the unusable bonus section is left out");
+  r = await runSample(WRITING[1], "writing", gen, Infinity, stubValidate(["revisedStory must start with a capital letter"]));
+  assert.equal(r.ok, true);
+  assert.equal(r.sections.revisedStory, false);
+  r = await runSample(WRITING[1], "writing", gen, Infinity, stubValidate([growNextQuote, "revisedStory still contains the misspelling \"x\" that the spelling check lists"]));
+  assert.equal(r.ok, true, "both bonus sections can be left out together");
+});
+
+test("any other problem alongside a bonus-section problem means the piece is NOT delivered (the safety net only covers bonus sections)", async () => {
+  const r = await runSample(WRITING[1], "writing", gen, Infinity, stubValidate(["growNext must quote a short fragment (3 to 10 words) exactly as it appears in the student's own text, and say what to do with it", "highlights must be an array of 2-10 items"]));
+  assert.equal(r.ok, false);
+  assert.equal(r.outcome, "failed");
+  assert.equal(r.attempts, 3);
+});
+
+test("a run with no time budget set does not time out at once (an unlimited deadline means no timeout)", async () => {
+  const r = await runSample(WRITING[0], "writing", async () => ({ parsed: {}, modelUsed: "stub" }), Infinity, stubValidate([]));
+  assert.equal(r.ok, true);
+  assert.equal(r.outcome, "delivered");
+  assert.equal(r.attempts, 1);
+  assert.equal(r.firstTry, true);
+});
+
+test("no source file contains a stray control character (a hidden backspace once turned a pattern into one that never matched)", () => {
+  const dirs = ["api", "scripts", "tests"];
+  const files = [];
+  const walk = (d) => fs.readdirSync(path.join(ROOT, d), { withFileTypes: true }).forEach((e) => (e.isDirectory() ? walk(path.join(d, e.name)) : /\.(js|html|json)$/.test(e.name) && files.push(path.join(d, e.name))));
+  dirs.forEach(walk);
+  ["index.html", "app.html", "analytics.js", "pricing.js", "vercel.json"].forEach((f) => files.push(f));
+  for (const f of files) {
+    const text = fs.readFileSync(path.join(ROOT, f), "utf8");
+    const bad = text.match(/[\x00-\x08\x0B\x0C\x0E-\x1F]/);
+    assert.ok(!bad, `${f} contains control character code ${bad && bad[0].charCodeAt(0)}`);
+  }
+});

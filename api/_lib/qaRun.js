@@ -67,20 +67,23 @@ function buildSample(s, kind) {
 // records BOTH whether the first attempt was right and what the customer would
 // actually have been given. Never throws: a failure is a result, not a crash.
 const MAX_ATTEMPTS = 3;
-const BONUS_ISSUE = /^(growNext|revisedStory)/;
+const BONUS_ISSUE = /^(growNext|revisedStory) /;
 
 // A run has a time budget (the host stops a function after 60 seconds, and a run that is
 // killed saves nothing). A sample that cannot finish another attempt in time stops and is
 // recorded as "ran out of time" instead of taking the whole run down with it.
 const ATTEMPT_MS = 14000; // about the longest one marking call takes
 function withTimeout(promise, ms) {
+  if (!Number.isFinite(ms)) return promise;
+  ms = Math.min(ms, 2147483647);
   return new Promise((resolve, reject) => {
     const t = setTimeout(() => reject(new Error("timed out waiting for the model")), Math.max(1, ms));
     promise.then((v) => { clearTimeout(t); resolve(v); }, (e) => { clearTimeout(t); reject(e); });
   });
 }
 
-async function runOne(s, kind, generate, deadline = Infinity) {
+// validate can be replaced in tests; in production it is always the real validator.
+async function runOne(s, kind, generate, deadline = Infinity, validate = validateFeedback) {
   const started = Date.now();
   const out = { name: s.name, kind, plan: s.plan, tier: s.tier, ok: false, firstTry: false, attempts: 0, outcome: "failed", issues: [], ms: 0 };
   try {
@@ -101,7 +104,7 @@ async function runOne(s, kind, generate, deadline = Infinity) {
         repairReadingExamEvidence(parsed, QUESTIONS, s.answers);
         sanitizeQuestionReview(parsed, PASSAGE, QUESTIONS.length);
       }
-      const check = validateFeedback(parsed, {
+      const check = validate(parsed, {
         tier: s.tier, standardsList, targetNames, submittedText: kind === "writing" ? s.text : undefined,
         readingScore: kind === "reading" ? built.score : undefined, capabilities: built.caps, genre: built.genre,
       });
@@ -109,10 +112,10 @@ async function runOne(s, kind, generate, deadline = Infinity) {
       let delivered = check.ok;
       let withoutBonus = false;
       if (!delivered && i === MAX_ATTEMPTS && check.issues.length > 0 && check.issues.every((x) => BONUS_ISSUE.test(x))) {
-        const growNextBad = check.issues.some((x) => /^growNext/.test(x));
+        const growNextBad = check.issues.some((x) => /^growNext /.test(x));
         if (!growNextBad || parsed.growNext) {
           if (growNextBad) delete parsed.growNext;
-          if (check.issues.some((x) => /^revisedStory/.test(x))) delete parsed.revisedStory;
+          if (check.issues.some((x) => /^revisedStory /.test(x))) delete parsed.revisedStory;
           delivered = true;
           withoutBonus = true;
         }
@@ -144,9 +147,9 @@ async function runOne(s, kind, generate, deadline = Infinity) {
 
 // Runs every sample at once (they are independent, and a serial run would not fit
 // in the function's time limit), then builds the summary.
-async function runQa({ generate, budgetMs = 48000 }) {
+async function runQa({ generate, budgetMs = 48000, validate }) {
   const deadline = Date.now() + budgetMs;
-  const jobs = [...WRITING.map((s) => runOne(s, "writing", generate, deadline)), ...READING.map((s) => runOne(s, "reading", generate, deadline))];
+  const jobs = [...WRITING.map((s) => runOne(s, "writing", generate, deadline, validate)), ...READING.map((s) => runOne(s, "reading", generate, deadline, validate))];
   const results = await Promise.all(jobs);
   const total = results.length;
   const passed = results.filter((r) => r.firstTry).length;      // right on the first attempt
