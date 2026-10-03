@@ -56,12 +56,24 @@ function redactEvent(event) {
 // at most FLUSH_TIMEOUT_MS, and only on a genuine 500, which is rare.
 const FLUSH_TIMEOUT_MS = 2000;
 
+// Optional list of failed quality checks an endpoint attached to its error
+// (err.checkIssues). Redacted like every other outgoing string, since the
+// issues can quote generated text.
+function errorDetails(err) {
+  if (!err || !Array.isArray(err.checkIssues) || !err.checkIssues.length) return null;
+  return err.checkIssues.map((i) => redact(String(i)));
+}
+
 async function captureIfUnexpected(err) {
   ensureInit();
   if (!process.env.SENTRY_DSN) return;
   const status = err.statusCode || 500;
   if (status < 500) return;
-  Sentry.captureException(err);
+  Sentry.withScope((scope) => {
+    const details = errorDetails(err);
+    if (details) scope.setExtra("checkIssues", details);
+    Sentry.captureException(err);
+  });
   try {
     await Sentry.flush(FLUSH_TIMEOUT_MS);
   } catch (_) {
@@ -69,4 +81,4 @@ async function captureIfUnexpected(err) {
   }
 }
 
-module.exports = { captureIfUnexpected, redact };
+module.exports = { captureIfUnexpected, redact, errorDetails };

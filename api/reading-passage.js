@@ -31,6 +31,9 @@ async function generateAndValidate(prompt, tier) {
   console.warn("Passage validation failed on attempt 2:", check.issues);
   const err = new Error("We couldn't generate a reading passage right now. Please try again.");
   err.statusCode = 502;
+  // Which checks failed - sent to Sentry alongside the error (never shown to
+  // the student) so a bad-passage report says WHY, not just "it failed".
+  err.checkIssues = check.issues;
   throw err;
 }
 
@@ -126,3 +129,4 @@ module.exports = async function handler(req, res) {
     await sendError(res, err);
   }
 };
+module.exports.generateAndValidate = generateAndValidate;
