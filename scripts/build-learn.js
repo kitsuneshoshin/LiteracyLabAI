@@ -14,6 +14,7 @@ const path = require("node:path");
 const { GRADE_MAPPED_TARGETS } = require("../api/_lib/masteryTargets");
 const { GRADE_WORD_TARGETS } = require("../api/_lib/writingLimits");
 const { TARGET_GUIDE, TIER_INFO } = require("./learn-content");
+const WS = require("./worksheets-pages");
 
 const ROOT = path.join(__dirname, "..");
 const SITE = "https://www.literacylabai.com";
@@ -215,7 +216,7 @@ const CSS = `
   footer a{ color:var(--ink-soft); }
 `;
 
-function layout({ title, description, canonical, jsonld, body, script }) {
+function layout({ title, description, canonical, jsonld, body, script, css }) {
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -236,7 +237,7 @@ function layout({ title, description, canonical, jsonld, body, script }) {
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700;800&amp;family=Source+Serif+4:ital,wght@0,400;0,600;1,400&amp;display=swap" rel="stylesheet">
-<style>${CSS}</style>
+<style>${CSS}${css || ""}</style>
 <script type="application/ld+json">${JSON.stringify(jsonld)}</script>
 <script src="/analytics.js"></script>
 </head>
@@ -319,6 +320,8 @@ function buildPage(g, groups, idx) {
     breadcrumbLd(crumbs),
   ] };
 
+  const wsSheets = r.slug === "uk" ? WS.published().filter((s) => s.year === g.label) : [];
+  const wsLink = wsSheets.length ? `<p class="small">Free reading practice: <a href="/learn/worksheets/${r.slug}/${WS.yearSlug(g.label)}/${wsSheets[0].id}/">${esc(wsSheets[0].title)}</a> (printable worksheet with answers)${wsSheets.length > 1 ? `, or <a href="/learn/worksheets/#${WS.yearSlug(g.label)}">see all ${wsSheets.length} ${esc(g.label)} worksheets</a>` : ""}.</p>` : "";
   const body = `<div class="crumbs"><a href="/">Home</a> › <a href="/learn/">Guides</a> › <a href="/learn/${r.slug}/">${esc(r.short)}</a> › ${esc(g.label)}</div>
 <h1>${esc(title)}</h1>
 ${intro}
@@ -328,7 +331,7 @@ ${cards}
 ${length}
 <h2>Three practice prompts to try this week</h2>
 <ol>${prompts.map((p) => `<li>${esc(p)}</li>`).join("")}</ol>
-<p class="small">Want more? <a href="/learn/prompts/?stage=${g.tier}">Try the free prompt generator</a> for this age group.</p>
+<p class="small">Want more? <a href="/learn/prompts/?stage=${g.tier}">Try the free prompt generator</a> for this age group.</p>${wsLink}
 <h2>Common questions</h2>
 ${faq}
 <h2>How to give feedback at home</h2>
@@ -376,7 +379,7 @@ function buildHub(regionGroups) {
 <ul class="grid">
 ${items}
 </ul>
-<p>Looking for something to write about? Try the <a href="/learn/prompts/">free writing prompt generator</a>: choose an age group, a topic and a kind of writing.</p>
+<p>Looking for something to write about? Try the <a href="/learn/prompts/">free writing prompt generator</a>: choose an age group, a topic and a kind of writing.</p>${WS.published().length ? `<p>Want reading practice? Download our <a href="/learn/worksheets/">free printable reading comprehension worksheets</a> for UK Years 3 to 6, with answer keys.</p>` : ""}
 ${ctaBlock("hub", "Get feedback on your child's writing")}
 <p class="small">General information based on published curriculum documents. Always check your school's own guidance.</p>`;
   return layout({ title, description, canonical: urlFor.hub(), jsonld, body });
@@ -434,6 +437,9 @@ function buildAll() {
   files[pathFor.hub()] = buildHub(regionGroups);
   files[pathFor.prompts()] = buildPromptsPage();
   const urls = [urlFor.hub(), urlFor.prompts()];
+  const ws = WS.buildWorksheetFiles({ layout, breadcrumbLd, ctaBlock });
+  Object.assign(files, ws.files);
+  urls.push(...ws.urls);
   regionGroups.forEach(({ region, groups }) => {
     files[pathFor.region(region)] = buildRegion(region, groups);
     urls.push(urlFor.region(region));
@@ -447,7 +453,7 @@ function buildSitemap(learnUrls) {
   const entry = (loc, lastmod, freq, pri) => `  <url>\n    <loc>${loc}</loc>\n    <lastmod>${lastmod}</lastmod>\n    <changefreq>${freq}</changefreq>\n    <priority>${pri}</priority>\n  </url>`;
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` + [
     entry(`${SITE}/`, "2026-09-28", "weekly", "1.0"),
-    ...learnUrls.map((u) => entry(u, LASTMOD, "monthly", u === urlFor.hub() ? "0.8" : u === urlFor.prompts() ? "0.8" : u.split("/").length <= 6 ? "0.7" : "0.6")),
+    ...learnUrls.map((u) => entry(u, u.includes("/learn/worksheets/") ? WS.WS_LASTMOD : LASTMOD, "monthly", u === urlFor.hub() ? "0.8" : u === urlFor.prompts() ? "0.8" : u.split("/").length <= 6 ? "0.7" : "0.6")),
     entry(`${SITE}/privacy.html`, "2026-09-26", "monthly", "0.3"),
     entry(`${SITE}/terms.html`, "2026-09-26", "monthly", "0.3"),
   ].join("\n") + "\n</urlset>\n";
