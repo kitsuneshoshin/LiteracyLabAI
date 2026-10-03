@@ -263,6 +263,12 @@ test("the homepage carries the Google Search Console verification tag in its hea
   assert.match(head, /<meta name="google-site-verification" content="[A-Za-z0-9_-]{30,}" \/>/);
 });
 
+test("the homepage carries the Pinterest website-claim tag in its head (so the claim stays valid and pins keep their attribution)", () => {
+  const index = fs.readFileSync(path.join(ROOT, "index.html"), "utf8");
+  const head = index.slice(0, index.indexOf("</head>"));
+  assert.match(head, /<meta name="p:domain_verify" content="[0-9a-f]{32}"\s*\/>/);
+});
+
 test("country flags on the guides are small images (flag emoji show as two letters, like GB and US, on Windows), and no flag emoji is left in a guide page", () => {
   for (const [rel, html] of pageFiles) {
     assert.ok(!/[\u{1F1E6}-\u{1F1FF}]/u.test(html), `${rel}: still contains a flag emoji`);

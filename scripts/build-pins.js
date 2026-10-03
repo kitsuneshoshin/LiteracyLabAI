@@ -25,7 +25,8 @@ function pinDescription(s) {
   return `Free printable ${s.year} reading comprehension worksheet (UK, ${W.ageRange(s.year)}). An original ${kind} with ${s.questions.length} questions and a full answer key. Download the PDF, no sign-up needed. Great for homework, revision or home learning. #readingcomprehension #${s.year.replace(" ", "").toLowerCase()} #freeprintable #homeschooluk #ks2english`;
 }
 const pinLink = (s) => `${W.pageUrl(s)}?utm_source=pinterest&utm_medium=social&utm_campaign=pin-${s.id}`;
-const pinBoard = (s) => `${s.year} Reading Comprehension Worksheets (free printables)`;
+// Pinterest limits board names to 50 characters; these match the boards on the account.
+const pinBoard = (s) => `${s.year} Reading Comprehension Worksheets`;
 
 function pinHtml(s) {
   const bg = BG[s.kind] || BG.story;
