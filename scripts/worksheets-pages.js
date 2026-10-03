@@ -167,7 +167,7 @@ function sheetCtaHtml(s) {
 <section class="cta">
   <h2>Want feedback on your child's own writing?</h2>
   <p>You mark the worksheet yourself with the answer key. LiteracyLab AI is different: it reads what your child has written and gives specific feedback, such as what worked, one thing to try next, and a corrected version, matched to their ${r.gradeNoun}. The Free plan includes 3 pieces a month and needs no card.</p>
-  <p><a class="btn" href="/app.html?utm_source=learn&amp;utm_medium=worksheet&amp;utm_campaign=worksheet-${esc(s.id)}">Try it free</a></p>
+  <p><a class="btn" href="/app.html">Try it free</a></p>
 </section>`;
 }
 

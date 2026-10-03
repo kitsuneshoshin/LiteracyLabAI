@@ -35,7 +35,7 @@ test("every year group the app supports a mapped curriculum for has a page, and 
   const uk = groupsFor(REGIONS.find((r) => r.slug === "uk")).map((g) => g.label);
   assert.ok(uk.includes("Years 7–9") && uk.includes("Years 10–11"), "England's shared years are one page each");
   const wsPages = require("../scripts/worksheets-pages").published().length;
-  assert.equal(pageFiles.length, 2 + REGIONS.length + REGIONS.reduce((n, r) => n + groupsFor(r).length, 0) + (wsPages ? 1 + wsPages : 0), "hub, prompt generator, regions, year groups, and the worksheets hub and sheets");
+  assert.equal(pageFiles.length, 2 + REGIONS.length + REGIONS.reduce((n, r) => n + groupsFor(r).length, 0) + (wsPages ? 1 + wsPages : 0) + require("../scripts/landing-pages").PAGES.length, "hub, prompt generator, regions, year groups, the worksheets hub and sheets, and the landing pages");
 });
 
 test("every focus area in the curriculum data has a plain-English explanation and something to try at home", () => {

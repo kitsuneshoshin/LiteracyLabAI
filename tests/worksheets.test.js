@@ -248,7 +248,7 @@ test("each sheet page has the passage, every question, an answer key, PDF links,
     assert.match(html, /Answer key for parents and teachers/);
     assert.ok(html.includes(`href="${W.pdfUrl(s)}"`) && html.includes(`href="${W.pdfUrl(s, true)}"`), `${s.id}: PDF links`);
     assert.ok(html.includes(s.writeAfter.replace(/'/g, "&#39;")) || html.includes(s.writeAfter), `${s.id}: writing task`);
-    assert.match(html, /utm_medium=worksheet&amp;utm_campaign=worksheet-/);
+    assert.ok(!/utm_/.test(html.replace(/utm_source=pinterest/g, "")), "no internal utm tags");
     assert.match(html, /You mark the worksheet yourself/, "says plainly that the tool gives feedback on writing, not on these answers");
     assert.ok(!/noindex/.test(html));
     assert.match(html, /"@type":"LearningResource"/);
