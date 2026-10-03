@@ -47,6 +47,25 @@ test("every sheet is complete: eight questions, answers, reasons, marks, a writi
   }
 });
 
+test("a sheet's id matches its title, so the web address always says what the sheet is", () => {
+  const slug = (t) => t.toLowerCase().replace(/[‘’']/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  for (const s of SHEETS) assert.equal(s.id, slug(s.title), `${s.id} vs "${s.title}"`);
+});
+
+test("multiple-choice questions have options A to D, a valid single-letter answer, and the right answer is not always the same letter", () => {
+  const letters = [];
+  for (const s of SHEETS) {
+    for (const q of s.questions.filter((x) => /\nA\./.test(x.q))) {
+      assert.ok(/^[A-D]$/.test(q.answer) || /^\d = [A-C],/.test(q.answer) || /^[A-C]$/.test(q.answer), `${s.id}: multiple-choice answer "${q.answer}"`);
+      if (/^[A-D]$/.test(q.answer)) {
+        letters.push(q.answer);
+        for (const l of ["A.", "B.", "C."]) assert.ok(q.q.includes(`\n${l}`), `${s.id}: option ${l}`);
+      }
+    }
+  }
+  assert.ok(letters.length >= 2 && new Set(letters).size > 1, `answers should vary: ${letters}`);
+});
+
 test("each sheet really practises the skill it is tagged with, and mixes question types", () => {
   for (const s of SHEETS) {
     const count = (types) => s.questions.filter((q) => types.includes(q.type)).length;
@@ -173,7 +192,9 @@ test("the print pages carry the writing task, answer lines and a copyright line,
   for (const s of SHEETS) {
     const ws = W.printWorksheetHtml(s);
     assert.ok(ws.includes("Name:") && ws.includes("Writing task:") && /class="line"/.test(ws));
-    assert.ok(s.questions.every((q) => q.answer.length < 30 || !ws.includes(q.answer.slice(0, 30))), `${s.id}: the student sheet must not contain the answers`);
+    // Answers may legitimately echo the passage, so look for them only after it.
+    const afterPassage = ws.slice(ws.indexOf("</div>", ws.indexOf('class="passage"')));
+    assert.ok(s.questions.every((q) => q.answer.length < 30 || !afterPassage.includes(q.answer.slice(0, 30))), `${s.id}: the student sheet must not contain the answers`);
     const key = W.printAnswersHtml(s);
     for (const q of s.questions) assert.ok(key.includes(q.answer.slice(0, 20).replace(/&/g, "&amp;").replace(/"/g, "&quot;")) || key.includes(q.answer.slice(0, 12)), `${s.id}: answer present in key`);
     assert.match(ws, /Free to print and copy/);

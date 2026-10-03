@@ -210,6 +210,10 @@ function printQuestion(q, i) {
   let work;
   if (isBoxList(rest)) {
     work = rest.map((l) => `<div class="opt"><span class="box"></span>${esc(l.replace(/^•\s*/, ""))}</div>`).join("");
+  } else if (/^Match/i.test(stem)) {
+    // "Match each word to its meaning": one answer slot per numbered item.
+    const items = (rest[0].match(/\d+\./g) || []).map((n) => n.replace(".", ""));
+    work = rest.map((l) => `<div class="opt">${esc(l)}</div>`).join("") + `<div class="answerbox">${items.map((n) => `${n} = <span style="width:14mm"></span>`).join("&nbsp;&nbsp;&nbsp;")}</div>`;
   } else if (optionLetters) {
     work = rest.map((l) => `<div class="opt">${esc(l)}</div>`).join("") + `<div class="answerbox">Answer: <span></span></div>`;
   } else if (rest.length) {

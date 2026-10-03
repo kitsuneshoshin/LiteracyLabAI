@@ -123,9 +123,13 @@ test("the sitemap lists every guide page, once, plus the homepage, privacy and t
 
 test("honest claims: no superlatives, guarantees, endorsements or invented statistics anywhere in the guides", () => {
   const banned = /\b(guarantee[sd]?|guaranteed|proven|#1|number one|best in|world'?s best|official(ly)?\b|endorsed|approved by|certified|miracle|instantly|\d+\s?%|studies show|research shows|experts agree)\b/i;
+  // Worksheet passages are history and science text, where "officially recorded" is a fact
+  // about the past, not a claim about us. Every other banned phrase still applies to them.
+  const bannedInWorksheets = new RegExp(banned.source.replace("official(ly)?\\b|", ""), "i");
+  assert.notEqual(bannedInWorksheets.source, banned.source, "the worksheet exemption must remove only the word official");
   for (const [rel, html] of pageFiles) {
     const t = text(html);
-    const hit = t.match(banned);
+    const hit = t.match(rel.startsWith("learn/worksheets/") ? bannedInWorksheets : banned);
     assert.ok(!hit, `${rel}: contains "${hit && hit[0]}"`);
     assert.ok(!/undefined|\[object|NaN|null/.test(t), `${rel}: leaked a bad value`);
   }
