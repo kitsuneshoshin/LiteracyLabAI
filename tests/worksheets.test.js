@@ -350,3 +350,38 @@ test("pins respect Pinterest's limits and match the country: title 100, descript
   }
   assert.equal(boards.size, 8, "one board per country and grade: UK Years 3-6 and US Grades 3-6");
 });
+
+test("answer keys mirror the question: every put-in-order answer uses exactly the listed steps in a clear 1-to-n order", () => {
+  const clean = (t) => t.toLowerCase().replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim();
+  for (const s of SHEETS) {
+    for (const q of s.questions.filter((x) => x.type === "order")) {
+      const items = q.q.split("\n").slice(1).map((l) => clean(l.replace(/^•\s*/, "")));
+      const ans = q.answer.split(/\s*\d\.\s*/).filter(Boolean).map(clean);
+      assert.deepEqual([...ans].sort(), [...items].sort(), `${s.id}: the answer must use the listed steps word for word`);
+      assert.deepEqual([...q.answer.matchAll(/(\d)\./g)].map((m) => Number(m[1])), items.map((_, i) => i + 1), `${s.id}: numbered 1 to ${items.length}`);
+    }
+  }
+});
+
+test("a multiple-choice question never gives the answer away by length: the right option is not the only longest one", () => {
+  for (const s of SHEETS) {
+    for (const q of s.questions.filter((x) => /\nA\./.test(x.q) && /^[A-D]$/.test(x.answer))) {
+      const opts = q.q.split("\n").slice(1).filter((l) => /^[A-D]\./.test(l));
+      const lens = opts.map((l) => l.length);
+      const max = Math.max(...lens);
+      const correct = opts.find((l) => l.startsWith(q.answer + "."));
+      assert.ok(!(correct.length === max && lens.filter((n) => n === max).length === 1), `${s.id}: the correct option "${correct.slice(0, 40)}…" is the only longest one`);
+    }
+  }
+});
+
+test("no doubled words, unbalanced quotation marks or stray spaces in any sheet", () => {
+  for (const s of SHEETS) {
+    for (const t of [...s.passage.map((p) => p.p), ...s.questions.flatMap((q) => [q.q, q.answer, q.why]), s.blurb, s.writeAfter]) {
+      assert.ok(!/\b([A-Za-z]{2,})\s+\1\b/i.test(t), `${s.id}: doubled word in "${t.slice(0, 50)}…"`);
+      assert.equal((t.match(/“/g) || []).length, (t.match(/”/g) || []).length, `${s.id}: unbalanced quotes in "${t.slice(0, 50)}…"`);
+      assert.ok(!/\s[,.;:!?]/.test(t) && t === t.trim(), `${s.id}: stray space in "${t.slice(0, 50)}…"`);
+    }
+    for (const p of s.passage) assert.match(p.p.trim(), /[.!?”]$/, `${s.id}: a paragraph ends without punctuation`);
+  }
+});
