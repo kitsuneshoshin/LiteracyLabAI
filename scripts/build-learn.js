@@ -320,7 +320,7 @@ function buildPage(g, groups, idx) {
     breadcrumbLd(crumbs),
   ] };
 
-  const wsSheets = r.slug === "uk" ? WS.published().filter((s) => s.year === g.label) : [];
+  const wsSheets = WS.published().filter((s) => s.region === r.slug && s.year === g.label);
   const wsLink = wsSheets.length ? `<p class="small">Free reading practice: <a href="/learn/worksheets/${r.slug}/${WS.yearSlug(g.label)}/${wsSheets[0].id}/">${esc(wsSheets[0].title)}</a> (printable worksheet with answers)${wsSheets.length > 1 ? `, or <a href="/learn/worksheets/#${WS.yearSlug(g.label)}">see all ${wsSheets.length} ${esc(g.label)} worksheets</a>` : ""}.</p>` : "";
   const body = `<div class="crumbs"><a href="/">Home</a> › <a href="/learn/">Guides</a> › <a href="/learn/${r.slug}/">${esc(r.short)}</a> › ${esc(g.label)}</div>
 <h1>${esc(title)}</h1>
@@ -379,7 +379,7 @@ function buildHub(regionGroups) {
 <ul class="grid">
 ${items}
 </ul>
-<p>Looking for something to write about? Try the <a href="/learn/prompts/">free writing prompt generator</a>: choose an age group, a topic and a kind of writing.</p>${WS.published().length ? `<p>Want reading practice? Download our <a href="/learn/worksheets/">free printable reading comprehension worksheets</a> for UK Years 3 to 6, with answer keys.</p>` : ""}
+<p>Looking for something to write about? Try the <a href="/learn/prompts/">free writing prompt generator</a>: choose an age group, a topic and a kind of writing.</p>${WS.published().length ? `<p>Want reading practice? Download our <a href="/learn/worksheets/">free printable reading comprehension worksheets</a> for ${WS.levelsText()}, with answer keys.</p>` : ""}
 ${ctaBlock("hub", "Get feedback on your child's writing")}
 <p class="small">General information based on published curriculum documents. Always check your school's own guidance.</p>`;
   return layout({ title, description, canonical: urlFor.hub(), jsonld, body });
@@ -453,7 +453,7 @@ function buildSitemap(learnUrls) {
   const entry = (loc, lastmod, freq, pri) => `  <url>\n    <loc>${loc}</loc>\n    <lastmod>${lastmod}</lastmod>\n    <changefreq>${freq}</changefreq>\n    <priority>${pri}</priority>\n  </url>`;
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` + [
     entry(`${SITE}/`, "2026-09-28", "weekly", "1.0"),
-    ...learnUrls.map((u) => entry(u, u.includes("/learn/worksheets/") ? WS.WS_LASTMOD : LASTMOD, "monthly", u === urlFor.hub() ? "0.8" : u === urlFor.prompts() ? "0.8" : u.split("/").length <= 6 ? "0.7" : "0.6")),
+    ...learnUrls.map((u) => entry(u, WS.isWorksheetUrl(u) ? WS.lastmodForUrl(u) : LASTMOD, "monthly", u === urlFor.hub() ? "0.8" : u === urlFor.prompts() ? "0.8" : u.split("/").length <= 6 ? "0.7" : "0.6")),
     entry(`${SITE}/privacy.html`, "2026-09-26", "monthly", "0.3"),
     entry(`${SITE}/terms.html`, "2026-09-26", "monthly", "0.3"),
   ].join("\n") + "\n</urlset>\n";
