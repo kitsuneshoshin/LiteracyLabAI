@@ -321,7 +321,7 @@ function buildPage(g, groups, idx) {
   ] };
 
   const wsSheets = WS.published().filter((s) => s.region === r.slug && s.year === g.label);
-  const wsLink = wsSheets.length ? `<p class="small">Free reading practice: <a href="/learn/worksheets/${r.slug}/${WS.yearSlug(g.label)}/${wsSheets[0].id}/">${esc(wsSheets[0].title)}</a> (printable worksheet with answers)${wsSheets.length > 1 ? `, or <a href="/learn/worksheets/#${WS.yearSlug(g.label)}">see all ${wsSheets.length} ${esc(g.label)} worksheets</a>` : ""}.</p>` : "";
+  const wsLink = wsSheets.length ? `<p class="small">Free reading practice: <a href="/learn/worksheets/${r.slug}/${WS.yearSlug(g.label)}/${wsSheets[0].id}/">${esc(wsSheets[0].title)}</a> (printable worksheet with answers)${wsSheets.length > 1 ? `, or <a href="/learn/worksheets/#${WS.anchorFor({ region: r.slug, year: g.label })}">see all ${wsSheets.length} ${esc(g.label)} worksheets</a>` : ""}.</p>` : "";
   const body = `<div class="crumbs"><a href="/">Home</a> › <a href="/learn/">Guides</a> › <a href="/learn/${r.slug}/">${esc(r.short)}</a> › ${esc(g.label)}</div>
 <h1>${esc(title)}</h1>
 ${intro}

@@ -13,8 +13,8 @@ const { GRADE_MAPPED_TARGETS } = require("../api/_lib/masteryTargets");
 const ROOT = path.join(__dirname, "..");
 const SHEETS = W.SHEETS;
 const TYPES = ["retrieval", "vocabulary", "inference", "explain", "order", "summary", "language", "opinion", "quote"];
-const COUNTRY_KEY = { uk: "🇬🇧 United Kingdom", us: "🇺🇸 United States" };
-const PER_LEVEL = { uk: 3, us: 2 };
+const COUNTRY_KEY = Object.fromEntries(Object.entries(W.REGION).map(([k, r]) => [k, r.countryKey]));
+const PER_LEVEL = { uk: 3, us: 2, australia: 2 };
 const norm = (s) => s.toLowerCase().replace(/[‘’]/g, "'").replace(/[“”]/g, '"');
 const passageText = (s) => s.passage.map((p) => (p.h ? p.h + " " : "") + p.p).join(" ");
 const sentences = (s) => s.passage.map((p) => p.p).join(" ").split(/(?<=[.!?])["”]?\s+/).filter(Boolean);
@@ -23,13 +23,13 @@ const of = (region) => SHEETS.filter((s) => s.region === region);
 // an alternative answer we accept, or a worked example of a good answer.
 const NOT_FROM_PASSAGE = ["flew up smoothly and powerfully", "wax tablets", "wonderful", "An owl has big eyes that let in lots of light, so it can see in the dark."];
 // A UK Year 4 child (8 to 9) reads at about a US Grade 3 level, so the bands step up accordingly.
-const SENTENCE_CAP = { uk: { 3: 12, 4: 15, 5: 17, 6: 20 }, us: { 3: 15, 4: 17, 5: 19, 6: 20 } };
-const WORDS = { uk: { 3: [150, 240], 4: [170, 270], 5: [260, 400], 6: [300, 480] }, us: { 3: [170, 270], 4: [250, 380], 5: [280, 420], 6: [300, 480] } };
+const SENTENCE_CAP = { uk: { 3: 12, 4: 15, 5: 17, 6: 20 }, us: { 3: 15, 4: 17, 5: 19, 6: 20 }, australia: { 3: 15, 4: 17, 5: 19, 6: 20 } };
+const WORDS = { uk: { 3: [150, 240], 4: [170, 270], 5: [260, 400], 6: [300, 480] }, us: { 3: [170, 270], 4: [250, 380], 5: [280, 420], 6: [300, 480] }, australia: { 3: [170, 270], 4: [250, 380], 5: [280, 420], 6: [300, 480] } };
 
-test("the sheets: UK Years 3 to 6 (three each) and US Grades 3 to 6 (two each), all with unique ids", () => {
-  assert.equal(SHEETS.length, 12 + 8);
+test("the sheets: UK Years 3 to 6 (three each), US Grades 3 to 6 and Australian Years 3 to 6 (two each), all with unique ids", () => {
+  assert.equal(SHEETS.length, 12 + 8 + 8);
   assert.equal(new Set(SHEETS.map((s) => s.id)).size, SHEETS.length);
-  for (const region of ["uk", "us"]) {
+  for (const region of ["uk", "us", "australia"]) {
     for (const y of [3, 4, 5, 6]) assert.equal(of(region).filter((s) => W.yearNum(s.year) === y).length, PER_LEVEL[region], `${region} ${y}`);
     for (const s of of(region)) assert.equal(s.year, `${W.REGION[region].gradeWord} ${W.yearNum(s.year)}`, `${s.id}: level label`);
   }
@@ -101,6 +101,17 @@ test("US sheets practise their grade's Common Core reading focus (the app's own 
   }
 });
 
+test("Australian sheets practise comprehension strategies: finding, inferring, word meaning, language or prediction, and summarising", () => {
+  for (const s of of("australia")) {
+    const count = (types) => s.questions.filter((q) => types.includes(q.type)).length;
+    assert.ok(count(["retrieval"]) >= 1, `${s.id}: finding information`);
+    assert.ok(count(["inference", "explain"]) >= 2, `${s.id}: at least two questions that need the reader to infer or explain`);
+    assert.ok(count(["vocabulary"]) >= 1, `${s.id}: word meaning`);
+    assert.ok(count(["summary"]) >= 1, `${s.id}: summarising`);
+    assert.ok(count(["language", "opinion", "order", "quote"]) >= 1, `${s.id}: language, prediction, sequencing or quoting`);
+  }
+});
+
 test("quote questions ask for quotation marks and their model answers are real, exact quotes from the passage", () => {
   for (const s of SHEETS) {
     const p = norm(passageText(s));
@@ -149,7 +160,7 @@ test("British spelling in UK sheets, American spelling in US sheets, and clean t
   const BRITISH = /\b(colour\w*|favour\w*|neighbour\w*|grey\w*|centre\w*|metre\w*|litre\w*|realis\w*|organis\w*|recognis\w*|summaris\w*|practis\w*|travell\w*|labour\w*|honour\w*|behaviour\w*|cheque|pyjamas|mum|mummy|grandad|tyre|kerb|plough|storey|learnt|spelt|whilst|towards|programme|jewellery|aluminium|mould|cosy)\b/i;
   for (const s of SHEETS) {
     const all = JSON.stringify(s).replace(/\b(size|sizes|prize|prizes)\b/gi, "");
-    if (s.region === "uk") assert.ok(!AMERICAN.test(all), `${s.id}: American spelling in a UK sheet`);
+    if (s.region !== "us") assert.ok(!AMERICAN.test(all) && !/\bmom\b/i.test(all), `${s.id}: American spelling in a ${s.region} sheet`);
     else {
       assert.ok(!BRITISH.test(all), `${s.id}: British spelling in a US sheet: ${(all.match(BRITISH) || [])[0]}`);
       assert.ok(!/\b(Mr|Mrs|Ms|Dr)\s/.test(passageText(s)), `${s.id}: US titles take a period (Mr. Mrs. Ms. Dr.)`);
@@ -164,6 +175,13 @@ test("US dates and numbers follow American usage", () => {
   for (const s of of("us")) {
     const text = JSON.stringify(s);
     assert.ok(!/\b\d{1,2}(st|nd|rd|th)? (January|February|March|April|May|June|July|August|September|October|November|December)\b/.test(text), `${s.id}: write dates as Month Day (July 20), not 20 July`);
+  }
+});
+
+test("UK and Australian dates are written day first (20 July), never the American way", () => {
+  for (const s of SHEETS.filter((x) => x.region !== "us")) {
+    const text = JSON.stringify(s);
+    assert.ok(!/\b(January|February|March|April|May|June|July|August|September|October|November|December) \d{1,2}\b/.test(text), `${s.id}: write dates day first, as in 8 June 1951`);
   }
 });
 
@@ -239,7 +257,7 @@ test("each sheet page has the passage, every question, an answer key, PDF links,
   }
 });
 
-test("page wording matches the country: points and Common Core for the US, marks and the national framework for the UK", () => {
+test("page wording matches the country: points and Common Core (US), marks and the national framework (UK), marks and the Australian Curriculum (Australia)", () => {
   for (const s of publishedSheets) {
     const html = files[W.pagePath(s)];
     const text = html.replace(/<script[\s\S]*?<\/script>/g, "").replace(/<[^>]+>/g, " ");
@@ -251,6 +269,14 @@ test("page wording matches the country: points and Common Core for the US, marks
       assert.match(text, /matched to their grade/);
       assert.match(text, /Informational text|Story/);
       assert.ok(!/\bRL\.\d|RI\.\d/.test(text) || /\((RL|RI)\.\d\.\d\)/.test(text), `${s.id}: standards codes look right`);
+    } else if (s.region === "australia") {
+      assert.match(text, /\d+ marks?\b/, `${s.id}: marks`);
+      assert.ok(!/\b\d+ points?\b/.test(text), `${s.id}: an Australian page should not say points`);
+      assert.match(text, /This sheet links to Comprehension Strategies \(AC9E[3-6]LY05\)/);
+      assert.match(text, /Australian Curriculum \(version 9\)/);
+      assert.match(text, /What this practises/);
+      assert.match(text, /matched to their year/);
+      assert.ok(!/Common Core|national curriculum test framework/.test(text), `${s.id}: wrong curriculum named`);
     } else {
       assert.match(text, /\d+ marks?\b/, `${s.id}: marks`);
       assert.ok(!/\b\d+ points?\b/.test(text), `${s.id}: a UK page should not say points`);
@@ -274,17 +300,24 @@ test("Common Core and UK skill codes: stories use RL, informational text uses RI
   assert.equal(us("story", 6, "opinion"), null);
   const uk = (type) => W.skillCode(type, { region: "uk", kind: "story", year: "Year 4" });
   assert.deepEqual(["retrieval", "vocabulary", "summary", "inference", "order"].map(uk), ["2b", "2a", "2c", "2d", null]);
+  const au = (type) => W.skillCode(type, { region: "australia", kind: "story", year: "Year 4" });
+  assert.deepEqual(["retrieval", "vocabulary", "summary", "inference"].map(au), [null, null, null, null], "Australia is linked once per sheet, not per question");
+  assert.equal(W.curriculumLink({ region: "australia", year: "Year 5", target: "Comprehension Strategies" }), "Comprehension Strategies (AC9E5LY05)");
 });
 
 test("the worksheets hub lists every published sheet, in country sections, and nothing else", () => {
   const hub = files[W.hubPath()];
   for (const s of SHEETS) assert.equal(hub.includes(`/${s.id}/`), !!s.published, `${s.id} on the hub`);
   for (const region of new Set(publishedSheets.map((s) => s.region))) assert.ok(hub.includes(`id="${region}"`), `${region} section`);
-  if (publishedSheets.some((s) => s.region === "us") && publishedSheets.some((s) => s.region === "uk")) {
-    assert.match(hub, /UK Years 3\u20136 and US Grades 3\u20136/);
-    assert.ok(hub.indexOf('id="uk"') < hub.indexOf('id="us"'), "UK section first");
+  const present = [...new Set(publishedSheets.map((s) => s.region))].sort((x, y) => W.REGION[x].order - W.REGION[y].order);
+  if (present.length > 1) {
+    for (const k of present) assert.ok(hub.includes(`${W.REGION[k].short} ${W.REGION[k].levels.replace(" to ", "\u2013")}`), `${k} named in the hub intro`);
+    const at = present.map((k) => hub.indexOf(`id="${k}"`));
+    assert.deepEqual([...at].sort((x, y) => x - y), at, "country sections in order: UK, US, Australia");
   }
-  for (const s of publishedSheets) assert.ok(hub.includes(`id="${W.yearSlug(s.year)}"`), `${s.year} anchor`);
+  for (const s of publishedSheets) assert.ok(hub.includes(`id="${W.anchorFor(s)}"`), `${s.year} anchor`);
+  const ids = [...hub.matchAll(/\sid="([^"]+)"/g)].map((m) => m[1]);
+  assert.equal(new Set(ids).size, ids.length, `hub ids must be unique (Australian Year 3 must not clash with UK Year 3): ${ids}`);
 });
 
 test("the guides link to the worksheets and the sitemap lists them with their own dates", () => {
@@ -335,20 +368,25 @@ test("pins respect Pinterest's limits and match the country: title 100, descript
     assert.ok(title.length <= 100, `${s.id}: pin title ${title.length}`);
     assert.ok(desc.length <= 500, `${s.id}: pin description ${desc.length}`);
     assert.ok(board.length <= 50, `${s.id}: board name "${board}" is ${board.length}`);
-    assert.match(link, /^https:\/\/www\.literacylabai\.com\/learn\/worksheets\/(uk|us)\/[a-z0-9-]+\/[a-z0-9-]+\/\?utm_source=pinterest&utm_medium=social&utm_campaign=pin-/);
+    assert.match(link, /^https:\/\/www\.literacylabai\.com\/learn\/worksheets\/(uk|us|australia)\/[a-z0-9-]+\/[a-z0-9-]+\/\?utm_source=pinterest&utm_medium=social&utm_campaign=pin-/);
     assert.ok(link.includes(`/${s.region}/`) && link.includes(`/${s.id}/`));
     assert.ok((desc.match(/#\w+/g) || []).length >= 3 && (desc.match(/#\w+/g) || []).length <= 6, `${s.id}: hashtags`);
     if (s.region === "us") {
       assert.match(title, /Free \dth Grade|Free 3rd Grade/);
       assert.match(desc, /#commoncore/);
       assert.ok(!/practise|revision|homeschooluk|ks2|\bUK\b|colour/i.test(desc), `${s.id}: US pin has UK wording`);
+    } else if (s.region === "australia") {
+      assert.match(title, /^Free Australian Year [3-6] Reading Comprehension: /);
+      assert.match(desc, /#homeschoolaustralia/);
+      assert.ok(!/commoncore|homeschooluk|ks2|homework, review|\bUK\b/i.test(desc), `${s.id}: Australian pin has UK or US wording`);
+      assert.ok(pins.pinBoard(s).startsWith("Australian Year "), "Australian boards are named so they do not clash with the UK boards");
     } else {
       assert.match(desc, /#homeschooluk/);
       assert.ok(!/commoncore|homework, review/i.test(desc), `${s.id}: UK pin has US wording`);
     }
     boards.set(board, (boards.get(board) || 0) + 1);
   }
-  assert.equal(boards.size, 8, "one board per country and grade: UK Years 3-6 and US Grades 3-6");
+  assert.equal(boards.size, 12, "one board per country and year: UK, US and Australia, Years/Grades 3-6");
 });
 
 test("answer keys mirror the question: every put-in-order answer uses exactly the listed steps in a clear 1-to-n order", () => {

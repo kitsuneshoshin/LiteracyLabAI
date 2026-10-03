@@ -12,6 +12,7 @@
 //   node scripts/build-worksheet-pdfs.js  writes the PDFs with headless Chrome
 
 const { SHEETS } = require("./worksheets-content");
+const { GRADE_MAPPED_TARGETS } = require("../api/_lib/masteryTargets");
 
 const SITE = "https://www.literacylabai.com";
 const DEFAULT_ADDED = "2026-10-03";
@@ -21,14 +22,20 @@ const REGION = {
   uk: {
     slug: "uk", short: "UK", gradeWord: "Year", gradeNoun: "year", locale: "en-GB", lang: "en-GB", paper: "A4",
     unit: "mark", infoText: "Information text", ageOf: (n) => [n + 4, n + 5],
-    levels: "Years 3 to 6", order: 1,
+    levels: "Years 3 to 6", order: 1, countryKey: "🇬🇧 United Kingdom",
     standards: "The codes in brackets are the reading content domains from the national curriculum test framework.",
   },
   us: {
     slug: "us", short: "US", gradeWord: "Grade", gradeNoun: "grade", locale: "en-US", lang: "en-US", paper: "Letter",
     unit: "point", infoText: "Informational text", ageOf: (n) => [n + 5, n + 6],
-    levels: "Grades 3 to 6", order: 2,
+    levels: "Grades 3 to 6", order: 2, countryKey: "🇺🇸 United States",
     standards: "The codes in brackets are Common Core State Standards for English Language Arts (reading). Standards vary by state, so check what your child's school uses.",
+  },
+  australia: {
+    slug: "australia", short: "Australia", gradeWord: "Year", gradeNoun: "year", locale: "en-AU", lang: "en-AU", paper: "A4",
+    unit: "mark", infoText: "Information text", ageOf: (n) => [n + 5, n + 6],
+    levels: "Years 3 to 6", order: 3, countryKey: "🇦🇺 Australia",
+    standards: "Schools and states deliver the Australian Curriculum (version 9) in different ways, so check what your child's school uses.",
   },
 };
 
@@ -38,7 +45,10 @@ const yearNum = (label) => Number(String(label).match(/(\d+)$/)[1]);
 const yearSlug = (label) => String(label).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
 const ordinal = (n) => `${n}${["th", "st", "nd", "rd"][n % 100 > 10 && n % 100 < 14 ? 0 : n % 10 < 4 ? n % 10 : 0]}`;
 // How a level is named in titles, pins and prose: "Year 4" in the UK, "4th Grade" in the US.
-const levelName = (s) => (s.region === "us" ? `${ordinal(yearNum(s.year))} Grade` : s.year);
+const levelName = (s) => (s.region === "us" ? `${ordinal(yearNum(s.year))} Grade` : s.region === "australia" ? `Australian ${s.year}` : s.year);
+// Hub anchors: UK "year-3" and US "grade-3" are unique already; Australia needs its own so it does not clash with the UK.
+const anchorFor = (s) => (s.region === "australia" ? `australia-${yearSlug(s.year)}` : yearSlug(s.year));
+const joinAnd = (a) => (a.length < 2 ? a.join("") : `${a.slice(0, -1).join(", ")} and ${a[a.length - 1]}`);
 const ageRange = (s) => { const [a, b] = regionOf(s).ageOf(yearNum(s.year)); return `ages ${a} to ${b}`; };
 const MINUTES = { 3: 15, 4: 20, 5: 25, 6: 30 };
 const minutesFor = (s) => MINUTES[yearNum(s.year)] || 20;
@@ -64,6 +74,7 @@ const SKILL = {
 const UK_CODE = { retrieval: "2b", vocabulary: "2a", summary: "2c", inference: "2d" };
 function skillCode(type, s) {
   if (s.region === "uk") return UK_CODE[type] || null;
+  if (s.region === "australia") return null; // one comprehension focus per year, linked once on the page
   const n = yearNum(s.year);
   const p = s.kind === "story" ? "RL" : "RI";
   if (type === "retrieval") return `${p}.${n}.1`;
@@ -73,7 +84,12 @@ function skillCode(type, s) {
   if (type === "quote" && n >= 5) return `${p}.${n}.1`;
   return null;
 }
-const skillName = (type, s) => (s.region === "uk" && type === "summary" ? "Summarising" : SKILL[type]);
+const skillName = (type, s) => (s.region !== "us" && type === "summary" ? "Summarising" : SKILL[type]);
+// The one curriculum link for countries that do not code every question type (Australia).
+function curriculumLink(s) {
+  const t = ((GRADE_MAPPED_TARGETS[regionOf(s).countryKey] || {})[s.year] || []).find((x) => x.name === s.target);
+  return t ? `${t.name} (${t.standard.split(" · ")[0]})` : null;
+}
 const skillLabel = (type, s) => { const c = skillCode(type, s); return c ? `${skillName(type, s)} (${c})` : skillName(type, s); };
 
 // Search results show about 160 characters, so cut at a word boundary rather than mid-word.
@@ -162,9 +178,10 @@ function buildSheetPage(s, ctx, siblings) {
   // A title that already ends in ? or ! reads better with a dash than a colon.
   const join = /[?!]$/.test(s.title) ? " –" : ":";
   const title = `${s.title}${join} free ${lvl} reading comprehension worksheet (printable PDF)`;
-  const trimmed = title.length <= 72 ? title : `${s.title}${join} free ${lvl} reading worksheet (PDF)`;
+  // Long titles fall back to shorter wording so the page title stays readable in search results.
+  const trimmed = [title, `${s.title}${join} free ${lvl} reading worksheet (PDF)`, `${s.title}${join} free ${lvl} worksheet`].find((t) => t.length <= 72) || `${s.title} | ${lvl} worksheet`;
   const description = fitDescription(`${s.blurb} Free printable PDF with answers.`);
-  const crumbs = [["Home", `${SITE}/`], ["Guides", `${SITE}/learn/`], ["Worksheets", hubUrl()], [`${r.short} ${s.year}`, `${hubUrl()}#${yearSlug(s.year)}`], [s.title, pageUrl(s)]];
+  const crumbs = [["Home", `${SITE}/`], ["Guides", `${SITE}/learn/`], ["Worksheets", hubUrl()], [`${r.short} ${s.year}`, `${hubUrl()}#${anchorFor(s)}`], [s.title, pageUrl(s)]];
   const skills = [...new Set(s.questions.map((q) => skillLabel(q.type, s)))];
   const [a, b] = r.ageOf(yearNum(s.year));
   const jsonld = { "@context": "https://schema.org", "@graph": [
@@ -175,15 +192,15 @@ function buildSheetPage(s, ctx, siblings) {
   const body = `<div class="crumbs"><a href="/">Home</a> › <a href="/learn/">Guides</a> › <a href="/learn/worksheets/">Worksheets</a> › ${esc(s.title)}</div>
 <h1>${esc(s.title)}</h1>
 <p class="lead">${esc(s.blurb)}</p>
-<p class="meta"><span><b>${esc(s.year)}</b> (${esc(ageRange(s))}${r.slug === "us" ? "" : ", UK"})</span><span>${kindLabel(s)}</span><span>About ${minutesFor(s)} minutes</span><span>${marksText(s, totalMarks(s))}</span><span>${wordCount(s)} words</span></p>
+<p class="meta"><span><b>${esc(s.year)}</b> (${esc(ageRange(s))}${r.slug === "us" ? "" : ", " + r.short})</span><span>${kindLabel(s)}</span><span>About ${minutesFor(s)} minutes</span><span>${marksText(s, totalMarks(s))}</span><span>${wordCount(s)} words</span></p>
 <div class="dl"><a class="btn" href="${pdfUrl(s)}" download>Download the worksheet (PDF)</a><a class="btn alt" href="${pdfUrl(s, true)}" download>Download the answers (PDF)</a></div>
 <h2>Read the passage</h2>
 <div class="passage">${passageHtml(s)}</div>
 <h2>Answer the questions</h2>
 ${questionsHtml(s)}
 <details class="key"><summary>Answer key for parents and teachers</summary>${answerKeyHtml(s)}</details>
-<h2>What this ${r.slug === "uk" ? "practises" : "practices"}</h2>
-<p>${esc(skills.join(", "))}. ${esc(r.standards)} ${r.unit === "point" ? "Points" : "Marks"} and answers are a guide: accept any sensible answer that is backed up by the text.</p>
+<h2>What this ${r.slug === "us" ? "practices" : "practises"}</h2>
+<p>${esc(skills.join(", "))}. ${curriculumLink(s) && r.slug === "australia" ? `This sheet links to ${esc(curriculumLink(s))}. ` : ""}${esc(r.standards)} ${r.unit === "point" ? "Points" : "Marks"} and answers are a guide: accept any sensible answer that is backed up by the text.</p>
 ${sheetCtaHtml(s)}
 ${more}
 <p class="small">${esc(COPYRIGHT)} The passage and questions were written for LiteracyLab AI.</p>`;
@@ -193,7 +210,7 @@ ${more}
 // "UK Years 3 to 6 and US Grades 3 to 6", built from the countries that have published sheets.
 function levelsText() {
   const regions = [...new Set(published().map((s) => s.region))].sort((x, y) => REGION[x].order - REGION[y].order);
-  return regions.map((k) => `${REGION[k].short} ${REGION[k].levels}`).join(" and ");
+  return joinAnd(regions.map((k) => `${REGION[k].short} ${REGION[k].levels}`));
 }
 
 function levelsSummary(list) {
@@ -205,11 +222,13 @@ function buildHubPage(ctx) {
   const { layout, breadcrumbLd } = ctx;
   const list = published();
   const regions = [...new Set(list.map((s) => s.region))].sort((x, y) => REGION[x].order - REGION[y].order);
-  const both = regions.length > 1;
-  const title = both ? "Free reading comprehension worksheets: UK Years 3–6 and US Grades 3–6" : "Free printable reading comprehension worksheets, Years 3 to 6 (UK)";
-  const description = both
-    ? "Free printable reading comprehension worksheets for UK Years 3 to 6 and US Grades 3 to 6, with original passages, questions and answer keys in PDF. No sign-up."
-    : "Free printable reading comprehension worksheets for UK Years 3 to 6: original passages, questions and answer keys, in PDF. No sign-up needed.";
+  const names = levelsSummary(list);
+  const title = regions.length > 2 ? "Free reading comprehension worksheets for the UK, US and Australia" : regions.length > 1 ? `Free reading comprehension worksheets: ${joinAnd(names)}` : "Free printable reading comprehension worksheets, Years 3 to 6 (UK)";
+  const description = regions.length > 2
+    ? "Free printable reading comprehension worksheets for UK Years 3 to 6, US Grades 3 to 6 and Australian Years 3 to 6, with original passages and answer keys in PDF."
+    : regions.length > 1
+      ? "Free printable reading comprehension worksheets for UK Years 3 to 6 and US Grades 3 to 6, with original passages, questions and answer keys in PDF. No sign-up."
+      : "Free printable reading comprehension worksheets for UK Years 3 to 6: original passages, questions and answer keys, in PDF. No sign-up needed.";
   const jsonld = { "@context": "https://schema.org", "@graph": [
     { "@type": "CollectionPage", name: title, description, url: hubUrl(), inLanguage: "en", dateModified: lastmodForUrl(hubUrl()) },
     breadcrumbLd([["Home", `${SITE}/`], ["Guides", `${SITE}/learn/`], ["Worksheets", hubUrl()]]),
@@ -220,14 +239,14 @@ function buildHubPage(ctx) {
     const years = [...new Set(rl.map((s) => s.year))].sort((x, y) => yearNum(x) - yearNum(y));
     return `<h2 class="region" id="${k}">${esc(r.short)} worksheets: ${esc(r.levels)}</h2>\n` + years.map((y) => {
       const sample = rl.find((s) => s.year === y);
-      return `<h3 id="${yearSlug(y)}">${esc(y)} (${esc(ageRange(sample))})</h3>
+      return `<h3 id="${anchorFor(sample)}">${esc(y)} (${esc(ageRange(sample))})</h3>
 <ul class="grid">${rl.filter((s) => s.year === y).map((s) => `<li><a href="/learn/worksheets/${dir(s)}/">${esc(s.title)}<small>${kindLabel(s)} · ${marksText(s, totalMarks(s))}</small></a></li>`).join("")}</ul>`;
     }).join("\n");
   }).join("\n");
-  const guides = regions.map((k) => `<a href="/learn/${k}/">${REGION[k].gradeNoun}-by-${REGION[k].gradeNoun} ${REGION[k].short} guides</a>`).join(" and our ");
+  const guides = joinAnd(regions.map((k) => `<a href="/learn/${k}/">${REGION[k].gradeNoun}-by-${REGION[k].gradeNoun} ${REGION[k].short} guides</a>`));
   const body = `<div class="crumbs"><a href="/">Home</a> › <a href="/learn/">Guides</a> › Worksheets</div>
 <h1>Free printable reading comprehension worksheets</h1>
-<p class="lead">Original passages with questions and a full answer key, written for ${esc(levelsSummary(list).join(" and "))}. Read online or print the PDF. Each one builds the reading skills children are tested on, and there is no sign-up.</p>
+<p class="lead">Original passages with questions and a full answer key, written for ${esc(joinAnd(levelsSummary(list)))}. Read online or print the PDF. Each one builds the reading skills children are tested on, and there is no sign-up.</p>
 ${sections}
 <h2>How to use them</h2>
 <ul>
@@ -331,5 +350,5 @@ ${s.questions.map((q, i) => `<div class="ans"><p><span class="num">${i + 1}.</sp
 module.exports = {
   SHEETS, REGION, published, buildWorksheetFiles, printWorksheetHtml, printAnswersHtml,
   pagePath, pageUrl, pdfPath, pdfUrl, hubUrl, hubPath, yearSlug, yearNum, ageRange, wordCount, totalMarks, minutesFor,
-  skillLabel, skillCode, levelsText, levelName, ordinal, regionOf, kindLabel, marksText, lastmodForUrl, isWorksheetUrl, added,
+  skillLabel, skillCode, curriculumLink, anchorFor, joinAnd, levelsText, levelName, ordinal, regionOf, kindLabel, marksText, lastmodForUrl, isWorksheetUrl, added,
 };

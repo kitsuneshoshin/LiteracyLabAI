@@ -29,6 +29,9 @@ function pinDescription(s) {
   if (s.region === "us") {
     return `${base} Great for homework, review or home learning. #readingcomprehension #${W.ordinal(W.yearNum(s.year))}grade #freeprintable #homeschool #commoncore`;
   }
+  if (s.region === "australia") {
+    return `${base} Great for homework, revision or home learning. #readingcomprehension #${s.year.replace(" ", "").toLowerCase()} #freeprintable #homeschoolaustralia #australiancurriculum`;
+  }
   return `${base} Great for homework, revision or home learning. #readingcomprehension #${s.year.replace(" ", "").toLowerCase()} #freeprintable #homeschooluk #ks2english`;
 }
 const pinLink = (s) => `${W.pageUrl(s)}?utm_source=pinterest&utm_medium=social&utm_campaign=pin-${s.id}`;
