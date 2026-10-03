@@ -11,7 +11,8 @@ const { buildWritingPrompt, buildReadingPrompt, examTechniqueSupported, correcti
 const { standardsFor } = require("./curriculum");
 const { targetsForGrade } = require("./masteryTargets");
 const { DEFAULT_GENRE_BY_TIER } = require("./writingFrameworks");
-const { validateFeedback, dropInvalidSpellingGrammar, sanitizeQuestionReview, repairZeroScoreGlow, repairReadingExamEvidence, stripUngrantedSections } = require("./validate");
+const { assessLength, calibrateWriting } = require("./calibrate");
+const { validateFeedback, dropGlowsQuotingMisspellings, dropInvalidSpellingGrammar, sanitizeQuestionReview, repairZeroScoreGlow, repairReadingExamEvidence, stripUngrantedSections } = require("./validate");
 
 const COUNTRY = "🇬🇧 United Kingdom";
 const GRADES = { early: "Year 2", elementary: "Year 5", middle: "Year 8", high: "Year 11" };
@@ -98,7 +99,7 @@ async function runOne(s, kind, generate, deadline = Infinity, validate = validat
       const parsed = attempt.parsed;
       out.attempts = i;
       if (kind === "writing") {
-        if (built.caps.spellingGrammar !== false) dropInvalidSpellingGrammar(parsed, s.text);
+        if (built.caps.spellingGrammar !== false) { dropInvalidSpellingGrammar(parsed, s.text); dropGlowsQuotingMisspellings(parsed); }
       } else {
         if (built.score === 0) repairZeroScoreGlow(parsed);
         repairReadingExamEvidence(parsed, QUESTIONS, s.answers);
@@ -107,6 +108,7 @@ async function runOne(s, kind, generate, deadline = Infinity, validate = validat
       const check = validate(parsed, {
         tier: s.tier, standardsList, targetNames, submittedText: kind === "writing" ? s.text : undefined,
         readingScore: kind === "reading" ? built.score : undefined, capabilities: built.caps, genre: built.genre,
+        lengthLevel: kind === "writing" ? assessLength({ text: s.text, tier: s.tier, country: COUNTRY, gradeLabel: grade }).level : undefined,
       });
       if (i === 1) { out.firstTry = check.ok; out.issues = check.issues.slice(0, 6).map((x) => String(x).slice(0, 200)); }
       let delivered = check.ok;
@@ -124,6 +126,7 @@ async function runOne(s, kind, generate, deadline = Infinity, validate = validat
         out.ok = true;
         out.outcome = withoutBonus ? "delivered without a bonus section" : "delivered";
         stripUngrantedSections(parsed, { capabilities: built.caps, kind });
+        if (kind === "writing") calibrateWriting(parsed, { text: s.text, tier: s.tier, country: COUNTRY, gradeLabel: grade, capabilities: built.caps });
         out.sections = {
           highlights: Array.isArray(parsed.highlights) ? parsed.highlights.length : 0,
           glows: Array.isArray(parsed.highlights) ? parsed.highlights.filter((h) => h.type === "glow").length : 0,

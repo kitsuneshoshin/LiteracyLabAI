@@ -5,6 +5,7 @@
 // yourself occasionally (every submission's feedback is saved to
 // submissions.feedback in Supabase for exactly that purpose).
 
+const { growDevelops } = require("./calibrate");
 const { frameworkForGenre, resolveGenre, VALID_GENRES } = require("./writingFrameworks");
 
 const MAX_AVG_WORDS_PER_SENTENCE = { early: 14, elementary: 18, middle: 24, high: 32 };
@@ -354,8 +355,8 @@ function validateRevisedStory(parsed, submittedText, issues) {
   const count = wordsOf(story).length;
   // A very short original (a few sentences) naturally grows a little when every error is
   // fixed and a sentence is completed, so the upper limit has some give.
-  if (count < Math.max(4, Math.floor(origCount * 0.6)) || count > Math.ceil(origCount * 1.8) + 12) {
-    issues.push("revisedStory must keep roughly the student's own length (about 60% to 180% of their word count) and their own ideas, not become a different piece");
+  if (count < Math.max(4, Math.floor(origCount * 0.6)) || count > Math.ceil(origCount * 1.35) + 8) {
+    issues.push("revisedStory must keep roughly the student's own length (about 60% to 135% of their word count, plus a few words for completed sentences) and their own ideas, not become a different piece");
   }
   if (foldLookalikes(story) === foldLookalikes(original)) {
     issues.push("revisedStory is identical to the student's text - it must be a corrected, improved version");
@@ -395,13 +396,60 @@ function validateRevisedStory(parsed, submittedText, issues) {
 // changes nothing) is dropped instead, and the honest total is reduced by
 // the same count, since a dropped entry was never a real error to count.
 // validateSpellingGrammar still runs afterwards as a backstop.
+// A "missing full stop" that is actually right there after the quoted fragment
+// (the model quoted up to the word and "corrected" it by adding the mark that
+// follows it in the text). Position-aware, so a real missing mark elsewhere is
+// still kept; it is the same rule for every country and grade.
+function addsPunctuationAlreadyThere(item, submittedText) {
+  const quote = String(item.quote);
+  const correction = String(item.correction);
+  if (!correction.startsWith(quote)) return false;
+  const added = correction.slice(quote.length).trim();
+  if (!added || /[\p{L}\p{N}]/u.test(added)) return false;
+  const text = String(submittedText);
+  // Only when EVERY occurrence of the fragment is already followed by the mark;
+  // if one occurrence really lacks it, the error is real and is kept.
+  let from = 0;
+  let seen = 0;
+  for (;;) {
+    const i = text.indexOf(quote, from);
+    if (i === -1) return seen > 0;
+    seen++;
+    if (!text.slice(i + quote.length).trimStart().startsWith(added)) return false;
+    from = i + 1;
+  }
+}
+
+// Words the spelling check lists as misspelled (in the quote, not in its fix).
+function misspeltWords(parsed) {
+  const out = new Set();
+  for (const item of Array.isArray(parsed?.spellingGrammar) ? parsed.spellingGrammar : []) {
+    if (item?.type !== "spelling" || typeof item.quote !== "string" || typeof item.correction !== "string") continue;
+    const fixed = new Set(wordsOf(item.correction));
+    for (const w of wordsOf(item.quote)) if (w.length > 2 && !fixed.has(w)) out.add(w);
+  }
+  return out;
+}
+
+// A "glow" highlight whose quote contains a word the spelling check says is
+// misspelled would praise the very error listed beside it, so it is dropped.
+function dropGlowsQuotingMisspellings(parsed) {
+  if (!parsed || !Array.isArray(parsed.highlights)) return parsed;
+  const bad = misspeltWords(parsed);
+  if (!bad.size) return parsed;
+  const kept = parsed.highlights.filter((h) => !(h && h.type === "glow" && typeof h.quote === "string" && wordsOf(h.quote).some((w) => bad.has(w))));
+  if (kept.length > 0 && kept.length < parsed.highlights.length) parsed.highlights = kept;
+  return parsed;
+}
+
 function dropInvalidSpellingGrammar(parsed, submittedText) {
   if (!parsed || !Array.isArray(parsed.spellingGrammar) || !submittedText) return parsed;
   const normalizedText = normalizeForMatch(submittedText);
   const kept = parsed.spellingGrammar.filter((item) =>
     checkString(item?.quote, 1, 200) && checkString(item?.correction, 1, 240) &&
     normalizedText.includes(normalizeForMatch(item.quote)) &&
-    foldLookalikes(item.correction) !== foldLookalikes(item.quote));
+    foldLookalikes(item.correction) !== foldLookalikes(item.quote) &&
+    !addsPunctuationAlreadyThere(item, submittedText));
   const dropped = parsed.spellingGrammar.length - kept.length;
   if (dropped > 0) {
     parsed.spellingGrammar = kept;
@@ -491,8 +539,11 @@ function stripUngrantedSections(parsed, { capabilities, kind }) {
   return parsed;
 }
 
-function validateFeedback(parsed, { tier, standardsList, targetNames, submittedText, readingScore, capabilities, genre }) {
+function validateFeedback(parsed, { tier, standardsList, targetNames, submittedText, readingScore, capabilities, genre, lengthLevel }) {
   const issues = [];
+  if ((lengthLevel === "thin" || lengthLevel === "minimal") && checkString(parsed?.grow, 1, 100000) && !growDevelops(parsed.grow)) {
+    issues.push("grow must be about developing this very short piece (adding the next reason, example or detail), not only polishing its wording");
+  }
   const caps = capabilities || {};
 
   if (!checkString(parsed?.glow, 20, 600)) issues.push("glow is missing, too short, or too long");
@@ -694,4 +745,4 @@ function validateWritingPrompt(parsed, { tier }) {
   return { ok: issues.length === 0, issues };
 }
 
-module.exports = { repairZeroScoreGlow, repairReadingExamEvidence, validateFeedback, validatePassage, validateWritingPrompt, resolveTarget, dropInvalidSpellingGrammar, sanitizeQuestionReview, stripUngrantedSections, MAX_AVG_WORDS_PER_SENTENCE };
+module.exports = { dropGlowsQuotingMisspellings, repairZeroScoreGlow, repairReadingExamEvidence, validateFeedback, validatePassage, validateWritingPrompt, resolveTarget, dropInvalidSpellingGrammar, sanitizeQuestionReview, stripUngrantedSections, MAX_AVG_WORDS_PER_SENTENCE };

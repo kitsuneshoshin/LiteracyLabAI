@@ -490,7 +490,7 @@ test("dropInvalidSpellingGrammar: drops entries that can't be shown truthfully a
   const parsed = {
     spellingGrammarTotal: 3,
     spellingGrammar: [
-      { quote: "The dog ran fast", type: "punctuation", correction: "The dog ran fast." },
+      { quote: "The dog ran fast", type: "grammar", correction: "The dog runs fast" },
       { quote: "a sentence the student never wrote", type: "grammar", correction: "a fixed sentence" },
       { quote: "It saw a cat", type: "spelling", correction: "It saw a cat" },
     ],
@@ -506,7 +506,7 @@ test("dropInvalidSpellingGrammar: keeps a total larger than the list when the mo
   const parsed = {
     spellingGrammarTotal: 15,
     spellingGrammar: [
-      { quote: "The dog ran fast", type: "punctuation", correction: "The dog ran fast." },
+      { quote: "The dog ran fast", type: "grammar", correction: "The dog runs fast" },
       { quote: "made up quote", type: "grammar", correction: "made up fix" },
     ],
   };

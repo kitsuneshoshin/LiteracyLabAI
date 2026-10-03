@@ -94,7 +94,7 @@ function writingExtras(tier, caps) {
   out.revisedStory = "The dog ran fast. It spotted a tiny grey cat high up in a tree. The end of the story was happy.";
   if (caps.spellingGrammar !== false) {
     out.spellingGrammarTotal = 1;
-    out.spellingGrammar = [{ quote: "The end of the story was happy", type: "punctuation", correction: "The end of the story was happy." }];
+    out.spellingGrammar = [{ quote: "The end of the story was happy", type: "grammar", correction: "The ending of the story was happy" }];
   }
   return { out, targets };
 }
@@ -341,7 +341,7 @@ test("full rewrite: if it can't be made correct through every retry, only the re
   });
   assert.equal(res.statusCode, 200, "the student still gets their feedback");
   assert.equal(prompts.length, 3, "all three attempts were made first");
-  assert.equal(res.body.feedback.revisedStory, undefined, "the unusable rewrite is not shown");
+  assert.equal(res.body.feedback.revisedStory, "The dog ran fast. It saw a cat up in a tree. The ending of the story was happy.", "the unusable rewrite is replaced by the student's own text with the listed fixes applied");
   assert.ok(res.body.feedback.highlights.length >= 2 && res.body.feedback.spellingGrammar, "everything else is intact");
 });
 

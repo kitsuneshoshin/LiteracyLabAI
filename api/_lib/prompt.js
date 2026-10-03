@@ -1,5 +1,6 @@
 const { curriculumLabel, standardsFor } = require("./curriculum");
 const { MAX_AVG_WORDS_PER_SENTENCE } = require("./validate");
+const { assessLength, lengthClause } = require("./calibrate");
 const { frameworkForGenre, resolveGenre, DEFAULT_GENRE_BY_TIER, VALID_GENRES } = require("./writingFrameworks");
 
 const TIER_LABEL = { early: "Early Years (ages 5-7)", elementary: "Elementary (ages 8-10)", middle: "Middle School (ages 11-13)", high: "High School (ages 14-18)" };
@@ -170,7 +171,7 @@ function revisedStoryClause(tier, withSpellingList) {
       : " Keep the vocabulary and sentence length at a level this student could plausibly write.";
   return `
 
-REVISED STORY (required): Return "revisedStory": the student's WHOLE piece rewritten as a polished, corrected version of the SAME piece. It must (1) fix EVERY spelling, grammar, capitalisation and punctuation error${withSpellingList ? ", including each one you list in the spelling and grammar check below" : ""}; (2) apply your "grow" suggestions and improve flow, sentence structure and word choice so it reads clearly better than the original; and (3) stay THEIR piece: the same ideas, events and arguments in the same order, and roughly the same length (within about 25% of their word count). Do NOT add facts, characters, events, arguments or opinions the student did not write, and do not explain or comment on the changes. Keep their paragraph breaks.${register} Return plain text only.`;
+REVISED STORY (required): Return "revisedStory": the student's WHOLE piece rewritten as a polished, corrected version of the SAME piece. It must (1) fix EVERY spelling, grammar, capitalisation and punctuation error${withSpellingList ? ", including each one you list in the spelling and grammar check below" : ""}; (2) apply your "grow" suggestions and improve flow, sentence structure and word choice so it reads clearly better than the original; and (3) stay THEIR piece: the same ideas, events and arguments in the same order, and roughly the same length (within about 25% of their word count). Do NOT add facts, characters, events, arguments, reasons, examples or opinions the student did not write - not even to strengthen or lengthen a short piece (a short piece stays short; the grow is where development is suggested) - and do not explain or comment on the changes. Keep their paragraph breaks.${register} Return plain text only.`;
 }
 
 // A dedicated, always-shown spelling/grammar check - separate from the
@@ -191,7 +192,7 @@ function spellingGrammarClause() {
 // piece actually reads. This is the parent-facing "how did this one
 // actually do" number, scored independently against the whole text.
 function overallScoreClause() {
-  return `\n\nOVERALL SCORE (required): Read the ENTIRE piece above again, as a whole, and score it 1-10 against these four equally-weighted criteria, calibrated to what's realistic for this student's age/grade (a 10 means excellent FOR THIS AGE, not adult-level writing): (1) ideas & content, (2) organisation/structure, (3) language & vocabulary choices, (4) technical accuracy (spelling, grammar, punctuation). Be genuinely critical - do not default to 8-9 out of politeness; a piece with real, frequent technical errors or weak structure should score in the lower half, even if the one "grow" step above only names a single example of it. Put the number in "overallScore" and ONE sentence citing the specific strength/weakness pattern (not just the single "grow" detail) that drove the score in "scoreReason".`;
+  return `\n\nOVERALL SCORE (required): Read the ENTIRE piece above again, as a whole, and score it 1-10 against these four equally-weighted criteria, calibrated to what's realistic for this student's age/grade (a 10 means excellent FOR THIS AGE, not adult-level writing): (1) ideas & content, (2) organisation/structure, (3) language & vocabulary choices, (4) technical accuracy (spelling, grammar, punctuation). Be genuinely critical - do not default to 8-9 out of politeness; a piece with real, frequent technical errors or weak structure should score in the lower half, and a piece far shorter than the length expected for this grade cannot score highly however accurate its few words are, even if the one "grow" step above only names a single example of it. Put the number in "overallScore" and ONE sentence citing the specific strength/weakness pattern (not just the single "grow" detail) that drove the score in "scoreReason".`;
 }
 
 // A single worked example, shown to every call regardless of the actual
@@ -237,7 +238,7 @@ function successCriteria(tier, { includeFramework, includeScore, includeSpelling
   return `Before you respond, check your own draft against these pass/fail criteria — if any fail, revise before sending:
 1. The glow names something concrete the student actually wrote or answered (quote a short fragment) — not a generic compliment that could apply to any submission.
 2. The glow's curriculum reference is either the exact standard you were given, or (if none was given) a general curriculum phrase — never an invented code.
-3. The grow names exactly ONE step, uses the student's stated interest as a real, concrete analogy (not just name-dropped), and ends with the motivation-appropriate line.
+3. The grow names exactly ONE step, uses the student's stated interest as a real, concrete analogy only where an accurate, natural one exists (never forced, and none for a very short piece), and ends with the motivation-appropriate line.
 4. Count the words per sentence across your glow and grow COMBINED, and average it — it must be UNDER ${cap} words per sentence for this age tier. Short, plain sentences. This is checked mechanically, so if a sentence is running long, split it into two rather than adding a comma clause.
 5. Both vocab definitions are one plain sentence each, framed through the student's interest where natural, and each has an "example" sentence that actually uses the term correctly (not just repeats the definition).
 6. glowTarget and growTarget are copied EXACTLY, character-for-character, from the provided list of skill area names — not paraphrased, shortened, or invented.
@@ -271,7 +272,7 @@ ${highlightsClause(tier)}
 ${deepFeedbackClause(caps.deepFeedback)}
 ${wantsExam ? examTechniqueClause({ tier, targets, kind: "writing" }) : ""}
 ${frameworkClause({ tier, genre })}
-${wantsScore ? overallScoreClause() : ""}
+${wantsScore ? overallScoreClause() : ""}${lengthClause(assessLength({ text, tier, country, gradeLabel }))}
 ${revisedStoryClause(tier, wantsSpelling)}
 ${wantsSpelling ? spellingGrammarClause() : ""}
 
@@ -284,7 +285,7 @@ ${successCriteria(tier, { includeFramework: true, includeScore: wantsScore, incl
 Respond with ONLY a JSON object (no markdown fences, no commentary) with exactly this shape:
 {
   "glow": "1-2 sentences of specific, genuine praise tied to something the student actually did in this text and to the curriculum standard noted above.",
-  "grow": "1-2 sentences naming ONE specific, actionable next step scaled to this student's zone of proximal development — not a laundry list. Weave in an analogy drawn from their stated interest (${interest}) to make the concept concrete. End with the motivation-appropriate closing line.",
+  "grow": "1-2 sentences naming ONE specific, actionable next step scaled to this student's zone of proximal development — not a laundry list. Where an accurate, natural one exists, weave in an analogy drawn from their stated interest (${interest}) to make the concept concrete; if it would be forced or inaccurate, leave the analogy out. End with the motivation-appropriate closing line.",
   "vocab": [
     { "term": "a single word or short phrase", "definition": "a one-sentence, age-appropriate definition, framed using their interest where natural", "example": "a fresh sentence using the term correctly, built around their stated interest (${interest})" },
     { "term": "a second word or short phrase", "definition": "a one-sentence, age-appropriate definition, framed using their interest where natural", "example": "a fresh sentence using the term correctly, built around their stated interest (${interest})" }

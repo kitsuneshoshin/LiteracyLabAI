@@ -99,7 +99,7 @@ test("prompt: every plan asks for the full rewrite; only Premium ties it to the 
   const premium = buildWritingPrompt({ ...args, capabilities: { spellingGrammar: true, overallScore: true } });
   assert.match(premium, /REVISED STORY \(required\)/);
   assert.match(premium, /fix EVERY spelling, grammar, capitalisation and punctuation error, including each one you list in the spelling and grammar check below/);
-  assert.match(premium, /Do NOT add facts, characters, events, arguments or opinions the student did not write/);
+  assert.match(premium, /Do NOT add facts, characters, events, arguments, reasons, examples or opinions the student did not write/);
   assert.match(premium, /about one genuine highlight for every 30-40 words, up to 10/);
   assert.match(premium, /"revisedStory":/);
   for (const caps of [{ spellingGrammar: false, overallScore: false }, { spellingGrammar: false, overallScore: false, deepFeedback: false }]) {
@@ -177,12 +177,12 @@ test("prompt: Premium's worked example shows a second step that quotes the stude
   assert.ok(!core.includes("growNext"), "Free and Core never see the second step");
 });
 
-test("revised story: a very short piece may grow by up to about 80% plus a dozen words when its errors are fixed, but not become a different piece", () => {
+test("revised story: a very short piece may grow by up to about 35% plus 8 words when its errors are fixed, but not become a different piece", () => {
   const original = ORIGINAL; // 20 words
   const words = (n) => Array.from({ length: n }, (_, i) => ["The", "hero", "named", "Superman", "faced", "villains", "and", "kryptonite", "bravely", "every", "single", "day", "because", "he", "cared", "about", "people", "everywhere"][i % 18]).join(" ") + ".";
   const issuesFor = (n) => about(validateFeedback(feedback({ revisedStory: words(n), spellingGrammar: [] }), { ...ctx, submittedText: original })).filter((i) => /length/.test(i));
   assert.deepEqual(issuesFor(20), []);
-  assert.deepEqual(issuesFor(40), [], "more than double the words is still accepted for a tiny piece");
-  assert.equal(issuesFor(50).length, 1, "but a very different length is refused");
+  assert.deepEqual(issuesFor(35), [], "a bit more than a third longer is still accepted for a tiny piece");
+  assert.equal(issuesFor(40).length, 1, "but a longer rewrite (new content) is refused");
   assert.equal(issuesFor(5).length, 1, "and so is a much shorter one");
 });

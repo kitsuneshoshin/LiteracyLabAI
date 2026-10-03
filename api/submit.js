@@ -6,9 +6,10 @@ const { buildWritingPrompt, buildReadingPrompt, correctiveAddendum, examTechniqu
 const { standardsFor } = require("./_lib/curriculum");
 const { targetsForGrade } = require("./_lib/masteryTargets");
 const { frameworkForGenre, resolveGenre } = require("./_lib/writingFrameworks");
-const { validateFeedback, resolveTarget, dropInvalidSpellingGrammar, sanitizeQuestionReview, repairZeroScoreGlow, repairReadingExamEvidence, stripUngrantedSections } = require("./_lib/validate");
+const { dropGlowsQuotingMisspellings, validateFeedback, resolveTarget, dropInvalidSpellingGrammar, sanitizeQuestionReview, repairZeroScoreGlow, repairReadingExamEvidence, stripUngrantedSections } = require("./_lib/validate");
 const { checkRateLimit } = require("./_lib/rateLimit");
 const { writingLimitsForGrade } = require("./_lib/writingLimits");
+const { assessLength, calibrateWriting, applyCorrections } = require("./_lib/calibrate");
 
 // Server-side character caps, derived per country+grade from real syllabus
 // word-count guidance - mirrors GRADE_WORD_TARGETS in app.html. Enforced
@@ -26,14 +27,16 @@ async function generateAndValidate(prompt, tier, country, gradeLabel, submittedT
   const targetNames = targetsForGrade(country, gradeLabel, tier).targets.map((t) => t.name);
   let nextPrompt = prompt;
   let lastIssues = [];
+  const lengthLevel = submittedText ? assessLength({ text: submittedText, tier, country, gradeLabel }).level : undefined;
 
   for (let i = 1; i <= MAX_ATTEMPTS; i++) {
     const attempt = await generateFeedbackJSON(nextPrompt);
     if (capabilities?.spellingGrammar !== false) dropInvalidSpellingGrammar(attempt.parsed, submittedText);
+    if (capabilities?.spellingGrammar !== false) dropGlowsQuotingMisspellings(attempt.parsed);
     if (readingScore === 0) repairZeroScoreGlow(attempt.parsed);
     if (readingContext) repairReadingExamEvidence(attempt.parsed, readingContext.questions, readingContext.answers);
     if (readingContext) sanitizeQuestionReview(attempt.parsed, readingContext.passage, readingContext.questionCount);
-    const check = validateFeedback(attempt.parsed, { tier, standardsList, targetNames, submittedText, readingScore, capabilities, genre });
+    const check = validateFeedback(attempt.parsed, { tier, standardsList, targetNames, submittedText, readingScore, capabilities, genre, lengthLevel });
     if (check.ok) {
       // Snap glowTarget/growTarget to the exact canonical string so
       // api/progress.js's exact-key Map lookup actually finds them.
@@ -51,7 +54,13 @@ async function generateAndValidate(prompt, tier, country, gradeLabel, submittedT
     const growNextBad = check.issues.some((issue) => /^growNext\b/.test(issue));
     if (i === MAX_ATTEMPTS && attempt.parsed && bonusOnly && (!growNextBad || attempt.parsed.growNext)) {
       if (growNextBad) delete attempt.parsed.growNext;
-      if (check.issues.some((issue) => /^revisedStory\b/.test(issue))) delete attempt.parsed.revisedStory;
+      if (check.issues.some((issue) => /^revisedStory\b/.test(issue))) {
+        // Keep a faithful corrected copy (the student's own words with the listed fixes
+        // applied) rather than nothing, when the model's rewrite wandered from the original.
+        const fixed = applyCorrections(submittedText, attempt.parsed.spellingGrammar);
+        if (fixed && fixed.trim() !== String(submittedText).trim()) attempt.parsed.revisedStory = fixed;
+        else delete attempt.parsed.revisedStory;
+      }
       attempt.parsed.glowTarget = resolveTarget(attempt.parsed.glowTarget, targetNames) || attempt.parsed.glowTarget;
       attempt.parsed.growTarget = resolveTarget(attempt.parsed.growTarget, targetNames) || attempt.parsed.growTarget;
       return attempt;
@@ -175,6 +184,8 @@ module.exports = async function handler(req, res) {
       }
 
       stripUngrantedSections(result.parsed, { capabilities: caps, kind: "writing" });
+      // Score and band caps from the real length against this grade's expected length.
+      calibrateWriting(result.parsed, { text, tier: existing.tier, country: existing.country, gradeLabel: existing.grade_label, capabilities: caps });
 
       // The model only writes frameworkTip.name/example (see prompt.js) -
       // its definition is fixed per genre, not left to the model to
