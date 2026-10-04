@@ -83,8 +83,19 @@ async function handleQa(req, res) {
     return res.status(405).json({ error: "Method not allowed." });
   }
   const secret = process.env.CRON_SECRET;
-  if (!secret) return res.status(500).json({ error: "CRON_SECRET is not set." });
-  if ((req.headers && req.headers.authorization) !== `Bearer ${secret}`) return res.status(401).json({ error: "Unauthorized." });
+  const bearer = (req.headers && req.headers.authorization) || "";
+  // Vercel Cron sends the secret. A signed-in ADMIN (ADMIN_EMAILS) may also run it by hand,
+  // so the owner can compare models without ever handling the secret.
+  let allowed = Boolean(secret) && bearer === `Bearer ${secret}`;
+  if (!allowed && bearer.startsWith("Bearer ")) {
+    try {
+      const user = await require("./_lib/auth").requireUser(req);
+      const admins = (process.env.ADMIN_EMAILS || "").split(",").map((e) => e.trim().toLowerCase()).filter(Boolean);
+      allowed = admins.includes(String(user.email || "").toLowerCase());
+    } catch (e) { allowed = false; }
+  }
+  if (!allowed && !secret) return res.status(500).json({ error: "CRON_SECRET is not set." });
+  if (!allowed) return res.status(401).json({ error: "Unauthorized." });
 
   const { runQa } = require("./_lib/qaRun");
   const { generateFeedbackJSON } = require("./_lib/openai");

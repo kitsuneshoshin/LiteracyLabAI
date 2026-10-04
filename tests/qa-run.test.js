@@ -201,3 +201,19 @@ test("no source file contains a stray control character (a hidden backspace once
     assert.ok(!bad, `${f} contains control character code ${bad && bad[0].charCodeAt(0)}`);
   }
 });
+
+test("endpoint: a signed-in admin can run it by hand (and pick another model), a signed-in non-admin cannot", async () => {
+  const saved = process.env.ADMIN_EMAILS;
+  try {
+    process.env.ADMIN_EMAILS = "someone-else@example.com";
+    assert.equal((await hit({ auth: "Bearer a-user-token" })).statusCode, 401, "a non-admin user is refused");
+    process.env.ADMIN_EMAILS = "parent@example.com"; // the harness's signed-in user
+    const log = [];
+    const res = await hit({ secret: null, auth: "Bearer a-user-token", query: { action: "qa", model: "gpt-4.1-mini" }, log });
+    assert.equal(res.statusCode, 200);
+    assert.equal(res.body.total, 8);
+    assert.equal(log.length, 0, "a run on another model is never saved over the weekly record");
+    const bad = await hit({ secret: null, auth: "Bearer a-user-token", query: { action: "qa", model: "bad model!!" } });
+    assert.equal(bad.statusCode, 200, "an invalid model name is ignored, not passed to OpenAI");
+  } finally { if (saved == null) delete process.env.ADMIN_EMAILS; else process.env.ADMIN_EMAILS = saved; }
+});
