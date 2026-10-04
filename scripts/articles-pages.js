@@ -12,7 +12,8 @@ const urlFor = (a) => `${SITE}/learn/articles/${a.slug}/`;
 function sectionHtml(s) {
   const paras = (s.p || []).map((t) => `<p>${esc(t)}</p>`).join("");
   const list = s.ul ? `<ul>${s.ul.map((t) => `<li>${esc(t)}</li>`).join("")}</ul>` : "";
-  return `<h2>${esc(s.h)}</h2>${paras}${list}`;
+  const extra = s.extra ? `<p>${esc(s.extra)}</p>` : "";
+  return `<h2>${esc(s.h)}</h2>${paras}${list}${extra}`;
 }
 
 function buildArticle(a, { layout, breadcrumbLd, ctaBlock }) {

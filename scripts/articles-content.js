@@ -312,4 +312,8 @@ const ARTICLES = [
   },
 ];
 
-module.exports = { ARTICLES, LINKS };
+// The five exam explainers are written out in full in articles-exam-content.js.
+const { EXAM } = require("./articles-exam-content");
+const ALL = ARTICLES.map((a) => EXAM[a.slug] || a);
+
+module.exports = { ARTICLES: ALL, LINKS };
