@@ -87,9 +87,9 @@ const ARTICLES = [
     description: "What the NAPLAN writing test asks of students, how results are described in four levels, and how to help your child practise at home without extra pressure.",
     lead: "NAPLAN is the national literacy and numeracy assessment taken by students in Years 3, 5, 7 and 9 in Australia. This guide covers the writing part: what children are asked to do and how to prepare calmly. Always confirm current dates and details with your school or the national NAPLAN website.",
     sections: [
-      { h: "What the writing task looks like", p: ["Students are given an idea or prompt and asked to write a response in one kind of writing, either a narrative (a story) or a persuasive piece (an argument). The test takes place in the first part of the year and runs for around forty minutes, but your school will give the exact timetable."] },
-      { h: "How results are described", p: ["Since 2023, results are reported in four proficiency levels: Exceeding, Strong, Developing and Needs additional support. Strong is the level students are expected to reach for their year. A result of Developing means a child is on the way and may benefit from focused help on specific skills. It is not a fail."] },
-      { h: "What markers look for", p: ["Writing is marked against published criteria covering areas such as how well the writing fits its purpose and audience, how ideas are organised, how paragraphs and sentences are built, vocabulary, and spelling and punctuation. The national program publishes the criteria, so you can read them yourself."] },
+      { h: "What the writing task looks like", p: ["Students are given an idea or prompt and asked to write a response in one kind of writing, either a narrative (a story) or a persuasive piece (an argument). NAPLAN is held in March, in Term 1. Writing is timed at 40 minutes in Year 3 and 42 minutes in Years 5, 7 and 9, and your school will give the exact timetable."] },
+      { h: "How results are described", p: ["Since 2023, results are reported in four proficiency levels: Exceeding, Strong, Developing and Needs additional support. Strong means a student is meeting challenging but reasonable expectations for their year. Developing means a student is working towards those expectations and may benefit from focused help on specific skills. It is not a fail."] },
+      { h: "What markers look for", p: ["Writing is marked by trained markers using a rubric with ten criteria. They cover areas such as how well the writing fits its purpose and audience, how ideas are organised, how paragraphs and sentences are built, vocabulary, and spelling and punctuation. The national program publishes the marking guides, so you can read them yourself."] },
       { h: "How to practise at home", ul: [
         "Practise both kinds: a short story and a short persuasive piece, one at a time.",
         "Plan first. Two minutes jotting a beginning, middle and end (or a point and two reasons) makes the writing clearer.",
@@ -98,7 +98,7 @@ const ARTICLES = [
       { h: "Keep it in proportion", p: ["NAPLAN is one snapshot, not a measure of your child. Regular writing and reading through the year does more than last-minute cramming."] },
     ],
     faq: [
-      ["Is there a pass mark?", "Results are described in four levels, not pass or fail. Strong is the expected level for the year."],
+      ["Is there a pass mark?", "Results are described in four levels, not pass or fail. Strong means meeting challenging but reasonable expectations for the year."],
       ["Which kinds of writing are tested?", "Narrative and persuasive writing. The task tells students which one to write."],
     ],
     related: rel("au", "prompts", "feedback"),
@@ -109,7 +109,7 @@ const ARTICLES = [
     description: "How the Year 6 SATs reading test and writing assessment work in England, what a scaled score of 100 means, and how to help at home without adding stress.",
     lead: "In England, children take national tests at the end of Key Stage 2 in Year 6, usually called SATs. This guide covers the English parts. Dates and formats can change, so confirm current details with your school or the government's published guidance.",
     sections: [
-      { h: "The reading test", p: ["The reading test is a single paper of about an hour with several texts and a mix of question types, from finding facts to explaining what a character feels and why. Each child's marks are turned into a scaled score, where 100 is the expected standard."] },
+      { h: "The reading test", p: ["The reading test is a single paper of 60 minutes with several texts and a mix of question types, from finding facts to explaining what a character feels and why. Each child's marks are turned into a scaled score, where 100 is the expected standard."] },
       { h: "Grammar, punctuation, spelling", p: ["There are separate short tests for grammar and punctuation, and for spelling. They are marked externally and also reported as scaled scores."] },
       { h: "Writing is different", p: ["There is no SATs writing test. Writing is assessed by the teacher, using work collected through Year 6, and schools' judgements are checked between schools. This means regular, good-quality writing across the year matters more than a single practice piece."] },
       { h: "Helping with reading at home", ul: [
@@ -189,7 +189,7 @@ const ARTICLES = [
         "Opinion and argument (W.1): state a claim and support it with reasons and evidence. In the early grades this starts as opinion writing, and it grows into logical argument.",
         "Informative and explanatory (W.2): explain a topic clearly using facts, definitions and details.",
         "Narrative (W.3): tell a real or imagined story with well-chosen details and events in a clear order."] },
-      { h: "How it grows with the grades", p: ["Young children state an opinion and give a reason. Upper-elementary students learn to organise reasons and link them with words such as because and for example. In middle and high school the emphasis moves to making precise claims, using evidence from texts and answering opposing views."] },
+      { h: "How it grows with the grades", p: ["Young children state an opinion and give a reason. Upper-elementary students learn to organize reasons and link them with words such as because and for example. In middle and high school the emphasis moves to making precise claims, using evidence from texts and answering opposing views."] },
       { h: "How to help at home", ul: [
         "Ask for a reason every time your child gives an opinion: \"Why do you think that?\" Then ask for an example.",
         "For explanations, ask them to teach you something they know, then write it down in order.",
