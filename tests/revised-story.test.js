@@ -97,14 +97,17 @@ test("highlights: up to 10 are accepted for a long piece, 11 are refused, and fe
 test("prompt: every plan asks for the full rewrite; only Premium ties it to the spelling list and gets the length-scaled highlights wording on top", () => {
   const args = { tier: "elementary", country: "x", gradeLabel: "Year 5", interest: "football", prompt: "Write.", text: ORIGINAL, targets: [], targetNames: ["A"], genre: "narrative" };
   const premium = buildWritingPrompt({ ...args, capabilities: { spellingGrammar: true, overallScore: true } });
-  assert.match(premium, /REVISED STORY \(required\)/);
+  assert.match(premium, /REVISED RESPONSE \(required\)/);
   assert.match(premium, /fix EVERY spelling, grammar, capitalisation and punctuation error, including each one you list in the spelling and grammar check below/);
-  assert.match(premium, /Do NOT add facts, characters, events, arguments, reasons, examples or opinions the student did not write/);
+  assert.match(premium, /DEVELOP it where it helps/, "a short piece may be developed from their own points");
+  assert.match(premium, /Do NOT change their position, add a new argument or a new character or event, and never invent statistics/);
+  const longEnough = buildWritingPrompt({ ...args, text: Array.from({ length: 160 }, (_, i) => "word" + String.fromCharCode(97 + (i % 26)) + String.fromCharCode(97 + Math.floor(i / 26))).join(" "), capabilities: { spellingGrammar: true, overallScore: true } });
+  assert.match(longEnough, /Do NOT add facts, characters, events, arguments, reasons, examples or opinions the student did not write/, "a full-length piece is only corrected and polished");
   assert.match(premium, /about one genuine highlight for every 30-40 words, up to 10/);
   assert.match(premium, /"revisedStory":/);
   for (const caps of [{ spellingGrammar: false, overallScore: false }, { spellingGrammar: false, overallScore: false, deepFeedback: false }]) {
     const core = buildWritingPrompt({ ...args, capabilities: caps });
-    assert.match(core, /REVISED STORY \(required\)/);
+    assert.match(core, /REVISED RESPONSE \(required\)/);
     assert.match(core, /"revisedStory":/);
     assert.ok(!core.includes("spelling and grammar check below"), "Core and Free are not pointed at a list they do not get");
     assert.ok(!core.includes("SPELLING AND GRAMMAR CHECK"), "the itemised spelling list stays Premium");

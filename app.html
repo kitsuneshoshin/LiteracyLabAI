@@ -2502,7 +2502,7 @@ function AnnotatedText({ text, highlights, revisedStory }){
           <div className="flex items-center justify-between gap-2 mb-2 flex-wrap">
             <div className="flex items-center gap-1.5">
               <IconSparkle size={13} strokeWidth={2.4} style={{ color: "var(--good)" }} />
-              <span className="text-[11px] font-bold uppercase tracking-wide" style={{ color: "var(--good)" }}>{typeof revisedStory === "string" && revisedStory.trim() ? "Your story, corrected and improved" : "Your story, revised"}</span>
+              <span className="text-[11px] font-bold uppercase tracking-wide" style={{ color: "var(--good)" }}>{typeof revisedStory === "string" && revisedStory.trim() ? "Your response, corrected and improved" : "Your response, revised"}</span>
             </div>
             <span className="inline-flex items-center gap-1 text-[11px] font-semibold" style={{ color: "var(--ink-faint)" }}>
               <mark className="rounded px-1" style={{ background: "var(--good)", color: "#fff" }}>highlighted</mark> = what changed
@@ -2620,6 +2620,7 @@ function FeedbackPanel({ tier, gradeLabel, country, interest, confidence, motiva
       <ExamTechniquePanel feedback={feedback} />
 
       <FrameworkTipPanel feedback={feedback} />
+      <ResponsesPanel feedback={feedback} />
 
       <Collapsible defaultOpen={true} borderColor="var(--border)" iconBg="var(--cyan-tint)" iconColor="var(--cyan-ink)"
         icon={<IconSparkle size={16} strokeWidth={2.2} />} title={`Vocabulary Upgrades — ${interestLabel} edition`}
@@ -2730,6 +2731,14 @@ function ExamTechniquePanel({ feedback }){
           );
         })}
       </div>
+      {Array.isArray(feedback.examNotBanded) && feedback.examNotBanded.length > 0 && (
+        <p className="text-[12.5px] mt-3" style={{ color: "var(--ink-faint)" }}>
+          Not banded here: {feedback.examNotBanded.join("; ")}. {feedback.examNotBanded.length === 1 ? "That is a" : "Those are"} {feedback.examNotBandedWhy || "skills this task cannot show"}.
+        </p>
+      )}
+      {feedback.examBasis && (
+        <p className="text-[12.5px] mt-2" style={{ color: "var(--ink-faint)" }}>{feedback.examBasis}</p>
+      )}
       {feedback.examSummary && (
         <div className="mt-4 pt-4 border-t text-[13.5px] leading-snug" style={{ borderColor: "var(--border-soft)", color: "var(--ink)" }}>
           <span className="font-semibold">Worth working on next: </span>{feedback.examSummary}
@@ -2830,10 +2839,108 @@ function FrameworkTipPanel({ feedback }){
         <p className="text-[13px] mb-3" style={{ color: "var(--ink-faint)" }}>{tip.description}</p>
       )}
       <div className="rounded-xl p-3.5" style={{ background: "var(--surface-2)" }}>
-        <span className="font-display font-bold text-[11px] block mb-1" style={{ color: "var(--ink-faint)" }}>FROM YOUR STORY</span>
+        <span className="font-display font-bold text-[11px] block mb-1" style={{ color: "var(--ink-faint)" }}>FROM YOUR WRITING</span>
         <p className="text-[13.5px] leading-relaxed font-read mb-3" style={{ color: "var(--ink-soft)" }}>“{tip.quote}”</p>
         <span className="font-display font-bold text-[11px] block mb-1" style={{ color: "var(--ink-faint)" }}>APPLYING {tip.name.toUpperCase()}</span>
         <p className="text-[13.5px] leading-relaxed font-read" style={{ color: "var(--ink)" }}>{tip.revision}</p>
+      </div>
+    </Collapsible>
+  );
+}
+
+// Splits a response into plain runs and runs labelled with a framework part, in the order
+// they occur. Labels whose text cannot be found (or that overlap an earlier one) are skipped,
+// so a bad label can never garble the response.
+function labelledRuns(text, labels){
+  const body = String(text || "");
+  const found = [];
+  (Array.isArray(labels) ? labels : []).forEach((l)=>{
+    if (!l || typeof l.text !== "string" || !l.text) return;
+    const at = body.indexOf(l.text);
+    if (at === -1) return;
+    found.push({ at, end: at + l.text.length, part: l.part, note: l.note, text: l.text });
+  });
+  found.sort((a,b)=> a.at - b.at);
+  const runs = [];
+  let pos = 0;
+  found.forEach((f)=>{
+    if (f.at < pos) return;
+    if (f.at > pos) runs.push({ text: body.slice(pos, f.at) });
+    runs.push(f);
+    pos = f.end;
+  });
+  if (pos < body.length) runs.push({ text: body.slice(pos) });
+  return runs;
+}
+
+const FRAMEWORK_PART_COLORS = [
+  ["var(--cyan-tint)", "var(--cyan-ink)"],
+  ["var(--gold-tint)", "var(--gold-ink)"],
+  ["var(--good-tint)", "var(--good)"],
+  ["var(--navy-tint)", "var(--ink)"],
+  ["var(--surface-2)", "var(--ink-soft)"],
+];
+
+// A response with every use of the framework marked: the part's name, the exact words that
+// do that job, and one sentence on how they do it.
+function LabelledResponse({ text, labels, parts }){
+  const colorOf = (name)=> FRAMEWORK_PART_COLORS[Math.max(0, parts.findIndex(p=>p.name===name)) % FRAMEWORK_PART_COLORS.length];
+  const runs = labelledRuns(text, labels);
+  return (
+    <div className="flex flex-col gap-2">
+      {runs.map((r, i)=> r.part ? (
+        <div key={i} className="rounded-xl p-3" style={{ background: colorOf(r.part)[0], borderLeft: "4px solid " + colorOf(r.part)[1] }}>
+          <span className="inline-block rounded-full px-2 py-0.5 text-[11px] font-bold mb-1.5" style={{ background: "var(--surface)", color: colorOf(r.part)[1], border: "1px solid " + colorOf(r.part)[1] }}>{r.part}</span>
+          <p className="whitespace-pre-wrap font-read text-[14px] leading-relaxed" style={{ color: "var(--ink)" }}>{r.text}</p>
+          {r.note && <p className="text-[12.5px] mt-1.5" style={{ color: "var(--ink-soft)" }}><span className="font-semibold">How it works: </span>{r.note}</p>}
+        </div>
+      ) : (
+        r.text.trim() ? <p key={i} className="whitespace-pre-wrap font-read text-[14px] leading-relaxed px-1" style={{ color: "var(--ink-soft)" }}>{r.text.trim()}</p> : null
+      ))}
+    </div>
+  );
+}
+
+// Premium: the framework (PEEL, PEAL, Story Mountain, Show Don't Tell) shown at work in the
+// student's own revised response and in a model response written to the same task, so they can
+// see exactly where each part is and then compare. Rendered only when the server returned it.
+function ResponsesPanel({ feedback }){
+  const info = feedback?.frameworkInfo;
+  const model = feedback?.modelResponse;
+  const parts = Array.isArray(info?.parts) ? info.parts : [];
+  if (!info?.name || !model || parts.length === 0) return null;
+  const revisedLabels = Array.isArray(feedback.revisedFramework) ? feedback.revisedFramework : [];
+  const hasRevised = typeof feedback.revisedStory === "string" && feedback.revisedStory.trim() && revisedLabels.length > 0;
+  const used = new Set(revisedLabels.map(l=>l.part));
+  const missing = parts.filter(p=>!used.has(p.name));
+  return (
+    <Collapsible defaultOpen={true} borderColor="var(--navy)" iconBg="var(--navy-tint)" iconColor="var(--ink)"
+      icon={<IconGrid size={15} strokeWidth={2.2} />} title={`See ${info.name} at work`}
+      teaser="In your response, and in a model response">
+      <p className="text-[13px] mb-3" style={{ color: "var(--ink-faint)" }}>{info.description}</p>
+      <div className="flex flex-wrap gap-1.5 mb-4">
+        {parts.map((pt, i)=>(
+          <span key={pt.name} title={pt.meaning} className="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11.5px] font-semibold"
+            style={{ background: FRAMEWORK_PART_COLORS[i % FRAMEWORK_PART_COLORS.length][0], color: FRAMEWORK_PART_COLORS[i % FRAMEWORK_PART_COLORS.length][1] }}>
+            {pt.name}<span className="font-normal" style={{ color: "var(--ink-soft)" }}> · {pt.meaning}</span>
+          </span>
+        ))}
+      </div>
+      {hasRevised && (
+        <div className="mb-5">
+          <div className="font-display font-bold text-[12px] mb-2" style={{ color: "var(--ink-faint)" }}>IN YOUR RESPONSE (corrected and improved)</div>
+          <LabelledResponse text={feedback.revisedStory} labels={revisedLabels} parts={parts} />
+          {missing.length > 0 && (
+            <p className="text-[12.5px] mt-2" style={{ color: "var(--ink-soft)" }}>
+              <span className="font-semibold" style={{ color: "var(--ink)" }}>Not in your response yet: </span>{missing.map(m=>m.name).join(", ")}. Add {missing.length === 1 ? "it" : "them"} next time and compare with the model below.
+            </p>
+          )}
+        </div>
+      )}
+      <div>
+        <div className="font-display font-bold text-[12px] mb-2" style={{ color: "var(--ink-faint)" }}>A MODEL RESPONSE TO THE SAME TASK</div>
+        <LabelledResponse text={model} labels={feedback.modelFramework} parts={parts} />
+        <p className="text-[12px] mt-2" style={{ color: "var(--ink-faint)" }}>Written by the AI as an example of a strong answer at your level. Use it to learn from, not to copy.</p>
       </div>
     </Collapsible>
   );

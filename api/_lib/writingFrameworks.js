@@ -12,18 +12,22 @@
 const FRAMEWORK_BY_GENRE = {
   descriptive: {
     name: "Show, Don't Tell",
+    parts: [["Show", "A detail the reader can see, hear or feel that proves the feeling or fact, instead of just naming it."]],
     description: "Instead of naming a feeling or fact, describe what a reader would see, hear, or feel that proves it — \"her hands were shaking\" instead of \"she was scared\".",
   },
   narrative: {
     name: "Story Mountain",
+    parts: [["Opening", "Introduces who and where."], ["Build-up", "Something starts to happen."], ["Climax", "The most exciting or tense moment."], ["Resolution", "It gets sorted out."], ["Ending", "How things settle."]],
     description: "A story's shape: Opening (introduce who and where), Build-up (something starts to happen), Climax (the most exciting or tense moment), Resolution (it gets sorted out), Ending (how things settle).",
   },
   analytical: {
     name: "PEEL",
+    parts: [["Point", "States the point."], ["Evidence", "A quote or detail that backs it up."], ["Explain", "Says what the evidence shows."], ["Link", "Connects back to the question or the next idea."]],
     description: "A paragraph that proves a point: Point (state it), Evidence (a quote or detail that backs it up), Explain (say what the evidence shows), Link (connect back to the question or the next idea).",
   },
   persuasive: {
     name: "PEAL",
+    parts: [["Point", "States the argument."], ["Evidence", "A fact, quote or example that backs it up."], ["Analysis", "Explains why that evidence matters and its effect."], ["Link", "Ties back to the question or the overall argument."]],
     description: "A paragraph that argues a case: Point (state your argument), Evidence (a quote, fact or example that backs it up), Analysis (explain why that evidence matters and the effect it has - not just what it shows), Link (tie it back to the question or your overall argument).",
   },
 };
@@ -36,6 +40,11 @@ const VALID_GENRES = Object.keys(FRAMEWORK_BY_GENRE);
 // generated before "genre" existed on the record at all, or if the model
 // ever omits/mistags it.
 const DEFAULT_GENRE_BY_TIER = { early: "descriptive", elementary: "narrative", middle: "analytical", high: "persuasive" };
+
+// The named parts of a framework, as [{ name, meaning }].
+function frameworkParts(fw) {
+  return fw && Array.isArray(fw.parts) ? fw.parts.map(([name, meaning]) => ({ name, meaning })) : [];
+}
 
 function frameworkForGenre(genre) {
   return FRAMEWORK_BY_GENRE[genre] || null;
@@ -55,4 +64,4 @@ function frameworkForTier(tier) {
   return frameworkForGenre(DEFAULT_GENRE_BY_TIER[tier]);
 }
 
-module.exports = { FRAMEWORK_BY_GENRE, VALID_GENRES, DEFAULT_GENRE_BY_TIER, frameworkForGenre, resolveGenre, frameworkForTier };
+module.exports = { frameworkParts, FRAMEWORK_BY_GENRE, VALID_GENRES, DEFAULT_GENRE_BY_TIER, frameworkForGenre, resolveGenre, frameworkForTier };

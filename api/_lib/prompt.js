@@ -1,6 +1,8 @@
 const { curriculumLabel, standardsFor } = require("./curriculum");
 const { MAX_AVG_WORDS_PER_SENTENCE } = require("./validate");
 const { assessLength, lengthClause } = require("./calibrate");
+const { examTargetsFor } = require("./masteryTargets");
+const RESP = require("./responses");
 const { frameworkForGenre, resolveGenre, DEFAULT_GENRE_BY_TIER, VALID_GENRES } = require("./writingFrameworks");
 
 const TIER_LABEL = { early: "Early Years (ages 5-7)", elementary: "Elementary (ages 8-10)", middle: "Middle School (ages 11-13)", high: "High School (ages 14-18)" };
@@ -83,9 +85,15 @@ const EXAM_BANDS = `Band 1 = "Emerging" (the objective is barely attempted), Ban
 // ("missing an entry for: ..." the other three of four). Pre-filling every
 // criterion name leaves the model only the band/evidence to fill in, and
 // makes a short array look wrong against its own template.
-function examJsonShape(targets) {
+function examJsonShape(targets, kind) {
+  const evidence = kind === "reading"
+    ? "the specific question(s) that show it, for example Q2 and Q4 answered incorrectly"
+    : "a short phrase copied EXACTLY from the student's text that shows this band - or, if the piece is too short to judge this objective, exactly: Too little writing to judge this yet.";
+  const next = kind === "reading"
+    ? "one specific change to their READING that would move this objective up one band"
+    : "one specific change to THEIR OWN WRITING that would move this objective up one band";
   const entries = targets.map((t) =>
-    `    { "criterion": ${JSON.stringify(t.name)}, "band": "an integer 1-4 for this objective", "descriptor": "that band's descriptor word", "evidence": "a short quote or the specific question that shows it - or say plainly it wasn't attempted", "toNextBand": "one specific change that would move this objective up one band" }`
+    `    { "criterion": ${JSON.stringify(t.name)}, "band": "an integer 1-4 for this objective", "descriptor": "that band's descriptor word", "evidence": "${evidence}", "toNextBand": "${next}" }`
   ).join(",\n");
   return `  "examTechnique": [\n${entries}\n  ],\n  "examSummary": "one sentence naming the single objective worth working on next, and why"`;
 }
@@ -118,12 +126,12 @@ function examTechniqueClause({ tier, targets, kind }) {
   // what counts as evidence.
   const readingNote = kind === "reading"
     ? `\nThis was a READING task and the student answered every question, so never say an objective was "not attempted". Judge each objective only from what their answers show (which questions they got right or wrong and what that suggests). For "evidence", name specific questions, for example "Q2 and Q4 answered incorrectly". If an objective is mostly about writing craft and the questions give little evidence of it, say "The reading questions give limited evidence for this" and band conservatively. Every "toNextBand" must be advice for READING practice (for example how to find and weigh evidence in a text), never advice about "your writing".`
-    : "";
+    : `\nEvery objective below is one a piece of writing can show; reading-only objectives are deliberately left out. Judge each one by what its curriculum reference asks of a student in this year, using only what is on the page. "evidence" must be a short phrase copied EXACTLY from the student's text. If the piece is too short, or gives you nothing to judge for an objective, band it 1 and write exactly: Too little writing to judge this yet. Never write "not attempted". "toNextBand" must be advice about the student's own writing, never about reading or comprehension.`;
   return `\n\nEXAM-TECHNIQUE SCORING (required for this student):${readingNote}
 Score ${source} against each of these assessment objectives for their year and region: ${criteria}.
 ${EXAM_BANDS}
-For EVERY objective listed, return an entry with: the objective's exact name, the band (1-4), the band's descriptor word, one piece of concrete evidence (a short quote from their own text, or the specific question/answer that shows it), and ONE specific change that would move that objective up exactly one band. Never award a band you cannot point to evidence for - if an objective genuinely isn't attempted at all in this piece, band it 1 and say plainly that it wasn't attempted rather than inflating it. Do not invent a raw exam mark, percentage, or grade letter: bands only.
-"examTechnique" MUST have exactly ${targets.length} entries - one for EACH objective below, even ones this piece doesn't touch on at all. Do not skip an objective just because it feels less relevant to this specific piece than the others - "not attempted, banded 1" is a valid, required entry, an entry silently missing is not:
+For EVERY objective listed, return an entry with: the objective's exact name, the band (1-4), the band's descriptor word, one piece of concrete evidence (a short exact quote from their own text, or the specific question that shows it), and ONE specific change that would move that objective up exactly one band. Never award a band you cannot point to evidence for - if you cannot, band it 1 rather than inflating it. Do not invent a raw exam mark, percentage, or grade letter: bands only.
+"examTechnique" MUST have exactly ${targets.length} entries - one for EACH objective below, even one this piece gives little evidence of. Do not skip an objective just because it feels less relevant to this piece than the others - a Band 1 entry is valid and required, an entry silently missing is not:
 ${checklist}
 Also return "examSummary": one sentence naming the single objective that would gain this student the most marks if they worked on it next, and why.`;
 }
@@ -163,15 +171,19 @@ Put this in a "frameworkTip" field with "name" set to exactly "${fw.name}", "quo
 // is the complete, corrected version beside it. It must stay THEIR piece (same
 // ideas, order and voice), because a rewrite that invents new content stops
 // being coaching and starts being someone else's work.
-function revisedStoryClause(tier, withSpellingList) {
+function revisedStoryClause(tier, withSpellingList, assessment, origWords) {
   const register = (tier === "middle" || tier === "high")
     ? " Keep a formal, third-person academic register with no personal asides and no analogies."
     : tier === "early"
       ? " Keep the sentences short and simple, at the level a child this age could write themselves."
       : " Keep the vocabulary and sentence length at a level this student could plausibly write.";
+  const lim = RESP.revisedLimits(assessment, origWords);
+  const expand = (!assessment || assessment.level === "ok")
+    ? "Keep roughly their length (within about 35% of their word count). Do NOT add facts, characters, events, arguments, reasons, examples or opinions the student did not write."
+    : `Their piece is short for this level, so DEVELOP it where it helps: explain and support the points they already made (the reason behind a claim, a clearer explanation, or a brief general example that fits), so it reads as a fuller version of what they were saying, up to about ${lim.max} words. Do NOT change their position, add a new argument or a new character or event, and never invent statistics, named studies, quotations or personal experiences.`;
   return `
 
-REVISED STORY (required): Return "revisedStory": the student's WHOLE piece rewritten as a polished, corrected version of the SAME piece. It must (1) fix EVERY spelling, grammar, capitalisation and punctuation error${withSpellingList ? ", including each one you list in the spelling and grammar check below" : ""}; (2) apply your "grow" suggestions and improve flow, sentence structure and word choice so it reads clearly better than the original; and (3) stay THEIR piece: the same ideas, events and arguments in the same order, and roughly the same length (within about 25% of their word count). Do NOT add facts, characters, events, arguments, reasons, examples or opinions the student did not write - not even to strengthen or lengthen a short piece (a short piece stays short; the grow is where development is suggested) - and do not explain or comment on the changes. Keep their paragraph breaks.${register} Return plain text only.`;
+REVISED RESPONSE (required): Return "revisedStory": the student's WHOLE response rewritten as a polished, corrected version of the SAME response. It must (1) fix EVERY spelling, grammar, capitalisation and punctuation error${withSpellingList ? ", including each one you list in the spelling and grammar check below" : ""}; (2) apply your "grow" suggestions and improve flow, sentence structure and word choice so it reads clearly better than the original; and (3) stay THEIR response: the same position, ideas and events in the same order. ${expand} Do not explain or comment on the changes. Keep their paragraph breaks.${register} Return plain text only.`;
 }
 
 // A dedicated, always-shown spelling/grammar check - separate from the
@@ -248,6 +260,12 @@ function successCriteria(tier, { includeFramework, includeScore, includeSpelling
 
 function buildWritingPrompt({ tier, country, gradeLabel, interest, confidenceWriting, motivation, prompt, text, targetNames, targets, capabilities, genre }) {
   const caps = capabilities || {};
+  const allTargets = targets;
+  targets = examTargetsFor(allTargets, "writing");
+  const assessment = assessLength({ text, tier, country, gradeLabel });
+  const origWords = RESP.wordCount(text);
+  const fw = frameworkForGenre(resolveGenre(genre, tier));
+  const wantsModel = !!caps.deepFeedback && !!fw;
   const wantsExam = caps.examTechnique && examTechniqueSupported(tier) && Array.isArray(targets) && targets.length > 0;
   // Premium-only (see api/_lib/plans.js). ON unless the plan says false, so
   // a caller with no plan info still gets the full feedback shape.
@@ -272,8 +290,8 @@ ${highlightsClause(tier)}
 ${deepFeedbackClause(caps.deepFeedback)}
 ${wantsExam ? examTechniqueClause({ tier, targets, kind: "writing" }) : ""}
 ${frameworkClause({ tier, genre })}
-${wantsScore ? overallScoreClause() : ""}${lengthClause(assessLength({ text, tier, country, gradeLabel }))}
-${revisedStoryClause(tier, wantsSpelling)}
+${wantsScore ? overallScoreClause() : ""}${lengthClause(assessment)}
+${revisedStoryClause(tier, wantsSpelling, assessment, origWords)}${wantsModel ? RESP.responsesClause({ fw, tier, gradeLabel, country, assessment }) : ""}
 ${wantsSpelling ? spellingGrammarClause() : ""}
 
 Read the actual submitted text closely — every point you make must be traceable to something specifically in it (quote a short fragment where useful), not a generic template response.
@@ -292,11 +310,11 @@ Respond with ONLY a JSON object (no markdown fences, no commentary) with exactly
   ],
   "glowTarget": "the exact skill area name from the given list that the glow demonstrates",
   "growTarget": "the exact skill area name from the given list that the grow is building towards",
-  "highlights": [{ "quote": "an exact substring copied from the submitted text", "type": "glow or grow", "note": "a short reason", "revision": "ONLY for type=grow: that same fragment actually rewritten to apply the suggestion" }],${caps.deepFeedback ? '\n  "growNext": "ONE further, harder step: the next level of the same skill as the main grow (or the very next skill), as a concrete action for their next piece that quotes a short verbatim fragment of their own work in quotation marks - no analogy, no games or projects, not a restatement.",' : ""}${wantsExam ? `\n${examJsonShape(targets)},` : ""}
+  "highlights": [{ "quote": "an exact substring copied from the submitted text", "type": "glow or grow", "note": "a short reason", "revision": "ONLY for type=grow: that same fragment actually rewritten to apply the suggestion" }],${caps.deepFeedback ? '\n  "growNext": "ONE further, harder step: the next level of the same skill as the main grow (or the very next skill), as a concrete action for their next piece that quotes a short verbatim fragment of their own work in quotation marks - no analogy, no games or projects, not a restatement.",' : ""}${wantsExam ? `\n${examJsonShape(targets, "writing")},` : ""}
   "frameworkTip": { "name": "the exact framework name you were given, verbatim", "quote": "a real, verbatim fragment from the student's own submitted text", "revision": "that exact fragment rewritten to demonstrate the framework applied to THEIR writing" }${wantsScore ? `,
   "overallScore": "an integer 1-10 scoring the WHOLE piece against the four criteria above",
   "scoreReason": "one sentence citing the specific strength/weakness pattern across the whole piece that drove that score"` : ""},
-  "revisedStory": "the student's WHOLE piece rewritten as a corrected, improved version of the same piece: every error fixed, same ideas and order, roughly the same length, nothing new added"${wantsSpelling ? `,
+  "revisedStory": "the student's WHOLE response rewritten as a corrected, improved version of the same response: every error fixed, same position and order, developed only as instructed above, nothing invented"${wantsModel ? ",\n" + RESP.responsesJsonShape(fw) : ""}${wantsSpelling ? `,
   "spellingGrammarTotal": "the TRUE total count of real errors found, honest even if more than 8",
   "spellingGrammar": [{ "quote": "an exact substring from the submitted text containing a real spelling/grammar/punctuation error", "type": "spelling, grammar, or punctuation", "correction": "that same fragment with just the error fixed" }]` : ""}
 }`;
@@ -352,6 +370,7 @@ function questionReviewShape(count) {
 
 function buildReadingPrompt({ tier, country, gradeLabel, interest, confidenceReading, motivation, passageTitle, passage, questions, answers, score, totalQuestions, targetNames, targets, capabilities }) {
   const caps = capabilities || {};
+  targets = examTargetsFor(targets, "reading");
   const wantsExam = caps.examTechnique && examTechniqueSupported(tier) && Array.isArray(targets) && targets.length > 0;
   const answerLines = questions.map((q, i) => {
     const chosen = answers[i];

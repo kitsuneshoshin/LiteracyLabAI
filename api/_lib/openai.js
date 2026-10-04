@@ -33,7 +33,7 @@ function friendlyProviderMessage(e) {
 // Calls the model with the given prompt and parses the response as JSON.
 // Uses OpenAI's native JSON mode (response_format) so the model is
 // constrained to valid JSON rather than relying on prompt instructions alone.
-async function generateFeedbackJSON(prompt) {
+async function generateFeedbackJSON(prompt, { maxTokens } = {}) {
   const openai = getOpenAI();
   const model = process.env.OPENAI_MODEL || DEFAULT_MODEL;
 
@@ -41,7 +41,7 @@ async function generateFeedbackJSON(prompt) {
   try {
     completion = await openai.chat.completions.create({
       model,
-      max_tokens: 2048,
+      max_tokens: maxTokens || 2048,
       response_format: { type: "json_object" },
       messages: [{ role: "user", content: prompt }],
     });

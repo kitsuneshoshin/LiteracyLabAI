@@ -3,7 +3,10 @@ const assert = require("node:assert/strict");
 const { capabilitiesFor } = require("../api/_lib/plans");
 const { buildWritingPrompt, buildReadingPrompt, buildReadingPassagePrompt } = require("../api/_lib/prompt");
 const { validatePassage } = require("../api/_lib/validate");
-const { targetsForGrade } = require("../api/_lib/masteryTargets");
+const { targetsForGrade, examTargetsFor } = require("../api/_lib/masteryTargets");
+const { assessLength } = require("../api/_lib/calibrate");
+const RESP = require("../api/_lib/responses");
+const { frameworkParts } = require("../api/_lib/writingFrameworks");
 const { standardsFor } = require("../api/_lib/curriculum");
 const { frameworkForGenre, resolveGenre, DEFAULT_GENRE_BY_TIER } = require("../api/_lib/writingFrameworks");
 const { did, loadHandler, call } = require("./harness");
@@ -99,11 +102,38 @@ function writingExtras(tier, caps) {
   return { out, targets };
 }
 
-function planExtras(tier, caps, targets) {
+// Letters-only filler words, so a fixture response has an exact number of distinct words.
+function filler(n, seed) {
+  return Array.from({ length: n }, (_, i) => {
+    let k = i + seed * 37 + 1;
+    let w = "";
+    while (k > 0) { w += "abcdefghijklmnopqrstuvwxyz"[k % 26]; k = Math.floor(k / 26); }
+    return w + "ly";
+  });
+}
+// A compliant Premium model response and labels for the default genre of this tier.
+function premiumResponses(tier) {
+  const fw = frameworkForGenre(resolveGenre(DEFAULT_GENRE_BY_TIER[tier], tier));
+  const parts = frameworkParts(fw);
+  const lim = RESP.modelLimits(assessLength({ text: TEXT, tier, country: COUNTRY, gradeLabel: TIERS[tier] }));
+  const per = Math.max(3, Math.floor(lim.n / parts.length));
+  const sentences = parts.map((pt, k) => {
+    const w = filler(per, k + 1);
+    w[0] = w[0][0].toUpperCase() + w[0].slice(1);
+    return w.join(" ") + ".";
+  });
+  return {
+    modelResponse: sentences.join(" "),
+    modelFramework: parts.map((pt, k) => ({ part: pt.name, text: sentences[k], note: "This sentence does the job of " + pt.name + " clearly." })),
+    revisedFramework: [{ part: parts[0].name, text: "The dog ran fast.", note: "This sentence opens the response clearly." }],
+  };
+}
+
+function planExtras(tier, caps, targets, kind = "writing") {
   const out = {};
   if (caps.deepFeedback) out.growNext = "Once that feels natural, rework \"The dog ran fast\" so it opens with where or when.";
   if (caps.examTechnique && EXAM_TIERS.has(tier)) {
-    out.examTechnique = targets.map((t) => ({ criterion: t.name, band: 2, descriptor: "Developing", evidence: "The dog ran fast", toNextBand: "Add one more developed sentence to show this clearly." }));
+    out.examTechnique = examTargetsFor(targets, kind).map((t) => ({ criterion: t.name, band: 2, descriptor: "Developing", evidence: "The dog ran fast", toNextBand: "Add one more developed sentence to show this clearly." }));
     out.examSummary = "Accurate, fluent writing would gain the most marks next.";
   }
   return out;
@@ -118,8 +148,8 @@ function obedient(plan, tier, kind) {
   const caps = capabilitiesFor(plan);
   const fb = baseFeedback(tier);
   const { out, targets } = writingExtras(tier, caps);
-  Object.assign(fb, planExtras(tier, caps, targets));
-  if (kind === "writing") Object.assign(fb, out);
+  Object.assign(fb, planExtras(tier, caps, targets, kind));
+  if (kind === "writing") { Object.assign(fb, out); if (caps.deepFeedback) Object.assign(fb, premiumResponses(tier)); }
   else fb.questionReview = readingReview();
   return fb;
 }
@@ -129,7 +159,8 @@ function overEager(tier, kind) {
   const premium = capabilitiesFor("premium");
   const fb = baseFeedback(tier);
   const { out, targets } = writingExtras(tier, premium);
-  Object.assign(fb, out, planExtras(tier, { deepFeedback: true, examTechnique: true }, targets));
+  Object.assign(fb, out, planExtras(tier, { deepFeedback: true, examTechnique: true }, targets, kind));
+  if (kind === "writing") Object.assign(fb, premiumResponses(tier));
   fb.questionReview = readingReview();
   fb.commitOptions = ["Try this", "Try that"];
   fb.followUp = "Great job trying last time.";
@@ -192,7 +223,7 @@ for (const plan of PLANS) {
       assert.equal(p.includes("SPELLING AND GRAMMAR CHECK"), want.spellingGrammar, "spelling check");
       assert.ok(p.includes("FRAMEWORK SPOTLIGHT"), "framework spotlight is on every plan");
       assert.ok(!p.includes("QUESTION-BY-QUESTION REVIEW"), "a writing prompt must not ask for a question review");
-      if (want.examTechnique) targets.forEach((t) => assert.ok(p.includes(`"criterion": ${JSON.stringify(t.name)}`), `exam template missing ${t.name}`));
+      if (want.examTechnique) examTargetsFor(targets, "writing").forEach((t) => assert.ok(p.includes(`"criterion": ${JSON.stringify(t.name)}`), `exam template missing ${t.name}`));
     });
 
     test(`prompt: ${plan} / ${tier} reading asks for exactly what the plan includes`, () => {
@@ -282,6 +313,8 @@ for (const plan of PLANS) {
           const included = lazy.includedFor(caps, tier);
           // The exam case only means something where an exam block exists.
           if (lazy.name.startsWith("only one exam") && !included) return;
+          // With a single objective that applies to this kind of task, one banded entry is complete.
+          if (lazy.name.startsWith("only one exam") && examTargetsFor(targetsForGrade(COUNTRY, TIERS[tier], tier).targets, kind).length < 2) return;
           const { res, prompts } = await runSubmit(plan, tier, kind, () => { const f = obedient(plan, tier, kind); lazy.mutate(f); return f; });
           if (included) {
             assert.equal(res.statusCode, 502, "a plan-included section was silently allowed to be missing");

@@ -30,7 +30,7 @@ test("every sample builds a real prompt, and a failing sample is retried like a 
   assert.equal(first.length, 8, "one first attempt per sample");
   assert.equal(retries.length, 16, "two retries for each of the eight failing samples");
   assert.ok(first.every((p) => p.length > 1500), "each prompt is a full prompt");
-  assert.ok(first.filter((p) => /REVISED STORY \(required\)/.test(p)).length === 6, "all six writing samples ask for the corrected story");
+  assert.ok(first.filter((p) => /REVISED RESPONSE \(required\)/.test(p)).length === 6, "all six writing samples ask for the corrected story");
 });
 
 test("a model that returns nothing usable fails every sample cleanly after three attempts: no crash, a plain reason each, and the numbers add up", async () => {

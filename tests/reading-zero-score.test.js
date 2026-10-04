@@ -2,7 +2,7 @@ const test = require("node:test");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
-const { targetsForGrade } = require("../api/_lib/masteryTargets");
+const { targetsForGrade, examTargetsFor } = require("../api/_lib/masteryTargets");
 const { paragraphise } = require("../api/_lib/passageFormat");
 const { buildReadingPassagePrompt } = require("../api/_lib/prompt");
 const { did, loadHandler, call } = require("./harness");
@@ -46,7 +46,7 @@ function modelOutput(bandValue, glow) {
     growNext: "Once that feels natural, pick the next question and write which sentence in the passage best supports the main claim.",
     glowTarget: targets[0].name,
     growTarget: targets[1] ? targets[1].name : targets[0].name,
-    examTechnique: targets.map((t) => ({ criterion: t.name, band: bandValue, descriptor: "Emerging", evidence: "Question 1 was answered incorrectly", toNextBand: "Re-read the passage and find the sentence that supports the answer." })),
+    examTechnique: examTargetsFor(targets, "reading").map((t) => ({ criterion: t.name, band: bandValue, descriptor: "Emerging", evidence: "Question 1 was answered incorrectly", toNextBand: "Re-read the passage and find the sentence that supports the answer." })),
     examSummary: "Reading closely for the writer's claim would help the most next.",
     questionReview: [1, 2, 3, 4, 5].map((n) => ({ n, explanation: `Question ${n}: the correct answer is supported by the passage.`, evidence: "She rebuilt it with her dad until midnight" })),
   };

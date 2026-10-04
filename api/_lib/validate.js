@@ -5,7 +5,8 @@
 // yourself occasionally (every submission's feedback is saved to
 // submissions.feedback in Supabase for exactly that purpose).
 
-const { growDevelops } = require("./calibrate");
+const { growDevelops, assessLength } = require("./calibrate");
+const RESP = require("./responses");
 const { frameworkForGenre, resolveGenre, VALID_GENRES } = require("./writingFrameworks");
 
 const MAX_AVG_WORDS_PER_SENTENCE = { early: 14, elementary: 18, middle: 24, high: 32 };
@@ -205,7 +206,7 @@ function wordOverlap(a, b) {
   return shared / smaller.size;
 }
 
-function validateExamTechnique(parsed, targetNames, issues) {
+function validateExamTechnique(parsed, targetNames, issues, submittedText) {
   const entries = parsed?.examTechnique;
   if (!Array.isArray(entries) || entries.length === 0) {
     issues.push("examTechnique must be an array with one entry per assessment objective");
@@ -230,7 +231,16 @@ function validateExamTechnique(parsed, targetNames, issues) {
       issues.push(`examTechnique[${i}].band must be an integer from 1 to 4`);
     }
     if (!checkString(e?.descriptor, 3, 40)) issues.push(`examTechnique[${i}].descriptor is missing or an unreasonable length`);
-    if (!checkString(e?.evidence, 5, 400)) issues.push(`examTechnique[${i}].evidence is missing or an unreasonable length`);
+    if (!checkString(e?.evidence, 5, 400)) {
+      issues.push(`examTechnique[${i}].evidence is missing or an unreasonable length`);
+    } else if (submittedText && Number.isInteger(e.band) && e.band >= 2) {
+      // On a writing task a band above Emerging has to point at the student's own words.
+      const haystack = normalizeForMatch(submittedText);
+      const candidates = [e.evidence, ...[...e.evidence.matchAll(/["\u201C']([^"\u201D']{3,200})["\u201D']/g)].map((m) => m[1])];
+      if (!candidates.some((c) => normalizeForMatch(c).length >= 3 && haystack.includes(normalizeForMatch(c)))) {
+        issues.push(`examTechnique[${i}].evidence must be a short phrase copied exactly from the student's text to support Band ${e.band} (or Band 1 with: Too little writing to judge this yet.)`);
+      }
+    }
     if (!checkString(e?.toNextBand, 10, 400)) issues.push(`examTechnique[${i}].toNextBand is missing or an unreasonable length`);
   });
   // Scoring only some objectives would let the model quietly skip the ones
@@ -344,7 +354,7 @@ function validateSpellingGrammar(parsed, submittedText, issues) {
 // capitalised and punctuated, and must not still contain a misspelling the
 // spelling check itself listed.
 const wordsOf = (t) => String(t).toLowerCase().match(/[a-z0-9À-ɏ']+/g) || [];
-function validateRevisedStory(parsed, submittedText, issues) {
+function validateRevisedStory(parsed, submittedText, issues, limits) {
   const story = parsed?.revisedStory;
   if (!checkString(story, 5, 20000)) {
     issues.push("revisedStory is missing or an unreasonable length");
@@ -355,8 +365,9 @@ function validateRevisedStory(parsed, submittedText, issues) {
   const count = wordsOf(story).length;
   // A very short original (a few sentences) naturally grows a little when every error is
   // fixed and a sentence is completed, so the upper limit has some give.
-  if (count < Math.max(4, Math.floor(origCount * 0.6)) || count > Math.ceil(origCount * 1.35) + 8) {
-    issues.push("revisedStory must keep roughly the student's own length (about 60% to 135% of their word count, plus a few words for completed sentences) and their own ideas, not become a different piece");
+  const lim = limits || { min: Math.max(4, Math.floor(origCount * 0.6)), max: Math.ceil(origCount * 1.35) + 8 };
+  if (count < lim.min || count > lim.max) {
+    issues.push(`revisedStory length must be between ${lim.min} and ${lim.max} words (it is ${count}): the student's own position and ideas, corrected and improved, developed only as far as the instructions allow, not a different piece`);
   }
   if (foldLookalikes(story) === foldLookalikes(original)) {
     issues.push("revisedStory is identical to the student's text - it must be a corrected, improved version");
@@ -433,6 +444,16 @@ function misspeltWords(parsed) {
 
 // A "glow" highlight whose quote contains a word the spelling check says is
 // misspelled would praise the very error listed beside it, so it is dropped.
+// Premium framework labels: unknown parts and non-verbatim quotes are dropped, the rest ordered as they occur.
+function repairResponses(parsed, genre, tier) {
+  const fw = frameworkForGenre(resolveGenre(genre, tier));
+  if (!parsed || !fw) return parsed;
+  RESP.composeModelResponse(parsed, fw);
+  RESP.repairFrameworkLabels(parsed, fw, "revisedFramework", "revisedStory");
+  RESP.sortByPosition(parsed, "revisedFramework", "revisedStory");
+  return parsed;
+}
+
 function dropGlowsQuotingMisspellings(parsed) {
   if (!parsed || !Array.isArray(parsed.highlights)) return parsed;
   const bad = misspeltWords(parsed);
@@ -525,12 +546,12 @@ function stripUngrantedSections(parsed, { capabilities, kind }) {
   // Retired features; nothing renders them any more.
   drop("commitOptions", "followUp");
 
-  if (!caps.deepFeedback) drop("growNext");
+  if (!caps.deepFeedback) drop("growNext", "modelResponse", "modelFramework", "revisedFramework");
   if (!caps.examTechnique) drop("examTechnique", "examSummary");
 
   if (kind === "reading") {
     // Reading has no free-text submission of the student's own to quote from.
-    drop("highlights", "frameworkTip", "overallScore", "scoreReason", "spellingGrammar", "spellingGrammarTotal", "revisedStory");
+    drop("highlights", "frameworkTip", "overallScore", "scoreReason", "spellingGrammar", "spellingGrammarTotal", "revisedStory", "modelResponse", "modelFramework", "revisedFramework");
   } else {
     drop("questionReview");
     if (caps.overallScore === false) drop("overallScore", "scoreReason");
@@ -539,8 +560,9 @@ function stripUngrantedSections(parsed, { capabilities, kind }) {
   return parsed;
 }
 
-function validateFeedback(parsed, { tier, standardsList, targetNames, submittedText, readingScore, capabilities, genre, lengthLevel }) {
+function validateFeedback(parsed, { tier, standardsList, targetNames, submittedText, readingScore, capabilities, genre, lengthLevel, lengthInfo, examTargetNames }) {
   const issues = [];
+  if (lengthInfo && !lengthLevel) lengthLevel = lengthInfo.level;
   if ((lengthLevel === "thin" || lengthLevel === "minimal") && checkString(parsed?.grow, 1, 100000) && !growDevelops(parsed.grow)) {
     issues.push("grow must be about developing this very short piece (adding the next reason, example or detail), not only polishing its wording");
   }
@@ -633,7 +655,14 @@ function validateFeedback(parsed, { tier, standardsList, targetNames, submittedT
     // says false; callers with no plan info keep the full checks.
     if (caps.overallScore !== false) validateOverallScore(parsed, issues);
     // Every plan gets the corrected rewrite of the student's piece.
-    validateRevisedStory(parsed, submittedText, issues);
+    validateRevisedStory(parsed, submittedText, issues, lengthInfo ? RESP.revisedLimits(lengthInfo, RESP.wordCount(submittedText)) : undefined);
+    // Premium: the model response and the framework labels for both responses.
+    if (caps.deepFeedback) {
+      const fw = frameworkForGenre(resolveGenre(genre, tier));
+      if (fw) {
+        RESP.validateResponses(parsed, { fw, assessment: lengthInfo || assessLength({ text: submittedText, tier, country: undefined, gradeLabel: undefined }), submittedText }, issues);
+      }
+    }
     if (caps.spellingGrammar !== false) {
       validateSpellingGrammar(parsed, submittedText, issues);
     }
@@ -669,7 +698,7 @@ function validateFeedback(parsed, { tier, standardsList, targetNames, submittedT
   // caps.examTechnique arriving here is already tier-resolved by submit.js -
   // the plan can grant it while the student's tier has no banded objectives.
   if (caps.examTechnique) {
-    validateExamTechnique(parsed, targetNames, issues);
+    validateExamTechnique(parsed, examTargetNames || targetNames, issues, submittedText);
   }
 
   // Reading feedback only (readingScore is undefined for writing).
@@ -745,4 +774,4 @@ function validateWritingPrompt(parsed, { tier }) {
   return { ok: issues.length === 0, issues };
 }
 
-module.exports = { dropGlowsQuotingMisspellings, repairZeroScoreGlow, repairReadingExamEvidence, validateFeedback, validatePassage, validateWritingPrompt, resolveTarget, dropInvalidSpellingGrammar, sanitizeQuestionReview, stripUngrantedSections, MAX_AVG_WORDS_PER_SENTENCE };
+module.exports = { repairResponses, dropGlowsQuotingMisspellings, repairZeroScoreGlow, repairReadingExamEvidence, validateFeedback, validatePassage, validateWritingPrompt, resolveTarget, dropInvalidSpellingGrammar, sanitizeQuestionReview, stripUngrantedSections, MAX_AVG_WORDS_PER_SENTENCE };

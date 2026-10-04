@@ -539,7 +539,33 @@ function targetsForGrade(country, gradeLabel, tier) {
   return { targets: targetsFor(country, tier), grain: "tier", approximatedFrom: null };
 }
 
+// Whether an objective can be judged from a student's OWN WRITING or only from
+// how they READ. Mapped objectives are a mix: for example AQA AO2/AO3, CCSS RL/RI,
+// Australian LY05 (comprehension strategies) and the Cambridge "Reading" strands are
+// reading skills, so banding them on an essay (and calling them "not attempted") is
+// both wrong and unhelpful. Writing tasks are banded on the writing objectives and
+// reading tasks on the reading ones.
+function targetMode(target) {
+  const std = String((target && target.standard) || "");
+  const name = String((target && target.name) || "");
+  // An objective whose own standard says "Writing" is a writing skill.
+  if (std.includes("Writing") && !std.includes("Reading")) return "writing";
+  if (/(^|[^A-Za-z])AO[1-4]([^0-9]|$)/.test(std)) return "reading";
+  if (std.includes("RL.") || std.includes("RI.") || std.includes("LY05") || std.includes("Reading") || std.includes("reading aim")) return "reading";
+  if (/(^|[^A-Za-z0-9])C2([^0-9]|$)/.test(std)) return "reading";
+  if (/Comprehension|Reading for Meaning|Implicit Meaning|Inference|Reading Strand/i.test(name)) return "reading";
+  return "writing";
+}
+
+// The objectives a task of this kind can honestly be banded on.
+function examTargetsFor(targets, kind) {
+  const list = Array.isArray(targets) ? targets : [];
+  const want = kind === "reading" ? "reading" : "writing";
+  return list.filter((t) => targetMode(t) === want);
+}
+
 module.exports = {
+  targetMode, examTargetsFor,
   MASTERY_TARGETS_UK, MASTERY_TARGETS_US, MASTERY_TARGETS_AU, MASTERY_TARGETS_GENERIC,
   MASTERY_TARGETS_AU_BY_GRADE, MASTERY_TARGETS_UK_BY_GRADE, MASTERY_TARGETS_US_BY_GRADE,
   MASTERY_TARGETS_CA_BY_GRADE, MASTERY_TARGETS_AE_BY_GRADE, MASTERY_TARGETS_SG_BY_GRADE,

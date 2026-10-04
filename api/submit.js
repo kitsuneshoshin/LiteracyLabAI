@@ -4,12 +4,13 @@ const { getMonthlyUsage } = require("./_lib/usage");
 const { generateFeedbackJSON } = require("./_lib/openai");
 const { buildWritingPrompt, buildReadingPrompt, correctiveAddendum, examTechniqueSupported } = require("./_lib/prompt");
 const { standardsFor } = require("./_lib/curriculum");
-const { targetsForGrade } = require("./_lib/masteryTargets");
+const { targetsForGrade, examTargetsFor } = require("./_lib/masteryTargets");
+const RESP = require("./_lib/responses");
 const { frameworkForGenre, resolveGenre } = require("./_lib/writingFrameworks");
-const { dropGlowsQuotingMisspellings, validateFeedback, resolveTarget, dropInvalidSpellingGrammar, sanitizeQuestionReview, repairZeroScoreGlow, repairReadingExamEvidence, stripUngrantedSections } = require("./_lib/validate");
+const { repairResponses, dropGlowsQuotingMisspellings, validateFeedback, resolveTarget, dropInvalidSpellingGrammar, sanitizeQuestionReview, repairZeroScoreGlow, repairReadingExamEvidence, stripUngrantedSections } = require("./_lib/validate");
 const { checkRateLimit } = require("./_lib/rateLimit");
 const { writingLimitsForGrade } = require("./_lib/writingLimits");
-const { assessLength, calibrateWriting, applyCorrections } = require("./_lib/calibrate");
+const { assessLength, calibrateWriting, applyCorrections, repairExamEvidence } = require("./_lib/calibrate");
 
 // Server-side character caps, derived per country+grade from real syllabus
 // word-count guidance - mirrors GRADE_WORD_TARGETS in app.html. Enforced
@@ -21,22 +22,54 @@ const { assessLength, calibrateWriting, applyCorrections } = require("./_lib/cal
 // runs — so a few attempts absorb that variance before we ever show a
 // child an error instead of feedback.
 const MAX_ATTEMPTS = 3;
+// The function is limited to 60s (vercel.json). A Premium answer is long, so if another full
+// attempt could not finish in time, the current one is treated as the last: bonus sections are
+// dropped as on a normal last attempt, otherwise the student gets the plain error, not a timeout.
+const TIME_BUDGET_MS = 50000;
+
+// Plain notes the exam panel shows: which objectives were left out because this kind of
+// task cannot show them, and (for years with no national objectives) which year's were used.
+function examNotes(country, gradeLabel, tier, kind) {
+  const info = targetsForGrade(country, gradeLabel, tier);
+  const banded = examTargetsFor(info.targets, kind).map((t) => t.name);
+  const left = info.targets.filter((t) => !banded.includes(t.name));
+  const out = {};
+  if (left.length) {
+    out.examNotBanded = left.map((t) => t.name);
+    out.examNotBandedWhy = kind === "reading"
+      ? "writing skills, banded when you submit a piece of writing"
+      : "reading skills, banded in reading practice";
+  }
+  if (info.approximatedFrom) {
+    out.examBasis = gradeLabel + " does not have its own published objectives, so these use the " + info.approximatedFrom + " objectives.";
+  }
+  return out;
+}
 
 async function generateAndValidate(prompt, tier, country, gradeLabel, submittedText, readingScore, capabilities, genre, readingContext) {
   const standardsList = standardsFor(country, tier, gradeLabel);
   const targetNames = targetsForGrade(country, gradeLabel, tier).targets.map((t) => t.name);
+  // Exam bands are given only on the objectives this kind of task can show: writing
+  // objectives for a piece of writing, reading objectives for a reading task.
+  const examTargetNames = examTargetsFor(targetsForGrade(country, gradeLabel, tier).targets, readingContext ? "reading" : "writing").map((t) => t.name);
   let nextPrompt = prompt;
   let lastIssues = [];
-  const lengthLevel = submittedText ? assessLength({ text: submittedText, tier, country, gradeLabel }).level : undefined;
+  const startedAt = Date.now();
+  const lengthInfo = submittedText ? assessLength({ text: submittedText, tier, country, gradeLabel }) : undefined;
 
   for (let i = 1; i <= MAX_ATTEMPTS; i++) {
-    const attempt = await generateFeedbackJSON(nextPrompt);
+    const attemptStarted = Date.now();
+    // A Premium writing answer carries the model response and its labels, so it needs more room.
+    const attempt = await generateFeedbackJSON(nextPrompt, { maxTokens: capabilities?.deepFeedback && submittedText ? 3800 : 2048 });
+    const lastAttempt = i === MAX_ATTEMPTS || (Date.now() - startedAt) + (Date.now() - attemptStarted) * 1.2 > TIME_BUDGET_MS;
     if (capabilities?.spellingGrammar !== false) dropInvalidSpellingGrammar(attempt.parsed, submittedText);
     if (capabilities?.spellingGrammar !== false) dropGlowsQuotingMisspellings(attempt.parsed);
+    if (submittedText && capabilities?.deepFeedback) repairResponses(attempt.parsed, genre, tier);
+    if (submittedText) repairExamEvidence(attempt.parsed);
     if (readingScore === 0) repairZeroScoreGlow(attempt.parsed);
     if (readingContext) repairReadingExamEvidence(attempt.parsed, readingContext.questions, readingContext.answers);
     if (readingContext) sanitizeQuestionReview(attempt.parsed, readingContext.passage, readingContext.questionCount);
-    const check = validateFeedback(attempt.parsed, { tier, standardsList, targetNames, submittedText, readingScore, capabilities, genre, lengthLevel });
+    const check = validateFeedback(attempt.parsed, { tier, standardsList, targetNames, submittedText, readingScore, capabilities, genre, lengthInfo, examTargetNames });
     if (check.ok) {
       // Snap glowTarget/growTarget to the exact canonical string so
       // api/progress.js's exact-key Map lookup actually finds them.
@@ -50,11 +83,14 @@ async function generateAndValidate(prompt, tier, country, gradeLabel, submittedT
     // otherwise good piece of feedback (the app simply doesn't show it).
     // The same goes for the Premium full rewrite ("revisedStory"): the app falls
     // back to the fragment-by-fragment revision when it is absent.
-    const bonusOnly = check.issues.length > 0 && check.issues.every((issue) => /^(growNext|revisedStory)\b/.test(issue));
+    const bonusOnly = check.issues.length > 0 && check.issues.every((issue) => /^(growNext|revisedStory|modelResponse|modelFramework|revisedFramework)\b/.test(issue));
     const growNextBad = check.issues.some((issue) => /^growNext\b/.test(issue));
-    if (i === MAX_ATTEMPTS && attempt.parsed && bonusOnly && (!growNextBad || attempt.parsed.growNext)) {
+    if (lastAttempt && attempt.parsed && bonusOnly && (!growNextBad || attempt.parsed.growNext)) {
       if (growNextBad) delete attempt.parsed.growNext;
+      if (check.issues.some((issue) => /^(modelResponse|modelFramework)\b/.test(issue))) { delete attempt.parsed.modelResponse; delete attempt.parsed.modelFramework; }
+      if (check.issues.some((issue) => /^revisedFramework\b/.test(issue))) delete attempt.parsed.revisedFramework;
       if (check.issues.some((issue) => /^revisedStory\b/.test(issue))) {
+        delete attempt.parsed.revisedFramework; // its quotes belong to the rewrite that is being replaced
         // Keep a faithful corrected copy (the student's own words with the listed fixes
         // applied) rather than nothing, when the model's rewrite wandered from the original.
         const fixed = applyCorrections(submittedText, attempt.parsed.spellingGrammar);
@@ -66,6 +102,7 @@ async function generateAndValidate(prompt, tier, country, gradeLabel, submittedT
       return attempt;
     }
     lastIssues = check.issues;
+    if (lastAttempt) break;
     nextPrompt = prompt + correctiveAddendum(check.issues);
   }
 
@@ -186,6 +223,11 @@ module.exports = async function handler(req, res) {
       stripUngrantedSections(result.parsed, { capabilities: caps, kind: "writing" });
       // Score and band caps from the real length against this grade's expected length.
       calibrateWriting(result.parsed, { text, tier: existing.tier, country: existing.country, gradeLabel: existing.grade_label, capabilities: caps });
+      if (Array.isArray(result.parsed.examTechnique)) Object.assign(result.parsed, examNotes(existing.country, existing.grade_label, existing.tier, "writing"));
+      if (result.parsed.modelResponse || result.parsed.revisedFramework) {
+        const fw = frameworkForGenre(resolveGenre(genre, existing.tier));
+        if (fw) result.parsed.frameworkInfo = RESP.frameworkInfo(fw);
+      }
 
       // The model only writes frameworkTip.name/example (see prompt.js) -
       // its definition is fixed per genre, not left to the model to
@@ -260,6 +302,7 @@ module.exports = async function handler(req, res) {
       }
 
       stripUngrantedSections(result.parsed, { capabilities: caps, kind: "reading" });
+      if (Array.isArray(result.parsed.examTechnique)) Object.assign(result.parsed, examNotes(existing.country, existing.grade_label, existing.tier, "reading"));
 
       const { error: updateErr } = await supabase
         .from("submissions")

@@ -55,11 +55,12 @@ function lengthClause(a) {
   if (a.level === "ok") return "";
   const pct = Math.max(1, Math.round(a.ratio * 100));
   const lead = `\n\nLENGTH CHECK (computed, not an estimate): the student wrote ${a.words} word${a.words === 1 ? "" : "s"}${a.repetitive ? ` (about ${a.effective} once repeated words are ignored)` : ""}; about ${a.target} are expected at this level, so this piece is roughly ${pct}% of the expected length.`;
-  const rules = ` Say so plainly and kindly in "scoreReason" (or in the grow if there is no score), do not award a high score or a high band for a piece this short, never describe it as developed, thorough or comprehensive, and make the main "grow" about developing the piece (adding the next reason, example or detail) rather than polishing wording. Do not praise a skill the few words do not demonstrate. Do not force an interest analogy into the grow. The corrected story must only correct the student's own words, with nothing added.`;
+  const rules = ` Say so plainly and kindly in "scoreReason" (or in the grow if there is no score), do not award a high score or a high band for a piece this short, never describe it as developed, thorough or comprehensive, and make the main "grow" about developing the piece (adding the next reason, example or detail) rather than polishing wording. Do not praise a skill the few words do not demonstrate. Do not force an interest analogy into the grow. The revised response may develop their own points only as the REVISED RESPONSE instructions allow, and must keep their position.`;
   return lead + rules;
 }
 
 const NOT_ATTEMPTED = /not\s+attempted|wasn'?t\s+attempted|did\s+not\s+attempt|didn'?t\s+attempt|no\s+evidence|nothing\s+to\s+(assess|judge)|not\s+(shown|demonstrated|addressed)|absent/i;
+const TOO_LITTLE = "Too little writing to judge this yet.";
 const BAND_WORD = { 1: "Emerging", 2: "Developing", 3: "Secure", 4: "Strong" };
 
 // Lowers examTechnique bands that the evidence or the length cannot support.
@@ -70,13 +71,25 @@ function calibrateBands(parsed, a) {
     let band = Number(e.band);
     if (!Number.isInteger(band)) continue;
     const text = `${e.evidence || ""} ${e.descriptor || ""}`;
-    if (NOT_ATTEMPTED.test(text)) band = 1;
+    if (NOT_ATTEMPTED.test(text)) { band = 1; e.evidence = TOO_LITTLE; }
     band = Math.min(band, a.bandCap);
     if (band !== Number(e.band)) {
       e.band = band;
       e.descriptor = BAND_WORD[band];
     }
   }
+}
+
+// Before validation: an entry whose evidence says the objective was "not attempted" (or
+// similar) on a piece of writing is an honest Band 1 with a plain reason, whatever band the
+// model attached, so it is normalised rather than retried.
+function repairExamEvidence(parsed) {
+  if (!parsed || !Array.isArray(parsed.examTechnique)) return parsed;
+  for (const e of parsed.examTechnique) {
+    if (!e || typeof e !== "object" || typeof e.evidence !== "string") continue;
+    if (NOT_ATTEMPTED.test(e.evidence)) { e.band = 1; e.descriptor = BAND_WORD[1]; e.evidence = TOO_LITTLE; }
+  }
+  return parsed;
 }
 
 function calibrateScore(parsed, a) {
@@ -128,4 +141,4 @@ function calibrateWriting(parsed, { text, tier, country, gradeLabel, capabilitie
   return a;
 }
 
-module.exports = { assessLength, lengthClause, calibrateWriting, calibrateBands, calibrateScore, applyCorrections, growDevelops, effectiveWordCount, wordsIn, LEVELS };
+module.exports = { repairExamEvidence, assessLength, lengthClause, calibrateWriting, calibrateBands, calibrateScore, applyCorrections, growDevelops, effectiveWordCount, wordsIn, LEVELS };
