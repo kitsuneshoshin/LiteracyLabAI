@@ -88,9 +88,14 @@ async function handleQa(req, res) {
 
   const { runQa } = require("./_lib/qaRun");
   const { generateFeedbackJSON } = require("./_lib/openai");
-  const summary = await runQa({ generate: generateFeedbackJSON });
+  // ?models=1 lists the models this key can use. ?model=<id> runs the same check on another
+  // model (and, like ?save=0, nothing is changed in production), to compare quality and cost.
+  if (req.query && req.query.models === "1") return res.status(200).json({ models: await require("./_lib/openai").listModels() });
+  const model = req.query && /^[a-z0-9][a-z0-9.\-]{2,40}$/.test(String(req.query.model || "")) ? String(req.query.model) : undefined;
+  const summary = await runQa({ generate: (prompt) => generateFeedbackJSON(prompt, { model, maxTokens: 3800 }) });
+  if (model) summary.model = model;
   let saved = false;
-  if (!(req.query && req.query.save === "0")) {
+  if (!(req.query && req.query.save === "0") && !model) {
     const { error } = await getSupabaseAdmin().from("qa_runs").insert({ passed: summary.passed, total: summary.total, summary });
     if (error) console.error("Saving the quality run failed:", error.message);
     else saved = true;

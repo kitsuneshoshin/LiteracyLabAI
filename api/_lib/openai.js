@@ -33,15 +33,23 @@ function friendlyProviderMessage(e) {
 // Calls the model with the given prompt and parses the response as JSON.
 // Uses OpenAI's native JSON mode (response_format) so the model is
 // constrained to valid JSON rather than relying on prompt instructions alone.
-async function generateFeedbackJSON(prompt, { maxTokens } = {}) {
+// Newer model families (gpt-5 and the o-series) reject max_tokens and spend part of the budget
+// thinking, so they get max_completion_tokens with room to think and a low reasoning effort.
+function usesCompletionTokens(model) {
+  return /^(gpt-5|o\d)/.test(String(model));
+}
+
+async function generateFeedbackJSON(prompt, { maxTokens, model: modelOverride } = {}) {
   const openai = getOpenAI();
-  const model = process.env.OPENAI_MODEL || DEFAULT_MODEL;
+  const model = modelOverride || process.env.OPENAI_MODEL || DEFAULT_MODEL;
+  const budget = maxTokens || 2048;
+  const limit = usesCompletionTokens(model) ? { max_completion_tokens: budget * 3, reasoning_effort: "low" } : { max_tokens: budget };
 
   let completion;
   try {
     completion = await openai.chat.completions.create({
       model,
-      max_tokens: maxTokens || 2048,
+      ...limit,
       response_format: { type: "json_object" },
       messages: [{ role: "user", content: prompt }],
     });
@@ -68,4 +76,9 @@ async function generateFeedbackJSON(prompt, { maxTokens } = {}) {
   return { parsed, modelUsed: completion.model };
 }
 
-module.exports = { generateFeedbackJSON };
+async function listModels() {
+  const page = await getOpenAI().models.list();
+  return (page.data || []).map((m) => m.id).filter((id) => /^(gpt|o\d)/.test(id)).sort();
+}
+
+module.exports = { generateFeedbackJSON, listModels, usesCompletionTokens };
