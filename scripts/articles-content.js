@@ -62,7 +62,7 @@ const ARTICLES = [
   {
     slug: "how-much-should-my-child-write",
     title: "How much should my child write? Length by year group",
-    description: "A practical guide to how long a child's writing should be in the UK, US and Australia, with example targets by year and why quality matters more than length.",
+    description: "How long should a child's writing be? Example targets by year for the UK, US and Australia, and why quality matters more than length.",
     lead: "There is no single correct length for a child's writing, and most curricula do not set one. But a rough target helps you judge whether a piece is thin, about right or long enough to show what a child can do.",
     sections: [
       { h: "Why length matters, and why it does not", p: ["A very short piece gives very little to work with. A child who writes two sentences has not had the chance to organise ideas, support a point or finish properly. On the other hand, a long piece is not automatically good: padding and repetition do not help.", "Think of length as a minimum that gives room to show skill, not a goal in itself."] },
@@ -84,7 +84,7 @@ const ARTICLES = [
   {
     slug: "naplan-writing-explained",
     title: "NAPLAN writing explained for parents (Years 3, 5, 7 and 9)",
-    description: "What the NAPLAN writing test asks of students, how results are described in four levels, and how to help your child practise at home without extra pressure.",
+    description: "What the NAPLAN writing test asks of students, how results are described in four levels, and how to help your child practise calmly at home.",
     lead: "NAPLAN is the national literacy and numeracy assessment taken by students in Years 3, 5, 7 and 9 in Australia. This guide covers the writing part: what children are asked to do and how to prepare calmly. Always confirm current dates and details with your school or the national NAPLAN website.",
     sections: [
       { h: "What the writing task looks like", p: ["Students are given an idea or prompt and asked to write a response in one kind of writing, either a narrative (a story) or a persuasive piece (an argument). NAPLAN is held in March, in Term 1. Writing is timed at 40 minutes in Year 3 and 42 minutes in Years 5, 7 and 9, and your school will give the exact timetable."] },
@@ -129,7 +129,7 @@ const ARTICLES = [
   {
     slug: "11-plus-english-explained",
     title: "11+ English explained: what is tested and how to prepare",
-    description: "A plain guide to the English part of the 11+ in England: comprehension, vocabulary and grammar, why papers differ by area, and how to prepare without overdoing it.",
+    description: "A plain guide to the English part of the 11+ in England: what is tested, why papers differ by area, and how to prepare without overdoing it.",
     lead: "The 11+ is the entrance test some areas of England use for selective secondary schools. There is no single national 11+, so the first step is always to find out exactly what your area and school use.",
     sections: [
       { h: "It varies by area", p: ["The format, subjects and provider differ between areas, consortia and sometimes individual schools. Some papers include English, maths, verbal reasoning and non-verbal reasoning, and others use only some of these. The test is usually taken in the autumn of Year 6."] },
@@ -182,7 +182,7 @@ const ARTICLES = [
   {
     slug: "common-core-writing-standards-explained",
     title: "Common Core writing standards explained for parents",
-    description: "The three kinds of writing in the Common Core standards (opinion or argument, informative and narrative) and what they look like as children move up the grades.",
+    description: "The three kinds of writing in the Common Core standards (opinion or argument, informative, narrative) and how they grow as children move up the grades.",
     lead: "The Common Core State Standards for English describe what US students should be able to do in writing at each grade. Not every state uses them in the same way, so check your own state's standards. This guide explains the three main kinds of writing in plain terms.",
     sections: [
       { h: "The three kinds of writing", ul: [
@@ -235,7 +235,7 @@ const ARTICLES = [
   {
     slug: "story-mountain-explained",
     title: "Story Mountain explained: planning a story step by step",
-    description: "What the Story Mountain is, its five parts (opening, build-up, climax, resolution, ending), and how to use it to help a child plan a story that holds together.",
+    description: "What the Story Mountain is, its five parts (opening, build-up, climax, resolution, ending) and how to use it to help a child plan a story.",
     lead: "The Story Mountain is a simple way to plan a story so it has a shape. Picture a mountain: the story climbs to an exciting peak and then comes back down. Children aged about 7 to 12 use it in many schools.",
     sections: [
       { h: "The five parts", ul: [
@@ -266,7 +266,7 @@ const ARTICLES = [
   {
     slug: "show-dont-tell-explained",
     title: "Show, don't tell: how to teach it with simple examples",
-    description: "What show, don't tell means in writing, with before and after examples for children, and simple exercises to help them describe instead of just naming a feeling.",
+    description: "What show, don't tell means, with before and after examples for children and simple exercises to help them describe instead of just naming a feeling.",
     lead: "Show, don't tell is advice every writing teacher gives. Instead of naming a feeling or a fact, describe what a reader would see, hear or feel that proves it.",
     sections: [
       { h: "Telling versus showing", p: ["Telling names it: She was scared. Showing makes the reader work it out: Her hands shook as she reached for the door handle. The second version feels more real because the reader notices the clue themselves."] },
@@ -290,7 +290,7 @@ const ARTICLES = [
   {
     slug: "help-a-child-who-makes-lots-of-spelling-mistakes",
     title: "Helping a child who makes lots of spelling and punctuation mistakes",
-    description: "Practical, low-pressure ways to help a child with frequent spelling and punctuation errors: what to fix first, how to practise, and when to seek extra help.",
+    description: "Low-pressure ways to help a child with frequent spelling and punctuation errors: what to fix first, how to practise, and when to ask for extra help.",
     lead: "Lots of spelling and punctuation mistakes can worry parents, but they are fixable. The key is to work on a few things at a time, keep it low-pressure, and not let mistakes stop your child from writing.",
     sections: [
       { h: "Separate ideas from accuracy", p: ["Praise the ideas first, always. Treat spelling and punctuation as a separate job done afterwards, like proofreading. Children who are afraid of mistakes tend to write less and use only words they can spell."] },
