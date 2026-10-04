@@ -35,7 +35,7 @@ test("every year group the app supports a mapped curriculum for has a page, and 
   const uk = groupsFor(REGIONS.find((r) => r.slug === "uk")).map((g) => g.label);
   assert.ok(uk.includes("Years 7–9") && uk.includes("Years 10–11"), "England's shared years are one page each");
   const wsPages = require("../scripts/worksheets-pages").published().length;
-  assert.equal(pageFiles.length, 2 + REGIONS.length + REGIONS.reduce((n, r) => n + groupsFor(r).length, 0) + (wsPages ? 1 + wsPages : 0) + require("../scripts/landing-pages").PAGES.length, "hub, prompt generator, regions, year groups, the worksheets hub and sheets, and the landing pages");
+  assert.equal(pageFiles.length, 2 + REGIONS.length + REGIONS.reduce((n, r) => n + groupsFor(r).length, 0) + (wsPages ? 1 + wsPages : 0) + require("../scripts/landing-pages").PAGES.length + 1 + require("../scripts/articles-content").ARTICLES.length, "hub, prompt generator, regions, year groups, the worksheets hub and sheets, the landing pages and the articles");
 });
 
 test("every focus area in the curriculum data has a plain-English explanation and something to try at home", () => {
@@ -85,7 +85,7 @@ test("every page has one h1, a unique title and description of sensible length, 
 
 test("year pages are substantial, not thin: each has a real explanation per focus area, practice prompts, tips and questions", () => {
   for (const [rel, html] of pageFiles) {
-    if (!/^learn\/[^/]+\/[^/]+\/index\.html$/.test(rel)) continue;
+    if (!/^learn\/[^/]+\/[^/]+\/index\.html$/.test(rel) || rel.startsWith("learn/articles/")) continue;
     const t = text(html);
     assert.ok(t.split(" ").length >= 380, `${rel}: only ${t.split(" ").length} words`);
     assert.ok((html.match(/class="card"/g) || []).length >= 3, `${rel}: at least three focus areas`);
@@ -234,7 +234,7 @@ test("the prompt page: has the tool, works without scripts, embeds the same gene
 test("the prompt page is linked from the hub and from every year page (with the right age group), and is in the sitemap", () => {
   assert.ok(built.files["learn/index.html"].includes('href="/learn/prompts/"'));
   for (const [rel, html] of pageFiles) {
-    if (!/^learn\/[^/]+\/[^/]+\/index\.html$/.test(rel) || rel.startsWith("learn/prompts/")) continue;
+    if (!/^learn\/[^/]+\/[^/]+\/index\.html$/.test(rel) || rel.startsWith("learn/prompts/") || rel.startsWith("learn/articles/")) continue;
     const m = html.match(/href="\/learn\/prompts\/\?stage=(early|elementary|middle|high)"/);
     assert.ok(m, `${rel}: links to the generator`);
   }

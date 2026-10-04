@@ -16,6 +16,7 @@ const { GRADE_WORD_TARGETS } = require("../api/_lib/writingLimits");
 const { TARGET_GUIDE, TIER_INFO } = require("./learn-content");
 const WS = require("./worksheets-pages");
 const LANDING = require("./landing-pages");
+const ARTICLES = require("./articles-pages");
 
 const ROOT = path.join(__dirname, "..");
 const SITE = "https://www.literacylabai.com";
@@ -380,6 +381,7 @@ function buildHub(regionGroups) {
 <ul class="grid">
 ${items}
 </ul>
+<p>Looking for advice? Browse our <a href="/learn/articles/">articles for parents</a> on reading, writing and exams.</p>
 <p>New here? Read <a href="/learn/how-it-works/">how LiteracyLab AI works</a>, what <a href="/learn/writing-feedback-for-kids/">good writing feedback</a> looks like, or find <a href="/learn/reading-comprehension-practice/">reading comprehension practice</a>.</p>
 <p>Looking for something to write about? Try the <a href="/learn/prompts/">free writing prompt generator</a>: choose an age group, a topic and a kind of writing.</p>${WS.published().length ? `<p>Want reading practice? Download our <a href="/learn/worksheets/">free printable reading comprehension worksheets</a> for ${WS.levelsText()}, with answer keys.</p>` : ""}
 ${ctaBlock("hub", "Get feedback on your child's writing")}
@@ -445,6 +447,9 @@ function buildAll() {
   const landing = LANDING.buildLandingFiles({ layout, breadcrumbLd, ctaBlock });
   Object.assign(files, landing.files);
   urls.push(...landing.urls);
+  const arts = ARTICLES.buildArticleFiles({ layout, breadcrumbLd, ctaBlock });
+  Object.assign(files, arts.files);
+  urls.push(...arts.urls);
   regionGroups.forEach(({ region, groups }) => {
     files[pathFor.region(region)] = buildRegion(region, groups);
     urls.push(urlFor.region(region));
