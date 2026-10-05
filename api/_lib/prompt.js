@@ -3,7 +3,8 @@ const { MAX_AVG_WORDS_PER_SENTENCE } = require("./validate");
 const { assessLength, lengthClause } = require("./calibrate");
 const { examTargetsFor } = require("./masteryTargets");
 const RESP = require("./responses");
-const { frameworkForGenre, resolveGenre, DEFAULT_GENRE_BY_TIER, VALID_GENRES } = require("./writingFrameworks");
+const TECH = require("./techniques");
+const { frameworkForGenre, frameworkFor, resolveGenre, DEFAULT_GENRE_BY_TIER, VALID_GENRES } = require("./writingFrameworks");
 
 const TIER_LABEL = { early: "Early Years (ages 5-7)", elementary: "Elementary (ages 8-10)", middle: "Middle School (ages 11-13)", high: "High School (ages 14-18)" };
 
@@ -158,7 +159,7 @@ It must be the next level of the SAME writing skill (for example from adding a d
 // stays reserved for the Grow/vocab fields, not this one.
 function frameworkClause({ tier, genre }) {
   const resolvedGenre = resolveGenre(genre, tier);
-  const fw = frameworkForGenre(resolvedGenre);
+  const fw = frameworkForGenre(resolvedGenre, tier);
   if (!fw) return "";
   return `\n\nFRAMEWORK SPOTLIGHT (required): Teach the student the "${fw.name}" framework, a genuinely well-known ${resolvedGenre} writing technique — you are given its exact name and definition, do not alter or re-explain it yourself: "${fw.description}"
 Find ONE real fragment (a sentence or short passage) FROM THE STUDENT'S OWN SUBMITTED TEXT ABOVE where "${fw.name}" genuinely applies, and quote it EXACTLY, verbatim, in a "quote" field. Then, in a "revision" field, rewrite that exact fragment so it actually demonstrates "${fw.name}" being applied to THEIR writing — a real improvement to something they actually wrote, never an unrelated invented example. If the framework has named parts (like PEEL's Point/Evidence/Explain/Link), label each part inline in the revision so the structure is visible, e.g. "Point: ... Evidence: ... Explain: ... Link: ..."; if it doesn't (like Show, Don't Tell), just apply the technique directly, no labels needed.${revisionToneClause(tier)}
@@ -246,7 +247,7 @@ Notice: the glow quotes the student's actual words, the standard is named natura
 
 function successCriteria(tier, { includeFramework, includeScore, includeSpelling, genre } = {}) {
   const cap = MAX_AVG_WORDS_PER_SENTENCE[tier] || 30;
-  const fw = includeFramework ? frameworkForGenre(resolveGenre(genre, tier)) : null;
+  const fw = includeFramework ? frameworkFor(genre, tier) : null;
   return `Before you respond, check your own draft against these pass/fail criteria — if any fail, revise before sending:
 1. The glow names something concrete the student actually wrote or answered (quote a short fragment) — not a generic compliment that could apply to any submission.
 2. The glow's curriculum reference is either the exact standard you were given, or (if none was given) a general curriculum phrase — never an invented code.
@@ -264,7 +265,7 @@ function buildWritingPrompt({ tier, country, gradeLabel, interest, confidenceWri
   targets = examTargetsFor(allTargets, "writing");
   const assessment = assessLength({ text, tier, country, gradeLabel });
   const origWords = RESP.wordCount(text);
-  const fw = frameworkForGenre(resolveGenre(genre, tier));
+  const fw = frameworkFor(genre, tier);
   const wantsModel = !!caps.deepFeedback && !!fw;
   const wantsExam = caps.examTechnique && examTechniqueSupported(tier) && Array.isArray(targets) && targets.length > 0;
   // Premium-only (see api/_lib/plans.js). ON unless the plan says false, so
@@ -292,7 +293,7 @@ ${wantsExam ? examTechniqueClause({ tier, targets, kind: "writing" }) : ""}
 ${frameworkClause({ tier, genre })}
 ${wantsScore ? overallScoreClause() : ""}${lengthClause(assessment)}
 ${revisedStoryClause(tier, wantsSpelling, assessment, origWords)}${wantsModel ? RESP.responsesClause({ fw, tier, gradeLabel, country, assessment }) : ""}
-${wantsSpelling ? spellingGrammarClause() : ""}
+${wantsSpelling ? spellingGrammarClause() : ""}${TECH.vocabTrickClause(tier)}
 
 Read the actual submitted text closely — every point you make must be traceable to something specifically in it (quote a short fragment where useful), not a generic template response.
 
@@ -305,8 +306,8 @@ Respond with ONLY a JSON object (no markdown fences, no commentary) with exactly
   "glow": "1-2 sentences of specific, genuine praise tied to something the student actually did in this text and to the curriculum standard noted above.",
   "grow": "1-2 sentences naming ONE specific, actionable next step scaled to this student's zone of proximal development — not a laundry list. Where an accurate, natural one exists, weave in an analogy drawn from their stated interest (${interest}) to make the concept concrete; if it would be forced or inaccurate, leave the analogy out. End with the motivation-appropriate closing line.",
   "vocab": [
-    { "term": "a single word or short phrase", "definition": "a one-sentence, age-appropriate definition, framed using their interest where natural", "example": "a fresh sentence using the term correctly, built around their stated interest (${interest})" },
-    { "term": "a second word or short phrase", "definition": "a one-sentence, age-appropriate definition, framed using their interest where natural", "example": "a fresh sentence using the term correctly, built around their stated interest (${interest})" }
+    { "term": "a single word or short phrase", "definition": "a one-sentence, age-appropriate definition, framed using their interest where natural", "example": "a fresh sentence using the term correctly, built around their stated interest (${interest})", "trick": "one short sentence applying the word trick to this word" },
+    { "term": "a second word or short phrase", "definition": "a one-sentence, age-appropriate definition, framed using their interest where natural", "example": "a fresh sentence using the term correctly, built around their stated interest (${interest})", "trick": "one short sentence applying the word trick to this word" }
   ],
   "glowTarget": "the exact skill area name from the given list that the glow demonstrates",
   "growTarget": "the exact skill area name from the given list that the grow is building towards",
@@ -394,7 +395,7 @@ ${MOTIVATION_NOTE[motivation] || ""}
 ${standardsClause(country, tier, gradeLabel)}
 ${targetsClause(targetNames)}
 ${deepFeedbackClause(caps.deepFeedback)}
-${wantsExam ? examTechniqueClause({ tier, targets, kind: "reading" }) : ""}${questionReviewClause(questions.length, interest)}
+${wantsExam ? examTechniqueClause({ tier, targets, kind: "reading" }) : ""}${questionReviewClause(questions.length, interest)}${TECH.readingStrategyClause(tier)}${TECH.vocabTrickClause(tier)}
 
 ${workedExample({ score: false, spelling: false })}
 
@@ -405,12 +406,13 @@ Respond with ONLY a JSON object (no markdown fences, no commentary) with exactly
   "glow": "1-2 sentences of specific praise. If they got questions right, name which comprehension skill they clearly demonstrated (e.g. inference, retrieval) and tie it to the curriculum standard noted above.${zeroScoreClause(score)}",
   "grow": "1-2 sentences on ONE specific, actionable next step. If they missed a question, point them back to the exact idea in the passage they should re-examine, without just giving away the answer outright. Weave in an analogy from their stated interest (${interest}). End with the motivation-appropriate closing line.",
   "vocab": [
-    { "term": "a word or phrase from the passage worth upgrading", "definition": "a one-sentence, age-appropriate definition, framed using their interest where natural", "example": "a fresh sentence using the term correctly, built around their stated interest (${interest})" },
-    { "term": "a second word or phrase from the passage", "definition": "a one-sentence, age-appropriate definition, framed using their interest where natural", "example": "a fresh sentence using the term correctly, built around their stated interest (${interest})" }
+    { "term": "a word or phrase from the passage worth upgrading", "definition": "a one-sentence, age-appropriate definition, framed using their interest where natural", "example": "a fresh sentence using the term correctly, built around their stated interest (${interest})", "trick": "one short sentence applying the word trick to this word" },
+    { "term": "a second word or phrase from the passage", "definition": "a one-sentence, age-appropriate definition, framed using their interest where natural", "example": "a fresh sentence using the term correctly, built around their stated interest (${interest})", "trick": "one short sentence applying the word trick to this word" }
   ],
   "glowTarget": "the exact skill area name from the given list that the glow demonstrates",
   "growTarget": "the exact skill area name from the given list that the grow is building towards"${caps.deepFeedback ? ',\n  "growNext": "ONE further, harder step: the next level of the same skill as the main grow (or the very next skill), as a concrete action for their next piece that quotes a short verbatim fragment of their own work in quotation marks - no analogy, no games or projects, not a restatement."' : ""}${wantsExam ? `,\n${examJsonShape(targets)}` : ""},
-${questionReviewShape(questions.length)}
+${questionReviewShape(questions.length)},
+${TECH.readingStrategyShape()}
 }`;
 }
 

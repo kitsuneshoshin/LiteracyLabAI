@@ -6,9 +6,10 @@ const { validatePassage } = require("../api/_lib/validate");
 const { targetsForGrade, examTargetsFor } = require("../api/_lib/masteryTargets");
 const { assessLength } = require("../api/_lib/calibrate");
 const RESP = require("../api/_lib/responses");
+const TECH = require("../api/_lib/techniques");
 const { frameworkParts } = require("../api/_lib/writingFrameworks");
 const { standardsFor } = require("../api/_lib/curriculum");
-const { frameworkForGenre, resolveGenre, DEFAULT_GENRE_BY_TIER } = require("../api/_lib/writingFrameworks");
+const { frameworkFor, DEFAULT_GENRE_BY_TIER } = require("../api/_lib/writingFrameworks");
 const { did, loadHandler, call } = require("./harness");
 
 // The full matrix: every plan x every age tier x writing/reading, run through
@@ -43,6 +44,7 @@ function expectedSections(plan, tier, kind) {
     frameworkTip: kind === "writing",
     highlights: kind === "writing",
     questionReview: kind === "reading",
+    readingStrategy: kind === "reading",
   };
 }
 function sectionsPresent(fb) {
@@ -55,6 +57,7 @@ function sectionsPresent(fb) {
     frameworkTip: fb.frameworkTip != null,
     highlights: fb.highlights != null,
     questionReview: fb.questionReview != null,
+    readingStrategy: fb.readingStrategy != null,
   };
 }
 
@@ -85,7 +88,7 @@ function baseFeedback(tier) {
 
 function writingExtras(tier, caps) {
   const targets = targetsForGrade(COUNTRY, TIERS[tier], tier).targets;
-  const fw = frameworkForGenre(resolveGenre(DEFAULT_GENRE_BY_TIER[tier], tier));
+  const fw = frameworkFor(DEFAULT_GENRE_BY_TIER[tier], tier);
   const out = {
     highlights: [
       { quote: "The dog ran fast", type: "glow", note: "A clear, strong opening." },
@@ -113,7 +116,7 @@ function filler(n, seed) {
 }
 // A compliant Premium model response and labels for the default genre of this tier.
 function premiumResponses(tier) {
-  const fw = frameworkForGenre(resolveGenre(DEFAULT_GENRE_BY_TIER[tier], tier));
+  const fw = frameworkFor(DEFAULT_GENRE_BY_TIER[tier], tier);
   const parts = frameworkParts(fw);
   const lim = RESP.modelLimits(assessLength({ text: TEXT, tier, country: COUNTRY, gradeLabel: TIERS[tier] }));
   const per = Math.max(3, Math.floor(lim.n / parts.length));
@@ -139,6 +142,10 @@ function planExtras(tier, caps, targets, kind = "writing") {
   return out;
 }
 
+function strategyFor(tier) {
+  return { name: TECH.strategiesFor(tier)[0].name, tip: "Look at question 2 again and use this strategy on the passage before you choose." };
+}
+
 function readingReview() {
   return [1, 2, 3, 4, 5].map((n) => ({ n, explanation: `Question ${n}: here is why the right answer works in the passage.`, evidence: "She rebuilt it with her dad until midnight" }));
 }
@@ -150,7 +157,7 @@ function obedient(plan, tier, kind) {
   const { out, targets } = writingExtras(tier, caps);
   Object.assign(fb, planExtras(tier, caps, targets, kind));
   if (kind === "writing") { Object.assign(fb, out); if (caps.deepFeedback) Object.assign(fb, premiumResponses(tier)); }
-  else fb.questionReview = readingReview();
+  else { fb.questionReview = readingReview(); fb.readingStrategy = strategyFor(tier); }
   return fb;
 }
 
@@ -162,6 +169,7 @@ function overEager(tier, kind) {
   Object.assign(fb, out, planExtras(tier, { deepFeedback: true, examTechnique: true }, targets, kind));
   if (kind === "writing") Object.assign(fb, premiumResponses(tier));
   fb.questionReview = readingReview();
+  fb.readingStrategy = strategyFor(tier);
   fb.commitOptions = ["Try this", "Try that"];
   fb.followUp = "Great job trying last time.";
   return fb;
@@ -578,3 +586,22 @@ for (const plan of PLANS) {
     assert.deepEqual(res.body.capabilities, capabilitiesFor(plan));
   });
 }
+
+// A reading answer's named strategy is snapped to the exact name and carries the fixed how-to; a
+// strategy the model made up never reaches the student, and a writing answer never carries one.
+test("reading strategy: the exact name and fixed how-to are attached, an invented name is refused, writing never gets one", async () => {
+  for (const tier of Object.keys(TIERS)) {
+    const first = TECH.strategiesFor(tier)[0];
+    const ok = await runSubmit("core", tier, "reading", () => { const f = obedient("core", tier, "reading"); f.readingStrategy = { name: first.name.toLowerCase(), tip: "Look at question 2 again and use this on the passage first." }; return f; });
+    assert.equal(ok.res.statusCode, 200, tier);
+    assert.deepEqual(ok.res.body.feedback.readingStrategy, { name: first.name, how: first.how, tip: "Look at question 2 again and use this on the passage first." }, tier);
+    const bad = await runSubmit("core", tier, "reading", () => { const f = obedient("core", tier, "reading"); f.readingStrategy = { name: "Totally invented", tip: "Look at question 2 again and use this on the passage first." }; return f; });
+    // a bonus: after the retries the rest of the feedback is still delivered, without the strategy
+    assert.equal(bad.res.statusCode, 200, tier);
+    assert.equal(bad.prompts.length, 3, tier + ": retried first");
+    assert.equal(bad.res.body.feedback.readingStrategy, undefined, tier);
+    const w = await runSubmit("core", tier, "writing", () => { const f = obedient("core", tier, "writing"); f.readingStrategy = strategyFor(tier); return f; });
+    assert.equal(w.res.statusCode, 200, tier);
+    assert.equal(w.res.body.feedback.readingStrategy, undefined, tier + ": stripped from writing");
+  }
+});

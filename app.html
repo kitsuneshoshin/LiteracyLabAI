@@ -2564,7 +2564,7 @@ function FeedbackPanel({ tier, gradeLabel, country, interest, confidence, motiva
   const glow = feedback?.glow || `${opener}${PRAISE[tier](gradeLabel, curriculum)}`;
   const grow = feedback?.grow || growthTipFor(tier, interest, motivation, country, confidence);
   const vocabList = feedback?.vocab
-    ? feedback.vocab.map(v=>[v.term, v.definition, v.example])
+    ? feedback.vocab.map(v=>[v.term, v.definition, v.example, v.trick])
     : vocabFor(interest, tier, country);
 
   return (
@@ -2754,12 +2754,15 @@ function ExamTechniquePanel({ feedback }){
 function VocabList({ items }){
   return (
     <div className="flex flex-col gap-2.5">
-      {items.map(([term, def, example])=> (
+      {items.map(([term, def, example, trick])=> (
         <div key={term} className="rounded-xl p-3.5" style={{ background: "var(--cyan-tint)" }}>
           <span className="font-display font-bold text-sm" style={{ color: "var(--cyan-ink)" }}>{term}</span>
           <p className="text-[13px] leading-snug mt-1" style={{ color: "var(--ink)" }}>{def}</p>
           {example && (
             <p className="text-[13px] leading-snug mt-1.5 italic" style={{ color: "var(--ink-soft)" }}>“{example}”</p>
+          )}
+          {trick && (
+            <p className="text-[12.5px] leading-snug mt-1.5" style={{ color: "var(--cyan-ink)" }}><span className="font-semibold">Word trick: </span>{trick}</p>
           )}
         </div>
       ))}
@@ -2946,6 +2949,23 @@ function ResponsesPanel({ feedback }){
   );
 }
 
+// A named reading strategy (see api/_lib/techniques.js) chosen for this attempt: its fixed how-to,
+// then one tip tied to a question the student actually met. Rendered only when the server sent one.
+function ReadingStrategyPanel({ feedback }){
+  const rs = feedback?.readingStrategy;
+  if (!rs?.name || !rs?.tip) return null;
+  return (
+    <Collapsible defaultOpen={true} borderColor="var(--border)" iconBg="var(--cyan-tint)" iconColor="var(--cyan-ink)"
+      icon={<IconBookOpenCheck size={16} strokeWidth={2.2} />} title={`Reading strategy — ${rs.name}`} teaser={rs.how}>
+      {rs.how && <p className="text-[13px] mb-3" style={{ color: "var(--ink-faint)" }}>{rs.how}</p>}
+      <div className="rounded-xl p-3.5" style={{ background: "var(--surface-2)" }}>
+        <span className="font-display font-bold text-[11px] block mb-1" style={{ color: "var(--ink-faint)" }}>TRY IT ON YOUR NEXT PASSAGE</span>
+        <p className="text-[14px] leading-relaxed font-read" style={{ color: "var(--ink)" }}>{rs.tip}</p>
+      </div>
+    </Collapsible>
+  );
+}
+
 // The Premium "second step" — rendered only when the server actually
 // generated one, same reasoning as the exam panel above.
 function GrowNextBlock({ feedback }){
@@ -3021,7 +3041,7 @@ function ReadingFeedbackPanel({ tier, country, interest, confidence, motivation,
   const glow = feedback?.glow || `${opener}${readingGlows(tier, score, totalQ, curriculum)}`;
   const grow = feedback?.grow || readingGrows(tier, score, totalQ, interest, country, motivation, confidence);
   const vocabList = feedback?.vocab
-    ? feedback.vocab.map(v=>[v.term, v.definition, v.example])
+    ? feedback.vocab.map(v=>[v.term, v.definition, v.example, v.trick])
     : vocabFor(interest, tier, country);
 
   return (
@@ -3053,6 +3073,8 @@ function ReadingFeedbackPanel({ tier, country, interest, confidence, motivation,
       </div>
 
       <QuestionReviewPanel feedback={feedback} questions={questions} answers={answers} />
+
+      <ReadingStrategyPanel feedback={feedback} />
 
       <ExamTechniquePanel feedback={feedback} />
 

@@ -13,6 +13,7 @@ function baseFeedback(overrides = {}) {
       { term: "sentence", definition: "a group of words that expresses a complete thought.", example: "\"The dog ran fast\" is a complete sentence." },
     ],
     // Reading feedback carries one explanation per question (ignored for writing).
+    readingStrategy: { name: "Predict", tip: "Look at question 1 again and use the clues in the passage before you decide." },
     questionReview: [{ n: 1, explanation: "You spotted the detail that shows how the character felt.", evidence: "The dog ran fast." }],
     glowTarget: "",
     growTarget: "",
@@ -189,7 +190,7 @@ test("regression: a reading glow fabricating comprehension on a 0-score attempt 
     "You engaged thoughtfully with complex ideas about coding and its relevance today. This reflects an understanding of how to articulate opinions.",
   ];
   for (const glow of fabricated) {
-    const result = validateFeedback(baseFeedback({ glow }), { tier: "middle", standardsList: [], targetNames: [], submittedText: null, readingScore: 0 });
+    const result = validateFeedback(baseFeedback({ glow, readingStrategy: { name: "Infer with evidence", tip: "Look at question 1 again and back your idea with a short quotation." } }), { tier: "middle", standardsList: [], targetNames: [], submittedText: null, readingScore: 0 });
     assert.equal(result.ok, false, `expected rejection for: "${glow}"`);
     assert.ok(result.issues.some((i) => i.includes("fabricates comprehension")), `expected a fabrication issue for: "${glow}"`);
   }
@@ -197,13 +198,13 @@ test("regression: a reading glow fabricating comprehension on a 0-score attempt 
 
 test("regression: the same fabrication check does not fire when the score is not zero", () => {
   const glow = "You engaged thoughtfully with complex ideas about coding and its relevance today.";
-  const result = validateFeedback(baseFeedback({ glow }), { tier: "middle", standardsList: [], targetNames: [], submittedText: null, readingScore: 2 });
+  const result = validateFeedback(baseFeedback({ glow, readingStrategy: { name: "Infer with evidence", tip: "Look at question 1 again and back your idea with a short quotation." } }), { tier: "middle", standardsList: [], targetNames: [], submittedText: null, readingScore: 2 });
   assert.equal(result.ok, true, `unexpected issues: ${JSON.stringify(result.issues)}`);
 });
 
 test("regression: an honest, content-free zero-score glow passes", () => {
   const glow = "You gave this passage a real go, and that's exactly the habit that builds stronger reading over time.";
-  const result = validateFeedback(baseFeedback({ glow }), { tier: "middle", standardsList: [], targetNames: [], submittedText: null, readingScore: 0 });
+  const result = validateFeedback(baseFeedback({ glow, readingStrategy: { name: "Infer with evidence", tip: "Look at question 1 again and back your idea with a short quotation." } }), { tier: "middle", standardsList: [], targetNames: [], submittedText: null, readingScore: 0 });
   assert.equal(result.ok, true, `unexpected issues: ${JSON.stringify(result.issues)}`);
 });
 
@@ -467,18 +468,17 @@ test("validateFeedback: frameworkTip is checked against the piece's OWN genre, n
       { quote: "It saw a cat", type: "glow", note: "Nice concrete detail here." },
       { quote: "The dog ran fast.", type: "grow", note: "Needs more variety.", revision: "Suddenly, the dog ran fast." },
     ],
-    // "PEAL" is the persuasive framework, not elementary's usual "Story
-    // Mountain" - correct here because this specific piece was persuasive.
+    // "PEAL" is the persuasive framework, not the usual "PEEL" - correct here because this specific piece was persuasive.
     frameworkTip: { name: "PEAL", quote: "It saw a cat up in a tree.", revision: "Point: dogs are naturally alert. Evidence: it saw a cat up in a tree. Analysis: this shows sharp instincts at work. Link: that's what makes dogs such loyal companions." },
   });
   const result = validateFeedback(feedback, {
-    tier: "elementary", standardsList: [], targetNames: [], submittedText: SUBMITTED_TEXT, genre: "persuasive",
+    tier: "middle", standardsList: [], targetNames: [], submittedText: SUBMITTED_TEXT, genre: "persuasive",
   });
   assert.equal(result.ok, true, `unexpected issues: ${JSON.stringify(result.issues)}`);
 
   // The same feedback, without telling the validator this was a persuasive
   // piece, is wrongly checked against elementary's default and rejected.
-  const withoutGenre = validateFeedback(feedback, { tier: "elementary", standardsList: [], targetNames: [], submittedText: SUBMITTED_TEXT });
+  const withoutGenre = validateFeedback(feedback, { tier: "middle", standardsList: [], targetNames: [], submittedText: SUBMITTED_TEXT });
   assert.equal(withoutGenre.ok, false);
 });
 

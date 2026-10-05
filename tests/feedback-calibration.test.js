@@ -5,7 +5,7 @@ const { GRADE_WORD_TARGETS } = require("../api/_lib/writingLimits");
 const { buildWritingPrompt } = require("../api/_lib/prompt");
 const { dropInvalidSpellingGrammar, dropGlowsQuotingMisspellings, validateFeedback } = require("../api/_lib/validate");
 const { targetsForGrade } = require("../api/_lib/masteryTargets");
-const { frameworkForGenre, resolveGenre } = require("../api/_lib/writingFrameworks");
+const { frameworkFor } = require("../api/_lib/writingFrameworks");
 const { standardsFor } = require("../api/_lib/curriculum");
 const { did, loadHandler, call } = require("./harness");
 
@@ -250,7 +250,7 @@ function filler(n, seed) {
 function modelOutput({ country, gradeLabel, tier, text, extra }) {
   const all = targetsForGrade(country, gradeLabel, tier).targets;
   const writing = examTargetsFor(all, "writing");
-  const fw = frameworkForGenre(resolveGenre("persuasive", tier));
+  const fw = frameworkFor("persuasive", tier);
   const parts = frameworkParts(fw);
   const lim = RESP.modelLimits(assessLength({ text, tier, country, gradeLabel }));
   const per = Math.max(3, Math.floor(lim.n / parts.length));
@@ -330,7 +330,7 @@ for (const fam of FAMILIES) {
     });
     const readingNames = all.filter((t) => targetMode(t) === "reading").map((t) => t.name);
     assert.deepEqual(fb.examNotBanded || [], readingNames, "the reading objectives are listed as not banded here");
-    const fw = frameworkForGenre(resolveGenre("persuasive", fam.tier));
+    const fw = frameworkFor("persuasive", fam.tier);
     assert.equal(typeof fb.modelResponse, "string");
     assert.deepEqual([...new Set(fb.modelFramework.map((e) => e.part))], frameworkParts(fw).map((p) => p.name), "every part of the framework is labelled in the model response");
     fb.modelFramework.forEach((e) => assert.ok(fb.modelResponse.includes(e.text), "each label quotes the model response exactly"));
@@ -589,7 +589,7 @@ test("end to end (Australia, Year 3): that rewrite no longer turns a good respon
     { quote: "my feets", type: "grow", note: "Plural of foot.", revision: "my feet" },
     { quote: "a top secret spy mission", type: "grow", note: "Sharper ending.", revision: "to open the box using a pointy stick, and a secret spy mission" },
   ];
-  const { res, prompts } = await runWeak({ ...fam, text: KIDS_STORY, extra: { highlights: hs, revisedStory: KIDS_STORY.replace("runned", "ran"), revisedFramework: [{ part: "Point", text: "I ran to the fig tree as fast as my feets could go!", note: "This sentence opens with a clear point." }], frameworkTip: out.frameworkTip } });
+  const { res, prompts } = await runWeak({ ...fam, text: KIDS_STORY, extra: { highlights: hs, revisedStory: KIDS_STORY.replace("runned", "ran"), revisedFramework: [{ part: "Opinion", text: "I ran to the fig tree as fast as my feets could go!", note: "This sentence opens with a clear point." }], frameworkTip: out.frameworkTip } });
   assert.equal(res.statusCode, 200, JSON.stringify(res.body).slice(0, 300));
   assert.equal(prompts.length, 1, "no retries needed");
   assert.equal(res.body.feedback.highlights.length, 3);

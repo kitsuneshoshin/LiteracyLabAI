@@ -13,6 +13,7 @@ const { targetsForGrade } = require("./masteryTargets");
 const { DEFAULT_GENRE_BY_TIER } = require("./writingFrameworks");
 const { assessLength, calibrateWriting, repairExamEvidence } = require("./calibrate");
 const { examTargetsFor } = require("./masteryTargets");
+const TECH = require("./techniques");
 const { validateFeedback, dropRestatingHighlights, repairResponses, dropGlowsQuotingMisspellings, dropInvalidSpellingGrammar, sanitizeQuestionReview, repairZeroScoreGlow, repairReadingExamEvidence, stripUngrantedSections } = require("./validate");
 
 const COUNTRY = "🇬🇧 United Kingdom";
@@ -69,7 +70,7 @@ function buildSample(s, kind) {
 // records BOTH whether the first attempt was right and what the customer would
 // actually have been given. Never throws: a failure is a result, not a crash.
 const MAX_ATTEMPTS = 3;
-const BONUS_ISSUE = /^(growNext|revisedStory|modelResponse|modelFramework|revisedFramework) /;
+const BONUS_ISSUE = /^(growNext|revisedStory|modelResponse|modelFramework|revisedFramework|readingStrategy)\b/;
 
 // A run has a time budget (the host stops a function after 60 seconds, and a run that is
 // killed saves nothing). A sample that cannot finish another attempt in time stops and is
@@ -103,6 +104,7 @@ async function runOne(s, kind, generate, deadline = Infinity, validate = validat
       if (kind === "writing") {
         if (built.caps.spellingGrammar !== false) { dropInvalidSpellingGrammar(parsed, s.text); dropGlowsQuotingMisspellings(parsed); }
         dropRestatingHighlights(parsed, s.text);
+        TECH.repairVocabTricks(parsed);
         if (built.caps.deepFeedback) repairResponses(parsed, built.genre, s.tier);
         repairExamEvidence(parsed);
       } else {
@@ -124,6 +126,7 @@ async function runOne(s, kind, generate, deadline = Infinity, validate = validat
           if (growNextBad) delete parsed.growNext;
           if (check.issues.some((x) => /^(modelResponse|modelFramework) /.test(x))) { delete parsed.modelResponse; delete parsed.modelFramework; }
           if (check.issues.some((x) => /^(revisedFramework|revisedStory) /.test(x))) delete parsed.revisedFramework;
+          if (check.issues.some((x) => /^readingStrategy\b/.test(x))) delete parsed.readingStrategy;
           if (check.issues.some((x) => /^revisedStory /.test(x))) delete parsed.revisedStory;
           delivered = true;
           withoutBonus = true;

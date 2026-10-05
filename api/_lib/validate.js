@@ -7,7 +7,8 @@
 
 const { growDevelops, assessLength } = require("./calibrate");
 const RESP = require("./responses");
-const { frameworkForGenre, resolveGenre, VALID_GENRES } = require("./writingFrameworks");
+const TECH = require("./techniques");
+const { frameworkFor, VALID_GENRES } = require("./writingFrameworks");
 
 const MAX_AVG_WORDS_PER_SENTENCE = { early: 14, elementary: 18, middle: 24, high: 32 };
 const SENTENCE_LENGTH_TOLERANCE = 2;
@@ -267,7 +268,7 @@ function validateExamTechnique(parsed, targetNames, issues, submittedText) {
 // judging whether an example genuinely demonstrates a framework isn't
 // something a cheap deterministic check can do.
 function validateFrameworkTip(parsed, tier, genre, submittedText, issues) {
-  const fw = frameworkForGenre(resolveGenre(genre, tier));
+  const fw = frameworkFor(genre, tier);
   if (!fw) return;
   const tip = parsed?.frameworkTip;
   if (!tip || tip.name !== fw.name) {
@@ -460,7 +461,7 @@ function misspeltWords(parsed) {
 // misspelled would praise the very error listed beside it, so it is dropped.
 // Premium framework labels: unknown parts and non-verbatim quotes are dropped, the rest ordered as they occur.
 function repairResponses(parsed, genre, tier) {
-  const fw = frameworkForGenre(resolveGenre(genre, tier));
+  const fw = frameworkFor(genre, tier);
   if (!parsed || !fw) return parsed;
   RESP.composeModelResponse(parsed, fw);
   RESP.repairFrameworkLabels(parsed, fw, "revisedFramework", "revisedStory");
@@ -567,7 +568,7 @@ function stripUngrantedSections(parsed, { capabilities, kind }) {
     // Reading has no free-text submission of the student's own to quote from.
     drop("highlights", "frameworkTip", "overallScore", "scoreReason", "spellingGrammar", "spellingGrammarTotal", "revisedStory", "modelResponse", "modelFramework", "revisedFramework");
   } else {
-    drop("questionReview");
+    drop("questionReview", "readingStrategy");
     if (caps.overallScore === false) drop("overallScore", "scoreReason");
     if (caps.spellingGrammar === false) drop("spellingGrammar", "spellingGrammarTotal");
   }
@@ -672,7 +673,7 @@ function validateFeedback(parsed, { tier, standardsList, targetNames, submittedT
     validateRevisedStory(parsed, submittedText, issues, lengthInfo ? RESP.revisedLimits(lengthInfo, RESP.wordCount(submittedText)) : undefined);
     // Premium: the model response and the framework labels for both responses.
     if (caps.deepFeedback) {
-      const fw = frameworkForGenre(resolveGenre(genre, tier));
+      const fw = frameworkFor(genre, tier);
       if (fw) {
         RESP.validateResponses(parsed, { fw, assessment: lengthInfo || assessLength({ text: submittedText, tier, country: undefined, gradeLabel: undefined }), submittedText }, issues);
       }
@@ -716,7 +717,10 @@ function validateFeedback(parsed, { tier, standardsList, targetNames, submittedT
   }
 
   // Reading feedback only (readingScore is undefined for writing).
-  if (readingScore !== undefined) validateQuestionReview(parsed, issues);
+  if (readingScore !== undefined) {
+    validateQuestionReview(parsed, issues);
+    TECH.validateReadingStrategy(parsed, tier, issues);
+  }
 
   return { ok: issues.length === 0, issues };
 }

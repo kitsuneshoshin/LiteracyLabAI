@@ -46,8 +46,43 @@ function frameworkParts(fw) {
   return fw && Array.isArray(fw.parts) ? fw.parts.map(([name, meaning]) => ({ name, meaning })) : [];
 }
 
-function frameworkForGenre(genre) {
-  return FRAMEWORK_BY_GENRE[genre] || null;
+// Age-appropriate versions of a genre's framework. The names and parts are fixed here, like the
+// main table, so a model can never invent a definition. Anything not listed uses the table above.
+const FRAMEWORK_VARIANTS = {
+  early: {
+    descriptive: {
+      name: "Use Your Senses",
+      description: "Describe what you can see, hear and feel so the reader can picture it: See (what it looks like), Hear (what it sounds like), Feel (how it feels to touch, or how you feel).",
+      parts: [["See", "What it looks like."], ["Hear", "What it sounds like."], ["Feel", "How it feels to touch, or how you feel."]],
+    },
+    narrative: {
+      name: "Beginning, Middle, End",
+      description: "A story has three parts: Beginning (who and where), Middle (what happens) and End (how it finishes).",
+      parts: [["Beginning", "Who and where."], ["Middle", "What happens."], ["End", "How it finishes."]],
+    },
+    persuasive: {
+      name: "Opinion and Reason",
+      description: "Say what you think and why: Opinion (what you think) and Reason (why you think it, using the word because).",
+      parts: [["Opinion", "What you think."], ["Reason", "Why you think it, using because."]],
+    },
+  },
+  elementary: {
+    persuasive: {
+      name: "OREO",
+      description: "An opinion paragraph: Opinion (say what you think), Reason (why), Example (a fact or example that backs the reason) and Restate (finish by saying your opinion again in new words).",
+      parts: [["Opinion", "Says what you think."], ["Reason", "Says why."], ["Example", "A fact or example that backs the reason."], ["Restate", "Says the opinion again in new words."]],
+    },
+  },
+};
+
+function frameworkForGenre(genre, tier) {
+  const variant = tier && FRAMEWORK_VARIANTS[tier] && FRAMEWORK_VARIANTS[tier][genre];
+  return variant || FRAMEWORK_BY_GENRE[genre] || null;
+}
+
+// The framework for this piece: its genre (or the tier's default), in the form that suits the age.
+function frameworkFor(genre, tier) {
+  return frameworkForGenre(resolveGenre(genre, tier), tier);
 }
 
 // Resolves the genre that actually applies to this feedback call: the
@@ -61,7 +96,7 @@ function resolveGenre(genre, tier) {
 }
 
 function frameworkForTier(tier) {
-  return frameworkForGenre(DEFAULT_GENRE_BY_TIER[tier]);
+  return frameworkForGenre(DEFAULT_GENRE_BY_TIER[tier], tier);
 }
 
-module.exports = { frameworkParts, FRAMEWORK_BY_GENRE, VALID_GENRES, DEFAULT_GENRE_BY_TIER, frameworkForGenre, resolveGenre, frameworkForTier };
+module.exports = { frameworkFor, FRAMEWORK_VARIANTS, frameworkParts, FRAMEWORK_BY_GENRE, VALID_GENRES, DEFAULT_GENRE_BY_TIER, frameworkForGenre, resolveGenre, frameworkForTier };

@@ -6,7 +6,8 @@ const { buildWritingPrompt, buildReadingPrompt, correctiveAddendum, examTechniqu
 const { standardsFor } = require("./_lib/curriculum");
 const { targetsForGrade, examTargetsFor } = require("./_lib/masteryTargets");
 const RESP = require("./_lib/responses");
-const { frameworkForGenre, resolveGenre } = require("./_lib/writingFrameworks");
+const TECH = require("./_lib/techniques");
+const { frameworkFor } = require("./_lib/writingFrameworks");
 const { dropRestatingHighlights, repairResponses, dropGlowsQuotingMisspellings, validateFeedback, resolveTarget, dropInvalidSpellingGrammar, sanitizeQuestionReview, repairZeroScoreGlow, repairReadingExamEvidence, stripUngrantedSections } = require("./_lib/validate");
 const { checkRateLimit } = require("./_lib/rateLimit");
 const { writingLimitsForGrade } = require("./_lib/writingLimits");
@@ -64,6 +65,7 @@ async function generateAndValidate(prompt, tier, country, gradeLabel, submittedT
     const lastAttempt = i === MAX_ATTEMPTS || (Date.now() - startedAt) + (Date.now() - attemptStarted) * 1.2 > TIME_BUDGET_MS;
     if (capabilities?.spellingGrammar !== false) dropInvalidSpellingGrammar(attempt.parsed, submittedText);
     if (capabilities?.spellingGrammar !== false) dropGlowsQuotingMisspellings(attempt.parsed);
+    TECH.repairVocabTricks(attempt.parsed);
     if (submittedText) dropRestatingHighlights(attempt.parsed, submittedText);
     if (submittedText && capabilities?.deepFeedback) repairResponses(attempt.parsed, genre, tier);
     if (submittedText) repairExamEvidence(attempt.parsed);
@@ -84,12 +86,13 @@ async function generateAndValidate(prompt, tier, country, gradeLabel, submittedT
     // otherwise good piece of feedback (the app simply doesn't show it).
     // The same goes for the Premium full rewrite ("revisedStory"): the app falls
     // back to the fragment-by-fragment revision when it is absent.
-    const bonusOnly = check.issues.length > 0 && check.issues.every((issue) => /^(growNext|revisedStory|modelResponse|modelFramework|revisedFramework)\b/.test(issue));
+    const bonusOnly = check.issues.length > 0 && check.issues.every((issue) => /^(growNext|revisedStory|modelResponse|modelFramework|revisedFramework|readingStrategy)\b/.test(issue));
     const growNextBad = check.issues.some((issue) => /^growNext\b/.test(issue));
     if (lastAttempt && attempt.parsed && bonusOnly && (!growNextBad || attempt.parsed.growNext)) {
       if (growNextBad) delete attempt.parsed.growNext;
       if (check.issues.some((issue) => /^(modelResponse|modelFramework)\b/.test(issue))) { delete attempt.parsed.modelResponse; delete attempt.parsed.modelFramework; }
       if (check.issues.some((issue) => /^revisedFramework\b/.test(issue))) delete attempt.parsed.revisedFramework;
+      if (check.issues.some((issue) => /^readingStrategy\b/.test(issue))) delete attempt.parsed.readingStrategy;
       if (check.issues.some((issue) => /^revisedStory\b/.test(issue))) {
         delete attempt.parsed.revisedFramework; // its quotes belong to the rewrite that is being replaced
         // Keep a faithful corrected copy (the student's own words with the listed fixes
@@ -226,7 +229,7 @@ module.exports = async function handler(req, res) {
       calibrateWriting(result.parsed, { text, tier: existing.tier, country: existing.country, gradeLabel: existing.grade_label, capabilities: caps });
       if (Array.isArray(result.parsed.examTechnique)) Object.assign(result.parsed, examNotes(existing.country, existing.grade_label, existing.tier, "writing"));
       if (result.parsed.modelResponse || result.parsed.revisedFramework) {
-        const fw = frameworkForGenre(resolveGenre(genre, existing.tier));
+        const fw = frameworkFor(genre, existing.tier);
         if (fw) result.parsed.frameworkInfo = RESP.frameworkInfo(fw);
       }
 
@@ -235,7 +238,7 @@ module.exports = async function handler(req, res) {
       // re-explain, so it's attached here from the single source of truth
       // rather than trusted from validated-but-still-model-written text.
       if (result.parsed.frameworkTip) {
-        const fw = frameworkForGenre(resolveGenre(genre, existing.tier));
+        const fw = frameworkFor(genre, existing.tier);
         if (fw) result.parsed.frameworkTip.description = fw.description;
       }
 
@@ -303,6 +306,7 @@ module.exports = async function handler(req, res) {
       }
 
       stripUngrantedSections(result.parsed, { capabilities: caps, kind: "reading" });
+      TECH.attachReadingStrategy(result.parsed, existing.tier);
       if (Array.isArray(result.parsed.examTechnique)) Object.assign(result.parsed, examNotes(existing.country, existing.grade_label, existing.tier, "reading"));
 
       const { error: updateErr } = await supabase
