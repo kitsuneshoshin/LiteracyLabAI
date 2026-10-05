@@ -1337,21 +1337,49 @@ const HISTORY_PAGE = 10;
 // "Test yourself" multiple-choice quiz built from the same list
 // (api/_lib/vocabQuiz.js). Two small internal views (browse/quiz) rather
 // than a separate page, since it's meant to be a quick side activity.
+// ---- Vocabulary practice. Words come from every piece of feedback; how well each is known is kept on this
+// device (a four-step Leitner ladder: a word you know climbs a step, one you miss drops back to the start), so
+// flashcards always begin with the words that need the most work. Nothing here changes what the server stores.
+const VOCAB_BOXES = 4;
+const VOCAB_BOX_NAME = ["New", "Learning", "Nearly there", "Know it"];
+const VOCAB_BOX_COLOR = ["var(--border)", "var(--gold)", "var(--cyan)", "var(--good)"];
+const vocabNextBox = (box, gotIt) => (gotIt ? Math.min(VOCAB_BOXES - 1, (Number.isInteger(box) ? box : 0) + 1) : 0);
+const vocabTermKey = (t) => String(t == null ? "" : t).trim().toLowerCase();
+const vocabBoxOf = (boxes, term) => { const b = boxes && boxes[vocabTermKey(term)]; return Number.isInteger(b) && b >= 0 && b < VOCAB_BOXES ? b : 0; };
+const vocabDeck = (words, boxes, size = 8) => (words || []).map((w, i) => ({ w, i, b: vocabBoxOf(boxes, w.term) })).sort((a, b) => a.b - b.b || a.i - b.i).slice(0, size).map((x) => x.w);
+function loadVocabBoxes(childId){
+  try { const v = JSON.parse(localStorage.getItem("ll_vocab_boxes_" + childId) || "{}"); return v && typeof v === "object" && !Array.isArray(v) ? v : {}; } catch (e) { return {}; }
+}
+function saveVocabBoxes(childId, boxes){
+  try { localStorage.setItem("ll_vocab_boxes_" + childId, JSON.stringify(boxes)); } catch (e) { /* private window: practice still works, it just is not remembered */ }
+}
+
+function MasteryPips({ box }){
+  return (
+    <span className="inline-flex items-center gap-1" title={VOCAB_BOX_NAME[box]} aria-label={VOCAB_BOX_NAME[box]}>
+      {[0, 1, 2, 3].map((n) => <span key={n} className="rounded-full" style={{ width: 14, height: 5, background: n <= box && box > 0 ? VOCAB_BOX_COLOR[box] : "var(--border)" }} />)}
+    </span>
+  );
+}
+
 function VocabularyBank({ session, childId, backendLive, onSeePlans, displayName }){
   const [words, setWords] = useState(null); // null = still loading
   const [locked, setLocked] = useState(false); // Free plan: the bank is Core/Premium
   const [loadError, setLoadError] = useState("");
-  const [mode, setMode] = useState("browse"); // "browse" | "quiz"
+  const [view, setView] = useState("words"); // words | cards | quiz
+  const [deck, setDeck] = useState([]);
+  const [boxes, setBoxes] = useState({});
+  const [query, setQuery] = useState("");
+  const [sort, setSort] = useState("newest");
   const [quiz, setQuiz] = useState(null);
   const [quizError, setQuizError] = useState("");
-  const [answers, setAnswers] = useState({}); // questionIndex -> chosen option index
   const [loading, setLoading] = useState(false);
 
-  // Fetched here (rather than passed in) because the bank is its own tab in
-  // the workspace now and opens straight after a submission - it always wants
-  // the latest words, not whatever the dashboard loaded earlier.
+  // Fetched here (rather than passed in) because the bank is its own tab in the workspace and opens straight
+  // after a submission - it always wants the latest words, not whatever the dashboard loaded earlier.
   useEffect(()=>{
-    setMode("browse"); setQuiz(null); setQuizError(""); setLoadError(""); setLocked(false);
+    setView("words"); setQuiz(null); setQuizError(""); setLoadError(""); setLocked(false); setQuery("");
+    setBoxes(childId ? loadVocabBoxes(childId) : {});
     if (!backendLive || !childId) { setWords([]); return; }
     let cancelled = false;
     setWords(null);
@@ -1361,25 +1389,33 @@ function VocabularyBank({ session, childId, backendLive, onSeePlans, displayName
     return ()=>{ cancelled = true; };
   }, [childId, backendLive]);
 
+  function rate(term, gotIt){
+    setBoxes((prev) => {
+      const next = { ...prev, [vocabTermKey(term)]: vocabNextBox(vocabBoxOf(prev, term), gotIt) };
+      if (childId) saveVocabBoxes(childId, next);
+      return next;
+    });
+  }
+
+  function startCards(){ setDeck(vocabDeck(words, boxes, 8)); setView("cards"); }
+
   async function startQuiz(){
     setLoading(true);
     setQuizError("");
-    setAnswers({});
     try {
-      // Tells the server which words the last quiz used so a new quiz picks
-      // different ones (when the bank has enough).
+      // Tells the server which words the last quiz used so a new quiz picks different ones (when the bank has enough).
       const exclude = (quiz?.questions || []).map(q => q.term).join("|");
       const data = await authedFetch(session, `/api/history?childId=${childId}&quiz=1&count=5${exclude ? `&exclude=${encodeURIComponent(exclude)}` : ""}`, { cache: "no-store" });
       if (!data.questions || data.questions.length === 0) {
-        setQuizError(`Collect at least ${data.minRequired || 4} different words first — ${wordsLearnedLabel(data.available)} so far.`);
+        setQuizError(`Collect at least ${data.minRequired || 4} different words first. You have ${wordsLearnedLabel(data.available)} so far.`);
         setQuiz(null);
       } else {
         setQuiz(data);
       }
-      setMode("quiz");
+      setView("quiz");
     } catch (err) {
       setQuizError(err.payload?.error || err.message || "Couldn't load the quiz right now.");
-      setMode("quiz");
+      setView("quiz");
     } finally {
       setLoading(false);
     }
@@ -1396,107 +1432,256 @@ function VocabularyBank({ session, childId, backendLive, onSeePlans, displayName
         <IconLock size={22} style={{ color: "var(--ink-faint)" }} />
         <div className="font-display font-semibold text-base" style={{ color: "var(--ink)" }}>The vocabulary bank is part of Core and Premium</div>
         <p className="text-[13px] max-w-[46ch]" style={{ color: "var(--ink-faint)" }}>
-          Every word from your feedback is still taught on each piece. Upgrade to collect them all in one place and test yourself with a quick quiz.
+          Every word from your feedback is still taught on each piece. Upgrade to collect them all in one place, practise them with flashcards and test yourself with a quick quiz.
         </p>
         <button onClick={onSeePlans} className="focus-ring inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-bold mt-1" style={{ background: "var(--gold)", color: "#fff" }}>See plans</button>
       </div>
     );
   }
 
-  return (
-    <div className="card p-6 max-w-3xl mx-auto">
-      <div className="flex items-center justify-between mb-1 flex-wrap gap-2">
-        <h2 className="font-display font-bold text-xl" style={{ color: "var(--ink)" }}>{who} vocabulary bank</h2>
-        {words && words.length > 0 && <span className="text-[11px]" style={{ color: "var(--ink-faint)" }}>{words.length} word{words.length === 1 ? "" : "s"} learned</span>}
-      </div>
-      <p className="text-xs mb-3" style={{ color: "var(--ink-faint)" }}>
-        Every vocabulary upgrade from past feedback, in one place.
-      </p>
+  const list = words || [];
+  const total = list.length;
+  const known = list.filter((w) => vocabBoxOf(boxes, w.term) === VOCAB_BOXES - 1).length;
+  const shown = list
+    .filter((w) => { const q = query.trim().toLowerCase(); return !q || vocabTermKey(w.term).includes(q) || String(w.definition || "").toLowerCase().includes(q); })
+    .slice()
+    .sort((a, b) => sort === "az" ? vocabTermKey(a.term).localeCompare(vocabTermKey(b.term)) : sort === "practise" ? vocabBoxOf(boxes, a.term) - vocabBoxOf(boxes, b.term) : 0);
 
-      {mode === "browse" ? (
-        <>
-          {!words
-            ? <div className="text-sm py-6 text-center" style={{ color: "var(--ink-faint)" }}>Loading…</div>
-            : loadError
-            ? <div className="text-sm py-6 text-center" style={{ color: "var(--bad)" }}>{loadError}</div>
-            : words.length === 0
-            ? (
-              <div className="py-8 text-center flex flex-col items-center gap-2">
-                <IconBookOpenCheck size={24} style={{ color: "var(--ink-faint)" }} />
-                <div className="font-display font-semibold text-sm" style={{ color: "var(--ink)" }}>No words collected yet</div>
-                <p className="text-[13px] max-w-[42ch]" style={{ color: "var(--ink-faint)" }}>
-                  {backendLive
-                    ? "Every writing or reading piece you submit teaches a few new words. They'll collect here, and once you have 4 you can test yourself."
-                    : "Sign in and submit a piece to start building a vocabulary bank."}
-                </p>
-              </div>
-            )
-            : <div className="max-h-[28rem] overflow-y-auto pr-1"><VocabList items={words.map(v=>[v.term, v.definition, v.example])} /></div>}
-          <button onClick={startQuiz} disabled={loading || !words || words.length === 0}
-            className="focus-ring mt-4 w-full rounded-full py-2.5 text-sm font-bold disabled:opacity-40 disabled:cursor-not-allowed"
-            style={{ background: "var(--cyan)", color: "white" }}>
-            {loading ? "Loading…" : "Test yourself"}
-          </button>
-        </>
+  return (
+    <div className="max-w-5xl mx-auto flex flex-col gap-4">
+      <div className="card p-5 sm:p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-4 justify-between">
+          <div className="min-w-0">
+            <h2 className="font-display font-bold text-xl" style={{ color: "var(--ink)" }}>{who} vocabulary bank</h2>
+            <p className="text-[13px] mt-0.5" style={{ color: "var(--ink-soft)" }}>Every word from your feedback, in one place. Practise a few each day and they stick.</p>
+          </div>
+          {total > 0 && view === "words" && (
+            <div className="flex flex-wrap gap-2 shrink-0">
+              <button onClick={startCards} className="focus-ring inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-bold" style={{ background: "var(--cyan)", color: "white" }}>
+                <IconSparkle size={14} /> Practise flashcards
+              </button>
+              <button onClick={startQuiz} disabled={loading} className="focus-ring inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-bold disabled:opacity-50" style={{ background: "var(--surface-2)", color: "var(--ink)" }}>
+                {loading ? "Loading…" : "Take a quiz"}
+              </button>
+            </div>
+          )}
+        </div>
+        {total > 0 && view === "words" && (
+          <div className="mt-4">
+            <div className="flex items-center justify-between text-xs mb-1.5" style={{ color: "var(--ink-soft)" }}>
+              <span><strong className="tabular" style={{ color: "var(--ink)" }}>{known}</strong> of {total} word{total === 1 ? "" : "s"} known</span>
+              <span className="tabular">{total - known} still to practise</span>
+            </div>
+            <div className="h-2 rounded-full overflow-hidden" style={{ background: "var(--border)" }} role="progressbar" aria-valuemin={0} aria-valuemax={total} aria-valuenow={known} aria-label="Words known">
+              <div className="h-full rounded-full" style={{ width: (total ? (known / total) * 100 : 0) + "%", background: "var(--good)", transition: "width 300ms" }} />
+            </div>
+          </div>
+        )}
+      </div>
+
+      {view === "cards" ? (
+        <VocabFlashcards deck={deck} boxes={boxes} onRate={rate} onBack={()=>setView("words")} onAgain={startCards} />
+      ) : view === "quiz" ? (
+        <VocabQuiz quiz={quiz} error={quizError} onRate={rate} onRetry={startQuiz} onBack={()=>setView("words")} loading={loading} />
+      ) : !words ? (
+        <div className="card p-6 text-sm text-center" style={{ color: "var(--ink-faint)" }}>Loading…</div>
+      ) : loadError ? (
+        <div className="card p-6 text-sm text-center" style={{ color: "var(--bad)" }}>{loadError}</div>
+      ) : total === 0 ? (
+        <div className="card py-10 px-6 text-center flex flex-col items-center gap-2">
+          <IconBookOpenCheck size={24} style={{ color: "var(--ink-faint)" }} />
+          <div className="font-display font-semibold text-sm" style={{ color: "var(--ink)" }}>No words collected yet</div>
+          <p className="text-[13px] max-w-[42ch]" style={{ color: "var(--ink-faint)" }}>
+            {backendLive
+              ? "Every writing or reading piece you submit teaches a few new words. They'll collect here, and once you have 4 you can practise and test yourself."
+              : "Sign in and submit a piece to start building a vocabulary bank."}
+          </p>
+        </div>
       ) : (
-        <VocabQuiz quiz={quiz} error={quizError} answers={answers} setAnswers={setAnswers}
-          onRetry={startQuiz} onBack={()=>setMode("browse")} />
+        <>
+          <div className="flex flex-wrap items-center gap-2">
+            <input type="search" value={query} onChange={(e)=>setQuery(e.target.value)} placeholder="Search your words"
+              aria-label="Search your words" className="focus-ring flex-1 min-w-[12rem] rounded-full border px-4 py-2 text-sm"
+              style={{ borderColor: "var(--border)", background: "var(--surface)", color: "var(--ink)" }} />
+            <select value={sort} onChange={(e)=>setSort(e.target.value)} aria-label="Sort words" className="focus-ring rounded-full border px-3 py-2 text-sm"
+              style={{ borderColor: "var(--border)", background: "var(--surface)", color: "var(--ink)" }}>
+              <option value="newest">Newest first</option>
+              <option value="practise">Needs practice first</option>
+              <option value="az">A to Z</option>
+            </select>
+          </div>
+          {shown.length === 0 ? (
+            <div className="card p-6 text-sm text-center" style={{ color: "var(--ink-faint)" }}>No words match "{query}".</div>
+          ) : (
+            <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-3">
+              {shown.map((v) => (
+                <div key={v.term} className="card p-4 flex flex-col gap-1.5" style={{ borderColor: "var(--border)" }}>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-display font-bold text-[15px]" style={{ color: "var(--cyan-ink)" }}>{v.term}</span>
+                    <MasteryPips box={vocabBoxOf(boxes, v.term)} />
+                  </div>
+                  <p className="text-[13px] leading-snug" style={{ color: "var(--ink)" }}>{v.definition}</p>
+                  {v.example && <p className="text-[13px] leading-snug italic" style={{ color: "var(--ink-soft)" }}>“{v.example}”</p>}
+                  {v.trick && <p className="text-[12.5px] leading-snug" style={{ color: "var(--cyan-ink)" }}><span className="font-semibold">Word trick: </span>{v.trick}</p>}
+                </div>
+              ))}
+            </div>
+          )}
+        </>
       )}
     </div>
   );
 }
 
-function VocabQuiz({ quiz, error, answers, setAnswers, onRetry, onBack }){
+// One word at a time: see the word, say what it means, flip to check, then say whether you knew it.
+function VocabFlashcards({ deck, boxes, onRate, onBack, onAgain }){
+  const [idx, setIdx] = useState(0);
+  const [flipped, setFlipped] = useState(false);
+  const [known, setKnown] = useState(0);
+  const card = deck[idx];
+  if (!card) {
+    return (
+      <div className="card p-8 flex flex-col items-center gap-4 text-center max-w-xl mx-auto w-full">
+        <ScoreRing score={known} total={deck.length} label="knew it" />
+        <div>
+          <h3 className="font-display font-bold text-lg" style={{ color: "var(--ink)" }}>{known === deck.length ? "You knew them all" : "Nice work"}</h3>
+          <p className="text-[13.5px] mt-1" style={{ color: "var(--ink-soft)" }}>Words you missed come back first next time, so they get the practice.</p>
+        </div>
+        <div className="flex gap-2 flex-wrap justify-center">
+          <button onClick={onAgain} className="focus-ring rounded-full px-5 py-2.5 text-sm font-bold" style={{ background: "var(--cyan)", color: "white" }}>Practise again</button>
+          <button onClick={onBack} className="focus-ring rounded-full px-5 py-2.5 text-sm font-bold" style={{ background: "var(--surface-2)", color: "var(--ink)" }}>Back to words</button>
+        </div>
+      </div>
+    );
+  }
+  function answer(gotIt){
+    onRate(card.term, gotIt);
+    if (gotIt) setKnown((k) => k + 1);
+    setFlipped(false);
+    setIdx((i) => i + 1);
+  }
+  return (
+    <div className="max-w-xl mx-auto w-full flex flex-col gap-4">
+      <div className="flex items-center gap-3">
+        <button onClick={onBack} className="focus-ring text-[13px] font-semibold underline" style={{ color: "var(--ink-soft)" }}>Back</button>
+        <div className="flex-1 h-2 rounded-full overflow-hidden" style={{ background: "var(--border)" }} role="progressbar" aria-valuemin={0} aria-valuemax={deck.length} aria-valuenow={idx} aria-label="Cards done">
+          <div className="h-full rounded-full" style={{ width: (idx / deck.length) * 100 + "%", background: "var(--cyan)", transition: "width 250ms" }} />
+        </div>
+        <span className="text-xs font-semibold tabular" style={{ color: "var(--ink-soft)" }}>{idx + 1} / {deck.length}</span>
+      </div>
+      <button type="button" onClick={()=>setFlipped((f) => !f)} aria-label={flipped ? "Show the word" : "Show the meaning"}
+        className="focus-ring card w-full text-left p-6 sm:p-8 min-h-[16rem] flex flex-col justify-center gap-3" style={{ borderColor: flipped ? "var(--cyan)" : "var(--border)", borderWidth: 1.5 }}>
+        <div className="flex items-center justify-between">
+          <span className="text-[11px] font-bold uppercase tracking-wide" style={{ color: "var(--ink-faint)" }}>{flipped ? "Meaning" : "What does this word mean?"}</span>
+          <MasteryPips box={vocabBoxOf(boxes, card.term)} />
+        </div>
+        <div className="font-display font-extrabold text-3xl" style={{ color: "var(--cyan-ink)" }}>{card.term}</div>
+        {flipped ? (
+          <div className="flex flex-col gap-2">
+            <p className="text-[15px] leading-relaxed font-read" style={{ color: "var(--ink)" }}>{card.definition}</p>
+            {card.example && <p className="text-[14px] leading-relaxed italic font-read" style={{ color: "var(--ink-soft)" }}>“{card.example}”</p>}
+            {card.trick && <p className="text-[13px]" style={{ color: "var(--cyan-ink)" }}><span className="font-semibold">Word trick: </span>{card.trick}</p>}
+          </div>
+        ) : (
+          <p className="text-[13px]" style={{ color: "var(--ink-faint)" }}>Say it in your own words, then tap the card to check.</p>
+        )}
+      </button>
+      {flipped ? (
+        <div className="grid grid-cols-2 gap-3">
+          <button onClick={()=>answer(false)} className="focus-ring rounded-xl py-3 text-sm font-bold" style={{ background: "var(--bad-tint)", color: "var(--bad)" }}>Not yet</button>
+          <button onClick={()=>answer(true)} className="focus-ring rounded-xl py-3 text-sm font-bold" style={{ background: "var(--good-tint)", color: "var(--good)" }}>I knew it</button>
+        </div>
+      ) : (
+        <button onClick={()=>setFlipped(true)} className="focus-ring rounded-xl py-3 text-sm font-bold" style={{ background: "var(--ink)", color: "white" }}>Show the meaning</button>
+      )}
+    </div>
+  );
+}
+
+// The quiz, one question at a time with an answer you can see straight away, then a summary that names the words to revisit.
+function VocabQuiz({ quiz, error, onRate, onRetry, onBack, loading }){
+  const [idx, setIdx] = useState(0);
+  const [chosen, setChosen] = useState(null);
+  const [results, setResults] = useState([]); // true/false per question answered
+  useEffect(()=>{ setIdx(0); setChosen(null); setResults([]); }, [quiz]);
   if (error) {
     return (
-      <div>
-        <p className="text-sm py-4 text-center" style={{ color: "var(--ink-faint)" }}>{error}</p>
-        <button onClick={onBack} className="focus-ring w-full rounded-full py-2.5 text-sm font-bold" style={{ background: "var(--surface-2)", color: "var(--ink)" }}>Back</button>
+      <div className="card p-6 max-w-xl mx-auto w-full">
+        <p className="text-sm py-2 text-center" style={{ color: "var(--ink-faint)" }}>{error}</p>
+        <button onClick={onBack} className="focus-ring mt-3 w-full rounded-full py-2.5 text-sm font-bold" style={{ background: "var(--surface-2)", color: "var(--ink)" }}>Back</button>
       </div>
     );
   }
   if (!quiz) return null;
-  const answeredCount = Object.keys(answers).length;
-  const correctCount = quiz.questions.filter((q, i) => answers[i] === q.correctIndex).length;
-  const allAnswered = answeredCount === quiz.questions.length;
-
-  return (
-    <div className="flex flex-col gap-4">
-      {quiz.questions.map((q, qi) => {
-        const chosen = answers[qi];
-        const isAnswered = chosen != null;
-        return (
-          <div key={qi} className="rounded-xl p-3.5" style={{ background: "var(--surface-2)" }}>
-            <div className="font-display font-bold text-sm mb-2" style={{ color: "var(--ink)" }}>Which definition fits "{q.term}"?</div>
-            <div className="flex flex-col gap-1.5">
-              {q.options.map((opt, oi) => {
-                const isCorrect = oi === q.correctIndex;
-                const isChosen = oi === chosen;
-                let style = { borderColor: "var(--border)", color: "var(--ink)" };
-                if (isAnswered && isCorrect) style = { borderColor: "var(--good)", background: "var(--good-tint)", color: "var(--ink)" };
-                else if (isAnswered && isChosen) style = { borderColor: "var(--bad)", background: "var(--bad-tint)", color: "var(--ink)" };
-                return (
-                  <button key={oi} disabled={isAnswered}
-                    onClick={()=>setAnswers(a=>({ ...a, [qi]: oi }))}
-                    className="focus-ring text-left rounded-lg border px-3 py-2 text-[13px] disabled:cursor-default"
-                    style={style}>
-                    {opt}
-                  </button>
-                );
-              })}
-            </div>
+  const qs = quiz.questions;
+  const q = qs[idx];
+  if (!q) {
+    const right = results.filter(Boolean).length;
+    const missed = qs.filter((_, i) => !results[i]);
+    return (
+      <div className="card p-6 sm:p-8 flex flex-col items-center gap-4 text-center max-w-xl mx-auto w-full">
+        <ScoreRing score={right} total={qs.length} />
+        <h3 className="font-display font-bold text-lg" style={{ color: "var(--ink)" }}>{right === qs.length ? "Perfect score" : right >= qs.length / 2 ? "Good going" : "Keep practising"}</h3>
+        {missed.length > 0 && (
+          <div className="w-full text-left flex flex-col gap-2">
+            <div className="text-[11px] font-bold uppercase tracking-wide" style={{ color: "var(--ink-faint)" }}>Words to revisit</div>
+            {missed.map((m) => (
+              <div key={m.term} className="rounded-xl p-3" style={{ background: "var(--surface-2)" }}>
+                <span className="font-display font-bold text-sm" style={{ color: "var(--cyan-ink)" }}>{m.term}</span>
+                <p className="text-[13px] mt-0.5" style={{ color: "var(--ink)" }}>{m.options[m.correctIndex]}</p>
+              </div>
+            ))}
           </div>
-        );
-      })}
-      {allAnswered && (
-        <div className="rounded-xl p-3.5 text-center" style={{ background: "var(--cyan-tint)" }}>
-          <span className="font-display font-bold" style={{ color: "var(--cyan-ink)" }}>{correctCount} of {quiz.questions.length} correct</span>
+        )}
+        <div className="flex gap-2 flex-wrap justify-center">
+          <button onClick={onRetry} disabled={loading} className="focus-ring rounded-full px-5 py-2.5 text-sm font-bold disabled:opacity-50" style={{ background: "var(--cyan)", color: "white" }}>{loading ? "Loading…" : "New quiz"}</button>
+          <button onClick={onBack} className="focus-ring rounded-full px-5 py-2.5 text-sm font-bold" style={{ background: "var(--surface-2)", color: "var(--ink)" }}>Back to words</button>
         </div>
-      )}
-      <div className="flex gap-2">
-        <button onClick={onBack} className="focus-ring flex-1 rounded-full py-2.5 text-sm font-bold" style={{ background: "var(--surface-2)", color: "var(--ink)" }}>Back to word list</button>
-        {allAnswered && <button onClick={onRetry} className="focus-ring flex-1 rounded-full py-2.5 text-sm font-bold" style={{ background: "var(--cyan)", color: "white" }}>New quiz</button>}
       </div>
+    );
+  }
+  const answered = chosen != null;
+  function pick(oi){
+    if (answered) return;
+    setChosen(oi);
+    const ok = oi === q.correctIndex;
+    setResults((r) => { const next = r.slice(); next[idx] = ok; return next; });
+    if (onRate) onRate(q.term, ok);
+  }
+  return (
+    <div className="max-w-xl mx-auto w-full flex flex-col gap-4">
+      <div className="flex items-center gap-3">
+        <button onClick={onBack} className="focus-ring text-[13px] font-semibold underline" style={{ color: "var(--ink-soft)" }}>Back</button>
+        <div className="flex-1 h-2 rounded-full overflow-hidden" style={{ background: "var(--border)" }} role="progressbar" aria-valuemin={0} aria-valuemax={qs.length} aria-valuenow={idx} aria-label="Quiz progress">
+          <div className="h-full rounded-full" style={{ width: (idx / qs.length) * 100 + "%", background: "var(--cyan)", transition: "width 250ms" }} />
+        </div>
+        <span className="text-xs font-semibold tabular" style={{ color: "var(--ink-soft)" }}>{idx + 1} / {qs.length}</span>
+      </div>
+      <div className="card p-5 sm:p-6">
+        <div className="text-[11px] font-bold uppercase tracking-wide mb-1" style={{ color: "var(--ink-faint)" }}>Which meaning fits?</div>
+        <div className="font-display font-extrabold text-2xl mb-4" style={{ color: "var(--cyan-ink)" }}>{q.term}</div>
+        <div className="flex flex-col gap-2">
+          {q.options.map((opt, oi) => {
+            const isCorrect = oi === q.correctIndex;
+            const isChosen = oi === chosen;
+            let st = { borderColor: "var(--border)", background: "var(--surface)", color: "var(--ink)" };
+            if (answered && isCorrect) st = { borderColor: "var(--good)", background: "var(--good-tint)", color: "var(--ink)" };
+            else if (answered && isChosen) st = { borderColor: "var(--bad)", background: "var(--bad-tint)", color: "var(--ink)" };
+            return (
+              <button key={oi} disabled={answered} onClick={()=>pick(oi)} className="focus-ring text-left rounded-xl border px-3.5 py-2.5 text-[14px] disabled:cursor-default" style={st}>{opt}</button>
+            );
+          })}
+        </div>
+        {answered && (
+          <p className="text-[13px] mt-3 font-semibold" style={{ color: chosen === q.correctIndex ? "var(--good)" : "var(--bad)" }} role="status">
+            {chosen === q.correctIndex ? "Correct" : "Not quite. The right meaning is highlighted."}
+          </p>
+        )}
+      </div>
+      <button onClick={()=>{ setChosen(null); setIdx((i) => i + 1); }} disabled={!answered}
+        className="focus-ring rounded-xl py-3 text-sm font-bold disabled:opacity-40" style={{ background: "var(--ink)", color: "white" }}>
+        {idx + 1 === qs.length ? "See my results" : "Next question"}
+      </button>
     </div>
   );
 }
@@ -2529,12 +2714,7 @@ function OverallScorePanel({ feedback }){
   const color = score >= 8 ? "var(--good)" : score >= 5 ? "var(--gold-ink)" : "var(--bad)";
   return (
     <div className="card p-5 sm:p-6 flex items-center gap-4" style={{ borderColor: color, borderWidth: 1.5 }}>
-      <div className="w-16 h-16 rounded-full grid place-items-center shrink-0 font-display font-extrabold" style={{ background: `color-mix(in srgb, ${color} 15%, transparent)`, color }}>
-        <div className="text-center leading-none">
-          <div className="text-xl">{score}</div>
-          <div className="text-[10px] font-semibold opacity-70 mt-0.5">/10</div>
-        </div>
-      </div>
+      <ScoreRing score={score} total={10} label="score" />
       <div className="min-w-0">
         <div className="flex items-center gap-1.5 mb-1">
           <IconAward size={14} strokeWidth={2.2} style={{ color }} />
@@ -2548,7 +2728,7 @@ function OverallScorePanel({ feedback }){
   );
 }
 
-function FeedbackPanel({ tier, gradeLabel, country, interest, confidence, motivation, seed, feedback, submissionId, session, backendLive, submittedText, onSeePlans }){
+function FeedbackPanel({ tier, gradeLabel, country, interest, confidence, motivation, seed, feedback, submissionId, session, backendLive, submittedText, onSeePlans, onPractise }){
   // Real feedback from a plan without the spelling check / overall score
   // simply doesn't contain them (the server never generates them - see
   // api/_lib/plans.js), so their absence, on feedback that exists at all, is
@@ -2630,6 +2810,15 @@ function FeedbackPanel({ tier, gradeLabel, country, interest, confidence, motiva
         <VocabList items={vocabList} />
       </Collapsible>
 
+      {onPractise && (
+        <div className="card p-4 sm:p-5 flex items-center justify-between gap-3 flex-wrap">
+          <div className="min-w-0">
+            <div className="font-display font-semibold text-sm" style={{ color: "var(--ink)" }}>Make these words stick</div>
+            <div className="text-[13px]" style={{ color: "var(--ink-soft)" }}>Flashcards and a quick quiz, starting with the words you need most.</div>
+          </div>
+          <button onClick={onPractise} className="focus-ring inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-bold shrink-0" style={{ background: "var(--cyan)", color: "white" }}>Practise words <IconArrowRight size={14} /></button>
+        </div>
+      )}
       <ThumbsFeedback context="writing feedback" session={session} submissionId={submissionId} backendLive={backendLive} />
      </div>
     </div>
@@ -3072,7 +3261,7 @@ function QuestionReviewPanel({ feedback, questions, answers }){
 }
 
 // The score as a ring: a quick read of "how did I do" before any text.
-function ScoreRing({ score, total, size = 92 }){
+function ScoreRing({ score, total, size = 92, label = "correct" }){
   const pct = total > 0 ? score / total : 0;
   const color = pct >= 0.8 ? "var(--good)" : pct >= 0.5 ? "var(--gold-ink)" : "var(--bad)";
   const r = (size - 12) / 2, c = 2 * Math.PI * r;
@@ -3085,13 +3274,13 @@ function ScoreRing({ score, total, size = 92 }){
       </svg>
       <div className="absolute inset-0 grid place-items-center text-center leading-none">
         <div><div className="font-display font-extrabold text-2xl tabular" style={{ color: "var(--ink)" }}>{score}<span className="text-sm font-bold" style={{ color: "var(--ink-faint)" }}>/{total}</span></div>
-        <div className="text-[10px] font-bold uppercase tracking-wide mt-1" style={{ color: "var(--ink-faint)" }}>correct</div></div>
+        <div className="text-[10px] font-bold uppercase tracking-wide mt-1" style={{ color: "var(--ink-faint)" }}>{label}</div></div>
       </div>
     </div>
   );
 }
 
-function ReadingFeedbackPanel({ tier, country, interest, confidence, motivation, score, totalQ, feedback, submissionId, session, backendLive, questions, answers, bank, onNew }){
+function ReadingFeedbackPanel({ tier, country, interest, confidence, motivation, score, totalQ, feedback, submissionId, session, backendLive, questions, answers, bank, onNew, onPractise }){
   const interestLabel = (INTERESTS.find(i=>i.id===interest) || INTERESTS[0]).label;
   const curriculum = GRADE_DATA[country].curriculum;
   const pct = Math.round((score/totalQ)*100);
@@ -3203,6 +3392,15 @@ function ReadingFeedbackPanel({ tier, country, interest, confidence, motivation,
         <VocabList items={vocabList} />
       </Collapsible>
 
+      {onPractise && (
+        <div className="card p-4 sm:p-5 flex items-center justify-between gap-3 flex-wrap">
+          <div className="min-w-0">
+            <div className="font-display font-semibold text-sm" style={{ color: "var(--ink)" }}>Make these words stick</div>
+            <div className="text-[13px]" style={{ color: "var(--ink-soft)" }}>Flashcards and a quick quiz, starting with the words you need most.</div>
+          </div>
+          <button onClick={onPractise} className="focus-ring inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-bold shrink-0" style={{ background: "var(--cyan)", color: "white" }}>Practise words <IconArrowRight size={14} /></button>
+        </div>
+      )}
       <ThumbsFeedback context="reading feedback" session={session} submissionId={submissionId} backendLive={backendLive} />
       </div>
       </div>
@@ -3548,12 +3746,12 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
             <>
               <SubmissionRecap tier={tier} title={meta?.title || "Your story"} words={words} onNew={handleNew} />
               <FeedbackPanel tier={tier} gradeLabel={gradeLabel} country={country} interest={feedbackInterest} confidence={confidenceWriting} motivation={motivation} seed={words}
-                feedback={backendFeedback} submissionId={submissionId} session={session} backendLive={backendLive} submittedText={text} onSeePlans={onSeePlans} />
+                feedback={backendFeedback} submissionId={submissionId} session={session} backendLive={backendLive} submittedText={text} onSeePlans={onSeePlans} onPractise={()=>setExerciseType("vocab")} />
             </>
           ) : readingBankEntry && Array.isArray(backendFeedback?.questionReview) && backendFeedback.questionReview.length > 0 ? (
             <ReadingFeedbackPanel tier={tier} country={country} interest={feedbackInterest} confidence={confidenceReading} motivation={motivation} score={readingScore} totalQ={qAutoCount(readingQuestions)}
               feedback={backendFeedback} submissionId={submissionId} session={session} backendLive={backendLive}
-              questions={readingQuestions} answers={answers} bank={readingBankEntry} onNew={handleNew} />
+              questions={readingQuestions} answers={answers} bank={readingBankEntry} onNew={handleNew} onPractise={()=>setExerciseType("vocab")} />
           ) : readingBankEntry ? (
             <>
               <ReadingExercise
