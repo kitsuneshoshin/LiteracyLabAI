@@ -41,6 +41,8 @@ const rowFor = (prefix) => {
 const TIERS = ["free", "core", "premium"];
 const BOOLEAN_ROWS = [
   ["Extended feedback", "deepFeedback"],
+  ["Your response revised", "deepFeedback"],
+  ["Written answer in reading comprehension", "deepFeedback"],
   ["Exam-technique scoring", "examTechnique"],
   ["Spelling & grammar check", "spellingGrammar"],
   ["Overall score out of 10", "overallScore"],

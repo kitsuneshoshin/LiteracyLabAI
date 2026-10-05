@@ -1725,7 +1725,7 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
   // Premium/Pro/Admin have nothing left to upgrade to.
   const PLAN_CARDS = [
                     { tier: "core", name: "Core", price: PLAN_META.core.price, sub: "One learner", features: ["Unlimited writing & reading submissions", "26-week progress trend chart", "Anonymous ranking in their year group", "Full activity history", "Vocabulary bank with a self-test quiz"] },
-                    { tier: "premium", name: "Premium", price: PLAN_META.premium.price, sub: "Up to 6 learners", features: ["Everything in Core, for the whole household", "Extended feedback: a second, harder next step", "Spelling & grammar check and a score out of 10 on every piece", "Exam-technique scoring against real assessment objectives (ages 11+)"] },
+                    { tier: "premium", name: "Premium", price: PLAN_META.premium.price, sub: "Up to 6 learners", features: ["Everything in Core, for the whole household", "Extended feedback: a second, harder next step", "Your response rewritten and a model response, with the framework shown in both", "A short written answer in reading, marked out of 2 or 3", "Spelling & grammar check and a score out of 10 on every piece", "Exam-technique scoring against real assessment objectives (ages 11+)"] },
   ];
   const upsellCards = plan === "free" ? PLAN_CARDS : plan === "core" ? PLAN_CARDS.filter(c => c.tier === "premium") : [];
 
@@ -3071,7 +3071,27 @@ function QuestionReviewPanel({ feedback, questions, answers }){
   );
 }
 
-function ReadingFeedbackPanel({ tier, country, interest, confidence, motivation, score, totalQ, feedback, submissionId, session, backendLive, questions, answers }){
+// The score as a ring: a quick read of "how did I do" before any text.
+function ScoreRing({ score, total, size = 92 }){
+  const pct = total > 0 ? score / total : 0;
+  const color = pct >= 0.8 ? "var(--good)" : pct >= 0.5 ? "var(--gold-ink)" : "var(--bad)";
+  const r = (size - 12) / 2, c = 2 * Math.PI * r;
+  return (
+    <div className="relative shrink-0" style={{ width: size, height: size }} role="img" aria-label={score + " out of " + total + " correct"}>
+      <svg width={size} height={size} viewBox={"0 0 " + size + " " + size}>
+        <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="var(--border)" strokeWidth="9" />
+        <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={color} strokeWidth="9" strokeLinecap="round"
+          strokeDasharray={c} strokeDashoffset={c * (1 - pct)} transform={"rotate(-90 " + size/2 + " " + size/2 + ")"} />
+      </svg>
+      <div className="absolute inset-0 grid place-items-center text-center leading-none">
+        <div><div className="font-display font-extrabold text-2xl tabular" style={{ color: "var(--ink)" }}>{score}<span className="text-sm font-bold" style={{ color: "var(--ink-faint)" }}>/{total}</span></div>
+        <div className="text-[10px] font-bold uppercase tracking-wide mt-1" style={{ color: "var(--ink-faint)" }}>correct</div></div>
+      </div>
+    </div>
+  );
+}
+
+function ReadingFeedbackPanel({ tier, country, interest, confidence, motivation, score, totalQ, feedback, submissionId, session, backendLive, questions, answers, bank, onNew }){
   const interestLabel = (INTERESTS.find(i=>i.id===interest) || INTERESTS[0]).label;
   const curriculum = GRADE_DATA[country].curriculum;
   const pct = Math.round((score/totalQ)*100);
@@ -3083,17 +3103,75 @@ function ReadingFeedbackPanel({ tier, country, interest, confidence, motivation,
     ? feedback.vocab.map(v=>[v.term, v.definition, v.example, v.trick])
     : vocabFor(interest, tier, country);
 
+  const split = !!bank;
+  const isPoem = split && /poem/i.test(String(bank.textType || ""));
+  const marked = feedback?.shortAnswer && typeof feedback.shortAnswer === "object" && Number.isInteger(feedback.shortAnswer.awarded) ? feedback.shortAnswer : null;
+  const glowCard = (
+    <div className="card p-5 sm:p-6 flex items-center gap-4" style={{ borderColor: "var(--good)", borderWidth: 1.5 }}>
+      <div className="w-14 h-14 rounded-full grid place-items-center shrink-0 font-display font-extrabold text-lg" style={{ background: "var(--good-tint)", color: "var(--good)" }}>
+        {pct}%
+      </div>
+      <div>
+        <h3 className="font-display font-bold mb-1" style={{ color: "var(--ink)" }}>Glows — what you did well</h3>
+        <p className="text-[14.5px] leading-relaxed font-read" style={{ color: "var(--ink)" }}>{glow}</p>
+      </div>
+    </div>
+  );
+  const hero = split && (
+    <div className="card p-5 sm:p-6" style={{ borderColor: "var(--good)", borderWidth: 1.5 }}>
+      <div className="flex flex-col sm:flex-row sm:items-center gap-5">
+        <ScoreRing score={score} total={totalQ} />
+        <div className="min-w-0 flex-1">
+          <SectionLabel>Reading comprehension · {bank.skill}{bank.textType ? " · " + bank.textType : ""}</SectionLabel>
+          <h3 className="font-display font-bold text-lg leading-snug mt-0.5" style={{ color: "var(--ink)" }}>{bank.title}</h3>
+          <div className="flex flex-wrap items-center gap-1.5 mt-2.5" aria-label="Result for each question">
+            {questions.map((q, i) => {
+              if (!qIsAuto(q)) {
+                return (
+                  <span key={i} className="inline-flex items-center gap-1 rounded-full px-2.5 h-7 text-[12px] font-bold tabular" style={{ background: "var(--gold-tint)", color: "var(--gold-ink)" }} title="Written answer">
+                    {i + 1} · {marked ? marked.awarded + "/" + marked.outOf + " marks" : "written"}
+                  </span>
+                );
+              }
+              const ok = qIsRight(q, answers?.[i]);
+              return (
+                <span key={i} className="inline-grid place-items-center rounded-full w-7 h-7 text-[12px] font-bold tabular" style={{ background: ok ? "var(--good-tint)" : "var(--bad-tint)", color: ok ? "var(--good)" : "var(--bad)" }} title={"Question " + (i + 1) + (ok ? " right" : " not quite")}>
+                  {ok ? <IconCheck size={13} strokeWidth={3} /> : <IconX size={13} strokeWidth={3} />}
+                </span>
+              );
+            })}
+          </div>
+        </div>
+        {onNew && (
+          <button onClick={onNew} className="focus-ring inline-flex items-center justify-center gap-1.5 rounded-lg px-4 py-2 text-sm font-semibold shrink-0 self-start sm:self-center" style={{ background: "var(--ink)", color: "white" }}>
+            New passage <IconArrowRight size={14} />
+          </button>
+        )}
+      </div>
+      <div className="mt-4 pt-4 border-t" style={{ borderColor: "var(--border-soft)" }}>
+        <div className="text-[11px] font-bold uppercase tracking-wide mb-1" style={{ color: "var(--good)" }}>Glow · what you did well</div>
+        <p className="text-[14.5px] leading-relaxed font-read" style={{ color: "var(--ink)" }}>{glow}</p>
+      </div>
+    </div>
+  );
+  const passageCard = split && (
+    <div className="card p-0 overflow-hidden lg:sticky lg:top-4">
+      <div className="px-5 pt-4 pb-3 border-b" style={{ borderColor: "var(--border-soft)" }}>
+        <SectionLabel>The passage{bank.textType ? " · " + bank.textType : ""}</SectionLabel>
+        <h3 className="font-display font-semibold mt-0.5" style={{ color: "var(--ink)" }}>{bank.title}</h3>
+      </div>
+      <div className="font-read text-[15px] px-5 py-4 leading-relaxed flex flex-col gap-3 lg:max-h-[calc(100vh-10rem)] lg:overflow-y-auto" style={{ color: "var(--ink)" }}>
+        {String(bank.passage).split(/\n\s*\n/).map((para, i) => <p key={i} className={isPoem ? "whitespace-pre-line" : ""}>{para}</p>)}
+      </div>
+    </div>
+  );
+
   return (
     <div className="animate-float-in flex flex-col gap-4">
-      <div className="card p-5 sm:p-6 flex items-center gap-4" style={{ borderColor: "var(--good)", borderWidth: 1.5 }}>
-        <div className="w-14 h-14 rounded-full grid place-items-center shrink-0 font-display font-extrabold text-lg" style={{ background: "var(--good-tint)", color: "var(--good)" }}>
-          {pct}%
-        </div>
-        <div>
-          <h3 className="font-display font-bold mb-1" style={{ color: "var(--ink)" }}>Glows — what you did well</h3>
-          <p className="text-[14.5px] leading-relaxed font-read" style={{ color: "var(--ink)" }}>{glow}</p>
-        </div>
-      </div>
+      {split ? hero : glowCard}
+      <div className={split ? "grid lg:grid-cols-5 gap-4 items-start" : "contents"}>
+      {split && <div className="lg:col-span-2 min-w-0">{passageCard}</div>}
+      <div className={split ? "lg:col-span-3 flex flex-col gap-4 min-w-0" : "contents"}>
 
       <div className="card p-5 sm:p-6" style={{ borderColor: "var(--cyan)", borderWidth: 1.5 }}>
         <div className="flex items-center justify-between gap-2 mb-2 flex-wrap">
@@ -3126,6 +3204,8 @@ function ReadingFeedbackPanel({ tier, country, interest, confidence, motivation,
       </Collapsible>
 
       <ThumbsFeedback context="reading feedback" session={session} submissionId={submissionId} backendLive={backendLive} />
+      </div>
+      </div>
     </div>
   );
 }
@@ -3463,13 +3543,17 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
         // stretched full-bleed, same reasoning as a body-text column anywhere
         // else: a line of prose that runs the full width of a wide screen is
         // harder to read, not easier.
-        <div className={"mx-auto flex flex-col gap-4 " + (exerciseType === "writing" ? "max-w-6xl" : "max-w-3xl")}>
+        <div className={"mx-auto flex flex-col gap-4 " + (exerciseType === "writing" || (readingBankEntry && Array.isArray(backendFeedback?.questionReview) && backendFeedback.questionReview.length > 0) ? "max-w-6xl" : "max-w-3xl")}>
           {exerciseType === "writing" ? (
             <>
               <SubmissionRecap tier={tier} title={meta?.title || "Your story"} words={words} onNew={handleNew} />
               <FeedbackPanel tier={tier} gradeLabel={gradeLabel} country={country} interest={feedbackInterest} confidence={confidenceWriting} motivation={motivation} seed={words}
                 feedback={backendFeedback} submissionId={submissionId} session={session} backendLive={backendLive} submittedText={text} onSeePlans={onSeePlans} />
             </>
+          ) : readingBankEntry && Array.isArray(backendFeedback?.questionReview) && backendFeedback.questionReview.length > 0 ? (
+            <ReadingFeedbackPanel tier={tier} country={country} interest={feedbackInterest} confidence={confidenceReading} motivation={motivation} score={readingScore} totalQ={qAutoCount(readingQuestions)}
+              feedback={backendFeedback} submissionId={submissionId} session={session} backendLive={backendLive}
+              questions={readingQuestions} answers={answers} bank={readingBankEntry} onNew={handleNew} />
           ) : readingBankEntry ? (
             <>
               <ReadingExercise
