@@ -86,7 +86,7 @@ async function generateAndValidate(prompt, tier, country, gradeLabel, submittedT
     // otherwise good piece of feedback (the app simply doesn't show it).
     // The same goes for the Premium full rewrite ("revisedStory"): the app falls
     // back to the fragment-by-fragment revision when it is absent.
-    const bonusOnly = check.issues.length > 0 && check.issues.every((issue) => /^(growNext|revisedStory|modelResponse|modelFramework|revisedFramework|readingStrategy)\b/.test(issue));
+    const bonusOnly = check.issues.length > 0 && check.issues.every((issue) => /^(growNext|revisedStory|modelResponse|modelFramework|revisedFramework|readingStrategy|sentences are too long)/.test(issue));
     const growNextBad = check.issues.some((issue) => /^growNext\b/.test(issue));
     if (lastAttempt && attempt.parsed && bonusOnly && (!growNextBad || attempt.parsed.growNext)) {
       if (growNextBad) delete attempt.parsed.growNext;

@@ -594,3 +594,18 @@ test("end to end (Australia, Year 3): that rewrite no longer turns a good respon
   assert.equal(prompts.length, 1, "no retries needed");
   assert.equal(res.body.feedback.highlights.length, 3);
 });
+
+// ------------------------------------------------------------ small things must not fail the whole feedback
+
+test("a glow and grow whose sentences run a little long are delivered on the last attempt instead of failing (found live on a Free Year 5 piece)", async () => {
+  const fam = { country: "🇦🇺 Australia", gradeLabel: "Year 3", tier: "elementary" };
+  const long = "You wrote a really lively opening sentence that told the reader exactly where the narrator was running and why they were in such a hurry, which is a lovely thing to do in a story. ".repeat(2).trim();
+  const { res, prompts } = await runWeak({ ...fam, text: KIDS_STORY, extra: { glow: long.replace("You wrote", "You wrote, matching " + standardToken(fam.country, fam.tier, fam.gradeLabel) + ", ") } });
+  assert.equal(res.statusCode, 200, JSON.stringify(res.body).slice(0, 300));
+  assert.equal(prompts.length, 3, "the model is asked three times first");
+});
+
+test("the function that grades a submission is allowed 60 seconds, matching the time guard", () => {
+  const cfg = JSON.parse(require("node:fs").readFileSync(require("node:path").join(__dirname, "..", "vercel.json"), "utf8"));
+  assert.equal(cfg.functions["api/submit.js"].maxDuration, 60);
+});

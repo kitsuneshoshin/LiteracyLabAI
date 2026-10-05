@@ -12,6 +12,9 @@
   "functions": {
     "api/email.js": {
       "maxDuration": 60
+    },
+    "api/submit.js": {
+      "maxDuration": 60
     }
   },
   "crons": [

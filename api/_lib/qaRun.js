@@ -70,7 +70,7 @@ function buildSample(s, kind) {
 // records BOTH whether the first attempt was right and what the customer would
 // actually have been given. Never throws: a failure is a result, not a crash.
 const MAX_ATTEMPTS = 3;
-const BONUS_ISSUE = /^(growNext|revisedStory|modelResponse|modelFramework|revisedFramework|readingStrategy)\b/;
+const BONUS_ISSUE = /^(growNext|revisedStory|modelResponse|modelFramework|revisedFramework|readingStrategy|sentences are too long)/;
 
 // A run has a time budget (the host stops a function after 60 seconds, and a run that is
 // killed saves nothing). A sample that cannot finish another attempt in time stops and is
