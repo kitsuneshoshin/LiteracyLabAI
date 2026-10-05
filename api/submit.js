@@ -307,7 +307,7 @@ module.exports = async function handler(req, res) {
           answers, score, totalQuestions, capabilities: caps, targets,
           targetNames: targets.map((t) => t.name),
         });
-        result = await generateAndValidate(llmPrompt, existing.tier, existing.country, existing.grade_label, undefined, score, caps, undefined, { passage: bank.passage, questionCount: totalQuestions, questions: bank.questions, answers });
+        result = await generateAndValidate(llmPrompt, existing.tier, existing.country, existing.grade_label, undefined, score, caps, undefined, { passage: bank.passage, questionCount: bank.questions.length, questions: bank.questions, answers });
       } catch (genErr) {
         await releaseClaim(supabase, submissionId);
         throw genErr;

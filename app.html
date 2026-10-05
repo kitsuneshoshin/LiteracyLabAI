@@ -3780,7 +3780,7 @@ const qAnswerText = (q, a) => (qStyle(q) === "short" ? (qIsAnswered(q, a) ? a.tr
 const qIsAuto = (q) => qStyle(q) !== "short";
 const qAutoCount = (questions) => (questions || []).filter(qIsAuto).length;
 const qCorrectText = (q) => (q && q.correct != null ? (Array.isArray(q.correct) && qStyle(q) === "order" ? q.correct.map((j, k) => (k + 1) + ". " + ((q.items || [])[j] ?? "?")).join("  ") : qText(q, q.correct)) : "");
-const Q_STYLE_NAME = { short: "Written answer (marked by Premium feedback)", mc: "Multiple choice", tfng: "True, false or not given", evidence: "Part B: which line proves it?", order: "Put in order", match: "Match each word to its meaning", cloze: "Fill the gap" };
+const Q_STYLE_NAME = { short: "Written answer", mc: "Multiple choice", tfng: "True, false or not given", evidence: "Part B: which line proves it?", order: "Put in order", match: "Match each word to its meaning", cloze: "Fill the gap" };
 
 function choiceStyle(revealed, selected, isCorrect) {
   let borderColor = "var(--border)", bg = "var(--surface)";
@@ -3807,7 +3807,7 @@ function ReadingQuestion({ q, qi, answer, setAnswer, revealed, disabled }){
           onChange={(e) => setAnswer(e.target.value)} placeholder="Write one to three sentences. Use the passage to support your answer."
           className="focus-ring w-full rounded-xl border px-3.5 py-2.5 text-sm font-read leading-relaxed"
           style={{ borderColor: "var(--border)", background: "var(--surface)", color: "var(--ink)", resize: "vertical" }} />
-        <div className="text-xs mt-1" style={{ color: "var(--ink-soft)" }}>Optional. Marked out of {q.marks} when you check your understanding. {words} {words === 1 ? "word" : "words"}</div>
+        {!revealed && <div className="text-xs mt-1" style={{ color: "var(--ink-soft)" }}>Optional. Marked out of {q.marks} when you check your understanding. {words} {words === 1 ? "word" : "words"}</div>}
       </div>
     );
   }

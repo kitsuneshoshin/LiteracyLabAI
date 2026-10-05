@@ -399,7 +399,9 @@ function buildReadingPrompt({ tier, country, gradeLabel, interest, confidenceRea
     const chosen = answers[i];
     const isCorrect = QT.isRight(q, chosen);
     const style = QT.STYLE_LABEL[QT.styleOf(q)] || "multiple choice";
-    if (!QT.isAuto(q)) return `Q${i + 1} [short written answer, not part of the score above - marked in the SHORT ANSWER MARKING section]: "${QT.describeForPrompt(q)}"`;
+    if (!QT.isAuto(q)) return caps.deepFeedback
+      ? `Q${i + 1} [short written answer, not part of the score above - marked in the SHORT ANSWER MARKING section]: "${QT.describeForPrompt(q)}"`
+      : `Q${i + 1} [optional written answer, not marked on this plan and not part of the score above]: "${q.q}"`;
     return `Q${i + 1} [${style}]: "${QT.describeForPrompt(q)}" — student answered "${QT.answerText(q, chosen)}" (${isCorrect ? "CORRECT" : `INCORRECT, correct answer was "${QT.correctText(q)}"`})`;
   }).join("\n");
 
@@ -419,7 +421,7 @@ ${MOTIVATION_NOTE[motivation] || ""}
 ${standardsClause(country, tier, gradeLabel)}
 ${targetsClause(targetNames)}
 ${deepFeedbackClause(caps.deepFeedback)}
-${wantsExam ? examTechniqueClause({ tier, targets, kind: "reading" }) : ""}${questionReviewClause(questions.length, interest)}${shortAnswerClause(questions, answers)}${TECH.readingStrategyClause(tier)}${TECH.vocabTrickClause(tier)}
+${wantsExam ? examTechniqueClause({ tier, targets, kind: "reading" }) : ""}${questionReviewClause(questions.length, interest)}${caps.deepFeedback ? shortAnswerClause(questions, answers) : ""}${TECH.readingStrategyClause(tier)}${TECH.vocabTrickClause(tier)}
 
 ${workedExample({ score: false, spelling: false })}
 
@@ -436,7 +438,7 @@ Respond with ONLY a JSON object (no markdown fences, no commentary) with exactly
   "glowTarget": "the exact skill area name from the given list that the glow demonstrates",
   "growTarget": "the exact skill area name from the given list that the grow is building towards"${caps.deepFeedback ? ',\n  "growNext": "ONE further, harder step: the next level of the same skill as the main grow (or the very next skill), as a concrete action for their next piece that quotes a short verbatim fragment of their own work in quotation marks - no analogy, no games or projects, not a restatement."' : ""}${wantsExam ? `,\n${examJsonShape(targets)}` : ""},
 ${questionReviewShape(questions.length)},
-${shortAnswerShape(questions)}${TECH.readingStrategyShape()}
+${caps.deepFeedback ? shortAnswerShape(questions) : ""}${TECH.readingStrategyShape()}
 }`;
 }
 
