@@ -431,6 +431,20 @@ function addsPunctuationAlreadyThere(item, submittedText) {
   }
 }
 
+// A "grow" highlight whose suggested rewrite just repeats its quote, or restates wording that is
+// elsewhere in the student's text, is dropped instead of failing the whole response (found live:
+// one such suggestion rejected an entire Australian Year 3 story three times running). Only done
+// while at least two highlights remain; otherwise the validator still reports it.
+function dropRestatingHighlights(parsed, submittedText) {
+  if (!parsed || !Array.isArray(parsed.highlights) || !submittedText) return parsed;
+  const text = normalizeForMatch(submittedText);
+  const bad = (h) => h && h.type === "grow" && checkString(h.quote, 1, 100000) && checkString(h.revision, 1, 100000) &&
+    (foldLookalikes(h.revision) === foldLookalikes(h.quote) || revisionDuplicatesExistingText(h.revision, text, normalizeForMatch(h.quote)));
+  const kept = parsed.highlights.filter((h) => !bad(h));
+  if (kept.length >= 2 && kept.length < parsed.highlights.length) parsed.highlights = kept;
+  return parsed;
+}
+
 // Words the spelling check lists as misspelled (in the quote, not in its fix).
 function misspeltWords(parsed) {
   const out = new Set();
@@ -774,4 +788,4 @@ function validateWritingPrompt(parsed, { tier }) {
   return { ok: issues.length === 0, issues };
 }
 
-module.exports = { repairResponses, dropGlowsQuotingMisspellings, repairZeroScoreGlow, repairReadingExamEvidence, validateFeedback, validatePassage, validateWritingPrompt, resolveTarget, dropInvalidSpellingGrammar, sanitizeQuestionReview, stripUngrantedSections, MAX_AVG_WORDS_PER_SENTENCE };
+module.exports = { dropRestatingHighlights, repairResponses, dropGlowsQuotingMisspellings, repairZeroScoreGlow, repairReadingExamEvidence, validateFeedback, validatePassage, validateWritingPrompt, resolveTarget, dropInvalidSpellingGrammar, sanitizeQuestionReview, stripUngrantedSections, MAX_AVG_WORDS_PER_SENTENCE };

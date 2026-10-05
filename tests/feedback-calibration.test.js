@@ -548,3 +548,49 @@ test("time guard: when another full attempt could not finish within the function
     Date.now = realNow;
   }
 });
+
+// ------------------------------------------------------------ one bad suggested rewrite must not sink the feedback
+
+const { dropRestatingHighlights } = require("../api/_lib/validate");
+
+const KIDS_STORY = "I runned to the fig tree as fast as my feets could go! Underneath the big roots there was a glowing shiney box. It had a weird keyhole shaped like a star. I was so exited I almost droped my apple juice everywhere.\n\nI decided to open the box using a pointy stick I found on the ground. When it popped open with a loud CLICK a tiny golden compass floated up into the air. It didn't point North though it pointed right towards the principal office!\n\nBecause I choosed to open the box instead of telling a teacher, now me and my best friend gotta sneak past the lunch duty guards to follow the compass. This changed my whole boring Monday into a top secret spy mission that is super fun!";
+
+test("a suggested rewrite that restates wording from elsewhere is dropped, the other highlights stay", () => {
+  const parsed = { highlights: [
+    { quote: "a glowing shiney box", type: "glow", note: "Good detail." },
+    { quote: "a weird keyhole shaped like a star", type: "glow", note: "Vivid." },
+    { quote: "I runned to the fig tree", type: "grow", note: "Past tense.", revision: "I ran to the fig tree" },
+    { quote: "It had a weird keyhole shaped like a star.", type: "grow", note: "Join.", revision: "It had a keyhole, so I decided to open the box using a pointy stick I found." },
+  ] };
+  dropRestatingHighlights(parsed, KIDS_STORY);
+  assert.equal(parsed.highlights.length, 3);
+  assert.ok(parsed.highlights.every((h) => h.type === "glow" || /I ran to/.test(h.revision)));
+});
+
+test("a rewrite identical to its quote is dropped too, but never down to fewer than two highlights", () => {
+  const two = { highlights: [
+    { quote: "a glowing shiney box", type: "glow", note: "Good." },
+    { quote: "I runned to the fig tree", type: "grow", note: "x", revision: "I runned to the fig tree" },
+  ] };
+  dropRestatingHighlights(two, KIDS_STORY);
+  assert.equal(two.highlights.length, 2, "the validator still reports it, since dropping would leave fewer than two");
+  const three = { highlights: [...two.highlights, { quote: "my apple juice", type: "glow", note: "Fun." }] };
+  dropRestatingHighlights(three, KIDS_STORY);
+  assert.equal(three.highlights.length, 2);
+  assert.ok(three.highlights.every((h) => h.type === "glow"));
+});
+
+test("end to end (Australia, Year 3): that rewrite no longer turns a good response into 'Couldn't generate feedback'", async () => {
+  const fam = { country: "🇦🇺 Australia", gradeLabel: "Year 3", tier: "elementary" };
+  const out = modelOutput({ ...fam, text: KIDS_STORY });
+  const hs = [
+    { quote: "I runned to the fig tree", type: "glow", note: "A strong, fast start." },
+    { quote: "a loud CLICK", type: "glow", note: "A sound the reader can hear." },
+    { quote: "my feets", type: "grow", note: "Plural of foot.", revision: "my feet" },
+    { quote: "a top secret spy mission", type: "grow", note: "Sharper ending.", revision: "to open the box using a pointy stick, and a secret spy mission" },
+  ];
+  const { res, prompts } = await runWeak({ ...fam, text: KIDS_STORY, extra: { highlights: hs, revisedStory: KIDS_STORY.replace("runned", "ran"), revisedFramework: [{ part: "Point", text: "I ran to the fig tree as fast as my feets could go!", note: "This sentence opens with a clear point." }], frameworkTip: out.frameworkTip } });
+  assert.equal(res.statusCode, 200, JSON.stringify(res.body).slice(0, 300));
+  assert.equal(prompts.length, 1, "no retries needed");
+  assert.equal(res.body.feedback.highlights.length, 3);
+});

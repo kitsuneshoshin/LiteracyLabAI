@@ -7,7 +7,7 @@ const { standardsFor } = require("./_lib/curriculum");
 const { targetsForGrade, examTargetsFor } = require("./_lib/masteryTargets");
 const RESP = require("./_lib/responses");
 const { frameworkForGenre, resolveGenre } = require("./_lib/writingFrameworks");
-const { repairResponses, dropGlowsQuotingMisspellings, validateFeedback, resolveTarget, dropInvalidSpellingGrammar, sanitizeQuestionReview, repairZeroScoreGlow, repairReadingExamEvidence, stripUngrantedSections } = require("./_lib/validate");
+const { dropRestatingHighlights, repairResponses, dropGlowsQuotingMisspellings, validateFeedback, resolveTarget, dropInvalidSpellingGrammar, sanitizeQuestionReview, repairZeroScoreGlow, repairReadingExamEvidence, stripUngrantedSections } = require("./_lib/validate");
 const { checkRateLimit } = require("./_lib/rateLimit");
 const { writingLimitsForGrade } = require("./_lib/writingLimits");
 const { assessLength, calibrateWriting, applyCorrections, repairExamEvidence } = require("./_lib/calibrate");
@@ -64,6 +64,7 @@ async function generateAndValidate(prompt, tier, country, gradeLabel, submittedT
     const lastAttempt = i === MAX_ATTEMPTS || (Date.now() - startedAt) + (Date.now() - attemptStarted) * 1.2 > TIME_BUDGET_MS;
     if (capabilities?.spellingGrammar !== false) dropInvalidSpellingGrammar(attempt.parsed, submittedText);
     if (capabilities?.spellingGrammar !== false) dropGlowsQuotingMisspellings(attempt.parsed);
+    if (submittedText) dropRestatingHighlights(attempt.parsed, submittedText);
     if (submittedText && capabilities?.deepFeedback) repairResponses(attempt.parsed, genre, tier);
     if (submittedText) repairExamEvidence(attempt.parsed);
     if (readingScore === 0) repairZeroScoreGlow(attempt.parsed);
