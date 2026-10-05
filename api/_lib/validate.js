@@ -504,29 +504,31 @@ function dropInvalidSpellingGrammar(parsed, submittedText) {
 // "one gap sinks everything" failure the exam-technique and spelling
 // sections both hit) - the pre-numbered template in the prompt is what keeps
 // the array complete in practice.
-// The marking of the one short written answer. The mark ceiling and a blank answer are decided by
-// the server, not the model: outOf is always the question's marks, awarded is clamped to it, and
-// nothing written scores 0 whatever the model said.
+// The marking of the one short written answer. The model only says WHICH key ideas the student made;
+// the server turns that into marks (one per idea, never above the question's marks), so a model can
+// neither award more than the maximum nor contradict its own list. Nothing written scores 0.
 function repairShortAnswer(parsed, shortQ, written) {
   if (!parsed || !shortQ) return parsed;
   const sa = parsed.shortAnswer;
   if (!sa || typeof sa !== "object") return parsed;
-  sa.outOf = shortQ.marks;
-  const n = Number(sa.awarded);
-  sa.awarded = Number.isFinite(n) ? Math.max(0, Math.min(shortQ.marks, Math.round(n))) : sa.awarded;
-  if (!(typeof written === "string" && written.trim().length >= 2)) {
-    sa.awarded = 0; sa.hit = [];
-    sa.comment = "You did not write an answer to this one. Have a go next time, even a short answer earns marks.";
-    sa.missed = shortQ.keyPoints.slice();
+  const kp = Array.isArray(shortQ.keyPoints) ? shortQ.keyPoints : [];
+  const blank = !(typeof written === "string" && written.trim().length >= 2);
+  if (Array.isArray(sa.made) || blank) {
+    const made = blank ? [] : [...new Set(sa.made.map(Number).filter((n) => Number.isInteger(n) && n >= 1 && n <= kp.length))].sort((x, y) => x - y);
+    sa.made = made;
+    sa.awarded = Math.min(shortQ.marks, made.length);
+    sa.outOf = shortQ.marks;
+    sa.hit = made.map((n) => kp[n - 1]);
+    sa.missed = kp.filter((_, i) => !made.includes(i + 1));
+    if (blank) sa.comment = "You did not write an answer to this one. Have a go next time, even a short answer earns marks.";
   }
-  for (const k of ["hit", "missed"]) sa[k] = Array.isArray(sa[k]) ? sa[k].filter((x) => typeof x === "string" && x.trim()).map((x) => x.trim().slice(0, 200)).slice(0, 4) : [];
   return parsed;
 }
 function validateShortAnswer(parsed, shortQ, issues) {
   if (!shortQ) return;
   const sa = parsed?.shortAnswer;
   if (!sa || typeof sa !== "object") { issues.push("shortAnswer is missing"); return; }
-  if (!Number.isInteger(sa.awarded) || sa.awarded < 0 || sa.awarded > shortQ.marks) issues.push(`shortAnswer.awarded must be a whole number from 0 to ${shortQ.marks}`);
+  if (!Array.isArray(sa.made)) issues.push("shortAnswer.made must be a list of the numbers of the key ideas the student made");
   if (!checkString(sa.comment, 10, 450)) issues.push("shortAnswer.comment is missing, too short, or too long");
 }
 

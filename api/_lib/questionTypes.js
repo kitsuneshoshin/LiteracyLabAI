@@ -212,7 +212,7 @@ function validateQuestions(questions, { template, passage } = {}, issues) {
         if (!Number.isInteger(q.marks) || q.marks < 1 || q.marks > 4) issues.push(`${at}.marks must be an integer from 1 to 4`);
         if (!okStr(q.modelAnswer, 15, 700)) issues.push(`${at}.modelAnswer is missing or an unreasonable length`);
         const kp = q.keyPoints;
-        if (!isArr(kp) || kp.length < 2 || kp.length > 4 || !kp.every((k) => okStr(k, 3, 180))) issues.push(`${at}.keyPoints must list 2 to 4 short ideas a good answer includes`);
+        if (!isArr(kp) || kp.length !== q.marks || !kp.every((k) => okStr(k, 3, 180))) issues.push(`${at}.keyPoints must list exactly ${q.marks} short ideas a good answer includes (one for each mark)`);
         if (okStr(q.q, 5, 300) && !/\?\s*$/.test(q.q.trim()) && !/^(explain|describe|why|how|what|which|give|say|write)\b/i.test(q.q.trim())) issues.push(`${at}.q must be a question or instruction`);
         break;
       }
@@ -281,7 +281,7 @@ const CLOZE_GAPS = { early: 1, elementary: 1, middle: 2, high: 2 };
 
 function styleRule(style, n, tier) {
   switch (style) {
-    case "short": return `"q": ONE open question that needs a written answer of one to three sentences and asks the student to explain, infer or support a view using the passage (for example "Why does ... ? Use evidence from the passage." or "How does the writer show ...?"). "modelAnswer": a strong answer of ${tier === "elementary" ? "one or two" : "two or three"} sentences, written the way a good student of this age would write it. "keyPoints": 2 or 3 short ideas (under 18 words each) that a correct answer should make, drawn from the passage - these are what the marking is based on. The question must have a clear, passage-supported answer, not a matter of opinion.`;
+    case "short": return `"q": ONE open question that needs a written answer of one to three sentences and asks the student to explain, infer or support a view using the passage (for example "Why does ... ? Use evidence from the passage." or "How does the writer show ...?"). "modelAnswer": a strong answer of ${tier === "elementary" ? "one or two" : "two or three"} sentences, written the way a good student of this age would write it. "keyPoints": exactly ${SHORT_MARKS[tier] || 2} short ideas (under 18 words each), one for each mark, that a correct answer should make, drawn from the passage and clearly different from each other - the marking is based on these. The question must have a clear, passage-supported answer, not a matter of opinion.`;
     case "mc": return '"q": a question about the passage, "options": exactly 4 answer choices, "correct": the index (0 to 3) of the one clearly correct choice. The other 3 must be plausible to a careless reader but clearly wrong to a careful one.';
     case "tfng": return '"q": ONE statement about the passage (a statement, not a question). "correct": 0 if the passage clearly says it is true, 1 if the passage clearly says the opposite, 2 if the passage simply does not say either way. Make "Not given" mean the passage really is silent, not that the answer is hard.';
     case "evidence": return `"q": "Which line from the passage best supports your answer to question ${n - 1}?" - "options": exactly 4 SHORT quotations (under 25 words each), each copied EXACTLY, word for word, from the passage; one is the best support for the correct answer to question ${n - 1}, the others come from elsewhere in the passage. "correct": the index (0 to 3) of the best one.`;

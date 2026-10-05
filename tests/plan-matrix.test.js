@@ -545,7 +545,7 @@ for (const plan of PLANS) {
         // when the prompt asks for a written answer too, it adds one.
         generate: async (prompt) => {
           const copy = JSON.parse(JSON.stringify(parsed));
-          if (/short written answer/.test(prompt)) copy.questions.push({ type: "short", q: "Why did the volcano matter to her?", modelAnswer: "It showed she would not give up, because she rebuilt it after it was knocked over.", keyPoints: ["she did not give up", "she rebuilt it"] });
+          if (/short written answer/.test(prompt)) copy.questions.push({ type: "short", q: "Why did the volcano matter to her?", modelAnswer: "It showed she would not give up, because she rebuilt it after it was knocked over.", keyPoints: ["she did not give up", "she rebuilt it", "it mattered to her"].slice(0, tier === "elementary" ? 2 : 3) });
           return { parsed: copy, modelUsed: "stub" };
         },
       });

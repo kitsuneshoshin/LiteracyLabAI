@@ -48,7 +48,7 @@ function modelOutput(shortAnswer, reviews = 6) {
   if (shortAnswer) out.shortAnswer = shortAnswer;
   return out;
 }
-const MARKED = { awarded: 1, outOf: 2, comment: "You gave one clear reason, nicely put. Add what had happened by ten to earn the second mark.", hit: ["she wanted people to notice the stall"], missed: ["only two people had stopped by ten"] };
+const MARKED = { made: [1], comment: "You gave one clear reason, nicely put. Add what had happened by ten to earn the second mark." };
 
 async function submit({ plan = "premium", answers, script, questions }) {
   const written = [], prompts = [];
@@ -64,22 +64,26 @@ test("Premium: the written answer is marked and shown, the instant score stays o
   assert.equal(res.body.totalQuestions, 5, "the written answer is not counted in the instant score");
   assert.equal(res.body.feedback.shortAnswer.awarded, 1);
   assert.equal(res.body.feedback.shortAnswer.outOf, 2);
+  assert.deepEqual(res.body.feedback.shortAnswer.hit, [SHORT.keyPoints[0]]);
+  assert.deepEqual(res.body.feedback.shortAnswer.missed, [SHORT.keyPoints[1]]);
   assert.equal(written[0].score, 5);
   assert.equal(written[0].total_questions, 5);
   assert.equal(res.body.questions.length, 6, "the key, including the model answer, is revealed after marking");
   assert.ok(res.body.questions[5].modelAnswer);
 });
 
-test("the server decides the mark ceiling: marks above the maximum, or a wrong outOf, are corrected", async () => {
-  const { res } = await submit({ answers: [...RIGHT, "She wanted people to see her cakes."], script: modelOutput({ ...MARKED, awarded: 7, outOf: 10 }) });
+test("the server decides the marks: the model's own mark and total are ignored, and ideas that do not exist are not counted", async () => {
+  const { res } = await submit({ answers: [...RIGHT, "She wanted people to see her cakes."], script: modelOutput({ ...MARKED, made: [1, 2, 9], awarded: 7, outOf: 10 }) });
   assert.equal(res.statusCode, 200, JSON.stringify(res.body));
   assert.equal(res.body.feedback.shortAnswer.outOf, 2);
   assert.equal(res.body.feedback.shortAnswer.awarded, 2);
+  const none = await submit({ answers: [...RIGHT, "Cakes are nice."], script: modelOutput({ ...MARKED, made: [], awarded: 2 }) });
+  assert.equal(none.res.body.feedback.shortAnswer.awarded, 0);
 });
 
 test("no answer written scores zero, whatever the model says, and is not charged against the instant score", async () => {
   for (const blank of [undefined, null, "", "   "]) {
-    const { res } = await submit({ answers: [...RIGHT, blank], script: modelOutput({ ...MARKED, awarded: 2 }) });
+    const { res } = await submit({ answers: [...RIGHT, blank], script: modelOutput({ ...MARKED, made: [1, 2] }) });
     assert.equal(res.statusCode, 200, JSON.stringify(res.body));
     assert.equal(res.body.feedback.shortAnswer.awarded, 0);
     assert.deepEqual(res.body.feedback.shortAnswer.hit, []);
@@ -108,7 +112,7 @@ test("if the model never marks the written answer, the student still gets the re
 });
 
 test("a marked answer with a non-numeric mark is repaired or dropped, never shown as garbage", async () => {
-  const { res } = await submit({ answers: [...RIGHT, "She wanted more customers."], script: modelOutput({ awarded: "lots", comment: "Good work on this one, keep it up." }) });
+  const { res } = await submit({ answers: [...RIGHT, "She wanted more customers."], script: modelOutput({ made: "lots", comment: "Good work on this one, keep it up." }) });
   assert.equal(res.statusCode, 200, JSON.stringify(res.body));
   const sa = res.body.feedback.shortAnswer;
   assert.ok(sa === undefined || (Number.isInteger(sa.awarded) && sa.awarded >= 0 && sa.awarded <= 2), JSON.stringify(sa));

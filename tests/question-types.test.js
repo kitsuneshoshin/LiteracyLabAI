@@ -32,7 +32,7 @@ function proseOf(words) {
 
 // What a model would send for each style, in its simple shape.
 const RAW = {
-  short: () => ({ q: "Why did Mia move her sign closer to the road?", modelAnswer: "She moved it so that people walking past would notice the stall, because by ten only two people had stopped.", keyPoints: ["she wanted more people to notice the stall", "only two people had stopped by ten"] }),
+  short: (tier) => ({ q: "Why did Mia move her sign closer to the road?", modelAnswer: "She moved it so that people walking past would notice the stall, because by ten only two people had stopped.", keyPoints: ["she wanted more people to notice the stall", "only two people had stopped by ten", "a bigger price made the stall clearer"].slice(0, { elementary: 2, middle: 3, high: 3 }[tier] || 3) }),
   mc: () => ({ q: "How did Mia feel after ten o'clock?", options: ["Worried about sales", "Delighted by the crowd", "Cross with her friend", "Sleepy and bored"], correct: 0 }),
   tfng: () => ({ q: "Mia sold every cake by noon.", correct: 0 }),
   evidence: () => ({ q: "Which line from the passage best supports your answer to the question before?", options: ["By ten, only two people had stopped, and both only looked.", "Mia set up her stall by the gate at nine.", "Soon a queue had formed, and by noon every cake was gone.", "She moved the sign closer to the road and wrote the price in bigger letters."], correct: 0 }),
@@ -403,32 +403,41 @@ test("the short question is checked for a model answer, key ideas and a sensible
   const issues = [];
   QT.validateQuestions([shortQ()], { template: ["short"] }, issues);
   assert.deepEqual(issues, []);
-  const bad = { ...shortQ(), keyPoints: ["only one"], modelAnswer: "short" };
+  const bad = { ...shortQ(), keyPoints: ["only one"], modelAnswer: "short" }; // three marks need three key ideas
   const bad2 = [];
   QT.validateQuestions([bad], { template: ["short"] }, bad2);
   assert.ok(bad2.some((i) => /keyPoints/.test(i)) && bad2.some((i) => /modelAnswer/.test(i)));
 });
 
-test("the server, not the model, decides the mark ceiling, and a blank answer scores nothing", () => {
-  const { repairShortAnswer, stripUngrantedSections, validateFeedback } = require("../api/_lib/validate");
-  const q = shortQ();
-  const over = { shortAnswer: { awarded: 9, outOf: 99, comment: "Good, you saw why she moved it.", hit: ["noticed"], missed: [] } };
-  repairShortAnswer(over, q, "She wanted people to see her stall.");
-  assert.equal(over.shortAnswer.outOf, 3);
-  assert.equal(over.shortAnswer.awarded, 3);
-  const blank = { shortAnswer: { awarded: 2, outOf: 3, comment: "A fine answer.", hit: ["x"], missed: [] } };
-  repairShortAnswer(blank, q, "   ");
+test("the server turns which key ideas were made into the marks: never above the maximum, and a blank answer scores nothing", () => {
+  const { repairShortAnswer, stripUngrantedSections } = require("../api/_lib/validate");
+  const q3 = shortQ(); // three marks, three key ideas
+  const claim = (made) => ({ shortAnswer: { made, comment: "Good, you saw why she moved it.", awarded: 99, outOf: 99, hit: ["x"], missed: [] } });
+  const two = claim([1, 3]); repairShortAnswer(two, q3, "She wanted people to notice, and the price was clearer.");
+  assert.equal(two.shortAnswer.awarded, 2);
+  assert.equal(two.shortAnswer.outOf, 3);
+  assert.deepEqual(two.shortAnswer.hit, [q3.keyPoints[0], q3.keyPoints[2]], "what was made comes from the stored key ideas, not the model");
+  assert.deepEqual(two.shortAnswer.missed, [q3.keyPoints[1]]);
+  const junk = claim([2, 2, 2, 7, 0, -1, "3", 1.5, null]); repairShortAnswer(junk, q3, "An answer.");
+  assert.deepEqual(junk.shortAnswer.made, [2, 3], "repeats and out-of-range numbers are ignored");
+  assert.equal(junk.shortAnswer.awarded, 2);
+  const all = claim([1, 2, 3]); repairShortAnswer(all, q3, "Everything.");
+  assert.equal(all.shortAnswer.awarded, 3);
+  const none = claim([]); repairShortAnswer(none, q3, "Off topic.");
+  assert.equal(none.shortAnswer.awarded, 0);
+  assert.deepEqual(none.shortAnswer.missed, q3.keyPoints);
+  const blank = claim([1, 2, 3]); repairShortAnswer(blank, q3, "   ");
   assert.equal(blank.shortAnswer.awarded, 0);
   assert.deepEqual(blank.shortAnswer.hit, []);
-  assert.equal(blank.shortAnswer.missed.length, 2);
-  // a plan without deep feedback never gets a marked answer
-  const free = { shortAnswer: { awarded: 1 }, questionReview: [] };
+  assert.match(blank.shortAnswer.comment, /did not write an answer/);
+  const noList = { shortAnswer: { awarded: 3, comment: "Nice answer, well done indeed." } }; repairShortAnswer(noList, q3, "Something.");
+  assert.ok(!Array.isArray(noList.shortAnswer.made), "no list of ideas, no invented marks: left for the check to refuse");
+  const free = { shortAnswer: { made: [1] }, questionReview: [] };
   stripUngrantedSections(free, { capabilities: { deepFeedback: false }, kind: "reading" });
   assert.ok(!("shortAnswer" in free));
-  const writing = { shortAnswer: { awarded: 1 } };
+  const writing = { shortAnswer: { made: [1] } };
   stripUngrantedSections(writing, { capabilities: { deepFeedback: true }, kind: "writing" });
   assert.ok(!("shortAnswer" in writing));
-  assert.equal(typeof validateFeedback, "function");
 });
 
 test("the feedback prompt asks the model to mark the written answer against the key ideas and treats it as data", () => {
