@@ -70,6 +70,10 @@ const norm = (s) => String(s == null ? "" : s)
   .replace(/[‘’‚‛]/g, "'").replace(/[“”„‟]/g, '"')
   .replace(/[–—]/g, "-").replace(/…/g, "...").replace(/\s+/g, " ").trim().toLowerCase();
 
+// Quotes and words are checked ignoring capitals, punctuation, line breaks and the slashes a model puts
+// between poem lines: what matters is that the words really are in the passage, in that order.
+const loose = (s) => norm(s).replace(/[^a-z0-9]+/g, " ").trim();
+
 function shuffle(arr, rng = Math.random) {
   const a = arr.slice();
   for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rng() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
@@ -169,10 +173,13 @@ function normalizeQuestions(questions, template, rng = Math.random, tier) {
         return { type: "match", q: raw.q, items: pairs.map((p) => String(p.word)), options, correct: meanings.map((m) => options.indexOf(m)) };
       }
       case "cloze": {
-        const blanks = isArr(raw.blanks) ? raw.blanks : null;
-        if (!blanks || !blanks.every((b) => b && typeof b === "object" && "answer" in b)) return { type: "cloze", q: raw.q, text: raw.text, blanks: raw.blanks, correct: raw.correct };
+        let blanks = isArr(raw.blanks) ? raw.blanks : null;
+        const clozeText = typeof raw.text === "string" ? raw.text.replace(/_{3,}/g, "___") : raw.text;
+        if (!blanks || !blanks.every((b) => b && typeof b === "object" && "answer" in b)) return { type: "cloze", q: raw.q, text: clozeText, blanks: raw.blanks, correct: raw.correct };
+        const gaps = typeof clozeText === "string" ? clozeText.split("___").length - 1 : 0;
+        if (gaps >= 1 && blanks.length > gaps) blanks = blanks.slice(0, gaps);
         const sets = blanks.map((b) => shuffle([String(b.answer), ...(isArr(b.wrong) ? b.wrong.map(String) : [])], rng));
-        return { type: "cloze", q: raw.q || "Choose the best word for each gap.", text: raw.text, blanks: sets, correct: sets.map((opts, k) => opts.indexOf(String(blanks[k].answer))) };
+        return { type: "cloze", q: raw.q || "Choose the best word for each gap.", text: clozeText, blanks: sets, correct: sets.map((opts, k) => opts.indexOf(String(blanks[k].answer))) };
       }
       default: return { type: "mc", q: raw.q, options: raw.options, correct: raw.correct };
     }
@@ -187,7 +194,7 @@ const distinct = (list) => new Set(list.map((o) => norm(o))).size === list.lengt
 function validateQuestions(questions, { template, passage } = {}, issues) {
   const want = template || MC_FOUR;
   if (!isArr(questions) || questions.length !== want.length) { issues.push(`questions must be an array of exactly ${want.length} items`); return; }
-  const text = norm(passage);
+  const text = loose(passage);
   questions.forEach((q, i) => {
     const at = `questions[${i}]`;
     const style = want[i];
@@ -219,7 +226,7 @@ function validateQuestions(questions, { template, passage } = {}, issues) {
         break;
       case "evidence":
         if (optionList(1, 220, 4) && text) {
-          q.options.forEach((o, oi) => { if (okStr(o, 1, 220) && !text.includes(norm(o))) issues.push(`${at}.options[${oi}] must be a quote copied exactly from the passage`); });
+          q.options.forEach((o, oi) => { if (okStr(o, 1, 220) && !text.includes(loose(o))) issues.push(`${at}.options[${oi}] must be a quote copied exactly from the passage`); });
         }
         if (!Number.isInteger(q.correct) || q.correct < 0 || q.correct > 3) issues.push(`${at}.correct must be an integer from 0 to 3`);
         if (i === 0 || want[i - 1] !== "mc") issues.push(`${at} is "which line proves it" and must follow a multiple choice question`);
@@ -237,7 +244,7 @@ function validateQuestions(questions, { template, passage } = {}, issues) {
         if (n < 3 || n > 4 || !isArr(q.options) || q.options.length !== n) { issues.push(`${at}.pairs must list 3 or 4 word and meaning pairs`); break; }
         q.items.forEach((w, wi) => {
           if (!okStr(w, 1, 40)) issues.push(`${at} word ${wi + 1} is missing or an unreasonable length`);
-          else if (text && !text.includes(norm(w))) issues.push(`${at} word "${w}" must appear in the passage`);
+          else if (text && !text.includes(loose(w))) issues.push(`${at} word "${w}" must appear in the passage`);
         });
         q.options.forEach((m, mi) => { if (!okStr(m, 3, 100)) issues.push(`${at} meaning ${mi + 1} is missing or an unreasonable length`); });
         if (!distinct(q.items) || !distinct(q.options)) issues.push(`${at} has duplicate words or meanings`);
@@ -259,7 +266,7 @@ function validateQuestions(questions, { template, passage } = {}, issues) {
           else if (!Number.isInteger(c[bi]) || c[bi] < 0 || c[bi] > 3) issues.push(`${at} has an invalid gap key`);
           else filled += opts[c[bi]] + parts[bi + 1];
         });
-        if (text && !text.includes(norm(filled))) issues.push(`${at} sentence, with the right words in, must be copied exactly from the passage`);
+        if (text && !text.includes(loose(filled))) issues.push(`${at} sentence, with the right words in, must be copied exactly from the passage`);
         break;
       }
       default: break;

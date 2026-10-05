@@ -15,6 +15,9 @@
     },
     "api/submit.js": {
       "maxDuration": 60
+    },
+    "api/reading-passage.js": {
+      "maxDuration": 60
     }
   },
   "crons": [

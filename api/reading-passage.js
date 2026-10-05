@@ -24,6 +24,7 @@ const VALID_TIERS = ["early", "elementary", "middle", "high"];
 // is never turned away just because a fancier question style was hard to write.
 async function generateAndValidate(prompt, tier, opts = {}) {
   const { template, textType, fallbackPrompt } = opts;
+  const fallbackTemplate = opts.fallbackTemplate || QT.MC_FOUR;
   const rng = opts.rng || Math.random;
   const attemptWith = async (p, tpl) => {
     const attempt = await generateFeedbackJSON(p);
@@ -41,8 +42,8 @@ async function generateAndValidate(prompt, tier, opts = {}) {
 
   const lastIssues = r.check.issues;
   if (fallbackPrompt) {
-    const plain = await attemptWith(fallbackPrompt, QT.MC_FOUR);
-    if (plain.check.ok) { plain.attempt.parsed.questionStyles = QT.MC_FOUR; return plain.attempt; }
+    const plain = await attemptWith(fallbackPrompt, fallbackTemplate);
+    if (plain.check.ok) { plain.attempt.parsed.questionStyles = fallbackTemplate; return plain.attempt; }
     console.warn("Passage validation failed on the plain fallback:", plain.check.issues);
   }
 
@@ -123,8 +124,10 @@ module.exports = async function handler(req, res) {
       const template = withShort ? [...baseTemplate, "short"] : baseTemplate;
       const textType = QT.pickTextType(tier);
       const llmPrompt = buildReadingPassagePrompt({ tier, country, gradeLabel, textType, template });
-      const fallbackPrompt = buildReadingPassagePrompt({ tier, country, gradeLabel, textType, template: QT.MC_FOUR });
-      ({ parsed } = await generateAndValidate(llmPrompt, tier, { template, textType, fallbackPrompt }));
+      // If the styled plan keeps failing, fall back to plain multiple choice, keeping the written answer for Premium.
+      const fallbackTemplate = withShort ? [...QT.MC_FOUR, "short"] : QT.MC_FOUR;
+      const fallbackPrompt = buildReadingPassagePrompt({ tier, country, gradeLabel, textType, template: fallbackTemplate });
+      ({ parsed } = await generateAndValidate(llmPrompt, tier, { template, textType, fallbackPrompt, fallbackTemplate }));
       // A poem keeps its line breaks; prose is regrouped into paragraphs if the model sent one block.
       parsed.passage = textType.lines ? String(parsed.passage).replace(/\r\n/g, "\n").trim() : paragraphise(parsed.passage);
       parsed.textType = textType.name;

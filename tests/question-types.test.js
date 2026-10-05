@@ -290,8 +290,9 @@ test("if the styled questions keep failing, a plain multiple-choice version of t
   assert.equal(res.statusCode, 200, JSON.stringify(res.body).slice(0, 200));
   assert.equal(prompts.length, 3, "styled, styled with the problems listed, then plain");
   assert.ok(!/true, false or not given/.test(prompts[2]), "the last try asks for plain multiple choice");
-  assert.ok(res.body.questions.every((q) => q.type === "mc"));
-  assert.deepEqual(stored.content.generatedPassage.questionStyles, QT.MC_FOUR);
+  // Premium keeps its written answer even on the plain fallback
+  assert.deepEqual(res.body.questions.map((q) => q.type), [...QT.MC_FOUR, "short"]);
+  assert.deepEqual(stored.content.generatedPassage.questionStyles, [...QT.MC_FOUR, "short"]);
   // the same kind of text, so the student still gets the variety in text types
   assert.match(prompts[2].split("\n")[2], new RegExp("original (" + QT.TEXT_TYPES.middle.map((t) => t.name).join("|") + ")"));
 });
@@ -449,4 +450,26 @@ test("the feedback prompt asks the model to mark the written answer against the 
     questions: [mc], answers: [0], score: 1, totalQuestions: 1, targetNames: [], targets: [], capabilities: {},
   });
   assert.doesNotMatch(none, /SHORT ANSWER MARKING/);
+});
+
+// ------------------------------------------------------------ what real models get slightly wrong (seen on the live site)
+
+test("a quote or word counts as copied from the passage even if the capitals, punctuation or poem line breaks differ", () => {
+  const poem = "At dusk, the bus stop coughs up blue moths,\nand the streetlight learns my face by heart.\nI thought the night was a locked room.";
+  const q = (options, correct = 0) => [{ type: "evidence", q: "Which line best supports your answer?", options, correct }];
+  const check = (opts) => { const issues = []; QT.validateQuestions([{ type: "mc", q: "What is the claim?", options: ["a", "b", "c", "d"], correct: 0 }, ...q(opts)], { template: ["mc", "evidence"], passage: poem }, issues); return issues; };
+  assert.deepEqual(check(["the streetlight learns my face by heart", "At dusk, the bus stop coughs up blue moths", "I thought the night was a locked room", "and the streetlight learns my face by heart."]), []);
+  assert.deepEqual(check(["The streetlight / learns my face by heart", "At dusk the bus stop coughs up blue moths", "i thought the night was a locked room!", "Blue moths and the night"]).length, 1, "only the words that are not in that order are refused");
+  const wrong = check(["the river carried tin reflections", "At dusk, the bus stop coughs up blue moths", "I thought the night was a locked room", "and the streetlight learns my face by heart"]);
+  assert.ok(wrong.some((i) => /quote copied exactly/.test(i)));
+});
+
+test("a gap-fill sentence with fewer gaps than sets of choices is repaired, and any run of underscores is understood", () => {
+  const raw = { q: "Choose.", text: "Soon a ____ had formed, and by noon every cake was gone.", blanks: [{ answer: "queue", wrong: ["storm", "puddle", "melody"] }, { answer: "gone", wrong: ["warm", "tiny", "loud"] }] };
+  const [c] = QT.normalizeQuestions([raw], ["cloze"], seeded(2));
+  assert.equal(c.text, "Soon a ___ had formed, and by noon every cake was gone.");
+  assert.equal(c.blanks.length, 1);
+  const issues = [];
+  QT.validateQuestions([c], { template: ["cloze"], passage: PASSAGE_CORE }, issues);
+  assert.deepEqual(issues, []);
 });

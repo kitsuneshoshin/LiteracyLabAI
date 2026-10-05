@@ -528,7 +528,7 @@ for (const plan of PLANS) {
       assert.ok(res.body.prompt && res.body.title);
     });
 
-    test(`reading passage: ${plan} / ${tier} - generates 5 questions and never sends the answer key`, async () => {
+    test(`reading passage: ${plan} / ${tier} - generates 5 questions (plus one written answer where the plan has Premium feedback) and never sends the answer key`, async () => {
       const [lo, hi] = passageWordRange(tier);
       const passage = Array.from({ length: Math.round((lo + hi) / 2) }, (_, i) => `word${i}`).join(" ") + ".";
       const parsed = { title: "The Volcano", skill: "Inference", passage, questions: QUESTIONS.map((q, i) => ({ ...q, options: [`a${i}`, `b${i}`, `c${i}`, `d${i}`] })) };
@@ -541,12 +541,20 @@ for (const plan of PLANS) {
           if (did(q, "insert")) return { data: { id: "pass-new" }, error: null };
           return { data: null, error: null };
         },
-        generate: async () => ({ parsed: JSON.parse(JSON.stringify(parsed)), modelUsed: "stub" }),
+        // This stand-in only ever writes plain multiple choice, so the styled plan fails and the plain fallback is used;
+        // when the prompt asks for a written answer too, it adds one.
+        generate: async (prompt) => {
+          const copy = JSON.parse(JSON.stringify(parsed));
+          if (/short written answer/.test(prompt)) copy.questions.push({ type: "short", q: "Why did the volcano matter to her?", modelAnswer: "It showed she would not give up, because she rebuilt it after it was knocked over.", keyPoints: ["she did not give up", "she rebuilt it"] });
+          return { parsed: copy, modelUsed: "stub" };
+        },
       });
       const res = await call(h, { method: "POST", body: { tier, country: COUNTRY, gradeLabel: TIERS[tier], interest: "space", childId: "c1" } });
       assert.equal(res.statusCode, 200, JSON.stringify(res.body));
-      assert.equal(res.body.questions.length, 5);
-      assert.ok(res.body.questions.every((q) => q.correct === undefined), "the answer key reached the browser");
+      const wantsWritten = ["premium", "pro", "admin"].includes(plan) && tier !== "early";
+      assert.equal(res.body.questions.length, wantsWritten ? 6 : 5);
+      assert.equal(res.body.questions.filter((q) => q.type === "short").length, wantsWritten ? 1 : 0);
+      assert.ok(res.body.questions.every((q) => q.correct === undefined && q.modelAnswer === undefined && q.keyPoints === undefined), "the answer key reached the browser");
     });
   }
 }
