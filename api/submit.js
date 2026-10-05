@@ -7,6 +7,7 @@ const { standardsFor } = require("./_lib/curriculum");
 const { targetsForGrade, examTargetsFor } = require("./_lib/masteryTargets");
 const RESP = require("./_lib/responses");
 const TECH = require("./_lib/techniques");
+const QT = require("./_lib/questionTypes");
 const { frameworkFor } = require("./_lib/writingFrameworks");
 const { dropRestatingHighlights, repairResponses, dropGlowsQuotingMisspellings, validateFeedback, resolveTarget, dropInvalidSpellingGrammar, sanitizeQuestionReview, repairZeroScoreGlow, repairReadingExamEvidence, stripUngrantedSections } = require("./_lib/validate");
 const { checkRateLimit } = require("./_lib/rateLimit");
@@ -285,7 +286,7 @@ module.exports = async function handler(req, res) {
       }
 
       let score = 0;
-      bank.questions.forEach((q, i) => { if (answers[i] === q.correct) score += 1; });
+      score = QT.scoreAnswers(bank.questions, answers);
       const totalQuestions = bank.questions.length;
 
       const targets = targetsForGrade(existing.country, existing.grade_label, existing.tier).targets;

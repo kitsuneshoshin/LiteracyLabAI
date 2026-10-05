@@ -176,7 +176,7 @@ function repairZeroScoreGlow(parsed) {
 // with the real, checkable facts: which questions were answered wrongly.
 function repairReadingExamEvidence(parsed, questions, answers) {
   if (!parsed || !Array.isArray(parsed.examTechnique) || !Array.isArray(questions)) return parsed;
-  const wrong = questions.map((q, i) => (answers && answers[i] === q.correct ? null : i + 1)).filter(Boolean);
+  const wrong = questions.map((q, i) => (answers && require("./questionTypes").isRight(q, answers[i]) ? null : i + 1)).filter(Boolean);
   const fact = wrong.length === 0
     ? "Every question was answered correctly."
     : wrong.length === questions.length
@@ -739,7 +739,9 @@ function wordCount(text) {
 // model call), but catches the failure modes that matter most: wrong shape,
 // a passage way off-length for the age group, or an out-of-range answer
 // index that would silently break grading.
-function validatePassage(parsed, { tier }) {
+// The passage and its questions. With a template, the questions must follow its styles exactly
+// (see api/_lib/questionTypes.js); without one, the original five multiple-choice questions.
+function validatePassage(parsed, { tier, template, textType }) {
   const issues = [];
 
   if (!checkString(parsed?.title, 2, 100)) issues.push("title is missing or an unreasonable length");
@@ -747,30 +749,13 @@ function validatePassage(parsed, { tier }) {
   if (!checkString(parsed?.passage, 20, 3000)) {
     issues.push("passage is missing or an unreasonable length");
   } else {
-    const [min, max] = PASSAGE_WORD_BOUNDS[tier] || [20, 400];
+    const [min0, max] = PASSAGE_WORD_BOUNDS[tier] || [20, 400];
+    const min = textType && textType.lines ? 25 : min0; // a poem is shorter than prose
     const words = wordCount(parsed.passage);
     if (words < min || words > max) issues.push(`passage is ${words} words, expected roughly ${min}-${max} for this age tier`);
   }
 
-  if (!Array.isArray(parsed?.questions) || parsed.questions.length !== 5) {
-    issues.push("questions must be an array of exactly 5 items");
-  } else {
-    parsed.questions.forEach((q, i) => {
-      if (!checkString(q?.q, 5, 300)) issues.push(`questions[${i}].q is missing or an unreasonable length`);
-      if (!Array.isArray(q?.options) || q.options.length !== 4) {
-        issues.push(`questions[${i}].options must be an array of exactly 4 items`);
-      } else {
-        q.options.forEach((opt, oi) => {
-          if (!checkString(opt, 1, 150)) issues.push(`questions[${i}].options[${oi}] is missing or an unreasonable length`);
-        });
-        const unique = new Set(q.options.map((o) => String(o).trim().toLowerCase()));
-        if (unique.size !== q.options.length) issues.push(`questions[${i}].options has duplicate answer choices`);
-      }
-      if (!Number.isInteger(q?.correct) || q.correct < 0 || q.correct > 3) {
-        issues.push(`questions[${i}].correct must be an integer from 0 to 3`);
-      }
-    });
-  }
+  require("./questionTypes").validateQuestions(parsed?.questions, { template, passage: parsed?.passage }, issues);
 
   return { ok: issues.length === 0, issues };
 }

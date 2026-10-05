@@ -373,10 +373,12 @@ function buildReadingPrompt({ tier, country, gradeLabel, interest, confidenceRea
   const caps = capabilities || {};
   targets = examTargetsFor(targets, "reading");
   const wantsExam = caps.examTechnique && examTechniqueSupported(tier) && Array.isArray(targets) && targets.length > 0;
+  const QT = require("./questionTypes");
   const answerLines = questions.map((q, i) => {
     const chosen = answers[i];
-    const isCorrect = chosen === q.correct;
-    return `Q${i + 1}: "${q.q}" — student chose "${chosen != null ? q.options[chosen] : "(no answer)"}" (${isCorrect ? "CORRECT" : `INCORRECT, correct answer was "${q.options[q.correct]}"`})`;
+    const isCorrect = QT.isRight(q, chosen);
+    const style = QT.STYLE_LABEL[QT.styleOf(q)] || "multiple choice";
+    return `Q${i + 1} [${style}]: "${QT.describeForPrompt(q)}" — student answered "${QT.answerText(q, chosen)}" (${isCorrect ? "CORRECT" : `INCORRECT, correct answer was "${QT.correctText(q)}"`})`;
   }).join("\n");
 
   return `You are the feedback engine inside LiteracyLab AI, an educational product for a ${TIER_LABEL[tier]} student in ${gradeLabel} (${country}).
@@ -452,30 +454,37 @@ const PASSAGE_SKILL = {
 // exercise itself that way would make it less realistic, not more
 // engaging - and it meant two students with different interests never saw
 // the same original passage even when everything else about them matched.
-function buildReadingPassagePrompt({ tier, country, gradeLabel }) {
+function buildReadingPassagePrompt({ tier, country, gradeLabel, textType, template }) {
+  const QT = require("./questionTypes");
+  const plan = template || QT.MC_FOUR;
+  const type = textType && textType.name ? textType : { name: "passage", lines: false };
+  const isPoem = !!type.lines;
+  const count = plan.length;
+  const layout = isPoem
+    ? "as 2-4 stanzas: separate each line with a single newline (\\n) and each stanza with a blank line (\\n\\n in the JSON string)"
+    : `as ${PASSAGE_PARAGRAPHS[tier]}, with a blank line between paragraphs (in the JSON string, separate paragraphs with \\n\\n). Each paragraph should hold one idea, moment or step in the argument - never one dense block of text`;
   return `You are generating an ORIGINAL reading-comprehension exercise for a ${TIER_LABEL[tier]} student in ${gradeLabel} (${country}).
 
-Write a short, wholly original passage — never copied or closely paraphrased from any existing published book, article, or other copyrighted work — appropriate for this age, plus 5 multiple-choice comprehension questions about it.
+Write a short, wholly original ${type.name} - never copied or closely paraphrased from any existing published book, article, poem, or other copyrighted work - appropriate for this age, plus ${count} comprehension questions about it, in the styles listed below.${type.note ? " " + type.note : ""}
 
 Requirements:
-- Passage length: ${PASSAGE_LENGTH[tier]}.
-- Layout: write it as ${PASSAGE_PARAGRAPHS[tier]}, with a blank line between paragraphs (in the JSON string, separate paragraphs with \\n\\n). Each paragraph should hold one idea, moment or step in the argument - never one dense block of text.
-- The questions should primarily test this comprehension skill: ${PASSAGE_SKILL[tier]}, but don't all ask the same thing in different words - cover distinct details, moments, or angles of the passage so the 5 questions feel genuinely different from each other, not five variations of one question.
-- Exactly 5 questions, each with exactly 4 answer options and exactly ONE unambiguously correct answer that is clearly supported by the passage. The other 3 options must be clearly wrong to a careful reader, not intentionally tricky or debatable.
+- Text length: ${isPoem ? "about 40-90 words in total (a poem is shorter than prose)" : PASSAGE_LENGTH[tier]}.
+- Layout: write it ${layout}.
+- The questions should primarily test this comprehension skill: ${PASSAGE_SKILL[tier]}, but cover distinct details, moments, or angles of the text so the ${count} questions feel genuinely different.
+- Each question has exactly ONE unambiguously correct answer that is clearly supported by the text. Wrong answers must be clearly wrong to a careful reader, not intentionally tricky or debatable.
 - Do not reuse character names, settings, or plots from well-known published works.
-- Pitch it as a real stretch for this age: at least two of the five questions must need inference or interpretation rather than finding a stated fact, and the wrong options should be plausible to a careless reader (but still clearly wrong to a careful one).
+- Pitch it as a real stretch for this age: at least two of the ${count} questions must need inference or interpretation rather than finding a stated fact.
+
+The ${count} questions, in this exact order and in these exact styles:
+${QT.questionPlanText(plan, tier)}
 
 Respond with ONLY a JSON object (no markdown fences, no commentary) with exactly this shape:
 {
-  "title": "a short title for the passage",
+  "title": "a short title for the text",
   "skill": "the one comprehension skill this set of questions tests, in plain words",
-  "passage": "the full original passage text",
+  "passage": "the full original text",
   "questions": [
-    { "q": "question text", "options": ["option A", "option B", "option C", "option D"], "correct": 0 },
-    { "q": "question text", "options": ["option A", "option B", "option C", "option D"], "correct": 1 },
-    { "q": "question text", "options": ["option A", "option B", "option C", "option D"], "correct": 2 },
-    { "q": "question text", "options": ["option A", "option B", "option C", "option D"], "correct": 0 },
-    { "q": "question text", "options": ["option A", "option B", "option C", "option D"], "correct": 1 }
+${QT.questionShapeText(plan, tier)}
   ]
 }`;
 }

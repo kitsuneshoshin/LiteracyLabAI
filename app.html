@@ -2990,7 +2990,7 @@ function QuestionReviewPanel({ feedback, questions, answers }){
   const review = Array.isArray(feedback?.questionReview) ? feedback.questionReview : null;
   if (!review || review.length === 0 || !Array.isArray(questions) || questions.length === 0) return null;
   const byNumber = new Map(review.map(r => [r.n, r]));
-  const rightCount = questions.filter((q, i) => answers?.[i] === q.correct).length;
+  const rightCount = questions.filter((q, i) => qIsRight(q, answers?.[i])).length;
   return (
     <Collapsible defaultOpen={true} borderColor="var(--border)" iconBg="var(--good-tint)" iconColor="var(--good)"
       icon={<IconBookOpenCheck size={16} strokeWidth={2.2} />} title="Question by question"
@@ -2999,7 +2999,7 @@ function QuestionReviewPanel({ feedback, questions, answers }){
         {questions.map((q, i) => {
           const r = byNumber.get(i + 1);
           const chosen = answers?.[i];
-          const isRight = chosen === q.correct;
+          const isRight = qIsRight(q, chosen);
           return (
             <div key={i} className="rounded-xl p-3.5" style={{ background: "var(--surface-2)" }}>
               <div className="flex items-start gap-2">
@@ -3007,13 +3007,14 @@ function QuestionReviewPanel({ feedback, questions, answers }){
                   {isRight ? <IconCheck size={15} strokeWidth={2.6} /> : <IconX size={15} strokeWidth={2.6} />}
                 </span>
                 <div className="min-w-0">
-                  <div className="text-[13.5px] font-semibold" style={{ color: "var(--ink)" }}>{i + 1}. {q.q}</div>
+                  <div className="text-[11px] font-bold uppercase tracking-wide" style={{ color: "var(--ink-faint)" }}>{Q_STYLE_NAME[qStyle(q)] || Q_STYLE_NAME.mc}</div>
+                  <div className="text-[13.5px] font-semibold" style={{ color: "var(--ink)" }}>{i + 1}. {qStyle(q) === "cloze" ? q.text : q.q}</div>
                   <div className="text-[13px] mt-1" style={{ color: "var(--ink-soft)" }}>
-                    You chose: <strong style={{ color: "var(--ink)" }}>{chosen != null ? q.options[chosen] : "no answer"}</strong>
+                    You chose: <strong style={{ color: "var(--ink)" }}>{qAnswerText(q, chosen)}</strong>
                   </div>
-                  {!isRight && q.correct != null && q.options?.[q.correct] && (
+                  {!isRight && q.correct != null && qCorrectText(q) && (
                     <div className="text-[13px]" style={{ color: "var(--ink-soft)" }}>
-                      Right answer: <strong style={{ color: "var(--good)" }}>{q.options[q.correct]}</strong>
+                      Right answer: <strong style={{ color: "var(--good)" }}>{qCorrectText(q)}</strong>
                     </div>
                   )}
                   {r?.explanation && <p className="text-[13.5px] leading-snug mt-1.5 font-read" style={{ color: "var(--ink)" }}>{r.explanation}</p>}
@@ -3225,7 +3226,7 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
         method: "POST",
         body: JSON.stringify({ tier, country, gradeLabel, interest: interestForPiece, childId }),
       });
-      const fresh = { submissionId: result.submissionId, title: result.title, skill: result.skill, passage: result.passage, questions: result.questions, interest: interestForPiece };
+      const fresh = { submissionId: result.submissionId, title: result.title, skill: result.skill, passage: result.passage, questions: result.questions, textType: result.textType, interest: interestForPiece };
       pendingReadingRef.current[cacheKey] = fresh;
       setReadingPassage(fresh);
       onSubmit(result.usage);
@@ -3287,7 +3288,7 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
   // now - a cached, still-ungraded piece can outlive a later rotation).
   const feedbackInterest = (exerciseType === "writing" ? writingPrompt?.interest : readingPassage?.interest) || activeInterest;
   const readingQuestions = readingBankEntry ? readingBankEntry.questions : [];
-  const allAnswered = readingQuestions.length > 0 && readingQuestions.every((_,i)=> answers[i] != null);
+  const allAnswered = readingQuestions.length > 0 && readingQuestions.every((q,i)=> qIsAnswered(q, answers[i]));
 
   async function handleSubmit(){
     if (locked || phase === "analyzing") return;
@@ -3305,7 +3306,7 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
       timerRef.current = setTimeout(()=>{
         if (liveContextRef.current !== submittedContext) return;
         if (exerciseType === "reading") {
-          const score = readingQuestions.reduce((n,q,i)=> n + (answers[i] === q.correct ? 1 : 0), 0);
+          const score = readingQuestions.reduce((n,q,i)=> n + (qIsRight(q, answers[i]) ? 1 : 0), 0);
           setReadingScore(score);
         }
         setPhase("done");
@@ -3628,44 +3629,182 @@ function SubmissionRecap({ tier, title, words, onNew }){
   );
 }
 
+// ---- Reading question styles. These mirror api/_lib/questionTypes.js (keep both in step): a question
+// is multiple choice, true/false/not given, "which line proves it", put in order, match words to
+// meanings, or fill the gap. An answer is a number, or a list of numbers for order, match and gap.
+const qStyle = (q) => (q && q.type) || "mc";
+const qIsAnswered = (q, a) => {
+  const st = qStyle(q);
+  if (st === "order" || st === "match") return Array.isArray(a) && a.length === (q.items || []).length && a.every(Number.isInteger);
+  if (st === "cloze") return Array.isArray(a) && a.length === (q.blanks || []).length && a.every(Number.isInteger);
+  return Number.isInteger(a);
+};
+const qIsRight = (q, a) => {
+  if (!q || !qIsAnswered(q, a)) return false;
+  if (Array.isArray(q.correct)) return q.correct.length === a.length && q.correct.every((v, i) => v === a[i]);
+  return a === q.correct;
+};
+const qText = (q, v) => {
+  if (!q || v == null) return "no answer";
+  const st = qStyle(q);
+  if (st === "order") return Array.isArray(v) && v.length ? v.map((j, k) => (k + 1) + ". " + ((q.items || [])[j] ?? "?")).join("  ") : "no answer";
+  if (st === "match") return Array.isArray(v) ? (q.items || []).map((w, i) => w + " = " + ((q.options || [])[v[i]] ?? "?")).join("; ") : "no answer";
+  if (st === "cloze") return Array.isArray(v) ? (q.blanks || []).map((o, i) => (o || [])[v[i]] ?? "?").join(", ") : "no answer";
+  return (q.options || [])[v] ?? "no answer";
+};
+const qAnswerText = (q, a) => (qIsAnswered(q, a) ? qText(q, a) : "no answer");
+const qCorrectText = (q) => (q && q.correct != null ? (Array.isArray(q.correct) && qStyle(q) === "order" ? q.correct.map((j, k) => (k + 1) + ". " + ((q.items || [])[j] ?? "?")).join("  ") : qText(q, q.correct)) : "");
+const Q_STYLE_NAME = { mc: "Multiple choice", tfng: "True, false or not given", evidence: "Part B: which line proves it?", order: "Put in order", match: "Match each word to its meaning", cloze: "Fill the gap" };
+
+function choiceStyle(revealed, selected, isCorrect) {
+  let borderColor = "var(--border)", bg = "var(--surface)";
+  if (revealed && isCorrect) { borderColor = "var(--good)"; bg = "var(--good-tint)"; }
+  else if (revealed && selected && !isCorrect) { borderColor = "var(--bad)"; bg = "var(--bad-tint)"; }
+  else if (!revealed && selected) { borderColor = "var(--cyan)"; bg = "var(--cyan-tint)"; }
+  return { borderColor, background: bg, color: "var(--ink)" };
+}
+
+function ReadingQuestion({ q, qi, answer, setAnswer, revealed, disabled }){
+  const st = qStyle(q);
+  const lock = disabled || revealed;
+  const label = <div className="text-[11px] font-bold uppercase tracking-wide mb-1" style={{ color: "var(--ink-faint)" }}>{Q_STYLE_NAME[st] || Q_STYLE_NAME.mc}</div>;
+  const title = st === "cloze" ? null : <div className="text-sm font-semibold mb-2" style={{ color: "var(--ink)" }}>{qi + 1}. {q.q}</div>;
+
+  if (st === "order") {
+    const picked = Array.isArray(answer) ? answer : [];
+    const items = q.items || [];
+    return (
+      <div>
+        {label}{title}
+        <div className="flex flex-col gap-1.5">
+          {items.map((item, j) => {
+            const pos = picked.indexOf(j);
+            const right = revealed && Array.isArray(q.correct) && pos !== -1 && q.correct[pos] === j;
+            const wrong = revealed && pos !== -1 && !right;
+            return (
+              <button key={j} disabled={lock || pos !== -1} onClick={() => setAnswer([...picked, j])}
+                className="focus-ring text-left rounded-xl border px-3.5 py-2.5 text-sm transition-colors flex items-center gap-2.5"
+                style={choiceStyle(false, false, false) && { borderColor: right ? "var(--good)" : wrong ? "var(--bad)" : pos !== -1 ? "var(--cyan)" : "var(--border)", background: right ? "var(--good-tint)" : wrong ? "var(--bad-tint)" : pos !== -1 ? "var(--cyan-tint)" : "var(--surface)", color: "var(--ink)" }}>
+                <span className="inline-grid place-items-center rounded-full text-[12px] font-bold shrink-0" style={{ width: 24, height: 24, background: pos !== -1 ? "var(--cyan)" : "var(--surface-2)", color: pos !== -1 ? "white" : "var(--ink-faint)" }}>{pos !== -1 ? pos + 1 : "•"}</span>
+                <span>{item}</span>
+              </button>
+            );
+          })}
+        </div>
+        {!revealed && (
+          <div className="flex items-center gap-3 mt-2 text-xs" style={{ color: "var(--ink-soft)" }}>
+            <span>Tap the events in the order they happen.</span>
+            {picked.length > 0 && <button type="button" disabled={lock} onClick={() => setAnswer(null)} className="focus-ring underline font-semibold">Start again</button>}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  if (st === "match") {
+    const chosen = Array.isArray(answer) ? answer : [];
+    const items = q.items || [];
+    return (
+      <div>
+        {label}{title}
+        <div className="flex flex-col gap-2">
+          {items.map((word, i) => {
+            const val = chosen[i];
+            const right = revealed && Array.isArray(q.correct) && val === q.correct[i];
+            const wrong = revealed && !right;
+            return (
+              <div key={i} className="flex items-center gap-3 flex-wrap">
+                <span className="text-sm font-semibold min-w-[6rem]" style={{ color: "var(--ink)" }}>{word}</span>
+                <select disabled={lock} value={val == null ? "" : String(val)} aria-label={"Meaning of " + word}
+                  onChange={(e) => { const next = items.map((_, k) => (chosen[k] == null ? null : chosen[k])); next[i] = e.target.value === "" ? null : Number(e.target.value); setAnswer(next); }}
+                  className="focus-ring rounded-xl border px-3 py-2 text-sm flex-1 min-w-[10rem]"
+                  style={{ borderColor: right ? "var(--good)" : wrong ? "var(--bad)" : "var(--border)", background: right ? "var(--good-tint)" : wrong ? "var(--bad-tint)" : "var(--surface)", color: "var(--ink)" }}>
+                  <option value="">Choose a meaning</option>
+                  {(q.options || []).map((m, mi) => <option key={mi} value={mi}>{m}</option>)}
+                </select>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+
+  if (st === "cloze") {
+    const chosen = Array.isArray(answer) ? answer : [];
+    const blanks = q.blanks || [];
+    const parts = String(q.text || "").split("___");
+    return (
+      <div>
+        {label}
+        <div className="text-sm font-semibold mb-2" style={{ color: "var(--ink)" }}>{qi + 1}. {q.q}</div>
+        <p className="font-read text-[15px] leading-loose" style={{ color: "var(--ink)" }}>
+          {parts.map((part, bi) => (
+            <React.Fragment key={bi}>
+              {part}
+              {bi < blanks.length && (() => {
+                const val = chosen[bi];
+                const right = revealed && Array.isArray(q.correct) && val === q.correct[bi];
+                const wrong = revealed && !right;
+                return (
+                  <select disabled={lock} value={val == null ? "" : String(val)} aria-label={"Gap " + (bi + 1)}
+                    onChange={(e) => { const next = blanks.map((_, k) => (chosen[k] == null ? null : chosen[k])); next[bi] = e.target.value === "" ? null : Number(e.target.value); setAnswer(next); }}
+                    className="focus-ring rounded-lg border px-2 py-1 text-sm mx-1 align-baseline"
+                    style={{ borderColor: right ? "var(--good)" : wrong ? "var(--bad)" : "var(--border)", background: right ? "var(--good-tint)" : wrong ? "var(--bad-tint)" : "var(--surface)", color: "var(--ink)" }}>
+                    <option value="">choose</option>
+                    {(blanks[bi] || []).map((w, wi) => <option key={wi} value={wi}>{w}</option>)}
+                  </select>
+                );
+              })()}
+            </React.Fragment>
+          ))}
+        </p>
+      </div>
+    );
+  }
+
+  // multiple choice, true/false/not given and "which line proves it" are all single choice
+  const options = q.options || [];
+  return (
+    <div>
+      {label}{title}
+      <div className={st === "tfng" ? "grid grid-cols-1 sm:grid-cols-3 gap-1.5" : "flex flex-col gap-1.5"}>
+        {options.map((opt, oi) => {
+          const selected = answer === oi;
+          const isCorrect = oi === q.correct;
+          return (
+            <button key={oi} disabled={lock} onClick={() => setAnswer(oi)}
+              className={"focus-ring text-left rounded-xl border px-3.5 py-2.5 text-sm transition-colors" + (st === "tfng" ? " text-center font-semibold" : "") + (st === "evidence" ? " font-read italic" : "")}
+              style={choiceStyle(revealed, selected, isCorrect)}>
+              {st === "evidence" ? "\u201C" + opt + "\u201D" : opt}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 function ReadingExercise({ bank, answers, setAnswers, allAnswered, phase, onSubmit, onNew, locked, onSeePlans }){
   const disabled = phase === "analyzing" || locked;
+  const isPoem = /poem/i.test(String(bank.textType || ""));
+  const answeredCount = bank.questions.filter((q, i) => qIsAnswered(q, answers[i])).length;
   return (
     <div className="card p-0 relative overflow-hidden">
       {phase === "analyzing" && <AnalyzingOverlay />}
       <div className="px-6 pt-5 pb-4 border-b" style={{ borderColor: "var(--border-soft)" }}>
-        <SectionLabel>Reading comprehension · {bank.skill}</SectionLabel>
+        <SectionLabel>Reading comprehension · {bank.skill}{bank.textType ? " · " + bank.textType : ""}</SectionLabel>
         <h3 className="font-display font-semibold text-lg mt-0.5" style={{ color: "var(--ink)" }}>{bank.title}</h3>
       </div>
-      <div className="font-read text-[15px] px-6 pt-4 pb-2 leading-relaxed flex flex-col gap-3" style={{ color: "var(--ink)" }}>{String(bank.passage).split(/\n\s*\n/).map((para, i) => <p key={i}>{para}</p>)}</div>
+      <div className="font-read text-[15px] px-6 pt-4 pb-2 leading-relaxed flex flex-col gap-3" style={{ color: "var(--ink)" }}>{String(bank.passage).split(/\n\s*\n/).map((para, i) => <p key={i} className={isPoem ? "whitespace-pre-line" : ""}>{para}</p>)}</div>
       <div className="px-6 pb-5 pt-3 flex flex-col gap-5">
         {bank.questions.map((q,qi)=>(
-          <div key={qi}>
-            <div className="text-sm font-semibold mb-2" style={{ color: "var(--ink)" }}>{qi+1}. {q.q}</div>
-            <div className="flex flex-col gap-1.5">
-              {q.options.map((opt,oi)=>{
-                const selected = answers[qi] === oi;
-                const revealed = phase === "done";
-                const isCorrect = oi === q.correct;
-                let borderColor = "var(--border)", bg = "var(--surface)";
-                if (revealed && isCorrect) { borderColor = "var(--good)"; bg = "var(--good-tint)"; }
-                else if (revealed && selected && !isCorrect) { borderColor = "var(--bad)"; bg = "var(--bad-tint)"; }
-                else if (!revealed && selected) { borderColor = "var(--cyan)"; bg = "var(--cyan-tint)"; }
-                return (
-                  <button key={oi} disabled={disabled || phase === "done"}
-                    onClick={()=>setAnswers(prev=>({ ...prev, [qi]: oi }))}
-                    className="focus-ring text-left rounded-xl border px-3.5 py-2.5 text-sm transition-colors"
-                    style={{ borderColor, background: bg, color: "var(--ink)" }}>
-                    {opt}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
+          <ReadingQuestion key={qi} q={q} qi={qi} answer={answers[qi]} revealed={phase === "done"} disabled={disabled}
+            setAnswer={(v)=>setAnswers(prev=>{ const next = { ...prev }; if (v == null) delete next[qi]; else next[qi] = v; return next; })} />
         ))}
       </div>
       <div className="flex items-center justify-between px-6 py-4 border-t flex-wrap gap-3" style={{ borderColor: "var(--border-soft)" }}>
-        <span className="text-xs font-semibold tabular" style={{ color: "var(--ink-soft)" }}>{Object.keys(answers).length} / {bank.questions.length} answered</span>
+        <span className="text-xs font-semibold tabular" style={{ color: "var(--ink-soft)" }}>{answeredCount} / {bank.questions.length} answered</span>
         {phase !== "done" ? (
           <button onClick={locked ? onSeePlans : onSubmit} disabled={locked ? false : (disabled || !allAnswered)}
             className="focus-ring inline-flex items-center gap-2 rounded-lg px-4 py-2 font-display font-semibold text-sm disabled:opacity-60"

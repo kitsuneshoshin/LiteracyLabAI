@@ -541,7 +541,7 @@ for (const plan of PLANS) {
           if (did(q, "insert")) return { data: { id: "pass-new" }, error: null };
           return { data: null, error: null };
         },
-        generate: async () => ({ parsed, modelUsed: "stub" }),
+        generate: async () => ({ parsed: JSON.parse(JSON.stringify(parsed)), modelUsed: "stub" }),
       });
       const res = await call(h, { method: "POST", body: { tier, country: COUNTRY, gradeLabel: TIERS[tier], interest: "space", childId: "c1" } });
       assert.equal(res.statusCode, 200, JSON.stringify(res.body));

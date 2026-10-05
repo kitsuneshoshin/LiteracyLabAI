@@ -7,6 +7,7 @@ const { generateFeedbackJSON } = require("./_lib/openai");
 const { buildReadingPassagePrompt, correctiveAddendum } = require("./_lib/prompt");
 const { validatePassage } = require("./_lib/validate");
 const { paragraphise } = require("./_lib/passageFormat");
+const QT = require("./_lib/questionTypes");
 
 const VALID_TIERS = ["early", "elementary", "middle", "high"];
 
@@ -18,22 +19,38 @@ const VALID_TIERS = ["early", "elementary", "middle", "high"];
 // score/feedback filled in later once the student actually answers -
 // exactly one credit per reading attempt, matching what a writing
 // submission costs, whether or not the student finishes it.
-async function generateAndValidate(prompt, tier) {
-  let attempt = await generateFeedbackJSON(prompt);
-  let check = validatePassage(attempt.parsed, { tier });
-  if (check.ok) return attempt;
+// Up to three tries: the styled questions, the same again with the problems listed, and (only if the
+// styled plan keeps failing) a plain multiple-choice version of the same kind of text, so a student
+// is never turned away just because a fancier question style was hard to write.
+async function generateAndValidate(prompt, tier, opts = {}) {
+  const { template, textType, fallbackPrompt } = opts;
+  const rng = opts.rng || Math.random;
+  const attemptWith = async (p, tpl) => {
+    const attempt = await generateFeedbackJSON(p);
+    if (attempt.parsed && Array.isArray(attempt.parsed.questions)) attempt.parsed.questions = QT.normalizeQuestions(attempt.parsed.questions, tpl, rng);
+    return { attempt, check: validatePassage(attempt.parsed, { tier, template: tpl, textType }) };
+  };
 
-  console.warn("Passage validation failed on attempt 1:", check.issues);
-  attempt = await generateFeedbackJSON(prompt + correctiveAddendum(check.issues));
-  check = validatePassage(attempt.parsed, { tier });
-  if (check.ok) return attempt;
+  let r = await attemptWith(prompt, template);
+  if (r.check.ok) return r.attempt;
+  console.warn("Passage validation failed on attempt 1:", r.check.issues);
 
-  console.warn("Passage validation failed on attempt 2:", check.issues);
+  r = await attemptWith(prompt + correctiveAddendum(r.check.issues), template);
+  if (r.check.ok) return r.attempt;
+  console.warn("Passage validation failed on attempt 2:", r.check.issues);
+
+  const lastIssues = r.check.issues;
+  if (fallbackPrompt) {
+    const plain = await attemptWith(fallbackPrompt, QT.MC_FOUR);
+    if (plain.check.ok) { plain.attempt.parsed.questionStyles = QT.MC_FOUR; return plain.attempt; }
+    console.warn("Passage validation failed on the plain fallback:", plain.check.issues);
+  }
+
   const err = new Error("We couldn't generate a reading passage right now. Please try again.");
   err.statusCode = 502;
   // Which checks failed - sent to Sentry alongside the error (never shown to
   // the student) so a bad-passage report says WHY, not just "it failed".
-  err.checkIssues = check.issues;
+  err.checkIssues = lastIssues;
   throw err;
 }
 
@@ -100,9 +117,15 @@ module.exports = async function handler(req, res) {
     // usage charge for a passage the student never actually received.
     let parsed;
     try {
-      const llmPrompt = buildReadingPassagePrompt({ tier, country, gradeLabel });
-      ({ parsed } = await generateAndValidate(llmPrompt, tier));
-      parsed.passage = paragraphise(parsed.passage);
+      const template = QT.pickTemplate(tier);
+      const textType = QT.pickTextType(tier);
+      const llmPrompt = buildReadingPassagePrompt({ tier, country, gradeLabel, textType, template });
+      const fallbackPrompt = buildReadingPassagePrompt({ tier, country, gradeLabel, textType, template: QT.MC_FOUR });
+      ({ parsed } = await generateAndValidate(llmPrompt, tier, { template, textType, fallbackPrompt }));
+      // A poem keeps its line breaks; prose is regrouped into paragraphs if the model sent one block.
+      parsed.passage = textType.lines ? String(parsed.passage).replace(/\r\n/g, "\n").trim() : paragraphise(parsed.passage);
+      parsed.textType = textType.name;
+      parsed.questionStyles = parsed.questionStyles || template;
     } catch (genErr) {
       await supabase.from("submissions").delete().eq("id", reserved.id);
       throw genErr;
@@ -122,7 +145,8 @@ module.exports = async function handler(req, res) {
       passage: parsed.passage,
       // Strip the answer key before it ever reaches the browser — grading
       // happens server-side in api/submit.js against the stored row.
-      questions: parsed.questions.map((q) => ({ q: q.q, options: q.options })),
+      questions: parsed.questions.map(QT.publicQuestion),
+      textType: parsed.textType,
       usage: updatedUsage,
     });
   } catch (err) {
