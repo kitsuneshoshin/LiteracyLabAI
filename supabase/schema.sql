@@ -280,3 +280,49 @@ create table if not exists public.qa_runs (
 );
 alter table public.qa_runs enable row level security;
 create index if not exists qa_runs_created_idx on public.qa_runs (created_at desc);
+
+-- ---------------------------------------------------------------------------
+-- OpenAI usage per day and model (api/_lib/aiUsage.js, written on every AI call): the call
+-- count, tokens and an estimated cost. Holds no customer content. Days are UTC. RLS on with no
+-- policy, like every table here; only the server (service role) reads or writes.
+-- ---------------------------------------------------------------------------
+create table if not exists public.ai_usage_daily (
+  day date not null,
+  model text not null,
+  calls integer not null default 0,
+  input_tokens bigint not null default 0,
+  output_tokens bigint not null default 0,
+  est_cost_usd numeric(12, 6) not null default 0,
+  primary key (day, model)
+);
+alter table public.ai_usage_daily enable row level security;
+
+-- One row per day on which the "spend today passed your alert level" email went out.
+create table if not exists public.ai_usage_alerts (
+  day date primary key,
+  sent_at timestamptz not null default now(),
+  cost_usd numeric(12, 4)
+);
+alter table public.ai_usage_alerts enable row level security;
+
+-- Adds one call atomically and returns today's rows, so one round trip does both.
+create or replace function public.record_ai_usage(p_day date, p_model text, p_in integer, p_out integer, p_cost numeric)
+returns table (model text, calls integer, input_tokens bigint, output_tokens bigint, est_cost_usd numeric)
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  insert into public.ai_usage_daily as u (day, model, calls, input_tokens, output_tokens, est_cost_usd)
+  values (p_day, p_model, 1, p_in, p_out, p_cost)
+  on conflict (day, model) do update
+    set calls = u.calls + 1,
+        input_tokens = u.input_tokens + excluded.input_tokens,
+        output_tokens = u.output_tokens + excluded.output_tokens,
+        est_cost_usd = u.est_cost_usd + excluded.est_cost_usd;
+  return query
+    select d.model, d.calls, d.input_tokens, d.output_tokens, d.est_cost_usd
+    from public.ai_usage_daily d where d.day = p_day;
+end;
+$$;
+revoke all on function public.record_ai_usage(date, text, integer, integer, numeric) from public, anon, authenticated;

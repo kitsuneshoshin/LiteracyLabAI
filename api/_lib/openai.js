@@ -62,6 +62,9 @@ async function generateFeedbackJSON(prompt, { maxTokens, model: modelOverride } 
     err.statusCode = e.status === 429 ? 429 : 502;
     throw err;
   }
+  // Count the call (and its estimated cost) before anything else can fail; never throws.
+  const usage = completion.usage || {};
+  await require("./aiUsage").recordUsage({ model: completion.model || model, inputTokens: usage.prompt_tokens, outputTokens: usage.completion_tokens });
   const raw = completion.choices[0]?.message?.content || "";
 
   let parsed;
