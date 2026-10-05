@@ -312,10 +312,11 @@ language plpgsql
 security definer
 set search_path = public
 as $$
+#variable_conflict use_column
 begin
   insert into public.ai_usage_daily as u (day, model, calls, input_tokens, output_tokens, est_cost_usd)
   values (p_day, p_model, 1, p_in, p_out, p_cost)
-  on conflict (day, model) do update
+  on conflict on constraint ai_usage_daily_pkey do update
     set calls = u.calls + 1,
         input_tokens = u.input_tokens + excluded.input_tokens,
         output_tokens = u.output_tokens + excluded.output_tokens,
