@@ -2994,15 +2994,50 @@ function QuestionReviewPanel({ feedback, questions, answers }){
   if (!review || review.length === 0 || !Array.isArray(questions) || questions.length === 0) return null;
   const byNumber = new Map(review.map(r => [r.n, r]));
   const rightCount = questions.filter((q, i) => qIsRight(q, answers?.[i])).length;
+  const autoTotal = qAutoCount(questions);
+  const marked = feedback?.shortAnswer && typeof feedback.shortAnswer === "object" ? feedback.shortAnswer : null;
   return (
     <Collapsible defaultOpen={true} borderColor="var(--border)" iconBg="var(--good-tint)" iconColor="var(--good)"
       icon={<IconBookOpenCheck size={16} strokeWidth={2.2} />} title="Question by question"
-      teaser={`${rightCount} of ${questions.length} right`}>
+      teaser={`${rightCount} of ${autoTotal} right`}>
       <div className="flex flex-col gap-3">
         {questions.map((q, i) => {
           const r = byNumber.get(i + 1);
           const chosen = answers?.[i];
           const isRight = qIsRight(q, chosen);
+          if (!qIsAuto(q)) {
+            const full = marked && marked.awarded === marked.outOf;
+            return (
+              <div key={i} className="rounded-xl p-3.5" style={{ background: "var(--surface-2)" }}>
+                <div className="flex items-start justify-between gap-2 flex-wrap">
+                  <div className="text-[11px] font-bold uppercase tracking-wide" style={{ color: "var(--ink-faint)" }}>{Q_STYLE_NAME.short}</div>
+                  {marked && Number.isInteger(marked.awarded) && (
+                    <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-[12px] font-bold" style={{ background: "var(--surface)", color: full ? "var(--good)" : "var(--gold-ink)", border: "1px solid " + (full ? "var(--good)" : "var(--gold)") }}>
+                      {marked.awarded} / {marked.outOf} marks
+                    </span>
+                  )}
+                </div>
+                <div className="text-[13.5px] font-semibold mt-1" style={{ color: "var(--ink)" }}>{i + 1}. {q.q}</div>
+                <div className="text-[13px] mt-1 font-read" style={{ color: "var(--ink-soft)" }}>
+                  You wrote: <strong style={{ color: "var(--ink)", fontWeight: 600 }}>{qAnswerText(q, chosen)}</strong>
+                </div>
+                {marked?.comment && <p className="text-[13.5px] leading-snug mt-1.5 font-read" style={{ color: "var(--ink)" }}>{marked.comment}</p>}
+                {marked && Array.isArray(marked.hit) && marked.hit.length > 0 && (
+                  <p className="text-[12.5px] mt-1.5" style={{ color: "var(--good)" }}><span className="font-semibold">You made these points: </span>{marked.hit.join("; ")}</p>
+                )}
+                {marked && Array.isArray(marked.missed) && marked.missed.length > 0 && (
+                  <p className="text-[12.5px] mt-1" style={{ color: "var(--ink-soft)" }}><span className="font-semibold">To earn more marks: </span>{marked.missed.join("; ")}</p>
+                )}
+                {!marked && <p className="text-[12.5px] mt-1.5" style={{ color: "var(--ink-faint)" }}>We could not mark this one this time, so compare it with the model answer below.</p>}
+                {q.modelAnswer && (
+                  <div className="mt-2 rounded-lg p-2.5" style={{ background: "var(--good-tint)" }}>
+                    <div className="text-[11px] font-bold uppercase tracking-wide" style={{ color: "var(--good)" }}>A strong answer</div>
+                    <p className="text-[13.5px] leading-snug mt-0.5 font-read" style={{ color: "var(--ink)" }}>{q.modelAnswer}</p>
+                  </div>
+                )}
+              </div>
+            );
+          }
           return (
             <div key={i} className="rounded-xl p-3.5" style={{ background: "var(--surface-2)" }}>
               <div className="flex items-start gap-2">
@@ -3291,7 +3326,7 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
   // now - a cached, still-ungraded piece can outlive a later rotation).
   const feedbackInterest = (exerciseType === "writing" ? writingPrompt?.interest : readingPassage?.interest) || activeInterest;
   const readingQuestions = readingBankEntry ? readingBankEntry.questions : [];
-  const allAnswered = readingQuestions.length > 0 && readingQuestions.every((q,i)=> qIsAnswered(q, answers[i]));
+  const allAnswered = readingQuestions.length > 0 && readingQuestions.every((q,i)=> !qIsAuto(q) || qIsAnswered(q, answers[i]));
 
   async function handleSubmit(){
     if (locked || phase === "analyzing") return;
@@ -3441,7 +3476,7 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
                 bank={readingBankEntry} answers={answers} setAnswers={setAnswers} allAnswered={allAnswered}
                 phase={phase} onSubmit={handleSubmit} onNew={handleNew} locked={locked} onSeePlans={onSeePlans}
               />
-              <ReadingFeedbackPanel tier={tier} country={country} interest={feedbackInterest} confidence={confidenceReading} motivation={motivation} score={readingScore} totalQ={readingQuestions.length}
+              <ReadingFeedbackPanel tier={tier} country={country} interest={feedbackInterest} confidence={confidenceReading} motivation={motivation} score={readingScore} totalQ={qAutoCount(readingQuestions)}
                 feedback={backendFeedback} submissionId={submissionId} session={session} backendLive={backendLive}
                 questions={readingQuestions} answers={answers} />
             </>
@@ -3638,6 +3673,7 @@ function SubmissionRecap({ tier, title, words, onNew }){
 const qStyle = (q) => (q && q.type) || "mc";
 const qIsAnswered = (q, a) => {
   const st = qStyle(q);
+  if (st === "short") return typeof a === "string" && a.trim().length >= 2;
   if (st === "order" || st === "match") return Array.isArray(a) && a.length === (q.items || []).length && a.every(Number.isInteger);
   if (st === "cloze") return Array.isArray(a) && a.length === (q.blanks || []).length && a.every(Number.isInteger);
   return Number.isInteger(a);
@@ -3655,9 +3691,12 @@ const qText = (q, v) => {
   if (st === "cloze") return Array.isArray(v) ? (q.blanks || []).map((o, i) => (o || [])[v[i]] ?? "?").join(", ") : "no answer";
   return (q.options || [])[v] ?? "no answer";
 };
-const qAnswerText = (q, a) => (qIsAnswered(q, a) ? qText(q, a) : "no answer");
+const qAnswerText = (q, a) => (qStyle(q) === "short" ? (qIsAnswered(q, a) ? a.trim() : "no answer written") : qIsAnswered(q, a) ? qText(q, a) : "no answer");
+// The written answer is marked by the AI, so it sits outside the instant score.
+const qIsAuto = (q) => qStyle(q) !== "short";
+const qAutoCount = (questions) => (questions || []).filter(qIsAuto).length;
 const qCorrectText = (q) => (q && q.correct != null ? (Array.isArray(q.correct) && qStyle(q) === "order" ? q.correct.map((j, k) => (k + 1) + ". " + ((q.items || [])[j] ?? "?")).join("  ") : qText(q, q.correct)) : "");
-const Q_STYLE_NAME = { mc: "Multiple choice", tfng: "True, false or not given", evidence: "Part B: which line proves it?", order: "Put in order", match: "Match each word to its meaning", cloze: "Fill the gap" };
+const Q_STYLE_NAME = { short: "Written answer (marked by Premium feedback)", mc: "Multiple choice", tfng: "True, false or not given", evidence: "Part B: which line proves it?", order: "Put in order", match: "Match each word to its meaning", cloze: "Fill the gap" };
 
 function choiceStyle(revealed, selected, isCorrect) {
   let borderColor = "var(--border)", bg = "var(--surface)";
@@ -3672,6 +3711,22 @@ function ReadingQuestion({ q, qi, answer, setAnswer, revealed, disabled }){
   const lock = disabled || revealed;
   const label = <div className="text-[11px] font-bold uppercase tracking-wide mb-1" style={{ color: "var(--ink-faint)" }}>{Q_STYLE_NAME[st] || Q_STYLE_NAME.mc}</div>;
   const title = st === "cloze" ? null : <div className="text-sm font-semibold mb-2" style={{ color: "var(--ink)" }}>{qi + 1}. {q.q}</div>;
+
+  if (st === "short") {
+    const text = typeof answer === "string" ? answer : "";
+    const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+    return (
+      <div>
+        {label}
+        <div className="text-sm font-semibold mb-2" style={{ color: "var(--ink)" }}>{qi + 1}. {q.q} <span className="font-normal text-xs" style={{ color: "var(--ink-faint)" }}>({q.marks} marks)</span></div>
+        <textarea value={text} disabled={lock} maxLength={1200} rows={4} aria-label={"Your written answer to question " + (qi + 1)}
+          onChange={(e) => setAnswer(e.target.value)} placeholder="Write one to three sentences. Use the passage to support your answer."
+          className="focus-ring w-full rounded-xl border px-3.5 py-2.5 text-sm font-read leading-relaxed"
+          style={{ borderColor: "var(--border)", background: "var(--surface)", color: "var(--ink)", resize: "vertical" }} />
+        <div className="text-xs mt-1" style={{ color: "var(--ink-soft)" }}>Optional. Marked out of {q.marks} when you check your understanding. {words} {words === 1 ? "word" : "words"}</div>
+      </div>
+    );
+  }
 
   if (st === "order") {
     const picked = Array.isArray(answer) ? answer : [];
@@ -3791,7 +3846,7 @@ function ReadingQuestion({ q, qi, answer, setAnswer, revealed, disabled }){
 function ReadingExercise({ bank, answers, setAnswers, allAnswered, phase, onSubmit, onNew, locked, onSeePlans }){
   const disabled = phase === "analyzing" || locked;
   const isPoem = /poem/i.test(String(bank.textType || ""));
-  const answeredCount = bank.questions.filter((q, i) => qIsAnswered(q, answers[i])).length;
+  const answeredCount = bank.questions.filter((q, i) => qIsAuto(q) && qIsAnswered(q, answers[i])).length;
   return (
     <div className="card p-0 relative overflow-hidden">
       {phase === "analyzing" && <AnalyzingOverlay />}
@@ -3807,7 +3862,7 @@ function ReadingExercise({ bank, answers, setAnswers, allAnswered, phase, onSubm
         ))}
       </div>
       <div className="flex items-center justify-between px-6 py-4 border-t flex-wrap gap-3" style={{ borderColor: "var(--border-soft)" }}>
-        <span className="text-xs font-semibold tabular" style={{ color: "var(--ink-soft)" }}>{answeredCount} / {bank.questions.length} answered</span>
+        <span className="text-xs font-semibold tabular" style={{ color: "var(--ink-soft)" }}>{answeredCount} / {qAutoCount(bank.questions)} answered</span>
         {phase !== "done" ? (
           <button onClick={locked ? onSeePlans : onSubmit} disabled={locked ? false : (disabled || !allAnswered)}
             className="focus-ring inline-flex items-center gap-2 rounded-lg px-4 py-2 font-display font-semibold text-sm disabled:opacity-60"

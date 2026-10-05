@@ -55,7 +55,13 @@ function pickTextType(tier, rng = Math.random) {
   return list[Math.floor(rng() * list.length)];
 }
 
+// Short written answers are marked by the AI in the feedback call, so they are not part of the
+// instant score: scoreAnswers never counts them and autoTotal leaves them out.
+const SHORT_MARKS = { elementary: 2, middle: 3, high: 3 };
+const SHORT_MAX_CHARS = 1200;
+
 const STYLE_LABEL = {
+  short: "short written answer, marked by you",
   mc: "multiple choice", tfng: "true, false or not given", evidence: "which line proves it",
   order: "put in order", match: "match words to meanings", cloze: "fill the gap",
 };
@@ -77,6 +83,7 @@ const isArr = Array.isArray;
 
 function isAnswered(q, a) {
   switch (styleOf(q)) {
+    case "short": return typeof a === "string" && a.trim().length >= 2;
     case "order": return isArr(a) && a.length === (q.items || []).length && a.every((v) => Number.isInteger(v));
     case "match": return isArr(a) && a.length === (q.items || []).length && a.every((v) => Number.isInteger(v));
     case "cloze": return isArr(a) && a.length === (q.blanks || []).length && a.every((v) => Number.isInteger(v));
@@ -93,6 +100,7 @@ function isRight(q, a) {
 function textFor(q, value) {
   if (!q || value == null) return "(no answer)";
   switch (styleOf(q)) {
+    case "short": return typeof value === "string" && value.trim() ? value.trim().slice(0, SHORT_MAX_CHARS) : "(no answer)";
     case "order": return isArr(value) && value.length ? value.map((j) => (q.items || [])[j] ?? "?").join(" -> ") : "(no answer)";
     case "match": return isArr(value) ? (q.items || []).map((w, i) => `${w} = ${(q.options || [])[value[i]] ?? "(none)"}`).join("; ") : "(no answer)";
     case "cloze": return isArr(value) ? (q.blanks || []).map((opts, i) => (opts || [])[value[i]] ?? "(none)").join(" / ") : "(no answer)";
@@ -101,6 +109,10 @@ function textFor(q, value) {
 }
 const answerText = (q, a) => (isAnswered(q, a) ? textFor(q, a) : "(no answer)");
 const correctText = (q) => textFor(q, q && q.correct);
+
+const isAuto = (q) => styleOf(q) !== "short";
+const autoTotal = (questions) => (questions || []).filter(isAuto).length;
+const shortIndex = (questions) => (questions || []).findIndex((q) => !isAuto(q));
 
 function scoreAnswers(questions, answers) {
   const list = isArr(answers) ? answers : [];
@@ -114,6 +126,7 @@ function publicQuestion(q) {
   if (q.items) out.items = q.items;
   if (q.blanks) out.blanks = q.blanks;
   if (q.text) out.text = q.text;
+  if (styleOf(q) === "short") out.marks = q.marks;
   return out;
 }
 
@@ -123,18 +136,20 @@ function describeForPrompt(q) {
     case "order": return `${q.q} Items (as shown): ${(q.items || []).join(" | ")}`;
     case "match": return `${q.q} Words: ${(q.items || []).join(", ")}. Meanings (as shown): ${(q.options || []).join(" | ")}`;
     case "cloze": return `${q.q} Sentence: ${q.text}`;
+    case "short": return `${q.q} (worth ${q.marks} marks)`;
     default: return q.q;
   }
 }
 
 // ---------------------------------------------------------------- from the model's shape to the stored shape
 
-function normalizeQuestions(questions, template, rng = Math.random) {
+function normalizeQuestions(questions, template, rng = Math.random, tier) {
   if (!isArr(questions)) return questions;
   return questions.map((raw, i) => {
     const style = template ? template[i] : styleOf(raw);
     if (!raw || typeof raw !== "object" || !style) return raw;
     switch (style) {
+      case "short": return { type: "short", q: raw.q, marks: SHORT_MARKS[tier] || 2, modelAnswer: raw.modelAnswer, keyPoints: raw.keyPoints };
       case "tfng": return { type: "tfng", q: raw.q, options: TFNG_OPTIONS.slice(), correct: raw.correct };
       case "evidence": return { type: "evidence", q: raw.q, options: raw.options, correct: raw.correct };
       case "order": {
@@ -186,6 +201,14 @@ function validateQuestions(questions, { template, passage } = {}, issues) {
       return true;
     };
     switch (style) {
+      case "short": {
+        if (!Number.isInteger(q.marks) || q.marks < 1 || q.marks > 4) issues.push(`${at}.marks must be an integer from 1 to 4`);
+        if (!okStr(q.modelAnswer, 15, 700)) issues.push(`${at}.modelAnswer is missing or an unreasonable length`);
+        const kp = q.keyPoints;
+        if (!isArr(kp) || kp.length < 2 || kp.length > 4 || !kp.every((k) => okStr(k, 3, 180))) issues.push(`${at}.keyPoints must list 2 to 4 short ideas a good answer includes`);
+        if (okStr(q.q, 5, 300) && !/\?\s*$/.test(q.q.trim()) && !/^(explain|describe|why|how|what|which|give|say|write)\b/i.test(q.q.trim())) issues.push(`${at}.q must be a question or instruction`);
+        break;
+      }
       case "mc":
         optionList(1, 150, 4);
         if (!Number.isInteger(q.correct) || q.correct < 0 || q.correct > 3) issues.push(`${at}.correct must be an integer from 0 to 3`);
@@ -251,6 +274,7 @@ const CLOZE_GAPS = { early: 1, elementary: 1, middle: 2, high: 2 };
 
 function styleRule(style, n, tier) {
   switch (style) {
+    case "short": return `"q": ONE open question that needs a written answer of one to three sentences and asks the student to explain, infer or support a view using the passage (for example "Why does ... ? Use evidence from the passage." or "How does the writer show ...?"). "modelAnswer": a strong answer of ${tier === "elementary" ? "one or two" : "two or three"} sentences, written the way a good student of this age would write it. "keyPoints": 2 or 3 short ideas (under 18 words each) that a correct answer should make, drawn from the passage - these are what the marking is based on. The question must have a clear, passage-supported answer, not a matter of opinion.`;
     case "mc": return '"q": a question about the passage, "options": exactly 4 answer choices, "correct": the index (0 to 3) of the one clearly correct choice. The other 3 must be plausible to a careless reader but clearly wrong to a careful one.';
     case "tfng": return '"q": ONE statement about the passage (a statement, not a question). "correct": 0 if the passage clearly says it is true, 1 if the passage clearly says the opposite, 2 if the passage simply does not say either way. Make "Not given" mean the passage really is silent, not that the answer is hard.';
     case "evidence": return `"q": "Which line from the passage best supports your answer to question ${n - 1}?" - "options": exactly 4 SHORT quotations (under 25 words each), each copied EXACTLY, word for word, from the passage; one is the best support for the correct answer to question ${n - 1}, the others come from elsewhere in the passage. "correct": the index (0 to 3) of the best one.`;
@@ -266,6 +290,7 @@ function styleRule(style, n, tier) {
 
 function styleShape(style, tier) {
   switch (style) {
+    case "short": return '{ "type": "short", "q": "an open question answered in 1-3 sentences", "modelAnswer": "a strong model answer", "keyPoints": ["idea a good answer makes", "second idea"] }';
     case "mc": return '{ "type": "mc", "q": "question text", "options": ["option A", "option B", "option C", "option D"], "correct": 0 }';
     case "tfng": return '{ "type": "tfng", "q": "a statement about the passage", "correct": 0 }';
     case "evidence": return '{ "type": "evidence", "q": "Which line from the passage best supports your answer to the question before?", "options": ["exact quote 1", "exact quote 2", "exact quote 3", "exact quote 4"], "correct": 0 }';
@@ -284,6 +309,7 @@ function questionShapeText(template, tier) {
 }
 
 module.exports = {
+  SHORT_MARKS, SHORT_MAX_CHARS, isAuto, autoTotal, shortIndex,
   TFNG_OPTIONS, TEMPLATES, MC_FOUR, TEXT_TYPES, STYLE_LABEL,
   pickTemplate, pickTextType, shuffle, styleOf, isAnswered, isRight, answerText, correctText, scoreAnswers,
   publicQuestion, describeForPrompt, normalizeQuestions, validateQuestions, questionPlanText, questionShapeText,

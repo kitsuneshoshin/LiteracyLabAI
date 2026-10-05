@@ -9,7 +9,7 @@ const RESP = require("./_lib/responses");
 const TECH = require("./_lib/techniques");
 const QT = require("./_lib/questionTypes");
 const { frameworkFor } = require("./_lib/writingFrameworks");
-const { dropRestatingHighlights, repairResponses, dropGlowsQuotingMisspellings, validateFeedback, resolveTarget, dropInvalidSpellingGrammar, sanitizeQuestionReview, repairZeroScoreGlow, repairReadingExamEvidence, stripUngrantedSections } = require("./_lib/validate");
+const { dropRestatingHighlights, repairResponses, dropGlowsQuotingMisspellings, validateFeedback, resolveTarget, dropInvalidSpellingGrammar, sanitizeQuestionReview, repairZeroScoreGlow, repairReadingExamEvidence, repairShortAnswer, stripUngrantedSections } = require("./_lib/validate");
 const { checkRateLimit } = require("./_lib/rateLimit");
 const { writingLimitsForGrade } = require("./_lib/writingLimits");
 const { assessLength, calibrateWriting, applyCorrections, repairExamEvidence } = require("./_lib/calibrate");
@@ -73,7 +73,10 @@ async function generateAndValidate(prompt, tier, country, gradeLabel, submittedT
     if (readingScore === 0) repairZeroScoreGlow(attempt.parsed);
     if (readingContext) repairReadingExamEvidence(attempt.parsed, readingContext.questions, readingContext.answers);
     if (readingContext) sanitizeQuestionReview(attempt.parsed, readingContext.passage, readingContext.questionCount);
-    const check = validateFeedback(attempt.parsed, { tier, standardsList, targetNames, submittedText, readingScore, capabilities, genre, lengthInfo, examTargetNames });
+    const shortAt = readingContext && capabilities?.deepFeedback ? QT.shortIndex(readingContext.questions) : -1;
+    const shortQuestion = shortAt >= 0 ? readingContext.questions[shortAt] : undefined;
+    if (shortQuestion) repairShortAnswer(attempt.parsed, shortQuestion, readingContext.answers[shortAt]);
+    const check = validateFeedback(attempt.parsed, { shortQuestion, tier, standardsList, targetNames, submittedText, readingScore, capabilities, genre, lengthInfo, examTargetNames });
     if (check.ok) {
       // Snap glowTarget/growTarget to the exact canonical string so
       // api/progress.js's exact-key Map lookup actually finds them.
@@ -87,13 +90,14 @@ async function generateAndValidate(prompt, tier, country, gradeLabel, submittedT
     // otherwise good piece of feedback (the app simply doesn't show it).
     // The same goes for the Premium full rewrite ("revisedStory"): the app falls
     // back to the fragment-by-fragment revision when it is absent.
-    const bonusOnly = check.issues.length > 0 && check.issues.every((issue) => /^(growNext|revisedStory|modelResponse|modelFramework|revisedFramework|readingStrategy|sentences are too long)/.test(issue));
+    const bonusOnly = check.issues.length > 0 && check.issues.every((issue) => /^(growNext|revisedStory|modelResponse|modelFramework|revisedFramework|readingStrategy|shortAnswer|sentences are too long)/.test(issue));
     const growNextBad = check.issues.some((issue) => /^growNext\b/.test(issue));
     if (lastAttempt && attempt.parsed && bonusOnly && (!growNextBad || attempt.parsed.growNext)) {
       if (growNextBad) delete attempt.parsed.growNext;
       if (check.issues.some((issue) => /^(modelResponse|modelFramework)\b/.test(issue))) { delete attempt.parsed.modelResponse; delete attempt.parsed.modelFramework; }
       if (check.issues.some((issue) => /^revisedFramework\b/.test(issue))) delete attempt.parsed.revisedFramework;
       if (check.issues.some((issue) => /^readingStrategy\b/.test(issue))) delete attempt.parsed.readingStrategy;
+      if (check.issues.some((issue) => /^shortAnswer\b/.test(issue))) delete attempt.parsed.shortAnswer;
       if (check.issues.some((issue) => /^revisedStory\b/.test(issue))) {
         delete attempt.parsed.revisedFramework; // its quotes belong to the rewrite that is being replaced
         // Keep a faithful corrected copy (the student's own words with the listed fixes
@@ -286,8 +290,11 @@ module.exports = async function handler(req, res) {
       }
 
       let score = 0;
+      // Short written answers arrive as text: cap their length. Everything else is graded by code.
+      const shortAt = QT.shortIndex(bank.questions);
+      if (shortAt >= 0 && typeof answers[shortAt] === "string") answers[shortAt] = answers[shortAt].trim().slice(0, QT.SHORT_MAX_CHARS);
       score = QT.scoreAnswers(bank.questions, answers);
-      const totalQuestions = bank.questions.length;
+      const totalQuestions = QT.autoTotal(bank.questions);
 
       const targets = targetsForGrade(existing.country, existing.grade_label, existing.tier).targets;
       const caps = { ...planCaps, examTechnique: planCaps.examTechnique && examTechniqueSupported(existing.tier) };

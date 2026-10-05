@@ -176,6 +176,7 @@ function repairZeroScoreGlow(parsed) {
 // with the real, checkable facts: which questions were answered wrongly.
 function repairReadingExamEvidence(parsed, questions, answers) {
   if (!parsed || !Array.isArray(parsed.examTechnique) || !Array.isArray(questions)) return parsed;
+  questions = questions.filter((q) => require("./questionTypes").isAuto(q));
   const wrong = questions.map((q, i) => (answers && require("./questionTypes").isRight(q, answers[i]) ? null : i + 1)).filter(Boolean);
   const fact = wrong.length === 0
     ? "Every question was answered correctly."
@@ -503,6 +504,32 @@ function dropInvalidSpellingGrammar(parsed, submittedText) {
 // "one gap sinks everything" failure the exam-technique and spelling
 // sections both hit) - the pre-numbered template in the prompt is what keeps
 // the array complete in practice.
+// The marking of the one short written answer. The mark ceiling and a blank answer are decided by
+// the server, not the model: outOf is always the question's marks, awarded is clamped to it, and
+// nothing written scores 0 whatever the model said.
+function repairShortAnswer(parsed, shortQ, written) {
+  if (!parsed || !shortQ) return parsed;
+  const sa = parsed.shortAnswer;
+  if (!sa || typeof sa !== "object") return parsed;
+  sa.outOf = shortQ.marks;
+  const n = Number(sa.awarded);
+  sa.awarded = Number.isFinite(n) ? Math.max(0, Math.min(shortQ.marks, Math.round(n))) : sa.awarded;
+  if (!(typeof written === "string" && written.trim().length >= 2)) {
+    sa.awarded = 0; sa.hit = [];
+    sa.comment = "You did not write an answer to this one. Have a go next time, even a short answer earns marks.";
+    sa.missed = shortQ.keyPoints.slice();
+  }
+  for (const k of ["hit", "missed"]) sa[k] = Array.isArray(sa[k]) ? sa[k].filter((x) => typeof x === "string" && x.trim()).map((x) => x.trim().slice(0, 200)).slice(0, 4) : [];
+  return parsed;
+}
+function validateShortAnswer(parsed, shortQ, issues) {
+  if (!shortQ) return;
+  const sa = parsed?.shortAnswer;
+  if (!sa || typeof sa !== "object") { issues.push("shortAnswer is missing"); return; }
+  if (!Number.isInteger(sa.awarded) || sa.awarded < 0 || sa.awarded > shortQ.marks) issues.push(`shortAnswer.awarded must be a whole number from 0 to ${shortQ.marks}`);
+  if (!checkString(sa.comment, 10, 450)) issues.push("shortAnswer.comment is missing, too short, or too long");
+}
+
 function validateQuestionReview(parsed, issues) {
   const items = parsed?.questionReview;
   if (!Array.isArray(items) || items.length < 1 || items.length > 10) {
@@ -561,21 +588,21 @@ function stripUngrantedSections(parsed, { capabilities, kind }) {
   // Retired features; nothing renders them any more.
   drop("commitOptions", "followUp");
 
-  if (!caps.deepFeedback) drop("growNext", "modelResponse", "modelFramework", "revisedFramework");
+  if (!caps.deepFeedback) drop("growNext", "modelResponse", "modelFramework", "revisedFramework", "shortAnswer");
   if (!caps.examTechnique) drop("examTechnique", "examSummary");
 
   if (kind === "reading") {
     // Reading has no free-text submission of the student's own to quote from.
     drop("highlights", "frameworkTip", "overallScore", "scoreReason", "spellingGrammar", "spellingGrammarTotal", "revisedStory", "modelResponse", "modelFramework", "revisedFramework");
   } else {
-    drop("questionReview", "readingStrategy");
+    drop("questionReview", "readingStrategy", "shortAnswer");
     if (caps.overallScore === false) drop("overallScore", "scoreReason");
     if (caps.spellingGrammar === false) drop("spellingGrammar", "spellingGrammarTotal");
   }
   return parsed;
 }
 
-function validateFeedback(parsed, { tier, standardsList, targetNames, submittedText, readingScore, capabilities, genre, lengthLevel, lengthInfo, examTargetNames }) {
+function validateFeedback(parsed, { tier, standardsList, targetNames, submittedText, readingScore, capabilities, genre, lengthLevel, lengthInfo, examTargetNames, shortQuestion }) {
   const issues = [];
   if (lengthInfo && !lengthLevel) lengthLevel = lengthInfo.level;
   if ((lengthLevel === "thin" || lengthLevel === "minimal") && checkString(parsed?.grow, 1, 100000) && !growDevelops(parsed.grow)) {
@@ -719,6 +746,7 @@ function validateFeedback(parsed, { tier, standardsList, targetNames, submittedT
   // Reading feedback only (readingScore is undefined for writing).
   if (readingScore !== undefined) {
     validateQuestionReview(parsed, issues);
+    validateShortAnswer(parsed, shortQuestion, issues);
     TECH.validateReadingStrategy(parsed, tier, issues);
   }
 
@@ -777,4 +805,4 @@ function validateWritingPrompt(parsed, { tier }) {
   return { ok: issues.length === 0, issues };
 }
 
-module.exports = { dropRestatingHighlights, repairResponses, dropGlowsQuotingMisspellings, repairZeroScoreGlow, repairReadingExamEvidence, validateFeedback, validatePassage, validateWritingPrompt, resolveTarget, dropInvalidSpellingGrammar, sanitizeQuestionReview, stripUngrantedSections, MAX_AVG_WORDS_PER_SENTENCE };
+module.exports = { repairShortAnswer, dropRestatingHighlights, repairResponses, dropGlowsQuotingMisspellings, repairZeroScoreGlow, repairReadingExamEvidence, validateFeedback, validatePassage, validateWritingPrompt, resolveTarget, dropInvalidSpellingGrammar, sanitizeQuestionReview, stripUngrantedSections, MAX_AVG_WORDS_PER_SENTENCE };

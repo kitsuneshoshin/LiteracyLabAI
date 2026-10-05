@@ -27,7 +27,7 @@ async function generateAndValidate(prompt, tier, opts = {}) {
   const rng = opts.rng || Math.random;
   const attemptWith = async (p, tpl) => {
     const attempt = await generateFeedbackJSON(p);
-    if (attempt.parsed && Array.isArray(attempt.parsed.questions)) attempt.parsed.questions = QT.normalizeQuestions(attempt.parsed.questions, tpl, rng);
+    if (attempt.parsed && Array.isArray(attempt.parsed.questions)) attempt.parsed.questions = QT.normalizeQuestions(attempt.parsed.questions, tpl, rng, tier);
     return { attempt, check: validatePassage(attempt.parsed, { tier, template: tpl, textType }) };
   };
 
@@ -117,7 +117,10 @@ module.exports = async function handler(req, res) {
     // usage charge for a passage the student never actually received.
     let parsed;
     try {
-      const template = QT.pickTemplate(tier);
+      // Premium learners from Year 3 or so also get one short written answer, marked by the AI after submitting.
+      const withShort = !!(usage.capabilities && usage.capabilities.deepFeedback) && !!QT.SHORT_MARKS[tier];
+      const baseTemplate = QT.pickTemplate(tier);
+      const template = withShort ? [...baseTemplate, "short"] : baseTemplate;
       const textType = QT.pickTextType(tier);
       const llmPrompt = buildReadingPassagePrompt({ tier, country, gradeLabel, textType, template });
       const fallbackPrompt = buildReadingPassagePrompt({ tier, country, gradeLabel, textType, template: QT.MC_FOUR });
@@ -133,7 +136,7 @@ module.exports = async function handler(req, res) {
 
     const { error: updateErr } = await supabase
       .from("submissions")
-      .update({ content: { generatedPassage: parsed }, total_questions: parsed.questions.length })
+      .update({ content: { generatedPassage: parsed }, total_questions: QT.autoTotal(parsed.questions) })
       .eq("id", reserved.id);
     if (updateErr) throw updateErr;
 
