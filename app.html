@@ -2568,7 +2568,8 @@ function FeedbackPanel({ tier, gradeLabel, country, interest, confidence, motiva
     : vocabFor(interest, tier, country);
 
   return (
-    <div className="animate-float-in flex flex-col gap-4">
+    <div className="animate-float-in grid lg:grid-cols-5 gap-4 items-start">
+     <div className="lg:col-span-3 flex flex-col gap-4 min-w-0">
       <OverallScorePanel feedback={feedback} />
 
       {submittedText && feedback?.highlights && (
@@ -2583,6 +2584,10 @@ function FeedbackPanel({ tier, gradeLabel, country, interest, confidence, motiva
         </div>
       )}
 
+      <ResponsesPanel feedback={feedback} />
+      <FrameworkTipPanel feedback={feedback} />
+     </div>
+     <div className="lg:col-span-2 flex flex-col gap-4 min-w-0">
       <SpellingGrammarPanel feedback={feedback} />
 
       {premiumSectionsLocked && (
@@ -2619,9 +2624,6 @@ function FeedbackPanel({ tier, gradeLabel, country, interest, confidence, motiva
 
       <ExamTechniquePanel feedback={feedback} />
 
-      <FrameworkTipPanel feedback={feedback} />
-      <ResponsesPanel feedback={feedback} />
-
       <Collapsible defaultOpen={true} borderColor="var(--border)" iconBg="var(--cyan-tint)" iconColor="var(--cyan-ink)"
         icon={<IconSparkle size={16} strokeWidth={2.2} />} title={`Vocabulary Upgrades — ${interestLabel} edition`}
         teaser={vocabList.map(([term])=>term).join(", ")}>
@@ -2629,6 +2631,7 @@ function FeedbackPanel({ tier, gradeLabel, country, interest, confidence, motiva
       </Collapsible>
 
       <ThumbsFeedback context="writing feedback" session={session} submissionId={submissionId} backendLive={backendLive} />
+     </div>
     </div>
   );
 }
@@ -3425,7 +3428,7 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
         // stretched full-bleed, same reasoning as a body-text column anywhere
         // else: a line of prose that runs the full width of a wide screen is
         // harder to read, not easier.
-        <div className="max-w-3xl mx-auto flex flex-col gap-4">
+        <div className={"mx-auto flex flex-col gap-4 " + (exerciseType === "writing" ? "max-w-6xl" : "max-w-3xl")}>
           {exerciseType === "writing" ? (
             <>
               <SubmissionRecap tier={tier} title={meta?.title || "Your story"} words={words} onNew={handleNew} />
