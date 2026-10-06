@@ -43,6 +43,85 @@ const VOCAB_TRICKS = {
   high: ["Roots and shades of meaning", "Use the root (often Latin or Greek) to unlock the meaning, and compare it with a close synonym to see the difference in tone."],
 };
 
+// ---- AFOREST: the persuasive devices. A checklist, not a paragraph shape: which of the seven did this piece use,
+// and which one would help most next. Names and meanings are fixed here, like the writing frameworks.
+const PERSUASIVE_DEVICES = [
+  ["Alliteration", "Words close together that start with the same sound, like \"big, bold and brave\"."],
+  ["Facts", "Information that can be checked and shown to be true."],
+  ["Opinion", "What the writer thinks or believes."],
+  ["Rhetorical question", "A question asked for effect, where the answer is meant to be obvious."],
+  ["Emotive language", "Words chosen to make the reader feel something strongly."],
+  ["Statistics", "Numbers or percentages used to back up a point."],
+  ["Triple", "Three words or ideas in a row, like \"safe, fair and fun\"."],
+];
+const DEVICE_LETTERS = "AFOREST";
+const deviceList = () => PERSUASIVE_DEVICES.map(([name, meaning], i) => ({ letter: DEVICE_LETTERS[i], name, meaning }));
+
+// Only for a persuasive piece, from Elementary up (an Early Years child has Opinion and Reason).
+function devicesApply(genre, tier) {
+  const { resolveGenre } = require("./writingFrameworks");
+  return resolveGenre(genre, tier) === "persuasive" && !!tier && tier !== "early";
+}
+function deviceClause(genre, tier) {
+  if (!devicesApply(genre, tier)) return "";
+  const list = PERSUASIVE_DEVICES.map(([n, m]) => `"${n}" (${m})`).join("; ");
+  return `\n\nPERSUASIVE DEVICES (AFOREST): This is a persuasive piece, so also check it against the AFOREST devices: ${list}. Return "deviceCheck": { "used": the devices the student genuinely used, each { "device": a name copied EXACTLY from the list, "quote": a short fragment (2 to 12 words) copied EXACTLY, verbatim, from their text that uses it } - none invented, at most 5; "tryNext": ONE device from the list they did NOT use, { "device": its exact name, "idea": one plain sentence (under 35 words) saying where in THEIR piece it would fit and what to try, without rewriting it for them }. If every device is already used, leave "tryNext" out. No analogy.`;
+}
+function deviceShape(genre, tier) {
+  return devicesApply(genre, tier)
+    ? '  "deviceCheck": { "used": [{ "device": "an exact device name from the list", "quote": "exact words from the student\'s text" }], "tryNext": { "device": "a device they did not use", "idea": "one plain sentence" } }'
+    : "";
+}
+const looseText = (s) => String(s || "").toLowerCase().replace(/[‘’]/g, "'").replace(/[^a-z0-9]+/g, " ").trim();
+const canonDevice = (name) => PERSUASIVE_DEVICES.find(([n]) => norm(n) === norm(name));
+// A bonus section: anything wrong is dropped, never a reason to fail the feedback. A device only counts as "used" if
+// its quote really is in the student's text.
+function repairDevices(parsed, text) {
+  if (!parsed || !("deviceCheck" in parsed)) return parsed;
+  const dc = parsed.deviceCheck;
+  if (!dc || typeof dc !== "object") { delete parsed.deviceCheck; return parsed; }
+  const hay = looseText(text);
+  const used = [], seen = new Set();
+  for (const u of Array.isArray(dc.used) ? dc.used : []) {
+    const d = u && typeof u === "object" ? canonDevice(u.device) : null;
+    const quote = u && typeof u.quote === "string" ? u.quote.trim() : "";
+    if (!d || seen.has(d[0]) || !quote || quote.split(/\s+/).length > 14 || !hay.includes(looseText(quote))) continue;
+    seen.add(d[0]); used.push({ device: d[0], quote });
+  }
+  let tryNext;
+  const t = dc.tryNext;
+  const td = t && typeof t === "object" ? canonDevice(t.device) : null;
+  const idea = t && typeof t.idea === "string" ? t.idea.trim() : "";
+  if (td && !seen.has(td[0]) && idea.length >= 10 && idea.length <= 260) tryNext = { device: td[0], idea };
+  if (!used.length && !tryNext) { delete parsed.deviceCheck; return parsed; }
+  parsed.deviceCheck = { used, ...(tryNext ? { tryNext } : {}), devices: deviceList() };
+  return parsed;
+}
+
+// ---- The Frayer card for a vocabulary word: definition, characteristics, example, non-example. The first and third
+// were always there; the model now adds the other two (from Elementary up). Both are optional: a missing or odd one is
+// dropped and the card shows what it has.
+const frayerOn = (tier) => !!tier && tier !== "early";
+function frayerClause(tier) {
+  if (!frayerOn(tier)) return "";
+  return `\n\nFRAYER WORD CARD: For each vocabulary item also return "characteristics": 2 to 6 words naming a key feature of the word's meaning (what it is like), and "nonExample": a short phrase (under 14 words) giving something that is NOT an example of the word, so the student sees the edges of its meaning. With the definition and example, these make a four-box word card.`;
+}
+function frayerShape(tier) {
+  return frayerOn(tier) ? ', "characteristics": "2-6 words: a key feature of the meaning", "nonExample": "a short phrase that is NOT an example of the word"' : "";
+}
+function repairFrayer(parsed) {
+  if (!parsed || !Array.isArray(parsed.vocab)) return parsed;
+  for (const v of parsed.vocab) {
+    if (!v || typeof v !== "object") continue;
+    for (const [k, min, max] of [["characteristics", 3, 80], ["nonExample", 3, 120]]) {
+      if (!(k in v)) continue;
+      const t = typeof v[k] === "string" ? v[k].trim().replace(/\.$/, "") : "";
+      if (t.length < min || t.length > max) delete v[k]; else v[k] = t;
+    }
+  }
+  return parsed;
+}
+
 const tierKey = (tier) => (READING_STRATEGIES[tier] ? tier : "elementary");
 
 function strategiesFor(tier) {
@@ -107,4 +186,6 @@ module.exports = {
   READING_STRATEGIES, VOCAB_TRICKS, strategiesFor, vocabTrickFor, resolveStrategy,
   readingStrategyClause, readingStrategyShape, vocabTrickClause,
   validateReadingStrategy, attachReadingStrategy, repairVocabTricks,
+  PERSUASIVE_DEVICES, devicesApply, deviceClause, deviceShape, repairDevices,
+  frayerClause, frayerShape, repairFrayer,
 };

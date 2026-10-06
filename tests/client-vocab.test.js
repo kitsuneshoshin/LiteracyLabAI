@@ -8,7 +8,7 @@ const path = require("node:path");
 // and that a blocked or corrupted browser store never breaks practice.
 const APP = fs.readFileSync(path.join(__dirname, "..", "app.html"), "utf8");
 const start = APP.indexOf("const VOCAB_BOXES = ");
-const end = APP.indexOf("function MasteryPips");
+const end = APP.indexOf("// The Frayer card for a word");
 assert.ok(start > 0 && end > start, "the vocabulary helpers are in app.html");
 function load(localStorage) {
   return new Function("localStorage", APP.slice(start, end) + "\nreturn { VOCAB_BOXES, vocabNextBox, vocabTermKey, vocabEntry, vocabMerge, vocabBoxOf, vocabDeck, loadVocabBoxes, saveVocabBoxes };")(localStorage);

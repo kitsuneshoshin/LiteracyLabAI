@@ -32,7 +32,7 @@ function proseOf(words) {
 
 // What a model would send for each style, in its simple shape.
 const RAW = {
-  short: (tier) => ({ q: "Why did Mia move her sign closer to the road?", modelAnswer: "She moved it so that people walking past would notice the stall, because by ten only two people had stopped.", keyPoints: ["she wanted more people to notice the stall", "only two people had stopped by ten", "a bigger price made the stall clearer"].slice(0, { elementary: 2, middle: 3, high: 3 }[tier] || 3) }),
+  short: (tier) => ({ q: "Why did Mia move her sign closer to the road?", modelParts: (() => { const fw = QT.answerFramework(QT.SHORT_FRAMEWORK[tier] || "RACE"); return fw.parts.map(([n]) => ({ part: n, text: n + ": she moved it so that people walking past would notice the stall." })); })(), keyPoints: ["she wanted more people to notice the stall", "only two people had stopped by ten", "a bigger price made the stall clearer"].slice(0, { elementary: 2, middle: 3, high: 3 }[tier] || 3) }),
   mc: () => ({ q: "How did Mia feel after ten o'clock?", options: ["Worried about sales", "Delighted by the crowd", "Cross with her friend", "Sleepy and bored"], correct: 0 }),
   tfng: () => ({ q: "Mia sold every cake by noon.", correct: 0 }),
   evidence: () => ({ q: "Which line from the passage best supports your answer to the question before?", options: ["By ten, only two people had stopped, and both only looked.", "Mia set up her stall by the gate at nine.", "Soon a queue had formed, and by noon every cake was gone.", "She moved the sign closer to the road and wrote the price in bigger letters."], correct: 0 }),
@@ -393,7 +393,10 @@ test("a short written answer is never part of the instant score, and the browser
   assert.equal(QT.shortIndex(qs), 1);
   assert.equal(QT.shortIndex([qs[0]]), -1);
   const pub = QT.publicQuestion(qs[1]);
-  assert.deepEqual(Object.keys(pub).sort(), ["marks", "q", "type"]);
+  assert.deepEqual(Object.keys(pub).sort(), ["framework", "marks", "q", "type"]);
+  assert.equal(pub.framework.name, "RACE");
+  assert.deepEqual(pub.framework.parts.map((p) => p.name), ["Restate", "Answer", "Cite", "Explain"]);
+  assert.ok(!("modelParts" in pub) && !("modelAnswer" in pub) && !("keyPoints" in pub));
   assert.equal(pub.marks, 3);
   assert.equal(QT.isAnswered(qs[1], "  "), false);
   assert.equal(QT.isAnswered(qs[1], "Because she wanted customers."), true);

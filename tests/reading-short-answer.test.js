@@ -14,7 +14,7 @@ const COUNTRY = "🇬🇧 United Kingdom";
 const GRADE = "Year 5";
 const PASSAGE = "Mia set up her stall by the gate at nine. By ten, only two people had stopped, and both only looked. She moved the sign closer to the road and wrote the price in bigger letters. Soon a queue had formed, and by noon every cake was gone. Mia counted the coins twice and smiled all the way home.";
 const MC = (i) => ({ type: "mc", q: `Question number ${i + 1} about the cake stall?`, options: ["Option A", "Option B", "Option C", "Option D"], correct: i % 4 });
-const SHORT = { type: "short", q: "Why did Mia move her sign closer to the road?", marks: 2, modelAnswer: "She moved it so people walking past would notice her stall, because only two had stopped by ten.", keyPoints: ["she wanted more people to notice the stall", "only two people had stopped by ten"] };
+const SHORT = { type: "short", q: "Why did Mia move her sign closer to the road?", marks: 2, framework: "RACE", modelParts: [{ part: "Restate", text: "Mia moved her sign closer to the road." }, { part: "Answer", text: "She wanted more people to notice her stall." }, { part: "Cite", text: "By ten only two people had stopped." }, { part: "Explain", text: "A sign nearer the road is seen by more people." }], modelAnswer: "Mia moved her sign closer to the road. She wanted more people to notice her stall. By ten only two people had stopped. A sign nearer the road is seen by more people.", keyPoints: ["she wanted more people to notice the stall", "only two people had stopped by ten"] };
 const QUESTIONS = [0, 1, 2, 3, 0].map(MC).concat([SHORT]);
 const RIGHT = [0, 1, 2, 3, 0];
 

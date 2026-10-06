@@ -83,7 +83,7 @@ module.exports = async function handler(req, res) {
     // "recent" slice.
     const vocabWords = dedupeByTerm(
       submissions.flatMap((s) => Array.isArray(s.feedback?.vocab)
-        ? s.feedback.vocab.filter((v) => v?.term && v?.definition).map((v) => ({ term: v.term, definition: v.definition, example: v.example, trick: v.trick, createdAt: s.created_at }))
+        ? s.feedback.vocab.filter((v) => v?.term && v?.definition).map((v) => ({ term: v.term, definition: v.definition, example: v.example, trick: v.trick, characteristics: v.characteristics, nonExample: v.nonExample, createdAt: s.created_at }))
         : [])
     );
 

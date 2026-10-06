@@ -1379,6 +1379,27 @@ function saveVocabBoxes(childId, boxes){
   try { localStorage.setItem("ll_vocab_boxes_" + childId, JSON.stringify(boxes)); } catch (e) { /* private window: practice still works, it just is not remembered here */ }
 }
 
+// The Frayer card for a word: definition, characteristics, example and non-example. Older words only have the
+// definition and example, so a box with nothing to show is left out rather than shown empty.
+function frayerCells(w){
+  const clean = (t) => (typeof t === "string" ? t.trim() : "");
+  return [["Definition", clean(w && w.definition)], ["Characteristics", clean(w && w.characteristics)], ["Example", clean(w && w.example)], ["Not an example", clean(w && w.nonExample)]].filter(([, text]) => text);
+}
+function FrayerCard({ w, big = false }){
+  const cells = frayerCells(w);
+  if (cells.length === 0) return null;
+  return (
+    <div className={"grid gap-2 " + (cells.length > 1 ? "sm:grid-cols-2" : "")} role="group" aria-label={"Word card for " + (w && w.term)}>
+      {cells.map(([label, text]) => (
+        <div key={label} className="rounded-lg p-2.5" style={{ background: label === "Not an example" ? "var(--bad-tint)" : "var(--surface)", border: "1px solid var(--border-soft)" }}>
+          <div className="text-[10.5px] font-bold uppercase tracking-wide mb-0.5" style={{ color: label === "Not an example" ? "var(--bad)" : "var(--ink-faint)" }}>{label}</div>
+          <p className={(big ? "text-[14px]" : "text-[13px]") + " leading-snug" + (label === "Example" || label === "Not an example" ? " italic" : "")} style={{ color: "var(--ink)" }}>{label === "Example" ? "“" + text + "”" : text}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function MasteryPips({ box }){
   return (
     <span className="inline-flex items-center gap-1" title={VOCAB_BOX_NAME[box]} aria-label={VOCAB_BOX_NAME[box]}>
@@ -1563,6 +1584,8 @@ function VocabularyBank({ session, childId, backendLive, onSeePlans, displayName
                   </div>
                   <p className="text-[13px] leading-snug" style={{ color: "var(--ink)" }}>{v.definition}</p>
                   {v.example && <p className="text-[13px] leading-snug italic" style={{ color: "var(--ink-soft)" }}>“{v.example}”</p>}
+                  {v.characteristics && <p className="text-[12.5px] leading-snug" style={{ color: "var(--ink-soft)" }}><span className="font-semibold" style={{ color: "var(--ink)" }}>It is: </span>{v.characteristics}</p>}
+                  {v.nonExample && <p className="text-[12.5px] leading-snug" style={{ color: "var(--ink-soft)" }}><span className="font-semibold" style={{ color: "var(--bad)" }}>Not: </span>{v.nonExample}</p>}
                   {v.trick && <p className="text-[12.5px] leading-snug" style={{ color: "var(--cyan-ink)" }}><span className="font-semibold">Word trick: </span>{v.trick}</p>}
                 </div>
               ))}
@@ -1619,8 +1642,7 @@ function VocabFlashcards({ deck, boxes, onRate, onBack, onAgain }){
         <div className="font-display font-extrabold text-3xl" style={{ color: "var(--cyan-ink)" }}>{card.term}</div>
         {flipped ? (
           <div className="flex flex-col gap-2">
-            <p className="text-[15px] leading-relaxed font-read" style={{ color: "var(--ink)" }}>{card.definition}</p>
-            {card.example && <p className="text-[14px] leading-relaxed italic font-read" style={{ color: "var(--ink-soft)" }}>“{card.example}”</p>}
+            <FrayerCard w={card} big />
             {card.trick && <p className="text-[13px]" style={{ color: "var(--cyan-ink)" }}><span className="font-semibold">Word trick: </span>{card.trick}</p>}
           </div>
         ) : (
@@ -2785,7 +2807,7 @@ function FeedbackPanel({ tier, gradeLabel, country, interest, confidence, motiva
   const glow = feedback?.glow || `${opener}${PRAISE[tier](gradeLabel, curriculum)}`;
   const grow = feedback?.grow || growthTipFor(tier, interest, motivation, country, confidence);
   const vocabList = feedback?.vocab
-    ? feedback.vocab.map(v=>[v.term, v.definition, v.example, v.trick])
+    ? feedback.vocab.map(v=>[v.term, v.definition, v.example, v.trick, v.characteristics, v.nonExample])
     : vocabFor(interest, tier, country);
 
   return (
@@ -2807,6 +2829,7 @@ function FeedbackPanel({ tier, gradeLabel, country, interest, confidence, motiva
 
       <ResponsesPanel feedback={feedback} />
       <FrameworkTipPanel feedback={feedback} />
+      <DevicesPanel feedback={feedback} />
      </div>
      <div className="lg:col-span-2 flex flex-col gap-4 min-w-0">
       <SpellingGrammarPanel feedback={feedback} />
@@ -2987,13 +3010,17 @@ function ExamTechniquePanel({ feedback }){
 function VocabList({ items }){
   return (
     <div className="flex flex-col gap-2.5">
-      {items.map(([term, def, example, trick])=> (
+      {items.map(([term, def, example, trick, characteristics, nonExample])=> (
         <div key={term} className="rounded-xl p-3.5" style={{ background: "var(--cyan-tint)" }}>
           <span className="font-display font-bold text-sm" style={{ color: "var(--cyan-ink)" }}>{term}</span>
+          {(characteristics || nonExample) ? (
+            <div className="mt-1.5"><FrayerCard w={{ term, definition: def, example, characteristics, nonExample }} /></div>
+          ) : (<>
           <p className="text-[13px] leading-snug mt-1" style={{ color: "var(--ink)" }}>{def}</p>
           {example && (
             <p className="text-[13px] leading-snug mt-1.5 italic" style={{ color: "var(--ink-soft)" }}>“{example}”</p>
           )}
+          </>)}
           {trick && (
             <p className="text-[12.5px] leading-snug mt-1.5" style={{ color: "var(--cyan-ink)" }}><span className="font-semibold">Word trick: </span>{trick}</p>
           )}
@@ -3061,6 +3088,48 @@ function SpellingGrammarPanel({ feedback }){
 // wrote, rather than just leaving "PEEL" as an unexplained mastery-table
 // label. Rendered only when the server actually returned one — never set for
 // reading feedback.
+// AFOREST: which persuasive devices the piece used (each with the student's own words), and one to try next.
+function DevicesPanel({ feedback }){
+  const dc = feedback && feedback.deviceCheck;
+  if (!dc || !Array.isArray(dc.devices) || dc.devices.length === 0) return null;
+  const used = Array.isArray(dc.used) ? dc.used : [];
+  const usedNames = new Set(used.map((u) => u.device));
+  const next = dc.tryNext && dc.tryNext.device ? dc.tryNext : null;
+  return (
+    <Collapsible defaultOpen={true} borderColor="var(--border)" iconBg="var(--gold-tint)" iconColor="var(--gold-ink)"
+      icon={<IconGrid size={15} strokeWidth={2.2} />} title="Persuasive devices (AFOREST)"
+      teaser={used.length + " of " + dc.devices.length + " used" + (next ? ", try " + next.device : "")}>
+      <div className="flex flex-wrap gap-1.5 mb-3" role="list" aria-label="The seven AFOREST devices">
+        {dc.devices.map((d) => {
+          const on = usedNames.has(d.name), isNext = next && next.device === d.name;
+          return (
+            <span key={d.name} role="listitem" title={d.meaning} className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[12px] font-semibold"
+              style={{ background: on ? "var(--good-tint)" : "var(--surface-2)", color: on ? "var(--good)" : isNext ? "var(--gold-ink)" : "var(--ink-faint)", border: "1px solid " + (on ? "var(--good)" : isNext ? "var(--gold)" : "var(--border)") }}>
+              <span className="font-display font-extrabold">{d.letter}</span>{d.name}{on ? <IconCheck size={12} strokeWidth={3} /> : null}
+            </span>
+          );
+        })}
+      </div>
+      {used.length > 0 && (
+        <div className="flex flex-col gap-1.5 mb-3">
+          {used.map((u) => (
+            <p key={u.device} className="text-[13px] leading-snug" style={{ color: "var(--ink-soft)" }}>
+              <span className="font-semibold" style={{ color: "var(--good)" }}>{u.device}: </span><span className="italic font-read">“{u.quote}”</span>
+            </p>
+          ))}
+        </div>
+      )}
+      {next && (
+        <div className="rounded-xl p-3" style={{ background: "var(--gold-tint)" }}>
+          <div className="text-[11px] font-bold uppercase tracking-wide" style={{ color: "var(--gold-ink)" }}>Try next: {next.device}</div>
+          <p className="text-[13.5px] leading-snug mt-0.5" style={{ color: "var(--ink)" }}>{next.idea}</p>
+          {(() => { const d = dc.devices.find((x) => x.name === next.device); return d ? <p className="text-[12px] mt-1" style={{ color: "var(--ink-soft)" }}>{d.name}: {d.meaning}</p> : null; })()}
+        </div>
+      )}
+    </Collapsible>
+  );
+}
+
 function FrameworkTipPanel({ feedback }){
   const tip = feedback?.frameworkTip;
   // "quote"/"revision" ground this in the student's OWN submission (same
@@ -3258,11 +3327,31 @@ function QuestionReviewPanel({ feedback, questions, answers }){
                 {marked && Array.isArray(marked.missed) && marked.missed.length > 0 && (
                   <p className="text-[12.5px] mt-1" style={{ color: "var(--ink-soft)" }}><span className="font-semibold">To earn more marks: </span>{marked.missed.join("; ")}</p>
                 )}
+                {marked && Array.isArray(marked.parts) && marked.parts.length > 0 && (
+                  <div className="mt-1.5 flex flex-wrap items-center gap-1.5" aria-label={(q.framework ? q.framework.name : "Answer") + " parts used"}>
+                    <span className="text-[11px] font-bold uppercase tracking-wide" style={{ color: "var(--ink-faint)" }}>{q.framework ? q.framework.name : "Parts"}</span>
+                    {marked.parts.map((pt) => (
+                      <span key={pt.name} className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11.5px] font-semibold" style={{ background: pt.used ? "var(--good-tint)" : "var(--surface)", color: pt.used ? "var(--good)" : "var(--ink-faint)", border: "1px solid " + (pt.used ? "var(--good)" : "var(--border)") }}>
+                        {pt.used ? <IconCheck size={11} strokeWidth={3} /> : <span aria-hidden="true">○</span>}{pt.name}
+                      </span>
+                    ))}
+                  </div>
+                )}
                 {!marked && <p className="text-[12.5px] mt-1.5" style={{ color: "var(--ink-faint)" }}>We could not mark this one this time, so compare it with the model answer below.</p>}
                 {q.modelAnswer && (
                   <div className="mt-2 rounded-lg p-2.5" style={{ background: "var(--good-tint)" }}>
-                    <div className="text-[11px] font-bold uppercase tracking-wide" style={{ color: "var(--good)" }}>A strong answer</div>
-                    <p className="text-[13.5px] leading-snug mt-0.5 font-read" style={{ color: "var(--ink)" }}>{q.modelAnswer}</p>
+                    <div className="text-[11px] font-bold uppercase tracking-wide" style={{ color: "var(--good)" }}>A strong answer{q.framework ? ", built with " + q.framework.name : ""}</div>
+                    {Array.isArray(q.modelParts) && q.modelParts.length > 0 ? (
+                      <p className="text-[13.5px] leading-relaxed mt-1 font-read" style={{ color: "var(--ink)" }}>
+                        {q.modelParts.map((m, k) => (
+                          <span key={k}>
+                            <span className="inline-block rounded px-1 mr-1 align-baseline text-[10.5px] font-bold uppercase tracking-wide" style={{ background: "var(--surface)", color: "var(--good)" }}>{m.part}</span>{m.text}{" "}
+                          </span>
+                        ))}
+                      </p>
+                    ) : (
+                      <p className="text-[13.5px] leading-snug mt-0.5 font-read" style={{ color: "var(--ink)" }}>{q.modelAnswer}</p>
+                    )}
                   </div>
                 )}
               </div>
@@ -3330,7 +3419,7 @@ function ReadingFeedbackPanel({ tier, country, interest, confidence, motivation,
   const glow = feedback?.glow || `${opener}${readingGlows(tier, score, totalQ, curriculum)}`;
   const grow = feedback?.grow || readingGrows(tier, score, totalQ, interest, country, motivation, confidence);
   const vocabList = feedback?.vocab
-    ? feedback.vocab.map(v=>[v.term, v.definition, v.example, v.trick])
+    ? feedback.vocab.map(v=>[v.term, v.definition, v.example, v.trick, v.characteristics, v.nonExample])
     : vocabFor(interest, tier, country);
 
   const split = !!bank;
@@ -4042,6 +4131,14 @@ function ReadingQuestion({ q, qi, answer, setAnswer, revealed, disabled }){
       <div>
         {label}
         <div className="text-sm font-semibold mb-2" style={{ color: "var(--ink)" }}>{qi + 1}. {q.q} <span className="font-normal text-xs" style={{ color: "var(--ink-faint)" }}>({q.marks} marks)</span></div>
+        {q.framework && Array.isArray(q.framework.parts) && (
+          <div className="rounded-xl p-3 mb-2" style={{ background: "var(--cyan-tint)" }}>
+            <div className="text-[12px] font-bold" style={{ color: "var(--cyan-ink)" }}>Build your answer with {q.framework.name}</div>
+            <ul className="mt-1 flex flex-col gap-0.5">
+              {q.framework.parts.map((pt) => <li key={pt.name} className="text-[12.5px] leading-snug" style={{ color: "var(--ink)" }}><strong>{pt.name}</strong>: {pt.meaning}</li>)}
+            </ul>
+          </div>
+        )}
         <textarea value={text} disabled={lock} maxLength={1200} rows={4} aria-label={"Your written answer to question " + (qi + 1)}
           onChange={(e) => setAnswer(e.target.value)} placeholder="Write one to three sentences. Use the passage to support your answer."
           className="focus-ring w-full rounded-xl border px-3.5 py-2.5 text-sm font-read leading-relaxed"

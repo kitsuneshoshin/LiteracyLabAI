@@ -522,6 +522,17 @@ function repairShortAnswer(parsed, shortQ, written) {
     sa.missed = kp.filter((_, i) => !made.includes(i + 1));
     if (blank) sa.comment = "You did not write an answer to this one. Have a go next time, even a short answer earns marks.";
   }
+  // Which parts of the answer-building framework (RACE or CER) the answer used: for the student's information only.
+  const fw = require("./questionTypes").answerFramework(shortQ.framework);
+  if (fw) {
+    const names = fw.parts.map(([n]) => n);
+    const norm = (s) => String(s == null ? "" : s).toLowerCase().replace(/[^a-z]/g, "");
+    const said = Array.isArray(sa.structure) ? new Set(sa.structure.map(norm)) : null;
+    if (blank) sa.parts = names.map((name) => ({ name, used: false }));
+    else if (said) sa.parts = names.map((name) => ({ name, used: said.has(norm(name)) }));
+    else delete sa.parts;
+    delete sa.structure;
+  }
   return parsed;
 }
 function validateShortAnswer(parsed, shortQ, issues) {

@@ -111,6 +111,8 @@ async function runOne(s, kind, generate, deadline = Infinity, validate = validat
         if (built.caps.spellingGrammar !== false) { dropInvalidSpellingGrammar(parsed, s.text); dropGlowsQuotingMisspellings(parsed); }
         dropRestatingHighlights(parsed, s.text);
         TECH.repairVocabTricks(parsed);
+        TECH.repairFrayer(parsed);
+        if (TECH.devicesApply(built.genre, s.tier)) TECH.repairDevices(parsed, s.text); else delete parsed.deviceCheck;
         if (built.caps.deepFeedback) repairResponses(parsed, built.genre, s.tier);
         repairExamEvidence(parsed);
       } else {

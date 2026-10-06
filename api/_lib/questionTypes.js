@@ -60,6 +60,26 @@ function pickTextType(tier, rng = Math.random) {
 const SHORT_MARKS = { elementary: 2, middle: 3, high: 3 };
 const SHORT_MAX_CHARS = 1200;
 
+// How to build a written answer, by age: RACE (Restate, Answer, Cite, Explain) from Elementary and Middle, and CER (Claim,
+// Evidence, Reasoning) for High School. Fixed here, like the writing frameworks, so a model can never invent a definition.
+// The student sees the steps beside the question; the model answer is written in these parts and marking notes which the
+// student used (for information only: the marks come from the key ideas).
+const ANSWER_FRAMEWORKS = {
+  RACE: {
+    name: "RACE",
+    description: "A way to build a written answer: Restate the question, Answer it, Cite evidence from the text, Explain how the evidence proves your answer.",
+    parts: [["Restate", "Say the question again as the start of your answer."], ["Answer", "Give your answer clearly."], ["Cite", "Quote or point to evidence from the text."], ["Explain", "Say how that evidence proves your answer."]],
+  },
+  CER: {
+    name: "CER",
+    description: "A way to build a written answer: Claim (state your answer), Evidence (a quote or detail from the text), Reasoning (explain how the evidence supports the claim).",
+    parts: [["Claim", "State your answer or position."], ["Evidence", "Give a quote or detail from the text that supports it."], ["Reasoning", "Explain how the evidence supports your claim."]],
+  },
+};
+const SHORT_FRAMEWORK = { elementary: "RACE", middle: "RACE", high: "CER" };
+const partsOf = (fw) => (fw ? fw.parts.map(([name, meaning]) => ({ name, meaning })) : []);
+const answerFramework = (name) => ANSWER_FRAMEWORKS[name] || null;
+
 const STYLE_LABEL = {
   short: "short written answer, marked by you",
   mc: "multiple choice", tfng: "true, false or not given", evidence: "which line proves it",
@@ -130,7 +150,11 @@ function publicQuestion(q) {
   if (q.items) out.items = q.items;
   if (q.blanks) out.blanks = q.blanks;
   if (q.text) out.text = q.text;
-  if (styleOf(q) === "short") out.marks = q.marks;
+  if (styleOf(q) === "short") {
+    out.marks = q.marks;
+    const fw = answerFramework(q.framework);
+    if (fw) out.framework = { name: fw.name, description: fw.description, parts: partsOf(fw) };
+  }
   return out;
 }
 
@@ -153,7 +177,16 @@ function normalizeQuestions(questions, template, rng = Math.random, tier) {
     const style = template ? template[i] : styleOf(raw);
     if (!raw || typeof raw !== "object" || !style) return raw;
     switch (style) {
-      case "short": return { type: "short", q: raw.q, marks: SHORT_MARKS[tier] || 2, modelAnswer: raw.modelAnswer, keyPoints: raw.keyPoints };
+      case "short": {
+        const framework = SHORT_FRAMEWORK[tier] || "RACE";
+        const names = ANSWER_FRAMEWORKS[framework].parts.map(([n]) => n);
+        const given = isArr(raw.modelParts) ? raw.modelParts.filter((m) => m && typeof m === "object") : null;
+        const modelParts = given ? given.map((m) => {
+          const part = String(m.part == null ? "" : m.part).trim();
+          return { part: names.find((n) => norm(n) === norm(part)) || part, text: String(m.text == null ? "" : m.text).trim() };
+        }) : undefined;
+        return { type: "short", q: raw.q, marks: SHORT_MARKS[tier] || 2, framework, modelParts, modelAnswer: modelParts ? modelParts.map((m) => m.text).join(" ") : raw.modelAnswer, keyPoints: raw.keyPoints };
+      }
       case "tfng": return { type: "tfng", q: raw.q, options: TFNG_OPTIONS.slice(), correct: raw.correct };
       case "evidence": return { type: "evidence", q: raw.q, options: raw.options, correct: raw.correct };
       case "order": {
@@ -211,6 +244,13 @@ function validateQuestions(questions, { template, passage } = {}, issues) {
       case "short": {
         if (!Number.isInteger(q.marks) || q.marks < 1 || q.marks > 4) issues.push(`${at}.marks must be an integer from 1 to 4`);
         if (!okStr(q.modelAnswer, 15, 700)) issues.push(`${at}.modelAnswer is missing or an unreasonable length`);
+        const afw = answerFramework(q.framework);
+        if (afw) {
+          const mp = q.modelParts;
+          if (!isArr(mp) || mp.length !== afw.parts.length || !mp.every((m, k) => m && norm(m.part) === norm(afw.parts[k][0]) && okStr(m.text, 3, 320))) {
+            issues.push(`${at}.modelParts must be exactly ${afw.parts.length} segments in this order, each with its own text: ${afw.parts.map(([n]) => n).join(", ")}`);
+          }
+        }
         const kp = q.keyPoints;
         if (!isArr(kp) || kp.length !== q.marks || !kp.every((k) => okStr(k, 3, 180))) issues.push(`${at}.keyPoints must list exactly ${q.marks} short ideas a good answer includes (one for each mark)`);
         if (okStr(q.q, 5, 300) && !/\?\s*$/.test(q.q.trim()) && !/^(explain|describe|why|how|what|which|give|say|write)\b/i.test(q.q.trim())) issues.push(`${at}.q must be a question or instruction`);
@@ -281,7 +321,7 @@ const CLOZE_GAPS = { early: 1, elementary: 1, middle: 2, high: 2 };
 
 function styleRule(style, n, tier) {
   switch (style) {
-    case "short": return `"q": ONE open question that needs a written answer of one to three sentences and asks the student to explain, infer or support a view using the passage (for example "Why does ... ? Use evidence from the passage." or "How does the writer show ...?"). "modelAnswer": a strong answer of ${tier === "elementary" ? "one or two" : "two or three"} sentences, written the way a good student of this age would write it. "keyPoints": exactly ${SHORT_MARKS[tier] || 2} short ideas (under 18 words each), one for each mark, that a correct answer should make, drawn from the passage and clearly different from each other - the marking is based on these. The question must have a clear, passage-supported answer, not a matter of opinion.`;
+    case "short": return `"q": ONE open question that needs a written answer of one to three sentences and asks the student to explain, infer or support a view using the passage (for example "Why does ... ? Use evidence from the passage." or "How does the writer show ...?"). "modelParts": the strong answer, written the way a good student of this age would write it, as exactly ${(ANSWER_FRAMEWORKS[SHORT_FRAMEWORK[tier] || "RACE"].parts).length} objects in this order, one for each part of ${SHORT_FRAMEWORK[tier] || "RACE"} (${ANSWER_FRAMEWORKS[SHORT_FRAMEWORK[tier] || "RACE"].parts.map(([n, m]) => n + ": " + m).join(" ")}): { "part": the part's name, "text": one sentence (under 30 words) that does that part's job }. Read in order the texts are the whole answer, and it must make every key idea below. "keyPoints": exactly ${SHORT_MARKS[tier] || 2} short ideas (under 18 words each), one for each mark, that a correct answer should make, drawn from the passage and clearly different from each other - the marking is based on these. The question must have a clear, passage-supported answer, not a matter of opinion.`;
     case "mc": return '"q": a question about the passage, "options": exactly 4 answer choices, "correct": the index (0 to 3) of the one clearly correct choice. The other 3 must be plausible to a careless reader but clearly wrong to a careful one.';
     case "tfng": return '"q": ONE statement about the passage (a statement, not a question). "correct": 0 if the passage clearly says it is true, 1 if the passage clearly says the opposite, 2 if the passage simply does not say either way. Make "Not given" mean the passage really is silent, not that the answer is hard.';
     case "evidence": return `"q": "Which line from the passage best supports your answer to question ${n - 1}?" - "options": exactly 4 SHORT quotations (under 25 words each), each copied EXACTLY, word for word, from the passage; one is the best support for the correct answer to question ${n - 1}, the others come from elsewhere in the passage. "correct": the index (0 to 3) of the best one.`;
@@ -297,7 +337,7 @@ function styleRule(style, n, tier) {
 
 function styleShape(style, tier) {
   switch (style) {
-    case "short": return '{ "type": "short", "q": "an open question answered in 1-3 sentences", "modelAnswer": "a strong model answer", "keyPoints": ["idea a good answer makes", "second idea"] }';
+    case "short": return '{ "type": "short", "q": "an open question answered in 1-3 sentences", "modelParts": [' + ANSWER_FRAMEWORKS[SHORT_FRAMEWORK[tier] || "RACE"].parts.map(([n]) => '{ "part": "' + n + '", "text": "one sentence doing that part\'s job" }').join(", ") + '], "keyPoints": ["idea a good answer makes", "second idea"] }';
     case "mc": return '{ "type": "mc", "q": "question text", "options": ["option A", "option B", "option C", "option D"], "correct": 0 }';
     case "tfng": return '{ "type": "tfng", "q": "a statement about the passage", "correct": 0 }';
     case "evidence": return '{ "type": "evidence", "q": "Which line from the passage best supports your answer to the question before?", "options": ["exact quote 1", "exact quote 2", "exact quote 3", "exact quote 4"], "correct": 0 }';
@@ -316,7 +356,7 @@ function questionShapeText(template, tier) {
 }
 
 module.exports = {
-  SHORT_MARKS, SHORT_MAX_CHARS, isAuto, autoTotal, shortIndex,
+  ANSWER_FRAMEWORKS, SHORT_FRAMEWORK, answerFramework, SHORT_MARKS, SHORT_MAX_CHARS, isAuto, autoTotal, shortIndex,
   TFNG_OPTIONS, TEMPLATES, MC_FOUR, TEXT_TYPES, STYLE_LABEL,
   pickTemplate, pickTextType, shuffle, styleOf, isAnswered, isRight, answerText, correctText, scoreAnswers,
   publicQuestion, describeForPrompt, normalizeQuestions, validateQuestions, questionPlanText, questionShapeText,
