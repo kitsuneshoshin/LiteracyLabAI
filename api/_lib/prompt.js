@@ -259,22 +259,44 @@ function successCriteria(tier, { includeFramework, includeScore, includeSpelling
 8. Every "grow" highlight has a "revision" that is an actual rewrite of its quote (different wording, applying the fix) — never the same text repeated, and never just advice about the quote instead of a rewrite of it.${(tier === "middle" || tier === "high") ? '\n9. Every "revision" reads as a natural continuation of this student\'s own formal, third-person essay — pure academic argument, with NO interest-based analogy dropped into the revision text itself in any phrasing ("like how I...", "similar to how...", "just like...", etc). That framing belongs only in the "grow" field.' : ""}${fw ? `\n10. frameworkTip.name is EXACTLY "${fw.name}", copied verbatim; frameworkTip.quote is an exact, verbatim substring of the submitted text above (not a paraphrase); and frameworkTip.revision is a genuine rewrite of that exact quote (different wording, actually applying "${fw.name}") — never the same text repeated, never an unrelated invented example.` : ""}${includeScore ? '\n11. overallScore is an integer 1-10 (never a string, never out of range) judging the WHOLE piece, not just the one glow/grow — if it disagrees with how positive the glow/grow read, that\'s fine and expected, since the score is the more critical, whole-piece judgement. scoreReason names a real pattern across the piece, not just a restatement of the single "grow" detail.' : ""}${includeSpelling ? '\n12. spellingGrammar contains only real errors (each "quote" a verbatim substring, each "correction" that same fragment with just the error fixed) — an empty array if the piece is genuinely clean, never a fabricated error to avoid returning an empty list, and never a stylistic choice mislabelled as a mistake. spellingGrammarTotal is the TRUE count of real errors, never silently capped to match the list length when there are genuinely more than 8.' : ""}`;
 }
 
-// part: undefined = everything in one prompt; "core" = the marking only; "responses" = only the rewrite of the
-// student's piece and the model response with framework labels (see splitGenerate.js, which asks for the two at once).
+// part: undefined = everything in one prompt. For Premium the answer is asked as three prompts at once (see
+// splitGenerate.js): "core" = the coaching (glow, grow, next step, highlights, vocabulary, framework spotlight),
+// "assess" = the assessment (score, spelling and grammar, exam bands), "responses" = only the rewrite of the
+// student's piece and the model response with framework labels.
 function buildWritingPrompt({ tier, country, gradeLabel, interest, confidenceWriting, motivation, prompt, text, targetNames, targets, capabilities, genre, part }) {
   const caps = capabilities || {};
   if (part === "responses") return buildResponsesPrompt({ tier, country, gradeLabel, prompt, text, capabilities: caps, genre });
+  if (part === "assess") return buildAssessPrompt({ tier, country, gradeLabel, prompt, text, targets, capabilities: caps });
+  const coreOnly = part === "core"; // the coaching on its own: no assessment, no rewrites
   const allTargets = targets;
   targets = examTargetsFor(allTargets, "writing");
   const assessment = assessLength({ text, tier, country, gradeLabel });
   const origWords = RESP.wordCount(text);
   const fw = frameworkFor(genre, tier);
   const wantsModel = !!caps.deepFeedback && !!fw;
-  const wantsExam = caps.examTechnique && examTechniqueSupported(tier) && Array.isArray(targets) && targets.length > 0;
+  const wantsExam = !coreOnly && caps.examTechnique && examTechniqueSupported(tier) && Array.isArray(targets) && targets.length > 0;
   // Premium-only (see api/_lib/plans.js). ON unless the plan says false, so
   // a caller with no plan info still gets the full feedback shape.
-  const wantsScore = caps.overallScore !== false;
-  const wantsSpelling = caps.spellingGrammar !== false;
+  const wantsScore = !coreOnly && caps.overallScore !== false;
+  const wantsSpelling = !coreOnly && caps.spellingGrammar !== false;
+  // The reply's fields, one entry each, so the shape stays valid JSON whichever are asked for.
+  const shapeEntries = [
+    `  "glow": "1-2 sentences of specific, genuine praise tied to something the student actually did in this text and to the curriculum standard noted above."`,
+    `  "grow": "1-2 sentences naming ONE specific, actionable next step scaled to this student's zone of proximal development — not a laundry list. Where an accurate, natural one exists, weave in an analogy drawn from their stated interest (${interest}) to make the concept concrete; if it would be forced or inaccurate, leave the analogy out. End with the motivation-appropriate closing line."`,
+    `  "vocab": [
+    { "term": "a single word or short phrase", "definition": "a one-sentence, age-appropriate definition, framed using their interest where natural", "example": "a fresh sentence using the term correctly, built around their stated interest (${interest})", "trick": "one short sentence applying the word trick to this word" },
+    { "term": "a second word or short phrase", "definition": "a one-sentence, age-appropriate definition, framed using their interest where natural", "example": "a fresh sentence using the term correctly, built around their stated interest (${interest})", "trick": "one short sentence applying the word trick to this word" }
+  ]`,
+    `  "glowTarget": "the exact skill area name from the given list that the glow demonstrates"`,
+    `  "growTarget": "the exact skill area name from the given list that the grow is building towards"`,
+    `  "highlights": [{ "quote": "an exact substring copied from the submitted text", "type": "glow or grow", "note": "a short reason", "revision": "ONLY for type=grow: that same fragment actually rewritten to apply the suggestion" }]`,
+  ];
+  if (caps.deepFeedback) shapeEntries.push('  "growNext": "ONE further, harder step: the next level of the same skill as the main grow (or the very next skill), as a concrete action for their next piece that quotes a short verbatim fragment of their own work in quotation marks - no analogy, no games or projects, not a restatement."');
+  if (wantsExam) shapeEntries.push(examJsonShape(targets, "writing"));
+  shapeEntries.push('  "frameworkTip": { "name": "the exact framework name you were given, verbatim", "quote": "a real, verbatim fragment from the student\'s own submitted text", "revision": "that exact fragment rewritten to demonstrate the framework applied to THEIR writing" }');
+  if (wantsScore) shapeEntries.push('  "overallScore": "an integer 1-10 scoring the WHOLE piece against the four criteria above",\n  "scoreReason": "one sentence citing the specific strength/weakness pattern across the whole piece that drove that score"');
+  if (!coreOnly) shapeEntries.push('  "revisedStory": "the student\'s WHOLE response rewritten as a corrected, improved version of the same response: every error fixed, same position and order, developed only as instructed above, nothing invented"' + (wantsModel ? ",\n" + RESP.responsesJsonShape(fw) : ""));
+  if (wantsSpelling) shapeEntries.push('  "spellingGrammarTotal": "the TRUE total count of real errors found, honest even if more than 8",\n  "spellingGrammar": [{ "quote": "an exact substring from the submitted text containing a real spelling/grammar/punctuation error", "type": "spelling, grammar, or punctuation", "correction": "that same fragment with just the error fixed" }]');
   return `You are the feedback engine inside LiteracyLab AI, an educational product for a ${TIER_LABEL[tier]} student in ${gradeLabel} (${country}).
 
 A student was given this writing prompt:
@@ -295,7 +317,7 @@ ${deepFeedbackClause(caps.deepFeedback)}
 ${wantsExam ? examTechniqueClause({ tier, targets, kind: "writing" }) : ""}
 ${frameworkClause({ tier, genre })}
 ${wantsScore ? overallScoreClause() : ""}${lengthClause(assessment)}
-${part === "core" ? "" : revisedStoryClause(tier, wantsSpelling, assessment, origWords) + (wantsModel ? RESP.responsesClause({ fw, tier, gradeLabel, country, assessment }) : "")}
+${coreOnly ? "" : revisedStoryClause(tier, wantsSpelling, assessment, origWords) + (wantsModel ? RESP.responsesClause({ fw, tier, gradeLabel, country, assessment }) : "")}
 ${wantsSpelling ? spellingGrammarClause() : ""}${TECH.vocabTrickClause(tier)}
 
 Read the actual submitted text closely — every point you make must be traceable to something specifically in it (quote a short fragment where useful), not a generic template response.
@@ -306,21 +328,7 @@ ${successCriteria(tier, { includeFramework: true, includeScore: wantsScore, incl
 
 Respond with ONLY a JSON object (no markdown fences, no commentary) with exactly this shape:
 {
-  "glow": "1-2 sentences of specific, genuine praise tied to something the student actually did in this text and to the curriculum standard noted above.",
-  "grow": "1-2 sentences naming ONE specific, actionable next step scaled to this student's zone of proximal development — not a laundry list. Where an accurate, natural one exists, weave in an analogy drawn from their stated interest (${interest}) to make the concept concrete; if it would be forced or inaccurate, leave the analogy out. End with the motivation-appropriate closing line.",
-  "vocab": [
-    { "term": "a single word or short phrase", "definition": "a one-sentence, age-appropriate definition, framed using their interest where natural", "example": "a fresh sentence using the term correctly, built around their stated interest (${interest})", "trick": "one short sentence applying the word trick to this word" },
-    { "term": "a second word or short phrase", "definition": "a one-sentence, age-appropriate definition, framed using their interest where natural", "example": "a fresh sentence using the term correctly, built around their stated interest (${interest})", "trick": "one short sentence applying the word trick to this word" }
-  ],
-  "glowTarget": "the exact skill area name from the given list that the glow demonstrates",
-  "growTarget": "the exact skill area name from the given list that the grow is building towards",
-  "highlights": [{ "quote": "an exact substring copied from the submitted text", "type": "glow or grow", "note": "a short reason", "revision": "ONLY for type=grow: that same fragment actually rewritten to apply the suggestion" }],${caps.deepFeedback ? '\n  "growNext": "ONE further, harder step: the next level of the same skill as the main grow (or the very next skill), as a concrete action for their next piece that quotes a short verbatim fragment of their own work in quotation marks - no analogy, no games or projects, not a restatement.",' : ""}${wantsExam ? `\n${examJsonShape(targets, "writing")},` : ""}
-  "frameworkTip": { "name": "the exact framework name you were given, verbatim", "quote": "a real, verbatim fragment from the student's own submitted text", "revision": "that exact fragment rewritten to demonstrate the framework applied to THEIR writing" }${wantsScore ? `,
-  "overallScore": "an integer 1-10 scoring the WHOLE piece against the four criteria above",
-  "scoreReason": "one sentence citing the specific strength/weakness pattern across the whole piece that drove that score"` : ""},
-${part === "core" ? "" : `  "revisedStory": "the student's WHOLE response rewritten as a corrected, improved version of the same response: every error fixed, same position and order, developed only as instructed above, nothing invented"${wantsModel ? ",\n" + RESP.responsesJsonShape(fw) : ""}${wantsSpelling ? "," : ""}`}${wantsSpelling ? `${part === "core" ? "" : "\n"}
-  "spellingGrammarTotal": "the TRUE total count of real errors found, honest even if more than 8",
-  "spellingGrammar": [{ "quote": "an exact substring from the submitted text containing a real spelling/grammar/punctuation error", "type": "spelling, grammar, or punctuation", "correction": "that same fragment with just the error fixed" }]` : ""}
+${shapeEntries.join(",\n")}
 }`;
 }
 
@@ -550,6 +558,36 @@ Respond with ONLY a JSON object (no markdown fences, no commentary) with exactly
 
 // Appended on a retry after the validator rejects the first attempt — tells
 // the model exactly what it got wrong rather than just asking it to try again.
+// The assessment third of a split Premium writing answer: the whole-piece score, the spelling and grammar check and
+// the exam bands. None of it needs the coaching or the rewrites, so it can be asked at the same time as them.
+function buildAssessPrompt({ tier, country, gradeLabel, prompt, text, targets, capabilities }) {
+  const caps = capabilities || {};
+  const exTargets = examTargetsFor(targets, "writing");
+  const assessment = assessLength({ text, tier, country, gradeLabel });
+  const wantsExam = caps.examTechnique && examTechniqueSupported(tier) && Array.isArray(exTargets) && exTargets.length > 0;
+  const wantsScore = caps.overallScore !== false;
+  const wantsSpelling = caps.spellingGrammar !== false;
+  const entries = [];
+  if (wantsExam) entries.push(examJsonShape(exTargets, "writing"));
+  if (wantsScore) entries.push('  "overallScore": "an integer 1-10 scoring the WHOLE piece against the four criteria above",\n  "scoreReason": "one sentence citing the specific strength/weakness pattern across the whole piece that drove that score"');
+  if (wantsSpelling) entries.push('  "spellingGrammarTotal": "the TRUE total count of real errors found, honest even if more than 8",\n  "spellingGrammar": [{ "quote": "an exact substring from the submitted text containing a real spelling/grammar/punctuation error", "type": "spelling, grammar, or punctuation", "correction": "that same fragment with just the error fixed" }]');
+  return `You are the assessment engine inside LiteracyLab AI, an educational product for a ${TIER_LABEL[tier]} student in ${gradeLabel} (${country}).
+
+A student was given this writing prompt:
+"${prompt}"
+
+They submitted this piece of writing:
+"""
+${text}
+"""
+${wantsExam ? examTechniqueClause({ tier, targets: exTargets, kind: "writing" }) : ""}${wantsScore ? overallScoreClause() : ""}${lengthClause(assessment)}${wantsSpelling ? spellingGrammarClause() : ""}
+
+Read the actual submitted text closely: every point must be traceable to something specifically in it. Every "quote" and every "evidence" must be an exact, verbatim substring of the submitted text. Respond with ONLY a JSON object (no markdown fences, no commentary) with exactly this shape:
+{
+${entries.join(",\n")}
+}`;
+}
+
 // The second half of a split Premium writing answer: only the long pieces of writing. It sees the same task and
 // the student's text, and needs nothing from the marking, so the two can be asked at the same time.
 function buildResponsesPrompt({ tier, country, gradeLabel, prompt, text, capabilities, genre }) {
@@ -580,4 +618,16 @@ function correctiveAddendum(issues) {
   return `\n\nYour previous attempt failed these checks — fix every one of them in this attempt:\n${issues.map(i => `- ${i}`).join("\n")}`;
 }
 
-module.exports = { buildWritingPrompt, buildReadingPrompt, buildReadingPassagePrompt, buildWritingPromptGenerator, correctiveAddendum, examTechniqueSupported };
+// The three prompts a Premium writing answer is asked as at once (see splitGenerate.js): the coaching, the assessment
+// (only if the plan has any of its parts) and the rewrites. Each gets room for just its own fields.
+function splitPrompts(args) {
+  const caps = args.capabilities || {};
+  const parts = { core: { prompt: buildWritingPrompt({ ...args, part: "core" }), maxTokens: 2200 } };
+  if ((caps.examTechnique && examTechniqueSupported(args.tier)) || caps.overallScore !== false || caps.spellingGrammar !== false) {
+    parts.assess = { prompt: buildWritingPrompt({ ...args, part: "assess" }), maxTokens: 1800 };
+  }
+  parts.responses = { prompt: buildWritingPrompt({ ...args, part: "responses" }), maxTokens: 3000 };
+  return parts;
+}
+
+module.exports = { splitPrompts, buildWritingPrompt, buildReadingPrompt, buildReadingPassagePrompt, buildWritingPromptGenerator, correctiveAddendum, examTechniqueSupported };

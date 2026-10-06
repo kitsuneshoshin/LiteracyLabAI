@@ -2,7 +2,7 @@ const { getSupabaseAdmin } = require("./_lib/supabaseAdmin");
 const { requireUser, sendError } = require("./_lib/auth");
 const { getMonthlyUsage } = require("./_lib/usage");
 const { generateFeedbackJSON } = require("./_lib/openai");
-const { buildWritingPrompt, buildReadingPrompt, correctiveAddendum, examTechniqueSupported } = require("./_lib/prompt");
+const { buildWritingPrompt, buildReadingPrompt, correctiveAddendum, examTechniqueSupported, splitPrompts } = require("./_lib/prompt");
 const { standardsFor } = require("./_lib/curriculum");
 const { targetsForGrade, examTargetsFor } = require("./_lib/masteryTargets");
 const RESP = require("./_lib/responses");
@@ -235,9 +235,7 @@ module.exports = async function handler(req, res) {
           prompt: generated.prompt, text, capabilities: caps, targets,
           targetNames: targets.map((t) => t.name), genre,
         };
-        const split = caps.deepFeedback && splitEnabled()
-          ? { core: { prompt: buildWritingPrompt({ ...writingArgs, part: "core" }), maxTokens: 2600 }, responses: { prompt: buildWritingPrompt({ ...writingArgs, part: "responses" }), maxTokens: 3000 } }
-          : undefined;
+        const split = caps.deepFeedback && splitEnabled() ? splitPrompts(writingArgs) : undefined;
         result = await generateAndValidate(llmPrompt, existing.tier, existing.country, existing.grade_label, text, undefined, caps, genre, undefined, split);
       } catch (genErr) {
         await releaseClaim(supabase, submissionId);

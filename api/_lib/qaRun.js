@@ -7,7 +7,7 @@
 // stored against any account, and only a summary row is written.
 
 const { capabilitiesFor } = require("./plans");
-const { buildWritingPrompt, buildReadingPrompt, examTechniqueSupported, correctiveAddendum } = require("./prompt");
+const { buildWritingPrompt, buildReadingPrompt, examTechniqueSupported, correctiveAddendum, splitPrompts } = require("./prompt");
 const { makeSplitGenerator, splitEnabled } = require("./splitGenerate");
 const { standardsFor } = require("./curriculum");
 const { targetsForGrade } = require("./masteryTargets");
@@ -57,9 +57,7 @@ function buildSample(s, kind) {
     const genre = DEFAULT_GENRE_BY_TIER[s.tier];
     const args = { ...common, confidenceWriting: "growing", prompt: s.prompt, text: s.text, genre };
     // Premium is asked the way production asks it: the marking and the long rewrites as two calls at once.
-    const parts = caps.deepFeedback && splitEnabled()
-      ? { core: { prompt: buildWritingPrompt({ ...args, part: "core" }), maxTokens: 2600 }, responses: { prompt: buildWritingPrompt({ ...args, part: "responses" }), maxTokens: 3000 } }
-      : undefined;
+    const parts = caps.deepFeedback && splitEnabled() ? splitPrompts(args) : undefined;
     return { caps, genre, parts, prompt: buildWritingPrompt(args) };
   }
   let score = 0;
