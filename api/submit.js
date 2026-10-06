@@ -9,6 +9,7 @@ const RESP = require("./_lib/responses");
 const TECH = require("./_lib/techniques");
 const QT = require("./_lib/questionTypes");
 const { frameworkFor } = require("./_lib/writingFrameworks");
+const { makeSplitGenerator, splitEnabled } = require("./_lib/splitGenerate");
 const { dropRestatingHighlights, repairResponses, dropGlowsQuotingMisspellings, validateFeedback, resolveTarget, dropInvalidSpellingGrammar, sanitizeQuestionReview, repairZeroScoreGlow, repairReadingExamEvidence, repairShortAnswer, stripUngrantedSections } = require("./_lib/validate");
 const { checkRateLimit } = require("./_lib/rateLimit");
 const { writingLimitsForGrade } = require("./_lib/writingLimits");
@@ -48,7 +49,7 @@ function examNotes(country, gradeLabel, tier, kind) {
   return out;
 }
 
-async function generateAndValidate(prompt, tier, country, gradeLabel, submittedText, readingScore, capabilities, genre, readingContext) {
+async function generateAndValidate(prompt, tier, country, gradeLabel, submittedText, readingScore, capabilities, genre, readingContext, split) {
   const standardsList = standardsFor(country, tier, gradeLabel);
   const targetNames = targetsForGrade(country, gradeLabel, tier).targets.map((t) => t.name);
   // Exam bands are given only on the objectives this kind of task can show: writing
@@ -59,10 +60,14 @@ async function generateAndValidate(prompt, tier, country, gradeLabel, submittedT
   const startedAt = Date.now();
   const lengthInfo = submittedText ? assessLength({ text: submittedText, tier, country, gradeLabel }) : undefined;
 
+  // Premium writing: the marking and the long rewrites are asked as two calls at once (splitGenerate.js).
+  const splitNext = split ? makeSplitGenerator(split, generateFeedbackJSON, correctiveAddendum) : null;
   for (let i = 1; i <= MAX_ATTEMPTS; i++) {
     const attemptStarted = Date.now();
     // A Premium writing answer carries the model response and its labels, so it needs more room.
-    const attempt = await generateFeedbackJSON(nextPrompt, { maxTokens: capabilities?.deepFeedback && submittedText ? 3800 : 2048 });
+    const attempt = splitNext
+      ? await splitNext(i === 1 ? [] : lastIssues)
+      : await generateFeedbackJSON(nextPrompt, { maxTokens: capabilities?.deepFeedback && submittedText ? 3800 : 2048 });
     const lastAttempt = i === MAX_ATTEMPTS || (Date.now() - startedAt) + (Date.now() - attemptStarted) * 1.2 > TIME_BUDGET_MS;
     if (capabilities?.spellingGrammar !== false) dropInvalidSpellingGrammar(attempt.parsed, submittedText);
     if (capabilities?.spellingGrammar !== false) dropGlowsQuotingMisspellings(attempt.parsed);
@@ -223,7 +228,17 @@ module.exports = async function handler(req, res) {
           prompt: generated.prompt, text, capabilities: caps, targets,
           targetNames: targets.map((t) => t.name), genre,
         });
-        result = await generateAndValidate(llmPrompt, existing.tier, existing.country, existing.grade_label, text, undefined, caps, genre);
+        // Premium: the marking and the long rewrites are asked for separately, at the same time.
+        const writingArgs = {
+          tier: existing.tier, country: existing.country, gradeLabel: existing.grade_label, interest: existing.interest,
+          confidenceWriting: body.confidenceWriting, motivation: body.motivation,
+          prompt: generated.prompt, text, capabilities: caps, targets,
+          targetNames: targets.map((t) => t.name), genre,
+        };
+        const split = caps.deepFeedback && splitEnabled()
+          ? { core: { prompt: buildWritingPrompt({ ...writingArgs, part: "core" }), maxTokens: 2600 }, responses: { prompt: buildWritingPrompt({ ...writingArgs, part: "responses" }), maxTokens: 3000 } }
+          : undefined;
+        result = await generateAndValidate(llmPrompt, existing.tier, existing.country, existing.grade_label, text, undefined, caps, genre, undefined, split);
       } catch (genErr) {
         await releaseClaim(supabase, submissionId);
         throw genErr;

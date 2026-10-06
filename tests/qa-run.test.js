@@ -1,4 +1,6 @@
 const test = require("node:test");
+// These scripted tests give one reply per attempt; the two-call Premium split is tested in split-generate.test.js.
+if (process.env.PREMIUM_SPLIT === undefined) process.env.PREMIUM_SPLIT = "0";
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");

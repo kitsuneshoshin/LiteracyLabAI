@@ -1,4 +1,7 @@
 const path = require("node:path");
+// The existing endpoint tests script ONE model reply per attempt, which is how a combined call behaves; the
+// Premium split into two calls at once is covered in tests/split-generate.test.js, which turns it on itself.
+if (process.env.PREMIUM_SPLIT === undefined) process.env.PREMIUM_SPLIT = "0";
 const { capabilitiesFor } = require("../api/_lib/plans");
 
 // Shared by plan-gates.test.js and plan-matrix.test.js: runs the REAL endpoint

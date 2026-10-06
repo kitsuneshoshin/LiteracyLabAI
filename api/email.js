@@ -103,7 +103,7 @@ async function handleQa(req, res) {
   // model (and, like ?save=0, nothing is changed in production), to compare quality and cost.
   if (req.query && req.query.models === "1") return res.status(200).json({ models: await require("./_lib/openai").listModels() });
   const model = req.query && /^[a-z0-9][a-z0-9.\-]{2,40}$/.test(String(req.query.model || "")) ? String(req.query.model) : undefined;
-  const summary = await runQa({ generate: (prompt) => generateFeedbackJSON(prompt, { model, maxTokens: 3800 }) });
+  const summary = await runQa({ generate: (prompt, o = {}) => generateFeedbackJSON(prompt, { model, maxTokens: o.maxTokens || 3800 }) });
   if (model) summary.model = model;
   let saved = false;
   if (!(req.query && req.query.save === "0") && !model) {

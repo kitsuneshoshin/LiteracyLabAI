@@ -172,7 +172,7 @@ Put this in a "frameworkTip" field with "name" set to exactly "${fw.name}", "quo
 // is the complete, corrected version beside it. It must stay THEIR piece (same
 // ideas, order and voice), because a rewrite that invents new content stops
 // being coaching and starts being someone else's work.
-function revisedStoryClause(tier, withSpellingList, assessment, origWords) {
+function revisedStoryClause(tier, withSpellingList, assessment, origWords, standalone = false) {
   const register = (tier === "middle" || tier === "high")
     ? " Keep a formal, third-person academic register with no personal asides and no analogies."
     : tier === "early"
@@ -184,7 +184,7 @@ function revisedStoryClause(tier, withSpellingList, assessment, origWords) {
     : `Their piece is short for this level, so DEVELOP it where it helps: explain and support the points they already made (the reason behind a claim, a clearer explanation, or a brief general example that fits), so it reads as a fuller version of what they were saying, up to about ${lim.max} words. Do NOT change their position, add a new argument or a new character or event, and never invent statistics, named studies, quotations or personal experiences.`;
   return `
 
-REVISED RESPONSE (required): Return "revisedStory": the student's WHOLE response rewritten as a polished, corrected version of the SAME response. It must (1) fix EVERY spelling, grammar, capitalisation and punctuation error${withSpellingList ? ", including each one you list in the spelling and grammar check below" : ""}; (2) apply your "grow" suggestions and improve flow, sentence structure and word choice so it reads clearly better than the original; and (3) stay THEIR response: the same position, ideas and events in the same order. ${expand} Do not explain or comment on the changes. Keep their paragraph breaks.${register} Return plain text only.`;
+REVISED RESPONSE (required): Return "revisedStory": the student's WHOLE response rewritten as a polished, corrected version of the SAME response. It must (1) fix EVERY spelling, grammar, capitalisation and punctuation error${withSpellingList ? ", including each one you list in the spelling and grammar check below" : ""}; (2) ${standalone ? "improve" : 'apply your "grow" suggestions and improve'} flow, sentence structure and word choice so it reads clearly better than the original; and (3) stay THEIR response: the same position, ideas and events in the same order. ${expand} Do not explain or comment on the changes. Keep their paragraph breaks.${register} Return plain text only.`;
 }
 
 // A dedicated, always-shown spelling/grammar check - separate from the
@@ -259,8 +259,11 @@ function successCriteria(tier, { includeFramework, includeScore, includeSpelling
 8. Every "grow" highlight has a "revision" that is an actual rewrite of its quote (different wording, applying the fix) — never the same text repeated, and never just advice about the quote instead of a rewrite of it.${(tier === "middle" || tier === "high") ? '\n9. Every "revision" reads as a natural continuation of this student\'s own formal, third-person essay — pure academic argument, with NO interest-based analogy dropped into the revision text itself in any phrasing ("like how I...", "similar to how...", "just like...", etc). That framing belongs only in the "grow" field.' : ""}${fw ? `\n10. frameworkTip.name is EXACTLY "${fw.name}", copied verbatim; frameworkTip.quote is an exact, verbatim substring of the submitted text above (not a paraphrase); and frameworkTip.revision is a genuine rewrite of that exact quote (different wording, actually applying "${fw.name}") — never the same text repeated, never an unrelated invented example.` : ""}${includeScore ? '\n11. overallScore is an integer 1-10 (never a string, never out of range) judging the WHOLE piece, not just the one glow/grow — if it disagrees with how positive the glow/grow read, that\'s fine and expected, since the score is the more critical, whole-piece judgement. scoreReason names a real pattern across the piece, not just a restatement of the single "grow" detail.' : ""}${includeSpelling ? '\n12. spellingGrammar contains only real errors (each "quote" a verbatim substring, each "correction" that same fragment with just the error fixed) — an empty array if the piece is genuinely clean, never a fabricated error to avoid returning an empty list, and never a stylistic choice mislabelled as a mistake. spellingGrammarTotal is the TRUE count of real errors, never silently capped to match the list length when there are genuinely more than 8.' : ""}`;
 }
 
-function buildWritingPrompt({ tier, country, gradeLabel, interest, confidenceWriting, motivation, prompt, text, targetNames, targets, capabilities, genre }) {
+// part: undefined = everything in one prompt; "core" = the marking only; "responses" = only the rewrite of the
+// student's piece and the model response with framework labels (see splitGenerate.js, which asks for the two at once).
+function buildWritingPrompt({ tier, country, gradeLabel, interest, confidenceWriting, motivation, prompt, text, targetNames, targets, capabilities, genre, part }) {
   const caps = capabilities || {};
+  if (part === "responses") return buildResponsesPrompt({ tier, country, gradeLabel, prompt, text, capabilities: caps, genre });
   const allTargets = targets;
   targets = examTargetsFor(allTargets, "writing");
   const assessment = assessLength({ text, tier, country, gradeLabel });
@@ -292,7 +295,7 @@ ${deepFeedbackClause(caps.deepFeedback)}
 ${wantsExam ? examTechniqueClause({ tier, targets, kind: "writing" }) : ""}
 ${frameworkClause({ tier, genre })}
 ${wantsScore ? overallScoreClause() : ""}${lengthClause(assessment)}
-${revisedStoryClause(tier, wantsSpelling, assessment, origWords)}${wantsModel ? RESP.responsesClause({ fw, tier, gradeLabel, country, assessment }) : ""}
+${part === "core" ? "" : revisedStoryClause(tier, wantsSpelling, assessment, origWords) + (wantsModel ? RESP.responsesClause({ fw, tier, gradeLabel, country, assessment }) : "")}
 ${wantsSpelling ? spellingGrammarClause() : ""}${TECH.vocabTrickClause(tier)}
 
 Read the actual submitted text closely — every point you make must be traceable to something specifically in it (quote a short fragment where useful), not a generic template response.
@@ -315,7 +318,7 @@ Respond with ONLY a JSON object (no markdown fences, no commentary) with exactly
   "frameworkTip": { "name": "the exact framework name you were given, verbatim", "quote": "a real, verbatim fragment from the student's own submitted text", "revision": "that exact fragment rewritten to demonstrate the framework applied to THEIR writing" }${wantsScore ? `,
   "overallScore": "an integer 1-10 scoring the WHOLE piece against the four criteria above",
   "scoreReason": "one sentence citing the specific strength/weakness pattern across the whole piece that drove that score"` : ""},
-  "revisedStory": "the student's WHOLE response rewritten as a corrected, improved version of the same response: every error fixed, same position and order, developed only as instructed above, nothing invented"${wantsModel ? ",\n" + RESP.responsesJsonShape(fw) : ""}${wantsSpelling ? `,
+${part === "core" ? "" : `  "revisedStory": "the student's WHOLE response rewritten as a corrected, improved version of the same response: every error fixed, same position and order, developed only as instructed above, nothing invented"${wantsModel ? ",\n" + RESP.responsesJsonShape(fw) : ""}${wantsSpelling ? "," : ""}`}${wantsSpelling ? `${part === "core" ? "" : "\n"}
   "spellingGrammarTotal": "the TRUE total count of real errors found, honest even if more than 8",
   "spellingGrammar": [{ "quote": "an exact substring from the submitted text containing a real spelling/grammar/punctuation error", "type": "spelling, grammar, or punctuation", "correction": "that same fragment with just the error fixed" }]` : ""}
 }`;
@@ -547,6 +550,32 @@ Respond with ONLY a JSON object (no markdown fences, no commentary) with exactly
 
 // Appended on a retry after the validator rejects the first attempt — tells
 // the model exactly what it got wrong rather than just asking it to try again.
+// The second half of a split Premium writing answer: only the long pieces of writing. It sees the same task and
+// the student's text, and needs nothing from the marking, so the two can be asked at the same time.
+function buildResponsesPrompt({ tier, country, gradeLabel, prompt, text, capabilities, genre }) {
+  const caps = capabilities || {};
+  const assessment = assessLength({ text, tier, country, gradeLabel });
+  const origWords = RESP.wordCount(text);
+  const fw = frameworkFor(genre, tier);
+  const wantsModel = !!caps.deepFeedback && !!fw;
+  return `You are the writing coach inside LiteracyLab AI, an educational product for a ${TIER_LABEL[tier]} student in ${gradeLabel} (${country}).
+
+A student was given this writing prompt:
+"${prompt}"
+
+They submitted this piece of writing:
+"""
+${text}
+"""
+${lengthClause(assessment)}
+${revisedStoryClause(tier, false, assessment, origWords, true)}${wantsModel ? RESP.responsesClause({ fw, tier, gradeLabel, country, assessment }) : ""}
+
+Every claim must be traceable to what the student actually wrote. Respond with ONLY a JSON object (no markdown fences, no commentary) with exactly this shape:
+{
+  "revisedStory": "the student's WHOLE response rewritten as a corrected, improved version of the same response: every error fixed, same position and order, developed only as instructed above, nothing invented"${wantsModel ? ",\n" + RESP.responsesJsonShape(fw) : ""}
+}`;
+}
+
 function correctiveAddendum(issues) {
   return `\n\nYour previous attempt failed these checks — fix every one of them in this attempt:\n${issues.map(i => `- ${i}`).join("\n")}`;
 }

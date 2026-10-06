@@ -8,6 +8,7 @@
 
 const { capabilitiesFor } = require("./plans");
 const { buildWritingPrompt, buildReadingPrompt, examTechniqueSupported, correctiveAddendum } = require("./prompt");
+const { makeSplitGenerator, splitEnabled } = require("./splitGenerate");
 const { standardsFor } = require("./curriculum");
 const { targetsForGrade } = require("./masteryTargets");
 const { DEFAULT_GENRE_BY_TIER } = require("./writingFrameworks");
@@ -54,7 +55,12 @@ function buildSample(s, kind) {
   const common = { tier: s.tier, country: COUNTRY, gradeLabel: grade, interest: "football", motivation: "grades", capabilities: caps, targets, targetNames: targets.map((t) => t.name) };
   if (kind === "writing") {
     const genre = DEFAULT_GENRE_BY_TIER[s.tier];
-    return { caps, genre, prompt: buildWritingPrompt({ ...common, confidenceWriting: "growing", prompt: s.prompt, text: s.text, genre }) };
+    const args = { ...common, confidenceWriting: "growing", prompt: s.prompt, text: s.text, genre };
+    // Premium is asked the way production asks it: the marking and the long rewrites as two calls at once.
+    const parts = caps.deepFeedback && splitEnabled()
+      ? { core: { prompt: buildWritingPrompt({ ...args, part: "core" }), maxTokens: 2600 }, responses: { prompt: buildWritingPrompt({ ...args, part: "responses" }), maxTokens: 3000 } }
+      : undefined;
+    return { caps, genre, parts, prompt: buildWritingPrompt(args) };
   }
   let score = 0;
   QUESTIONS.forEach((q, i) => { if (s.answers[i] === q.correct) score += 1; });
@@ -96,9 +102,11 @@ async function runOne(s, kind, generate, deadline = Infinity, validate = validat
     const targetNames = targetsForGrade(COUNTRY, grade, s.tier).targets.map((t) => t.name);
     const examTargetNames = examTargetsFor(targetsForGrade(COUNTRY, grade, s.tier).targets, kind).map((t) => t.name);
     let prompt = built.prompt;
+    let retryIssues = [];
+    const splitNext = built.parts ? makeSplitGenerator(built.parts, generate, correctiveAddendum) : null;
     for (let i = 1; i <= MAX_ATTEMPTS; i++) {
       if (i > 1 && Date.now() + ATTEMPT_MS > deadline) { out.timedOut = true; out.outcome = "ran out of time"; break; }
-      const attempt = await withTimeout(Promise.resolve(generate(prompt)), deadline - Date.now());
+      const attempt = await withTimeout(Promise.resolve(splitNext ? splitNext(i === 1 ? [] : retryIssues) : generate(prompt)), deadline - Date.now());
       const parsed = attempt.parsed;
       out.attempts = i;
       if (kind === "writing") {
@@ -150,6 +158,7 @@ async function runOne(s, kind, generate, deadline = Infinity, validate = validat
       }
       out.lastIssues = check.issues.slice(0, 6).map((x) => String(x).slice(0, 200));
       prompt = built.prompt + correctiveAddendum(check.issues);
+      retryIssues = check.issues;
     }
   } catch (err) {
     out.issues = [`The model call failed: ${String(err && err.message).slice(0, 160)}`];
