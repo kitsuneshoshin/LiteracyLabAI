@@ -3328,8 +3328,8 @@ function QuestionReviewPanel({ feedback, questions, answers }){
                   <p className="text-[12.5px] mt-1" style={{ color: "var(--ink-soft)" }}><span className="font-semibold">To earn more marks: </span>{marked.missed.join("; ")}</p>
                 )}
                 {marked && Array.isArray(marked.parts) && marked.parts.length > 0 && (
-                  <div className="mt-1.5 flex flex-wrap items-center gap-1.5" aria-label={(q.framework ? q.framework.name : "Answer") + " parts used"}>
-                    <span className="text-[11px] font-bold uppercase tracking-wide" style={{ color: "var(--ink-faint)" }}>{q.framework ? q.framework.name : "Parts"}</span>
+                  <div className="mt-1.5 flex flex-wrap items-center gap-1.5" aria-label={(qFwName(q) || "Answer") + " parts used"}>
+                    <span className="text-[11px] font-bold uppercase tracking-wide" style={{ color: "var(--ink-faint)" }}>{qFwName(q) || "Parts"}</span>
                     {marked.parts.map((pt) => (
                       <span key={pt.name} className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11.5px] font-semibold" style={{ background: pt.used ? "var(--good-tint)" : "var(--surface)", color: pt.used ? "var(--good)" : "var(--ink-faint)", border: "1px solid " + (pt.used ? "var(--good)" : "var(--border)") }}>
                         {pt.used ? <IconCheck size={11} strokeWidth={3} /> : <span aria-hidden="true">○</span>}{pt.name}
@@ -3340,7 +3340,7 @@ function QuestionReviewPanel({ feedback, questions, answers }){
                 {!marked && <p className="text-[12.5px] mt-1.5" style={{ color: "var(--ink-faint)" }}>We could not mark this one this time, so compare it with the model answer below.</p>}
                 {q.modelAnswer && (
                   <div className="mt-2 rounded-lg p-2.5" style={{ background: "var(--good-tint)" }}>
-                    <div className="text-[11px] font-bold uppercase tracking-wide" style={{ color: "var(--good)" }}>A strong answer{q.framework ? ", built with " + q.framework.name : ""}</div>
+                    <div className="text-[11px] font-bold uppercase tracking-wide" style={{ color: "var(--good)" }}>A strong answer{qFwName(q) ? ", built with " + qFwName(q) : ""}</div>
                     {Array.isArray(q.modelParts) && q.modelParts.length > 0 ? (
                       <p className="text-[13.5px] leading-relaxed mt-1 font-read" style={{ color: "var(--ink)" }}>
                         {q.modelParts.map((m, k) => (
@@ -4083,6 +4083,9 @@ function SubmissionRecap({ tier, title, words, onNew }){
 // is multiple choice, true/false/not given, "which line proves it", put in order, match words to
 // meanings, or fill the gap. An answer is a number, or a list of numbers for order, match and gap.
 const qStyle = (q) => (q && q.type) || "mc";
+// Before marking the page holds the question as sent to the browser (framework is an object with its steps); after
+// marking it holds the stored question (framework is just the name). Either way, this is the name.
+const qFwName = (q) => (q && q.framework ? (typeof q.framework === "string" ? q.framework : q.framework.name || "") : "");
 const qIsAnswered = (q, a) => {
   const st = qStyle(q);
   if (st === "short") return typeof a === "string" && a.trim().length >= 2;

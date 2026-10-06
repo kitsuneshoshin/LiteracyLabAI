@@ -329,3 +329,16 @@ test("the page shows the steps beside the question, the parts used after marking
   assert.match(APP, /<DevicesPanel feedback=\{feedback\} \/>/);
   assert.match(APP, /function FrayerCard/);
 });
+
+test("after marking, the page names the framework whether the question came as sent to the browser or as stored (found live: it said 'built with undefined')", () => {
+  const APP = fs.readFileSync(path.join(__dirname, "..", "app.html"), "utf8");
+  const a = APP.indexOf("const qFwName"), b = APP.indexOf("\n", a);
+  assert.ok(a > 0);
+  const { qFwName } = new Function(APP.slice(a, b) + "\nreturn { qFwName };")();
+  const [stored] = QT.normalizeQuestions([rawShort("high")], ["short"], Math.random, "high");
+  assert.equal(typeof stored.framework, "string", "the revealed key carries the framework as a name");
+  assert.equal(qFwName(stored), "CER");
+  assert.equal(qFwName(QT.publicQuestion(stored)), "CER", "the question as first sent carries it as an object");
+  assert.equal(qFwName({}), ""); assert.equal(qFwName(null), ""); assert.equal(qFwName({ framework: {} }), "");
+  assert.doesNotMatch(APP, /built with " + q.framework.name/, "no place builds the label straight from q.framework.name");
+});
