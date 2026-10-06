@@ -340,5 +340,5 @@ test("after marking, the page names the framework whether the question came as s
   assert.equal(qFwName(stored), "CER");
   assert.equal(qFwName(QT.publicQuestion(stored)), "CER", "the question as first sent carries it as an object");
   assert.equal(qFwName({}), ""); assert.equal(qFwName(null), ""); assert.equal(qFwName({ framework: {} }), "");
-  assert.doesNotMatch(APP, /built with " + q.framework.name/, "no place builds the label straight from q.framework.name");
+  assert.ok(!APP.includes('built with " + q.framework.name'), "no place builds the label straight from q.framework.name");
 });
