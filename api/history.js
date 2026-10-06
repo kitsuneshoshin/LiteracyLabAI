@@ -3,18 +3,34 @@ const { requireUser, sendError } = require("./_lib/auth");
 const { computeTimeline, computeStreak } = require("./_lib/progressHistory");
 const { getMonthlyUsage } = require("./_lib/usage");
 const { dedupeByTerm, buildQuiz } = require("./_lib/vocabQuiz");
+const { readVocabProgress, writeVocabProgress } = require("./_lib/vocabProgress");
+const { checkRateLimit } = require("./_lib/rateLimit");
 
 // Real progress data for the dashboard — replaces the hardcoded "12 days" /
 // "8,450 words" mock stats with numbers actually derived from submissions.
 
 module.exports = async function handler(req, res) {
   try {
-    if (req.method !== "GET") {
-      res.setHeader("Allow", "GET");
+    if (req.method !== "GET" && req.method !== "POST") {
+      res.setHeader("Allow", "GET, POST");
       return res.status(405).json({ error: "Method not allowed." });
     }
     const user = await requireUser(req);
     const supabase = getSupabaseAdmin();
+
+    // POST saves how well a learner knows their vocabulary words, so it follows them between devices.
+    if (req.method === "POST") {
+      const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body || {};
+      if (!body.childId) return res.status(400).json({ error: "childId is required." });
+      const { capabilities: planCaps } = await getMonthlyUsage(supabase, user.id);
+      if (planCaps.vocabBank === false) return res.status(403).json({ error: "The vocabulary bank is part of Core and Premium.", vocabLocked: true });
+      const { data: child, error: childErr } = await supabase.from("child_profiles").select("id").eq("id", body.childId).eq("profile_id", user.id).maybeSingle();
+      if (childErr) throw childErr;
+      if (!child) return res.status(404).json({ error: "Learner not found for this account." });
+      await checkRateLimit(supabase, user.id, "vocab_progress", { limit: 120, windowSeconds: 300 });
+      const saved = await writeVocabProgress(supabase, user.id, child.id, body.updates);
+      return res.status(200).json({ saved });
+    }
     const { childId, quiz, count } = req.query;
     if (!childId) return res.status(400).json({ error: "childId is required." });
 
@@ -91,6 +107,8 @@ module.exports = async function handler(req, res) {
 
     return res.status(200).json({
       vocabWords: vocabLocked ? [] : vocabWords,
+      // How well each word is known, so a second device starts where the first left off ({} until saved, or on a plan without the bank).
+      vocabProgress: vocabLocked ? {} : await readVocabProgress(supabase, user.id, childId),
       vocabLocked,
       totalSubmissions: submissions.length,
       wordsWritten,

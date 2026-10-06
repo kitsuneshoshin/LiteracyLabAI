@@ -11,7 +11,7 @@ const start = APP.indexOf("const VOCAB_BOXES = ");
 const end = APP.indexOf("function MasteryPips");
 assert.ok(start > 0 && end > start, "the vocabulary helpers are in app.html");
 function load(localStorage) {
-  return new Function("localStorage", APP.slice(start, end) + "\nreturn { VOCAB_BOXES, vocabNextBox, vocabTermKey, vocabBoxOf, vocabDeck, loadVocabBoxes, saveVocabBoxes };")(localStorage);
+  return new Function("localStorage", APP.slice(start, end) + "\nreturn { VOCAB_BOXES, vocabNextBox, vocabTermKey, vocabEntry, vocabMerge, vocabBoxOf, vocabDeck, loadVocabBoxes, saveVocabBoxes };")(localStorage);
 }
 const memory = () => { const m = {}; return { getItem: (k) => (k in m ? m[k] : null), setItem: (k, v) => { m[k] = String(v); }, _m: m }; };
 
@@ -28,8 +28,9 @@ test("a word you know climbs one step at a time to the top and stays there; one 
 
 test("a word is found whatever its capitals or spacing, and an unknown or garbled step counts as new", () => {
   const V = load(memory());
-  const boxes = { queue: 2, stall: 7, price: -1, gate: "3" };
+  const boxes = { queue: { box: 2, at: 5 }, stall: 7, price: -1, gate: "3", plain: 1 };
   assert.equal(V.vocabBoxOf(boxes, "  Queue "), 2);
+  assert.equal(V.vocabBoxOf(boxes, "plain"), 1, "a bare number, as an earlier version stored it, still reads");
   assert.equal(V.vocabBoxOf(boxes, "stall"), 0);
   assert.equal(V.vocabBoxOf(boxes, "price"), 0);
   assert.equal(V.vocabBoxOf(boxes, "gate"), 0);
@@ -50,8 +51,10 @@ test("a flashcard round starts with the words that need the most work, newest fi
 test("progress is remembered per learner on this device, and a blocked or corrupted store never breaks practice", () => {
   const store = memory();
   const V = load(store);
-  V.saveVocabBoxes("kid1", { queue: 2 });
-  assert.deepEqual(V.loadVocabBoxes("kid1"), { queue: 2 });
+  V.saveVocabBoxes("kid1", { queue: { box: 2, at: 99 } });
+  assert.deepEqual(V.loadVocabBoxes("kid1"), { queue: { box: 2, at: 99 } });
+  store._m["ll_vocab_boxes_old"] = JSON.stringify({ queue: 2, stall: 9, gate: { box: 1, at: "x" } });
+  assert.deepEqual(V.loadVocabBoxes("old"), { queue: { box: 2, at: 0 }, gate: { box: 1, at: 0 } }, "an earlier version's saved progress is upgraded and bad entries dropped");
   assert.deepEqual(V.loadVocabBoxes("kid2"), {}, "another learner starts fresh");
   store._m["ll_vocab_boxes_bad"] = "{not json";
   assert.deepEqual(V.loadVocabBoxes("bad"), {});
@@ -66,4 +69,32 @@ test("progress is remembered per learner on this device, and a blocked or corrup
 test("the word trick travels with each word from the server to the vocabulary page", () => {
   const history = fs.readFileSync(path.join(__dirname, "..", "api", "history.js"), "utf8");
   assert.match(history, /trick: v\.trick/);
+});
+
+test("this device and the account are joined word by word, the newer change winning, and what the account lacks is sent up", () => {
+  const V = load(memory());
+  const local = { queue: { box: 2, at: 200 }, stall: { box: 1, at: 100 }, price: { box: 3, at: 300 }, jetty: { box: 1, at: 0 } };
+  const server = { queue: { box: 1, at: 100 }, stall: { box: 3, at: 400 }, price: { box: 3, at: 300 }, gate: { box: 2, at: 50 } };
+  const { merged, toPush } = V.vocabMerge(local, server);
+  assert.deepEqual(merged.queue, { box: 2, at: 200 }, "this device is newer");
+  assert.deepEqual(merged.stall, { box: 3, at: 400 }, "the account is newer");
+  assert.deepEqual(merged.price, { box: 3, at: 300 }, "equal: nothing to do");
+  assert.deepEqual(merged.gate, { box: 2, at: 50 }, "a word only the account has comes down");
+  assert.deepEqual(merged.jetty, { box: 1, at: 0 }, "a word only this device has stays");
+  assert.deepEqual(toPush.map((u) => u.term).sort(), ["jetty", "queue"], "only what the account is missing or has older goes up");
+  assert.deepEqual(V.vocabMerge({}, {}), { merged: {}, toPush: [] });
+  assert.deepEqual(V.vocabMerge(undefined, undefined), { merged: {}, toPush: [] });
+  const fresh = V.vocabMerge({ a: { box: 1, at: 5 } }, {});
+  assert.deepEqual(fresh.toPush, [{ term: "a", box: 1, at: 5 }], "a new device with progress and an empty account uploads it");
+  const down = V.vocabMerge({}, { a: { box: 2, at: 5 } });
+  assert.deepEqual(down.merged, { a: { box: 2, at: 5 } });
+  assert.deepEqual(down.toPush, [], "a new device with nothing just downloads");
+  const garbled = V.vocabMerge({ a: "x", b: { box: 99 } }, { c: null });
+  assert.deepEqual(garbled, { merged: {}, toPush: [] });
+});
+
+test("the page and the server agree on how a word is written down", () => {
+  const { cleanTerm } = require("../api/_lib/vocabProgress");
+  const V = load(memory());
+  for (const t of ["Queue", "  stall ", "Word  Trick", "ÉCLAT", "a b c"]) assert.equal(V.vocabTermKey(t), cleanTerm(t), JSON.stringify(t));
 });

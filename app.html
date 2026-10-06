@@ -1337,21 +1337,46 @@ const HISTORY_PAGE = 10;
 // "Test yourself" multiple-choice quiz built from the same list
 // (api/_lib/vocabQuiz.js). Two small internal views (browse/quiz) rather
 // than a separate page, since it's meant to be a quick side activity.
-// ---- Vocabulary practice. Words come from every piece of feedback; how well each is known is kept on this
-// device (a four-step Leitner ladder: a word you know climbs a step, one you miss drops back to the start), so
-// flashcards always begin with the words that need the most work. Nothing here changes what the server stores.
+// ---- Vocabulary practice. Words come from every piece of feedback; how well each is known is a four-step Leitner
+// ladder (a word you know climbs a step, one you miss drops back to the start), so flashcards always begin with the
+// words that need the most work. Progress is kept on this device AND saved to the account, so it follows the learner
+// between devices: each word is { box, at } (when it last changed) and, when the two copies disagree, the newer one wins.
 const VOCAB_BOXES = 4;
 const VOCAB_BOX_NAME = ["New", "Learning", "Nearly there", "Know it"];
 const VOCAB_BOX_COLOR = ["var(--border)", "var(--gold)", "var(--cyan)", "var(--good)"];
 const vocabNextBox = (box, gotIt) => (gotIt ? Math.min(VOCAB_BOXES - 1, (Number.isInteger(box) ? box : 0) + 1) : 0);
-const vocabTermKey = (t) => String(t == null ? "" : t).trim().toLowerCase();
-const vocabBoxOf = (boxes, term) => { const b = boxes && boxes[vocabTermKey(term)]; return Number.isInteger(b) && b >= 0 && b < VOCAB_BOXES ? b : 0; };
+const vocabTermKey = (t) => String(t == null ? "" : t).trim().toLowerCase().replace(/\s+/g, " ");
+// One saved word: a bare number (how an earlier version stored it) or { box, at }; anything else is not a word.
+function vocabEntry(v){
+  if (Number.isInteger(v) && v >= 0 && v < VOCAB_BOXES) return { box: v, at: 0 };
+  if (v && typeof v === "object" && Number.isInteger(v.box) && v.box >= 0 && v.box < VOCAB_BOXES) return { box: v.box, at: Number.isFinite(v.at) && v.at > 0 ? v.at : 0 };
+  return null;
+}
+const vocabBoxOf = (boxes, term) => { const e = vocabEntry(boxes && boxes[vocabTermKey(term)]); return e ? e.box : 0; };
 const vocabDeck = (words, boxes, size = 8) => (words || []).map((w, i) => ({ w, i, b: vocabBoxOf(boxes, w.term) })).sort((a, b) => a.b - b.b || a.i - b.i).slice(0, size).map((x) => x.w);
+// Joins this device's copy with the account's: for each word the newer change wins. toPush is what the account
+// is missing or has older, to be saved; merged is what both should now hold.
+function vocabMerge(local, server){
+  const merged = {}, toPush = [];
+  const keys = new Set([...Object.keys(local || {}), ...Object.keys(server || {})]);
+  for (const k of keys) {
+    const l = vocabEntry(local && local[k]), s = vocabEntry(server && server[k]);
+    if (l && (!s || l.at > s.at)) { merged[k] = l; toPush.push({ term: k, box: l.box, at: l.at }); }
+    else if (s) merged[k] = s;
+  }
+  return { merged, toPush };
+}
 function loadVocabBoxes(childId){
-  try { const v = JSON.parse(localStorage.getItem("ll_vocab_boxes_" + childId) || "{}"); return v && typeof v === "object" && !Array.isArray(v) ? v : {}; } catch (e) { return {}; }
+  try {
+    const raw = JSON.parse(localStorage.getItem("ll_vocab_boxes_" + childId) || "{}");
+    if (!raw || typeof raw !== "object" || Array.isArray(raw)) return {};
+    const out = {};
+    for (const k of Object.keys(raw)) { const e = vocabEntry(raw[k]); if (e) out[k] = e; }
+    return out;
+  } catch (e) { return {}; }
 }
 function saveVocabBoxes(childId, boxes){
-  try { localStorage.setItem("ll_vocab_boxes_" + childId, JSON.stringify(boxes)); } catch (e) { /* private window: practice still works, it just is not remembered */ }
+  try { localStorage.setItem("ll_vocab_boxes_" + childId, JSON.stringify(boxes)); } catch (e) { /* private window: practice still works, it just is not remembered here */ }
 }
 
 function MasteryPips({ box }){
@@ -1384,17 +1409,33 @@ function VocabularyBank({ session, childId, backendLive, onSeePlans, displayName
     let cancelled = false;
     setWords(null);
     authedFetch(session, `/api/history?childId=${childId}`)
-      .then(d => { if (!cancelled) { setLocked(!!d.vocabLocked); setWords(d.vocabWords || []); } })
+      .then(d => {
+        if (cancelled) return;
+        setLocked(!!d.vocabLocked); setWords(d.vocabWords || []);
+        // Join this device's progress with the account's (the newer change wins) and save back whatever the account lacks.
+        if (!d.vocabLocked && d.vocabProgress && typeof d.vocabProgress === "object") {
+          const { merged, toPush } = vocabMerge(loadVocabBoxes(childId), d.vocabProgress);
+          setBoxes(merged); saveVocabBoxes(childId, merged);
+          for (let i = 0; i < toPush.length; i += 100) {
+            authedFetch(session, "/api/history", { method: "POST", body: JSON.stringify({ childId, updates: toPush.slice(i, i + 100) }) }).catch(() => {});
+          }
+        }
+      })
       .catch(err => { if (!cancelled) { setLoadError(err.message || "Couldn't load your vocabulary right now."); setWords([]); } });
     return ()=>{ cancelled = true; };
   }, [childId, backendLive]);
 
   function rate(term, gotIt){
+    const key = vocabTermKey(term);
+    const entry = { box: vocabNextBox(vocabBoxOf(boxes, term), gotIt), at: Date.now() };
     setBoxes((prev) => {
-      const next = { ...prev, [vocabTermKey(term)]: vocabNextBox(vocabBoxOf(prev, term), gotIt) };
+      const next = { ...prev, [key]: entry };
       if (childId) saveVocabBoxes(childId, next);
       return next;
     });
+    // Saved to the account too, quietly: if it cannot be (offline, plan change), this device keeps it and the
+    // next time the page opens the newer copy is sent up.
+    if (backendLive && childId && session) authedFetch(session, "/api/history", { method: "POST", body: JSON.stringify({ childId, updates: [{ term: key, box: entry.box, at: entry.at }] }) }).catch(() => {});
   }
 
   function startCards(){ setDeck(vocabDeck(words, boxes, 8)); setView("cards"); }

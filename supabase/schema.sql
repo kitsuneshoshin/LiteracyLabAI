@@ -327,3 +327,21 @@ begin
 end;
 $$;
 revoke all on function public.record_ai_usage(date, text, integer, integer, numeric) from public, anon, authenticated;
+
+-- ---------------------------------------------------------------------------
+-- How well each learner knows each vocabulary word (api/_lib/vocabProgress.js, read and written through
+-- api/history.js), so flashcard progress follows a learner between devices. One row per learner and
+-- word: a box from 0 (new) to 3 (known) and when it last changed; the newest change wins. Holds only
+-- words the product itself taught, never anything a student wrote. RLS on with no policy, like every
+-- table here; only the server (service role) reads or writes.
+-- ---------------------------------------------------------------------------
+create table if not exists public.vocab_progress (
+  child_id uuid not null references public.child_profiles(id) on delete cascade,
+  profile_id uuid not null references public.profiles(id) on delete cascade,
+  term text not null,
+  box smallint not null check (box between 0 and 3),
+  updated_at timestamptz not null default now(),
+  primary key (child_id, term)
+);
+alter table public.vocab_progress enable row level security;
+create index if not exists vocab_progress_profile_idx on public.vocab_progress (profile_id);
