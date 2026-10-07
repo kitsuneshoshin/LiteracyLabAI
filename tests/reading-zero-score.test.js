@@ -124,7 +124,7 @@ test("passages: the generation prompt asks for paragraphs at every age", () => {
 
 test("app.html renders passage paragraphs as separate blocks", () => {
   const app = fs.readFileSync(path.join(__dirname, "..", "app.html"), "utf8");
-  assert.ok(app.includes("String(bank.passage).split(/\\n\\s*\\n/)"), "the passage is split on blank lines");
+  assert.ok(app.includes("function passageParagraphs") && app.includes("re.exec(text)"), "the passage is split on blank lines, paragraph by paragraph");
 });
 
 // ------------------------------------------------------------------ question review voice and interest

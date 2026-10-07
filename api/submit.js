@@ -318,7 +318,7 @@ module.exports = async function handler(req, res) {
         const llmPrompt = buildReadingPrompt({
           tier: existing.tier, country: existing.country, gradeLabel: existing.grade_label, interest: existing.interest,
           confidenceReading: body.confidenceReading, motivation: body.motivation,
-          passageTitle: bank.title, passage: bank.passage, questions: bank.questions,
+          passageTitle: bank.title, passage: bank.passage, visual: bank.visual, questions: bank.questions,
           answers, score, totalQuestions, capabilities: caps, targets,
           targetNames: targets.map((t) => t.name),
         });

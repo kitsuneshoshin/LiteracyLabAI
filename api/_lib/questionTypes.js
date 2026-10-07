@@ -23,8 +23,24 @@ const TEMPLATES = {
   high: [["tfng", "mc", "evidence", "mc", "tfng"], ["mc", "mc", "evidence", "tfng", "mc"], ["mc", "tfng", "mc", "evidence", "mc"]],
 };
 
-function pickTemplate(tier, rng = Math.random) {
-  const list = TEMPLATES[tier] || TEMPLATES.elementary;
+// A data text (table or chart) is read for numbers, so its questions are multiple choice and true/false/not given: the
+// order, match, gap-fill and quote questions all need events, words or sentences that a short text about data may not
+// hold. Two texts get multiple choice, "which line proves it" and true/false/not given, with the quote question always
+// straight after a multiple choice question.
+const TEMPLATES_DATA = {
+  elementary: [["mc", "tfng", "mc", "tfng", "mc"]],
+  middle: [["tfng", "mc", "tfng", "mc", "mc"], ["mc", "tfng", "mc", "mc", "tfng"]],
+  high: [["mc", "tfng", "mc", "tfng", "mc"], ["tfng", "mc", "mc", "tfng", "mc"]],
+};
+const TEMPLATES_TWO = {
+  elementary: [["mc", "evidence", "tfng", "mc", "tfng"]],
+  middle: [["mc", "evidence", "tfng", "mc", "mc"], ["tfng", "mc", "evidence", "mc", "mc"]],
+  high: [["mc", "evidence", "mc", "tfng", "mc"], ["mc", "mc", "evidence", "tfng", "mc"]],
+};
+
+function pickTemplate(tier, rng = Math.random, textType) {
+  const table = textType && textType.visual ? TEMPLATES_DATA : textType && textType.two ? TEMPLATES_TWO : TEMPLATES;
+  const list = table[tier] || table.elementary || TEMPLATES.elementary;
   return list[Math.floor(rng() * list.length)].slice();
 }
 
@@ -37,16 +53,25 @@ const TEXT_TYPES = {
   elementary: [
     { name: "short story", lines: false }, { name: "information text", lines: false }, { name: "poem", lines: true, note: "Two to four stanzas of short lines, with imagery and, if you like, rhyme." },
     { name: "set of instructions", lines: false, note: "A clear title, what you need, and ordered steps." }, { name: "diary entry or letter", lines: false, note: "Written in the first person, with a date or greeting and sign-off." },
+    { name: "data table", lines: false, visual: "table", note: "A short information text about an invented survey or record, with the matching table." },
+    { name: "bar chart", lines: false, visual: "chart", note: "A short information text about invented counts, with the matching bar chart." },
+    { name: "two short texts", lines: false, two: true, note: "Two short texts on the same subject (for example a diary entry and a notice) that differ in who is speaking or why." },
   ],
   middle: [
     { name: "short story", lines: false }, { name: "news or magazine article", lines: false, note: "With a headline-style title, a clear opening, quotations or facts, and a viewpoint." },
     { name: "persuasive piece", lines: false, note: "A writer arguing for a view, with reasons and at least one persuasive device." }, { name: "poem", lines: true, note: "Two to four stanzas with imagery, rhythm and a shift in feeling or idea." },
     { name: "diary entry or letter", lines: false, note: "In a distinct first-person voice." },
+    { name: "data table", lines: false, visual: "table", note: "A short report on an invented survey or set of records, with the matching table." },
+    { name: "bar chart", lines: false, visual: "chart", note: "A short report on invented counts or measurements, with the matching bar chart." },
+    { name: "two texts", lines: false, two: true, note: "Two short texts on the same subject (for example a news report and a personal account, or two opinions) that differ in viewpoint, purpose or tone." },
   ],
   high: [
     { name: "story extract", lines: false, note: "An extract that starts mid-story, with carefully chosen detail and an implied mood." }, { name: "article", lines: false, note: "An analytical or feature article that presents more than one view." },
     { name: "persuasive or opinion piece", lines: false, note: "A reasoned argument with rhetorical choices and a clear structure." }, { name: "speech", lines: false, note: "A speech with direct address, rhetorical devices and a call to action." },
     { name: "poem", lines: true, note: "Two to four stanzas with layered imagery and a shift in tone." },
+    { name: "data table", lines: false, visual: "table", note: "A short report or article extract on an invented study or set of records, with the matching table." },
+    { name: "bar chart", lines: false, visual: "chart", note: "A short report or article extract on invented figures, with the matching bar chart." },
+    { name: "two texts", lines: false, two: true, note: "Two short texts on the same subject (for example an article and a speech, or two accounts of one event) that differ in viewpoint, purpose or tone." },
   ],
 };
 
@@ -357,7 +382,7 @@ function questionShapeText(template, tier) {
 
 module.exports = {
   ANSWER_FRAMEWORKS, SHORT_FRAMEWORK, answerFramework, SHORT_MARKS, SHORT_MAX_CHARS, isAuto, autoTotal, shortIndex,
-  TFNG_OPTIONS, TEMPLATES, MC_FOUR, TEXT_TYPES, STYLE_LABEL,
+  TEMPLATES_DATA, TEMPLATES_TWO, TFNG_OPTIONS, TEMPLATES, MC_FOUR, TEXT_TYPES, STYLE_LABEL,
   pickTemplate, pickTextType, shuffle, styleOf, isAnswered, isRight, answerText, correctText, scoreAnswers,
   publicQuestion, describeForPrompt, normalizeQuestions, validateQuestions, questionPlanText, questionShapeText,
 };

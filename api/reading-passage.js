@@ -8,6 +8,7 @@ const { buildReadingPassagePrompt, correctiveAddendum } = require("./_lib/prompt
 const { validatePassage } = require("./_lib/validate");
 const { paragraphise } = require("./_lib/passageFormat");
 const QT = require("./_lib/questionTypes");
+const { normalizeVisual } = require("./_lib/visualText");
 
 const VALID_TIERS = ["early", "elementary", "middle", "high"];
 
@@ -28,6 +29,7 @@ async function generateAndValidate(prompt, tier, opts = {}) {
   const rng = opts.rng || Math.random;
   const attemptWith = async (p, tpl) => {
     const attempt = await generateFeedbackJSON(p);
+    if (attempt.parsed && textType && textType.visual && attempt.parsed.visual) attempt.parsed.visual = normalizeVisual(attempt.parsed.visual);
     if (attempt.parsed && Array.isArray(attempt.parsed.questions)) attempt.parsed.questions = QT.normalizeQuestions(attempt.parsed.questions, tpl, rng, tier);
     return { attempt, check: validatePassage(attempt.parsed, { tier, template: tpl, textType }) };
   };
@@ -120,17 +122,18 @@ module.exports = async function handler(req, res) {
     try {
       // Premium learners from Year 3 or so also get one short written answer, marked by the AI after submitting.
       const withShort = !!(usage.capabilities && usage.capabilities.deepFeedback) && !!QT.SHORT_MARKS[tier];
-      const baseTemplate = QT.pickTemplate(tier);
-      const template = withShort ? [...baseTemplate, "short"] : baseTemplate;
       const textType = QT.pickTextType(tier);
+      const baseTemplate = QT.pickTemplate(tier, Math.random, textType);
+      const template = withShort ? [...baseTemplate, "short"] : baseTemplate;
       const llmPrompt = buildReadingPassagePrompt({ tier, country, gradeLabel, textType, template });
       // If the styled plan keeps failing, fall back to plain multiple choice, keeping the written answer for Premium.
       const fallbackTemplate = withShort ? [...QT.MC_FOUR, "short"] : QT.MC_FOUR;
       const fallbackPrompt = buildReadingPassagePrompt({ tier, country, gradeLabel, textType, template: fallbackTemplate });
       ({ parsed } = await generateAndValidate(llmPrompt, tier, { template, textType, fallbackPrompt, fallbackTemplate }));
       // A poem keeps its line breaks; prose is regrouped into paragraphs if the model sent one block.
-      parsed.passage = textType.lines ? String(parsed.passage).replace(/\r\n/g, "\n").trim() : paragraphise(parsed.passage);
+      parsed.passage = (textType.lines || textType.two) ? String(parsed.passage).replace(/\r\n/g, "\n").trim() : paragraphise(parsed.passage);
       parsed.textType = textType.name;
+      if (textType.visual) parsed.visual = parsed.visual; // checked and tidied in generateAndValidate
       parsed.questionStyles = parsed.questionStyles || template;
     } catch (genErr) {
       await supabase.from("submissions").delete().eq("id", reserved.id);
@@ -153,6 +156,7 @@ module.exports = async function handler(req, res) {
       // happens server-side in api/submit.js against the stored row.
       questions: parsed.questions.map(QT.publicQuestion),
       textType: parsed.textType,
+      visual: parsed.visual || null,
       usage: updatedUsage,
     });
   } catch (err) {

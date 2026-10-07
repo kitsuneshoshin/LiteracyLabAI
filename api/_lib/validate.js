@@ -791,11 +791,18 @@ function validatePassage(parsed, { tier, template, textType }) {
     issues.push("passage is missing or an unreasonable length");
   } else {
     const [min0, max] = PASSAGE_WORD_BOUNDS[tier] || [20, 400];
-    const min = textType && textType.lines ? 25 : min0; // a poem is shorter than prose
+    const min = textType && (textType.lines || textType.visual) ? 25 : min0; // a poem, or a short text that comes with data, is shorter than prose
     const words = wordCount(parsed.passage);
     if (words < min || words > max) issues.push(`passage is ${words} words, expected roughly ${min}-${max} for this age tier`);
   }
 
+  if (textType && textType.visual) require("./visualText").validateVisual(parsed?.visual, textType.visual, issues);
+  if (textType && textType.two) {
+    const text = typeof parsed?.passage === "string" ? parsed.passage : "";
+    const m = text.match(/^\s*Text A:[^\n]*\n([\s\S]*?)\n\s*Text B:[^\n]*\n([\s\S]*)$/);
+    if (!m) issues.push('passage must hold two texts: a line "Text A: <title>", its paragraphs, a blank line, then a line "Text B: <title>" and its paragraphs');
+    else if (wordCount(m[1]) < 25 || wordCount(m[2]) < 25) issues.push("each of the two texts must be at least 25 words");
+  }
   require("./questionTypes").validateQuestions(parsed?.questions, { template, passage: parsed?.passage }, issues);
 
   return { ok: issues.length === 0, issues };

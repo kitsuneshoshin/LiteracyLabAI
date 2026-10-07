@@ -215,13 +215,26 @@ test("every kind of text is available at the age it suits, and the young get sim
 
 // ------------------------------------------------------------ the generator, end to end
 
+
+// A stand-in model also answers the data and two-text kinds of passage when the prompt asks for them.
+function adaptToPrompt(parsed, prompt) {
+  if (/"visual": \{ "type": "table"/.test(prompt)) parsed.visual = { type: "table", title: "Pets at school", headers: ["Pet", "Pupils"], rows: [["Dog", "12"], ["Cat", "9"], ["Fish", "5"]] };
+  else if (/"visual": \{ "type": "chart"/.test(prompt)) parsed.visual = { type: "chart", title: "Pets at school", unit: "pupils", items: [{ label: "Dog", value: 12 }, { label: "Cat", value: 9 }, { label: "Fish", value: 5 }] };
+  if (/"Text A: <a short title>"/.test(prompt)) {
+    const words = String(parsed.passage).split(/\s+/);
+    const half = Math.ceil(words.length / 2);
+    parsed.passage = "Text A: The first view\n" + words.slice(0, half).join(" ") + "\n\nText B: The second view\n" + words.slice(half).join(" ");
+  }
+  return parsed;
+}
+
 // A stand-in model: reads the styles out of the prompt it is given and writes matching questions.
 function fakeModel(prompt, { passage } = {}) {
   const labels = [...prompt.matchAll(/^Question \d+ - ([^:]+):/gm)].map((m) => m[1]);
   const style = (label) => Object.keys(QT.STYLE_LABEL).find((k) => QT.STYLE_LABEL[k] === label);
   const tier = /Early Years/.test(prompt) ? "early" : /Elementary/.test(prompt) ? "elementary" : /Middle School/.test(prompt) ? "middle" : "high";
   const isPoem = /wholly original (simple )?poem\b/.test(prompt);
-  return { title: "The Cake Stall", skill: "Inference", passage: passage || (isPoem ? poemPassage : proseOf({ early: 110, elementary: 210, middle: 290, high: 370 }[tier])), questions: labels.map((l) => RAW[style(l)](tier)) };
+  return adaptToPrompt({ title: "The Cake Stall", skill: "Inference", passage: passage || (isPoem ? poemPassage : proseOf({ early: 110, elementary: 210, middle: 290, high: 370 }[tier])), questions: labels.map((l) => RAW[style(l)](tier)) }, prompt);
 }
 
 async function runGenerator(tier, generate) {
@@ -253,7 +266,7 @@ test("a passage is generated in a mix of styles for every age band, stored with 
       const styles = res.body.questions.map((q) => q.type);
       assert.equal(styles.length, tier === "early" ? 5 : 6, `${tier}: Premium adds one short written answer from Elementary up`);
       if (tier !== "early") assert.equal(styles[5], "short");
-      assert.ok(new Set(styles.filter((s) => s !== "short")).size >= 3, `${tier}: a real mix, got ${styles.join(",")}`);
+      assert.ok(new Set(styles.filter((s) => s !== "short")).size >= (/data table|bar chart|two/.test(res.body.textType) ? 2 : 3), `${tier}: a real mix, got ${styles.join(",")}`);
       assert.ok(res.body.questions.every((q) => !("correct" in q) && !("modelAnswer" in q) && !("keyPoints" in q)), "no key to the browser");
       if (tier !== "early") assert.equal(res.body.questions[5].marks, QT.SHORT_MARKS[tier]);
       assert.ok(QT.TEXT_TYPES[tier].some((t) => t.name === res.body.textType));

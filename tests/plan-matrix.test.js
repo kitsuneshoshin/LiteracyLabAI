@@ -545,6 +545,10 @@ for (const plan of PLANS) {
         // when the prompt asks for a written answer too, it adds one.
         generate: async (prompt) => {
           const copy = JSON.parse(JSON.stringify(parsed));
+          // the data and two-text kinds of passage need their data / two parts when the prompt asks for them
+          if (/"visual": \{ "type": "table"/.test(prompt)) copy.visual = { type: "table", title: "Pets at school", headers: ["Pet", "Pupils"], rows: [["Dog", "12"], ["Cat", "9"], ["Fish", "5"]] };
+          else if (/"visual": \{ "type": "chart"/.test(prompt)) copy.visual = { type: "chart", title: "Pets at school", unit: "pupils", items: [{ label: "Dog", value: 12 }, { label: "Cat", value: 9 }, { label: "Fish", value: 5 }] };
+          if (/"Text A: <a short title>"/.test(prompt)) { const w = copy.passage.split(" "); const h = Math.ceil(w.length / 2); copy.passage = "Text A: One view\n" + w.slice(0, h).join(" ") + "\n\nText B: Another view\n" + w.slice(h).join(" "); }
           if (/short written answer/.test(prompt)) copy.questions.push({ type: "short", q: "Why did the volcano matter to her?", modelParts: (() => { const QTf = require("../api/_lib/questionTypes"); const fw = QTf.answerFramework(QTf.SHORT_FRAMEWORK[tier] || "RACE"); return fw.parts.map(([n]) => ({ part: n, text: n + ": a sentence that does this part's job well." })); })(), modelAnswer: "unused: the parts above are what counts", keyPoints: ["she did not give up", "she rebuilt it", "it mattered to her"].slice(0, tier === "elementary" ? 2 : 3) });
           return { parsed: copy, modelUsed: "stub" };
         },

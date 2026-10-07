@@ -405,7 +405,7 @@ function shortAnswerShape(questions) {
   return `  "shortAnswer": { "made": [1], "comment": "1-2 sentences to the student"${fw ? ', "structure": ["' + fw.parts[0][0] + '"]' : ""} },\n`;
 }
 
-function buildReadingPrompt({ tier, country, gradeLabel, interest, confidenceReading, motivation, passageTitle, passage, questions, answers, score, totalQuestions, targetNames, targets, capabilities }) {
+function buildReadingPrompt({ tier, country, gradeLabel, interest, confidenceReading, motivation, passageTitle, passage, visual, questions, answers, score, totalQuestions, targetNames, targets, capabilities }) {
   const caps = capabilities || {};
   targets = examTargetsFor(targets, "reading");
   const wantsExam = caps.examTechnique && examTechniqueSupported(tier) && Array.isArray(targets) && targets.length > 0;
@@ -426,7 +426,7 @@ A student read this passage, titled "${passageTitle}":
 """
 ${passage}
 """
-
+${visual ? "\nIt came with this data, which some questions are about:\n\"\"\"\n" + require("./visualText").describeVisual(visual) + "\n\"\"\"\n" : ""}
 They answered ${score} of ${totalQuestions} comprehension questions correctly:
 ${answerLines}
 
@@ -501,18 +501,37 @@ function buildReadingPassagePrompt({ tier, country, gradeLabel, textType, templa
   const count = plan.length;
   const layout = isPoem
     ? "as 2-4 stanzas: separate each line with a single newline (\\n) and each stanza with a blank line (\\n\\n in the JSON string)"
-    : `as ${PASSAGE_PARAGRAPHS[tier]}, with a blank line between paragraphs (in the JSON string, separate paragraphs with \\n\\n). Each paragraph should hold one idea, moment or step in the argument - never one dense block of text`;
+    : type.visual
+      ? "as 2-3 short paragraphs (separate paragraphs with \\n\\n) that introduce and comment on the data - the numbers themselves go in \"visual\", not only in the text"
+      : type.two
+        ? "as two short texts in the one string: a line \"Text A: <a short title>\", then its one or two paragraphs, then a blank line, then a line \"Text B: <a short title>\", then its one or two paragraphs (separate paragraphs with \\n\\n). The two must be about the same subject but differ in viewpoint, purpose or tone"
+        : `as ${PASSAGE_PARAGRAPHS[tier]}, with a blank line between paragraphs (in the JSON string, separate paragraphs with \\n\\n). Each paragraph should hold one idea, moment or step in the argument - never one dense block of text`;
+  const lengthNote = isPoem
+    ? "about 40-90 words in total (a poem is shorter than prose)"
+    : type.visual
+      ? "about 60-140 words of writing (the data comes on top of this)"
+      : PASSAGE_LENGTH[tier];
+  const visualRule = type.visual === "table"
+    ? `
+- Data: also return "visual", a table of invented but believable data that the text refers to: { "type": "table", "title": a short title, "headers": 2 to 5 short column labels, "rows": 3 to 7 rows, each with exactly one short cell per column (numbers as plain text, no units inside the cells unless short) }. The text and the table must agree. At least two questions must need numbers from the table (reading a value, comparing, a total, or a trend), and every such answer must be certain from the table alone.`
+    : type.visual === "chart"
+      ? `
+- Data: also return "visual", a bar chart of invented but believable counts that the text refers to: { "type": "chart", "title": a short title, "unit": what the bars measure (for example "votes"), "items": 3 to 7 bars, each { "label": a short name, "value": a whole number } }. The text and the chart must agree. At least two questions must need numbers from the chart (reading a value, comparing bars, a total, or a difference), and every such answer must be certain from the chart alone.`
+      : type.two
+        ? `
+- Two texts: at least two of the questions must need both texts (for example how they differ in viewpoint, purpose, tone or evidence). Make clear in each question which text it asks about, using "Text A" and "Text B".`
+        : "";
   return `You are generating an ORIGINAL reading-comprehension exercise for a ${TIER_LABEL[tier]} student in ${gradeLabel} (${country}).
 
 Write a short, wholly original ${type.name} - never copied or closely paraphrased from any existing published book, article, poem, or other copyrighted work - appropriate for this age, plus ${count} comprehension questions about it, in the styles listed below.${type.note ? " " + type.note : ""}
 
 Requirements:
-- Text length: ${isPoem ? "about 40-90 words in total (a poem is shorter than prose)" : PASSAGE_LENGTH[tier]}.
+- Text length: ${lengthNote}.
 - Layout: write it ${layout}.
 - The questions should primarily test this comprehension skill: ${PASSAGE_SKILL[tier]}, but cover distinct details, moments, or angles of the text so the ${count} questions feel genuinely different.
 - Each question has exactly ONE unambiguously correct answer that is clearly supported by the text. Wrong answers must be clearly wrong to a careful reader, not intentionally tricky or debatable.
 - Do not reuse character names, settings, or plots from well-known published works.
-- Pitch it as a real stretch for this age: at least two of the ${count} questions must need inference or interpretation rather than finding a stated fact.
+- Pitch it as a real stretch for this age: at least two of the ${count} questions must need inference or interpretation rather than finding a stated fact.${visualRule}
 
 The ${count} questions, in this exact order and in these exact styles:
 ${QT.questionPlanText(plan, tier)}
@@ -521,7 +540,7 @@ Respond with ONLY a JSON object (no markdown fences, no commentary) with exactly
 {
   "title": "a short title for the text",
   "skill": "the one comprehension skill this set of questions tests, in plain words",
-  "passage": "the full original text",
+  "passage": "the full original text",${type.visual === "table" ? '\n  "visual": { "type": "table", "title": "a short title", "headers": ["column one", "column two"], "rows": [["row one", "12"], ["row two", "9"], ["row three", "15"]] },' : type.visual === "chart" ? '\n  "visual": { "type": "chart", "title": "a short title", "unit": "votes", "items": [{ "label": "first bar", "value": 12 }, { "label": "second bar", "value": 9 }, { "label": "third bar", "value": 15 }] },' : ""}
   "questions": [
 ${QT.questionShapeText(plan, tier)}
   ]
