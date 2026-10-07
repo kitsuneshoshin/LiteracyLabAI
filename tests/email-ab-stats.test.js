@@ -62,3 +62,15 @@ test("email stats endpoint: closed to everyone but the cron secret or an admin",
   const res = await call(h, { method: "GET", query: { action: "stats" }, headers: {} });
   assert.equal(res.statusCode, 401);
 });
+
+test("email stats endpoint: explains how to switch it on when only the send-only key exists", async () => {
+  const saved = { c: process.env.CRON_SECRET, r: process.env.RESEND_READ_KEY };
+  process.env.CRON_SECRET = "s"; delete process.env.RESEND_READ_KEY;
+  const h = loadHandler("email.js", {});
+  const res = await call(h, { method: "GET", query: { action: "stats" }, headers: { authorization: "Bearer s" } });
+  if (saved.c === undefined) delete process.env.CRON_SECRET; else process.env.CRON_SECRET = saved.c;
+  if (saved.r !== undefined) process.env.RESEND_READ_KEY = saved.r;
+  assert.equal(res.statusCode, 200);
+  assert.equal(res.body.available, false);
+  assert.match(res.body.reason, /RESEND_READ_KEY/);
+});

@@ -136,16 +136,18 @@ async function handleStats(req, res) {
     } catch (e) { allowed = false; }
   }
   if (!allowed) return res.status(401).json({ error: "Unauthorized." });
-  if (!process.env.RESEND_API_KEY) return res.status(500).json({ error: "RESEND_API_KEY is not set." });
+  // The sending key is deliberately send-only, so reading needs its own key (RESEND_READ_KEY, full access).
+  const readKey = process.env.RESEND_READ_KEY;
+  if (!readKey) return res.status(200).json({ available: false, reason: "Add RESEND_READ_KEY (a Resend API key with full access) in Vercel to see open and click numbers. The sending key cannot read them." });
 
   const { summarise, totals, fetchRecent } = require("./_lib/emailStats");
   const { SUBJECT_B } = require("./_lib/emailAb");
-  const rows = summarise(await fetchRecent({ apiKey: process.env.RESEND_API_KEY, pauseMs: 550 }));
+  const rows = summarise(await fetchRecent({ apiKey: readKey, pauseMs: 550 }));
   const none = (s) => ({ subject: s, sent: 0, delivered: 0, opened: 0, clicked: 0, bounced: 0, openRate: null, clickRate: null });
   const find = (s) => rows.find((r) => r.subject === s) || none(s);
   // Each email in the test: A is the original subject, B the alternative.
   const subjectTests = Object.keys(SUBJECT_B).map((k) => ({ email: k, A: find(buildAnyEmail(k, sampleContext(k)).subject), B: find(SUBJECT_B[k]) }));
-  return res.status(200).json({ checkedAt: new Date().toISOString(), totals: totals(rows), bySubject: rows, subjectTests });
+  return res.status(200).json({ available: true, checkedAt: new Date().toISOString(), totals: totals(rows), bySubject: rows, subjectTests });
 }
 
 // ------------------------------------------------------------------ test copies
