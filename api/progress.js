@@ -2,6 +2,7 @@ const { getSupabaseAdmin } = require("./_lib/supabaseAdmin");
 const { requireUser, sendError } = require("./_lib/auth");
 const { targetsForGrade, isMappedCountry } = require("./_lib/masteryTargets");
 const { curriculumLabel } = require("./_lib/curriculum");
+const { MASTERY_WINDOW, recentMastery } = require("./_lib/mastery");
 
 // Real per-skill mastery, computed from this student's own submission
 // history rather than the static placeholder numbers the dashboard used to
@@ -9,28 +10,25 @@ const { curriculumLabel } = require("./_lib/curriculum");
 // strength in) and a growTarget (a skill it's still building towards) —
 // see api/_lib/prompt.js. This aggregates those tags per curriculum target:
 //   pct = strength mentions / (strength + growth mentions) for that target
-// A target with zero mentions yet is "Not Yet Assessed" rather than a
-// fabricated percentage.
+// The share is over the target's RECENT mentions (the last MASTERY_WINDOW, see _lib/mastery.js), so it moves as the
+// learner improves. A target with zero mentions yet is "Not Yet Assessed" rather than a fabricated percentage.
+// submissions arrive newest first.
 function scoreTargets(targets, submissions) {
-  const counts = new Map(targets.map((t) => [t.name, { strength: 0, growth: 0 }]));
-
-  for (const sub of submissions) {
+  const outcomes = new Map(targets.map((t) => [t.name, []])); // oldest first, once reversed below
+  for (const sub of [...submissions].reverse()) {
     const fb = sub.feedback || {};
-    const glowTarget = counts.get(fb.glowTarget);
-    if (glowTarget) glowTarget.strength += 1;
-    const growTarget = counts.get(fb.growTarget);
-    if (growTarget) growTarget.growth += 1;
+    if (outcomes.has(fb.glowTarget)) outcomes.get(fb.glowTarget).push("g");
+    if (outcomes.has(fb.growTarget)) outcomes.get(fb.growTarget).push("n");
   }
 
   return targets.map((t) => {
-    const c = counts.get(t.name);
-    const total = c.strength + c.growth;
-    if (total === 0) {
-      return { name: t.name, standard: t.standard, pct: null, status: "Not Yet Assessed", assessedCount: 0 };
+    const all = outcomes.get(t.name);
+    if (all.length === 0) {
+      return { name: t.name, standard: t.standard, pct: null, status: "Not Yet Assessed", assessedCount: 0, strengths: 0, nextSteps: 0 };
     }
-    const pct = Math.round((c.strength / total) * 100);
-    const status = pct >= 80 ? "Mastered" : pct >= 50 ? "In Progress" : "Needs Attention";
-    return { name: t.name, standard: t.standard, pct, status, assessedCount: total };
+    const m = recentMastery(all);
+    const status = m.pct >= 80 ? "Mastered" : m.pct >= 50 ? "In Progress" : "Needs Attention";
+    return { name: t.name, standard: t.standard, pct: m.pct, status, assessedCount: all.length, strengths: m.strengths, nextSteps: m.nextSteps };
   });
 }
 
@@ -64,6 +62,7 @@ module.exports = async function handler(req, res) {
       curriculumLabel: curriculumLabel(country),
       grain,
       approximatedFrom,
+      masteryWindow: MASTERY_WINDOW,
       targets: scoreTargets(targetDefs, submissions),
     });
   } catch (err) {

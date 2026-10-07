@@ -510,14 +510,15 @@ function dropGlowsQuotingMisspellings(parsed) {
   return parsed;
 }
 
-function dropInvalidSpellingGrammar(parsed, submittedText) {
+function dropInvalidSpellingGrammar(parsed, submittedText, country) {
   if (!parsed || !Array.isArray(parsed.spellingGrammar) || !submittedText) return parsed;
   const normalizedText = normalizeForMatch(submittedText);
   const kept = parsed.spellingGrammar.filter((item) =>
     checkString(item?.quote, 1, 200) && checkString(item?.correction, 1, 240) &&
     normalizedText.includes(normalizeForMatch(item.quote)) &&
     foldLookalikes(item.correction) !== foldLookalikes(item.quote) &&
-    !addsPunctuationAlreadyThere(item, submittedText));
+    !addsPunctuationAlreadyThere(item, submittedText) &&
+    !require("./regional").isRegionalVariantOnly(item.quote, item.correction, country));
   const dropped = parsed.spellingGrammar.length - kept.length;
   if (dropped > 0) {
     parsed.spellingGrammar = kept;

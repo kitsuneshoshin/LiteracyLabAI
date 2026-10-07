@@ -1120,10 +1120,29 @@ function Pill({ active, onClick, icon: IconEl, children, tone = "cyan" }){
   );
 }
 
+// Why a year shows another year's targets, in the way that country sets its senior years.
+function approximationNote(country, gradeLabel, from){
+  const c = country || "";
+  if (/Australia/.test(c)) return gradeLabel + " is set by each state or territory rather than the national curriculum, so these targets use the national " + from + " standards, the last year that has them.";
+  if (/United Kingdom/.test(c) && /Year 1[23]/.test(gradeLabel)) return gradeLabel + " (A-level) is set by each exam board, so these targets use the " + from + " (GCSE) objectives, the closest set that applies to every learner.";
+  if (/UAE|GCC/.test(c)) return gradeLabel + " is set by the exam board, so these targets use the " + from + " objectives, the closest set that applies to every learner.";
+  if (/Singapore/.test(c)) return gradeLabel + " is set by the exam board, so these targets use the " + from + " objectives, the closest set that applies to every learner.";
+  if (/Kindergarten|Reception/.test(gradeLabel)) return gradeLabel + " has no separate written standard for this skill, so these targets start from " + from + ".";
+  return gradeLabel + " isn't set by a national standard, so targets shown are anchored to " + from + ", the closest year that is.";
+}
+
+// The line under a target: how many of its recent mentions were strengths and how many were the next step.
+function masteryEvidence(row, windowSize){
+  const s = row.strengths || 0, n = row.nextSteps || 0, total = s + n;
+  const part = (k, one, many) => k + " " + (k === 1 ? one : many);
+  const base = part(s, "strength", "strengths") + " · " + part(n, "next step", "next steps");
+  return row.assessedCount > total && windowSize ? base + " in the last " + total + " mentions" : base + (total === 1 ? " so far" : " so far");
+}
+
 const STATUS_TIP = {
-  "Mastered": "80% or more of this skill's mentions in feedback have been a Glow (a strength), not a Grow.",
-  "In Progress": "50-79% of this skill's mentions in feedback have been a Glow so far.",
-  "Needs Attention": "Under 50% of this skill's mentions in feedback have been a Glow so far - more Grows than Glows.",
+  "Mastered": "80% or more of this skill's recent mentions in feedback (the last 8) have been a Glow (a strength), not a Grow.",
+  "In Progress": "50-79% of this skill's recent mentions in feedback (the last 8) have been a Glow.",
+  "Needs Attention": "Under 50% of this skill's recent mentions in feedback (the last 8) have been a Glow - more Grows than Glows.",
   "Not Yet Assessed": "No submission has been tagged against this skill yet - it hasn't come up in feedback.",
 };
 function StatusTag({ status }){
@@ -1912,15 +1931,29 @@ function PausedLearnerNotice({ child, children_, activeChangeAvailableAt, onMake
 }
 
 function ProgressTimeline({ weeks }){
+  // The chart is drawn at the width of its card, so it lines up with the heading and fills the space on a wide screen.
   const plottable = (weeks || []).filter(w => w.masteryPct != null);
+  const hasChart = plottable.length >= 2;
+  const boxRef = useRef(null);
+  const [boxW, setBoxW] = useState(0);
+  useEffect(() => {
+    const el = boxRef.current;
+    if (!el) return;
+    const measure = () => setBoxW(Math.round(el.getBoundingClientRect().width));
+    measure();
+    if (typeof ResizeObserver === "undefined") return;
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [hasChart]);
   if (plottable.length < 2) {
     return (
-      <div className="text-sm py-6 text-center" style={{ color: "var(--ink-faint)" }}>
+      <div ref={boxRef} className="text-sm py-6 text-center" style={{ color: "var(--ink-faint)" }}>
         Keep submitting stories — a trend line appears once there are at least two weeks of assessed writing.
       </div>
     );
   }
-  const W = 640, H = 200, padL = 34, padR = 12, padT = 16, padB = 28;
+  const W = Math.max(300, Math.min(1400, boxW || 640)), H = W >= 700 ? 240 : 200, padL = 40, padR = 16, padT = 16, padB = 28;
   const innerW = W - padL - padR, innerH = H - padT - padB;
   const n = plottable.length;
   const x = (i) => padL + (n === 1 ? innerW / 2 : (i / (n - 1)) * innerW);
@@ -1933,7 +1966,8 @@ function ProgressTimeline({ weeks }){
   // At most 5 x-axis labels, evenly spaced, so dense histories don't overlap.
   const labelEvery = Math.max(1, Math.ceil(n / 5));
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} className="w-full" style={{ height: 200 }}>
+    <div ref={boxRef} className="w-full">
+    <svg viewBox={`0 0 ${W} ${H}`} width={W} height={H} className="block" style={{ maxWidth: "100%" }} role="img" aria-label="Average target mastery by week">
       {[0, 25, 50, 75, 100].map(gy => (
         <g key={gy}>
           <line x1={padL} x2={W - padR} y1={y(gy)} y2={y(gy)} stroke="var(--border-soft)" strokeWidth="1" />
@@ -1960,6 +1994,7 @@ function ProgressTimeline({ weeks }){
         )
       ))}
     </svg>
+    </div>
   );
 }
 
@@ -2033,8 +2068,8 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
   // (it used to get only a sentence about Premium and no way to act on it),
   // Premium/Pro/Admin have nothing left to upgrade to.
   const PLAN_CARDS = [
-                    { tier: "core", name: "Core", price: PLAN_META.core.price, sub: "One learner", features: ["Unlimited writing & reading submissions", "26-week progress trend chart", "Anonymous ranking in their year group", "Full activity history", "Vocabulary bank with a self-test quiz"] },
-                    { tier: "premium", name: "Premium", price: PLAN_META.premium.price, sub: "Up to 6 learners", features: ["Everything in Core, for the whole household", "Extended feedback: a second, harder next step", "Your response rewritten and a model response, with the framework shown in both", "A short written answer in reading, marked out of 2 or 3", "Spelling & grammar check and a score out of 10 on every piece", "Exam-technique scoring against real assessment objectives (ages 11+)"] },
+                    { tier: "core", name: "Core", price: PLAN_META.core.price, sub: "One learner", features: ["Unlimited writing & reading submissions", "26-week progress trend chart", "Anonymous ranking in their year group", "Full activity history", "Vocabulary bank with flashcards, a quiz and progress saved across devices"] },
+                    { tier: "premium", name: "Premium", price: PLAN_META.premium.price, sub: "Up to 6 learners", features: ["Everything in Core, for the whole household", "Extended feedback: a second, harder next step", "Your response rewritten and a model response, with the framework shown in both", "A short written answer in reading, marked out of 2 or 3", "Exam-style prompts: NAPLAN, KS2 SATs, KS3, GCSE and US state tests", "Spelling & grammar check and a score out of 10 on every piece", "Exam-technique scoring against real assessment objectives (ages 11+)"] },
   ];
   const upsellCards = plan === "free" ? PLAN_CARDS : plan === "core" ? PLAN_CARDS.filter(c => c.tier === "premium") : [];
 
@@ -2176,7 +2211,7 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
           <p className="text-xs mb-4" style={{ color: "var(--ink-faint)" }}>
             {backendLive
               ? (isMapped
-                  ? "Each target cites the exact standard it's drawn from. Progress below is computed from your own submission history, not a demo number."
+                  ? "Each target cites the exact standard it's drawn from. Progress below comes from your own submission history, not a demo number, and reflects the last 8 times each skill came up, so it moves as your learner improves."
                   : `${stripFlag(country)} isn't individually mapped to a national standard yet, so target names are illustrative — but the progress shown is still computed from your own submission history.`)
               : (isMapped
                   ? "Each target cites the exact standard, content domain, or Assessment Objective it's drawn from."
@@ -2184,7 +2219,7 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
           </p>
           {backendLive && progress?.approximatedFrom && (
             <p className="text-xs mb-4 -mt-2" style={{ color: "var(--ink-faint)" }}>
-              {gradeLabel} isn't set by a national standard, so targets shown are anchored to {progress.approximatedFrom}, the closest year that is.
+              {approximationNote(country, gradeLabel, progress.approximatedFrom)}
             </p>
           )}
           {backendLive && !targets && (
@@ -2209,6 +2244,7 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
                 <div role="cell">
                   <div className="font-medium" style={{ color: "var(--ink)" }}>{row.name}</div>
                   {row.standard && <div className="text-[11px] mt-0.5" style={{ color: "var(--ink-faint)" }}>{row.standard}</div>}
+                  {backendLive && row.assessedCount > 0 && <div className="text-[11px] mt-0.5" style={{ color: "var(--ink-faint)" }}>{masteryEvidence(row, progress && progress.masteryWindow)}</div>}
                 </div>
                 <div role="cell" className="flex items-center gap-2" aria-label={"Progress " + (row.pct != null ? row.pct + " percent" : "not yet assessed")}>
                   <div className="h-2 rounded-full flex-1" style={{ background: "var(--surface-2)" }}>

@@ -69,7 +69,7 @@ async function generateAndValidate(prompt, tier, country, gradeLabel, submittedT
       ? await splitNext(i === 1 ? [] : lastIssues)
       : await generateFeedbackJSON(nextPrompt, { maxTokens: capabilities?.deepFeedback && submittedText ? 3800 : 2048 });
     const lastAttempt = i === MAX_ATTEMPTS || (Date.now() - startedAt) + (Date.now() - attemptStarted) * 1.2 > TIME_BUDGET_MS;
-    if (capabilities?.spellingGrammar !== false) dropInvalidSpellingGrammar(attempt.parsed, submittedText);
+    if (capabilities?.spellingGrammar !== false) dropInvalidSpellingGrammar(attempt.parsed, submittedText, country);
     if (capabilities?.spellingGrammar !== false) dropGlowsQuotingMisspellings(attempt.parsed);
     TECH.repairVocabTricks(attempt.parsed);
     coerceOverallScore(attempt.parsed);

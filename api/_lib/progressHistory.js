@@ -4,6 +4,8 @@
 // Monday (UTC) of the week containing d, as "YYYY-MM-DD" - the bucket key
 // for the progress timeline below. UTC avoids the bucket a submission lands
 // in shifting with the server's local time zone.
+const { recentMastery } = require("./mastery");
+
 function weekStartKey(d) {
   const day = (d.getUTCDay() + 6) % 7; // 0 = Monday
   const monday = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate() - day));
@@ -26,7 +28,7 @@ function weekStartKey(d) {
 // fabricated value.
 function computeTimeline(submissions) {
   const byWeek = new Map();
-  const skills = new Map(); // skill name -> { glow, grow }, cumulative up to the current week
+  const skills = new Map(); // skill name -> its outcomes so far ("g" strength, "n" next step), oldest first: only the recent ones count
   const ascending = [...submissions].sort((a, b) => String(a.created_at).localeCompare(String(b.created_at)));
   for (const s of ascending) {
     const key = weekStartKey(new Date(s.created_at));
@@ -37,21 +39,21 @@ function computeTimeline(submissions) {
     const fb = s.feedback || {};
     if (fb.glowTarget) {
       bucket.glow += 1;
-      const c = skills.get(fb.glowTarget) || { glow: 0, grow: 0 };
-      c.glow += 1;
+      const c = skills.get(fb.glowTarget) || [];
+      c.push("g");
       skills.set(fb.glowTarget, c);
     }
     if (fb.growTarget) {
       bucket.grow += 1;
-      const c = skills.get(fb.growTarget) || { glow: 0, grow: 0 };
-      c.grow += 1;
+      const c = skills.get(fb.growTarget) || [];
+      c.push("n");
       skills.set(fb.growTarget, c);
     }
     // Snapshot after every submission; the last one in a week is the week's value.
     if (skills.size > 0) {
       let sum = 0;
-      for (const c of skills.values()) sum += c.glow / (c.glow + c.grow);
-      bucket.endMastery = Math.round((sum / skills.size) * 100);
+      for (const c of skills.values()) sum += recentMastery(c).pct;
+      bucket.endMastery = Math.round(sum / skills.size);
     }
     if (s.kind === "reading" && s.total_questions && s.score != null) {
       bucket.readingScoreSum += s.score / s.total_questions;

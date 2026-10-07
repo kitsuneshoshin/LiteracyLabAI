@@ -108,7 +108,7 @@ async function runOne(s, kind, generate, deadline = Infinity, validate = validat
       const parsed = attempt.parsed;
       out.attempts = i;
       if (kind === "writing") {
-        if (built.caps.spellingGrammar !== false) { dropInvalidSpellingGrammar(parsed, s.text); dropGlowsQuotingMisspellings(parsed); }
+        if (built.caps.spellingGrammar !== false) { dropInvalidSpellingGrammar(parsed, s.text, COUNTRY); dropGlowsQuotingMisspellings(parsed); }
         dropNonVerbatimHighlights(parsed, s.text);
         dropRestatingHighlights(parsed, s.text);
         TECH.repairVocabTricks(parsed);

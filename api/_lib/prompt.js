@@ -1,4 +1,5 @@
 const { curriculumLabel, standardsFor } = require("./curriculum");
+const REGIONAL = require("./regional");
 const { MAX_AVG_WORDS_PER_SENTENCE } = require("./validate");
 const { assessLength, lengthClause } = require("./calibrate");
 const { examTargetsFor } = require("./masteryTargets");
@@ -298,7 +299,7 @@ function buildWritingPrompt({ tier, country, gradeLabel, interest, confidenceWri
   if (wantsScore) shapeEntries.push('  "overallScore": "an integer 1-10 scoring the WHOLE piece against the four criteria above",\n  "scoreReason": "one sentence citing the specific strength/weakness pattern across the whole piece that drove that score"');
   if (!coreOnly) shapeEntries.push('  "revisedStory": "the student\'s WHOLE response rewritten as a corrected, improved version of the same response: every error fixed, same position and order, developed only as instructed above, nothing invented"' + (wantsModel ? ",\n" + RESP.responsesJsonShape(fw) : ""));
   if (wantsSpelling) shapeEntries.push('  "spellingGrammarTotal": "the TRUE total count of real errors found, honest even if more than 8",\n  "spellingGrammar": [{ "quote": "an exact substring from the submitted text containing a real spelling/grammar/punctuation error", "type": "spelling, grammar, or punctuation", "correction": "that same fragment with just the error fixed" }]');
-  return `You are the feedback engine inside LiteracyLab AI, an educational product for a ${TIER_LABEL[tier]} student in ${gradeLabel} (${country}).
+  return `You are the feedback engine inside LiteracyLab AI, an educational product for a ${TIER_LABEL[tier]} student in ${gradeLabel} (${country}).${REGIONAL.spellingClause(country, "both")}
 
 A student was given this writing prompt:
 "${prompt}"
@@ -420,7 +421,7 @@ function buildReadingPrompt({ tier, country, gradeLabel, interest, confidenceRea
     return `Q${i + 1} [${style}]: "${QT.describeForPrompt(q)}" — student answered "${QT.answerText(q, chosen)}" (${isCorrect ? "CORRECT" : `INCORRECT, correct answer was "${QT.correctText(q)}"`})`;
   }).join("\n");
 
-  return `You are the feedback engine inside LiteracyLab AI, an educational product for a ${TIER_LABEL[tier]} student in ${gradeLabel} (${country}).
+  return `You are the feedback engine inside LiteracyLab AI, an educational product for a ${TIER_LABEL[tier]} student in ${gradeLabel} (${country}).${REGIONAL.spellingClause(country, "both")}
 
 A student read this passage, titled "${passageTitle}":
 """
@@ -522,7 +523,7 @@ function buildReadingPassagePrompt({ tier, country, gradeLabel, textType, templa
         ? `
 - Two texts: at least two of the questions must need both texts (for example how they differ in viewpoint, purpose, tone or evidence). Make clear in each question which text it asks about, using "Text A" and "Text B".`
         : "";
-  return `You are generating an ORIGINAL reading-comprehension exercise for a ${TIER_LABEL[tier]} student in ${gradeLabel} (${country}).
+  return `You are generating an ORIGINAL reading-comprehension exercise for a ${TIER_LABEL[tier]} student in ${gradeLabel} (${country}).${REGIONAL.spellingClause(country, "write")}
 
 Write a short, wholly original ${type.name} - never copied or closely paraphrased from any existing published book, article, poem, or other copyrighted work - appropriate for this age, plus ${count} comprehension questions about it, in the styles listed below.${type.note ? " " + type.note : ""}
 
@@ -569,7 +570,7 @@ function buildWritingPromptGenerator({ tier, country, gradeLabel, genre, exam })
   const classify = chosen
     ? `- This prompt must ask for a "${chosen}" piece, so classify it as exactly "${chosen}" (from these exact options: ${VALID_GENRES.join(", ")}). This is used later to decide which writing technique to teach the student.`
     : `- Also classify what this specific prompt is actually asking the student to write, from these exact options: ${VALID_GENRES.join(", ")}. This will typically be "${DEFAULT_GENRE_BY_TIER[tier]}" for a piece written at this tier, but tag whichever one genuinely matches what you wrote — this is used later to decide which writing technique to teach the student, so it must reflect the real exercise, not just default to the usual one.`;
-  return `You are generating an ORIGINAL creative-writing or essay prompt for a ${TIER_LABEL[tier]} student in ${gradeLabel} (${country}).
+  return `You are generating an ORIGINAL creative-writing or essay prompt for a ${TIER_LABEL[tier]} student in ${gradeLabel} (${country}).${REGIONAL.spellingClause(country, "write")}
 
 Write ${task}.${examLine}
 
@@ -603,7 +604,7 @@ function buildAssessPrompt({ tier, country, gradeLabel, prompt, text, targets, c
   if (wantsExam) entries.push(examJsonShape(exTargets, "writing"));
   if (wantsScore) entries.push('  "overallScore": "an integer 1-10 scoring the WHOLE piece against the four criteria above",\n  "scoreReason": "one sentence citing the specific strength/weakness pattern across the whole piece that drove that score"');
   if (wantsSpelling) entries.push('  "spellingGrammarTotal": "the TRUE total count of real errors found, honest even if more than 8",\n  "spellingGrammar": [{ "quote": "an exact substring from the submitted text containing a real spelling/grammar/punctuation error", "type": "spelling, grammar, or punctuation", "correction": "that same fragment with just the error fixed" }]');
-  return `You are the assessment engine inside LiteracyLab AI, an educational product for a ${TIER_LABEL[tier]} student in ${gradeLabel} (${country}).
+  return `You are the assessment engine inside LiteracyLab AI, an educational product for a ${TIER_LABEL[tier]} student in ${gradeLabel} (${country}).${REGIONAL.spellingClause(country, "check")}
 
 A student was given this writing prompt:
 "${prompt}"
@@ -628,7 +629,7 @@ function buildResponsesPrompt({ tier, country, gradeLabel, prompt, text, capabil
   const origWords = RESP.wordCount(text);
   const fw = frameworkFor(genre, tier);
   const wantsModel = !!caps.deepFeedback && !!fw;
-  return `You are the writing coach inside LiteracyLab AI, an educational product for a ${TIER_LABEL[tier]} student in ${gradeLabel} (${country}).
+  return `You are the writing coach inside LiteracyLab AI, an educational product for a ${TIER_LABEL[tier]} student in ${gradeLabel} (${country}).${REGIONAL.spellingClause(country, "write")}
 
 A student was given this writing prompt:
 "${prompt}"

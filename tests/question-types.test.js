@@ -307,7 +307,7 @@ test("if the styled questions keep failing, a plain multiple-choice version of t
   assert.deepEqual(res.body.questions.map((q) => q.type), [...QT.MC_FOUR, "short"]);
   assert.deepEqual(stored.content.generatedPassage.questionStyles, [...QT.MC_FOUR, "short"]);
   // the same kind of text, so the student still gets the variety in text types
-  assert.match(prompts[2].split("\n")[2], new RegExp("original (" + QT.TEXT_TYPES.middle.map((t) => t.name).join("|") + ")"));
+  assert.match(prompts[2].split("\n").find((l) => /wholly original/.test(l)), new RegExp("original (" + QT.TEXT_TYPES.middle.map((t) => t.name).join("|") + ")"));
 });
 
 test("if even the plain version fails, the student gets the plain error and nothing is left reserved", async () => {
