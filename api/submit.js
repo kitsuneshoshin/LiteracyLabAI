@@ -10,7 +10,7 @@ const TECH = require("./_lib/techniques");
 const QT = require("./_lib/questionTypes");
 const { frameworkFor } = require("./_lib/writingFrameworks");
 const { makeSplitGenerator, splitEnabled } = require("./_lib/splitGenerate");
-const { dropNonVerbatimHighlights, dropRestatingHighlights, repairResponses, dropGlowsQuotingMisspellings, validateFeedback, resolveTarget, dropInvalidSpellingGrammar, sanitizeQuestionReview, repairZeroScoreGlow, repairReadingExamEvidence, repairShortAnswer, stripUngrantedSections } = require("./_lib/validate");
+const { coerceOverallScore, dropNonVerbatimHighlights, dropRestatingHighlights, repairResponses, dropGlowsQuotingMisspellings, validateFeedback, resolveTarget, dropInvalidSpellingGrammar, sanitizeQuestionReview, repairZeroScoreGlow, repairReadingExamEvidence, repairShortAnswer, stripUngrantedSections } = require("./_lib/validate");
 const { checkRateLimit } = require("./_lib/rateLimit");
 const { writingLimitsForGrade } = require("./_lib/writingLimits");
 const { assessLength, calibrateWriting, applyCorrections, repairExamEvidence } = require("./_lib/calibrate");
@@ -72,6 +72,7 @@ async function generateAndValidate(prompt, tier, country, gradeLabel, submittedT
     if (capabilities?.spellingGrammar !== false) dropInvalidSpellingGrammar(attempt.parsed, submittedText);
     if (capabilities?.spellingGrammar !== false) dropGlowsQuotingMisspellings(attempt.parsed);
     TECH.repairVocabTricks(attempt.parsed);
+    coerceOverallScore(attempt.parsed);
     TECH.repairFrayer(attempt.parsed);
     if (submittedText) { if (TECH.devicesApply(genre, tier)) TECH.repairDevices(attempt.parsed, submittedText); else delete attempt.parsed.deviceCheck; }
     if (submittedText) { dropNonVerbatimHighlights(attempt.parsed, submittedText); dropRestatingHighlights(attempt.parsed, submittedText); }

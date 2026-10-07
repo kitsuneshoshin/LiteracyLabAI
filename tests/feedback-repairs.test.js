@@ -1,6 +1,6 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
-const { dropNonVerbatimHighlights, validateExamTechnique } = require("../api/_lib/validate");
+const { dropNonVerbatimHighlights, validateExamTechnique, coerceOverallScore } = require("../api/_lib/validate");
 
 // Two things made a real Year 11 essay fail three times running, shown to the student as "Couldn't generate feedback":
 // a highlight that quoted words the student never wrote, and an exam summary that repeated the length check's own
@@ -68,4 +68,15 @@ test("the repair runs on every piece of writing before it is checked", () => {
   assert.match(submit, /dropNonVerbatimHighlights\(attempt\.parsed, submittedText\)/);
   const qa = fs.readFileSync(path.join(__dirname, "..", "api", "_lib", "qaRun.js"), "utf8");
   assert.match(qa, /dropNonVerbatimHighlights\(parsed, s\.text\)/);
+});
+
+test("a score sent as clear text is turned into the number, and anything unclear is left to be refused", () => {
+  const c = (v) => coerceOverallScore({ overallScore: v }).overallScore;
+  assert.equal(c("6"), 6); assert.equal(c(" 7 "), 7); assert.equal(c("8/10"), 8); assert.equal(c("9 / 10"), 9); assert.equal(c("5.0"), 5); assert.equal(c(6.0), 6); assert.equal(c(10), 10);
+  for (const bad of ["six", "11/10", "6.5", 6.5, "", null, undefined, "ten", "6 out of 10", [6], {}]) assert.deepEqual(c(bad), bad, String(bad));
+  assert.deepEqual(coerceOverallScore({ glow: "x" }), { glow: "x" }); assert.equal(coerceOverallScore(null), null);
+  const { validateFeedback } = require("../api/_lib/validate");
+  assert.equal(typeof validateFeedback, "function");
+  const fs = require("node:fs"), path = require("node:path");
+  assert.match(fs.readFileSync(path.join(__dirname, "..", "api", "submit.js"), "utf8"), /coerceOverallScore\(attempt\.parsed\)/);
 });

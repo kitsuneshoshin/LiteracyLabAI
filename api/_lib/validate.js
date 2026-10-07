@@ -299,6 +299,21 @@ function validateFrameworkTip(parsed, tier, genre, submittedText, issues) {
 // prompt.js). Shown in Activity History, not blended into the mastery
 // trend line (api/_lib/progressHistory.js), which tracks a different
 // thing: per-skill glow/grow direction over time, not a holistic score.
+// The reply's template shows the score as quoted text, so a model sometimes sends "6", "6/10" or 6.0. Those are
+// unambiguous and are turned into the whole number, the way exam bands already are, instead of costing a whole retry.
+// Anything else ("six", 11, a decimal like 6.5) is left alone and still refused.
+function coerceOverallScore(parsed) {
+  if (!parsed || typeof parsed !== "object") return parsed;
+  const v = parsed.overallScore;
+  if (typeof v === "string") {
+    const m = v.trim().match(/^(\d{1,2})(?:\.0+)?\s*(?:\/\s*10)?$/);
+    if (m && Number(m[1]) >= 1 && Number(m[1]) <= 10) parsed.overallScore = Number(m[1]);
+  } else if (typeof v === "number" && Number.isFinite(v) && !Number.isInteger(v) && Math.abs(v - Math.round(v)) < 1e-9) {
+    parsed.overallScore = Math.round(v);
+  }
+  return parsed;
+}
+
 function validateOverallScore(parsed, issues) {
   const score = parsed?.overallScore;
   if (!Number.isInteger(score) || score < 1 || score > 10) {
@@ -841,4 +856,4 @@ function validateWritingPrompt(parsed, { tier }) {
   return { ok: issues.length === 0, issues };
 }
 
-module.exports = { dropNonVerbatimHighlights, validateExamTechnique, repairShortAnswer, dropRestatingHighlights, repairResponses, dropGlowsQuotingMisspellings, repairZeroScoreGlow, repairReadingExamEvidence, validateFeedback, validatePassage, validateWritingPrompt, resolveTarget, dropInvalidSpellingGrammar, sanitizeQuestionReview, stripUngrantedSections, MAX_AVG_WORDS_PER_SENTENCE };
+module.exports = { coerceOverallScore, dropNonVerbatimHighlights, validateExamTechnique, repairShortAnswer, dropRestatingHighlights, repairResponses, dropGlowsQuotingMisspellings, repairZeroScoreGlow, repairReadingExamEvidence, validateFeedback, validatePassage, validateWritingPrompt, resolveTarget, dropInvalidSpellingGrammar, sanitizeQuestionReview, stripUngrantedSections, MAX_AVG_WORDS_PER_SENTENCE };
