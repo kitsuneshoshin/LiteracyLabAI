@@ -493,7 +493,8 @@ const PASSAGE_SKILL = {
 // exercise itself that way would make it less realistic, not more
 // engaging - and it meant two students with different interests never saw
 // the same original passage even when everything else about them matched.
-function buildReadingPassagePrompt({ tier, country, gradeLabel, textType, template }) {
+// skill: { key, text } the learner chose to work on (see focus.js), or undefined for the age's usual mix.
+function buildReadingPassagePrompt({ tier, country, gradeLabel, textType, template, skill }) {
   const QT = require("./questionTypes");
   const plan = template || QT.MC_FOUR;
   const type = textType && textType.name ? textType : { name: "passage", lines: false };
@@ -528,7 +529,7 @@ Write a short, wholly original ${type.name} - never copied or closely paraphrase
 Requirements:
 - Text length: ${lengthNote}.
 - Layout: write it ${layout}.
-- The questions should primarily test this comprehension skill: ${PASSAGE_SKILL[tier]}, but cover distinct details, moments, or angles of the text so the ${count} questions feel genuinely different.
+- The questions should primarily test this comprehension skill: ${skill && skill.text ? skill.text : PASSAGE_SKILL[tier]}, but cover distinct details, moments, or angles of the text so the ${count} questions feel genuinely different.${skill && skill.text ? ` The learner chose to work on this skill, so at least three of the ${count} questions must test it directly.` : ""}
 - Each question has exactly ONE unambiguously correct answer that is clearly supported by the text. Wrong answers must be clearly wrong to a careful reader, not intentionally tricky or debatable.
 - Do not reuse character names, settings, or plots from well-known published works.
 - Pitch it as a real stretch for this age: at least two of the ${count} questions must need inference or interpretation rather than finding a stated fact.${visualRule}
@@ -559,17 +560,25 @@ const WRITING_EXERCISE_TYPE = {
 // prompt every session. Mirrors buildReadingPassagePrompt's reasoning.
 // Same reasoning as buildReadingPassagePrompt above: interest stays out of
 // the exercise itself, and only shapes the feedback afterward.
-function buildWritingPromptGenerator({ tier, country, gradeLabel }) {
+// genre: the kind of piece the learner chose (see focus.js), or undefined for a surprise. exam: an exam style (Premium) or undefined.
+function buildWritingPromptGenerator({ tier, country, gradeLabel, genre, exam }) {
+  const { WRITING_TASK } = require("./focus");
+  const chosen = genre && WRITING_TASK[genre] && WRITING_TASK[genre][tier] ? genre : null;
+  const task = chosen ? WRITING_TASK[chosen][tier] : WRITING_EXERCISE_TYPE[tier];
+  const examLine = exam && exam.style ? ` Write the prompt ${exam.style}, so it works as practice for the ${exam.name}.` : "";
+  const classify = chosen
+    ? `- This prompt must ask for a "${chosen}" piece, so classify it as exactly "${chosen}" (from these exact options: ${VALID_GENRES.join(", ")}). This is used later to decide which writing technique to teach the student.`
+    : `- Also classify what this specific prompt is actually asking the student to write, from these exact options: ${VALID_GENRES.join(", ")}. This will typically be "${DEFAULT_GENRE_BY_TIER[tier]}" for a piece written at this tier, but tag whichever one genuinely matches what you wrote — this is used later to decide which writing technique to teach the student, so it must reflect the real exercise, not just default to the usual one.`;
   return `You are generating an ORIGINAL creative-writing or essay prompt for a ${TIER_LABEL[tier]} student in ${gradeLabel} (${country}).
 
-Write ${WRITING_EXERCISE_TYPE[tier]}.
+Write ${task}.${examLine}
 
 Requirements:
 - The prompt must be wholly original — not copied or closely paraphrased from any existing published writing prompt, exam question, or exercise.
 - Do not reuse character names, settings, or specific plots from well-known published works.
 - Pitch it as a real stretch for this age: it should ask the student to make choices, take a perspective or develop an idea, not just describe or retell something simple.
 - Keep the prompt itself short (one or two sentences) — the student does the writing, not you.
-- Also classify what this specific prompt is actually asking the student to write, from these exact options: ${VALID_GENRES.join(", ")}. This will typically be "${DEFAULT_GENRE_BY_TIER[tier]}" for a piece written at this tier, but tag whichever one genuinely matches what you wrote — this is used later to decide which writing technique to teach the student, so it must reflect the real exercise, not just default to the usual one.
+${classify}
 
 Respond with ONLY a JSON object (no markdown fences, no commentary) with exactly this shape:
 {

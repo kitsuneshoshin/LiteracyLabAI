@@ -3654,7 +3654,132 @@ function ReadingFeedbackPanel({ tier, country, interest, confidence, motivation,
 /* ---------------------------------------------------------------- */
 /* Student Workspace                                                  */
 /* ---------------------------------------------------------------- */
-function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, interests, confidenceWriting, confidenceReading, motivation, used, total, onSubmit, session, backendLive, childId, children_, onSwitchChild, onMakeUsable, activeChangeAvailableAt, onSeePlans, displayName }){
+// ---- Choose your focus. What a learner can ask to practise instead of a surprise. These lists mirror api/_lib/focus.js and
+// the text types in api/_lib/questionTypes.js (tests/focus.test.js proves they agree); the server checks every choice again.
+const FOCUS_GENRES = {
+  early: ["narrative", "descriptive", "persuasive"],
+  elementary: ["narrative", "descriptive", "persuasive", "analytical"],
+  middle: ["narrative", "descriptive", "persuasive", "analytical"],
+  high: ["narrative", "descriptive", "persuasive", "analytical"],
+};
+const FOCUS_GENRE_LABEL = { narrative: "A story", descriptive: "A description", persuasive: "Persuade or argue", analytical: "Analyse or explain" };
+function focusGenreLabel(country, genre){
+  if (/United States/.test(country || "")) {
+    if (genre === "persuasive") return "Opinion or argument";
+    if (genre === "analytical") return "Informative or explanatory";
+  }
+  return FOCUS_GENRE_LABEL[genre] || genre;
+}
+function focusGradeNumber(gradeLabel){ const m = String(gradeLabel || "").match(/(?:year|grade)\s*(\d{1,2})\b/i); return m ? Number(m[1]) : null; }
+// The exam this learner is most likely preparing for (null when there is no clear one). Mirrors examStyleFor in focus.js.
+function focusExamName(country, gradeLabel){
+  const c = country || "", n = focusGradeNumber(gradeLabel);
+  if (n == null) return null;
+  if (/Australia/.test(c) && n >= 3 && n <= 9) return "NAPLAN";
+  if (/United Kingdom/.test(c)) { if (n >= 10 && n <= 11) return "GCSE English Language"; if (n >= 7 && n <= 9) return "KS3 English"; if (n >= 3 && n <= 6) return "KS2 SATs"; }
+  if (/United States/.test(c) && n >= 3 && n <= 12) return "state test (Common Core)";
+  return null;
+}
+// A small tag on a kind of writing that the learner's exam asks for.
+function focusGenreTag(country, gradeLabel, genre){
+  const c = country || "", n = focusGradeNumber(gradeLabel);
+  if (/Australia/.test(c) && n != null && n >= 3 && n <= 9 && (genre === "narrative" || genre === "persuasive")) return "NAPLAN";
+  if (/United Kingdom/.test(c) && n != null && n >= 10 && n <= 11) {
+    if (genre === "narrative" || genre === "descriptive") return "GCSE Paper 1";
+    if (genre === "persuasive") return "GCSE Paper 2";
+  }
+  if (/United States/.test(c) && n != null && n >= 3 && n <= 12 && genre !== "descriptive") return "Common Core";
+  return null;
+}
+const FOCUS_TEXT_TYPES = {
+  early: ["short story", "simple poem", "set of instructions"],
+  elementary: ["short story", "information text", "poem", "set of instructions", "diary entry or letter", "data table", "bar chart", "two short texts"],
+  middle: ["short story", "news or magazine article", "persuasive piece", "poem", "diary entry or letter", "data table", "bar chart", "two texts"],
+  high: ["story extract", "article", "persuasive or opinion piece", "speech", "poem", "data table", "bar chart", "two texts"],
+};
+const FOCUS_SKILLS = {
+  retrieve: "Finding facts and details", infer: "Reading between the lines", evidence: "Finding the evidence", vocab: "Words in context",
+  mainidea: "The main idea", purpose: "The writer's purpose", compare: "Comparing ideas",
+};
+const FOCUS_SKILLS_BY_TIER = {
+  early: ["retrieve", "infer", "vocab", "mainidea"],
+  elementary: ["retrieve", "infer", "evidence", "vocab", "mainidea", "purpose", "compare"],
+  middle: ["retrieve", "infer", "evidence", "vocab", "mainidea", "purpose", "compare"],
+  high: ["retrieve", "infer", "evidence", "vocab", "mainidea", "purpose", "compare"],
+};
+const capFirst = (t) => String(t || "").charAt(0).toUpperCase() + String(t || "").slice(1);
+function readFocus(kind, childId, tier){
+  try { const v = JSON.parse(localStorage.getItem("ll_focus_" + kind + "_" + childId + "_" + tier) || "{}"); return v && typeof v === "object" && !Array.isArray(v) ? v : {}; } catch (e) { return {}; }
+}
+function saveFocus(kind, childId, tier, value){
+  try { localStorage.setItem("ll_focus_" + kind + "_" + childId + "_" + tier, JSON.stringify(value || {})); } catch (e) { /* not remembered, still works */ }
+}
+// Only choices that still exist for this age are sent; anything else is dropped (a surprise).
+function cleanFocus(kind, tier, v){
+  const o = v && typeof v === "object" ? v : {};
+  if (kind === "writing") {
+    const out = {};
+    if (FOCUS_GENRES[tier] && FOCUS_GENRES[tier].includes(o.genre)) out.genre = o.genre;
+    if (o.examStyle === true) out.examStyle = true;
+    return out;
+  }
+  const out = {};
+  if (FOCUS_TEXT_TYPES[tier] && FOCUS_TEXT_TYPES[tier].includes(o.textType)) out.textType = o.textType;
+  if (FOCUS_SKILLS_BY_TIER[tier] && FOCUS_SKILLS_BY_TIER[tier].includes(o.skill)) out.skill = o.skill;
+  return out;
+}
+
+function FocusPicker({ kind, tier, country, gradeLabel, premium, value, onChange, onSeePlans }){
+  const v = cleanFocus(kind, tier, value);
+  const chip = (on, label, onClick, tag, key) => (
+    <button key={key} type="button" aria-pressed={on} onClick={onClick}
+      className="focus-ring rounded-full border px-3 py-1.5 text-[13px] font-semibold inline-flex items-center gap-1.5"
+      style={ on ? { background: "var(--cyan-tint)", borderColor: "var(--cyan)", color: "var(--cyan-ink)" } : { borderColor: "var(--border)", color: "var(--ink-soft)", background: "var(--surface)" } }>
+      {label}{tag && <span className="text-[10.5px] font-bold uppercase tracking-wide rounded-full px-1.5 py-0.5" style={{ background: "var(--gold-tint)", color: "var(--gold-ink)" }}>{tag}</span>}
+    </button>
+  );
+  if (kind === "writing") {
+    const exam = focusExamName(country, gradeLabel);
+    return (
+      <div className="w-full max-w-md flex flex-col items-center gap-2.5 mt-1" role="group" aria-label="What would you like to write?">
+        <div className="text-[12px] font-bold uppercase tracking-wide" style={{ color: "var(--ink-faint)" }}>What would you like to write?</div>
+        <div className="flex flex-wrap justify-center gap-1.5">
+          {chip(!v.genre, "Surprise me", () => onChange({ ...v, genre: undefined }), null, "any")}
+          {(FOCUS_GENRES[tier] || []).map((g) => chip(v.genre === g, focusGenreLabel(country, g), () => onChange({ ...v, genre: g }), focusGenreTag(country, gradeLabel, g), g))}
+        </div>
+        {exam && (premium ? (
+          <label className="flex items-center gap-2 text-[13px] font-medium" style={{ color: "var(--ink-soft)" }}>
+            <input type="checkbox" checked={!!v.examStyle} onChange={(e) => onChange({ ...v, examStyle: e.target.checked ? true : undefined })} style={{ width: 16, height: 16 }} />
+            Word it like a {exam} task
+          </label>
+        ) : (
+          <button type="button" onClick={onSeePlans} className="focus-ring inline-flex items-center gap-1.5 text-[12.5px] font-semibold underline" style={{ color: "var(--ink-faint)" }}>
+            <IconLock size={12} /> {exam}-style prompts are on Premium
+          </button>
+        ))}
+      </div>
+    );
+  }
+  return (
+    <div className="w-full max-w-md flex flex-col items-center gap-2.5 mt-1" role="group" aria-label="What would you like to read?">
+      <div className="text-[12px] font-bold uppercase tracking-wide" style={{ color: "var(--ink-faint)" }}>What would you like to read?</div>
+      <div className="flex flex-wrap justify-center gap-1.5">
+        {chip(!v.textType, "Surprise me", () => onChange({ ...v, textType: undefined }), null, "any")}
+        {(FOCUS_TEXT_TYPES[tier] || []).map((t) => chip(v.textType === t, capFirst(t), () => onChange({ ...v, textType: t }), null, t))}
+      </div>
+      <label className="flex items-center gap-2 text-[13px] font-medium" style={{ color: "var(--ink-soft)" }}>
+        Skill to work on
+        <select value={v.skill || ""} onChange={(e) => onChange({ ...v, skill: e.target.value || undefined })} className="focus-ring rounded-full border px-3 py-1.5 text-[13px]"
+          style={{ borderColor: "var(--border)", background: "var(--surface)", color: "var(--ink)" }}>
+          <option value="">Any</option>
+          {(FOCUS_SKILLS_BY_TIER[tier] || []).map((k) => <option key={k} value={k}>{FOCUS_SKILLS[k]}</option>)}
+        </select>
+      </label>
+    </div>
+  );
+}
+
+function Workspace({ plan, country, gradeIdx, setGradeIdx, tier, setTierOverride, interests, confidenceWriting, confidenceReading, motivation, used, total, onSubmit, session, backendLive, childId, children_, onSwitchChild, onMakeUsable, activeChangeAvailableAt, onSeePlans, displayName }){
   const grades = GRADE_DATA[country].grades;
   const gradeLabel = grades[gradeIdx];
   const [exerciseType, setExerciseType] = useState("writing"); // writing | reading | vocab
@@ -3690,6 +3815,13 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
   // tapped explicitly, which is a genuine, intentional new credit spend.
   const pendingWritingRef = useRef({});
   const pendingReadingRef = useRef({});
+  // What the learner chose to practise, remembered per learner and age band.
+  const [writingFocus, setWritingFocus] = useState({});
+  const [readingFocus, setReadingFocus] = useState({});
+  useEffect(() => { setWritingFocus(cleanFocus("writing", tier, readFocus("writing", childId, tier))); setReadingFocus(cleanFocus("reading", tier, readFocus("reading", childId, tier))); }, [childId, tier]);
+  const premium = plan === "premium" || plan === "pro" || plan === "admin";
+  const changeWritingFocus = (v) => { const c = cleanFocus("writing", tier, v); setWritingFocus(c); saveFocus("writing", childId, tier, c); };
+  const changeReadingFocus = (v) => { const c = cleanFocus("reading", tier, v); setReadingFocus(c); saveFocus("reading", childId, tier, c); };
   const locked = used >= total;
   const [bannerDismissed, setBannerDismissed] = useState(false);
 
@@ -3750,7 +3882,7 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
     try {
       const result = await authedFetch(session, "/api/writing-prompt", {
         method: "POST",
-        body: JSON.stringify({ tier, country, gradeLabel, interest: interestForPiece, childId }),
+        body: JSON.stringify({ tier, country, gradeLabel, interest: interestForPiece, childId, focus: cleanFocus("writing", tier, writingFocus) }),
       });
       const fresh = { submissionId: result.submissionId, title: result.title, prompt: result.prompt, interest: interestForPiece };
       pendingWritingRef.current[cacheKey] = fresh;
@@ -3783,7 +3915,7 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
     try {
       const result = await authedFetch(session, "/api/reading-passage", {
         method: "POST",
-        body: JSON.stringify({ tier, country, gradeLabel, interest: interestForPiece, childId }),
+        body: JSON.stringify({ tier, country, gradeLabel, interest: interestForPiece, childId, focus: cleanFocus("reading", tier, readingFocus) }),
       });
       const fresh = { submissionId: result.submissionId, title: result.title, skill: result.skill, passage: result.passage, questions: result.questions, textType: result.textType, visual: result.visual || null, interest: interestForPiece };
       pendingReadingRef.current[cacheKey] = fresh;
@@ -3931,8 +4063,10 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
     setPhase("draft");
     setBackendFeedback(null);
     setSubmissionId(null);
-    if (exerciseType === "reading") requestNewPassage(true);
-    else if (backendLive) requestNewWritingPrompt(true);
+    // A new piece goes back to the choice (what to practise), then a deliberate tap spends the credit. In demo mode it just rerolls.
+    if (exerciseType === "reading") {
+      if (backendLive) { pendingReadingRef.current[cacheKey] = null; setReadingPassage(null); } else requestNewPassage(true);
+    } else if (backendLive) { pendingWritingRef.current[cacheKey] = null; setWritingPrompt(null); }
   }
 
   return (
@@ -4029,6 +4163,7 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
                     <IconSparkle size={22} style={{ color: "var(--cyan-ink)" }} />
                     <div className="font-display font-semibold text-sm" style={{ color: "var(--ink)" }}>Ready for a {TIER_META[tier].label.toLowerCase()} prompt?</div>
                     <p className="text-[13px] max-w-[30ch]" style={{ color: "var(--ink-faint)" }}>This uses 1 of your {total === 999 ? "" : `${total - used} remaining `}submissions.</p>
+                    <FocusPicker kind="writing" tier={tier} country={country} gradeLabel={gradeLabel} premium={premium} value={writingFocus} onChange={changeWritingFocus} onSeePlans={onSeePlans} />
                     <button onClick={()=>requestNewWritingPrompt()}
                       className="focus-ring inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-bold mt-1"
                       style={{ background: "var(--cyan)", color: "#fff" }}>
@@ -4062,6 +4197,7 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
                     <IconSparkle size={22} style={{ color: "var(--cyan-ink)" }} />
                     <div className="font-display font-semibold text-sm" style={{ color: "var(--ink)" }}>Ready for a {TIER_META[tier].label.toLowerCase()} passage?</div>
                     <p className="text-[13px] max-w-[30ch]" style={{ color: "var(--ink-faint)" }}>This uses 1 of your {total === 999 ? "" : `${total - used} remaining `}submissions.</p>
+                    <FocusPicker kind="reading" tier={tier} country={country} gradeLabel={gradeLabel} premium={premium} value={readingFocus} onChange={changeReadingFocus} onSeePlans={onSeePlans} />
                     <button onClick={()=>requestNewPassage()}
                       className="focus-ring inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-bold mt-1"
                       style={{ background: "var(--cyan)", color: "#fff" }}>
@@ -5009,7 +5145,7 @@ function App({ session }){
           page={view === "profile" || view === "plan" ? view : "overview"} />
       </div>
       <div style={{ display: view === "workspace" ? "block" : "none" }}>
-        <Workspace country={country} gradeIdx={gradeIdx} setGradeIdx={handleGradeChange} tier={tier} setTierOverride={setTierAndSyncGrade}
+        <Workspace plan={plan} country={country} gradeIdx={gradeIdx} setGradeIdx={handleGradeChange} tier={tier} setTierOverride={setTierAndSyncGrade}
           interests={interests} confidenceWriting={confidenceWriting} confidenceReading={confidenceReading} motivation={motivation}
           used={used} total={total} onSubmit={handleSubmit} session={session} backendLive={backendLive}
           displayName={activeChild?.display_name || ""}

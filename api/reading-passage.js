@@ -9,6 +9,7 @@ const { validatePassage } = require("./_lib/validate");
 const { paragraphise } = require("./_lib/passageFormat");
 const QT = require("./_lib/questionTypes");
 const { normalizeVisual } = require("./_lib/visualText");
+const { readingFocusFor } = require("./_lib/focus");
 
 const VALID_TIERS = ["early", "elementary", "middle", "high"];
 
@@ -122,17 +123,20 @@ module.exports = async function handler(req, res) {
     try {
       // Premium learners from Year 3 or so also get one short written answer, marked by the AI after submitting.
       const withShort = !!(usage.capabilities && usage.capabilities.deepFeedback) && !!QT.SHORT_MARKS[tier];
-      const textType = QT.pickTextType(tier);
+      // What the learner chose to practise: a kind of text and/or a skill (checked against fixed lists).
+      const focus = readingFocusFor({ tier }, body.focus);
+      const textType = focus.textType || QT.pickTextType(tier);
       const baseTemplate = QT.pickTemplate(tier, Math.random, textType);
       const template = withShort ? [...baseTemplate, "short"] : baseTemplate;
-      const llmPrompt = buildReadingPassagePrompt({ tier, country, gradeLabel, textType, template });
+      const llmPrompt = buildReadingPassagePrompt({ tier, country, gradeLabel, textType, template, skill: focus.skill || undefined });
       // If the styled plan keeps failing, fall back to plain multiple choice, keeping the written answer for Premium.
       const fallbackTemplate = withShort ? [...QT.MC_FOUR, "short"] : QT.MC_FOUR;
-      const fallbackPrompt = buildReadingPassagePrompt({ tier, country, gradeLabel, textType, template: fallbackTemplate });
+      const fallbackPrompt = buildReadingPassagePrompt({ tier, country, gradeLabel, textType, template: fallbackTemplate, skill: focus.skill || undefined });
       ({ parsed } = await generateAndValidate(llmPrompt, tier, { template, textType, fallbackPrompt, fallbackTemplate }));
       // A poem keeps its line breaks; prose is regrouped into paragraphs if the model sent one block.
       parsed.passage = (textType.lines || textType.two) ? String(parsed.passage).replace(/\r\n/g, "\n").trim() : paragraphise(parsed.passage);
       parsed.textType = textType.name;
+      if (focus.skill) parsed.focusSkill = focus.skill.key;
       if (textType.visual) parsed.visual = parsed.visual; // checked and tidied in generateAndValidate
       parsed.questionStyles = parsed.questionStyles || template;
     } catch (genErr) {
