@@ -188,7 +188,7 @@ test("job: live run sends the welcome once, records it, and creates the parent's
   const s = await runFreeEmailJob({ supabase: fakeDb(tables), now: MON, send: r.send, address: "1 Example St", dryRun: false });
   assert.equal(s.sent, 1);
   assert.equal(r.sent[0].to, "new@example.com");
-  assert.match(r.sent[0].subject, /Welcome to LiteracyLab AI/);
+  assert.match(r.sent[0].subject, /Welcome to LiteracyLab AI|account is ready/); // half of parents see the alternative subject (emailAb.js)
   assert.equal(r.sent[0].oneClickUrl, `${SITE}/api/email?action=unsubscribe&t=token-p-new`);
   assert.equal(r.sent[0].idempotencyKey, "p-new:free-welcome");
   assert.equal(tables.email_log.length, 1);
@@ -592,7 +592,8 @@ test("the email function is allowed to run long enough for a paced batch, and th
   assert.equal(cfg.functions["api/email.js"].maxDuration, 60, "the default 10 seconds would cut a run of 40 paced emails short");
   const src = fs.readFileSync(path.join(ROOT, "api", "email.js"), "utf8");
   assert.match(src, /pauseMs: 550/);
-  assert.match(src, /EMAIL_MAX_PER_RUN\) \|\| 40/);
+  assert.match(src, /EMAIL_MAX_PER_RUN\) \|\| 80/);
+  assert.match(src, /budgetMs: 45000/, "the run stops sending well before the 60 s limit");
 });
 
 test("job: a pause between sends is applied only when asked for", async () => {
@@ -655,4 +656,22 @@ test("cron: addresses in EMAIL_SKIP are left out of the run, without gaining adm
     const t = await callWith(h, { query: { action: "test", to: "skip.me@example.com" }, headers: { authorization: "Bearer s3cret" } });
     assert.equal(t.statusCode, 403);
   });
+});
+
+test("job: a run stops sending when its time budget is spent, and says so, instead of being cut off by the host", async () => {
+  const profiles = Array.from({ length: 10 }, (_, i) => ({ id: `b${i}`, email: `b${i}@example.com`, plan: "free", created_at: ago(0.5).toISOString() }));
+  const tables = { profiles, email_preferences: [], email_log: [], submissions: [] };
+  let clockNow = 0;
+  const sent = [];
+  const summary = await runFreeEmailJob({
+    supabase: fakeDb(tables), now: MON, address: "x", dryRun: false, maxPerRun: 100, budgetMs: 3000,
+    clock: () => clockNow, send: async (m) => { sent.push(m); clockNow += 1000; return { id: "r" }; },
+  });
+  assert.equal(summary.sent, 3, "three sends fit in 3 seconds of budget");
+  assert.equal(summary.stoppedEarly, "time");
+  assert.equal(tables.email_log.length, 3, "the parents not reached have no claim, so the next run sends to them");
+  const r = recorder();
+  const all = await runFreeEmailJob({ supabase: fakeDb(tables), now: MON, address: "x", dryRun: false, maxPerRun: 100, send: r.send });
+  assert.equal(all.sent, 7);
+  assert.equal(all.stoppedEarly, null);
 });

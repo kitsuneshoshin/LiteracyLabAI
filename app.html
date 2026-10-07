@@ -3260,8 +3260,16 @@ function DevicesPanel({ feedback }){
   );
 }
 
+// True when the "See <framework> at work" panel will show. It covers the same ground as the one-sentence
+// spotlight (and more: the whole response labelled, plus a model), so the spotlight steps aside for it.
+function responsesShown(feedback){
+  const info = feedback?.frameworkInfo;
+  return !!(info?.name && feedback?.modelResponse && Array.isArray(info.parts) && info.parts.length > 0);
+}
+
 function FrameworkTipPanel({ feedback }){
   const tip = feedback?.frameworkTip;
+  if (responsesShown(feedback)) return null;
   // "quote"/"revision" ground this in the student's OWN submission (same
   // mechanic as the "highlights" annotated card) - a generic demo the
   // child never wrote is far less useful than seeing their own sentence
@@ -3343,7 +3351,7 @@ function ResponsesPanel({ feedback }){
   const info = feedback?.frameworkInfo;
   const model = feedback?.modelResponse;
   const parts = Array.isArray(info?.parts) ? info.parts : [];
-  if (!info?.name || !model || parts.length === 0) return null;
+  if (!responsesShown(feedback)) return null;
   const revisedLabels = Array.isArray(feedback.revisedFramework) ? feedback.revisedFramework : [];
   const hasRevised = typeof feedback.revisedStory === "string" && feedback.revisedStory.trim() && revisedLabels.length > 0;
   const used = new Set(revisedLabels.map(l=>l.part));

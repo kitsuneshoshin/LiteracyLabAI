@@ -15,6 +15,7 @@ const { buildAnyEmail, ALL_EMAIL_KEYS, sampleContext } = require("./_lib/emailAn
 //   feedback     POST  save what a customer tells us: the product backlog
 //   rating       POST  a thumbs up/down on a piece of feedback (was api/commit.js)
 //   qa           GET   the weekly marking-quality check (called by Vercel Cron)
+//   stats        GET   delivery, open and click numbers per email subject (admin or cron secret)
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const CATEGORIES = ["bug", "idea", "praise", "question", "other"];
@@ -63,8 +64,9 @@ async function handleCron(req, res) {
     send: sendEmail,
     address: process.env.EMAIL_POSTAL_ADDRESS || "",
     dryRun: !live,
-    maxPerRun: Number(process.env.EMAIL_MAX_PER_RUN) || 40,
+    maxPerRun: Number(process.env.EMAIL_MAX_PER_RUN) || 80,
     pauseMs: 550,
+    budgetMs: 45000, // the function may run for 60 s; stop sending well before that
     adminEmails,
   });
   const report = { mode: live ? "live" : "dry-run", missingSettings: missing, emailLiveFlag: process.env.EMAIL_LIVE === "true", ...summary };
@@ -113,6 +115,37 @@ async function handleQa(req, res) {
   }
   console.log("qa-run", JSON.stringify({ passed: summary.passed, delivered: summary.delivered, total: summary.total, avgMs: summary.avgMs, saved }));
   return res.status(200).json({ saved, passedFirstTry: summary.passed, delivered: summary.delivered, total: summary.total, passRate: summary.passRate, deliveredRate: summary.deliveredRate, timedOut: summary.timedOut, avgAttempts: summary.avgAttempts, avgMs: summary.avgMs, results: summary.results.map((r) => ({ name: r.name, firstTry: r.firstTry, outcome: r.outcome, attempts: r.attempts, ms: r.ms, issues: r.issues })) });
+}
+
+// ------------------------------------------------------------------ open and click numbers
+// What Resend reports for the last 500 emails, grouped by subject, with the subject-line test (emailAb.js)
+// pairs lined up. Callable by the cron secret or a signed-in admin, like the quality check.
+async function handleStats(req, res) {
+  if (req.method !== "GET") {
+    res.setHeader("Allow", "GET");
+    return res.status(405).json({ error: "Method not allowed." });
+  }
+  const secret = process.env.CRON_SECRET;
+  const bearer = (req.headers && req.headers.authorization) || "";
+  let allowed = Boolean(secret) && bearer === `Bearer ${secret}`;
+  if (!allowed && bearer.startsWith("Bearer ")) {
+    try {
+      const user = await requireUser(req);
+      const admins = (process.env.ADMIN_EMAILS || "").split(",").map((e) => e.trim().toLowerCase()).filter(Boolean);
+      allowed = admins.includes(String(user.email || "").toLowerCase());
+    } catch (e) { allowed = false; }
+  }
+  if (!allowed) return res.status(401).json({ error: "Unauthorized." });
+  if (!process.env.RESEND_API_KEY) return res.status(500).json({ error: "RESEND_API_KEY is not set." });
+
+  const { summarise, totals, fetchRecent } = require("./_lib/emailStats");
+  const { SUBJECT_B } = require("./_lib/emailAb");
+  const rows = summarise(await fetchRecent({ apiKey: process.env.RESEND_API_KEY, pauseMs: 550 }));
+  const none = (s) => ({ subject: s, sent: 0, delivered: 0, opened: 0, clicked: 0, bounced: 0, openRate: null, clickRate: null });
+  const find = (s) => rows.find((r) => r.subject === s) || none(s);
+  // Each email in the test: A is the original subject, B the alternative.
+  const subjectTests = Object.keys(SUBJECT_B).map((k) => ({ email: k, A: find(buildAnyEmail(k, sampleContext(k)).subject), B: find(SUBJECT_B[k]) }));
+  return res.status(200).json({ checkedAt: new Date().toISOString(), totals: totals(rows), bySubject: rows, subjectTests });
 }
 
 // ------------------------------------------------------------------ test copies
@@ -319,6 +352,7 @@ module.exports = async function handler(req, res) {
     const action = String((req.query && req.query.action) || "");
     if (action === "cron") return await handleCron(req, res);
     if (action === "qa") return await handleQa(req, res);
+    if (action === "stats") return await handleStats(req, res);
     if (action === "test") return await handleTest(req, res);
     if (action === "unsubscribe") return await handleUnsubscribe(req, res);
     if (action === "feedback") return await handleFeedback(req, res);

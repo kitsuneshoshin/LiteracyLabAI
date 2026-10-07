@@ -15,11 +15,14 @@
 //    skipped.
 //  - At most maxPerRun emails per run (a provider's daily limit is real), paced
 //    with pauseMs between sends to stay under the provider's rate limit.
+//  - A run also stops at budgetMs, well before the host's time limit, so a slow run can never be cut off
+//    mid-send. Anyone not reached has no claim recorded, so the next run picks them up.
 
 const { pickEmail } = require("./freeEmails");
 const { pickPaidEmail, pickSharedEmail } = require("./paidEmails");
 const { buildAnyEmail } = require("./emailAny");
 const { SITE } = require("./emailTemplate");
+const { applyVariant } = require("./emailAb");
 
 const DAY = 86400000;
 const PLANS = ["free", "core", "premium", "pro"];
@@ -40,8 +43,9 @@ function mostCommon(values) {
 const tierOf = (plan) => (plan === "free" ? "free" : plan === "core" ? "core" : "premium");
 const PLAN_LABEL = { free: "Free", core: "Core", premium: "Premium" };
 
-async function runFreeEmailJob({ supabase, now = new Date(), send, address, dryRun = true, maxPerRun = 40, adminEmails = [], pauseMs = 0 }) {
-  const summary = { dryRun, considered: 0, optedOut: 0, eligible: 0, sent: 0, errors: 0, plan: [] };
+async function runFreeEmailJob({ supabase, now = new Date(), send, address, dryRun = true, maxPerRun = 40, adminEmails = [], pauseMs = 0, budgetMs = 0, clock = Date.now }) {
+  const summary = { dryRun, considered: 0, optedOut: 0, eligible: 0, sent: 0, errors: 0, plan: [], stoppedEarly: null };
+  const started = clock();
 
   const { data: profiles, error: pErr } = await supabase.from("profiles").select("id, email, plan, created_at").in("plan", PLANS).limit(1000);
   if (pErr) throw pErr;
@@ -103,7 +107,8 @@ async function runFreeEmailJob({ supabase, now = new Date(), send, address, dryR
     summary.eligible++;
     summary.plan.push({ email: pick.key, account: String(p.id).slice(-6) });
     if (dryRun) continue;
-    if (summary.sent >= maxPerRun) break;
+    if (summary.sent >= maxPerRun) { summary.stoppedEarly = "limit"; break; }
+    if (budgetMs && clock() - started >= budgetMs) { summary.stoppedEarly = "time"; break; }
 
     // A token the unsubscribe and feedback links carry (created on first email).
     let token = prefs.get(p.id)?.unsubscribe_token;
@@ -142,7 +147,7 @@ async function runFreeEmailJob({ supabase, now = new Date(), send, address, dryR
         planLabel: PLAN_LABEL[tier],
       };
       // The Free summary reads stats.pieces / stats.words / stats.glow / stats.grow
-      const built = buildAnyEmail(pick.key, { ...ctx, stats: { pieces: ctx.pieces, words: ctx.words, glow: ctx.glow, grow: ctx.grow } });
+      const built = applyVariant(pick.key, p.id, buildAnyEmail(pick.key, { ...ctx, stats: { pieces: ctx.pieces, words: ctx.words, glow: ctx.glow, grow: ctx.grow } }));
       const r = await send({
         to: p.email, subject: built.subject, html: built.html, text: built.text, bcc: built.bcc,
         oneClickUrl: built.transactional ? undefined : `${SITE}/api/email?action=unsubscribe&t=${token}`,
