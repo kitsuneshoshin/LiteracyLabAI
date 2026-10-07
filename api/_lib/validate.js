@@ -145,6 +145,10 @@ const ZERO_SCORE_FABRICATION_PATTERN = /\b(you\s+(noticed|recognised|recognized|
 // raw mark or grade letter, which the prompt forbids - a model volunteering
 // "roughly 17/24" would be inventing a precision no single unmoderated
 // piece can support, and that number would end up in front of a parent.
+// A fact about how long the piece is ("about 44% of the expected length") is true and useful, and it is what our own length
+// check tells the model, so it is not an invented exam score. Everything else with a percentage or a fraction still is.
+const LENGTH_FACT = /\b\d{1,3}(\.\d+)?\s*%\s+of\s+(the\s+)?(expected|target|required|usual|typical|recommended)\s+(length|word count|words|number of words)/gi;
+const stripLengthFacts = (s) => String(s).replace(LENGTH_FACT, "of the expected length");
 const FABRICATED_MARK_PATTERN = /\b(\d{1,3}\s*(\/|out of)\s*\d{1,3}|\d{1,3}\s*%|grade\s*[A-E1-9][*+-]?\b)/i;
 
 function coerceBand(band) {
@@ -254,7 +258,7 @@ function validateExamTechnique(parsed, targetNames, issues, submittedText) {
   }
   if (!checkString(parsed?.examSummary, 15, 400)) {
     issues.push("examSummary is missing, too short, or too long");
-  } else if (FABRICATED_MARK_PATTERN.test(parsed.examSummary)) {
+  } else if (FABRICATED_MARK_PATTERN.test(stripLengthFacts(parsed.examSummary))) {
     issues.push(`examSummary invents a raw mark, percentage or grade letter ("${parsed.examSummary}") - bands only, never a fabricated exam score`);
   }
 }
@@ -443,6 +447,18 @@ function dropRestatingHighlights(parsed, submittedText) {
   const bad = (h) => h && h.type === "grow" && checkString(h.quote, 1, 100000) && checkString(h.revision, 1, 100000) &&
     (foldLookalikes(h.revision) === foldLookalikes(h.quote) || revisionDuplicatesExistingText(h.revision, text, normalizeForMatch(h.quote)));
   const kept = parsed.highlights.filter((h) => !bad(h));
+  if (kept.length >= 2 && kept.length < parsed.highlights.length) parsed.highlights = kept;
+  return parsed;
+}
+
+// A highlight whose "quote" is a paraphrase, not the student's own words, cannot be shown against their text. One such
+// highlight used to fail the whole response three times running (found live on a Year 11 essay: "highlights[4].quote does
+// not appear verbatim"), so it is dropped and the rest kept, as long as at least two real ones remain.
+function dropNonVerbatimHighlights(parsed, submittedText) {
+  if (!parsed || !Array.isArray(parsed.highlights) || !submittedText) return parsed;
+  const text = normalizeForMatch(submittedText);
+  const real = (h) => h && checkString(h.quote, 3, 200) && text.includes(normalizeForMatch(h.quote));
+  const kept = parsed.highlights.filter(real);
   if (kept.length >= 2 && kept.length < parsed.highlights.length) parsed.highlights = kept;
   return parsed;
 }
@@ -825,4 +841,4 @@ function validateWritingPrompt(parsed, { tier }) {
   return { ok: issues.length === 0, issues };
 }
 
-module.exports = { repairShortAnswer, dropRestatingHighlights, repairResponses, dropGlowsQuotingMisspellings, repairZeroScoreGlow, repairReadingExamEvidence, validateFeedback, validatePassage, validateWritingPrompt, resolveTarget, dropInvalidSpellingGrammar, sanitizeQuestionReview, stripUngrantedSections, MAX_AVG_WORDS_PER_SENTENCE };
+module.exports = { dropNonVerbatimHighlights, validateExamTechnique, repairShortAnswer, dropRestatingHighlights, repairResponses, dropGlowsQuotingMisspellings, repairZeroScoreGlow, repairReadingExamEvidence, validateFeedback, validatePassage, validateWritingPrompt, resolveTarget, dropInvalidSpellingGrammar, sanitizeQuestionReview, stripUngrantedSections, MAX_AVG_WORDS_PER_SENTENCE };

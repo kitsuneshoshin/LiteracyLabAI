@@ -10,7 +10,7 @@ const TECH = require("./_lib/techniques");
 const QT = require("./_lib/questionTypes");
 const { frameworkFor } = require("./_lib/writingFrameworks");
 const { makeSplitGenerator, splitEnabled } = require("./_lib/splitGenerate");
-const { dropRestatingHighlights, repairResponses, dropGlowsQuotingMisspellings, validateFeedback, resolveTarget, dropInvalidSpellingGrammar, sanitizeQuestionReview, repairZeroScoreGlow, repairReadingExamEvidence, repairShortAnswer, stripUngrantedSections } = require("./_lib/validate");
+const { dropNonVerbatimHighlights, dropRestatingHighlights, repairResponses, dropGlowsQuotingMisspellings, validateFeedback, resolveTarget, dropInvalidSpellingGrammar, sanitizeQuestionReview, repairZeroScoreGlow, repairReadingExamEvidence, repairShortAnswer, stripUngrantedSections } = require("./_lib/validate");
 const { checkRateLimit } = require("./_lib/rateLimit");
 const { writingLimitsForGrade } = require("./_lib/writingLimits");
 const { assessLength, calibrateWriting, applyCorrections, repairExamEvidence } = require("./_lib/calibrate");
@@ -74,7 +74,7 @@ async function generateAndValidate(prompt, tier, country, gradeLabel, submittedT
     TECH.repairVocabTricks(attempt.parsed);
     TECH.repairFrayer(attempt.parsed);
     if (submittedText) { if (TECH.devicesApply(genre, tier)) TECH.repairDevices(attempt.parsed, submittedText); else delete attempt.parsed.deviceCheck; }
-    if (submittedText) dropRestatingHighlights(attempt.parsed, submittedText);
+    if (submittedText) { dropNonVerbatimHighlights(attempt.parsed, submittedText); dropRestatingHighlights(attempt.parsed, submittedText); }
     if (submittedText && capabilities?.deepFeedback) repairResponses(attempt.parsed, genre, tier);
     if (submittedText) repairExamEvidence(attempt.parsed);
     if (readingScore === 0) repairZeroScoreGlow(attempt.parsed);

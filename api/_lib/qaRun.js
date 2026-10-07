@@ -15,7 +15,7 @@ const { DEFAULT_GENRE_BY_TIER } = require("./writingFrameworks");
 const { assessLength, calibrateWriting, repairExamEvidence } = require("./calibrate");
 const { examTargetsFor } = require("./masteryTargets");
 const TECH = require("./techniques");
-const { validateFeedback, dropRestatingHighlights, repairResponses, dropGlowsQuotingMisspellings, dropInvalidSpellingGrammar, sanitizeQuestionReview, repairZeroScoreGlow, repairReadingExamEvidence, stripUngrantedSections } = require("./validate");
+const { validateFeedback, dropNonVerbatimHighlights, dropRestatingHighlights, repairResponses, dropGlowsQuotingMisspellings, dropInvalidSpellingGrammar, sanitizeQuestionReview, repairZeroScoreGlow, repairReadingExamEvidence, stripUngrantedSections } = require("./validate");
 
 const COUNTRY = "🇬🇧 United Kingdom";
 const GRADES = { early: "Year 2", elementary: "Year 5", middle: "Year 8", high: "Year 11" };
@@ -109,6 +109,7 @@ async function runOne(s, kind, generate, deadline = Infinity, validate = validat
       out.attempts = i;
       if (kind === "writing") {
         if (built.caps.spellingGrammar !== false) { dropInvalidSpellingGrammar(parsed, s.text); dropGlowsQuotingMisspellings(parsed); }
+        dropNonVerbatimHighlights(parsed, s.text);
         dropRestatingHighlights(parsed, s.text);
         TECH.repairVocabTricks(parsed);
         TECH.repairFrayer(parsed);

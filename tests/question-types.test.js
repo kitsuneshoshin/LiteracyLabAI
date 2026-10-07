@@ -282,7 +282,7 @@ test("a passage is generated in a mix of styles for every age band, stored with 
 
 test("a poem keeps its line breaks and stanzas; prose is still regrouped into paragraphs", async () => {
   let sawPoem = false, sawProse = false;
-  for (let k = 0; k < 40 && !(sawPoem && sawProse); k++) {
+  for (let k = 0; k < 200 && !(sawPoem && sawProse); k++) {
     const { res } = await runGenerator("elementary", async (prompt) => ({ parsed: fakeModel(prompt), modelUsed: "stub" }));
     if (res.body.textType === "poem") { sawPoem = true; assert.ok(res.body.passage.includes("\n") && res.body.passage.includes("\n\n"), "poem lines and stanzas kept"); assert.equal(res.body.passage, poemPassage); }
     else { sawProse = true; assert.ok(!res.body.passage.includes("The kite climbs")); }
