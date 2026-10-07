@@ -74,9 +74,9 @@ function loadHandler(name, { plan = "free", used = 0, db, log, stripe, generate,
   return require(file);
 }
 
-async function call(handler, { method = "GET", query = {}, body } = {}) {
+async function call(handler, { method = "GET", query = {}, body, headers = {} } = {}) {
   const res = fakeRes();
-  await handler({ method, query, body, headers: {} }, res);
+  await handler({ method, query, body, headers }, res);
   return res;
 }
 

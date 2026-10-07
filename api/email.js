@@ -196,15 +196,23 @@ async function handleFeedback(req, res) {
   const category = CATEGORIES.includes(body.category) ? body.category : "other";
   if (message.length > 2000) return res.status(400).json({ error: "Please keep feedback under 2000 characters." });
   if (!message && !rating) return res.status(400).json({ error: "Please add a rating or a message." });
+  const fromApp = body.source === "app";
   const emailKey = typeof body.emailKey === "string" ? body.emailKey.slice(0, 60) : null;
   const contactOk = body.contactOk === true;
 
   const supabase = getSupabaseAdmin();
 
-  // Attribute to a parent only when the link carried a valid token; anyone
+  // Feedback sent from inside the app (the dashboard's "Send us feedback" card) comes from a signed-in parent, so it is
+  // attached to their account. If the sign-in turns out not to be valid it is simply treated as anonymous feedback.
+  let appUser = null;
+  if (fromApp && req.headers && req.headers.authorization) {
+    try { appUser = await requireUser(req); } catch (e) { appUser = null; }
+  }
+
+  // Attribute to a parent only when the link carried a valid token (or they are signed in); anyone
   // else can still leave feedback, anonymously.
-  let profileId = null;
-  if (typeof body.token === "string" && UUID.test(body.token)) {
+  let profileId = appUser ? appUser.id : null;
+  if (!profileId && typeof body.token === "string" && UUID.test(body.token)) {
     const { data } = await supabase.from("email_preferences").select("profile_id").eq("unsubscribe_token", body.token).maybeSingle();
     if (data) profileId = data.profile_id;
   }
@@ -218,7 +226,7 @@ async function handleFeedback(req, res) {
   if ((count || 0) >= 5) return res.status(429).json({ error: "Thanks, we've got plenty from you for now. Please try again later." });
 
   const { error } = await supabase.from("feedback").insert({
-    profile_id: profileId, source: "email", email_key: emailKey, rating, category,
+    profile_id: profileId, source: appUser ? "app" : "email", email_key: appUser ? (emailKey || "app-dashboard") : emailKey, rating, category,
     message: message || null, contact_ok: contactOk, ip_hash: ipHash,
   });
   if (error) throw error;
@@ -239,7 +247,7 @@ async function handleFeedback(req, res) {
         paragraphs: [
           `Type: ${category}`,
           `Rating: ${rating || "none"}`,
-          `From email: ${emailKey || "not from an email"}`,
+          appUser ? "From: the feedback card on the parent dashboard (signed in)" : `From email: ${emailKey || "not from an email"}`,
           `Message: ${message || "(none)"}`,
           customerEmail ? `The customer is happy to be contacted: ${customerEmail}. Reply to this email to reach them.` : "No permission to contact this customer.",
         ],

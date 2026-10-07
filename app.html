@@ -1749,6 +1749,67 @@ function VocabQuiz({ quiz, error, onRate, onRetry, onBack, loading }){
   );
 }
 
+// Tell us what you think: a short form on the dashboard. It goes to the same place as feedback from the emails, tied to the
+// signed-in account, and arrives in the owner's backlog.
+const FEEDBACK_KINDS = [["idea", "An idea"], ["bug", "Something is wrong"], ["praise", "Something I like"], ["question", "A question"], ["other", "Something else"]];
+function FeedbackCard({ session, backendLive }){
+  const [kind, setKind] = useState("idea");
+  const [message, setMessage] = useState("");
+  const [contactOk, setContactOk] = useState(false);
+  const [state, setState] = useState("idle"); // idle | sending | sent | error
+  const [error, setError] = useState("");
+  const tooShort = message.trim().length < 5;
+  async function send(e){
+    e.preventDefault();
+    if (tooShort || state === "sending") return;
+    setState("sending"); setError("");
+    try {
+      await authedFetch(session, "/api/email?action=feedback", { method: "POST", body: JSON.stringify({ source: "app", emailKey: "app-dashboard", category: kind, message: message.trim(), contactOk }) });
+      setState("sent"); setMessage("");
+    } catch (err) {
+      setError(err.payload?.error || err.message || "That did not send. Please try again."); setState("error");
+    }
+  }
+  if (!backendLive) return null;
+  return (
+    <div className="card p-5 sm:p-6" id="feedback-card">
+      <h2 className="font-display font-bold text-xl" style={{ color: "var(--ink)" }}>Tell us what you think</h2>
+      <p className="text-xs mt-0.5 mb-3" style={{ color: "var(--ink-faint)" }}>An idea, something that is not working, or something you like. We read every message.</p>
+      {state === "sent" ? (
+        <div className="flex items-center justify-between gap-3 flex-wrap rounded-xl p-3.5" style={{ background: "var(--good-tint)" }} role="status">
+          <span className="flex items-center gap-2 text-sm font-semibold" style={{ color: "var(--good)" }}><IconCheck size={16} strokeWidth={2.6} /> Thank you, we have it.</span>
+          <button type="button" onClick={()=>setState("idle")} className="focus-ring text-[13px] font-semibold underline" style={{ color: "var(--ink-soft)" }}>Send another</button>
+        </div>
+      ) : (
+        <form onSubmit={send} className="flex flex-col gap-3">
+          <div className="flex flex-wrap gap-1.5" role="group" aria-label="What is this about?">
+            {FEEDBACK_KINDS.map(([k, label]) => (
+              <button key={k} type="button" aria-pressed={kind === k} onClick={()=>setKind(k)} className="focus-ring rounded-full border px-3 py-1 text-[13px] font-semibold"
+                style={ kind === k ? { background: "var(--cyan-tint)", borderColor: "var(--cyan)", color: "var(--cyan-ink)" } : { borderColor: "var(--border)", color: "var(--ink-soft)", background: "var(--surface)" } }>{label}</button>
+            ))}
+          </div>
+          <label className="flex flex-col gap-1">
+            <span className="sr-only">Your message</span>
+            <textarea value={message} onChange={(e)=>setMessage(e.target.value)} rows={4} maxLength={2000} placeholder="What would you like us to know?"
+              className="focus-ring w-full rounded-xl border px-3.5 py-2.5 text-sm" style={{ borderColor: "var(--border)", background: "var(--surface)", color: "var(--ink)", resize: "vertical" }} />
+          </label>
+          <label className="flex items-center gap-2 text-[13px]" style={{ color: "var(--ink-soft)" }}>
+            <input type="checkbox" checked={contactOk} onChange={(e)=>setContactOk(e.target.checked)} style={{ width: 16, height: 16 }} />
+            You can email me about this
+          </label>
+          {state === "error" && <div className="text-[13px]" style={{ color: "var(--bad)" }} role="alert">{error}</div>}
+          <div className="flex items-center gap-3">
+            <button type="submit" disabled={tooShort || state === "sending"} className="focus-ring rounded-full px-5 py-2 text-sm font-bold disabled:opacity-50" style={{ background: "var(--ink)", color: "white" }}>
+              {state === "sending" ? "Sending…" : "Send feedback"}
+            </button>
+            <span className="text-[11px] tabular" style={{ color: "var(--ink-faint)" }}>{message.length} / 2000</span>
+          </div>
+        </form>
+      )}
+    </div>
+  );
+}
+
 function ActivityHistory({ recent, historyLimit, displayName }){
   const [expanded, setExpanded] = useState(false);
   const rows = recent || [];
@@ -2277,6 +2338,8 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
               : <ActivityHistory recent={history.recent} historyLimit={history.historyLimit} displayName={displayName} />}
           </div>
         )}
+
+        <FeedbackCard session={session} backendLive={backendLive} />
 
       </div>
       </>)}
