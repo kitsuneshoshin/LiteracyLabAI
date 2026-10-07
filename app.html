@@ -3964,10 +3964,10 @@ function Workspace({ country, gradeIdx, setGradeIdx, tier, setTierOverride, inte
         </div>
       </div>
 
-      <div className="flex items-center gap-1.5 rounded-full border p-1 w-fit mb-6" style={{ borderColor: "var(--border)", background: "var(--surface-2)" }}>
+      <div className="flex items-center gap-1 sm:gap-1.5 rounded-full border p-1 w-fit max-w-full overflow-x-auto mb-6" style={{ borderColor: "var(--border)", background: "var(--surface-2)" }}>
         {[["writing","Writing",IconPen],["reading","Reading Comprehension",IconBookOpenCheck],["vocab","Vocabulary",IconBook]].map(([key,label,IconEl])=>(
           <button key={key} onClick={()=>setExerciseType(key)}
-            className="focus-ring flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold transition-colors"
+            className="focus-ring flex items-center gap-1.5 rounded-full px-2.5 sm:px-3.5 py-1.5 text-xs font-semibold transition-colors whitespace-nowrap"
             style={ exerciseType===key ? { background: "var(--cyan)", color: "#fff" } : { color: "var(--ink-soft)" } }>
             <IconEl size={13} strokeWidth={2.2} />{label}
           </button>
