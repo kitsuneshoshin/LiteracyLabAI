@@ -2832,6 +2832,7 @@ function FeedbackPanel({ tier, gradeLabel, country, interest, confidence, motiva
       <DevicesPanel feedback={feedback} />
      </div>
      <div className="lg:col-span-2 flex flex-col gap-4 min-w-0">
+      <ExpandAllBar />
       <SpellingGrammarPanel feedback={feedback} />
 
       {premiumSectionsLocked && (
@@ -2868,7 +2869,7 @@ function FeedbackPanel({ tier, gradeLabel, country, interest, confidence, motiva
 
       <ExamTechniquePanel feedback={feedback} />
 
-      <Collapsible defaultOpen={true} borderColor="var(--border)" iconBg="var(--cyan-tint)" iconColor="var(--cyan-ink)"
+      <Collapsible id="vocab" defaultOpen={false} borderColor="var(--border)" iconBg="var(--cyan-tint)" iconColor="var(--cyan-ink)"
         icon={<IconSparkle size={16} strokeWidth={2.2} />} title={`Vocabulary Upgrades — ${interestLabel} edition`}
         teaser={vocabList.map(([term])=>term).join(", ")}>
         <VocabList items={vocabList} />
@@ -2910,8 +2911,38 @@ const EXAM_BAND_META = {
 // wall of boxes) - the student/parent controls what stays open, and each
 // header always shows a one-line teaser so a collapsed section still
 // visibly "does something" rather than looking like it vanished.
-function Collapsible({ icon, iconBg, iconColor, title, teaser, borderColor, defaultOpen, staticOpen, children }){
-  const [openState, setOpen] = useState(defaultOpen);
+// ---- Remembered open/closed. A section the learner opens (or closes) stays that way next time, per section, on this
+// device. Where nothing is remembered, or the browser blocks storage, the section's own default applies.
+function readOpenChoice(id, fallback){
+  if (!id) return fallback;
+  try { const v = localStorage.getItem("ll_open_" + id); return v === "1" ? true : v === "0" ? false : fallback; } catch (e) { return fallback; }
+}
+function saveOpenChoice(id, open){
+  if (!id) return;
+  try { localStorage.setItem("ll_open_" + id, open ? "1" : "0"); } catch (e) { /* not remembered, still works */ }
+}
+
+// One button that opens or closes every section on the page (it does not change what is remembered).
+function ExpandAllBar(){
+  const [allOpen, setAllOpen] = useState(false);
+  return (
+    <div className="flex justify-end">
+      <button type="button" onClick={()=>{ const next = !allOpen; setAllOpen(next); window.dispatchEvent(new CustomEvent("ll-set-all-sections", { detail: next })); }}
+        className="focus-ring text-[12.5px] font-semibold underline" style={{ color: "var(--ink-soft)" }}>
+        {allOpen ? "Close all sections" : "Open all sections"}
+      </button>
+    </div>
+  );
+}
+
+function Collapsible({ id, icon, iconBg, iconColor, title, teaser, borderColor, defaultOpen, staticOpen, children }){
+  const [openState, setOpenState] = useState(() => readOpenChoice(id, defaultOpen));
+  const setOpen = (fn) => setOpenState((prev) => { const next = typeof fn === "function" ? fn(prev) : fn; saveOpenChoice(id, next); return next; });
+  useEffect(() => {
+    const onAll = (e) => setOpenState(!!e.detail);
+    window.addEventListener("ll-set-all-sections", onAll);
+    return () => window.removeEventListener("ll-set-all-sections", onAll);
+  }, []);
   // staticOpen: a page whose whole content IS this card (Manage profile) has
   // no reason to let the header collapse it away - always open, no toggle.
   const open = staticOpen || openState;
@@ -2947,7 +2978,7 @@ function ExamTechniquePanel({ feedback }){
   const rows = Array.isArray(feedback?.examTechnique) ? feedback.examTechnique : null;
   if (!rows || rows.length === 0) return null;
   return (
-    <Collapsible defaultOpen={true} borderColor="var(--gold)" iconBg="var(--gold-tint)" iconColor="var(--gold-ink)"
+    <Collapsible id="exam" defaultOpen={false} borderColor="var(--gold)" iconBg="var(--gold-tint)" iconColor="var(--gold-ink)"
       icon={<IconGrad size={16} strokeWidth={2.2} />} title="Exam-technique scoring"
       teaser={feedback.examSummary || `${rows.length} objective${rows.length === 1 ? "" : "s"} scored`}>
       <p className="text-[12.5px] mb-4" style={{ color: "var(--ink-faint)" }}>
@@ -3051,7 +3082,7 @@ function SpellingGrammarPanel({ feedback }){
   const total = Number.isInteger(feedback?.spellingGrammarTotal) ? feedback.spellingGrammarTotal : items.length;
   const moreThanShown = total > items.length;
   return (
-    <Collapsible defaultOpen={!clean} borderColor="var(--border)"
+    <Collapsible id="spelling" defaultOpen={!clean} borderColor="var(--border)"
       iconBg={clean ? "var(--good-tint)" : "var(--gold-tint)"} iconColor={clean ? "var(--good)" : "var(--gold-ink)"}
       icon={clean ? <IconCheck size={15} strokeWidth={2.4} /> : <IconAlert size={15} strokeWidth={2.2} />}
       title="Spelling & grammar check"
@@ -3096,7 +3127,7 @@ function DevicesPanel({ feedback }){
   const usedNames = new Set(used.map((u) => u.device));
   const next = dc.tryNext && dc.tryNext.device ? dc.tryNext : null;
   return (
-    <Collapsible defaultOpen={true} borderColor="var(--border)" iconBg="var(--gold-tint)" iconColor="var(--gold-ink)"
+    <Collapsible id="devices" defaultOpen={false} borderColor="var(--border)" iconBg="var(--gold-tint)" iconColor="var(--gold-ink)"
       icon={<IconGrid size={15} strokeWidth={2.2} />} title="Persuasive devices (AFOREST)"
       teaser={used.length + " of " + dc.devices.length + " used" + (next ? ", try " + next.device : "")}>
       <div className="flex flex-wrap gap-1.5 mb-3" role="list" aria-label="The seven AFOREST devices">
@@ -3138,8 +3169,8 @@ function FrameworkTipPanel({ feedback }){
   // actually rewritten to apply the framework.
   if (!tip?.name || !tip?.quote || !tip?.revision) return null;
   return (
-    <Collapsible defaultOpen={true} borderColor="var(--navy)" iconBg="var(--navy-tint)" iconColor="var(--ink)"
-      icon={<IconGrid size={15} strokeWidth={2.2} />} title={`Framework spotlight — ${tip.name}`} teaser={tip.description}>
+    <Collapsible id="framework" defaultOpen={false} borderColor="var(--navy)" iconBg="var(--navy-tint)" iconColor="var(--ink)"
+      icon={<IconGrid size={15} strokeWidth={2.2} />} title={`Framework spotlight — ${tip.name}`} teaser={`One of your sentences, rewritten to show ${tip.name}`}>
       {tip.description && (
         <p className="text-[13px] mb-3" style={{ color: "var(--ink-faint)" }}>{tip.description}</p>
       )}
@@ -3219,7 +3250,7 @@ function ResponsesPanel({ feedback }){
   const used = new Set(revisedLabels.map(l=>l.part));
   const missing = parts.filter(p=>!used.has(p.name));
   return (
-    <Collapsible defaultOpen={true} borderColor="var(--navy)" iconBg="var(--navy-tint)" iconColor="var(--ink)"
+    <Collapsible id="responses" defaultOpen={true} borderColor="var(--navy)" iconBg="var(--navy-tint)" iconColor="var(--ink)"
       icon={<IconGrid size={15} strokeWidth={2.2} />} title={`See ${info.name} at work`}
       teaser="In your response, and in a model response">
       <p className="text-[13px] mb-3" style={{ color: "var(--ink-faint)" }}>{info.description}</p>
@@ -3257,7 +3288,7 @@ function ReadingStrategyPanel({ feedback }){
   const rs = feedback?.readingStrategy;
   if (!rs?.name || !rs?.tip) return null;
   return (
-    <Collapsible defaultOpen={true} borderColor="var(--border)" iconBg="var(--cyan-tint)" iconColor="var(--cyan-ink)"
+    <Collapsible id="strategy" defaultOpen={false} borderColor="var(--border)" iconBg="var(--cyan-tint)" iconColor="var(--cyan-ink)"
       icon={<IconBookOpenCheck size={16} strokeWidth={2.2} />} title={`Reading strategy — ${rs.name}`} teaser={rs.how}>
       {rs.how && <p className="text-[13px] mb-3" style={{ color: "var(--ink-faint)" }}>{rs.how}</p>}
       <div className="rounded-xl p-3.5" style={{ background: "var(--surface-2)" }}>
@@ -3296,7 +3327,7 @@ function QuestionReviewPanel({ feedback, questions, answers }){
   const autoTotal = qAutoCount(questions);
   const marked = feedback?.shortAnswer && typeof feedback.shortAnswer === "object" ? feedback.shortAnswer : null;
   return (
-    <Collapsible defaultOpen={true} borderColor="var(--border)" iconBg="var(--good-tint)" iconColor="var(--good)"
+    <Collapsible id="review" defaultOpen={true} borderColor="var(--border)" iconBg="var(--good-tint)" iconColor="var(--good)"
       icon={<IconBookOpenCheck size={16} strokeWidth={2.2} />} title="Question by question"
       teaser={`${rightCount} of ${autoTotal} right`}>
       <div className="flex flex-col gap-3">
@@ -3508,6 +3539,7 @@ function ReadingFeedbackPanel({ tier, country, interest, confidence, motivation,
         <GrowNextBlock feedback={feedback} />
       </div>
 
+      <ExpandAllBar />
       <QuestionReviewPanel feedback={feedback} questions={questions} answers={answers} />
 
       <ReadingStrategyPanel feedback={feedback} />
@@ -3516,7 +3548,7 @@ function ReadingFeedbackPanel({ tier, country, interest, confidence, motivation,
 
       <FrameworkTipPanel feedback={feedback} />
 
-      <Collapsible defaultOpen={true} borderColor="var(--border)" iconBg="var(--cyan-tint)" iconColor="var(--cyan-ink)"
+      <Collapsible id="vocab" defaultOpen={false} borderColor="var(--border)" iconBg="var(--cyan-tint)" iconColor="var(--cyan-ink)"
         icon={<IconSparkle size={16} strokeWidth={2.2} />} title={`Vocabulary Upgrades — ${interestLabel} edition`}
         teaser={vocabList.map(([term])=>term).join(", ")}>
         <VocabList items={vocabList} />
