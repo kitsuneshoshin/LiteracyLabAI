@@ -147,7 +147,7 @@ async function runFreeEmailJob({ supabase, now = new Date(), send, address, dryR
         planLabel: PLAN_LABEL[tier],
       };
       // The Free summary reads stats.pieces / stats.words / stats.glow / stats.grow
-      const built = applyVariant(pick.key, p.id, buildAnyEmail(pick.key, { ...ctx, stats: { pieces: ctx.pieces, words: ctx.words, glow: ctx.glow, grow: ctx.grow } }));
+      const built = applyVariant(pick.key, p.id, buildAnyEmail(pick.key, { ...ctx, stats: { pieces: ctx.pieces, words: ctx.words, glow: ctx.glow, grow: ctx.grow, days: ctx.days } }));
       const r = await send({
         to: p.email, subject: built.subject, html: built.html, text: built.text, bcc: built.bcc,
         oneClickUrl: built.transactional ? undefined : `${SITE}/api/email?action=unsubscribe&t=${token}`,

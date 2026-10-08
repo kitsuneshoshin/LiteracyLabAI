@@ -1393,6 +1393,12 @@ const vocabVisible = (words, boxes, showKnown, query) => {
     ? (vocabTermKey(w.term).includes(q) || String(w.definition || "").toLowerCase().includes(q))
     : (showKnown || vocabBoxOf(boxes, w.term) < VOCAB_BOXES - 1));
 };
+// One word to spotlight today: the same word all day for a learner, a different one tomorrow, never one they already
+// know. Chosen from the list in a fixed order so it does not change when new words arrive in the middle of the day.
+const vocabWordOfDay = (words, boxes, day) => {
+  const open = (words || []).filter((w) => vocabBoxOf(boxes, w.term) < VOCAB_BOXES - 1).slice().sort((a, b) => vocabTermKey(a.term).localeCompare(vocabTermKey(b.term)));
+  return open.length ? open[Math.abs(Math.floor(Number(day) || 0)) % open.length] : null;
+};
 const vocabDeck = (words, boxes, size = 8) => (words || []).map((w, i) => ({ w, i, b: vocabBoxOf(boxes, w.term) })).sort((a, b) => a.b - b.b || a.i - b.i).slice(0, size).map((x) => x.w);
 // Joins this device's copy with the account's: for each word the newer change wins. toPush is what the account
 // is missing or has older, to be saved; merged is what both should now hold.
@@ -1551,6 +1557,7 @@ function VocabularyBank({ session, childId, backendLive, onSeePlans, displayName
   const list = words || [];
   const total = list.length;
   const known = list.filter((w) => vocabBoxOf(boxes, w.term) === VOCAB_BOXES - 1).length;
+  const wordOfDay = vocabWordOfDay(list, boxes, Math.floor((Date.now() - new Date().getTimezoneOffset() * 60000) / 86400000));
   const shown = vocabVisible(list, boxes, showKnown, query)
     .slice()
     .sort((a, b) => sort === "az" ? vocabTermKey(a.term).localeCompare(vocabTermKey(b.term)) : sort === "practise" ? vocabBoxOf(boxes, a.term) - vocabBoxOf(boxes, b.term) : 0);
@@ -1625,6 +1632,20 @@ function VocabularyBank({ session, childId, backendLive, onSeePlans, displayName
               </button>
             )}
           </div>
+          {wordOfDay && !query.trim() && (
+            <div className="card p-4 sm:p-5" style={{ borderColor: "var(--gold)" }} aria-label="Word of the day">
+              <div className="flex items-center justify-between gap-2 flex-wrap">
+                <span className="text-[11px] font-bold uppercase tracking-wide" style={{ color: "var(--gold-ink)" }}>Word of the day</span>
+                <MasteryPips box={vocabBoxOf(boxes, wordOfDay.term)} />
+              </div>
+              <div className="font-display font-bold text-xl mt-1" style={{ color: "var(--cyan-ink)" }}>{wordOfDay.term}</div>
+              <p className="text-[13.5px] leading-snug mt-1" style={{ color: "var(--ink)" }}>{wordOfDay.definition}</p>
+              {wordOfDay.example && <p className="text-[13px] leading-snug italic mt-1" style={{ color: "var(--ink-soft)" }}>“{wordOfDay.example}”</p>}
+              {wordOfDay.trick && <p className="text-[12.5px] leading-snug mt-1" style={{ color: "var(--cyan-ink)" }}><span className="font-semibold">Word trick: </span>{wordOfDay.trick}</p>}
+              <p className="text-[12px] mt-2" style={{ color: "var(--ink-faint)" }}>Try using it once today, in a sentence you say or write.</p>
+              <button type="button" onClick={()=>setWordBox(wordOfDay.term, VOCAB_BOXES - 1)} className="focus-ring mt-2 inline-flex items-center gap-1 rounded-full border px-3 py-1 text-[12px] font-semibold" style={{ borderColor: "var(--good)", color: "var(--good)", background: "var(--good-tint)" }}><IconCheck size={12} strokeWidth={2.6} /> I know this</button>
+            </div>
+          )}
           {shown.length === 0 ? (
             <div className="card p-6 text-sm text-center" style={{ color: "var(--ink-faint)" }}>
               {query.trim() ? <>No words match "{query}".</> : <>You know every word on your list. Nice work. New words will appear after your next piece, or <button type="button" onClick={()=>setShowKnown(true)} className="focus-ring underline font-semibold" style={{ color: "var(--ink-soft)" }}>show the {known} you know</button>.</>}
@@ -3476,8 +3497,9 @@ function ResponsesPanel({ feedback }){
           </span>
         ))}
       </div>
+      <div className="grid md:grid-cols-2 gap-5 items-start">
       {hasRevised && (
-        <div className="mb-5">
+        <div className="min-w-0">
           <div className="font-display font-bold text-[12px] mb-2" style={{ color: "var(--ink-faint)" }}>IN YOUR RESPONSE (corrected and improved)</div>
           <LabelledResponse text={feedback.revisedStory} labels={revisedLabels} parts={parts} />
           {missing.length > 0 && (
@@ -3487,10 +3509,11 @@ function ResponsesPanel({ feedback }){
           )}
         </div>
       )}
-      <div>
+      <div className="min-w-0">
         <div className="font-display font-bold text-[12px] mb-2" style={{ color: "var(--ink-faint)" }}>A MODEL RESPONSE TO THE SAME TASK</div>
         <LabelledResponse text={model} labels={feedback.modelFramework} parts={parts} />
         <p className="text-[12px] mt-2" style={{ color: "var(--ink-faint)" }}>Written by the AI as an example of a strong answer at your level. Use it to learn from, not to copy.</p>
+      </div>
       </div>
     </Collapsible>
   );
@@ -3562,7 +3585,10 @@ function QuestionReviewPanel({ feedback, questions, answers, passageBank, shownQ
                   )}
                 </div>
                 <div className="text-[13.5px] font-semibold mt-1" style={{ color: "var(--ink)" }}>{i + 1}. {q.q}</div>
-                <div className="text-[13px] mt-1 font-read" style={{ color: "var(--ink-soft)" }}>
+                <div className="grid md:grid-cols-2 gap-3 mt-2 items-start">
+                <div className="min-w-0 flex flex-col gap-0">
+                <div className="text-[11px] font-bold uppercase tracking-wide mb-1" style={{ color: "var(--ink-faint)" }}>Your answer</div>
+                <div className="text-[13px] font-read" style={{ color: "var(--ink-soft)" }}>
                   You wrote: <strong style={{ color: "var(--ink)", fontWeight: 600 }}>{qAnswerText(q, chosen)}</strong>
                 </div>
                 {marked?.comment && <p className="text-[13.5px] leading-snug mt-1.5 font-read" style={{ color: "var(--ink)" }}>{marked.comment}</p>}
@@ -3582,9 +3608,10 @@ function QuestionReviewPanel({ feedback, questions, answers, passageBank, shownQ
                     ))}
                   </div>
                 )}
-                {!marked && <p className="text-[12.5px] mt-1.5" style={{ color: "var(--ink-faint)" }}>We could not mark this one this time, so compare it with the model answer below.</p>}
+                {!marked && <p className="text-[12.5px] mt-1.5" style={{ color: "var(--ink-faint)" }}>We could not mark this one this time, so compare it with the model answer beside it.</p>}
+                </div>
                 {q.modelAnswer && (
-                  <div className="mt-2 rounded-lg p-2.5" style={{ background: "var(--good-tint)" }}>
+                  <div className="rounded-lg p-2.5 min-w-0" style={{ background: "var(--good-tint)" }}>
                     <div className="text-[11px] font-bold uppercase tracking-wide" style={{ color: "var(--good)" }}>A strong answer{qFwName(q) ? ", built with " + qFwName(q) : ""}</div>
                     {Array.isArray(q.modelParts) && q.modelParts.length > 0 ? (
                       <p className="text-[13.5px] leading-relaxed mt-1 font-read" style={{ color: "var(--ink)" }}>
@@ -3599,6 +3626,7 @@ function QuestionReviewPanel({ feedback, questions, answers, passageBank, shownQ
                     )}
                   </div>
                 )}
+                </div>
               </div>
             );
           }

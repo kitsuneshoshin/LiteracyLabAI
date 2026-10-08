@@ -65,6 +65,20 @@ function button(label, url) {
   </td></tr></table>`;
 }
 
+// A row of simple progress bars, built from table cells so they work in every mail client (rings need images or
+// SVG, which many clients block). Each is { label, value (text), pct (0 to 100) }. Shown only when there is real data.
+function meterBlock(meters) {
+  const rows = (meters || []).filter((m) => m && m.label && Number.isFinite(m.pct)).map((m) => {
+    const pct = Math.max(0, Math.min(100, Math.round(m.pct)));
+    const fill = pct > 0 ? `<td class="ll-bar" width="${pct}%" height="10" style="width:${pct}%;height:10px;line-height:10px;font-size:0;background:${BRAND.wine};border-radius:6px;">&nbsp;</td>` : "";
+    const rest = pct < 100 ? `<td width="${100 - pct}%" height="10" style="width:${100 - pct}%;height:10px;line-height:10px;font-size:0;">&nbsp;</td>` : "";
+    return `<tr><td style="padding:8px 0 2px;font-family:${FONT_SANS};font-size:14px;color:${BRAND.ink};" class="ll-ink"><span style="font-weight:600;">${esc(m.label)}</span> <span class="ll-soft" style="color:${BRAND.inkSoft};">${esc(m.value)}</span></td></tr>
+  <tr><td style="padding:0 0 8px;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" class="ll-tint" style="background:${BRAND.wineTint};border-radius:6px;"><tr>${fill}${rest}</tr></table></td></tr>`;
+  });
+  if (!rows.length) return "";
+  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:12px 0 8px;">${rows.join("\n")}</table>`;
+}
+
 function noteBox(text) {
   return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:20px 0 4px;"><tr><td class="ll-tint" style="background:${BRAND.wineTint};border-radius:10px;padding:14px 18px;font-family:${FONT_SANS};font-size:14px;line-height:1.6;color:${BRAND.wineInk};">${esc(text)}</td></tr></table>`;
 }
@@ -85,6 +99,7 @@ function feedbackRow(baseUrl) {
  * @param {string} c.heading
  * @param {string[]} c.paragraphs   plain text, escaped here
  * @param {{title,text}[]} [c.steps]
+ * @param {{label,value,pct}[]} [c.meters]  progress bars shown under the paragraphs (for example days practised this week)
  * @param {{label,url}} [c.cta]
  * @param {string} [c.note]
  * @param {string} [c.campaign]     tags links for analytics, e.g. "free_welcome"
@@ -99,6 +114,7 @@ function buildEmail(c) {
   const body = [
     `<h1 class="ll-ink" style="margin:0 0 18px;font-family:${FONT_SANS};font-size:26px;line-height:1.25;font-weight:700;color:${BRAND.ink};">${esc(c.heading)}</h1>`,
     ...(c.paragraphs || []).map(paragraph),
+    ...(c.meters && c.meters.length ? [meterBlock(c.meters)] : []),
     c.steps ? stepsBlock(c.steps) : "",
     c.cta ? button(c.cta.label, ctaUrl) : "",
     c.note ? noteBox(c.note) : "",
@@ -176,6 +192,7 @@ ${body}
     c.heading,
     "",
     ...(c.paragraphs || []).flatMap((p) => [p, ""]),
+    ...(c.meters && c.meters.length ? c.meters.filter((m) => m && m.label && Number.isFinite(m.pct)).map((m) => `${m.label}: ${m.value}`).concat([""]) : []),
     ...(c.steps ? c.steps.flatMap((s, i) => [`${i + 1}. ${s.title} - ${s.text}`]).concat([""]) : []),
     ...(c.cta ? [`${c.cta.label}: ${ctaUrl}`, ""] : []),
     ...(c.note ? [c.note, ""] : []),

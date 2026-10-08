@@ -90,6 +90,13 @@ const ACCOUNT_REASON = "You're receiving this because of your LiteracyLab AI acc
 function readingLine(st) {
   return st.readingAvg == null ? null : `Reading comprehension average: ${st.readingAvg}%.`;
 }
+// The week's bars: days practised out of 7, and the reading average when there was reading. Real numbers only.
+function weekMeters(st) {
+  const out = [];
+  if (Number.isFinite(st.days) && st.days >= 0) out.push({ label: "Days practised", value: `${Math.min(7, st.days)} of 7`, pct: (Math.min(7, st.days) / 7) * 100 });
+  if (st.readingAvg != null) out.push({ label: "Reading average", value: `${st.readingAvg}%`, pct: st.readingAvg });
+  return out;
+}
 function focusLines(st) {
   return [
     ...(st.glow ? [`What went well: ${st.glow}.`] : []),
@@ -154,6 +161,7 @@ const CONTENT = {
       ...focusLines(c),
       "Your 26-week progress chart and year-group ranking are on the dashboard.",
     ],
+    meters: weekMeters(c),
     cta: { label: "See the progress chart", url: SITE + "/app.html" },
     reason: LIFECYCLE_REASON("Core"),
     bcc: ["support@literacylabai.com"],
@@ -168,6 +176,7 @@ const CONTENT = {
       ...c.learners.map((l) => `${l.name}: ${l.pieces} ${s(l.pieces, "piece", "pieces")}, ${l.words} words.`),
       ...focusLines(c),
     ],
+    meters: weekMeters(c),
     cta: { label: "Open the dashboard", url: SITE + "/app.html" },
     reason: LIFECYCLE_REASON("Premium"),
     bcc: ["support@literacylabai.com"],
@@ -276,6 +285,7 @@ function buildPaidEmail(key, ctx) {
     heading: c.heading,
     paragraphs: c.paragraphs,
     steps: c.steps,
+    meters: c.meters,
     cta,
     note: c.note,
     campaign: key.replace(/-/g, "_"),
