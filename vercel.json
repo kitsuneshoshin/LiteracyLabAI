@@ -7,6 +7,10 @@
     {
       "source": "/feedback",
       "destination": "/feedback.html"
+    },
+    {
+      "source": "/c/:token",
+      "destination": "/share.html"
     }
   ],
   "functions": {

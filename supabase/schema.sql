@@ -368,3 +368,28 @@ create table if not exists public.referrals (
 );
 alter table public.referrals enable row level security;
 create index if not exists referrals_referrer_idx on public.referrals (referrer_id);
+
+-- ---------------------------------------------------------------------------
+-- Shareable result cards (api/_lib/shareCards.js, served by /api/account?action=share-*, shown at /c/<token>).
+-- A parent can turn a finished piece into a small public page for a friend. A row holds only what the page shows:
+-- the first name or nickname the parent typed, the kind of piece, the year group, one curriculum skill name and
+-- (reading) the score. Never any writing or feedback text. Reached only by its random token; switched off by
+-- setting revoked_at. RLS on with no policy, like every table here; only the server (service role) reads or writes.
+-- ---------------------------------------------------------------------------
+create table if not exists public.share_cards (
+  id uuid primary key default gen_random_uuid(),
+  token text not null unique,
+  profile_id uuid not null references public.profiles(id) on delete cascade,
+  submission_id uuid references public.submissions(id) on delete set null,
+  display_name text not null,
+  kind text not null check (kind in ('writing', 'reading')),
+  grade_label text,
+  skill text,
+  score smallint,
+  total smallint,
+  created_at timestamptz not null default now(),
+  revoked_at timestamptz
+);
+alter table public.share_cards enable row level security;
+create index if not exists share_cards_profile_idx on public.share_cards (profile_id);
+create index if not exists share_cards_submission_idx on public.share_cards (submission_id);

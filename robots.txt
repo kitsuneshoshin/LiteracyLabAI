@@ -1,6 +1,7 @@
 User-agent: *
 Allow: /
 Disallow: /app.html
+Disallow: /c/
 
 # Explicitly welcomed rather than merely un-blocked: these are the crawlers
 # behind AI answer engines and chat assistants (ChatGPT, Perplexity, Google's

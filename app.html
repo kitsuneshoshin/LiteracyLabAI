@@ -2758,6 +2758,75 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
 // satisfaction score into an actual product-feedback backlog (see
 // commitments.feedback_text). Thumbs-up stays a single tap: there's nothing
 // to elaborate on when something already worked.
+// Share a finished piece as a small card for a friend (api/_lib/shareCards.js). The card shows only a first name the
+// parent types, the year group, one skill name and, for reading, the score: never any writing. The parent can switch
+// the link off at any time, and a friend who signs up through it counts as an invite.
+function ShareResultCard({ session, backendLive, submissionId }){
+  const [name, setName] = useState("");
+  const [card, setCard] = useState(null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  const [copied, setCopied] = useState(false);
+  useEffect(()=>{
+    setCard(null); setError(""); setName("");
+    if (!backendLive || !session || !submissionId) return;
+    let live = true;
+    authedFetch(session, "/api/account?action=share-mine&submissionId=" + encodeURIComponent(submissionId), { cache: "no-store" })
+      .then(d => { if (live && d.card) { setCard(d.card); setName(d.card.name === "My child" ? "" : d.card.name); } })
+      .catch(()=>{});
+    return ()=>{ live = false; };
+  }, [submissionId, backendLive]);
+  if (!backendLive || !submissionId) return null;
+  async function create(){
+    if (busy) return;
+    setBusy(true); setError("");
+    try { setCard(await authedFetch(session, "/api/account?action=share-create", { method: "POST", body: JSON.stringify({ submissionId, name }) })); }
+    catch (err) { setError(err.payload?.error || err.message || "That did not work. Please try again."); }
+    finally { setBusy(false); }
+  }
+  async function stop(){
+    if (busy || !card) return;
+    setBusy(true); setError("");
+    try { await authedFetch(session, "/api/account?action=share-revoke", { method: "POST", body: JSON.stringify({ token: card.token }) }); setCard(null); }
+    catch (err) { setError(err.payload?.error || err.message || "That did not work. Please try again."); }
+    finally { setBusy(false); }
+  }
+  async function copy(){
+    try { await navigator.clipboard.writeText(card.url); setCopied(true); setTimeout(()=>setCopied(false), 2000); }
+    catch (e) { const el = document.getElementById("share-link"); if (el) { el.focus(); el.select(); } }
+  }
+  const canShare = typeof navigator !== "undefined" && typeof navigator.share === "function";
+  return (
+    <div className="card p-4 sm:p-5" id="share-result-card">
+      <h3 className="font-display font-bold text-[15px]" style={{ color: "var(--ink)" }}>Share this result</h3>
+      <p className="text-[12.5px] mt-0.5 mb-3" style={{ color: "var(--ink-faint)" }}>
+        Make a simple card to send to a friend. It shows the first name you type, the year group, the skill and, for reading, the score. It never shows any writing, and you can switch it off at any time.
+      </p>
+      {!card ? (
+        <div className="flex gap-2 flex-wrap items-center">
+          <input value={name} onChange={(e)=>setName(e.target.value)} maxLength={24} aria-label="First name or nickname for the card" placeholder="First name or nickname (optional)"
+            className="focus-ring flex-1 min-w-0 rounded-xl px-3 py-2 text-[13px]" style={{ background: "var(--surface-2)", color: "var(--ink)", border: "1px solid var(--border)", minWidth: "190px" }} />
+          <button type="button" onClick={create} disabled={busy} className="focus-ring rounded-full px-5 py-2 text-[13px] font-bold disabled:opacity-50" style={{ background: "var(--ink)", color: "white" }}>{busy ? "Making…" : "Create share link"}</button>
+        </div>
+      ) : (
+        <div className="flex flex-col gap-2">
+          <div className="flex gap-2 flex-wrap items-center">
+            <input id="share-link" readOnly value={card.url} onFocus={(e)=>e.target.select()} aria-label="Your share link"
+              className="focus-ring flex-1 min-w-0 rounded-xl px-3 py-2 text-[13px]" style={{ background: "var(--surface-2)", color: "var(--ink)", border: "1px solid var(--border)", minWidth: "190px" }} />
+            <button type="button" onClick={copy} className="focus-ring rounded-full px-4 py-2 text-[13px] font-bold" style={{ background: "var(--ink)", color: "white" }}>{copied ? "Copied" : "Copy link"}</button>
+            {canShare && <button type="button" onClick={()=>navigator.share({ title: "A result on LiteracyLab AI", url: card.url }).catch(()=>{})} className="focus-ring rounded-full border px-4 py-2 text-[13px] font-bold" style={{ borderColor: "var(--border)", color: "var(--ink)" }}>Share…</button>}
+          </div>
+          <div className="flex gap-4 flex-wrap text-[12.5px]">
+            <a href={card.url} target="_blank" rel="noopener" className="focus-ring font-semibold underline" style={{ color: "var(--ink-soft)" }}>Preview the card</a>
+            <button type="button" onClick={stop} disabled={busy} className="focus-ring font-semibold underline" style={{ color: "var(--bad)" }}>Stop sharing</button>
+          </div>
+        </div>
+      )}
+      {error && <p className="text-[12.5px] mt-2" style={{ color: "var(--bad)" }} role="alert">{error}</p>}
+    </div>
+  );
+}
+
 function ThumbsFeedback({ context, session, submissionId, backendLive }){
   const [value, setValue] = useState(null);
   const [showCommentBox, setShowCommentBox] = useState(false);
@@ -3112,6 +3181,7 @@ function FeedbackPanel({ tier, gradeLabel, country, interest, confidence, motiva
         </div>
       )}
       <ThumbsFeedback context="writing feedback" session={session} submissionId={submissionId} backendLive={backendLive} />
+      <ShareResultCard session={session} backendLive={backendLive} submissionId={submissionId} />
      </div>
     </div>
   );
@@ -3824,6 +3894,7 @@ function ReadingFeedbackPanel({ tier, country, interest, confidence, motivation,
         </div>
       )}
       <ThumbsFeedback context="reading feedback" session={session} submissionId={submissionId} backendLive={backendLive} />
+      <ShareResultCard session={session} backendLive={backendLive} submissionId={submissionId} />
       </div>
       </div>
     </div>

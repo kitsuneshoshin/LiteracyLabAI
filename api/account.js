@@ -2,6 +2,12 @@ const { getSupabaseAdmin } = require("./_lib/supabaseAdmin");
 const { getStripe } = require("./_lib/stripe");
 const { requireUser, sendError } = require("./_lib/auth");
 const { statusFor } = require("./_lib/referrals");
+const shareCards = require("./_lib/shareCards");
+
+function bodyOf(req) {
+  if (typeof req.body === "string") { try { return JSON.parse(req.body || "{}"); } catch (e) { return {}; } }
+  return req.body || {};
+}
 
 // Merged export-data.js and delete-account.js into one file - Vercel's
 // Hobby plan caps a deployment at 12 serverless functions, and having both
@@ -11,8 +17,22 @@ const { statusFor } = require("./_lib/referrals");
 // nothing functionally.
 module.exports = async function handler(req, res) {
   try {
+    const action = (req.query && req.query.action) || "";
+    // The public face of a shared result card: no sign-in, only the fields listed in api/_lib/shareCards.js.
+    if (req.method === "GET" && action === "share-view") {
+      const card = await shareCards.viewCard(getSupabaseAdmin(), req.query.t);
+      res.setHeader("Cache-Control", "public, max-age=60");
+      if (!card) return res.status(404).json({ error: "This card is not available." });
+      return res.status(200).json({ card });
+    }
+
     const user = await requireUser(req);
     const supabase = getSupabaseAdmin();
+
+    // Share cards (api/_lib/shareCards.js). Chosen by ?action= so the account export and deletion below are untouched.
+    if (req.method === "GET" && action === "share-mine") return res.status(200).json(await shareCards.mineFor(supabase, user, req.query.submissionId));
+    if (req.method === "POST" && action === "share-create") return res.status(200).json(await shareCards.createCard(supabase, user, bodyOf(req)));
+    if (req.method === "POST" && action === "share-revoke") return res.status(200).json(await shareCards.revokeCard(supabase, user, bodyOf(req).token));
 
     // GET ?action=referral: the refer-a-friend card (api/_lib/referrals.js). Here rather than in a new file
     // because the host allows only 12 serverless functions and api/ already holds 12.
@@ -25,12 +45,13 @@ module.exports = async function handler(req, res) {
       // JSON file the browser downloads. privacy.html promises this as a
       // self-service right ("export a copy... in a portable format, on
       // request"); this is the endpoint that actually backs that promise.
-      const [{ data: profile }, { data: children }, { data: submissions }, { data: commitments }, { data: referrals }] = await Promise.all([
+      const [{ data: profile }, { data: children }, { data: submissions }, { data: commitments }, { data: referrals }, { data: sharedCards }] = await Promise.all([
         supabase.from("profiles").select("id, email, plan, created_at").eq("id", user.id).maybeSingle(),
         supabase.from("child_profiles").select("*").eq("profile_id", user.id),
         supabase.from("submissions").select("*").eq("profile_id", user.id),
         supabase.from("commitments").select("*").eq("profile_id", user.id),
         supabase.from("referrals").select("referrer_id, referred_id, status, created_at, rewarded_at").or(`referrer_id.eq.${user.id},referred_id.eq.${user.id}`),
+        supabase.from("share_cards").select("token, display_name, kind, grade_label, skill, score, total, created_at, revoked_at").eq("profile_id", user.id),
       ]);
 
       const exportData = {
@@ -40,6 +61,7 @@ module.exports = async function handler(req, res) {
         submissions: submissions || [],
         commitments: commitments || [],
         referrals: referrals || [],
+        sharedCards: sharedCards || [],
       };
 
       res.setHeader("Content-Type", "application/json");

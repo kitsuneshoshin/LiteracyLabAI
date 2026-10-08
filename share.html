@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>A result shared from LiteracyLab AI</title>
+<meta property="og:title" content="A result shared from LiteracyLab AI">
+<meta property="og:description" content="A parent shared this result. LiteracyLab AI gives children feedback on their writing and reading that matches their school curriculum.">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F1F1EF; --surface:#FFFFFF; --border:#D3D3CF; --ink:#212121; --ink-soft:#5A5A56;
+    --wine:#7A3B45; --wine-ink:#552830; --wine-tint:#F0E3E5; --good:#2F6B4A;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --bg:#161513; --surface:#1E1B18; --border:#37322B; --ink:#EDE9E2; --ink-soft:#B3AB9C; --wine:#C4776E; --wine-ink:#E3A79F; --wine-tint:#3A2528; --good:#7FD6A4; }
+  }
+  *{ box-sizing:border-box; }
+  body{ margin:0; background:var(--bg); color:var(--ink); font-family:"Lexend","Segoe UI",Helvetica,Arial,sans-serif; line-height:1.6; border-top:4px solid var(--wine); min-height:100vh; }
+  .wrap{ max-width:520px; margin:0 auto; padding:20px 16px 56px; }
+  .brand{ display:flex; align-items:center; gap:12px; text-decoration:none; color:var(--ink); padding:8px 0 20px; }
+  .brand img{ width:44px; height:44px; border-radius:10px; }
+  .brand span{ font-weight:700; font-size:22px; letter-spacing:-.2px; }
+  .brand b{ color:var(--wine-ink); }
+  .card{ background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:28px; }
+  .kicker{ font-size:12px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--wine-ink); margin:0 0 8px; }
+  h1{ font-size:24px; line-height:1.3; margin:0 0 12px; }
+  p{ margin:0 0 14px; color:var(--ink-soft); }
+  .skill{ background:var(--wine-tint); border-radius:10px; padding:12px 16px; color:var(--ink); margin:0 0 16px; }
+  .skill small{ display:block; font-size:12px; font-weight:600; color:var(--wine-ink); }
+  .ring{ display:block; margin:4px 0 16px; }
+  .btn{ display:inline-block; font-weight:600; font-size:16px; padding:13px 26px; border-radius:999px; background:var(--wine); color:#fff; text-decoration:none; }
+  .btn:focus-visible, a:focus-visible{ outline:2px solid var(--wine); outline-offset:2px; }
+  .fine{ font-size:12px; color:var(--ink-soft); margin:18px 0 0; }
+  a{ color:var(--wine-ink); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="brand" href="/"><img src="/apple-touch-icon.png" alt="" width="44" height="44"><span>LiteracyLab <b>AI</b></span></a>
+  <div class="card" id="card" aria-live="polite">
+    <h1>Loading…</h1>
+  </div>
+</div>
+<script>
+(function () {
+  var token = (location.pathname.match(/\/c\/([a-z0-9]{12})\/?$/) || [])[1] || "";
+  var card = document.getElementById("card");
+  function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+  function gone() {
+    card.textContent = "";
+    card.appendChild(el("h1", null, "This card is not available"));
+    card.appendChild(el("p", null, "The parent may have stopped sharing it, or the link is not quite right."));
+    var a = el("a", "btn", "See LiteracyLab AI"); a.href = "/"; card.appendChild(a);
+  }
+  function ring(score, total) {
+    var size = 96, r = 40, c = 2 * Math.PI * r, pct = total > 0 ? score / total : 0;
+    var ns = "http://www.w3.org/2000/svg";
+    var svg = document.createElementNS(ns, "svg");
+    svg.setAttribute("width", size); svg.setAttribute("height", size); svg.setAttribute("viewBox", "0 0 96 96"); svg.setAttribute("class", "ring");
+    svg.setAttribute("role", "img"); svg.setAttribute("aria-label", score + " out of " + total + " correct");
+    function circle(stroke, offset) {
+      var k = document.createElementNS(ns, "circle");
+      k.setAttribute("cx", 48); k.setAttribute("cy", 48); k.setAttribute("r", r); k.setAttribute("fill", "none");
+      k.setAttribute("stroke", stroke); k.setAttribute("stroke-width", 9); k.setAttribute("stroke-linecap", "round");
+      if (offset != null) { k.setAttribute("stroke-dasharray", c); k.setAttribute("stroke-dashoffset", offset); k.setAttribute("transform", "rotate(-90 48 48)"); }
+      return k;
+    }
+    svg.appendChild(circle("var(--border)")); svg.appendChild(circle("var(--wine)", c * (1 - pct)));
+    var t = document.createElementNS(ns, "text");
+    t.setAttribute("x", 48); t.setAttribute("y", 56); t.setAttribute("text-anchor", "middle"); t.setAttribute("font-size", 24); t.setAttribute("font-weight", 700); t.setAttribute("fill", "var(--ink)");
+    t.textContent = score + "/" + total; svg.appendChild(t);
+    return svg;
+  }
+  function show(c) {
+    var name = c.name || "My child", year = c.year ? c.year + " " : "";
+    card.textContent = "";
+    card.appendChild(el("p", "kicker", c.kind === "reading" ? "Reading practice" : "Writing practice"));
+    if (c.kind === "reading" && Number.isInteger(c.score) && Number.isInteger(c.total) && c.total > 0) {
+      card.appendChild(el("h1", null, name + " scored " + c.score + " out of " + c.total + " on a " + year + "reading piece"));
+      card.appendChild(ring(c.score, c.total));
+    } else {
+      card.appendChild(el("h1", null, name + " just finished a " + year + (c.kind === "reading" ? "reading" : "writing") + " piece"));
+    }
+    if (c.skill) { var s = el("div", "skill"); s.appendChild(el("small", null, "Skill in focus")); s.appendChild(document.createTextNode(c.skill)); card.appendChild(s); }
+    card.appendChild(el("p", null, "LiteracyLab AI gives children feedback on their writing and reading that matches their school curriculum. It is free to start."));
+    var a = el("a", "btn", "Try it free"); a.href = c.ref ? "/?ref=" + encodeURIComponent(c.ref) : "/"; card.appendChild(a);
+    card.appendChild(el("p", "fine", "A parent chose to share this. It shows no writing, only the skill and, for reading, the score."));
+  }
+  if (!token) { gone(); return; }
+  fetch("/api/account?action=share-view&t=" + encodeURIComponent(token))
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .then(function (d) { if (d && d.card) show(d.card); else gone(); })
+    .catch(gone);
+})();
+</script>
+</body>
+</html>
