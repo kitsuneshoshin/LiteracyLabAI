@@ -259,6 +259,19 @@ function speakText(text) {
   window.speechSynthesis.speak(utterance);
 }
 
+// A friend's link (?ref=CODE) is remembered in this browser and travels with the sign-up (api/_lib/referrals.js).
+const REF_KEY = "ll_ref";
+function captureReferral(){
+  try {
+    const m = /[?&]ref=([A-Za-z0-9]{6,12})(&|$)/.exec(window.location.search);
+    if (m) localStorage.setItem(REF_KEY, m[1].toUpperCase());
+  } catch (e) { /* private window: the link still works if they sign up in the same visit */ }
+}
+function storedReferral(){
+  try { const v = localStorage.getItem(REF_KEY) || ""; return /^[A-Z0-9]{6,12}$/.test(v) ? v : ""; } catch (e) { return ""; }
+}
+captureReferral();
+
 async function authedFetch(session, path, options = {}) {
   const res = await fetch(path, {
     ...options,
@@ -1771,6 +1784,70 @@ function VocabQuiz({ quiz, error, onRate, onRetry, onBack, loading }){
 // Tell us what you think: a short form on the dashboard. It goes to the same place as feedback from the emails, tied to the
 // signed-in account, and arrives in the owner's backlog.
 const FEEDBACK_KINDS = [["idea", "An idea"], ["bug", "Something is wrong"], ["praise", "Something I like"], ["question", "A question"], ["other", "Something else"]];
+// Refer-a-friend. Both sides get extra pieces for the month once the friend has signed up through the link, confirmed
+// their email and finished a first piece (rules and checks live in api/_lib/referrals.js). Shown to Free accounts,
+// and to anyone who joined through a friend's link and has not yet unlocked their pieces.
+function InviteFriendCard({ session, backendLive, plan }){
+  const [data, setData] = useState(null);
+  const [copied, setCopied] = useState(false);
+  const [failed, setFailed] = useState(false);
+  const userId = session && session.user && session.user.id;
+  useEffect(()=>{
+    if (!backendLive || !session) return;
+    let live = true;
+    authedFetch(session, "/api/account?action=referral", { cache: "no-store" })
+      .then(d=>{ if (live) setData(d); })
+      .catch(()=>{ if (live) setFailed(true); });
+    return ()=>{ live = false; };
+  }, [backendLive, userId]);
+  if (!backendLive || failed || !data) return null;
+  const invited = data.invitedStatus === "signed_up";
+  const isFree = plan === "free";
+  if (!isFree && !invited) return null;
+  async function copy(){
+    try { await navigator.clipboard.writeText(data.link); setCopied(true); setTimeout(()=>setCopied(false), 2000); }
+    catch (e) { const el = document.getElementById("invite-link"); if (el) { el.focus(); el.select(); } }
+  }
+  const STEP_TEXT = {
+    signed_up: "Signed up, waiting to confirm their email",
+    confirmed: "Email confirmed, waiting for their first piece",
+    rewarded: "Done, " + data.rewardPieces + " pieces added for you both",
+  };
+  return (
+    <div className="card p-5 sm:p-6" id="invite-card">
+      {invited && (
+        <div className="rounded-xl p-3.5 mb-4 text-sm" style={{ background: "var(--gold-tint)", color: "var(--gold-ink)" }} role="status">
+          <span className="font-semibold">You joined through a friend.</span> Finish your first piece and you each get {data.rewardPieces} extra pieces this month.
+        </div>
+      )}
+      {isFree && (<>
+        <h2 className="font-display font-bold text-xl" style={{ color: "var(--ink)" }}>Invite a friend: you both get {data.rewardPieces} extra pieces</h2>
+        <p className="text-xs mt-0.5 mb-3" style={{ color: "var(--ink-faint)" }}>
+          Share your link. When a friend signs up through it, confirms their email and finishes their first piece, you each get {data.rewardPieces} extra pieces for that month. Up to {data.maxPerMonth} friends a month.
+        </p>
+        <div className="flex gap-2 flex-wrap">
+          <input id="invite-link" readOnly value={data.link} onFocus={(e)=>e.target.select()} aria-label="Your invite link"
+            className="focus-ring flex-1 min-w-0 rounded-xl px-3 py-2 text-[13px]" style={{ background: "var(--surface-2)", color: "var(--ink)", border: "1px solid var(--border)", minWidth: "180px" }} />
+          <button type="button" onClick={copy} className="focus-ring rounded-full px-5 py-2 text-[13px] font-bold" style={{ background: "var(--ink)", color: "white" }}>{copied ? "Copied" : "Copy link"}</button>
+        </div>
+        {data.friends.length > 0 && (
+          <ul className="mt-4 flex flex-col gap-1.5" aria-label="Friends you have invited">
+            {data.friends.map((f)=>(
+              <li key={f.label} className="flex items-center gap-2 text-[13px]" style={{ color: "var(--ink-soft)" }}>
+                {f.step === "rewarded" ? <IconCheck size={14} strokeWidth={2.6} style={{ color: "var(--good)" }} /> : <span aria-hidden="true" style={{ width: 14, textAlign: "center" }}>•</span>}
+                <span><span className="font-semibold" style={{ color: "var(--ink)" }}>{f.label}</span>: {STEP_TEXT[f.step]}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+        <p className="text-[11px] mt-3" style={{ color: "var(--ink-faint)" }}>
+          This month: {data.rewardedThisMonth} of {data.maxPerMonth} friends done{data.bonusThisMonth > 0 ? ", " + data.bonusThisMonth + " extra pieces unlocked" : ""}. Only friends who sign up through your link and finish a piece count, and extra pieces are for the month they are earned.
+        </p>
+      </>)}
+    </div>
+  );
+}
+
 function FeedbackCard({ session, backendLive }){
   const [kind, setKind] = useState("idea");
   const [message, setMessage] = useState("");
@@ -2374,6 +2451,8 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
               : <ActivityHistory recent={history.recent} historyLimit={history.historyLimit} displayName={displayName} />}
           </div>
         )}
+
+        <InviteFriendCard session={session} backendLive={backendLive} plan={plan} />
 
         <FeedbackCard session={session} backendLive={backendLive} />
 
@@ -5232,7 +5311,8 @@ function AuthScreen(){
         return;
       }
       if (mode === "signup") {
-        const { error } = await supabaseClient.auth.signUp({ email, password });
+        const ref = storedReferral();
+        const { error } = await supabaseClient.auth.signUp(ref ? { email, password, options: { data: { referral_code: ref } } } : { email, password });
         if (error) throw error;
         window.llTrack && window.llTrack("sign_up", { method: "email" });
         setStatus("check-email");

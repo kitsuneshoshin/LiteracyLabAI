@@ -1,6 +1,7 @@
 const { getSupabaseAdmin } = require("./_lib/supabaseAdmin");
 const { getStripe } = require("./_lib/stripe");
 const { requireUser, sendError } = require("./_lib/auth");
+const { statusFor } = require("./_lib/referrals");
 
 // Merged export-data.js and delete-account.js into one file - Vercel's
 // Hobby plan caps a deployment at 12 serverless functions, and having both
@@ -13,16 +14,23 @@ module.exports = async function handler(req, res) {
     const user = await requireUser(req);
     const supabase = getSupabaseAdmin();
 
+    // GET ?action=referral: the refer-a-friend card (api/_lib/referrals.js). Here rather than in a new file
+    // because the host allows only 12 serverless functions and api/ already holds 12.
+    if (req.method === "GET" && req.query && req.query.action === "referral") {
+      return res.status(200).json(await statusFor(supabase, user));
+    }
+
     if (req.method === "GET") {
       // Returns every piece of personal data this account holds, as one
       // JSON file the browser downloads. privacy.html promises this as a
       // self-service right ("export a copy... in a portable format, on
       // request"); this is the endpoint that actually backs that promise.
-      const [{ data: profile }, { data: children }, { data: submissions }, { data: commitments }] = await Promise.all([
+      const [{ data: profile }, { data: children }, { data: submissions }, { data: commitments }, { data: referrals }] = await Promise.all([
         supabase.from("profiles").select("id, email, plan, created_at").eq("id", user.id).maybeSingle(),
         supabase.from("child_profiles").select("*").eq("profile_id", user.id),
         supabase.from("submissions").select("*").eq("profile_id", user.id),
         supabase.from("commitments").select("*").eq("profile_id", user.id),
+        supabase.from("referrals").select("referrer_id, referred_id, status, created_at, rewarded_at").or(`referrer_id.eq.${user.id},referred_id.eq.${user.id}`),
       ]);
 
       const exportData = {
@@ -31,6 +39,7 @@ module.exports = async function handler(req, res) {
         children: children || [],
         submissions: submissions || [],
         commitments: commitments || [],
+        referrals: referrals || [],
       };
 
       res.setHeader("Content-Type", "application/json");

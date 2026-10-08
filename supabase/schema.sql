@@ -345,3 +345,26 @@ create table if not exists public.vocab_progress (
 );
 alter table public.vocab_progress enable row level security;
 create index if not exists vocab_progress_profile_idx on public.vocab_progress (profile_id);
+
+-- ---------------------------------------------------------------------------
+-- Refer-a-friend (api/_lib/referrals.js, served by GET /api/account?action=referral). Each parent has a personal
+-- code. A referral row ties a new account (referred_id, unique: one referral per account) to the parent whose link it
+-- came through. It starts "signed_up", becomes "rewarded" once the friend has confirmed their email and finished a
+-- piece (both then get extra pieces for that month, worked out from these rows), or is "rejected" (own link, same
+-- email address, throwaway email, not a new account) with the reason kept. RLS on with no policy, like every
+-- table here; only the server (service role) reads or writes.
+-- ---------------------------------------------------------------------------
+alter table public.profiles add column if not exists referral_code text;
+create unique index if not exists profiles_referral_code_idx on public.profiles (referral_code) where referral_code is not null;
+
+create table if not exists public.referrals (
+  id uuid primary key default gen_random_uuid(),
+  referrer_id uuid not null references public.profiles(id) on delete cascade,
+  referred_id uuid not null unique references public.profiles(id) on delete cascade,
+  status text not null check (status in ('signed_up', 'rewarded', 'rejected')),
+  reason text,
+  created_at timestamptz not null default now(),
+  rewarded_at timestamptz
+);
+alter table public.referrals enable row level security;
+create index if not exists referrals_referrer_idx on public.referrals (referrer_id);

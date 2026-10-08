@@ -1,6 +1,7 @@
 const { getSupabaseAdmin } = require("./_lib/supabaseAdmin");
 const { requireUser, sendError } = require("./_lib/auth");
 const { getMonthlyUsage } = require("./_lib/usage");
+const { settleReferralSafe } = require("./_lib/referrals");
 const { generateFeedbackJSON } = require("./_lib/openai");
 const { buildWritingPrompt, buildReadingPrompt, correctiveAddendum, examTechniqueSupported, splitPrompts } = require("./_lib/prompt");
 const { standardsFor } = require("./_lib/curriculum");
@@ -274,6 +275,7 @@ module.exports = async function handler(req, res) {
         .eq("id", submissionId);
       if (updateErr) throw updateErr;
 
+      await settleReferralSafe(supabase, user); // a friend's first finished piece can unlock the referral reward
       const updatedUsage = await getMonthlyUsage(supabase, user.id);
       return res.status(200).json({
         submissionId, feedback: result.parsed, usage: updatedUsage,
@@ -343,6 +345,7 @@ module.exports = async function handler(req, res) {
         .eq("id", submissionId);
       if (updateErr) throw updateErr;
 
+      await settleReferralSafe(supabase, user); // a friend's first finished piece can unlock the referral reward
       const updatedUsage = await getMonthlyUsage(supabase, user.id);
       return res.status(200).json({
         submissionId, feedback: result.parsed, score, totalQuestions,

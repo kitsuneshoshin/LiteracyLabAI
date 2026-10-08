@@ -1,4 +1,5 @@
 const { capabilitiesFor } = require("./plans");
+const { bonusFor } = require("./referrals");
 
 const FREE_MONTHLY_CAP = 3;
 
@@ -55,7 +56,13 @@ async function getMonthlyUsage(supabase, profileId) {
   const isAdmin = ADMIN_EMAILS.includes((profile.email || "").toLowerCase());
   const plan = isAdmin ? "admin" : profile.plan;
   const caps = capabilitiesFor(plan);
-  return { used: Math.max(0, (count || 0) - (neverDelivered || 0)), cap: caps.monthlyCap, plan, capabilities: caps };
+  // Extra pieces earned this month by referring a friend, or by being referred (see referrals.js). Only a limited
+  // plan can use them, and a problem reading them (for example before the table exists) just means no bonus.
+  let referralBonus = 0;
+  if (Number.isFinite(caps.monthlyCap)) {
+    try { referralBonus = (await bonusFor(supabase, profileId, now)).pieces; } catch (e) { referralBonus = 0; }
+  }
+  return { used: Math.max(0, (count || 0) - (neverDelivered || 0)), cap: caps.monthlyCap + referralBonus, referralBonus, plan, capabilities: caps };
 }
 
 module.exports = { getMonthlyUsage, FREE_MONTHLY_CAP, ABANDONED_AFTER_MS };
