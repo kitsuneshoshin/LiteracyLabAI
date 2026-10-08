@@ -16,7 +16,7 @@ function fakeGoogle() {
     if (String(url).startsWith("https://oauth2.googleapis.com/token")) return { ok: true, status: 200, json: async () => ({ access_token: "tok" }) };
     const body = JSON.parse(init.body);
     assert.equal(init.headers.Authorization, "Bearer tok");
-    if (body.dateRanges.length === 2) return { ok: true, json: async () => ({ rows: [row(["last7"], [10, 6, 14, 40, 9]), row(["last28"], [30, 22, 55, 160, 33])] }) };
+    if (body.dateRanges.length === 2) return { ok: true, json: async () => ({ rows: [row(["last7"], [10, 6, 14, 40, 9, 300, 4]), row(["last28"], [30, 22, 55, 160, 33, 900, 11])] }) };
     const dim = body.dimensions[0].name;
     if (dim === "date") return { ok: true, json: async () => ({ rows: [row(["20261001"], [3, 4]), row(["20261002"], [5, 6])] }) };
     if (dim === "sessionDefaultChannelGroup") return { ok: true, json: async () => ({ rows: [row(["Direct"], [30, 20]), row(["Organic Search"], [12, 9])] }) };
@@ -46,6 +46,7 @@ test("summary: headline numbers for 7 and 28 days, the daily trend, sources, pag
   const g = fakeGoogle();
   const s = await fetchSummary({ rawCreds: CREDS, propertyId: "556212809", fetchImpl: g.fetchImpl, nowSec: 1790000000 });
   assert.equal(s.last7.activeUsers, 10); assert.equal(s.last7.sessions, 14); assert.equal(s.last28.screenPageViews, 160);
+  assert.equal(s.last7.eventCount, 300); assert.equal(s.last28.keyEvents, 11);
   assert.deepEqual(s.daily, [{ date: "20261001", activeUsers: 3, sessions: 4 }, { date: "20261002", activeUsers: 5, sessions: 6 }]);
   assert.equal(s.sources[0].sessionDefaultChannelGroup, "Direct");
   assert.equal(s.pages[0].pagePath, "/");

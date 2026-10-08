@@ -57,7 +57,7 @@ function rowsOf(report, dims, mets) {
   });
 }
 
-const METRICS = ["activeUsers", "newUsers", "sessions", "screenPageViews", "engagedSessions"];
+const METRICS = ["activeUsers", "newUsers", "sessions", "screenPageViews", "engagedSessions", "eventCount", "keyEvents"];
 
 // Headline numbers for the last 7 and 28 days, the daily trend, and the top sources, pages and countries.
 async function fetchSummary({ rawCreds, propertyId, fetchImpl = fetch, nowSec }) {
