@@ -128,10 +128,11 @@ module.exports = async function handler(req, res) {
       const textType = focus.textType || QT.pickTextType(tier);
       const baseTemplate = QT.pickTemplate(tier, Math.random, textType);
       const template = withShort ? [...baseTemplate, "short"] : baseTemplate;
-      const llmPrompt = buildReadingPassagePrompt({ tier, country, gradeLabel, textType, template, skill: focus.skill || undefined });
+      const strict = !!(usage.capabilities && usage.capabilities.strictStandard);
+      const llmPrompt = buildReadingPassagePrompt({ tier, country, gradeLabel, textType, template, skill: focus.skill || undefined, strict });
       // If the styled plan keeps failing, fall back to plain multiple choice, keeping the written answer for Premium.
       const fallbackTemplate = withShort ? [...QT.MC_FOUR, "short"] : QT.MC_FOUR;
-      const fallbackPrompt = buildReadingPassagePrompt({ tier, country, gradeLabel, textType, template: fallbackTemplate, skill: focus.skill || undefined });
+      const fallbackPrompt = buildReadingPassagePrompt({ tier, country, gradeLabel, textType, template: fallbackTemplate, skill: focus.skill || undefined, strict });
       ({ parsed } = await generateAndValidate(llmPrompt, tier, { template, textType, fallbackPrompt, fallbackTemplate }));
       // A poem keeps its line breaks; prose is regrouped into paragraphs if the model sent one block.
       parsed.passage = (textType.lines || textType.two) ? String(parsed.passage).replace(/\r\n/g, "\n").trim() : paragraphise(parsed.passage);

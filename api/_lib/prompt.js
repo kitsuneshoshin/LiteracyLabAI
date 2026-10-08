@@ -142,6 +142,16 @@ Also return "examSummary": one sentence naming the single objective that would g
 // engine, asked for more of it. Core gets one Grow (one step, deliberately
 // - a single actionable step is better coaching than a list); Premium adds a
 // clearly-labelled second, harder step for households that want to push.
+// The Free plan is held to the full grade-level standard: no rounding up, no general praise, and shortfalls named
+// plainly. (Free shows no AI score, so this is what makes its marking strict.) Core and Premium keep their own wording.
+function strictStandardClause(caps, kind) {
+  if (!caps || !caps.strictStandard) return "";
+  if (kind === "reading") {
+    return `\n\nSTRICT STANDARD: Hold this learner to the full expectation for their year group and do not round up. Praise only what the answers truly show: name the questions answered correctly, and for every wrong answer say exactly why the chosen option fails against the passage. Never call a result strong, excellent or secure when questions were missed. Stay encouraging in tone but do not soften the facts.`;
+  }
+  return `\n\nSTRICT STANDARD: Hold this piece to the full expectation for this year group and country and do not round up. The Glow names only what is genuinely strong FOR THIS GRADE, with a short quote as proof, never general praise. If the piece falls short of the expected length, structure, sentence variety or accuracy, the Grow says so plainly and concretely, in encouraging words but without softening the fact. Never call a piece excellent, perfect or flawless unless it truly is.`;
+}
+
 function deepFeedbackClause(deep) {
   if (!deep) return "";
   return `\n\nThis student's plan includes extended feedback. In addition to the single main "grow" above, return a "growNext" field: ONE further step, harder than the main grow, that they'd take AFTER mastering it.
@@ -315,7 +325,7 @@ ${MOTIVATION_NOTE[motivation] || ""}
 ${standardsClause(country, tier, gradeLabel)}
 ${targetsClause(targetNames)}
 ${highlightsClause(tier)}
-${deepFeedbackClause(caps.deepFeedback)}
+${deepFeedbackClause(caps.deepFeedback)}${strictStandardClause(caps, "writing")}
 ${wantsExam ? examTechniqueClause({ tier, targets, kind: "writing" }) : ""}
 ${frameworkClause({ tier, genre })}${TECH.deviceClause(genre, tier)}
 ${wantsScore ? overallScoreClause() : ""}${lengthClause(assessment)}
@@ -436,7 +446,7 @@ ${CONFIDENCE_NOTE[confidenceReading] || ""}
 ${MOTIVATION_NOTE[motivation] || ""}
 ${standardsClause(country, tier, gradeLabel)}
 ${targetsClause(targetNames)}
-${deepFeedbackClause(caps.deepFeedback)}
+${deepFeedbackClause(caps.deepFeedback)}${strictStandardClause(caps, "reading")}
 ${wantsExam ? examTechniqueClause({ tier, targets, kind: "reading" }) : ""}${questionReviewClause(questions.length, interest)}${caps.deepFeedback ? shortAnswerClause(questions, answers) : ""}${TECH.readingStrategyClause(tier)}${TECH.vocabTrickClause(tier)}${TECH.frayerClause(tier)}
 
 ${workedExample({ score: false, spelling: false })}
@@ -495,7 +505,7 @@ const PASSAGE_SKILL = {
 // engaging - and it meant two students with different interests never saw
 // the same original passage even when everything else about them matched.
 // skill: { key, text } the learner chose to work on (see focus.js), or undefined for the age's usual mix.
-function buildReadingPassagePrompt({ tier, country, gradeLabel, textType, template, skill }) {
+function buildReadingPassagePrompt({ tier, country, gradeLabel, textType, template, skill, strict }) {
   const QT = require("./questionTypes");
   const plan = template || QT.MC_FOUR;
   const type = textType && textType.name ? textType : { name: "passage", lines: false };
@@ -533,7 +543,7 @@ Requirements:
 - The questions should primarily test this comprehension skill: ${skill && skill.text ? skill.text : PASSAGE_SKILL[tier]}, but cover distinct details, moments, or angles of the text so the ${count} questions feel genuinely different.${skill && skill.text ? ` The learner chose to work on this skill, so at least three of the ${count} questions must test it directly.` : ""}
 - Each question has exactly ONE unambiguously correct answer that is clearly supported by the text. Wrong answers must be clearly wrong to a careful reader, not intentionally tricky or debatable.
 - Do not reuse character names, settings, or plots from well-known published works.
-- Pitch it as a real stretch for this age: at least two of the ${count} questions must need inference or interpretation rather than finding a stated fact.${visualRule}
+- Pitch it as a real stretch for this age: at least two of the ${count} questions must need inference or interpretation rather than finding a stated fact.${strict ? ` Hold it to the full standard for this age: at least half of the ${count} questions must need inference, interpretation or comparing details, and every wrong option must be tempting to a reader who skimmed (taken from the text or a likely misreading), never obviously silly.` : ""}${visualRule}
 
 The ${count} questions, in this exact order and in these exact styles:
 ${QT.questionPlanText(plan, tier)}

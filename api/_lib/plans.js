@@ -21,6 +21,7 @@ const PLANS = {
     spellingGrammar: false,
     overallScore: false,
     vocabBank: false,
+    strictStandard: true,
   },
   core: {
     label: "Core",
@@ -34,6 +35,7 @@ const PLANS = {
     spellingGrammar: false,
     overallScore: false,
     vocabBank: true,
+    strictStandard: false,
   },
   premium: {
     label: "Premium",
@@ -47,6 +49,7 @@ const PLANS = {
     spellingGrammar: true,
     overallScore: true,
     vocabBank: true,
+    strictStandard: false,
   },
 };
 

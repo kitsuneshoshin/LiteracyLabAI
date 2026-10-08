@@ -1385,6 +1385,14 @@ function vocabEntry(v){
   return null;
 }
 const vocabBoxOf = (boxes, term) => { const e = vocabEntry(boxes && boxes[vocabTermKey(term)]); return e ? e.box : 0; };
+// The words the list shows. Words marked as known are tucked away so the list does not keep growing, unless the
+// learner asks to see them or searches for one.
+const vocabVisible = (words, boxes, showKnown, query) => {
+  const q = String(query || "").trim().toLowerCase();
+  return (words || []).filter((w) => q
+    ? (vocabTermKey(w.term).includes(q) || String(w.definition || "").toLowerCase().includes(q))
+    : (showKnown || vocabBoxOf(boxes, w.term) < VOCAB_BOXES - 1));
+};
 const vocabDeck = (words, boxes, size = 8) => (words || []).map((w, i) => ({ w, i, b: vocabBoxOf(boxes, w.term) })).sort((a, b) => a.b - b.b || a.i - b.i).slice(0, size).map((x) => x.w);
 // Joins this device's copy with the account's: for each word the newer change wins. toPush is what the account
 // is missing or has older, to be saved; merged is what both should now hold.
@@ -1434,8 +1442,11 @@ function FrayerCard({ w, big = false }){
 
 function MasteryPips({ box }){
   return (
-    <span className="inline-flex items-center gap-1" title={VOCAB_BOX_NAME[box]} aria-label={VOCAB_BOX_NAME[box]}>
+    <span className="inline-flex items-center gap-1.5" title={VOCAB_BOX_NAME[box]} aria-label={VOCAB_BOX_NAME[box]}>
+      <span className="text-[10.5px] font-semibold" style={{ color: "var(--ink-faint)" }}>{VOCAB_BOX_NAME[box]}</span>
+      <span className="inline-flex items-center gap-1" aria-hidden="true">
       {[0, 1, 2, 3].map((n) => <span key={n} className="rounded-full" style={{ width: 14, height: 5, background: n <= box && box > 0 ? VOCAB_BOX_COLOR[box] : "var(--border)" }} />)}
+      </span>
     </span>
   );
 }
@@ -1449,6 +1460,7 @@ function VocabularyBank({ session, childId, backendLive, onSeePlans, displayName
   const [boxes, setBoxes] = useState({});
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState("newest");
+  const [showKnown, setShowKnown] = useState(false);
   const [quiz, setQuiz] = useState(null);
   const [quizError, setQuizError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -1478,9 +1490,12 @@ function VocabularyBank({ session, childId, backendLive, onSeePlans, displayName
     return ()=>{ cancelled = true; };
   }, [childId, backendLive]);
 
-  function rate(term, gotIt){
+  function rate(term, gotIt){ setWordBox(term, vocabNextBox(vocabBoxOf(boxes, term), gotIt)); }
+
+  // Sets a word straight to a box: "I know this" clears it from the list (box 3), "Bring back" puts it in practice (box 1).
+  function setWordBox(term, box){
     const key = vocabTermKey(term);
-    const entry = { box: vocabNextBox(vocabBoxOf(boxes, term), gotIt), at: Date.now() };
+    const entry = { box, at: Date.now() };
     setBoxes((prev) => {
       const next = { ...prev, [key]: entry };
       if (childId) saveVocabBoxes(childId, next);
@@ -1536,8 +1551,7 @@ function VocabularyBank({ session, childId, backendLive, onSeePlans, displayName
   const list = words || [];
   const total = list.length;
   const known = list.filter((w) => vocabBoxOf(boxes, w.term) === VOCAB_BOXES - 1).length;
-  const shown = list
-    .filter((w) => { const q = query.trim().toLowerCase(); return !q || vocabTermKey(w.term).includes(q) || String(w.definition || "").toLowerCase().includes(q); })
+  const shown = vocabVisible(list, boxes, showKnown, query)
     .slice()
     .sort((a, b) => sort === "az" ? vocabTermKey(a.term).localeCompare(vocabTermKey(b.term)) : sort === "practise" ? vocabBoxOf(boxes, a.term) - vocabBoxOf(boxes, b.term) : 0);
 
@@ -1548,6 +1562,7 @@ function VocabularyBank({ session, childId, backendLive, onSeePlans, displayName
           <div className="min-w-0">
             <h2 className="font-display font-bold text-xl" style={{ color: "var(--ink)" }}>{who} vocabulary bank</h2>
             <p className="text-[13px] mt-0.5" style={{ color: "var(--ink-soft)" }}>Every word from your feedback, in one place. Practise a few each day and they stick.</p>
+            <p className="text-[12px] mt-1" style={{ color: "var(--ink-faint)" }}>The bars on each card show how well you know the word: New, Learning, Nearly there, Know it. Press “I know this” on a word you are comfortable with to clear it from your list. You can bring it back any time.</p>
           </div>
           {total > 0 && view === "words" && (
             <div className="flex flex-wrap gap-2 shrink-0">
@@ -1603,9 +1618,17 @@ function VocabularyBank({ session, childId, backendLive, onSeePlans, displayName
               <option value="practise">Needs practice first</option>
               <option value="az">A to Z</option>
             </select>
+            {known > 0 && (
+              <button type="button" onClick={()=>setShowKnown(v=>!v)} aria-pressed={showKnown} className="focus-ring rounded-full border px-3 py-2 text-sm font-semibold"
+                style={{ borderColor: showKnown ? "var(--good)" : "var(--border)", background: showKnown ? "var(--good-tint)" : "var(--surface)", color: showKnown ? "var(--good)" : "var(--ink-soft)" }}>
+                {showKnown ? "Hide known words" : "Show known words (" + known + ")"}
+              </button>
+            )}
           </div>
           {shown.length === 0 ? (
-            <div className="card p-6 text-sm text-center" style={{ color: "var(--ink-faint)" }}>No words match "{query}".</div>
+            <div className="card p-6 text-sm text-center" style={{ color: "var(--ink-faint)" }}>
+              {query.trim() ? <>No words match "{query}".</> : <>You know every word on your list. Nice work. New words will appear after your next piece, or <button type="button" onClick={()=>setShowKnown(true)} className="focus-ring underline font-semibold" style={{ color: "var(--ink-soft)" }}>show the {known} you know</button>.</>}
+            </div>
           ) : (
             <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-3">
               {shown.map((v) => (
@@ -1619,6 +1642,11 @@ function VocabularyBank({ session, childId, backendLive, onSeePlans, displayName
                   {v.characteristics && <p className="text-[12.5px] leading-snug" style={{ color: "var(--ink-soft)" }}><span className="font-semibold" style={{ color: "var(--ink)" }}>It is: </span>{v.characteristics}</p>}
                   {v.nonExample && <p className="text-[12.5px] leading-snug" style={{ color: "var(--ink-soft)" }}><span className="font-semibold" style={{ color: "var(--bad)" }}>Not: </span>{v.nonExample}</p>}
                   {v.trick && <p className="text-[12.5px] leading-snug" style={{ color: "var(--cyan-ink)" }}><span className="font-semibold">Word trick: </span>{v.trick}</p>}
+                  <div className="mt-1">
+                    {vocabBoxOf(boxes, v.term) === VOCAB_BOXES - 1
+                      ? <button type="button" onClick={()=>setWordBox(v.term, 1)} className="focus-ring text-[12px] font-semibold underline" style={{ color: "var(--ink-soft)" }}>Bring back to practice</button>
+                      : <button type="button" onClick={()=>setWordBox(v.term, VOCAB_BOXES - 1)} className="focus-ring inline-flex items-center gap-1 rounded-full border px-3 py-1 text-[12px] font-semibold" style={{ borderColor: "var(--good)", color: "var(--good)", background: "var(--good-tint)" }}><IconCheck size={12} strokeWidth={2.6} /> I know this</button>}
+                  </div>
                 </div>
               ))}
             </div>
