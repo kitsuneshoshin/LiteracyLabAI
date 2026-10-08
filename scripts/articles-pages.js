@@ -3,7 +3,7 @@
 const { ARTICLES } = require("./articles-content");
 
 const SITE = "https://www.literacylabai.com";
-const LASTMOD = "2026-10-04";
+const LASTMOD = "2026-10-08";
 const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
 const hubUrl = () => `${SITE}/learn/articles/`;

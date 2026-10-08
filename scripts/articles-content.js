@@ -1,4 +1,4 @@
-// Twelve plain-English articles for parents. Rules for everything here (a test enforces the
+// Twenty-one plain-English articles for parents (twelve here, the nine newer ones in articles-more-content.js). Rules for everything here (a test enforces the
 // mechanical ones): no statistics, guarantees, rankings or endorsements; exam details only where
 // they were checked against the exam provider's published material, and each exam article tells
 // the reader to confirm current details with the school or provider; examples are invented by us.
@@ -314,6 +314,7 @@ const ARTICLES = [
 
 // The five exam explainers are written out in full in articles-exam-content.js.
 const { EXAM } = require("./articles-exam-content");
-const ALL = ARTICLES.map((a) => EXAM[a.slug] || a);
+const { MORE } = require("./articles-more-content");
+const ALL = ARTICLES.map((a) => EXAM[a.slug] || a).concat(MORE);
 
 module.exports = { ARTICLES: ALL, LINKS };
