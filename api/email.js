@@ -15,6 +15,7 @@ const { buildAnyEmail, ALL_EMAIL_KEYS, sampleContext } = require("./_lib/emailAn
 //   feedback     POST  save what a customer tells us: the product backlog
 //   rating       POST  a thumbs up/down on a piece of feedback (was api/commit.js)
 //   qa           GET   the weekly marking-quality check (called by Vercel Cron)
+//   ga           GET   Google Analytics numbers for the dashboard (admin or cron secret)
 //   stats        GET   delivery, open and click numbers per email subject (admin or cron secret)
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -115,6 +116,34 @@ async function handleQa(req, res) {
   }
   console.log("qa-run", JSON.stringify({ passed: summary.passed, delivered: summary.delivered, total: summary.total, avgMs: summary.avgMs, saved }));
   return res.status(200).json({ saved, passedFirstTry: summary.passed, delivered: summary.delivered, total: summary.total, passRate: summary.passRate, deliveredRate: summary.deliveredRate, timedOut: summary.timedOut, avgAttempts: summary.avgAttempts, avgMs: summary.avgMs, results: summary.results.map((r) => ({ name: r.name, firstTry: r.firstTry, outcome: r.outcome, attempts: r.attempts, ms: r.ms, issues: r.issues })) });
+}
+
+// ------------------------------------------------------------------ Google Analytics numbers
+// The site's visitors, sessions, sources and pages from Google Analytics, for the owner's dashboard.
+// Closed to everyone but the cron secret or a signed-in admin. Needs GA_SERVICE_ACCOUNT_JSON (a read-only
+// service account's key) and GA_PROPERTY_ID; without them it says how to switch it on.
+async function handleGa(req, res) {
+  if (req.method !== "GET") {
+    res.setHeader("Allow", "GET");
+    return res.status(405).json({ error: "Method not allowed." });
+  }
+  const secret = process.env.CRON_SECRET;
+  const bearer = (req.headers && req.headers.authorization) || "";
+  let allowed = Boolean(secret) && bearer === `Bearer ${secret}`;
+  if (!allowed && bearer.startsWith("Bearer ")) {
+    try {
+      const user = await requireUser(req);
+      const admins = (process.env.ADMIN_EMAILS || "").split(",").map((e) => e.trim().toLowerCase()).filter(Boolean);
+      allowed = admins.includes(String(user.email || "").toLowerCase());
+    } catch (e) { allowed = false; }
+  }
+  if (!allowed) return res.status(401).json({ error: "Unauthorized." });
+  if (!process.env.GA_SERVICE_ACCOUNT_JSON || !process.env.GA_PROPERTY_ID) {
+    return res.status(200).json({ available: false, reason: "Add GA_SERVICE_ACCOUNT_JSON (the read-only service account key) and GA_PROPERTY_ID in Vercel to see Google Analytics numbers here." });
+  }
+  const { fetchSummary } = require("./_lib/gaReport");
+  const summary = await fetchSummary({ rawCreds: process.env.GA_SERVICE_ACCOUNT_JSON, propertyId: process.env.GA_PROPERTY_ID });
+  return res.status(200).json({ available: true, ...summary });
 }
 
 // ------------------------------------------------------------------ open and click numbers
@@ -355,6 +384,7 @@ module.exports = async function handler(req, res) {
     if (action === "cron") return await handleCron(req, res);
     if (action === "qa") return await handleQa(req, res);
     if (action === "stats") return await handleStats(req, res);
+    if (action === "ga") return await handleGa(req, res);
     if (action === "test") return await handleTest(req, res);
     if (action === "unsubscribe") return await handleUnsubscribe(req, res);
     if (action === "feedback") return await handleFeedback(req, res);
