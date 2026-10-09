@@ -91,8 +91,9 @@ h1, h2,
 .font-display.text-lg, .font-display.text-xl, .font-display.text-2xl, .font-display.text-3xl, .font-display.text-4xl{
   font-family: var(--serif-display) !important;
   font-weight: 500 !important;
-  letter-spacing: -0.012em;
+  letter-spacing: 0;
   font-size-adjust: 0.49;
+  line-height: 1.16;
 }
 
 /* Small typewriter labels, used for the "FIG." captions and section labels on the marketing pages. */
@@ -115,8 +116,8 @@ h1, h2,
 
 /* Guide pages: typewriter breadcrumbs, a hairline above each section, flat call-to-action. */
 .crumbs, .crumbs a{ font-family: var(--mono-label); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; }
-.doc h2{ border-top: 1px solid var(--border); padding-top: 20px; margin-top: 40px; font-size: 28px; line-height: 1.15; }
-.doc h1{ font-size: 44px; line-height: 1.08; font-weight: 500; }
+.doc h2{ border-top: 1px solid var(--border); padding-top: 20px; margin-top: 40px; font-size: 28px; line-height: 1.22; }
+.doc h1{ font-size: 44px; line-height: 1.16; font-weight: 500; }
 .cta{ border-radius: 4px; border: 1px solid var(--ink); background: var(--surface-2); }
 .grid a{ border-radius: 4px; }
 .card.ref, .card{ border-radius: 6px; }

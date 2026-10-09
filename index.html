@@ -488,8 +488,8 @@
 /* A friend's link (?ref=CODE) is remembered so it can travel with their sign-up in the app. */
 (function(){ try { var m = /[?&]ref=([A-Za-z0-9]{6,12})(&|$)/.exec(location.search); if (m) localStorage.setItem("ll_ref", m[1].toUpperCase()); } catch (e) {} })();
 </script>
-<link rel="stylesheet" href="/theme.css?v=2">
-<link rel="stylesheet" href="/home.css?v=3">
+<link rel="stylesheet" href="/theme.css?v=3">
+<link rel="stylesheet" href="/home.css?v=4">
 </head>
 <body>
 
@@ -561,16 +561,17 @@
           <button type="button" data-step="3" aria-pressed="false">3 The Grow</button>
         </div>
         <figure class="plate">
-          <svg viewBox="0 0 560 270" role="img" aria-label="An invented sentence from a child, shown step by step with a strength circled and a next step underlined">
-            <line class="rule" x1="10" y1="62" x2="550" y2="62"/><line class="rule" x1="10" y1="114" x2="550" y2="114"/><line class="rule" x1="10" y1="166" x2="550" y2="166"/>
-            <text class="child" x="14" y="54">The old oak creaked in the wind</text>
-            <text class="child" x="14" y="106">and I was scared because it was dark.</text>
-            <text class="child" x="14" y="158">I ran home.</text>
-            <ellipse id="markGlow" class="mark" cx="130" cy="40" rx="124" ry="24" transform="rotate(-1.5 130 40)" hidden/>
-            <path id="markGrow" class="mark mark-dash" d="M14 118 Q 180 128 322 112" hidden/>
-            <text id="noteLabel" class="note-label" x="14" y="204">READ IT</text>
-            <text id="noteL1" class="note" x="14" y="228">Your coach reads it first and asks:</text>
-            <text id="noteL2" class="note" x="14" y="250">what is already working here?</text>
+          <svg viewBox="0 0 560 284" role="img" aria-label="An invented sentence from a child, shown step by step with a strength highlighted and a next step underlined">
+            <line class="rule" x1="10" y1="76" x2="550" y2="76"/><line class="rule" x1="10" y1="130" x2="550" y2="130"/><line class="rule" x1="10" y1="184" x2="550" y2="184"/>
+            <rect id="markGlow" class="mark mark-fill" x="4" y="22" width="300" height="44" rx="22" hidden/>
+            <text class="child" x="16" y="56"><tspan id="phGlow">The old oak creaked</tspan><tspan> in the wind</tspan></text>
+            <text class="child" x="16" y="110"><tspan>and </tspan><tspan id="phGrow">I was scared</tspan><tspan> because it was dark.</tspan></text>
+            <text class="child" x="16" y="164">I ran home.</text>
+            <path id="markGrow" class="mark mark-dash" d="M0 0" hidden/>
+            <rect id="tagBg" class="tag-bg" x="16" y="206" width="90" height="24" rx="12"/>
+            <text id="noteLabel" class="note-label" x="28" y="223">READ IT</text>
+            <text id="noteL1" class="note" x="16" y="252">Your coach reads it first and asks:</text>
+            <text id="noteL2" class="note" x="16" y="274">what is already working here?</text>
           </svg>
         </figure>
         <div class="plate-foot">
@@ -614,7 +615,7 @@
     </div>
 
     <div class="where" id="where">
-      <h3 class="where-title" id="whereTitle" style="font-size:clamp(26px,3.4vw,38px); font-weight:400; margin-bottom:20px;">Choose where your child is learning.</h3>
+      <h3 class="where-title" id="whereTitle" style="font-size:clamp(26px,3.4vw,38px); font-weight:400; line-height:1.2; margin-bottom:20px;">Choose where your child is learning.</h3>
       <div class="where-tabs" role="group" aria-labelledby="whereTitle">
         <button type="button" data-place="au" aria-pressed="true">Australia</button>
         <button type="button" data-place="uk" aria-pressed="false">United Kingdom</button>
@@ -1172,7 +1173,7 @@
       3: ['GROW', 'Show the fear: what did your hands', 'do when it got dark? Try a line.', 'Start again']
     };
     var step = 1;
-    function show(n){
+    var show = function(n){
       step = n;
       var d = NOTES[n];
       lab.textContent = d[0]; l1.textContent = d[1]; l2.textContent = d[2]; next.textContent = d[3];
@@ -1181,6 +1182,25 @@
     }
     tabs.forEach(function(t){ t.addEventListener('click', function(){ show(Number(t.getAttribute('data-step'))); }); });
     next.addEventListener('click', function(){ show(step >= 3 ? 1 : step + 1); });
+    // Draw the marks from the real size of the words, so they always fit the sentence however the font loads.
+    var tagBg = document.getElementById('tagBg');
+    function place(){
+      try {
+        var g = document.getElementById('phGlow').getBBox();
+        glow.setAttribute('x', g.x - 10); glow.setAttribute('y', g.y + 2);
+        glow.setAttribute('width', g.width + 20); glow.setAttribute('height', g.height - 2);
+        glow.setAttribute('rx', (g.height - 2) / 2);
+        var r = document.getElementById('phGrow').getBBox();
+        var y = r.y + r.height + 3, w = r.width / 2;
+        grow.setAttribute('d', 'M' + r.x + ' ' + y + ' q ' + (w / 2) + ' 6 ' + w + ' 0 t ' + w + ' 0');
+        tagBg.setAttribute('width', lab.getBBox().width + 24);
+      } catch (e) { /* a browser without SVG text measuring simply shows no marks */ }
+    }
+    var showOrig = show;
+    show = function(n){ showOrig(n); place(); };
+    place();
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(place);
+    window.addEventListener('resize', place);
     show(1);
   })();
 
