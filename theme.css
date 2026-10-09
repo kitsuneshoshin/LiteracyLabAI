@@ -1,0 +1,122 @@
+/* LiteracyLab AI: the "Notebook" theme, shared by every page.
+   One file sets the palette (warm paper, ink and the brand wine), the type (a classic serif for headings, Lexend for
+   everything you read or tap, kept because it is built for easy reading) and the shape of cards. Each page still
+   defines the variable names it uses; this file loads after them, so one edit here changes the whole site.
+   The logo is untouched: the two-letter tiles and the "LiteracyLab AI" wordmark. */
+
+:root{
+  --bg: #EFEAE2;
+  --bg-elevated: #F6F2EB;
+  --surface: #FBF8F3;
+  --surface-2: #E6DFD3;
+  --border: #CFC6B8;
+  --border-soft: #DDD5C8;
+  --ink: #2E2B28;
+  --ink-soft: #5A544D;
+  --ink-faint: #6F675D;
+  --accent: #7A3B45;
+  --accent-ink: #552830;
+  --accent-tint: #EBDCD8;
+  --cyan: #7A3B45;
+  --cyan-ink: #552830;
+  --cyan-tint: #EBDCD8;
+  --wine: #7A3B45;
+  --wine-ink: #552830;
+  --wine-tint: #EBDCD8;
+  --gold: #8C7040;
+  --gold-ink: #5F4A26;
+  --gold-tint: #E9E0CC;
+  --navy-tint: #E6DFD3;
+  --good: #3F7A52;
+  --good-tint: #E1EAD9;
+  --warn: #A97A2E;
+  --warn-tint: #F1E4C9;
+  --bad: #B14A42;
+  --bad-tint: #F3DFDA;
+  --grid-line: rgba(46,43,40,0.06);
+  --serif-display: "EB Garamond", "Iowan Old Style", Georgia, "Times New Roman", serif;
+  --mono-label: "Courier Prime", "Courier New", Courier, monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg: #211F1C;
+    --bg-elevated: #27241F;
+    --surface: #2A2723;
+    --surface-2: #34302B;
+    --border: #4A453F;
+    --border-soft: #3A3631;
+    --ink: #F3EEE8;
+    --ink-soft: #C9C1B5;
+    --ink-faint: #9A9185;
+    --accent: #C4776E;
+    --accent-ink: #E3A79F;
+    --accent-tint: #3A2528;
+    --cyan: #C4776E;
+    --cyan-ink: #E3A79F;
+    --cyan-tint: #3A2528;
+    --wine: #C4776E;
+    --wine-ink: #E3A79F;
+    --wine-tint: #3A2528;
+    --navy-tint: #34302B;
+    --grid-line: rgba(255,255,255,0.05);
+  }
+}
+:root[data-theme="dark"]{
+  --bg: #211F1C;
+  --bg-elevated: #27241F;
+  --surface: #2A2723;
+  --surface-2: #34302B;
+  --border: #4A453F;
+  --border-soft: #3A3631;
+  --ink: #F3EEE8;
+  --ink-soft: #C9C1B5;
+  --ink-faint: #9A9185;
+  --accent: #C4776E;
+  --accent-ink: #E3A79F;
+  --accent-tint: #3A2528;
+  --cyan: #C4776E;
+  --cyan-ink: #E3A79F;
+  --cyan-tint: #3A2528;
+  --wine: #C4776E;
+  --wine-ink: #E3A79F;
+  --wine-tint: #3A2528;
+  --navy-tint: #34302B;
+  --grid-line: rgba(255,255,255,0.05);
+}
+
+/* Headings: a classic serif, set a little larger because its letters are small for their height. Small interface
+   labels keep Lexend, so tiny text stays easy to read. */
+h1, h2,
+.serif-display,
+.font-display.text-lg, .font-display.text-xl, .font-display.text-2xl, .font-display.text-3xl, .font-display.text-4xl{
+  font-family: var(--serif-display) !important;
+  font-weight: 500 !important;
+  letter-spacing: -0.012em;
+  font-size-adjust: 0.49;
+}
+
+/* Small typewriter labels, used for the "FIG." captions and section labels on the marketing pages. */
+.label-mono{
+  font-family: var(--mono-label);
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-weight: 400;
+}
+
+/* Cards: flat paper with a hairline edge, instead of rounded, floating tiles. */
+.card{
+  border-radius: 10px;
+  box-shadow: none;
+  border: 1px solid var(--border);
+}
+
+::selection{ background: var(--cyan); color: #fff; }
+
+/* Guide pages: typewriter breadcrumbs, a hairline above each section, flat call-to-action. */
+.crumbs, .crumbs a{ font-family: var(--mono-label); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; }
+.doc h2{ border-top: 1px solid var(--border); padding-top: 20px; margin-top: 40px; font-size: 28px; line-height: 1.15; }
+.doc h1{ font-size: 44px; line-height: 1.08; font-weight: 500; }
+.cta{ border-radius: 4px; border: 1px solid var(--ink); background: var(--surface-2); }
+.grid a{ border-radius: 4px; }
+.card.ref, .card{ border-radius: 6px; }

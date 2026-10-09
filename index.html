@@ -133,7 +133,7 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=Lexend:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=Lexend:wght@400;500;600;700;800;900&family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
 
 <style>
   :root{
@@ -488,6 +488,8 @@
 /* A friend's link (?ref=CODE) is remembered so it can travel with their sign-up in the app. */
 (function(){ try { var m = /[?&]ref=([A-Za-z0-9]{6,12})(&|$)/.exec(location.search); if (m) localStorage.setItem("ll_ref", m[1].toUpperCase()); } catch (e) {} })();
 </script>
+<link rel="stylesheet" href="/theme.css?v=2">
+<link rel="stylesheet" href="/home.css?v=3">
 </head>
 <body>
 
@@ -533,34 +535,62 @@
 <main>
 <section class="hero">
   <div class="wrap hero-inner">
-    <span class="eyebrow">A literacy coach, not a chatbot · Ages 5–18</span>
-    <h1>Feedback your child's <em>own teacher</em> would recognise.</h1>
-    <p class="hero-sub">LiteracyLab AI reads what your child writes — or checks what they understood — maps it against their real school curriculum, and turns it into feedback they'll actually want to act on — explained through the things they already love.</p>
-    <div class="hero-ctas">
-      <a class="btn btn-primary btn-lg" href="app.html">Start free — 3 submissions a month</a>
-      <a class="btn btn-ghost btn-lg" href="#how">See how it works</a>
-    </div>
-    <div class="hero-meta">No credit card required · Free plan, no time limit</div>
+    <div class="hero-grid">
+      <div class="hero-copy">
+        <span class="eyebrow">A literacy coach, not a chatbot · Ages 5–18</span>
+        <h1 id="heroTitle" data-parent="Feedback your child's <em>own teacher</em> would recognise." data-learner="Write something. See what is <em>already good</em> in it.">Feedback your child's <em>own teacher</em> would recognise.</h1>
+        <p class="hero-sub" id="heroSub" data-parent="LiteracyLab AI reads what your child writes — or checks what they understood — maps it against their real school curriculum, and turns it into feedback they'll actually want to act on — explained through the things they already love." data-learner="Pick a prompt, write a few sentences, and your coach shows what works and the one thing to try next. Then you collect the new words.">LiteracyLab AI reads what your child writes — or checks what they understood — maps it against their real school curriculum, and turns it into feedback they'll actually want to act on — explained through the things they already love.</p>
 
-    <div class="preview-shell">
-      <div class="preview-chrome"><span></span><span></span><span></span></div>
-      <div class="preview-body">
-        <div style="display:flex; flex-direction:column; gap:14px;">
-          <div class="pv-card pv-praise">
-            <div class="pv-label">Glow — what you did well</div>
-            <div class="pv-text">"Your thesis directly answers the question — exactly what examiners look for at Year 11 level."</div>
-          </div>
-          <div class="pv-card pv-tip">
-            <span class="pv-tag">explained through Space</span>
-            <div class="pv-text">"Close this paragraph with a synthesis sentence — like a spacecraft's trajectory, where every stage quietly corrects course toward one destination."</div>
-          </div>
+        <div class="aud-label" id="audLabel">Who is this for?</div>
+        <div class="aud" role="group" aria-labelledby="audLabel">
+          <button type="button" data-aud="parent" aria-pressed="true">I'm a parent</button>
+          <button type="button" data-aud="learner" aria-pressed="false">I'm a learner</button>
         </div>
-        <div class="pv-card" style="display:flex; flex-direction:column; justify-content:center;">
-          <div class="pv-label">Vocabulary upgrades — Space edition</div>
-          <div class="pv-vocab">
-            <div><b>celestial</b><span>relating to the sky or outer space</span></div>
-            <div><b>propulsion</b><span>the force that pushes something forward</span></div>
-          </div>
+
+        <div class="hero-ctas">
+          <a class="btn btn-primary btn-lg" href="app.html">Start free — 3 submissions a month</a>
+          <a class="btn btn-ghost btn-lg" href="#how">See how it works</a>
+        </div>
+        <div class="hero-meta">No credit card required · Free plan, no time limit</div>
+      </div>
+
+      <div class="hero-plate">
+        <div class="plate-tabs" role="group" aria-label="See how a piece of feedback is built">
+          <button type="button" data-step="1" aria-pressed="true">1 Read it</button>
+          <button type="button" data-step="2" aria-pressed="false">2 The Glow</button>
+          <button type="button" data-step="3" aria-pressed="false">3 The Grow</button>
+        </div>
+        <figure class="plate">
+          <svg viewBox="0 0 560 270" role="img" aria-label="An invented sentence from a child, shown step by step with a strength circled and a next step underlined">
+            <line class="rule" x1="10" y1="62" x2="550" y2="62"/><line class="rule" x1="10" y1="114" x2="550" y2="114"/><line class="rule" x1="10" y1="166" x2="550" y2="166"/>
+            <text class="child" x="14" y="54">The old oak creaked in the wind</text>
+            <text class="child" x="14" y="106">and I was scared because it was dark.</text>
+            <text class="child" x="14" y="158">I ran home.</text>
+            <ellipse id="markGlow" class="mark" cx="130" cy="40" rx="124" ry="24" transform="rotate(-1.5 130 40)" hidden/>
+            <path id="markGrow" class="mark mark-dash" d="M14 118 Q 180 128 322 112" hidden/>
+            <text id="noteLabel" class="note-label" x="14" y="204">READ IT</text>
+            <text id="noteL1" class="note" x="14" y="228">Your coach reads it first and asks:</text>
+            <text id="noteL2" class="note" x="14" y="250">what is already working here?</text>
+          </svg>
+        </figure>
+        <div class="plate-foot">
+          <span class="plate-cap">FIG.1 &nbsp;A sentence, step by step</span>
+          <button type="button" class="plate-next" id="plateNext">Show the Glow</button>
+        </div>
+
+        <div class="aud-card" id="cardParent">
+          <span class="k">What you see on Monday</span>
+          <p class="row"><strong>Days practised</strong> <span>4 of 7</span></p>
+          <div class="meter"><i style="width:57%"></i></div>
+          <p class="row"><strong>Reading average</strong> <span>75%</span></p>
+          <div class="meter"><i style="width:75%"></i></div>
+          <p class="small">Next skill to work on: using a comma after an opening phrase.</p>
+        </div>
+        <div class="aud-card" id="cardLearner" hidden>
+          <span class="k">Word of the day</span>
+          <p class="word">ominous</p>
+          <p class="small">Suggesting that something bad may happen.</p>
+          <p class="ex">An ominous silence filled the hall.</p>
         </div>
       </div>
     </div>
@@ -581,6 +611,24 @@
       <div class="trust-item"><img src="https://flagcdn.com/20x15/ae.png" srcset="https://flagcdn.com/40x30/ae.png 2x" width="20" height="15" alt="" loading="lazy"> UAE &amp; Gulf: Cambridge / IGCSE</div>
       <div class="trust-item"><img src="https://flagcdn.com/20x15/sg.png" srcset="https://flagcdn.com/40x30/sg.png 2x" width="20" height="15" alt="" loading="lazy"> Singapore: Cambridge &amp; IB</div>
       <div class="trust-item">🌐 English language learners (CEFR levels)</div>
+    </div>
+
+    <div class="where" id="where">
+      <h3 class="where-title" id="whereTitle" style="font-size:clamp(26px,3.4vw,38px); font-weight:400; margin-bottom:20px;">Choose where your child is learning.</h3>
+      <div class="where-tabs" role="group" aria-labelledby="whereTitle">
+        <button type="button" data-place="au" aria-pressed="true">Australia</button>
+        <button type="button" data-place="uk" aria-pressed="false">United Kingdom</button>
+        <button type="button" data-place="us" aria-pressed="false">United States</button>
+        <button type="button" data-place="ca" aria-pressed="false">Canada</button>
+        <button type="button" data-place="sg" aria-pressed="false">Singapore</button>
+        <button type="button" data-place="ae" aria-pressed="false">UAE and the Gulf</button>
+        <button type="button" data-place="esl" aria-pressed="false">English learners</button>
+      </div>
+      <dl class="where-facts" aria-live="polite">
+        <div><dt>Curriculum</dt><dd id="whereCurr"></dd></div>
+        <div><dt>Exam-style prompts (Premium)</dt><dd id="whereExam"></dd></div>
+        <div><dt>Spelling checked as</dt><dd id="whereSpell"></dd></div>
+      </dl>
     </div>
   </div>
 </section>
@@ -1099,6 +1147,62 @@
       toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
     });
     links.querySelectorAll('a').forEach(function(a){ a.addEventListener('click', close); });
+  })();
+
+  // Hero: who it is for, and the sentence shown step by step
+  (function(){
+    var title = document.getElementById('heroTitle'), sub = document.getElementById('heroSub');
+    var audBtns = document.querySelectorAll('.aud button');
+    var cardP = document.getElementById('cardParent'), cardL = document.getElementById('cardLearner');
+    function aud(which){
+      title.innerHTML = title.getAttribute('data-' + which);
+      sub.innerHTML = sub.getAttribute('data-' + which);
+      audBtns.forEach(function(b){ b.setAttribute('aria-pressed', b.getAttribute('data-aud') === which ? 'true' : 'false'); });
+      cardP.hidden = which !== 'parent'; cardL.hidden = which !== 'learner';
+    }
+    audBtns.forEach(function(b){ b.addEventListener('click', function(){ aud(b.getAttribute('data-aud')); }); });
+
+    var tabs = document.querySelectorAll('.plate-tabs button');
+    var next = document.getElementById('plateNext');
+    var glow = document.getElementById('markGlow'), grow = document.getElementById('markGrow');
+    var lab = document.getElementById('noteLabel'), l1 = document.getElementById('noteL1'), l2 = document.getElementById('noteL2');
+    var NOTES = {
+      1: ['READ IT', 'Your coach reads it first and asks:', 'what is already working here?', 'Show the Glow'],
+      2: ['GLOW', 'You gave the sound of the tree,', 'and I could hear it.', 'Show the Grow'],
+      3: ['GROW', 'Show the fear: what did your hands', 'do when it got dark? Try a line.', 'Start again']
+    };
+    var step = 1;
+    function show(n){
+      step = n;
+      var d = NOTES[n];
+      lab.textContent = d[0]; l1.textContent = d[1]; l2.textContent = d[2]; next.textContent = d[3];
+      glow.toggleAttribute('hidden', n < 2); grow.toggleAttribute('hidden', n < 3); // SVG shapes have no .hidden property, so the attribute is toggled
+      tabs.forEach(function(t){ t.setAttribute('aria-pressed', Number(t.getAttribute('data-step')) === n ? 'true' : 'false'); });
+    }
+    tabs.forEach(function(t){ t.addEventListener('click', function(){ show(Number(t.getAttribute('data-step'))); }); });
+    next.addEventListener('click', function(){ show(step >= 3 ? 1 : step + 1); });
+    show(1);
+  })();
+
+  // Where it applies
+  (function(){
+    var D = {
+      au:  ['Australian Curriculum', 'NAPLAN, Years 3 to 9', 'British-style (Australian)'],
+      uk:  ['UK National Curriculum', 'KS2 SATs, KS3 and GCSE English', 'British'],
+      us:  ['US Common Core and AP', 'State tests (Common Core), Grades 3 to 12', 'American'],
+      ca:  ['Ontario Curriculum', 'Not yet available', 'Canadian: either -ize or -ise accepted'],
+      sg:  ['Cambridge and IB', 'Not yet available', 'British'],
+      ae:  ['Cambridge and IGCSE', 'Not yet available', 'British'],
+      esl: ['English language learners (CEFR levels)', 'Not yet available', 'Either British or American']
+    };
+    var btns = document.querySelectorAll('.where-tabs button');
+    var c = document.getElementById('whereCurr'), e = document.getElementById('whereExam'), p = document.getElementById('whereSpell');
+    function pick(k){
+      c.textContent = D[k][0]; e.textContent = D[k][1]; p.textContent = D[k][2];
+      btns.forEach(function(b){ b.setAttribute('aria-pressed', b.getAttribute('data-place') === k ? 'true' : 'false'); });
+    }
+    btns.forEach(function(b){ b.addEventListener('click', function(){ pick(b.getAttribute('data-place')); }); });
+    pick('au');
   })();
 
   // Age-tier preview switcher

@@ -238,10 +238,11 @@ function layout({ title, description, canonical, jsonld, body, script, css }) {
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700;800&amp;family=Source+Serif+4:ital,wght@0,400;0,600;1,400&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700;800&amp;family=Source+Serif+4:ital,wght@0,400;0,600;1,400&amp;family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&amp;family=Courier+Prime:wght@400;700&amp;display=swap" rel="stylesheet">
 <style>${CSS}${css || ""}</style>
 <script type="application/ld+json">${JSON.stringify(jsonld)}</script>
 <script src="/analytics.js"></script>
+<link rel="stylesheet" href="/theme.css?v=2">
 </head>
 <body>
 <div class="nav"><div class="nav-inner">

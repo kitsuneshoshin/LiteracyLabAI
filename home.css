@@ -1,0 +1,108 @@
+/* LiteracyLab AI: the Notebook look for the home page. Loads after theme.css and the page's own styles, so it only
+   restyles; the markup, links and scripts of the page do the work. The logo lockup is not touched. */
+
+/* ---------- type ---------- */
+h3, h4, .price-amount, .tier-panel .t-title, .step h4{ font-family: var(--serif-display); font-weight: 500; letter-spacing: -0.012em; font-size-adjust: 0.49; }
+.eyebrow{ font-family: var(--mono-label); font-size: 12px; font-weight: 400; letter-spacing: 0.1em; color: var(--ink); }
+.eyebrow::before{ display: none; }
+
+/* ---------- buttons: round pills ---------- */
+.btn{ border-radius: 999px; }
+.btn-ghost{ border-color: var(--ink); }
+.btn-ghost:hover{ background: var(--ink); color: var(--bg); border-color: var(--ink); }
+
+/* ---------- nav ---------- */
+.nav{ border-bottom-color: var(--border); }
+.nav-links{ font-family: var(--mono-label); font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 400; color: var(--ink); }
+
+/* ---------- hero ---------- */
+.hero{ padding-top: 56px; padding-bottom: 56px; }
+.hero-inner{ text-align: left; }
+.hero-grid{ display: grid; grid-template-columns: minmax(0, 1.02fr) minmax(0, 1fr); gap: 56px; align-items: start; }
+@media (max-width: 920px){ .hero-grid{ grid-template-columns: minmax(0, 1fr); gap: 40px; } }
+.hero h1{ font-size: clamp(38px, 5.4vw, 70px); line-height: 1.03; font-weight: 400 !important; margin-top: 20px; }
+.hero-sub{ margin: 22px 0 0; max-width: 560px; font-family: "Lexend", sans-serif; font-size: 17px; line-height: 1.6; color: var(--ink-soft); }
+.hero-ctas{ justify-content: flex-start; }
+.hero-meta{ margin-top: 14px; }
+
+.aud-label{ margin: 30px 0 10px; font-family: var(--mono-label); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; }
+.aud{ display: flex; gap: 10px; flex-wrap: wrap; }
+.aud button, .plate-tabs button{
+  font-family: "Lexend", sans-serif; font-size: 15px; font-weight: 500; min-height: 46px; padding: 0 22px; border-radius: 999px;
+  border: 1.5px solid var(--ink); background: transparent; color: var(--ink); cursor: pointer;
+}
+.aud button[aria-pressed="true"], .plate-tabs button[aria-pressed="true"]{ background: var(--ink); color: var(--bg); }
+.aud button:focus-visible, .plate-tabs button:focus-visible, .where-tabs button:focus-visible, .plate-next:focus-visible{ outline: 2px solid var(--accent); outline-offset: 2px; }
+.hero-ctas{ margin-top: 26px; }
+
+/* the teaching plate */
+.plate-tabs{ display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+.plate-tabs button{ font-family: var(--mono-label); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; padding: 0 16px; min-height: 44px; }
+.plate{ margin: 0; background: var(--surface-2); padding: 22px; border-radius: 2px; }
+.plate svg{ display: block; width: 100%; height: auto; }
+.plate svg [hidden]{ display: none; }
+.plate .rule{ stroke: var(--border); stroke-width: 1; }
+.plate .child{ font-family: var(--serif-display); font-style: italic; font-size: 31px; fill: var(--ink); }
+.plate .mark{ fill: none; stroke: var(--accent); stroke-width: 2.4; }
+.plate .mark-dash{ stroke-dasharray: 7 5; }
+.plate .note{ font-family: var(--mono-label); font-size: 16px; fill: var(--ink); }
+.plate .note-label{ font-family: var(--mono-label); font-size: 13px; letter-spacing: 1.4px; font-weight: 700; fill: var(--accent); }
+.plate-foot{ display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 10px; }
+.plate-cap{ font-family: var(--mono-label); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink); }
+.plate-next{ background: none; border: 0; padding: 10px 0; min-height: 44px; font-family: "Lexend", sans-serif; font-size: 15px; font-weight: 500; color: var(--accent); cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+.aud-card{ margin-top: 22px; border: 1px solid var(--border); background: var(--surface); padding: 20px 22px; }
+.aud-card[hidden]{ display: none; }
+.aud-card .k{ font-family: var(--mono-label); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 12px; display: block; }
+.aud-card .row{ font-family: "Lexend", sans-serif; font-size: 14.5px; margin: 0 0 4px; }
+.aud-card .row span{ color: var(--ink-soft); }
+.aud-card .meter{ height: 10px; border-radius: 6px; background: var(--surface-2); margin-bottom: 14px; overflow: hidden; }
+.aud-card .meter i{ display: block; height: 100%; background: var(--accent); border-radius: 6px; }
+.aud-card .small{ font-family: "Lexend", sans-serif; font-size: 14.5px; color: var(--ink-soft); margin: 0; line-height: 1.5; }
+.aud-card .word{ font-family: var(--serif-display); font-size: 34px; line-height: 1.1; margin: 0 0 6px; font-weight: 500; }
+.aud-card .ex{ font-family: var(--serif-display); font-size: 19px; font-style: italic; color: var(--ink-soft); margin: 4px 0 0; }
+
+/* ---------- sections ---------- */
+section{ padding-block: 88px; }
+@media (max-width: 640px){ section{ padding-block: 56px; } }
+.section-head{ max-width: 760px; }
+.section-head h2{ font-size: clamp(32px, 4.4vw, 52px); line-height: 1.08; font-weight: 400 !important; margin-top: 14px; }
+.section-head p{ font-family: "Lexend", sans-serif; font-size: 16.5px; }
+.section-alt{ background: var(--surface-2); border-color: var(--border); }
+.final-cta{ background: var(--ink); color: var(--bg); border-top: 0; }
+.final-cta h2{ font-weight: 400 !important; font-size: clamp(34px, 5vw, 60px); }
+.final-cta p{ color: color-mix(in srgb, var(--bg) 80%, transparent); font-family: "Lexend", sans-serif; }
+.final-cta .btn-primary{ background: var(--bg); color: var(--ink); }
+.final-cta .btn-primary:hover{ background: var(--surface); }
+
+/* where it applies */
+.where{ margin-top: 40px; }
+.where-tabs{ display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 26px; }
+.where-tabs button{
+  font-family: "Lexend", sans-serif; font-size: 15px; font-weight: 500; min-height: 46px; padding: 0 20px; border-radius: 999px;
+  border: 1.5px solid var(--ink); background: transparent; color: var(--ink); cursor: pointer;
+}
+.where-tabs button[aria-pressed="true"]{ background: var(--ink); color: var(--bg); }
+.where-facts{ margin: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid var(--ink); border-bottom: 1px solid var(--border); }
+@media (max-width: 780px){ .where-facts{ grid-template-columns: minmax(0, 1fr); } }
+.where-facts > div{ padding: 26px 28px 26px 0; }
+.where-facts > div + div{ padding-left: 28px; border-left: 1px solid var(--border); }
+@media (max-width: 780px){ .where-facts > div + div{ padding-left: 0; border-left: 0; border-top: 1px solid var(--border); } }
+.where-facts dt{ font-family: var(--mono-label); font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 10px; }
+.where-facts dd{ margin: 0; font-family: var(--serif-display); font-size: clamp(24px, 2.6vw, 32px); line-height: 1.15; font-weight: 500; }
+
+/* ---------- how it works: ruled columns, not boxes ---------- */
+.steps{ gap: 0; border-top: 1px solid var(--ink); }
+.step{ border: 0; border-radius: 0; background: transparent; padding: 26px 28px 8px 0; }
+.step + .step{ padding-left: 28px; border-left: 1px solid var(--border); }
+@media (max-width: 760px){ .step + .step{ padding-left: 0; border-left: 0; border-top: 1px solid var(--border); } }
+.step-num{ font-family: var(--mono-label); font-weight: 400; color: var(--ink); letter-spacing: 0.1em; }
+.step h4{ font-size: 30px; line-height: 1.1; margin-top: 14px; }
+.step p{ font-size: 15px; }
+
+/* ---------- flatter panels ---------- */
+.compare, .faq-item, .tier-panel, .price-card, .plan-table-scroll, .pv-card{ border-radius: 4px; }
+.price-amount{ font-weight: 500; }
+.trust-item{ border-color: var(--border); }
+.tier-tabs{ border-color: var(--ink); background: transparent; }
+
+.final-cta .hero-ctas{ justify-content: center; }
