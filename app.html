@@ -1286,18 +1286,18 @@ function Header({ view, setView, used, total, plan, theme, setTheme, backendLive
           </div>
           <div className="leading-tight">
             <div className="font-display font-bold text-[17px]" style={{ color: "var(--ink)" }}>LiteracyLab <span style={{ color: "var(--cyan-ink)" }}>AI</span></div>
-            <div className="text-[11px] font-medium" style={{ color: "var(--ink-faint)" }}>Adaptive reading &amp; writing coach</div>
+            <div className="label-mono" style={{ fontSize: 10, color: "var(--ink-faint)" }}>Adaptive reading &amp; writing coach</div>
           </div>
         </a>
 
         <div className="flex items-center gap-2 order-3 sm:order-2 w-full sm:w-auto justify-center">
-          <div className="inline-flex p-1 rounded-full border" style={{ borderColor: "var(--border)", background: "var(--surface-2)" }}>
+          <div className="inline-flex gap-1">
             {[["workspace","Student Workspace",IconPen],["dashboard","Parent & Student Dashboard",IconGrid]].map(([key,label,IconEl])=>{
               const disabled = needsOnboarding && key === "workspace";
               return (
                 <button key={key} onClick={()=>setView(key)} disabled={disabled} title={disabled ? "Finish learner setup first" : undefined}
-                  className="focus-ring inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[13px] font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-                  style={ view===key ? { background: "var(--ink)", color: "white" } : { color: "var(--ink-soft)" } }
+                  className="focus-ring label-mono inline-flex items-center gap-1.5 px-3 py-2.5 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                  style={{ fontSize: 12, color: view===key ? "var(--ink)" : "var(--ink-soft)", borderBottom: "2px solid " + (view===key ? "var(--cyan)" : "transparent") }}
                 >
                   <IconEl size={14} strokeWidth={2.2} />
                   {label}
@@ -1313,13 +1313,13 @@ function Header({ view, setView, used, total, plan, theme, setTheme, backendLive
             style={{ borderColor: "var(--border)", color: "var(--ink-soft)" }} aria-label="Toggle theme">
             {theme === "dark" ? <IconSun size={15} /> : <IconMoon size={15} />}
           </button>
-          <div className="hidden md:flex items-center gap-2 rounded-full border pl-3 pr-1 py-1" style={{ borderColor: "var(--border)", background: "var(--surface-2)" }}>
+          <div className="hidden md:flex items-center gap-2">
             <span className="text-xs font-medium" style={{ color: "var(--ink-soft)" }}>
               {paid ? `${meta.label}: unlimited submissions` : (
                 <>Free Plan: <span className="font-bold tabular" style={{ color: remaining <= 1 ? "var(--bad)" : "var(--ink)" }}>{remaining}</span> of {total} monthly submissions remaining</>
               )}
             </span>
-            <span className="rounded-full px-2 py-1 text-[11px] font-bold" style={{ background: paid ? "var(--gold-tint)" : "var(--navy-tint)", color: paid ? "var(--gold-ink)" : "var(--ink)" }}>{meta.badge}</span>
+            <span className="label-mono rounded-full px-2.5 py-1" style={{ fontSize: 10.5, fontWeight: 700, border: "1px solid " + (paid ? "var(--gold)" : "var(--ink)"), color: paid ? "var(--gold-ink)" : "var(--ink)" }}>{meta.badge}</span>
           </div>
           <AccountMenu className="hidden md:block" plan={plan} backendLive={backendLive}
             onGoToProfile={onGoToProfile} onGoToPlan={onGoToPlan} onManagePayment={onManagePayment}
@@ -4329,18 +4329,18 @@ function Workspace({ plan, country, gradeIdx, setGradeIdx, tier, setTierOverride
         <PausedLearnerNotice child={children_.find(c => c.id === childId)} children_={children_}
           activeChangeAvailableAt={activeChangeAvailableAt} onMakeUsable={onMakeUsable} onSeePlans={onSeePlans} />
       )}
-      <div className="flex items-center justify-between flex-wrap gap-3 mb-4">
+      <div className="flex items-end justify-between flex-wrap gap-4 mb-5 pb-5" style={{ borderBottom: "1px solid var(--border)" }}>
         <div>
-          <h2 className="font-display font-bold text-2xl" style={{ color: "var(--ink)" }}>{displayName ? `${displayName}'s Workspace` : "Student Workspace"}</h2>
-          <p className="text-sm mt-0.5" style={{ color: "var(--ink-soft)" }}><CountryLabel country={country} /> · {gradeLabel}</p>
+          <p className="label-mono mb-1.5" style={{ color: "var(--ink-soft)" }}><CountryLabel country={country} /> · {gradeLabel}</p>
+          <h2 className="font-display text-4xl" style={{ color: "var(--ink)" }}>{displayName ? `${displayName}'s workspace` : "Student workspace"}</h2>
         </div>
-        <div className="flex items-center gap-1.5 rounded-full border p-1 flex-wrap" style={{ borderColor: "var(--border)", background: "var(--surface-2)" }}>
+        <div className="flex items-center gap-2 flex-wrap">
           {TIER_KEYS.map(k=>{
             const TIcon = TIER_META[k].icon;
             return (
               <button key={k} onClick={()=>{ setTierOverride(k); }}
-                className="focus-ring flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition-colors"
-                style={ tier===k ? { background: "var(--ink)", color: "white" } : { color: "var(--ink-soft)" } }
+                className="focus-ring flex items-center gap-1.5 rounded-full px-3.5 py-2 text-xs font-semibold transition-colors"
+                style={{ border: "1px solid " + (tier===k ? "var(--ink)" : "var(--border)"), ...(tier===k ? { background: "var(--ink)", color: "var(--bg)" } : { color: "var(--ink-soft)" }) }}
                 title={TIER_META[k].ageRange}>
                 <TIcon size={13} strokeWidth={2.2} />{TIER_META[k].label}
               </button>
@@ -4349,11 +4349,11 @@ function Workspace({ plan, country, gradeIdx, setGradeIdx, tier, setTierOverride
         </div>
       </div>
 
-      <div className="flex items-center gap-1 sm:gap-1.5 rounded-full border p-1 w-fit max-w-full overflow-x-auto mb-6" style={{ borderColor: "var(--border)", background: "var(--surface-2)" }}>
+      <div className="flex items-center gap-5 sm:gap-8 w-full max-w-full overflow-x-auto mb-6" style={{ borderBottom: "1px solid var(--border)" }}>
         {[["writing","Writing",IconPen],["reading","Reading Comprehension",IconBookOpenCheck],["vocab","Vocabulary",IconBook]].map(([key,label,IconEl])=>(
           <button key={key} onClick={()=>setExerciseType(key)}
-            className="focus-ring flex items-center gap-1.5 rounded-full px-2.5 sm:px-3.5 py-1.5 text-xs font-semibold transition-colors whitespace-nowrap"
-            style={ exerciseType===key ? { background: "var(--cyan)", color: "#fff" } : { color: "var(--ink-soft)" } }>
+            className="focus-ring label-mono flex items-center gap-1.5 py-3 transition-colors whitespace-nowrap"
+            style={{ fontSize: 12, color: exerciseType===key ? "var(--ink)" : "var(--ink-soft)", borderBottom: "2px solid " + (exerciseType===key ? "var(--cyan)" : "transparent"), marginBottom: -1 }}>
             <IconEl size={13} strokeWidth={2.2} />{label}
           </button>
         ))}
@@ -4411,12 +4411,12 @@ function Workspace({ plan, country, gradeIdx, setGradeIdx, tier, setTierOverride
                   </>
                 ) : (
                   <>
-                    <IconSparkle size={22} style={{ color: "var(--cyan-ink)" }} />
-                    <div className="font-display font-semibold text-sm" style={{ color: "var(--ink)" }}>Ready for a {TIER_META[tier].label.toLowerCase()} prompt?</div>
+                    <span className="label-mono" style={{ color: "var(--ink-soft)" }}>A prompt, made for you</span>
+                    <div className="font-display text-3xl" style={{ color: "var(--ink)" }}>Ready for a {TIER_META[tier].label.toLowerCase()} prompt?</div>
                     <p className="text-[13px] max-w-[30ch]" style={{ color: "var(--ink-faint)" }}>This uses 1 of your {total === 999 ? "" : `${total - used} remaining `}submissions.</p>
                     <FocusPicker kind="writing" tier={tier} country={country} gradeLabel={gradeLabel} premium={premium} value={writingFocus} onChange={changeWritingFocus} onSeePlans={onSeePlans} />
                     <button onClick={()=>requestNewWritingPrompt()}
-                      className="focus-ring inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-bold mt-1"
+                      className="focus-ring inline-flex items-center gap-1.5 rounded-full px-7 py-3 text-[15px] font-bold mt-2"
                       style={{ background: "var(--cyan)", color: "#fff" }}>
                       Get my prompt
                     </button>
@@ -4445,12 +4445,12 @@ function Workspace({ plan, country, gradeIdx, setGradeIdx, tier, setTierOverride
                   </>
                 ) : (
                   <>
-                    <IconSparkle size={22} style={{ color: "var(--cyan-ink)" }} />
-                    <div className="font-display font-semibold text-sm" style={{ color: "var(--ink)" }}>Ready for a {TIER_META[tier].label.toLowerCase()} passage?</div>
+                    <span className="label-mono" style={{ color: "var(--ink-soft)" }}>A passage, made for you</span>
+                    <div className="font-display text-3xl" style={{ color: "var(--ink)" }}>Ready for a {TIER_META[tier].label.toLowerCase()} passage?</div>
                     <p className="text-[13px] max-w-[30ch]" style={{ color: "var(--ink-faint)" }}>This uses 1 of your {total === 999 ? "" : `${total - used} remaining `}submissions.</p>
                     <FocusPicker kind="reading" tier={tier} country={country} gradeLabel={gradeLabel} premium={premium} value={readingFocus} onChange={changeReadingFocus} onSeePlans={onSeePlans} />
                     <button onClick={()=>requestNewPassage()}
-                      className="focus-ring inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-bold mt-1"
+                      className="focus-ring inline-flex items-center gap-1.5 rounded-full px-7 py-3 text-[15px] font-bold mt-2"
                       style={{ background: "var(--cyan)", color: "#fff" }}>
                       Get my passage
                     </button>
@@ -4473,10 +4473,14 @@ function Workspace({ plan, country, gradeIdx, setGradeIdx, tier, setTierOverride
                 once a reading passage + 5 questions makes the left column
                 much taller. */}
             <div className="card p-6 flex flex-col items-center justify-center text-center gap-3 min-h-[220px]" style={{ borderStyle: submitError ? "solid" : "dashed", borderColor: submitError ? "var(--bad)" : undefined }}>
-              <div className="w-11 h-11 rounded-full grid place-items-center" style={{ background: submitError ? "var(--bad-tint)" : "var(--cyan-tint)", color: submitError ? "var(--bad)" : "var(--cyan-ink)" }}>
-                {submitError ? <IconAlert size={20} strokeWidth={2} /> : <IconSparkle size={20} strokeWidth={2} />}
-              </div>
-              <div className="font-display font-semibold text-sm" style={{ color: "var(--ink)" }}>{submitError ? "Couldn't generate feedback" : "Key Takeaways will appear here"}</div>
+              {submitError ? (
+                <div className="w-11 h-11 rounded-full grid place-items-center" style={{ background: "var(--bad-tint)", color: "var(--bad)" }}>
+                  <IconAlert size={20} strokeWidth={2} />
+                </div>
+              ) : (
+                <span className="label-mono" style={{ color: "var(--ink-soft)" }}>FIG.2 &nbsp; Your feedback</span>
+              )}
+              <div className="font-display text-2xl" style={{ color: "var(--ink)" }}>{submitError ? "Couldn't generate feedback" : "Key Takeaways will appear here"}</div>
               <p className="text-[13px] max-w-[28ch]" style={{ color: "var(--ink-faint)" }}>
                 {submitError || `${exerciseType === "writing" ? `Submit your ${tier === "high" ? "essay" : "story"}` : "Check your understanding"} to see personalised feedback from LiteracyLab AI.`}
               </p>
