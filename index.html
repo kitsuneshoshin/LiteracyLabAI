@@ -500,7 +500,7 @@
 (function(){ try { var m = /[?&]ref=([A-Za-z0-9]{6,12})(&|$)/.exec(location.search); if (m) localStorage.setItem("ll_ref", m[1].toUpperCase()); } catch (e) {} })();
 </script>
 <link rel="stylesheet" href="/theme.css?v=6">
-<link rel="stylesheet" href="/home.css?v=9">
+<link rel="stylesheet" href="/home.css?v=10">
 </head>
 <body>
 
@@ -866,7 +866,7 @@
     </div>
 
     <div class="plan-compare" id="planCompare">
-    <p class="plan-note" id="planNote">Showing what changes between plans</p>
+    <p class="plan-note" id="planNote">Tap a section to open it</p>
     <div class="plan-table-scroll">
       <table class="plan-table" role="table" aria-label="Free, Core and Premium compared">
         <thead role="rowgroup">
@@ -1041,7 +1041,7 @@
       </table>
     </div>
     </div>
-    <div class="plan-toggle-wrap"><button type="button" class="plan-toggle" id="planToggle" aria-expanded="false" aria-controls="planCompare">Show what every plan includes</button></div>
+    <div class="plan-toggle-wrap"><button type="button" class="plan-toggle" id="planToggle" aria-expanded="false" aria-controls="planCompare">Open all sections</button></div>
   </div>
 </section>
 
@@ -1220,39 +1220,49 @@
     show(1);
   })();
 
-  // The plan comparison shows only what differs between plans. Rows that are the same in every plan are tucked away
-  // behind one button; ticks replace the word "Yes". Without scripts the whole table simply stays as written.
+  // The plan comparison is a set of sections (Practice, Feedback, Progress...) that open and close from their headings.
+  // Every row stays in the page's HTML, so search engines and AI tools read all of it; this only changes what is shown.
+  // Ticks replace the word "Yes". Without scripts the whole table simply stays open as written.
   (function(){
     var box = document.getElementById('planCompare'), btn = document.getElementById('planToggle'), note = document.getElementById('planNote');
     var table = box && box.querySelector('.plan-table');
     if (!box || !btn || !table) return;
     var TICK = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 12.5l5 5 10-11"/></svg><span class="sr">Yes</span>';
-    var rows = table.querySelectorAll('tbody tr'), groupHead = null, groupRows = [], common = 0;
-    function closeGroup(){
-      if (groupHead && groupRows.length && groupRows.every(function(r){ return r.classList.contains('is-common'); })) groupHead.classList.add('is-empty');
-    }
-    rows.forEach(function(tr){
-      if (tr.classList.contains('group-head')) { closeGroup(); groupHead = tr; groupRows = []; return; }
-      var cells = tr.querySelectorAll('td'), texts = [];
-      cells.forEach(function(td){ texts.push(td.textContent.trim()); });
-      if (texts.length > 1 && texts.every(function(t){ return t === texts[0]; })) { tr.classList.add('is-common'); common++; }
-      cells.forEach(function(td){
+    var groups = [], cur = null, n = 0;
+    table.querySelectorAll('tbody tr').forEach(function(tr){
+      if (tr.classList.contains('group-head')) {
+        var th = tr.querySelector('th'), label = th.textContent.trim(), id = 'plan-sec-' + (++n);
+        th.innerHTML = '<button type="button" class="plan-sec-btn" aria-expanded="true" aria-controls="' + id + '"><span>' + label + '</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>';
+        cur = { head: tr, btn: th.querySelector('button'), rows: [] };
+        cur.btn.addEventListener('click', (function(g){ return function(){ setGroup(g, g.btn.getAttribute('aria-expanded') !== 'true'); sync(); }; })(cur));
+        groups.push(cur);
+        return;
+      }
+      tr.querySelectorAll('td').forEach(function(td){
         var t = td.textContent.trim();
         if (t === 'Yes') td.innerHTML = TICK;
-        else if (t === '\u2014' || t === '-') td.innerHTML = '<span class="dash" aria-hidden="true">\u2014</span><span class="sr">Not included</span>';
+        else if (t === '—' || t === '-') td.innerHTML = '<span class="dash" aria-hidden="true">—</span><span class="sr">Not included</span>';
       });
-      groupRows.push(tr);
+      if (cur) cur.rows.push(tr);
     });
-    closeGroup();
-    function set(hide){
-      box.classList.toggle('hide-common', hide);
-      btn.setAttribute('aria-expanded', hide ? 'false' : 'true');
-      btn.textContent = hide ? 'Show what every plan includes (' + common + ')' : 'Hide what every plan includes';
-      note.textContent = hide ? 'Showing what changes between plans' : 'Showing every feature';
+    function setGroup(g, open){
+      g.btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      g.head.classList.toggle('is-closed', !open);
+      g.rows.forEach(function(r){ r.classList.toggle('is-folded', !open); });
     }
-    btn.addEventListener('click', function(){ set(!box.classList.contains('hide-common')); });
-    if (common === 0) { btn.parentNode.hidden = true; note.hidden = true; return; }
-    set(true);
+    function sync(){
+      var all = groups.every(function(g){ return g.btn.getAttribute('aria-expanded') === 'true'; });
+      btn.textContent = all ? 'Close all sections' : 'Open all sections';
+      btn.setAttribute('aria-expanded', all ? 'true' : 'false');
+    }
+    btn.addEventListener('click', function(){
+      var open = btn.getAttribute('aria-expanded') !== 'true';
+      groups.forEach(function(g){ setGroup(g, open); }); sync();
+    });
+    if (!groups.length) { btn.parentNode.hidden = true; note.hidden = true; return; }
+    note.textContent = 'Tap a section to open it';
+    groups.forEach(function(g, i){ setGroup(g, i === 0); });
+    sync();
   })();
 
   // Where it applies
