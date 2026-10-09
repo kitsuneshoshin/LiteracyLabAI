@@ -28,7 +28,7 @@ function buildArticle(a, { layout, breadcrumbLd, ctaBlock }) {
 <p class="lead">${esc(a.lead)}</p>
 ${a.sections.map(sectionHtml).join("\n")}
 <h2>Common questions</h2>
-${a.faq.map(([q, ans]) => `<h3>${esc(q)}</h3><p>${esc(ans)}</p>`).join("")}
+${a.faq.map(([q, ans]) => `<details class="faq-q"><summary>${esc(q)}</summary><p>${esc(ans)}</p></details>`).join("")}
 ${ctaBlock("article-" + a.slug, "Get feedback on your child's writing")}
 <h2>Related</h2>
 <ul>${a.related.map(([href, text]) => `<li><a href="${href}">${esc(text)}</a></li>`).join("")}</ul>

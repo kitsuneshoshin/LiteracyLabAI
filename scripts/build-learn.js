@@ -242,7 +242,7 @@ function layout({ title, description, canonical, jsonld, body, script, css }) {
 <style>${CSS}${css || ""}</style>
 <script type="application/ld+json">${JSON.stringify(jsonld)}</script>
 <script src="/analytics.js"></script>
-<link rel="stylesheet" href="/theme.css?v=6">
+<link rel="stylesheet" href="/theme.css?v=7">
 </head>
 <body>
 <div class="nav"><div class="nav-inner">
@@ -312,7 +312,7 @@ function buildPage(g, groups, idx) {
     [`How much should a ${isEsl ? "learner at this level" : g.label + " child"} write?`, `${capFirst(info.length)}${words ? `, or ${words}` : ""} is a sensible target for practice. Quality matters more than length.`],
     [`What are the main skills at this level?`, `${names.join("; ")}. Each is explained above with something to try at home.`],
     [`How do I know if my child is on track?`, `Compare their writing with the three focus areas above and ask their teacher for a view. A tool such as LiteracyLab AI can show, for each piece, what worked and the next step, but your child's teacher knows their progress best.`],
-  ].map(([q, a]) => `<h3>${esc(q)}</h3><p>${esc(a)}</p>`).join("");
+  ].map(([q, a]) => `<details class="faq-q"><summary>${esc(q)}</summary><p>${esc(a)}</p></details>`).join("");
 
   const prev = groups[idx - 1], next = groups[idx + 1];
   const nav = `<div class="pn"><span>${prev ? `<a href="/learn/${r.slug}/${prev.slug}/">← ${esc(prev.label)}</a>` : ""}</span><span>${next ? `<a href="/learn/${r.slug}/${next.slug}/">${esc(next.label)} →</a>` : ""}</span></div>`;

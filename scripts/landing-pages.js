@@ -126,7 +126,7 @@ function buildLandingFiles({ layout, breadcrumbLd, ctaBlock }) {
 <h1>${esc(p.h1)}</h1>
 <p class="lead">${esc(p.lead)}</p>${p.body}
 <h2>Common questions</h2>
-${p.faq.map(([q, a]) => `<h3>${esc(q)}</h3><p>${esc(a)}</p>`).join("")}
+${p.faq.map(([q, a]) => `<details class="faq-q"><summary>${esc(q)}</summary><p>${esc(a)}</p></details>`).join("")}
 ${ctaBlock(p.slug, p.cta)}
 <p class="small">${PAGES.filter((o) => o !== p).map((o) => `<a href="/learn/${o.slug}/">${esc(o.h1)}</a>`).join(" · ")}</p>`;
     files[`learn/${p.slug}/index.html`] = layout({ title: p.title, description: p.description, canonical: urlFor(p), jsonld, body });
