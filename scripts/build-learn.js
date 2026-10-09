@@ -20,7 +20,7 @@ const ARTICLES = require("./articles-pages");
 
 const ROOT = path.join(__dirname, "..");
 const SITE = "https://www.literacylabai.com";
-const LASTMOD = "2026-10-02";
+const LASTMOD = "2026-10-09";
 
 // The app's own list of years per region and where each stage of schooling starts
 // (app.html GRADE_DATA); a test checks these stay identical to the app's.
@@ -463,7 +463,7 @@ function buildAll() {
 function buildSitemap(learnUrls) {
   const entry = (loc, lastmod, freq, pri) => `  <url>\n    <loc>${loc}</loc>\n    <lastmod>${lastmod}</lastmod>\n    <changefreq>${freq}</changefreq>\n    <priority>${pri}</priority>\n  </url>`;
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` + [
-    entry(`${SITE}/`, "2026-09-28", "weekly", "1.0"),
+    entry(`${SITE}/`, "2026-10-09", "weekly", "1.0"),
     ...learnUrls.map((u) => entry(u, WS.isWorksheetUrl(u) ? WS.lastmodForUrl(u) : LASTMOD, "monthly", u === urlFor.hub() ? "0.8" : u === urlFor.prompts() ? "0.8" : u.split("/").length <= 6 ? "0.7" : "0.6")),
     entry(`${SITE}/privacy.html`, "2026-09-26", "monthly", "0.3"),
     entry(`${SITE}/terms.html`, "2026-09-26", "monthly", "0.3"),

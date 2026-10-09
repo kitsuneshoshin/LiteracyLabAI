@@ -36,6 +36,18 @@ Both paid plans are billed monthly through Stripe with no lock-in contract; canc
 
 Parent-managed accounts by design. Student writing is processed only to generate feedback for that child — never sold, never used to train public AI models. Parents can review, export, or permanently delete a child's data at any time from the dashboard.
 
+## Articles for parents
+
+Plain-English explainers, each with FAQs: https://www.literacylabai.com/learn/articles/ — topics include KS2 SATs, 11+ and GCSE English Language, NAPLAN reading and writing, Common Core writing standards, PEEL/PEAL paragraphs, RACE and CER short answers, Show Don't Tell, Story Mountain, inference questions, reading poetry, building vocabulary, and correcting a child's writing without putting them off.
+
+## Free printable worksheets
+
+Original reading-comprehension worksheets with answer keys for the UK, US and Australia, written in each country's spelling and curriculum language: https://www.literacylabai.com/learn/worksheets/
+
+## Free writing prompt generator
+
+https://www.literacylabai.com/learn/prompts/
+
 ## Links
 
 - Homepage: https://www.literacylabai.com/
