@@ -109,17 +109,49 @@ section{ padding-block: 88px; }
 
 .final-cta .hero-ctas{ justify-content: center; }
 
-/* ---------- the plan comparison: short by default, every feature on request ---------- */
+/* ---------- the plan comparison ----------
+   A decision table: plan names and prices on top, the checks centred under them, only what DIFFERS between plans by
+   default (rows that are the same in every plan are tucked away behind one button), ticks instead of the word "Yes",
+   hairlines instead of boxes, and one quiet highlight for the most popular plan. */
 .plan-compare{ position: relative; }
-.plan-compare.is-collapsed .plan-table-scroll{ max-height: 600px; overflow: hidden; }
-.plan-compare.is-collapsed::after{
-  content: ""; position: absolute; left: 0; right: 0; bottom: 64px; height: 130px; pointer-events: none;
-  background: linear-gradient(to bottom, transparent, var(--surface-2));
+.plan-note{ margin: 0 0 14px; font-family: var(--mono-label); font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink); text-align: center; }
+.plan-compare.hide-common tr.is-common{ display: none; }
+.plan-compare.hide-common tr.group-head.is-empty{ display: none; }
+.sr{ position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+.plan-table-scroll{ border: 0; border-radius: 0; background: transparent; border-top: 1px solid var(--ink); }
+.plan-table th, .plan-table td{ padding: 18px 16px; font-size: 15px; border-top: 1px solid var(--border-soft); vertical-align: middle; }
+.plan-table thead th{
+  background: transparent; border-top: 0; border-bottom: 1px solid var(--ink);
+  font-family: var(--serif-display); font-size: 28px; font-weight: 500; line-height: 1.2; letter-spacing: 0; text-align: center; padding: 26px 16px 18px;
 }
-.plan-toggle-wrap{ text-align: center; margin-top: 18px; }
+.plan-table thead th:first-child{ text-align: left; font-family: var(--mono-label); font-size: 12px; font-weight: 400; letter-spacing: 0.1em; text-transform: uppercase; vertical-align: bottom; }
+.plan-table thead th span{ font-family: "Lexend", sans-serif; font-size: 14px; font-weight: 500; color: var(--ink-soft); margin-top: 6px; }
+.plan-table th[scope="row"]{ font-weight: 500; font-size: 15.5px; line-height: 1.4; }
+.plan-table td{ text-align: center; color: var(--ink); }
+.plan-table td svg{ display: inline-block; vertical-align: middle; color: var(--good); }
+.plan-table td .dash{ color: var(--ink-faint); }
+.plan-table .col-best{ background: color-mix(in srgb, var(--accent) 7%, transparent); }
+.plan-table thead .col-best{ background: color-mix(in srgb, var(--accent) 7%, transparent); color: var(--ink); }
+.plan-table thead .col-best::before{ content: "MOST POPULAR"; display: block; margin-bottom: 8px; font-family: var(--mono-label); font-size: 10.5px; letter-spacing: 0.12em; color: var(--accent-ink); font-weight: 700; }
+.plan-table tbody tr.group-head th{
+  background: transparent; border-top: 1px solid var(--ink); padding: 40px 16px 10px; text-align: left;
+  font-family: var(--mono-label); font-size: 12px; font-weight: 400; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink);
+}
+.plan-table tbody tr.group-head + tr th, .plan-table tbody tr.group-head + tr td{ border-top: 0; }
+.plan-table .yes, .plan-table .no{ font-weight: 400; }
+.plan-toggle-wrap{ text-align: center; margin-top: 22px; }
 .plan-toggle{
   font-family: "Lexend", sans-serif; font-size: 15px; font-weight: 500; min-height: 46px; padding: 0 24px; border-radius: 999px;
   border: 1.5px solid var(--ink); background: transparent; color: var(--ink); cursor: pointer;
 }
 .plan-toggle:hover{ background: var(--ink); color: var(--bg); }
 .plan-toggle:focus-visible{ outline: 2px solid var(--accent); outline-offset: 2px; }
+
+@media (max-width: 720px){
+  .plan-table-scroll{ border-top: 0; }
+  .plan-table tr{ border-radius: 4px; background: var(--surface); }
+  .plan-table td{ text-align: left; }
+  .plan-table tbody tr.group-head{ margin: 30px 0 10px; }
+  .plan-table tbody tr.group-head th{ padding: 0 2px; border-top: 0; }
+}

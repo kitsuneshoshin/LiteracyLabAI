@@ -489,7 +489,7 @@
 (function(){ try { var m = /[?&]ref=([A-Za-z0-9]{6,12})(&|$)/.exec(location.search); if (m) localStorage.setItem("ll_ref", m[1].toUpperCase()); } catch (e) {} })();
 </script>
 <link rel="stylesheet" href="/theme.css?v=6">
-<link rel="stylesheet" href="/home.css?v=7">
+<link rel="stylesheet" href="/home.css?v=9">
 </head>
 <body>
 
@@ -855,6 +855,7 @@
     </div>
 
     <div class="plan-compare" id="planCompare">
+    <p class="plan-note" id="planNote">Showing what changes between plans</p>
     <div class="plan-table-scroll">
       <table class="plan-table" role="table" aria-label="Free, Core and Premium compared">
         <thead role="rowgroup">
@@ -1029,7 +1030,7 @@
       </table>
     </div>
     </div>
-    <div class="plan-toggle-wrap"><button type="button" class="plan-toggle" id="planToggle" aria-expanded="true" aria-controls="planCompare">Show fewer features</button></div>
+    <div class="plan-toggle-wrap"><button type="button" class="plan-toggle" id="planToggle" aria-expanded="false" aria-controls="planCompare">Show what every plan includes</button></div>
   </div>
 </section>
 
@@ -1208,17 +1209,39 @@
     show(1);
   })();
 
-  // The plan comparison starts short; "Show every feature" opens the whole table. Without scripts it simply stays open.
+  // The plan comparison shows only what differs between plans. Rows that are the same in every plan are tucked away
+  // behind one button; ticks replace the word "Yes". Without scripts the whole table simply stays as written.
   (function(){
-    var box = document.getElementById('planCompare'), btn = document.getElementById('planToggle');
-    if (!box || !btn) return;
-    function set(open){
-      box.classList.toggle('is-collapsed', !open);
-      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
-      btn.textContent = open ? 'Show fewer features' : 'Show every feature';
+    var box = document.getElementById('planCompare'), btn = document.getElementById('planToggle'), note = document.getElementById('planNote');
+    var table = box && box.querySelector('.plan-table');
+    if (!box || !btn || !table) return;
+    var TICK = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 12.5l5 5 10-11"/></svg><span class="sr">Yes</span>';
+    var rows = table.querySelectorAll('tbody tr'), groupHead = null, groupRows = [], common = 0;
+    function closeGroup(){
+      if (groupHead && groupRows.length && groupRows.every(function(r){ return r.classList.contains('is-common'); })) groupHead.classList.add('is-empty');
     }
-    btn.addEventListener('click', function(){ set(box.classList.contains('is-collapsed')); });
-    set(false);
+    rows.forEach(function(tr){
+      if (tr.classList.contains('group-head')) { closeGroup(); groupHead = tr; groupRows = []; return; }
+      var cells = tr.querySelectorAll('td'), texts = [];
+      cells.forEach(function(td){ texts.push(td.textContent.trim()); });
+      if (texts.length > 1 && texts.every(function(t){ return t === texts[0]; })) { tr.classList.add('is-common'); common++; }
+      cells.forEach(function(td){
+        var t = td.textContent.trim();
+        if (t === 'Yes') td.innerHTML = TICK;
+        else if (t === '\u2014' || t === '-') td.innerHTML = '<span class="dash" aria-hidden="true">\u2014</span><span class="sr">Not included</span>';
+      });
+      groupRows.push(tr);
+    });
+    closeGroup();
+    function set(hide){
+      box.classList.toggle('hide-common', hide);
+      btn.setAttribute('aria-expanded', hide ? 'false' : 'true');
+      btn.textContent = hide ? 'Show what every plan includes (' + common + ')' : 'Hide what every plan includes';
+      note.textContent = hide ? 'Showing what changes between plans' : 'Showing every feature';
+    }
+    btn.addEventListener('click', function(){ set(!box.classList.contains('hide-common')); });
+    if (common === 0) { btn.parentNode.hidden = true; note.hidden = true; return; }
+    set(true);
   })();
 
   // Where it applies
