@@ -132,7 +132,7 @@ test("the endpoint serves the public card without sign-in, never exposes the own
   assert.equal(res.statusCode, 200);
   assert.deepEqual(res.body.card, { name: "Maya", kind: "reading", year: "Year 5", skill: "Inference", score: 4, total: 5, ref: "ABCD2345" });
   assert.ok(!JSON.stringify(res.body).includes("secret-profile"));
-  assert.match(res.headers["Cache-Control"], /max-age=60/);
+  assert.equal(res.headers["Cache-Control"], "no-store", "never cached, so switching a card off takes effect at once");
   const gone = loadHandler("account.js", { db: () => ({ data: null, error: null }) });
   assert.equal((await call(gone, { method: "GET", query: { action: "share-view", t: "abcdefghjkmn" } })).statusCode, 404);
   const src = fs.readFileSync(path.join(ROOT, "api", "account.js"), "utf8");

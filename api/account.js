@@ -21,7 +21,8 @@ module.exports = async function handler(req, res) {
     // The public face of a shared result card: no sign-in, only the fields listed in api/_lib/shareCards.js.
     if (req.method === "GET" && action === "share-view") {
       const card = await shareCards.viewCard(getSupabaseAdmin(), req.query.t);
-      res.setHeader("Cache-Control", "public, max-age=60");
+      // Never cached: when a parent switches a card off, it must stop working at once.
+      res.setHeader("Cache-Control", "no-store");
       if (!card) return res.status(404).json({ error: "This card is not available." });
       return res.status(200).json({ card });
     }
