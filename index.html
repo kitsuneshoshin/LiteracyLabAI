@@ -488,8 +488,8 @@
 /* A friend's link (?ref=CODE) is remembered so it can travel with their sign-up in the app. */
 (function(){ try { var m = /[?&]ref=([A-Za-z0-9]{6,12})(&|$)/.exec(location.search); if (m) localStorage.setItem("ll_ref", m[1].toUpperCase()); } catch (e) {} })();
 </script>
-<link rel="stylesheet" href="/theme.css?v=5">
-<link rel="stylesheet" href="/home.css?v=5">
+<link rel="stylesheet" href="/theme.css?v=6">
+<link rel="stylesheet" href="/home.css?v=6">
 </head>
 <body>
 
@@ -854,6 +854,7 @@
       </div>
     </div>
 
+    <div class="plan-compare" id="planCompare">
     <div class="plan-table-scroll">
       <table class="plan-table" role="table" aria-label="Free, Core and Premium compared">
         <thead role="rowgroup">
@@ -1027,6 +1028,8 @@
         </tbody>
       </table>
     </div>
+    </div>
+    <div class="plan-toggle-wrap"><button type="button" class="plan-toggle" id="planToggle" aria-expanded="true" aria-controls="planCompare">Show fewer features</button></div>
   </div>
 </section>
 
@@ -1187,8 +1190,8 @@
     function place(){
       try {
         var g = document.getElementById('phGlow').getBBox();
-        glow.setAttribute('x', g.x - 10); glow.setAttribute('y', g.y + 2);
-        glow.setAttribute('width', g.width + 20); glow.setAttribute('height', g.height - 2);
+        glow.setAttribute('x', g.x - 5); glow.setAttribute('y', g.y + 2);
+        glow.setAttribute('width', g.width + 10); glow.setAttribute('height', g.height - 2);
         glow.setAttribute('rx', (g.height - 2) / 2);
         var r = document.getElementById('phGrow').getBBox();
         var y = r.y + r.height + 3, w = r.width / 2;
@@ -1202,6 +1205,19 @@
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(place);
     window.addEventListener('resize', place);
     show(1);
+  })();
+
+  // The plan comparison starts short; "Show every feature" opens the whole table. Without scripts it simply stays open.
+  (function(){
+    var box = document.getElementById('planCompare'), btn = document.getElementById('planToggle');
+    if (!box || !btn) return;
+    function set(open){
+      box.classList.toggle('is-collapsed', !open);
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      btn.textContent = open ? 'Show fewer features' : 'Show every feature';
+    }
+    btn.addEventListener('click', function(){ set(box.classList.contains('is-collapsed')); });
+    set(false);
   })();
 
   // Where it applies

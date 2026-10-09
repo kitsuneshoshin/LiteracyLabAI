@@ -2,7 +2,7 @@
    restyles; the markup, links and scripts of the page do the work. The logo lockup is not touched. */
 
 /* ---------- type ---------- */
-h3, h4, .price-amount, .tier-panel .t-title, .step h4{ font-family: var(--serif-display); font-weight: 500; letter-spacing: 0; font-size-adjust: 0.49; line-height: 1.24; }
+h3, h4, .price-amount, .tier-panel .t-title, .step h4{ font-family: var(--serif-display); font-weight: 500; letter-spacing: 0; line-height: 1.25; }
 .eyebrow{ font-family: var(--mono-label); font-size: 12px; font-weight: 400; letter-spacing: 0.1em; color: var(--ink); }
 .eyebrow::before{ display: none; }
 
@@ -20,7 +20,7 @@ h3, h4, .price-amount, .tier-panel .t-title, .step h4{ font-family: var(--serif-
 .hero-inner{ text-align: left; }
 .hero-grid{ display: grid; grid-template-columns: minmax(0, 1.02fr) minmax(0, 1fr); gap: 56px; align-items: start; }
 @media (max-width: 920px){ .hero-grid{ grid-template-columns: minmax(0, 1fr); gap: 40px; } }
-.hero h1{ font-size: clamp(38px, 5.4vw, 70px); line-height: 1.2; font-weight: 400 !important; margin-top: 20px; }
+.hero h1{ font-size: clamp(40px, 5.8vw, 76px); line-height: 1.2; font-weight: 400 !important; margin-top: 20px; }
 .hero-sub{ margin: 22px 0 0; max-width: 560px; font-family: "Lexend", sans-serif; font-size: 17px; line-height: 1.6; color: var(--ink-soft); }
 .hero-ctas{ justify-content: flex-start; }
 .hero-meta{ margin-top: 14px; }
@@ -67,11 +67,11 @@ h3, h4, .price-amount, .tier-panel .t-title, .step h4{ font-family: var(--serif-
 section{ padding-block: 88px; }
 @media (max-width: 640px){ section{ padding-block: 56px; } }
 .section-head{ max-width: 760px; }
-.section-head h2{ font-size: clamp(32px, 4.4vw, 52px); line-height: 1.22; font-weight: 400 !important; margin-top: 14px; }
+.section-head h2{ font-size: clamp(34px, 4.8vw, 58px); line-height: 1.22; font-weight: 400 !important; margin-top: 14px; }
 .section-head p{ font-family: "Lexend", sans-serif; font-size: 16.5px; }
 .section-alt{ background: var(--surface-2); border-color: var(--border); }
 .final-cta{ background: var(--ink); color: var(--bg); border-top: 0; }
-.final-cta h2{ font-weight: 400 !important; font-size: clamp(34px, 5vw, 60px); line-height: 1.22; }
+.final-cta h2{ font-weight: 400 !important; font-size: clamp(36px, 5.4vw, 66px); line-height: 1.22; }
 .final-cta p{ color: color-mix(in srgb, var(--bg) 80%, transparent); font-family: "Lexend", sans-serif; }
 .final-cta .btn-primary{ background: var(--bg); color: var(--ink); }
 .final-cta .btn-primary:hover{ background: var(--surface); }
@@ -90,7 +90,7 @@ section{ padding-block: 88px; }
 .where-facts > div + div{ padding-left: 28px; border-left: 1px solid var(--border); }
 @media (max-width: 780px){ .where-facts > div + div{ padding-left: 0; border-left: 0; border-top: 1px solid var(--border); } }
 .where-facts dt{ font-family: var(--mono-label); font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 10px; }
-.where-facts dd{ margin: 0; font-family: var(--serif-display); font-size: clamp(24px, 2.6vw, 32px); line-height: 1.24; font-weight: 500; }
+.where-facts dd{ margin: 0; font-family: var(--serif-display); font-size: clamp(26px, 2.8vw, 34px); line-height: 1.24; font-weight: 500; }
 
 /* ---------- how it works: ruled columns, not boxes ---------- */
 .steps{ gap: 0; border-top: 1px solid var(--ink); }
@@ -98,7 +98,7 @@ section{ padding-block: 88px; }
 .step + .step{ padding-left: 28px; border-left: 1px solid var(--border); }
 @media (max-width: 760px){ .step + .step{ padding-left: 0; border-left: 0; border-top: 1px solid var(--border); } }
 .step-num{ font-family: var(--mono-label); font-weight: 400; color: var(--ink); letter-spacing: 0.1em; }
-.step h4{ font-size: 30px; line-height: 1.2; margin-top: 14px; }
+.step h4{ font-size: 32px; line-height: 1.2; margin-top: 14px; }
 .step p{ font-size: 15px; }
 
 /* ---------- flatter panels ---------- */
@@ -108,3 +108,18 @@ section{ padding-block: 88px; }
 .tier-tabs{ border-color: var(--ink); background: transparent; }
 
 .final-cta .hero-ctas{ justify-content: center; }
+
+/* ---------- the plan comparison: short by default, every feature on request ---------- */
+.plan-compare{ position: relative; }
+.plan-compare.is-collapsed .plan-table-scroll{ max-height: 600px; overflow: hidden; }
+.plan-compare.is-collapsed::after{
+  content: ""; position: absolute; left: 0; right: 0; bottom: 64px; height: 130px; pointer-events: none;
+  background: linear-gradient(to bottom, transparent, var(--surface-2));
+}
+.plan-toggle-wrap{ text-align: center; margin-top: 18px; }
+.plan-toggle{
+  font-family: "Lexend", sans-serif; font-size: 15px; font-weight: 500; min-height: 46px; padding: 0 24px; border-radius: 999px;
+  border: 1.5px solid var(--ink); background: transparent; color: var(--ink); cursor: pointer;
+}
+.plan-toggle:hover{ background: var(--ink); color: var(--bg); }
+.plan-toggle:focus-visible{ outline: 2px solid var(--accent); outline-offset: 2px; }
