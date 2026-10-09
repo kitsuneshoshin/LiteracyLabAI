@@ -1207,8 +1207,8 @@
         glow.setAttribute('width', g.width + 6); glow.setAttribute('height', g.height * 0.52);
         glow.setAttribute('rx', 3);
         var r = document.getElementById('phGrow').getBBox();
-        var y = r.y + r.height + 3, w = r.width / 2;
-        grow.setAttribute('d', 'M' + r.x + ' ' + y + ' q ' + (w / 2) + ' 6 ' + w + ' 0 t ' + w + ' 0');
+        var y = r.y + r.height + 3;
+        grow.setAttribute("d", "M" + r.x + " " + y + " h " + r.width);
         tagBg.setAttribute('width', lab.getBBox().width + 24);
       } catch (e) { /* a browser without SVG text measuring simply shows no marks */ }
     }
