@@ -44,7 +44,7 @@ h3, h4, .price-amount, .tier-panel .t-title, .step h4{ font-family: var(--serif-
 .plate .rule{ stroke: var(--border); stroke-width: 1; }
 .plate .child{ font-family: var(--serif-display); font-style: italic; font-size: 31px; fill: var(--ink); }
 .plate .mark{ fill: none; stroke: var(--accent); stroke-width: 2.2; stroke-linecap: round; }
-.plate .mark-fill{ fill: color-mix(in srgb, var(--accent) 12%, transparent); }
+.plate .mark-fill{ fill: color-mix(in srgb, var(--accent) 30%, transparent); stroke: none; }
 .plate .mark-dash{ stroke-dasharray: 7 5; }
 .plate .tag-bg{ fill: var(--accent); }
 .plate .note{ font-family: var(--mono-label); font-size: 16px; fill: var(--ink); }

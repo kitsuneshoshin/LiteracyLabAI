@@ -489,7 +489,7 @@
 (function(){ try { var m = /[?&]ref=([A-Za-z0-9]{6,12})(&|$)/.exec(location.search); if (m) localStorage.setItem("ll_ref", m[1].toUpperCase()); } catch (e) {} })();
 </script>
 <link rel="stylesheet" href="/theme.css?v=6">
-<link rel="stylesheet" href="/home.css?v=6">
+<link rel="stylesheet" href="/home.css?v=7">
 </head>
 <body>
 
@@ -1190,9 +1190,10 @@
     function place(){
       try {
         var g = document.getElementById('phGlow').getBBox();
-        glow.setAttribute('x', g.x - 5); glow.setAttribute('y', g.y + 2);
-        glow.setAttribute('width', g.width + 10); glow.setAttribute('height', g.height - 2);
-        glow.setAttribute('rx', (g.height - 2) / 2);
+        // a highlighter-pen band behind the words, no outline, so nothing crosses a letter
+        glow.setAttribute('x', g.x - 3); glow.setAttribute('y', g.y + g.height * 0.36);
+        glow.setAttribute('width', g.width + 6); glow.setAttribute('height', g.height * 0.52);
+        glow.setAttribute('rx', 3);
         var r = document.getElementById('phGrow').getBBox();
         var y = r.y + r.height + 3, w = r.width / 2;
         grow.setAttribute('d', 'M' + r.x + ' ' + y + ' q ' + (w / 2) + ' 6 ' + w + ' 0 t ' + w + ' 0');
