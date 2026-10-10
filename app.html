@@ -169,7 +169,7 @@
   input[type="range"]{ accent-color: var(--cyan); }
 </style>
 <script src="analytics.js"></script>
-<link rel="stylesheet" href="/theme.css?v=7">
+<link rel="stylesheet" href="/theme.css?v=8">
 </head>
 <body>
 
@@ -1193,7 +1193,7 @@ function Tooltip({ text, children, position = "top" }){
       {children}
       <span
         className={`pointer-events-none absolute left-1/2 ${posClasses} w-40 sm:w-56 max-w-[calc(100vw-1.5rem)] -translate-x-1/2 rounded-xl p-3 text-[12.5px] leading-snug opacity-0 scale-95 transition-all duration-150 group-hover:opacity-100 group-hover:scale-100 group-focus:opacity-100 group-focus:scale-100 z-20`}
-        style={{ background: "var(--ink)", color: "white", boxShadow: "0 10px 30px -12px hsl(var(--shadow) / 0.4)" }}>
+        style={{ background: "var(--ink)", color: "var(--on-ink)", boxShadow: "0 10px 30px -12px hsl(var(--shadow) / 0.4)" }}>
         {text}
       </span>
     </span>
@@ -1234,7 +1234,7 @@ function AccountMenu({ plan, backendLive, onGoToProfile, onGoToPlan, onManagePay
     <div className={`relative ${className || ""}`} ref={ref}>
       <button onClick={() => setOpen(o => !o)} aria-expanded={open} aria-haspopup="true"
         className="focus-ring inline-flex items-center gap-1.5 rounded-full px-3.5 py-2 text-[13px] font-bold"
-        style={{ background: "var(--gold)", color: "#fff" }}>
+        style={{ background: "var(--gold)", color: "var(--on-solid)" }}>
         <IconCrown size={13} strokeWidth={2.4} /> Account
         <IconChevron size={13} strokeWidth={2.2} style={{ transform: open ? "rotate(180deg)" : "none", transition: "transform 150ms" }} />
       </button>
@@ -1350,7 +1350,7 @@ function LockedFeature({ title, blurb, onSeePlans }){
       <div className="font-display font-semibold text-sm" style={{ color: "var(--ink)" }}>{title}</div>
       <p className="text-[13px] max-w-[46ch]" style={{ color: "var(--ink-faint)" }}>{blurb}</p>
       {onSeePlans && (
-        <button onClick={onSeePlans} className="focus-ring mt-1 inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[12.5px] font-bold" style={{ background: "var(--gold)", color: "#fff" }}>
+        <button onClick={onSeePlans} className="focus-ring mt-1 inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[12.5px] font-bold" style={{ background: "var(--gold)", color: "var(--on-solid)" }}>
           <IconCrown size={12} strokeWidth={2.4} /> See plans
         </button>
       )}
@@ -1550,7 +1550,7 @@ function VocabularyBank({ session, childId, backendLive, onSeePlans, displayName
         <p className="text-[13px] max-w-[46ch]" style={{ color: "var(--ink-faint)" }}>
           Every word from your feedback is still taught on each piece. Upgrade to collect them all in one place, practise them with flashcards and test yourself with a quick quiz.
         </p>
-        <button onClick={onSeePlans} className="focus-ring inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-bold mt-1" style={{ background: "var(--gold)", color: "#fff" }}>See plans</button>
+        <button onClick={onSeePlans} className="focus-ring inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-bold mt-1" style={{ background: "var(--gold)", color: "var(--on-solid)" }}>See plans</button>
       </div>
     );
   }
@@ -1574,7 +1574,7 @@ function VocabularyBank({ session, childId, backendLive, onSeePlans, displayName
           </div>
           {total > 0 && view === "words" && (
             <div className="flex flex-wrap gap-2 shrink-0">
-              <button onClick={startCards} className="focus-ring inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-bold" style={{ background: "var(--cyan)", color: "white" }}>
+              <button onClick={startCards} className="focus-ring inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-bold" style={{ background: "var(--cyan)", color: "var(--on-solid)" }}>
                 <IconSparkle size={14} /> Practise flashcards
               </button>
               <button onClick={startQuiz} disabled={loading} className="focus-ring inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-bold disabled:opacity-50" style={{ background: "var(--surface-2)", color: "var(--ink)" }}>
@@ -1694,7 +1694,7 @@ function VocabFlashcards({ deck, boxes, onRate, onBack, onAgain }){
           <p className="text-[13.5px] mt-1" style={{ color: "var(--ink-soft)" }}>Words you missed come back first next time, so they get the practice.</p>
         </div>
         <div className="flex gap-2 flex-wrap justify-center">
-          <button onClick={onAgain} className="focus-ring rounded-full px-5 py-2.5 text-sm font-bold" style={{ background: "var(--cyan)", color: "white" }}>Practise again</button>
+          <button onClick={onAgain} className="focus-ring rounded-full px-5 py-2.5 text-sm font-bold" style={{ background: "var(--cyan)", color: "var(--on-solid)" }}>Practise again</button>
           <button onClick={onBack} className="focus-ring rounded-full px-5 py-2.5 text-sm font-bold" style={{ background: "var(--surface-2)", color: "var(--ink)" }}>Back to words</button>
         </div>
       </div>
@@ -1737,7 +1737,7 @@ function VocabFlashcards({ deck, boxes, onRate, onBack, onAgain }){
           <button onClick={()=>answer(true)} className="focus-ring rounded-xl py-3 text-sm font-bold" style={{ background: "var(--good-tint)", color: "var(--good)" }}>I knew it</button>
         </div>
       ) : (
-        <button onClick={()=>setFlipped(true)} className="focus-ring rounded-xl py-3 text-sm font-bold" style={{ background: "var(--ink)", color: "white" }}>Show the meaning</button>
+        <button onClick={()=>setFlipped(true)} className="focus-ring rounded-xl py-3 text-sm font-bold" style={{ background: "var(--ink)", color: "var(--on-ink)" }}>Show the meaning</button>
       )}
     </div>
   );
@@ -1779,7 +1779,7 @@ function VocabQuiz({ quiz, error, onRate, onRetry, onBack, loading }){
           </div>
         )}
         <div className="flex gap-2 flex-wrap justify-center">
-          <button onClick={onRetry} disabled={loading} className="focus-ring rounded-full px-5 py-2.5 text-sm font-bold disabled:opacity-50" style={{ background: "var(--cyan)", color: "white" }}>{loading ? "Loading…" : "New quiz"}</button>
+          <button onClick={onRetry} disabled={loading} className="focus-ring rounded-full px-5 py-2.5 text-sm font-bold disabled:opacity-50" style={{ background: "var(--cyan)", color: "var(--on-solid)" }}>{loading ? "Loading…" : "New quiz"}</button>
           <button onClick={onBack} className="focus-ring rounded-full px-5 py-2.5 text-sm font-bold" style={{ background: "var(--surface-2)", color: "var(--ink)" }}>Back to words</button>
         </div>
       </div>
@@ -1824,7 +1824,7 @@ function VocabQuiz({ quiz, error, onRate, onRetry, onBack, loading }){
         )}
       </div>
       <button onClick={()=>{ setChosen(null); setIdx((i) => i + 1); }} disabled={!answered}
-        className="focus-ring rounded-xl py-3 text-sm font-bold disabled:opacity-40" style={{ background: "var(--ink)", color: "white" }}>
+        className="focus-ring rounded-xl py-3 text-sm font-bold disabled:opacity-40" style={{ background: "var(--ink)", color: "var(--on-ink)" }}>
         {idx + 1 === qs.length ? "See my results" : "Next question"}
       </button>
     </div>
@@ -1878,7 +1878,7 @@ function InviteFriendCard({ session, backendLive, plan }){
         <div className="flex gap-2 flex-wrap">
           <input id="invite-link" readOnly value={data.link} onFocus={(e)=>e.target.select()} aria-label="Your invite link"
             className="focus-ring flex-1 min-w-0 rounded-xl px-3 py-2 text-[13px]" style={{ background: "var(--surface-2)", color: "var(--ink)", border: "1px solid var(--border)", minWidth: "180px" }} />
-          <button type="button" onClick={copy} className="focus-ring rounded-full px-5 py-2 text-[13px] font-bold" style={{ background: "var(--ink)", color: "white" }}>{copied ? "Copied" : "Copy link"}</button>
+          <button type="button" onClick={copy} className="focus-ring rounded-full px-5 py-2 text-[13px] font-bold" style={{ background: "var(--ink)", color: "var(--on-ink)" }}>{copied ? "Copied" : "Copy link"}</button>
         </div>
         {data.friends.length > 0 && (
           <ul className="mt-4 flex flex-col gap-1.5" aria-label="Friends you have invited">
@@ -1945,7 +1945,7 @@ function FeedbackCard({ session, backendLive }){
           </label>
           {state === "error" && <div className="text-[13px]" style={{ color: "var(--bad)" }} role="alert">{error}</div>}
           <div className="flex items-center gap-3">
-            <button type="submit" disabled={tooShort || state === "sending"} className="focus-ring rounded-full px-5 py-2 text-sm font-bold disabled:opacity-50" style={{ background: "var(--ink)", color: "white" }}>
+            <button type="submit" disabled={tooShort || state === "sending"} className="focus-ring rounded-full px-5 py-2 text-sm font-bold disabled:opacity-50" style={{ background: "var(--ink)", color: "var(--on-ink)" }}>
               {state === "sending" ? "Sending…" : "Send feedback"}
             </button>
             <span className="text-[11px] tabular" style={{ color: "var(--ink-faint)" }}>{message.length} / 2000</span>
@@ -2045,9 +2045,9 @@ function PausedLearnerNotice({ child, children_, activeChangeAvailableAt, onMake
         <div className="flex flex-wrap items-center gap-2">
           {blockedUntil
             ? <span className="text-[12px]" style={{ color: "var(--ink-faint)" }}>You can change your active learner again on {blockedUntil.toLocaleDateString(undefined, { day: "numeric", month: "long" })}.</span>
-            : <button onClick={choose} className="focus-ring rounded-full px-3.5 py-1.5 text-[12.5px] font-bold" style={{ background: "var(--ink)", color: "#fff" }}>Make {name} the active learner</button>}
+            : <button onClick={choose} className="focus-ring rounded-full px-3.5 py-1.5 text-[12.5px] font-bold" style={{ background: "var(--ink)", color: "var(--on-ink)" }}>Make {name} the active learner</button>}
           {onSeePlans && (
-            <button onClick={onSeePlans} className="focus-ring inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[12.5px] font-bold" style={{ background: "var(--gold)", color: "#fff" }}>
+            <button onClick={onSeePlans} className="focus-ring inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[12.5px] font-bold" style={{ background: "var(--gold)", color: "var(--on-solid)" }}>
               <IconCrown size={12} strokeWidth={2.4} /> See plans
             </button>
           )}
@@ -2150,7 +2150,7 @@ function ChildSwitcher({ children_, activeChildId, onSwitchChild, onAddChild, sh
       {children_.map(c=>(
         <button key={c.id} onClick={()=>onSwitchChild(c.id)}
           className="focus-ring inline-flex items-center gap-1.5 rounded-full pl-1 pr-3.5 py-1 text-xs font-semibold transition-colors"
-          style={ c.id===activeChildId ? { background: "var(--ink)", color: "white" } : { color: "var(--ink-soft)" } }>
+          style={ c.id===activeChildId ? { background: "var(--ink)", color: "var(--on-ink)" } : { color: "var(--ink-soft)" } }>
           <Avatar avatarId={c.avatar_id ?? 0} size={22} />
           {c.display_name || "Learner"}
           {c.locked && <IconLock size={11} strokeWidth={2.4} aria-label="Paused on your current plan" style={{ opacity: 0.75 }} />}
@@ -2269,7 +2269,7 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
     {needsOnboarding && !showPlan && (
       <div className="mx-auto max-w-[1400px] px-4 sm:px-6 pt-8">
         <div className="rounded-2xl px-5 py-4 flex items-center gap-3 flex-wrap" style={{ background: "var(--cyan-tint)", border: "1.5px solid var(--cyan)" }}>
-          <div className="w-9 h-9 rounded-full grid place-items-center shrink-0" style={{ background: "var(--cyan)", color: "#fff" }}>
+          <div className="w-9 h-9 rounded-full grid place-items-center shrink-0" style={{ background: "var(--cyan)", color: "var(--on-solid)" }}>
             <IconSparkle size={17} strokeWidth={2.2} />
           </div>
           <div className="flex-1 min-w-[200px]">
@@ -2671,7 +2671,7 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
         <div id="account-plan-section" className="card p-6 relative overflow-hidden" style={{ background: "linear-gradient(160deg, var(--ink), #3E2028)" }}>
           <div className="absolute -right-6 -top-6 w-28 h-28 rounded-full" style={{ background: "radial-gradient(circle, var(--gold) 0%, transparent 70%)", opacity: .35 }} />
           <div className="relative">
-            <div className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold mb-3" style={{ background: "var(--gold)", color: "#fff" }}>
+            <div className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold mb-3" style={{ background: "var(--gold)", color: "var(--on-solid)" }}>
               <IconCrown size={12} strokeWidth={2.4} /> LITERACYLAB PLANS
             </div>
             {paid ? (
@@ -2710,7 +2710,7 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
                       <button onClick={()=>handleBilling(p.tier)} disabled={billingLoading || !backendLive}
                         className="focus-ring w-full rounded-lg py-2 mt-3 font-display font-bold text-[13px] inline-flex items-center justify-center gap-1.5 disabled:opacity-70"
                         style={ p.tier === "core" || plan === "core"
-                          ? { background: "var(--gold)", color: "#fff" }
+                          ? { background: "var(--gold)", color: "var(--on-solid)" }
                           : { background: "transparent", color: "#fff", border: "1px solid rgba(255,255,255,.35)" } }>
                         {billingLoading ? "Redirecting…" : <>{plan === "core" ? "Upgrade to" : "Choose"} {p.name} <IconArrowRight size={14} strokeWidth={2.3} /></>}
                       </button>
@@ -2721,7 +2721,7 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
             {paid && plan !== "admin" && (
               <button onClick={()=>handleBilling()} disabled={billingLoading || !backendLive}
                 className="focus-ring w-full rounded-xl py-2.5 font-display font-bold text-sm inline-flex items-center justify-center gap-1.5 disabled:opacity-70"
-                style={{ background: "var(--gold)", color: "#fff" }}>
+                style={{ background: "var(--gold)", color: "var(--on-solid)" }}>
                 {billingLoading ? "Redirecting…" : <>Manage subscription <IconArrowRight size={15} strokeWidth={2.3} /></>}
               </button>
             )}
@@ -2807,14 +2807,14 @@ function ShareResultCard({ session, backendLive, submissionId }){
         <div className="flex gap-2 flex-wrap items-center">
           <input value={name} onChange={(e)=>setName(e.target.value)} maxLength={24} aria-label="First name or nickname for the card" placeholder="First name or nickname (optional)"
             className="focus-ring flex-1 min-w-0 rounded-xl px-3 py-2 text-[13px]" style={{ background: "var(--surface-2)", color: "var(--ink)", border: "1px solid var(--border)", minWidth: "190px" }} />
-          <button type="button" onClick={create} disabled={busy} className="focus-ring rounded-full px-5 py-2 text-[13px] font-bold disabled:opacity-50" style={{ background: "var(--ink)", color: "white" }}>{busy ? "Making…" : "Create share link"}</button>
+          <button type="button" onClick={create} disabled={busy} className="focus-ring rounded-full px-5 py-2 text-[13px] font-bold disabled:opacity-50" style={{ background: "var(--ink)", color: "var(--on-ink)" }}>{busy ? "Making…" : "Create share link"}</button>
         </div>
       ) : (
         <div className="flex flex-col gap-2">
           <div className="flex gap-2 flex-wrap items-center">
             <input id="share-link" readOnly value={card.url} onFocus={(e)=>e.target.select()} aria-label="Your share link"
               className="focus-ring flex-1 min-w-0 rounded-xl px-3 py-2 text-[13px]" style={{ background: "var(--surface-2)", color: "var(--ink)", border: "1px solid var(--border)", minWidth: "190px" }} />
-            <button type="button" onClick={copy} className="focus-ring rounded-full px-4 py-2 text-[13px] font-bold" style={{ background: "var(--ink)", color: "white" }}>{copied ? "Copied" : "Copy link"}</button>
+            <button type="button" onClick={copy} className="focus-ring rounded-full px-4 py-2 text-[13px] font-bold" style={{ background: "var(--ink)", color: "var(--on-ink)" }}>{copied ? "Copied" : "Copy link"}</button>
             {canShare && <button type="button" onClick={()=>navigator.share({ title: "A result on LiteracyLab AI", url: card.url }).catch(()=>{})} className="focus-ring rounded-full border px-4 py-2 text-[13px] font-bold" style={{ borderColor: "var(--border)", color: "var(--ink)" }}>Share…</button>}
           </div>
           <div className="flex gap-4 flex-wrap text-[12.5px]">
@@ -2861,7 +2861,7 @@ function ThumbsFeedback({ context, session, submissionId, backendLive }){
           style={{ borderColor: "var(--border)", background: "var(--surface)", color: "var(--ink)" }} />
         <div className="flex items-center gap-3">
           <button onClick={()=>send(good ? "up" : "down", comment.trim() || null)}
-            className="focus-ring rounded-full px-3.5 py-1.5 text-xs font-semibold" style={{ background: "var(--ink)", color: "white" }}>
+            className="focus-ring rounded-full px-3.5 py-1.5 text-xs font-semibold" style={{ background: "var(--ink)", color: "var(--on-ink)" }}>
             Send
           </button>
           <button onClick={()=>send(good ? "up" : "down", null)} className="focus-ring text-xs font-semibold" style={{ color: "var(--ink-faint)" }}>
@@ -2940,7 +2940,7 @@ function diffWordsToParts(original, revised){
     if (last && last.c === it.c) last.t += it.t; else runs.push({ t: it.t, c: it.c });
   });
   return runs.map((r, k) => r.c
-    ? <mark key={`dv${k}`} title="Changed from your original" className="rounded px-0.5" style={{ background: "var(--good)", color: "#fff" }}>{r.t}</mark>
+    ? <mark key={`dv${k}`} title="Changed from your original" className="rounded px-0.5" style={{ background: "var(--good)", color: "var(--on-solid)" }}>{r.t}</mark>
     : <span key={`dv${k}`}>{r.t}</span>);
 }
 
@@ -2992,7 +2992,7 @@ function AnnotatedText({ text, highlights, revisedStory }){
           piece = piece.slice(0, -1);
         }
         out.push(
-          <mark key={`rh${i}`} title="Changed from your original" className="rounded px-0.5" style={{ background: "var(--good)", color: "#fff" }}>
+          <mark key={`rh${i}`} title="Changed from your original" className="rounded px-0.5" style={{ background: "var(--good)", color: "var(--on-solid)" }}>
             {piece}
           </mark>
         );
@@ -3050,7 +3050,7 @@ function AnnotatedText({ text, highlights, revisedStory }){
               <span className="text-[11px] font-bold uppercase tracking-wide" style={{ color: "var(--good)" }}>{typeof revisedStory === "string" && revisedStory.trim() ? "Your response, corrected and improved" : "Your response, revised"}</span>
             </div>
             <span className="inline-flex items-center gap-1 text-[11px] font-semibold" style={{ color: "var(--ink-faint)" }}>
-              <mark className="rounded px-1" style={{ background: "var(--good)", color: "#fff" }}>highlighted</mark> = what changed
+              <mark className="rounded px-1" style={{ background: "var(--good)", color: "var(--on-solid)" }}>highlighted</mark> = what changed
             </span>
           </div>
           <p className="whitespace-pre-wrap font-read text-[14.5px] leading-relaxed" style={{ color: "var(--ink)" }}>{revisedParts}</p>
@@ -3178,7 +3178,7 @@ function FeedbackPanel({ tier, gradeLabel, country, interest, confidence, motiva
             <div className="font-display font-semibold text-sm" style={{ color: "var(--ink)" }}>Make these words stick</div>
             <div className="text-[13px]" style={{ color: "var(--ink-soft)" }}>Flashcards and a quick quiz, starting with the words you need most.</div>
           </div>
-          <button onClick={onPractise} className="focus-ring inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-bold shrink-0" style={{ background: "var(--cyan)", color: "white" }}>Practise words <IconArrowRight size={14} /></button>
+          <button onClick={onPractise} className="focus-ring inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-bold shrink-0" style={{ background: "var(--cyan)", color: "var(--on-solid)" }}>Practise words <IconArrowRight size={14} /></button>
         </div>
       )}
       <ThumbsFeedback context="writing feedback" session={session} submissionId={submissionId} backendLive={backendLive} />
@@ -3729,7 +3729,7 @@ function QuestionReviewPanel({ feedback, questions, answers, passageBank, shownQ
                       <p className="text-[12.5px] leading-snug mt-1.5 font-read" style={{ color: "var(--ink-faint)" }}>
                         From the passage: “{ev}”{findable && (
                           <button type="button" onClick={() => onShowQuote(on ? "" : ev)} aria-pressed={on} className="focus-ring ml-2 inline-flex items-center rounded-full px-2 py-0.5 text-[11.5px] font-sans font-semibold not-italic"
-                            style={{ background: on ? "var(--gold)" : "var(--gold-tint)", color: on ? "#fff" : "var(--gold-ink)" }}>{on ? "Hide in passage" : "Show in passage"}</button>
+                            style={{ background: on ? "var(--gold)" : "var(--gold-tint)", color: on ? "var(--on-solid)" : "var(--gold-ink)" }}>{on ? "Hide in passage" : "Show in passage"}</button>
                         )}
                       </p>
                     );
@@ -3824,7 +3824,7 @@ function ReadingFeedbackPanel({ tier, country, interest, confidence, motivation,
           </div>
         </div>
         {onNew && (
-          <button onClick={onNew} className="focus-ring inline-flex items-center justify-center gap-1.5 rounded-lg px-4 py-2 text-sm font-semibold shrink-0 self-start sm:self-center" style={{ background: "var(--ink)", color: "white" }}>
+          <button onClick={onNew} className="focus-ring inline-flex items-center justify-center gap-1.5 rounded-lg px-4 py-2 text-sm font-semibold shrink-0 self-start sm:self-center" style={{ background: "var(--ink)", color: "var(--on-ink)" }}>
             New passage <IconArrowRight size={14} />
           </button>
         )}
@@ -3891,7 +3891,7 @@ function ReadingFeedbackPanel({ tier, country, interest, confidence, motivation,
             <div className="font-display font-semibold text-sm" style={{ color: "var(--ink)" }}>Make these words stick</div>
             <div className="text-[13px]" style={{ color: "var(--ink-soft)" }}>Flashcards and a quick quiz, starting with the words you need most.</div>
           </div>
-          <button onClick={onPractise} className="focus-ring inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-bold shrink-0" style={{ background: "var(--cyan)", color: "white" }}>Practise words <IconArrowRight size={14} /></button>
+          <button onClick={onPractise} className="focus-ring inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-bold shrink-0" style={{ background: "var(--cyan)", color: "var(--on-solid)" }}>Practise words <IconArrowRight size={14} /></button>
         </div>
       )}
       <ThumbsFeedback context="reading feedback" session={session} submissionId={submissionId} backendLive={backendLive} />
@@ -4402,7 +4402,7 @@ function Workspace({ plan, country, gradeIdx, setGradeIdx, tier, setTierOverride
                     <IconLock size={22} style={{ color: "var(--ink-faint)" }} />
                     <div className="font-display font-semibold text-sm" style={{ color: "var(--ink)" }}>Upgrade for more writing prompts</div>
                     <p className="text-[13px] max-w-[28ch]" style={{ color: "var(--ink-faint)" }}>You've used all your free submissions this month.</p>
-                    <button onClick={onSeePlans} className="focus-ring inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-bold mt-1" style={{ background: "var(--gold)", color: "#fff" }}>See plans</button>
+                    <button onClick={onSeePlans} className="focus-ring inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-bold mt-1" style={{ background: "var(--gold)", color: "var(--on-solid)" }}>See plans</button>
                   </>
                 ) : writingLoading ? (
                   <>
@@ -4417,7 +4417,7 @@ function Workspace({ plan, country, gradeIdx, setGradeIdx, tier, setTierOverride
                     <FocusPicker kind="writing" tier={tier} country={country} gradeLabel={gradeLabel} premium={premium} value={writingFocus} onChange={changeWritingFocus} onSeePlans={onSeePlans} />
                     <button onClick={()=>requestNewWritingPrompt()}
                       className="focus-ring inline-flex items-center gap-1.5 rounded-full px-7 py-3 text-[15px] font-bold mt-2"
-                      style={{ background: "var(--cyan)", color: "#fff" }}>
+                      style={{ background: "var(--cyan)", color: "var(--on-solid)" }}>
                       Get my prompt
                     </button>
                   </>
@@ -4436,7 +4436,7 @@ function Workspace({ plan, country, gradeIdx, setGradeIdx, tier, setTierOverride
                     <IconLock size={22} style={{ color: "var(--ink-faint)" }} />
                     <div className="font-display font-semibold text-sm" style={{ color: "var(--ink)" }}>Upgrade for more reading passages</div>
                     <p className="text-[13px] max-w-[28ch]" style={{ color: "var(--ink-faint)" }}>You've used all your free submissions this month.</p>
-                    <button onClick={onSeePlans} className="focus-ring inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-bold mt-1" style={{ background: "var(--gold)", color: "#fff" }}>See plans</button>
+                    <button onClick={onSeePlans} className="focus-ring inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-bold mt-1" style={{ background: "var(--gold)", color: "var(--on-solid)" }}>See plans</button>
                   </>
                 ) : readingLoading ? (
                   <>
@@ -4451,7 +4451,7 @@ function Workspace({ plan, country, gradeIdx, setGradeIdx, tier, setTierOverride
                     <FocusPicker kind="reading" tier={tier} country={country} gradeLabel={gradeLabel} premium={premium} value={readingFocus} onChange={changeReadingFocus} onSeePlans={onSeePlans} />
                     <button onClick={()=>requestNewPassage()}
                       className="focus-ring inline-flex items-center gap-1.5 rounded-full px-7 py-3 text-[15px] font-bold mt-2"
-                      style={{ background: "var(--cyan)", color: "#fff" }}>
+                      style={{ background: "var(--cyan)", color: "var(--on-solid)" }}>
                       Get my passage
                     </button>
                   </>
@@ -4504,7 +4504,7 @@ function Workspace({ plan, country, gradeIdx, setGradeIdx, tier, setTierOverride
               <div className="text-[11px]" style={{ color: "var(--ink-faint)" }}>{total >= 999 ? "Thanks for subscribing." : locked ? "Upgrade to Core for unlimited submissions." : "Resets automatically at the start of next month."}</div>
             </div>
             {locked && (
-              <button onClick={onSeePlans} className="focus-ring shrink-0 rounded-full px-3 py-1.5 text-[12px] font-bold" style={{ background: "var(--gold)", color: "#fff" }}>See plans</button>
+              <button onClick={onSeePlans} className="focus-ring shrink-0 rounded-full px-3 py-1.5 text-[12px] font-bold" style={{ background: "var(--gold)", color: "var(--on-solid)" }}>See plans</button>
             )}
             <button onClick={()=>setBannerDismissed(true)} className="focus-ring w-7 h-7 rounded-full grid place-items-center shrink-0" style={{ color: "var(--ink-faint)" }} aria-label="Dismiss">
               <IconX size={14} />
@@ -4780,7 +4780,7 @@ function ReadingQuestion({ q, qi, answer, setAnswer, revealed, disabled }){
                   onClick={() => setAnswer(pos !== -1 ? picked.filter((k) => k !== j) : [...picked, j])}
                   className="focus-ring text-left rounded-xl border px-3.5 py-2.5 text-sm transition-colors flex items-center gap-2.5 flex-1 min-w-0"
                   style={{ borderColor: right ? "var(--good)" : wrong ? "var(--bad)" : pos !== -1 ? "var(--cyan)" : "var(--border)", background: right ? "var(--good-tint)" : wrong ? "var(--bad-tint)" : pos !== -1 ? "var(--cyan-tint)" : "var(--surface)", color: "var(--ink)" }}>
-                  <span className="inline-grid place-items-center rounded-full text-[12px] font-bold shrink-0" style={{ width: 24, height: 24, background: pos !== -1 ? "var(--cyan)" : "var(--surface-2)", color: pos !== -1 ? "white" : "var(--ink-faint)" }}>{pos !== -1 ? pos + 1 : "•"}</span>
+                  <span className="inline-grid place-items-center rounded-full text-[12px] font-bold shrink-0" style={{ width: 24, height: 24, background: pos !== -1 ? "var(--cyan)" : "var(--surface-2)", color: pos !== -1 ? "var(--on-solid)" : "var(--ink-faint)" }}>{pos !== -1 ? pos + 1 : "•"}</span>
                   <span>{item}</span>
                 </button>
                 {!revealed && pos !== -1 && (
@@ -4910,7 +4910,7 @@ function ReadingExercise({ bank, answers, setAnswers, allAnswered, phase, onSubm
         {phase !== "done" ? (
           <button onClick={locked ? onSeePlans : onSubmit} disabled={locked ? false : (disabled || !allAnswered)}
             className="focus-ring inline-flex items-center gap-2 rounded-lg px-4 py-2 font-display font-semibold text-sm disabled:opacity-60"
-            style={{ background: "var(--ink)", color: "white" }}>
+            style={{ background: "var(--ink)", color: "var(--on-ink)" }}>
             {locked ? <><IconLock size={15} /> Upgrade to Continue</> : <>Check My Understanding <IconSend size={14} /></>}
           </button>
         ) : (
@@ -4971,7 +4971,7 @@ function TierEditor({ tier, meta, text, setText, words, phase, onSubmit, onNew, 
           {phase !== "done" ? (
             <button onClick={locked ? onSeePlans : onSubmit} disabled={locked ? false : disabled}
               className="focus-ring inline-flex items-center gap-2 rounded-full px-5 py-2.5 font-display font-extrabold text-sm disabled:opacity-60"
-              style={{ background: "var(--cyan)", color: "#fff" }}>
+              style={{ background: "var(--cyan)", color: "var(--on-solid)" }}>
               {locked ? <><IconLock size={15} /> Upgrade to Continue</> : <>{submitLabel} <IconSend size={15} /></>}
             </button>
           ) : (
@@ -5022,7 +5022,7 @@ function TierEditor({ tier, meta, text, setText, words, phase, onSubmit, onNew, 
           {phase !== "done" ? (
             <button onClick={locked ? onSeePlans : onSubmit} disabled={locked ? false : disabled}
               className="focus-ring inline-flex items-center gap-2 rounded-full px-5 py-2.5 font-display font-bold text-sm disabled:opacity-60"
-              style={{ background: "var(--cyan)", color: "#fff" }}>
+              style={{ background: "var(--cyan)", color: "var(--on-solid)" }}>
               {locked ? <><IconLock size={15} /> Upgrade to Continue</> : <>{submitLabel} <IconSend size={15} /></>}
             </button>
           ) : (
@@ -5051,7 +5051,7 @@ function TierEditor({ tier, meta, text, setText, words, phase, onSubmit, onNew, 
           {phase !== "done" ? (
             <button onClick={locked ? onSeePlans : onSubmit} disabled={locked ? false : disabled}
               className="focus-ring inline-flex items-center gap-2 rounded-lg px-4 py-2 font-display font-semibold text-sm disabled:opacity-60"
-              style={{ background: "var(--ink)", color: "white" }}>
+              style={{ background: "var(--ink)", color: "var(--on-ink)" }}>
               {locked ? <><IconLock size={15} /> Upgrade to Continue</> : <>{submitLabel} <IconSend size={14} /></>}
             </button>
           ) : (
@@ -5086,7 +5086,7 @@ function TierEditor({ tier, meta, text, setText, words, phase, onSubmit, onNew, 
         {phase !== "done" ? (
           <button onClick={locked ? onSeePlans : onSubmit} disabled={locked ? false : disabled}
             className="focus-ring inline-flex items-center gap-2 rounded-lg px-5 py-2.5 font-display font-semibold text-sm disabled:opacity-60"
-            style={{ background: "var(--ink)", color: "white" }}>
+            style={{ background: "var(--ink)", color: "var(--on-ink)" }}>
             {locked ? <><IconLock size={15} /> Upgrade to Continue</> : <>{submitLabel} <IconSend size={14} /></>}
           </button>
         ) : (
@@ -5519,7 +5519,7 @@ function AuthScreen(){
                 )}
                 <button type="submit" disabled={status === "loading"}
                   className="focus-ring w-full rounded-xl py-2.5 font-display font-bold text-sm disabled:opacity-60"
-                  style={{ background: "var(--cyan)", color: "#fff" }}>
+                  style={{ background: "var(--cyan)", color: "var(--on-solid)" }}>
                   {status === "loading" ? "Please wait…" : mode === "signup" ? "Create account" : mode === "forgot" ? "Send me a link" : "Log in"}
                 </button>
               </form>
@@ -5582,7 +5582,7 @@ function SetNewPassword({ onDone }){
               </div>
               <h2 className="font-display font-bold mb-1.5" style={{ color: "var(--ink)" }}>Password updated</h2>
               <p className="text-sm" style={{ color: "var(--ink-soft)" }}>You're signed in with your new password.</p>
-              <button onClick={onDone} className="focus-ring mt-4 w-full rounded-xl py-2.5 font-display font-bold text-sm" style={{ background: "var(--cyan)", color: "#fff" }}>Continue to LiteracyLab AI</button>
+              <button onClick={onDone} className="focus-ring mt-4 w-full rounded-xl py-2.5 font-display font-bold text-sm" style={{ background: "var(--cyan)", color: "var(--on-solid)" }}>Continue to LiteracyLab AI</button>
             </div>
           ) : (
             <>
@@ -5604,7 +5604,7 @@ function SetNewPassword({ onDone }){
                 )}
                 <button type="submit" disabled={status === "loading"}
                   className="focus-ring w-full rounded-xl py-2.5 font-display font-bold text-sm disabled:opacity-60"
-                  style={{ background: "var(--cyan)", color: "#fff" }}>
+                  style={{ background: "var(--cyan)", color: "var(--on-solid)" }}>
                   {status === "loading" ? "Please wait…" : "Save new password"}
                 </button>
               </form>
@@ -5664,7 +5664,7 @@ class ErrorBoundary extends React.Component {
         <div className="text-center max-w-sm">
           <div className="font-display font-bold text-lg mb-2" style={{ color: "var(--ink)" }}>Something went wrong</div>
           <p className="text-sm mb-4" style={{ color: "var(--ink-soft)" }}>We've been notified. Reloading the page usually fixes this.</p>
-          <button onClick={()=>window.location.reload()} className="focus-ring rounded-full px-4 py-2 text-sm font-bold" style={{ background: "var(--cyan)", color: "#fff" }}>Reload</button>
+          <button onClick={()=>window.location.reload()} className="focus-ring rounded-full px-4 py-2 text-sm font-bold" style={{ background: "var(--cyan)", color: "var(--on-solid)" }}>Reload</button>
         </div>
       </div>
     );

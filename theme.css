@@ -34,6 +34,8 @@
   --bad: #A33A33;
   --bad-tint: #F0D3CE;
   --grid-line: rgba(31,28,25,0.08);
+  --on-ink: #FFFDF8;
+  --on-solid: #FFFFFF;
   --serif-display: "EB Garamond", "Iowan Old Style", Georgia, "Times New Roman", serif;
   --mono-label: "Courier Prime", "Courier New", Courier, monospace;
 }
@@ -68,6 +70,8 @@
     --bad: #F0928A;
     --bad-tint: #3A211C;
     --grid-line: rgba(255,255,255,0.07);
+    --on-ink: #171513;
+    --on-solid: #171513;
   }
 }
 :root[data-theme="dark"]{
@@ -100,6 +104,8 @@
   --bad: #F0928A;
   --bad-tint: #3A211C;
   --grid-line: rgba(255,255,255,0.07);
+  --on-ink: #171513;
+  --on-solid: #171513;
 }
 
 /* Headings: a classic serif, set a little larger because its letters are small for their height. Small interface
@@ -129,7 +135,7 @@ h1, h2,
   border: 1px solid var(--border);
 }
 
-::selection{ background: var(--cyan); color: #fff; }
+::selection{ background: var(--cyan); color: var(--on-solid); }
 
 /* Guide pages: typewriter breadcrumbs, a hairline above each section, flat call-to-action. */
 .crumbs, .crumbs a{ font-family: var(--mono-label); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; }

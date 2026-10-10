@@ -217,7 +217,7 @@
     font-family: "Source Serif 4", Georgia, serif;
     -webkit-font-smoothing: antialiased;
   }
-  ::selection{ background: var(--accent); color: #fff; }
+  ::selection{ background: var(--accent); color: var(--on-solid); }
   a{ color: inherit; }
   h1,h2,h3{ text-wrap: balance; margin: 0; font-family: "Fraunces", serif; font-weight: 500; }
   p{ margin: 0; }
@@ -240,12 +240,12 @@
     white-space: nowrap;
   }
   .btn:active{ transform: translateY(1px); }
-  .btn-primary{ background: var(--accent); color: #fff; }
+  .btn-primary{ background: var(--accent); color: var(--on-solid); }
   .btn-primary:hover{ background: var(--accent-ink); }
   :root[data-theme="dark"] .btn-primary:hover, :root:not([data-theme="light"]) .btn-primary:hover{ background: color-mix(in srgb, var(--accent) 80%, white 20%); }
   .btn-ghost{ background: transparent; color: var(--ink); border-color: var(--border); }
   .btn-ghost:hover{ border-color: var(--ink-faint); }
-  .btn-gold{ background: var(--gold); color: #fff; }
+  .btn-gold{ background: var(--gold); color: var(--on-solid); }
   .btn-gold:hover{ background: var(--gold-ink); }
   .btn-lg{ padding: 16px 26px; font-size: 15.5px; }
 
@@ -383,7 +383,7 @@
   @media (max-width: 900px){ .pricing{ grid-template-columns: 1fr; max-width: 460px; } }
   .price-card{ border:1px solid var(--border); border-radius:8px; padding: 30px 26px; background: var(--surface); }
   .price-card.pro{ border-color: var(--gold); position:relative; background: linear-gradient(180deg, var(--gold-tint), var(--surface) 55%); }
-  .price-card.pro::before{ content:"MOST POPULAR"; position:absolute; top:-11px; left:26px; background: var(--gold); color:#fff; font-family:"Lexend",sans-serif; font-size:10.5px; font-weight:800; letter-spacing:.06em; padding:4px 10px; border-radius:999px; }
+  .price-card.pro::before{ content:"MOST POPULAR"; position:absolute; top:-11px; left:26px; background: var(--gold); color: var(--on-solid); font-family:"Lexend",sans-serif; font-size:10.5px; font-weight:800; letter-spacing:.06em; padding:4px 10px; border-radius:999px; }
   .price-plan{ font-family:"Lexend",sans-serif; font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color: var(--ink-faint); }
   .price-amount{ font-family:"Fraunces",serif; font-size:36px; font-weight:600; margin-top:10px; letter-spacing:-0.01em; }
   .price-amount span{ font-family:"Lexend",sans-serif; font-size:14px; font-weight:500; color: var(--ink-faint); }
@@ -499,7 +499,7 @@
 /* A friend's link (?ref=CODE) is remembered so it can travel with their sign-up in the app. */
 (function(){ try { var m = /[?&]ref=([A-Za-z0-9]{6,12})(&|$)/.exec(location.search); if (m) localStorage.setItem("ll_ref", m[1].toUpperCase()); } catch (e) {} })();
 </script>
-<link rel="stylesheet" href="/theme.css?v=7">
+<link rel="stylesheet" href="/theme.css?v=8">
 <link rel="stylesheet" href="/home.css?v=10">
 </head>
 <body>
