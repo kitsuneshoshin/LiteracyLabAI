@@ -158,3 +158,11 @@ section{ padding-block: 88px; }
   .plan-table tbody tr.group-head{ margin: 30px 0 10px; }
   .plan-table tbody tr.group-head th{ padding: 0 2px; border-top: 0; }
 }
+
+/* Pricing table text: every value in the full ink colour (the Free column and "no" cells used to be dimmer, which was
+   hard to read in dark mode), a slightly larger size, and a stronger tick. */
+.plan-table td, .plan-table td.yes, .plan-table td.no{ color: var(--ink); font-size: 15.5px; }
+.plan-table td .dash{ color: var(--ink-soft); }
+.plan-table td svg{ stroke-width: 2.8; }
+.plan-table th[scope="row"]{ color: var(--ink); }
+.plan-table thead th span{ color: var(--ink); opacity: 0.85; }
