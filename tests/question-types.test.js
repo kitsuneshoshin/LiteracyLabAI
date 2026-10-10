@@ -498,3 +498,13 @@ test("a gap-fill sentence with fewer gaps than sets of choices is repaired, and 
   QT.validateQuestions([c], { template: ["cloze"], passage: PASSAGE_CORE }, issues);
   assert.deepEqual(issues, []);
 });
+
+test("an order question whose events are listed out of passage order is rejected so the model rewrites it", () => {
+  const passage = "First, gather a clear plastic lid, tissue paper, glue, and string. Tear the tissue into tiny pieces and press them onto the lid. Leave a small space in the middle so the light can shine through. Tie the string to the top of the lid. When the picture is dry, hang it where friends can admire your bright work.";
+  const mk = (steps) => QT.normalizeQuestions([{ q: "Put these events in the order they happen.", steps }], ["order"], seeded(5));
+  const good = mk(["Gather a clear plastic lid, tissue paper, glue and string", "Tear the tissue into tiny pieces and press them onto the lid", "Tie the string to the top of the lid", "Hang it where friends can admire your bright work"]);
+  const bad = mk(["Hang it where friends can admire your bright work", "Gather a clear plastic lid, tissue paper, glue and string", "Tear the tissue into tiny pieces and press them onto the lid", "Tie the string to the top of the lid"]);
+  const run = (qs) => { const issues = []; QT.validateQuestions(qs, { template: ["order"], passage }, issues); return issues; };
+  assert.deepEqual(run(good), []);
+  assert.match(run(bad).join(" "), /order key is wrong/);
+});

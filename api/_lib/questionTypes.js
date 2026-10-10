@@ -247,6 +247,27 @@ function normalizeQuestions(questions, template, rng = Math.random, tier) {
 // ---------------------------------------------------------------- validation of the stored shape
 
 const okStr = (v, min, max) => typeof v === "string" && v.trim().length >= min && v.trim().length <= max;
+// The model writes the four events "in the correct order", and sometimes gets it wrong (a real passage listed
+// "hang the picture" before "gather the supplies"). The key is only trusted when it agrees with the passage: each event is
+// matched to the one sentence it shares most words with, and the events, in the stated order, must not go backwards through
+// the passage. An event that matches no sentence clearly is skipped, so this only flags an order that is plainly wrong.
+const STEP_STOP = new Set("then next after before first finally with from that this they them their were have into onto when while until your some".split(" "));
+function stepWords(t) { return new Set(String(t || "").toLowerCase().match(/[a-z]{4,}/g)?.filter((w) => !STEP_STOP.has(w)) || []); }
+function orderIssue(items, correct, passage) {
+  const sentences = String(passage || "").split(/(?<=[.!?])\s+|\n+/).map(stepWords).filter((w) => w.size);
+  if (sentences.length < 4) return null;
+  let last = -1, lastStep = null;
+  for (let k = 0; k < correct.length; k++) {
+    const words = stepWords(items[correct[k]]);
+    const scores = sentences.map((sw) => { let n = 0; words.forEach((w) => { if (sw.has(w)) n++; }); return n; });
+    const best = Math.max(...scores);
+    if (best < 2 || scores.filter((n) => n === best).length !== 1) continue;
+    const at = scores.indexOf(best);
+    if (at < last) return `the order key is wrong: "${items[correct[k]]}" comes earlier in the passage than "${lastStep}", so it must be listed before it`;
+    last = at; lastStep = items[correct[k]];
+  }
+  return null;
+}
 const distinct = (list) => new Set(list.map((o) => norm(o))).size === list.length;
 
 function validateQuestions(questions, { template, passage } = {}, issues) {
@@ -302,6 +323,7 @@ function validateQuestions(questions, { template, passage } = {}, issues) {
         if (!distinct(q.items)) issues.push(`${at} has duplicate events`);
         const c = q.correct;
         if (!isArr(c) || c.length !== 4 || !c.every((v) => Number.isInteger(v) && v >= 0 && v < 4) || new Set(c).size !== 4) issues.push(`${at} has an invalid order key`);
+        else { const wrong = orderIssue(q.items, c, passage); if (wrong) issues.push(`${at} ${wrong}`); }
         break;
       }
       case "match": {
