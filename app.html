@@ -4772,19 +4772,30 @@ function ReadingQuestion({ q, qi, answer, setAnswer, revealed, disabled }){
             const pos = picked.indexOf(j);
             const right = revealed && Array.isArray(q.correct) && pos !== -1 && q.correct[pos] === j;
             const wrong = revealed && pos !== -1 && !right;
+            const move = (d) => { const next = picked.slice(); const t = next[pos + d]; next[pos + d] = next[pos]; next[pos] = t; setAnswer(next); };
+            const arrowStyle = { width: 34, borderColor: "var(--border)", background: "var(--surface)", color: "var(--ink)" };
             return (
-              <button key={j} disabled={lock || pos !== -1} onClick={() => setAnswer([...picked, j])}
-                className="focus-ring text-left rounded-xl border px-3.5 py-2.5 text-sm transition-colors flex items-center gap-2.5"
-                style={choiceStyle(false, false, false) && { borderColor: right ? "var(--good)" : wrong ? "var(--bad)" : pos !== -1 ? "var(--cyan)" : "var(--border)", background: right ? "var(--good-tint)" : wrong ? "var(--bad-tint)" : pos !== -1 ? "var(--cyan-tint)" : "var(--surface)", color: "var(--ink)" }}>
-                <span className="inline-grid place-items-center rounded-full text-[12px] font-bold shrink-0" style={{ width: 24, height: 24, background: pos !== -1 ? "var(--cyan)" : "var(--surface-2)", color: pos !== -1 ? "white" : "var(--ink-faint)" }}>{pos !== -1 ? pos + 1 : "•"}</span>
-                <span>{item}</span>
-              </button>
+              <div key={j} className="flex items-stretch gap-1.5">
+                <button type="button" disabled={lock} aria-label={pos !== -1 ? "Take \"" + item + "\" out of the order" : "Put \"" + item + "\" next in the order"}
+                  onClick={() => setAnswer(pos !== -1 ? picked.filter((k) => k !== j) : [...picked, j])}
+                  className="focus-ring text-left rounded-xl border px-3.5 py-2.5 text-sm transition-colors flex items-center gap-2.5 flex-1 min-w-0"
+                  style={{ borderColor: right ? "var(--good)" : wrong ? "var(--bad)" : pos !== -1 ? "var(--cyan)" : "var(--border)", background: right ? "var(--good-tint)" : wrong ? "var(--bad-tint)" : pos !== -1 ? "var(--cyan-tint)" : "var(--surface)", color: "var(--ink)" }}>
+                  <span className="inline-grid place-items-center rounded-full text-[12px] font-bold shrink-0" style={{ width: 24, height: 24, background: pos !== -1 ? "var(--cyan)" : "var(--surface-2)", color: pos !== -1 ? "white" : "var(--ink-faint)" }}>{pos !== -1 ? pos + 1 : "•"}</span>
+                  <span>{item}</span>
+                </button>
+                {!revealed && pos !== -1 && (
+                  <>
+                    <button type="button" disabled={lock || pos === 0} onClick={() => move(-1)} aria-label={"Move \"" + item + "\" earlier"} className="focus-ring rounded-xl border text-sm disabled:opacity-30" style={arrowStyle}>↑</button>
+                    <button type="button" disabled={lock || pos === picked.length - 1} onClick={() => move(1)} aria-label={"Move \"" + item + "\" later"} className="focus-ring rounded-xl border text-sm disabled:opacity-30" style={arrowStyle}>↓</button>
+                  </>
+                )}
+              </div>
             );
           })}
         </div>
         {!revealed && (
           <div className="flex items-center gap-3 mt-2 text-xs" style={{ color: "var(--ink-soft)" }}>
-            <span>Tap the events in the order they happen.</span>
+            <span>Tap the events in the order they happen. Change your mind? Use the arrows to move one, or tap it again to take it out.</span>
             {picked.length > 0 && <button type="button" disabled={lock} onClick={() => setAnswer(null)} className="focus-ring underline font-semibold">Start again</button>}
           </div>
         )}
