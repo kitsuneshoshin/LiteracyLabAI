@@ -7,7 +7,7 @@
 const SITE = "https://www.literacylabai.com";
 const LASTMOD = "2026-10-04";
 
-const PAGES = [
+const BASE_PAGES = [
   {
     slug: "writing-feedback-for-kids",
     title: "Writing feedback for kids: what good feedback looks like",
@@ -108,6 +108,8 @@ const PAGES = [
     ],
   },
 ];
+
+const PAGES = [...BASE_PAGES, ...require("./landing-pages-seo").PAGES];
 
 const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 const urlFor = (p) => `${SITE}/learn/${p.slug}/`;

@@ -384,6 +384,7 @@ ${items}
 </ul>
 <p>Looking for advice? Browse our <a href="/learn/articles/">articles for parents</a> on reading, writing and exams.</p>
 <p>New here? Read <a href="/learn/how-it-works/">how LiteracyLab AI works</a>, what <a href="/learn/writing-feedback-for-kids/">good writing feedback</a> looks like, or find <a href="/learn/reading-comprehension-practice/">reading comprehension practice</a>.</p>
+<p>Preparing for a test? See <a href="/learn/naplan-writing-practice/">NAPLAN writing practice</a>, <a href="/learn/ks2-sats-reading-practice/">KS2 SATs reading practice</a>, <a href="/learn/11-plus-english-practice/">11+ English practice</a>, <a href="/learn/igcse-english-first-language-writing-feedback/">IGCSE English writing feedback</a> or <a href="/learn/common-core-writing-feedback-for-parents/">Common Core writing feedback</a>. Worried about AI and children? Read <a href="/learn/ai-writing-coach-for-kids/">what parents should know</a>.</p>
 <p>Looking for something to write about? Try the <a href="/learn/prompts/">free writing prompt generator</a>: choose an age group, a topic and a kind of writing.</p>${WS.published().length ? `<p>Want reading practice? Download our <a href="/learn/worksheets/">free printable reading comprehension worksheets</a> for ${WS.levelsText()}, with answer keys.</p>` : ""}
 ${ctaBlock("hub", "Get feedback on your child's writing")}
 <p class="small">General information based on published curriculum documents. Always check your school's own guidance.</p>`;

@@ -40,6 +40,15 @@ Parent-managed accounts by design. Student writing is processed only to generate
 
 Plain-English explainers, each with FAQs: https://www.literacylabai.com/learn/articles/ — topics include KS2 SATs, 11+ and GCSE English Language, NAPLAN reading and writing, Common Core writing standards, PEEL/PEAL paragraphs, RACE and CER short answers, Show Don't Tell, Story Mountain, inference questions, reading poetry, building vocabulary, and correcting a child's writing without putting them off.
 
+## Exam and test guides
+
+- NAPLAN writing practice (Australia): https://www.literacylabai.com/learn/naplan-writing-practice/
+- KS2 SATs reading practice (England): https://www.literacylabai.com/learn/ks2-sats-reading-practice/
+- 11+ English practice at home: https://www.literacylabai.com/learn/11-plus-english-practice/
+- IGCSE English First Language writing feedback: https://www.literacylabai.com/learn/igcse-english-first-language-writing-feedback/
+- Common Core writing feedback for parents (US): https://www.literacylabai.com/learn/common-core-writing-feedback-for-parents/
+- AI writing coach for kids, safety and limits: https://www.literacylabai.com/learn/ai-writing-coach-for-kids/
+
 ## Free printable worksheets
 
 Original reading-comprehension worksheets with answer keys for the UK, US and Australia, written in each country's spelling and curriculum language: https://www.literacylabai.com/learn/worksheets/
