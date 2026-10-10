@@ -2080,7 +2080,7 @@ function ProgressTimeline({ weeks }){
       </div>
     );
   }
-  const W = Math.max(300, Math.min(1400, boxW || 640)), H = W >= 700 ? 240 : 200, padL = 40, padR = 16, padT = 16, padB = 28;
+  const W = Math.max(300, Math.min(1400, boxW || 640)), H = W >= 700 ? 300 : 240, padL = 40, padR = 16, padT = 16, padB = 28;
   const innerW = W - padL - padR, innerH = H - padT - padB;
   const n = plottable.length;
   const x = (i) => padL + (n === 1 ? innerW / 2 : (i / (n - 1)) * innerW);
@@ -2095,7 +2095,7 @@ function ProgressTimeline({ weeks }){
   return (
     <div ref={boxRef} className="w-full">
     <svg viewBox={`0 0 ${W} ${H}`} width={W} height={H} className="block" style={{ maxWidth: "100%" }} role="img" aria-label="Average target mastery by week">
-      {[0, 25, 50, 75, 100].map(gy => (
+      {(W >= 700 ? [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100] : [0, 20, 40, 60, 80, 100]).map(gy => (
         <g key={gy}>
           <line x1={padL} x2={W - padR} y1={y(gy)} y2={y(gy)} stroke="var(--border-soft)" strokeWidth="1" />
           <text x={padL - 8} y={y(gy) + 4} textAnchor="end" fontSize="10" fill="var(--ink-faint)">{gy}%</text>
