@@ -3,6 +3,7 @@ const { requireUser, sendError } = require("./_lib/auth");
 const { targetsForGrade, isMappedCountry } = require("./_lib/masteryTargets");
 const { curriculumLabel } = require("./_lib/curriculum");
 const { MASTERY_WINDOW, recentMastery } = require("./_lib/mastery");
+const { conventionsTarget, conventionsOutcome } = require("./_lib/conventions");
 
 // Real per-skill mastery, computed from this student's own submission
 // history rather than the static placeholder numbers the dashboard used to
@@ -15,10 +16,16 @@ const { MASTERY_WINDOW, recentMastery } = require("./_lib/mastery");
 // submissions arrive newest first.
 function scoreTargets(targets, submissions) {
   const outcomes = new Map(targets.map((t) => [t.name, []])); // oldest first, once reversed below
+  const conv = conventionsTarget(targets);
   for (const sub of [...submissions].reverse()) {
     const fb = sub.feedback || {};
     if (outcomes.has(fb.glowTarget)) outcomes.get(fb.glowTarget).push("g");
     if (outcomes.has(fb.growTarget)) outcomes.get(fb.growTarget).push("n");
+    // Premium's spelling and grammar check also speaks for the conventions target, unless the AI already chose it this time.
+    if (conv && fb.glowTarget !== conv && fb.growTarget !== conv) {
+      const o = conventionsOutcome(sub);
+      if (o) outcomes.get(conv).push(o);
+    }
   }
 
   return targets.map((t) => {
@@ -51,7 +58,7 @@ module.exports = async function handler(req, res) {
     // won't match here and drop out of the count — not incorrect, just
     // not counted yet. Also scoped to one learner, same reasoning as
     // api/history.js - a sibling's submissions must never blend into this.
-    let query = supabase.from("submissions").select("feedback").eq("profile_id", user.id).eq("child_id", childId).eq("tier", tier).eq("country", country);
+    let query = supabase.from("submissions").select("feedback, word_count").eq("profile_id", user.id).eq("child_id", childId).eq("tier", tier).eq("country", country);
     if (gradeLabel) query = query.eq("grade_label", gradeLabel);
     const { data: submissions, error } = await query.order("created_at", { ascending: false }).limit(200);
     if (error) throw error;
