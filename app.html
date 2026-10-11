@@ -2127,15 +2127,13 @@ function ProgressTimeline({ weeks }){
 
 function StatTile({ icon: IconEl, label, value, sub, accent, tip }){
   return (
-    <div className="card p-5 flex flex-col gap-3">
-      <div className="flex items-center justify-between">
+    <div className="card p-5 sm:p-6 flex flex-col gap-2.5" style={{ borderTop: "3px solid " + accent }}>
+      <div className="flex items-center justify-between gap-2">
         <SectionLabel tip={tip}>{label}</SectionLabel>
-        <div className="w-8 h-8 rounded-lg grid place-items-center" style={{ background: accent + "1A", color: accent }}>
-          <IconEl size={16} strokeWidth={2} />
-        </div>
+        <span style={{ color: accent }}><IconEl size={17} strokeWidth={2} /></span>
       </div>
-      <div className="font-display font-extrabold text-3xl tabular" style={{ color: "var(--ink)" }}>{value}</div>
-      <div className="text-[13px]" style={{ color: "var(--ink-soft)" }}>{sub}</div>
+      <div className="font-display text-5xl tabular" style={{ color: "var(--ink)", lineHeight: 1.1 }}>{value}</div>
+      <div className="text-[13.5px]" style={{ color: "var(--ink-soft)" }}>{sub}</div>
     </div>
   );
 }
@@ -2294,7 +2292,7 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
           card; now leads the page since it's what a returning parent
           actually wants first, not buried below a settings form. */}
       <div className="flex flex-col gap-3">
-        <div className="text-[11px] font-bold uppercase tracking-wide" style={{ color: "var(--ink-faint)" }}>Snapshot</div>
+        <div className="label-mono" style={{ color: "var(--ink-soft)" }}>Snapshot</div>
         <div className="grid sm:grid-cols-3 gap-4">
           {backendLive ? (
             <>
@@ -2320,13 +2318,13 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
           from the same glow/grow data, peer comparison, the raw activity
           log, and the vocabulary bank. */}
       <div className="flex flex-col gap-6">
-        <div className="text-[11px] font-bold uppercase tracking-wide" style={{ color: "var(--ink-faint)" }}>Learning activity</div>
+        <div className="label-mono" style={{ color: "var(--ink-soft)" }}>Learning activity</div>
 
         <div className="card p-6">
           <div className="flex items-center justify-between mb-1 flex-wrap gap-2">
-            <h2 className="font-display font-bold text-xl" style={{ color: "var(--ink)" }}>{displayName ? `${displayName}'s target mastery` : "Target mastery"} — {gradeLabel}</h2>
+            <h2 className="font-display text-3xl" style={{ color: "var(--ink)" }}>{displayName ? `${displayName}'s target mastery` : "Target mastery"} — {gradeLabel}</h2>
             {isMapped ? (
-              <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold" style={{ background: "var(--good-tint)", color: "var(--good)" }}>
+              <span className="label-mono inline-flex items-center gap-1.5 rounded-full px-2.5 py-1" style={{ fontSize: 10.5, border: "1px solid var(--good)", color: "var(--good)" }}>
                 <IconCheck size={12} strokeWidth={2.6} /> {MAPPED_BADGE[country]}
               </span>
             ) : (
@@ -2362,9 +2360,9 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
                 block (name, then progress and status); from sm up it is the familiar
                 three-column row with a heading line. */}
             <div role="row" className="hidden sm:grid grid-cols-[1fr_10rem_7.5rem] gap-x-3 pb-2.5 text-left" style={{ color: "var(--ink-faint)" }}>
-              <div role="columnheader" className="font-semibold text-xs uppercase tracking-wider">Curriculum target</div>
-              <div role="columnheader" className="font-semibold text-xs uppercase tracking-wider">Progress</div>
-              <div role="columnheader" className="font-semibold text-xs uppercase tracking-wider">Status</div>
+              <div role="columnheader" className="label-mono">Curriculum target</div>
+              <div role="columnheader" className="label-mono">Progress</div>
+              <div role="columnheader" className="label-mono">Status</div>
             </div>
             {targets.map((row,i)=>(
               <div role="row" key={row.name} className="border-t py-3 grid grid-cols-1 sm:grid-cols-[1fr_10rem_7.5rem] gap-x-3 gap-y-2 sm:items-center" style={{ borderColor: "var(--border-soft)" }}>
@@ -2374,8 +2372,8 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
                   {backendLive && row.assessedCount > 0 && <div className="text-[11px] mt-0.5" style={{ color: "var(--ink-faint)" }}>{masteryEvidence(row, progress && progress.masteryWindow)}</div>}
                 </div>
                 <div role="cell" className="flex items-center gap-2" aria-label={"Progress " + (row.pct != null ? row.pct + " percent" : "not yet assessed")}>
-                  <div className="h-2 rounded-full flex-1" style={{ background: "var(--surface-2)" }}>
-                    <div className="h-2 rounded-full" style={{ width: (row.pct ?? 0) + "%", background: STATUS_STYLE[row.status].ink }} />
+                  <div className="h-2.5 rounded-full flex-1" style={{ background: "var(--surface-2)" }}>
+                    <div className="h-2.5 rounded-full" style={{ width: (row.pct ?? 0) + "%", background: STATUS_STYLE[row.status].ink }} />
                   </div>
                   <span className="text-xs font-semibold tabular w-10 text-right" style={{ color: "var(--ink-soft)" }}>{row.pct != null ? `${row.pct}%` : "—"}</span>
                 </div>
@@ -2389,7 +2387,7 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
         {backendLive && (
           <div className="card p-6">
             <div className="flex items-center justify-between mb-1 flex-wrap gap-2">
-              <h2 className="font-display font-bold text-xl" style={{ color: "var(--ink)" }}>Progress over time</h2>
+              <h2 className="font-display text-3xl" style={{ color: "var(--ink)" }}>Progress over time</h2>
             </div>
             <p className="text-xs mb-4" style={{ color: "var(--ink-faint)" }}>
               Average target mastery at the end of each week — built from the same strengths and next steps behind Target mastery above, tracked week by week from {displayName || "your learner"}'s own submission history.
@@ -2410,7 +2408,7 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
         {backendLive && (
           <div className="card p-6">
             <div className="flex items-center justify-between mb-1 flex-wrap gap-2">
-              <h2 className="font-display font-bold text-xl" style={{ color: "var(--ink)" }}>How {displayName || "your learner"} compares</h2>
+              <h2 className="font-display text-3xl" style={{ color: "var(--ink)" }}>How {displayName || "your learner"} compares</h2>
               <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold" style={{ background: "var(--surface-2)", color: "var(--ink-faint)" }}>
                 <CountryLabel country={country} /> · {gradeLabel}
               </span>
@@ -2490,7 +2488,7 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
         {backendLive && (
           <div className="card p-6">
             <div className="flex items-center justify-between mb-1 flex-wrap gap-2">
-              <h2 className="font-display font-bold text-xl" style={{ color: "var(--ink)" }}>Activity history</h2>
+              <h2 className="font-display text-3xl" style={{ color: "var(--ink)" }}>Activity history</h2>
               {history && <span className="text-[11px]" style={{ color: "var(--ink-faint)" }}>{history.totalSubmissions} total</span>}
             </div>
             <p className="text-xs mb-3" style={{ color: "var(--ink-faint)" }}>
@@ -2668,7 +2666,7 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
         </div>
         )}
         {showPlan && (
-        <div id="account-plan-section" className="card p-6 relative overflow-hidden" style={{ background: "linear-gradient(160deg, var(--ink), #3E2028)" }}>
+        <div id="account-plan-section" className="card p-6 relative overflow-hidden" style={{ background: "linear-gradient(160deg, #1F1C19, #3E2028)", border: "1px solid #1F1C19" }}>
           <div className="absolute -right-6 -top-6 w-28 h-28 rounded-full" style={{ background: "radial-gradient(circle, var(--gold) 0%, transparent 70%)", opacity: .35 }} />
           <div className="relative">
             <div className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold mb-3" style={{ background: "var(--gold)", color: "var(--on-solid)" }}>
