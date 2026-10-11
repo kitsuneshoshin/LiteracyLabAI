@@ -3068,20 +3068,32 @@ function AnnotatedText({ text, highlights, revisedStory }){
 // comprehension attempt already has its own natural score (X of Y
 // questions correct), shown as the percentage circle in
 // ReadingFeedbackPanel below.
+// Glow and Grow share one look: a coloured rule down the left edge, a small monospaced label, and the words themselves
+// set large in the reading serif, so the two sentences a learner most needs to read are the first thing the eye lands on.
+function FeedbackNote({ tone, kicker, tag, children }){
+  const glow = tone === "glow";
+  return (
+    <div className="card p-5 sm:p-6" style={{ borderLeft: "4px solid " + (glow ? "var(--good)" : "var(--cyan)") }}>
+      <div className="flex items-center justify-between gap-2 flex-wrap mb-2.5">
+        <div className="label-mono" style={{ color: glow ? "var(--good)" : "var(--cyan-ink)", fontWeight: 700 }}>{kicker}</div>
+        {tag && <span className="label-mono rounded-full px-2.5 py-1" style={{ fontSize: 10.5, border: "1px solid var(--border)", color: "var(--ink-soft)" }}>{tag}</span>}
+      </div>
+      {children}
+    </div>
+  );
+}
+
 function OverallScorePanel({ feedback }){
   const score = feedback?.overallScore;
   if (score == null) return null;
   const color = score >= 8 ? "var(--good)" : score >= 5 ? "var(--gold-ink)" : "var(--bad)";
   return (
-    <div className="card p-5 sm:p-6 flex items-center gap-4" style={{ borderColor: color, borderWidth: 1.5 }}>
+    <div className="card p-5 sm:p-6 flex items-center gap-5" style={{ borderLeft: "4px solid " + color }}>
       <ScoreRing score={score} total={10} label="score" />
       <div className="min-w-0">
-        <div className="flex items-center gap-1.5 mb-1">
-          <IconAward size={14} strokeWidth={2.2} style={{ color }} />
-          <h3 className="font-display font-bold text-sm" style={{ color: "var(--ink)" }}>Overall score</h3>
-        </div>
+        <div className="label-mono mb-1.5" style={{ color: "var(--ink-soft)" }}>Overall score</div>
         {feedback?.scoreReason && (
-          <p className="text-[13.5px] leading-snug" style={{ color: "var(--ink-soft)" }}>{feedback.scoreReason}</p>
+          <p className="text-[15.5px] leading-[1.55] font-read" style={{ color: "var(--ink)" }}>{feedback.scoreReason}</p>
         )}
       </div>
     </div>
@@ -3114,11 +3126,9 @@ function FeedbackPanel({ tier, gradeLabel, country, interest, confidence, motiva
 
       {submittedText && feedback?.highlights && (
         <div className="card p-5 sm:p-6">
-          <div className="flex items-center gap-2 mb-3">
-            <div className="w-8 h-8 rounded-full grid place-items-center" style={{ background: "var(--navy-tint)", color: "var(--ink)" }}>
-              <IconPen size={15} strokeWidth={2.2} />
-            </div>
-            <h3 className="font-display font-bold" style={{ color: "var(--ink)" }}>Your submission, annotated</h3>
+          <div className="mb-3">
+            <div className="label-mono mb-1" style={{ color: "var(--ink-soft)" }}>FIG.1 &nbsp; Your piece</div>
+            <h3 className="font-display text-xl" style={{ color: "var(--ink)" }}>Your submission, annotated</h3>
           </div>
           <AnnotatedText text={submittedText} highlights={feedback.highlights} revisedStory={feedback.revisedStory} />
         </div>
@@ -3138,31 +3148,14 @@ function FeedbackPanel({ tier, gradeLabel, country, interest, confidence, motiva
           onSeePlans={onSeePlans} />
       )}
 
-      <div className="card p-5 sm:p-6" style={{ borderColor: "var(--good)", borderWidth: 1.5 }}>
-        <div className="flex items-center gap-2 mb-2">
-          <div className="w-8 h-8 rounded-full grid place-items-center" style={{ background: "var(--good-tint)", color: "var(--good)" }}>
-            <IconCheck size={16} strokeWidth={2.4} />
-          </div>
-          <h3 className="font-display font-bold" style={{ color: "var(--ink)" }}>Glows — what you did well</h3>
-        </div>
-        <p className="text-[15px] leading-relaxed font-read" style={{ color: "var(--ink)" }}>{glow}</p>
-      </div>
+      <FeedbackNote tone="glow" kicker="Glow · what you did well">
+        <p className="text-[17px] leading-[1.6] font-read" style={{ color: "var(--ink)" }}>{glow}</p>
+      </FeedbackNote>
 
-      <div className="card p-5 sm:p-6" style={{ borderColor: "var(--cyan)", borderWidth: 1.5 }}>
-        <div className="flex items-center justify-between gap-2 mb-2 flex-wrap">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full grid place-items-center" style={{ background: "var(--cyan-tint)", color: "var(--cyan-ink)" }}>
-              <IconTarget size={16} strokeWidth={2.2} />
-            </div>
-            <h3 className="font-display font-bold" style={{ color: "var(--ink)" }}>Grows — your next step</h3>
-          </div>
-          <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold" style={{ background: "var(--cyan-tint)", color: "var(--cyan-ink)" }}>
-            explained through {interestLabel}
-          </span>
-        </div>
-        <p className="text-[15px] leading-relaxed font-read" style={{ color: "var(--ink)" }}>{grow}</p>
+      <FeedbackNote tone="grow" kicker="Grow · your next step" tag={"explained through " + interestLabel}>
+        <p className="text-[17px] leading-[1.6] font-read" style={{ color: "var(--ink)" }}>{grow}</p>
         <GrowNextBlock feedback={feedback} />
-      </div>
+      </FeedbackNote>
 
       <ExamTechniquePanel feedback={feedback} />
 
@@ -3246,23 +3239,23 @@ function Collapsible({ id, icon, iconBg, iconColor, title, teaser, borderColor, 
   const open = staticOpen || openState;
   if (staticOpen) {
     return (
-      <div className="card p-5 sm:p-6" style={{ borderColor, borderWidth: 1.5 }}>
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-full grid place-items-center shrink-0" style={{ background: iconBg, color: iconColor }}>{icon}</div>
-          <h3 className="font-display font-bold" style={{ color: "var(--ink)" }}>{title}</h3>
+      <div className="card p-5 sm:p-6">
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-full grid place-items-center shrink-0" style={{ border: "1px solid var(--border)", color: "var(--ink)" }}>{icon}</div>
+          <h3 className="font-display text-xl" style={{ color: "var(--ink)" }}>{title}</h3>
         </div>
         <div className="mt-3">{children}</div>
       </div>
     );
   }
   return (
-    <div className="card p-5 sm:p-6" style={{ borderColor, borderWidth: 1.5 }}>
-      <button onClick={()=>setOpen(o=>!o)} className="focus-ring w-full flex items-center gap-2 text-left" aria-expanded={open}>
-        <div className="w-8 h-8 rounded-full grid place-items-center shrink-0" style={{ background: iconBg, color: iconColor }}>
+    <div className="card p-5 sm:p-6">
+      <button onClick={()=>setOpen(o=>!o)} className="focus-ring w-full flex items-center gap-2.5 text-left" aria-expanded={open}>
+        <div className="w-8 h-8 rounded-full grid place-items-center shrink-0" style={{ border: "1px solid var(--border)", color: "var(--ink)" }}>
           {icon}
         </div>
         <div className="flex-1 min-w-0">
-          <h3 className="font-display font-bold" style={{ color: "var(--ink)" }}>{title}</h3>
+          <h3 className="font-display text-xl" style={{ color: "var(--ink)" }}>{title}</h3>
           {!open && teaser && <p className="text-[12px] truncate" style={{ color: "var(--ink-faint)" }}>{teaser}</p>}
         </div>
         <IconChevron size={16} strokeWidth={2.2} style={{ color: "var(--ink-faint)", transform: open ? "rotate(180deg)" : "none", transition: "transform 150ms", flexShrink: 0 }} />
@@ -3788,15 +3781,9 @@ function ReadingFeedbackPanel({ tier, country, interest, confidence, motivation,
   const isPoem = split && /poem/i.test(String(bank.textType || ""));
   const marked = feedback?.shortAnswer && typeof feedback.shortAnswer === "object" && Number.isInteger(feedback.shortAnswer.awarded) ? feedback.shortAnswer : null;
   const glowCard = (
-    <div className="card p-5 sm:p-6 flex items-center gap-4" style={{ borderColor: "var(--good)", borderWidth: 1.5 }}>
-      <div className="w-14 h-14 rounded-full grid place-items-center shrink-0 font-display font-extrabold text-lg" style={{ background: "var(--good-tint)", color: "var(--good)" }}>
-        {pct}%
-      </div>
-      <div>
-        <h3 className="font-display font-bold mb-1" style={{ color: "var(--ink)" }}>Glows — what you did well</h3>
-        <p className="text-[14.5px] leading-relaxed font-read" style={{ color: "var(--ink)" }}>{glow}</p>
-      </div>
-    </div>
+    <FeedbackNote tone="glow" kicker="Glow · what you did well" tag={pct + "% correct"}>
+      <p className="text-[17px] leading-[1.6] font-read" style={{ color: "var(--ink)" }}>{glow}</p>
+    </FeedbackNote>
   );
   const hero = split && (
     <div className="card p-5 sm:p-6" style={{ borderColor: "var(--good)", borderWidth: 1.5 }}>
@@ -3830,8 +3817,8 @@ function ReadingFeedbackPanel({ tier, country, interest, confidence, motivation,
         )}
       </div>
       <div className="mt-4 pt-4 border-t" style={{ borderColor: "var(--border-soft)" }}>
-        <div className="text-[11px] font-bold uppercase tracking-wide mb-1" style={{ color: "var(--good)" }}>Glow · what you did well</div>
-        <p className="text-[14.5px] leading-relaxed font-read" style={{ color: "var(--ink)" }}>{glow}</p>
+        <div className="label-mono mb-1.5" style={{ color: "var(--good)", fontWeight: 700 }}>Glow · what you did well</div>
+        <p className="text-[17px] leading-[1.6] font-read" style={{ color: "var(--ink)" }}>{glow}</p>
       </div>
     </div>
   );
@@ -3854,21 +3841,10 @@ function ReadingFeedbackPanel({ tier, country, interest, confidence, motivation,
       {split && <div className="lg:col-span-2 min-w-0">{passageCard}</div>}
       <div className={split ? "lg:col-span-3 flex flex-col gap-4 min-w-0" : "contents"}>
 
-      <div className="card p-5 sm:p-6" style={{ borderColor: "var(--cyan)", borderWidth: 1.5 }}>
-        <div className="flex items-center justify-between gap-2 mb-2 flex-wrap">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full grid place-items-center" style={{ background: "var(--cyan-tint)", color: "var(--cyan-ink)" }}>
-              <IconTarget size={16} strokeWidth={2.2} />
-            </div>
-            <h3 className="font-display font-bold" style={{ color: "var(--ink)" }}>Grows — your next step</h3>
-          </div>
-          <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold" style={{ background: "var(--cyan-tint)", color: "var(--cyan-ink)" }}>
-            explained through {interestLabel}
-          </span>
-        </div>
-        <p className="text-[15px] leading-relaxed font-read" style={{ color: "var(--ink)" }}>{grow}</p>
+      <FeedbackNote tone="grow" kicker="Grow · your next step" tag={"explained through " + interestLabel}>
+        <p className="text-[17px] leading-[1.6] font-read" style={{ color: "var(--ink)" }}>{grow}</p>
         <GrowNextBlock feedback={feedback} />
-      </div>
+      </FeedbackNote>
 
       <ExpandAllBar />
       <QuestionReviewPanel feedback={feedback} questions={questions} answers={answers} passageBank={bank} shownQuote={shownQuote} onShowQuote={setShownQuote} />
