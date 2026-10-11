@@ -675,3 +675,14 @@ test("job: a run stops sending when its time budget is spent, and says so, inste
   assert.equal(all.sent, 7);
   assert.equal(all.stoppedEarly, null);
 });
+
+test("vercel.json sends the basic browser-protection headers on every page", () => {
+  const cfg = JSON.parse(fs.readFileSync(path.join(ROOT, "vercel.json"), "utf8"));
+  const all = (cfg.headers || []).find((h) => h.source === "/(.*)");
+  assert.ok(all, "a header rule for every path");
+  const map = Object.fromEntries(all.headers.map((h) => [h.key, h.value]));
+  assert.equal(map["X-Content-Type-Options"], "nosniff");
+  assert.equal(map["Referrer-Policy"], "strict-origin-when-cross-origin");
+  assert.equal(map["X-Frame-Options"], "SAMEORIGIN");
+  assert.match(map["Permissions-Policy"], /camera=\(\)/);
+});
