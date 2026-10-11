@@ -169,7 +169,7 @@
   input[type="range"]{ accent-color: var(--cyan); }
 </style>
 <script src="analytics.js"></script>
-<link rel="stylesheet" href="/theme.css?v=8">
+<link rel="stylesheet" href="/theme.css?v=9">
 </head>
 <body>
 
@@ -1709,7 +1709,7 @@ function VocabFlashcards({ deck, boxes, onRate, onBack, onAgain }){
   return (
     <div className="max-w-xl mx-auto w-full flex flex-col gap-4">
       <div className="flex items-center gap-3">
-        <button onClick={onBack} className="focus-ring text-[13px] font-semibold underline" style={{ color: "var(--ink-soft)" }}>Back</button>
+        <button onClick={onBack} className="focus-ring text-[13px] font-semibold underline py-3 pr-3" style={{ color: "var(--ink-soft)" }}>Back</button>
         <div className="flex-1 h-2 rounded-full overflow-hidden" style={{ background: "var(--border)" }} role="progressbar" aria-valuemin={0} aria-valuemax={deck.length} aria-valuenow={idx} aria-label="Cards done">
           <div className="h-full rounded-full" style={{ width: (idx / deck.length) * 100 + "%", background: "var(--cyan)", transition: "width 250ms" }} />
         </div>
@@ -1796,7 +1796,7 @@ function VocabQuiz({ quiz, error, onRate, onRetry, onBack, loading }){
   return (
     <div className="max-w-xl mx-auto w-full flex flex-col gap-4">
       <div className="flex items-center gap-3">
-        <button onClick={onBack} className="focus-ring text-[13px] font-semibold underline" style={{ color: "var(--ink-soft)" }}>Back</button>
+        <button onClick={onBack} className="focus-ring text-[13px] font-semibold underline py-3 pr-3" style={{ color: "var(--ink-soft)" }}>Back</button>
         <div className="flex-1 h-2 rounded-full overflow-hidden" style={{ background: "var(--border)" }} role="progressbar" aria-valuemin={0} aria-valuemax={qs.length} aria-valuenow={idx} aria-label="Quiz progress">
           <div className="h-full rounded-full" style={{ width: (idx / qs.length) * 100 + "%", background: "var(--cyan)", transition: "width 250ms" }} />
         </div>
@@ -2266,12 +2266,12 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
     <>
     {needsOnboarding && !showPlan && (
       <div className="mx-auto max-w-[1400px] px-4 sm:px-6 pt-8">
-        <div className="rounded-2xl px-5 py-4 flex items-center gap-3 flex-wrap" style={{ background: "var(--cyan-tint)", border: "1.5px solid var(--cyan)" }}>
+        <div className="px-5 py-4 flex items-center gap-3 flex-wrap" style={{ background: "var(--cyan-tint)", borderLeft: "4px solid var(--cyan)", borderRadius: 4 }}>
           <div className="w-9 h-9 rounded-full grid place-items-center shrink-0" style={{ background: "var(--cyan)", color: "var(--on-solid)" }}>
             <IconSparkle size={17} strokeWidth={2.2} />
           </div>
           <div className="flex-1 min-w-[200px]">
-            <div className="font-display font-bold text-sm" style={{ color: "var(--ink)" }}>Welcome! Let's set up your learner first.</div>
+            <div className="font-display text-2xl" style={{ color: "var(--ink)" }}>Welcome! Let's set up your learner first.</div>
             <div className="text-[13px]" style={{ color: "var(--ink-soft)" }}>This takes under a minute and personalises every piece of feedback from here on.</div>
           </div>
         </div>
@@ -2674,7 +2674,7 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
             </div>
             {paid ? (
               <>
-                <h3 className="font-display font-bold text-lg text-white mb-1.5">You're on {meta.label}</h3>
+                <h3 className="font-display text-3xl text-white mb-2">You're on {meta.label}</h3>
                 <p className="text-[13px] mb-4" style={{ color: "#E4D6D2" }}>
                   {plan === "admin"
                     ? "Admin account: every feature is unlocked and nothing is billed."
@@ -2685,7 +2685,7 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
               </>
             ) : (
               <>
-                <h3 className="font-display font-bold text-lg text-white mb-1.5">{remaining <= 1 ? "Almost at your monthly limit" : "Unlock unlimited submissions"}</h3>
+                <h3 className="font-display text-3xl text-white mb-2">{remaining <= 1 ? "Almost at your monthly limit" : "Unlock unlimited submissions"}</h3>
                 <p className="text-[13px] mb-4" style={{ color: "#E4D6D2" }}>
                   You’ve used {used} of {total} free submissions this month. Choose the plan that fits your household.
                 </p>
@@ -3217,7 +3217,7 @@ function ExpandAllBar(){
   return (
     <div className="flex justify-end">
       <button type="button" onClick={()=>{ const next = !allOpen; setAllOpen(next); window.dispatchEvent(new CustomEvent("ll-set-all-sections", { detail: next })); }}
-        className="focus-ring text-[12.5px] font-semibold underline" style={{ color: "var(--ink-soft)" }}>
+        className="focus-ring text-[12.5px] font-semibold underline py-3 pl-3" style={{ color: "var(--ink-soft)" }}>
         {allOpen ? "Close all sections" : "Open all sections"}
       </button>
     </div>
@@ -5447,43 +5447,43 @@ function AuthScreen(){
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4" style={{ background: "var(--bg)" }}>
-      <div className="w-full max-w-sm">
+      <div className="w-full max-w-md">
         <div className="flex items-center gap-2.5 justify-center mb-6">
           <IconMark size={30} />
-          <span className="font-display font-bold text-lg" style={{ color: "var(--ink)" }}>LiteracyLab <span style={{ color: "var(--cyan-ink)" }}>AI</span></span>
+          <span className="font-display text-2xl" style={{ color: "var(--ink)" }}>LiteracyLab <span style={{ color: "var(--cyan-ink)" }}>AI</span></span>
         </div>
-        <div className="card p-6">
+        <div className="card p-7 sm:p-9">
           {status === "reset-sent" ? (
             <div className="text-center py-4">
-              <div className="w-11 h-11 rounded-full grid place-items-center mx-auto mb-3" style={{ background: "var(--good-tint)", color: "var(--good)" }}>
+              <div className="w-11 h-11 rounded-full grid place-items-center mx-auto mb-4" style={{ border: "1.5px solid var(--good)", color: "var(--good)" }}>
                 <IconCheck size={20} strokeWidth={2.4} />
               </div>
-              <h2 className="font-display font-bold mb-1.5" style={{ color: "var(--ink)" }}>Check your email</h2>
-              <p className="text-sm" style={{ color: "var(--ink-soft)" }}>If there's a LiteracyLab AI account for <strong>{email}</strong>, we've sent a link to choose a new password. It can take a minute to arrive.</p>
+              <h2 className="font-display text-3xl mb-2" style={{ color: "var(--ink)" }}>Check your email</h2>
+              <p className="text-[15px] leading-relaxed" style={{ color: "var(--ink-soft)" }}>If there's a LiteracyLab AI account for <strong>{email}</strong>, we've sent a link to choose a new password. It can take a minute to arrive.</p>
               <button onClick={()=>{ setStatus("idle"); setMode("login"); }} className="focus-ring mt-4 text-sm font-semibold" style={{ color: "var(--cyan-ink)" }}>Back to log in</button>
             </div>
           ) : status === "check-email" ? (
             <div className="text-center py-4">
-              <div className="w-11 h-11 rounded-full grid place-items-center mx-auto mb-3" style={{ background: "var(--good-tint)", color: "var(--good)" }}>
+              <div className="w-11 h-11 rounded-full grid place-items-center mx-auto mb-4" style={{ border: "1.5px solid var(--good)", color: "var(--good)" }}>
                 <IconCheck size={20} strokeWidth={2.4} />
               </div>
-              <h2 className="font-display font-bold mb-1.5" style={{ color: "var(--ink)" }}>Check your email</h2>
-              <p className="text-sm" style={{ color: "var(--ink-soft)" }}>We sent a confirmation link to <strong>{email}</strong>. Click it, then come back and log in.</p>
+              <h2 className="font-display text-3xl mb-2" style={{ color: "var(--ink)" }}>Check your email</h2>
+              <p className="text-[15px] leading-relaxed" style={{ color: "var(--ink-soft)" }}>We sent a confirmation link to <strong>{email}</strong>. Click it, then come back and log in.</p>
               <button onClick={()=>{ setStatus("idle"); setMode("login"); }} className="focus-ring mt-4 text-sm font-semibold" style={{ color: "var(--cyan-ink)" }}>Back to log in</button>
             </div>
           ) : (
             <>
-              <h2 className="font-display font-bold text-lg mb-1" style={{ color: "var(--ink)" }}>{mode === "signup" ? "Create your account" : mode === "forgot" ? "Reset your password" : "Welcome back"}</h2>
-              <p className="text-sm mb-5" style={{ color: "var(--ink-soft)" }}>{mode === "signup" ? "One account per household — set up your learner after signing up." : mode === "forgot" ? "Enter your email and we'll send you a link to choose a new password." : "Log in to see your learner's dashboard."}</p>
+              <h2 className="font-display text-3xl mb-2" style={{ color: "var(--ink)" }}>{mode === "signup" ? "Create your account" : mode === "forgot" ? "Reset your password" : "Welcome back"}</h2>
+              <p className="text-[15px] leading-relaxed mb-6" style={{ color: "var(--ink-soft)" }}>{mode === "signup" ? "One account per household — set up your learner after signing up." : mode === "forgot" ? "Enter your email and we'll send you a link to choose a new password." : "Log in to see your learner's dashboard."}</p>
               <form onSubmit={handleSubmit} className="flex flex-col gap-3">
                 <label className="flex flex-col gap-1.5">
-                  <span className="text-xs font-semibold" style={{ color: "var(--ink-soft)" }}>Email</span>
+                  <span className="label-mono" style={{ color: "var(--ink-soft)" }}>Email</span>
                   <input type="email" required value={email} onChange={(e)=>setEmail(e.target.value)}
                     className="focus-ring w-full rounded-xl border px-3.5 py-2.5 text-sm" style={{ borderColor: "var(--border)", background: "var(--surface)", color: "var(--ink)" }} placeholder="parent@email.com" />
                 </label>
                 {mode !== "forgot" && (
                 <label className="flex flex-col gap-1.5">
-                  <span className="text-xs font-semibold" style={{ color: "var(--ink-soft)" }}>Password</span>
+                  <span className="label-mono" style={{ color: "var(--ink-soft)" }}>Password</span>
                   <input type="password" required minLength={8} value={password} onChange={(e)=>setPassword(e.target.value)}
                     className="focus-ring w-full rounded-xl border px-3.5 py-2.5 text-sm" style={{ borderColor: "var(--border)", background: "var(--surface)", color: "var(--ink)" }} placeholder="At least 8 characters" />
                 </label>
@@ -5492,17 +5492,17 @@ function AuthScreen(){
                   <div className="text-[13px] rounded-lg px-3 py-2" style={{ background: "var(--bad-tint)", color: "var(--bad)" }}>{errorMsg}</div>
                 )}
                 <button type="submit" disabled={status === "loading"}
-                  className="focus-ring w-full rounded-xl py-2.5 font-display font-bold text-sm disabled:opacity-60"
+                  className="focus-ring w-full rounded-full py-3 font-bold text-[15px] disabled:opacity-60"
                   style={{ background: "var(--cyan)", color: "var(--on-solid)" }}>
                   {status === "loading" ? "Please wait…" : mode === "signup" ? "Create account" : mode === "forgot" ? "Send me a link" : "Log in"}
                 </button>
               </form>
               {mode === "login" && (
-                <button onClick={()=>{ setStatus("idle"); setErrorMsg(""); setMode("forgot"); }} className="focus-ring w-full text-center text-sm font-semibold mt-4" style={{ color: "var(--ink-soft)" }}>
+                <button onClick={()=>{ setStatus("idle"); setErrorMsg(""); setMode("forgot"); }} className="focus-ring w-full text-center text-sm font-semibold mt-3 py-3" style={{ color: "var(--ink-soft)" }}>
                   Forgot your password?
                 </button>
               )}
-              <button onClick={()=>{ setStatus("idle"); setErrorMsg(""); setMode(mode === "signup" ? "login" : mode === "forgot" ? "login" : "signup"); }} className="focus-ring w-full text-center text-sm font-semibold mt-3" style={{ color: "var(--cyan-ink)" }}>
+              <button onClick={()=>{ setStatus("idle"); setErrorMsg(""); setMode(mode === "signup" ? "login" : mode === "forgot" ? "login" : "signup"); }} className="focus-ring w-full text-center text-sm font-semibold mt-1 py-3" style={{ color: "var(--cyan-ink)" }}>
                 {mode === "signup" ? "Already have an account? Log in" : mode === "forgot" ? "Back to log in" : "New here? Create an account"}
               </button>
             </>
@@ -5543,33 +5543,33 @@ function SetNewPassword({ onDone }){
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4" style={{ background: "var(--bg)" }}>
-      <div className="w-full max-w-sm">
+      <div className="w-full max-w-md">
         <div className="flex items-center gap-2.5 justify-center mb-6">
           <IconMark size={30} />
-          <span className="font-display font-bold text-lg" style={{ color: "var(--ink)" }}>LiteracyLab <span style={{ color: "var(--cyan-ink)" }}>AI</span></span>
+          <span className="font-display text-2xl" style={{ color: "var(--ink)" }}>LiteracyLab <span style={{ color: "var(--cyan-ink)" }}>AI</span></span>
         </div>
-        <div className="card p-6">
+        <div className="card p-7 sm:p-9">
           {status === "done" ? (
             <div className="text-center py-4">
-              <div className="w-11 h-11 rounded-full grid place-items-center mx-auto mb-3" style={{ background: "var(--good-tint)", color: "var(--good)" }}>
+              <div className="w-11 h-11 rounded-full grid place-items-center mx-auto mb-4" style={{ border: "1.5px solid var(--good)", color: "var(--good)" }}>
                 <IconCheck size={20} strokeWidth={2.4} />
               </div>
-              <h2 className="font-display font-bold mb-1.5" style={{ color: "var(--ink)" }}>Password updated</h2>
-              <p className="text-sm" style={{ color: "var(--ink-soft)" }}>You're signed in with your new password.</p>
-              <button onClick={onDone} className="focus-ring mt-4 w-full rounded-xl py-2.5 font-display font-bold text-sm" style={{ background: "var(--cyan)", color: "var(--on-solid)" }}>Continue to LiteracyLab AI</button>
+              <h2 className="font-display text-3xl mb-2" style={{ color: "var(--ink)" }}>Password updated</h2>
+              <p className="text-[15px] leading-relaxed" style={{ color: "var(--ink-soft)" }}>You're signed in with your new password.</p>
+              <button onClick={onDone} className="focus-ring mt-5 w-full rounded-full py-3 font-bold text-[15px]" style={{ background: "var(--cyan)", color: "var(--on-solid)" }}>Continue to LiteracyLab AI</button>
             </div>
           ) : (
             <>
-              <h2 className="font-display font-bold text-lg mb-1" style={{ color: "var(--ink)" }}>Choose a new password</h2>
-              <p className="text-sm mb-5" style={{ color: "var(--ink-soft)" }}>Pick something you haven't used elsewhere. At least 8 characters.</p>
+              <h2 className="font-display text-3xl mb-2" style={{ color: "var(--ink)" }}>Choose a new password</h2>
+              <p className="text-[15px] leading-relaxed mb-6" style={{ color: "var(--ink-soft)" }}>Pick something you haven't used elsewhere. At least 8 characters.</p>
               <form onSubmit={handleSubmit} className="flex flex-col gap-3">
                 <label className="flex flex-col gap-1.5">
-                  <span className="text-xs font-semibold" style={{ color: "var(--ink-soft)" }}>New password</span>
+                  <span className="label-mono" style={{ color: "var(--ink-soft)" }}>New password</span>
                   <input id="new-password" type="password" required minLength={8} autoComplete="new-password" value={password} onChange={(e)=>setPassword(e.target.value)}
                     className="focus-ring w-full rounded-xl border px-3.5 py-2.5 text-sm" style={{ borderColor: "var(--border)", background: "var(--surface)", color: "var(--ink)" }} />
                 </label>
                 <label className="flex flex-col gap-1.5">
-                  <span className="text-xs font-semibold" style={{ color: "var(--ink-soft)" }}>Type it again</span>
+                  <span className="label-mono" style={{ color: "var(--ink-soft)" }}>Type it again</span>
                   <input id="new-password-again" type="password" required minLength={8} autoComplete="new-password" value={again} onChange={(e)=>setAgain(e.target.value)}
                     className="focus-ring w-full rounded-xl border px-3.5 py-2.5 text-sm" style={{ borderColor: "var(--border)", background: "var(--surface)", color: "var(--ink)" }} />
                 </label>
@@ -5577,7 +5577,7 @@ function SetNewPassword({ onDone }){
                   <div className="text-[13px] rounded-lg px-3 py-2" style={{ background: "var(--bad-tint)", color: "var(--bad)" }}>{errorMsg}</div>
                 )}
                 <button type="submit" disabled={status === "loading"}
-                  className="focus-ring w-full rounded-xl py-2.5 font-display font-bold text-sm disabled:opacity-60"
+                  className="focus-ring w-full rounded-full py-3 font-bold text-[15px] disabled:opacity-60"
                   style={{ background: "var(--cyan)", color: "var(--on-solid)" }}>
                   {status === "loading" ? "Please wait…" : "Save new password"}
                 </button>

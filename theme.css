@@ -71,7 +71,7 @@
     --bad-tint: #3A211C;
     --grid-line: rgba(255,255,255,0.07);
     --on-ink: #171513;
-    --on-solid: #171513;
+    --on-solid: #0B0A09;
   }
 }
 :root[data-theme="dark"]{
@@ -105,7 +105,7 @@
   --bad-tint: #3A211C;
   --grid-line: rgba(255,255,255,0.07);
   --on-ink: #171513;
-  --on-solid: #171513;
+  --on-solid: #0B0A09;
 }
 
 /* Headings: a classic serif, set a little larger because its letters are small for their height. Small interface
