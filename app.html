@@ -2513,13 +2513,14 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
       <div className={`flex flex-col gap-6 ${showOverview ? "" : "w-full mx-auto " + (showPlan ? "max-w-4xl" : "max-w-5xl")}`}>
         {!showOverview && (
           <div>
-            <button onClick={()=>setView("dashboard")} className="focus-ring inline-flex items-center gap-1.5 text-[13px] font-semibold mb-3" style={{ color: "var(--ink-soft)" }}>
+            <button onClick={()=>setView("dashboard")} className="focus-ring inline-flex items-center gap-1.5 text-[13px] font-semibold mb-2 py-2.5 pr-3" style={{ color: "var(--ink-soft)" }}>
               <IconArrowRight size={14} style={{ transform: "rotate(180deg)" }} /> Back to dashboard
             </button>
-            <h1 className="font-display font-bold text-2xl" style={{ color: "var(--ink)" }}>
+            <div className="label-mono mb-1.5" style={{ color: "var(--ink-soft)" }}>Account</div>
+            <h1 className="font-display text-5xl" style={{ color: "var(--ink)", lineHeight: 1.1 }}>
               {showPlan ? "Manage plan" : (displayName ? `Manage ${displayName}'s profile` : "Manage profile")}
             </h1>
-            <p className="text-sm mt-0.5" style={{ color: "var(--ink-soft)" }}>
+            <p className="text-[15px] mt-2" style={{ color: "var(--ink-soft)" }}>
               {showPlan ? "Your subscription and what each plan includes." : "Curriculum, year group, interests and account settings."}
             </p>
           </div>
@@ -2531,18 +2532,18 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
               <button key={target} onClick={()=>setView(target)}
                 className="focus-ring card p-5 flex items-center justify-between gap-3 text-left transition-colors">
                 <div>
-                  <div className="font-display font-semibold text-sm" style={{ color: "var(--ink)" }}>{label}</div>
-                  <div className="text-xs mt-0.5" style={{ color: "var(--ink-soft)" }}>{sub}</div>
+                  <div className="font-display text-2xl" style={{ color: "var(--ink)" }}>{label}</div>
+                  <div className="text-[13px] mt-1" style={{ color: "var(--ink-soft)" }}>{sub}</div>
                 </div>
                 <IconArrowRight size={18} style={{ color: "var(--cyan-ink)" }} className="shrink-0" />
               </button>
             ))}
             <button onClick={needsOnboarding ? onCompleteOnboarding : ()=>setView("workspace")}
               className="focus-ring card p-5 flex items-center justify-between gap-3 text-left transition-colors"
-              style={ needsOnboarding ? { borderColor: "var(--cyan)", borderWidth: 1.5, background: "var(--cyan-tint)" } : {} }>
+              style={ needsOnboarding ? { borderLeft: "4px solid var(--cyan)", background: "var(--cyan-tint)" } : {} }>
               <div>
-                <div className="font-display font-semibold text-sm" style={{ color: "var(--ink)" }}>{needsOnboarding ? "Start Writing" : "Go to Student Workspace"}</div>
-                <div className="text-xs mt-0.5" style={{ color: "var(--ink-soft)" }}>{needsOnboarding ? "Setup saved — begin your first session" : `Start today’s ${TIER_META[tier].label.toLowerCase()} writing or reading session`}</div>
+                <div className="font-display text-2xl" style={{ color: "var(--ink)" }}>{needsOnboarding ? "Start Writing" : "Go to Student Workspace"}</div>
+                <div className="text-[13px] mt-1" style={{ color: "var(--ink-soft)" }}>{needsOnboarding ? "Setup saved — begin your first session" : `Start today’s ${TIER_META[tier].label.toLowerCase()} writing or reading session`}</div>
               </div>
               <IconArrowRight size={18} style={{ color: "var(--cyan-ink)" }} className="shrink-0" />
             </button>
@@ -2557,7 +2558,7 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
           teaser={`${displayName || "Your learner"} · ${TIER_META[tier].label} · ${stripFlag(country)}`}>
           <div className="flex items-start justify-between gap-4 flex-wrap mb-5">
             <p className="text-sm" style={{ color: "var(--ink-soft)" }}>Curriculum, year group and interests personalise every prompt and feedback note.</p>
-            <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold" style={{ background: "var(--navy-tint)", color: "var(--ink)" }}>
+            <span className="label-mono inline-flex items-center gap-1.5 rounded-full px-3 py-1.5" style={{ border: "1px solid var(--border)", color: "var(--ink)" }}>
               {React.createElement(TIER_META[tier].icon, { size: 13, strokeWidth: 2.3 })}
               {TIER_META[tier].label} · {TIER_META[tier].ageRange}
             </span>
@@ -2565,7 +2566,7 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
 
           {backendLive && (
             <label className="flex flex-col gap-1.5 mb-4">
-              <span className="text-xs font-semibold" style={{ color: "var(--ink-soft)" }}>Learner's name</span>
+              <span className="label-mono" style={{ color: "var(--ink-soft)" }}>Learner's name</span>
               <div className="flex items-center gap-3">
                 <Avatar avatarId={avatarId} size={40} />
                 <input type="text" value={displayName} onChange={(e)=>setDisplayName(e.target.value)} placeholder="e.g. Maya"
@@ -2577,14 +2578,14 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
 
           {backendLive && (
             <div className="flex flex-col gap-1.5 mb-6">
-              <span className="text-xs font-semibold" style={{ color: "var(--ink-soft)" }}>Choose an avatar</span>
+              <span className="label-mono" style={{ color: "var(--ink-soft)" }}>Choose an avatar</span>
               <AvatarPicker value={avatarId} onChange={setAvatarId} />
             </div>
           )}
 
           <div className="grid sm:grid-cols-2 gap-4 mb-6">
             <label className="flex flex-col gap-1.5">
-              <span className="text-xs font-semibold" style={{ color: "var(--ink-soft)" }}>Country curriculum</span>
+              <span className="label-mono" style={{ color: "var(--ink-soft)" }}>Country curriculum</span>
               <div className="relative">
                 <select value={country} onChange={(e)=>setCountry(e.target.value)}
                   className="focus-ring w-full appearance-none rounded-xl border px-3.5 py-2.5 pr-9 text-sm font-medium"
@@ -2601,7 +2602,7 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
               <span className="text-[11px]" style={{ color: "var(--ink-faint)" }}>{GRADE_DATA[country].curriculum}</span>
             </label>
             <label className="flex flex-col gap-1.5">
-              <span className="text-xs font-semibold" style={{ color: "var(--ink-soft)" }}>Grade / year / level</span>
+              <span className="label-mono" style={{ color: "var(--ink-soft)" }}>Grade / year / level</span>
               <div className="relative">
                 <select value={gradeIdx} onChange={(e)=>setGradeIdx(Number(e.target.value))}
                   className="focus-ring w-full appearance-none rounded-xl border px-3.5 py-2.5 pr-9 text-sm font-medium"
@@ -2613,7 +2614,7 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
             </label>
           </div>
 
-          <span className="text-xs font-semibold" style={{ color: "var(--ink-soft)" }}>Interests</span>
+          <span className="label-mono" style={{ color: "var(--ink-soft)" }}>Interests</span>
           <p className="text-[11px] mt-0.5 mb-2" style={{ color: "var(--ink-faint)" }}>Shown for {TIER_META[tier].label} in {country.replace(/^\S+\s/,"")} — the options change with age and region.</p>
           <div className="flex flex-wrap gap-2 mb-5">
             {interestsForTier(tier).map(({id,label,icon})=> (
@@ -2621,21 +2622,21 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
             ))}
           </div>
 
-          <span className="text-xs font-semibold" style={{ color: "var(--ink-soft)" }}>How confident do you feel about writing?</span>
+          <span className="label-mono" style={{ color: "var(--ink-soft)" }}>How confident do you feel about writing?</span>
           <div className="flex flex-wrap gap-2 mt-2 mb-4">
             {CONFIDENCE_LEVELS.map(({id,label})=> (
               <Pill key={id} active={confidenceWriting===id} onClick={()=>setConfidenceWriting(id)}>{label}</Pill>
             ))}
           </div>
 
-          <span className="text-xs font-semibold" style={{ color: "var(--ink-soft)" }}>How confident do you feel about reading?</span>
+          <span className="label-mono" style={{ color: "var(--ink-soft)" }}>How confident do you feel about reading?</span>
           <div className="flex flex-wrap gap-2 mt-2 mb-5">
             {CONFIDENCE_LEVELS.map(({id,label})=> (
               <Pill key={id} active={confidenceReading===id} onClick={()=>setConfidenceReading(id)}>{label}</Pill>
             ))}
           </div>
 
-          <span className="text-xs font-semibold" style={{ color: "var(--ink-soft)" }}>What's the main goal right now?</span>
+          <span className="label-mono" style={{ color: "var(--ink-soft)" }}>What's the main goal right now?</span>
           <div className="flex flex-wrap gap-2 mt-2">
             {MOTIVATIONS.map(({id,label})=> (
               <Pill key={id} active={motivation===id} onClick={()=>setMotivation(id)}>{label}</Pill>
@@ -2644,19 +2645,20 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
 
           {backendLive && children_.length > 1 && (
             <button onClick={()=>{ if (window.confirm(`Remove ${displayName || "this learner"}? This deletes all of their submissions and progress history permanently.`)) onRemoveChild(activeChildId); }}
-              className="focus-ring mt-6 pt-4 border-t text-xs font-semibold w-full text-left" style={{ borderColor: "var(--border-soft)", color: "var(--bad)" }}>
+              className="focus-ring mt-6 pt-4 pb-2 border-t text-[13px] font-semibold w-full text-left" style={{ borderColor: "var(--border-soft)", color: "var(--bad)" }}>
               Remove {displayName || "this learner"} from this account
             </button>
           )}
           {backendLive && (
-            <div className={children_.length > 1 ? "mt-3 flex flex-wrap gap-4" : "mt-6 pt-4 border-t flex flex-wrap gap-4"} style={{ borderColor: "var(--border-soft)" }}>
+            <div className={children_.length > 1 ? "mt-3 flex flex-wrap items-center gap-x-5 gap-y-1" : "mt-6 pt-4 border-t flex flex-wrap items-center gap-x-5 gap-y-1"} style={{ borderColor: "var(--border-soft)" }}>
+              <span className="label-mono" style={{ color: "var(--ink-soft)" }}>Your data</span>
               <Tooltip text="Downloads a JSON file with everything this account holds: every learner's profile and their complete writing/reading history. Instant, self-service.">
-                <button onClick={handleExportData} className="focus-ring text-xs font-semibold" style={{ color: "var(--ink-soft)" }}>
+                <button onClick={handleExportData} className="focus-ring text-[13px] font-semibold underline py-3" style={{ color: "var(--ink-soft)" }}>
                   Export my account data
                 </button>
               </Tooltip>
               <Tooltip text="Permanently deletes every learner profile and all history on this account, and cancels any active subscription. Immediate and cannot be undone.">
-                <button onClick={handleDeleteAccount} className="focus-ring text-xs font-semibold" style={{ color: "var(--bad)" }}>
+                <button onClick={handleDeleteAccount} className="focus-ring text-[13px] font-semibold underline py-3" style={{ color: "var(--bad)" }}>
                   Delete my entire account
                 </button>
               </Tooltip>
@@ -2697,12 +2699,12 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
                     <div key={p.tier} className="rounded-xl p-3.5" style={{ background: "rgba(255,255,255,.07)", border: "1px solid rgba(255,255,255,.14)" }}>
                       <div className="flex items-baseline justify-between gap-2">
                         <div className="font-display font-bold text-sm text-white">{p.name}</div>
-                        <div className="text-[13px] font-semibold" style={{ color: "var(--gold)" }}>{p.price}<span className="text-[11px] font-normal" style={{ color: "#B9A69F" }}> /mo</span></div>
+                        <div className="text-[13px] font-semibold" style={{ color: "#E8C275" }}>{p.price}<span className="text-[11px] font-normal" style={{ color: "#B9A69F" }}> /mo</span></div>
                       </div>
                       <div className="text-[11px] mb-2" style={{ color: "#B9A69F" }}>{p.sub}</div>
                       <ul className="text-[12.5px] space-y-1" style={{ color: "#EDE1DC" }}>
                         {p.features.map(t=>(
-                          <li key={t} className="flex items-start gap-2"><IconCheck size={12} strokeWidth={2.4} style={{ color: "var(--gold)", flexShrink: 0, marginTop: 3 }} />{t}</li>
+                          <li key={t} className="flex items-start gap-2"><IconCheck size={12} strokeWidth={2.4} style={{ color: "#E8C275", flexShrink: 0, marginTop: 3 }} />{t}</li>
                         ))}
                       </ul>
                       <button onClick={()=>handleBilling(p.tier)} disabled={billingLoading || !backendLive}
