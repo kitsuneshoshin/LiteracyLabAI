@@ -79,3 +79,21 @@ test("the page offers 'I know this' and 'Bring back', explains the bars, and sav
   assert.match(fn, /saveVocabBoxes\(childId, next\)/);
   assert.match(fn, /\/api\/history/);
 });
+
+// ---------------------------------------------------------------- the youngest learners: no grown-up exam words
+test("for ages 5 to 7 the goal note never mentions graders, examiners or marks, and asks for plain words", () => {
+  const { buildWritingPrompt, buildReadingPrompt } = require("../api/_lib/prompt");
+  const common = { country: "🇬🇧 United Kingdom", gradeLabel: "Year 1", interest: "football", confidenceWriting: "growing", confidenceReading: "growing", motivation: "grades", targetNames: ["Language Conventions"], targets: [{ name: "Language Conventions", standard: "B3" }], capabilities: {} };
+  const young = buildWritingPrompt({ ...common, tier: "early", prompt: "Write about a bell.", text: "I rang the tiny bell." });
+  assert.ok(!/examiner or grader/i.test(young), "the exam-and-grader goal note is not used for ages 5 to 7");
+  assert.match(young, /what their teacher would love to see/);
+  assert.match(young, /LANGUAGE FOR THIS AGE/);
+  const youngComp = buildWritingPrompt({ ...common, tier: "early", motivation: "competition", prompt: "p", text: "I rang the tiny bell." });
+  assert.ok(!/winning one/.test(youngComp));
+  const read = buildReadingPrompt({ ...common, tier: "early", passageTitle: "T", passage: "A bell rang.", questions: [], answers: [], score: 1, totalQuestions: 1 });
+  assert.match(read, /LANGUAGE FOR THIS AGE/);
+  // older students keep the original wording
+  const older = buildWritingPrompt({ ...common, tier: "high", gradeLabel: "Year 11", prompt: "p", text: "An essay." });
+  assert.match(older, /examiner or grader/);
+  assert.ok(!/LANGUAGE FOR THIS AGE/.test(older));
+});

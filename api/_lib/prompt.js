@@ -21,6 +21,19 @@ const MOTIVATION_NOTE = {
   competition: "Their stated goal is competition or test prep — close the Grow by connecting it to the kind of polish that separates a strong entry from a winning one.",
 };
 
+// For the youngest learners the goal notes change: a six-year-old is not working towards "exams", so the Grow is tied to
+// what their teacher would love to see, in plain words, and the exam words (grader, examiner, marks...) are kept out.
+const EARLY_MOTIVATION_NOTE = {
+  grades: "Their stated goal is doing well at school. Close the Grow by saying what their teacher would love to see in a finished piece, in plain words a young child knows. Do not use the words grader, examiner, marks, exam or assessment.",
+  enjoyment: MOTIVATION_NOTE.enjoyment,
+  competition: "Their stated goal is to do their very best. Close the Grow with one friendly tip that would make this their best piece yet. Do not use exam, test or competition words.",
+};
+const EARLY_VOICE = "LANGUAGE FOR THIS AGE: write the Glow, the Grow and every explanation for a child of 5 to 7. Use everyday words and short sentences. Say 'your teacher' or 'a reader', never 'grader', 'examiner', 'marker' or 'assessor'. Curriculum standard names are still quoted exactly as given.";
+function motivationNote(motivation, tier) {
+  const table = tier === "early" ? EARLY_MOTIVATION_NOTE : MOTIVATION_NOTE;
+  return (table[motivation] || "") + (tier === "early" ? "\n" + EARLY_VOICE : "");
+}
+
 function standardsClause(country, tier, gradeLabel) {
   const standards = standardsFor(country, tier, gradeLabel);
   if (standards) {
@@ -321,7 +334,7 @@ ${text}
 
 Their stated interest for personalising feedback is: ${interest}.
 ${CONFIDENCE_NOTE[confidenceWriting] || ""}
-${MOTIVATION_NOTE[motivation] || ""}
+${motivationNote(motivation, tier)}
 ${standardsClause(country, tier, gradeLabel)}
 ${targetsClause(targetNames)}
 ${highlightsClause(tier)}
@@ -443,7 +456,7 @@ ${answerLines}
 
 Their stated interest for personalising feedback is: ${interest}.
 ${CONFIDENCE_NOTE[confidenceReading] || ""}
-${MOTIVATION_NOTE[motivation] || ""}
+${motivationNote(motivation, tier)}
 ${standardsClause(country, tier, gradeLabel)}
 ${targetsClause(targetNames)}
 ${deepFeedbackClause(caps.deepFeedback)}${strictStandardClause(caps, "reading")}
