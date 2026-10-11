@@ -1568,7 +1568,7 @@ function VocabularyBank({ session, childId, backendLive, onSeePlans, displayName
       <div className="card p-5 sm:p-6">
         <div className="flex flex-col sm:flex-row sm:items-center gap-4 justify-between">
           <div className="min-w-0">
-            <h2 className="font-display font-bold text-xl" style={{ color: "var(--ink)" }}>{who} vocabulary bank</h2>
+            <h2 className="font-display text-3xl" style={{ color: "var(--ink)" }}>{who} vocabulary bank</h2>
             <p className="text-[13px] mt-0.5" style={{ color: "var(--ink-soft)" }}>Every word from your feedback, in one place. Practise a few each day and they stick.</p>
             <p className="text-[12px] mt-1" style={{ color: "var(--ink-faint)" }}>The bars on each card show how well you know the word: New, Learning, Nearly there, Know it. Press “I know this” on a word you are comfortable with to clear it from your list. You can bring it back any time.</p>
           </div>
@@ -1634,14 +1634,14 @@ function VocabularyBank({ session, childId, backendLive, onSeePlans, displayName
             )}
           </div>
           {wordOfDay && !query.trim() && (
-            <div className="card p-4 sm:p-5" style={{ borderColor: "var(--gold)" }} aria-label="Word of the day">
+            <div className="card p-5 sm:p-6" style={{ borderLeft: "4px solid var(--gold)" }} aria-label="Word of the day">
               <div className="flex items-center justify-between gap-2 flex-wrap">
-                <span className="text-[11px] font-bold uppercase tracking-wide" style={{ color: "var(--gold-ink)" }}>Word of the day</span>
+                <span className="label-mono" style={{ color: "var(--gold-ink)", fontWeight: 700 }}>Word of the day</span>
                 <MasteryPips box={vocabBoxOf(boxes, wordOfDay.term)} />
               </div>
-              <div className="font-display font-bold text-xl mt-1" style={{ color: "var(--cyan-ink)" }}>{wordOfDay.term}</div>
-              <p className="text-[13.5px] leading-snug mt-1" style={{ color: "var(--ink)" }}>{wordOfDay.definition}</p>
-              {wordOfDay.example && <p className="text-[13px] leading-snug italic mt-1" style={{ color: "var(--ink-soft)" }}>“{wordOfDay.example}”</p>}
+              <div className="font-display text-4xl mt-1.5" style={{ color: "var(--ink)", lineHeight: 1.15 }}>{wordOfDay.term}</div>
+              <p className="text-[16px] leading-[1.55] font-read mt-1.5" style={{ color: "var(--ink)" }}>{wordOfDay.definition}</p>
+              {wordOfDay.example && <p className="text-[15px] leading-snug italic font-read mt-1.5" style={{ color: "var(--ink-soft)" }}>“{wordOfDay.example}”</p>}
               {wordOfDay.trick && <p className="text-[12.5px] leading-snug mt-1" style={{ color: "var(--cyan-ink)" }}><span className="font-semibold">Word trick: </span>{wordOfDay.trick}</p>}
               <p className="text-[12px] mt-2" style={{ color: "var(--ink-faint)" }}>Try using it once today, in a sentence you say or write.</p>
               <button type="button" onClick={()=>setWordBox(wordOfDay.term, VOCAB_BOXES - 1)} className="focus-ring mt-2 inline-flex items-center gap-1 rounded-full border px-3 py-1 text-[12px] font-semibold" style={{ borderColor: "var(--good)", color: "var(--good)", background: "var(--good-tint)" }}><IconCheck size={12} strokeWidth={2.6} /> I know this</button>
@@ -1656,11 +1656,11 @@ function VocabularyBank({ session, childId, backendLive, onSeePlans, displayName
               {shown.map((v) => (
                 <div key={v.term} className="card p-4 flex flex-col gap-1.5" style={{ borderColor: "var(--border)" }}>
                   <div className="flex items-center justify-between gap-2">
-                    <span className="font-display font-bold text-[15px]" style={{ color: "var(--cyan-ink)" }}>{v.term}</span>
+                    <span className="font-display text-2xl" style={{ color: "var(--ink)", lineHeight: 1.2 }}>{v.term}</span>
                     <MasteryPips box={vocabBoxOf(boxes, v.term)} />
                   </div>
-                  <p className="text-[13px] leading-snug" style={{ color: "var(--ink)" }}>{v.definition}</p>
-                  {v.example && <p className="text-[13px] leading-snug italic" style={{ color: "var(--ink-soft)" }}>“{v.example}”</p>}
+                  <p className="text-[14.5px] leading-snug font-read" style={{ color: "var(--ink)" }}>{v.definition}</p>
+                  {v.example && <p className="text-[14px] leading-snug italic font-read" style={{ color: "var(--ink-soft)" }}>“{v.example}”</p>}
                   {v.characteristics && <p className="text-[12.5px] leading-snug" style={{ color: "var(--ink-soft)" }}><span className="font-semibold" style={{ color: "var(--ink)" }}>It is: </span>{v.characteristics}</p>}
                   {v.nonExample && <p className="text-[12.5px] leading-snug" style={{ color: "var(--ink-soft)" }}><span className="font-semibold" style={{ color: "var(--bad)" }}>Not: </span>{v.nonExample}</p>}
                   {v.trick && <p className="text-[12.5px] leading-snug" style={{ color: "var(--cyan-ink)" }}><span className="font-semibold">Word trick: </span>{v.trick}</p>}
@@ -1718,10 +1718,10 @@ function VocabFlashcards({ deck, boxes, onRate, onBack, onAgain }){
       <button type="button" onClick={()=>setFlipped((f) => !f)} aria-label={flipped ? "Show the word" : "Show the meaning"}
         className="focus-ring card w-full text-left p-6 sm:p-8 min-h-[16rem] flex flex-col justify-center gap-3" style={{ borderColor: flipped ? "var(--cyan)" : "var(--border)", borderWidth: 1.5 }}>
         <div className="flex items-center justify-between">
-          <span className="text-[11px] font-bold uppercase tracking-wide" style={{ color: "var(--ink-faint)" }}>{flipped ? "Meaning" : "What does this word mean?"}</span>
+          <span className="label-mono" style={{ color: "var(--ink-soft)" }}>{flipped ? "Meaning" : "What does this word mean?"}</span>
           <MasteryPips box={vocabBoxOf(boxes, card.term)} />
         </div>
-        <div className="font-display font-extrabold text-3xl" style={{ color: "var(--cyan-ink)" }}>{card.term}</div>
+        <div className="font-display text-5xl" style={{ color: "var(--ink)", lineHeight: 1.1 }}>{card.term}</div>
         {flipped ? (
           <div className="flex flex-col gap-2">
             <FrayerCard w={card} big />
@@ -1769,10 +1769,10 @@ function VocabQuiz({ quiz, error, onRate, onRetry, onBack, loading }){
         <h3 className="font-display font-bold text-lg" style={{ color: "var(--ink)" }}>{right === qs.length ? "Perfect score" : right >= qs.length / 2 ? "Good going" : "Keep practising"}</h3>
         {missed.length > 0 && (
           <div className="w-full text-left flex flex-col gap-2">
-            <div className="text-[11px] font-bold uppercase tracking-wide" style={{ color: "var(--ink-faint)" }}>Words to revisit</div>
+            <div className="label-mono" style={{ color: "var(--ink-soft)" }}>Words to revisit</div>
             {missed.map((m) => (
               <div key={m.term} className="rounded-xl p-3" style={{ background: "var(--surface-2)" }}>
-                <span className="font-display font-bold text-sm" style={{ color: "var(--cyan-ink)" }}>{m.term}</span>
+                <span className="font-display text-xl" style={{ color: "var(--ink)" }}>{m.term}</span>
                 <p className="text-[13px] mt-0.5" style={{ color: "var(--ink)" }}>{m.options[m.correctIndex]}</p>
               </div>
             ))}
@@ -1803,8 +1803,8 @@ function VocabQuiz({ quiz, error, onRate, onRetry, onBack, loading }){
         <span className="text-xs font-semibold tabular" style={{ color: "var(--ink-soft)" }}>{idx + 1} / {qs.length}</span>
       </div>
       <div className="card p-5 sm:p-6">
-        <div className="text-[11px] font-bold uppercase tracking-wide mb-1" style={{ color: "var(--ink-faint)" }}>Which meaning fits?</div>
-        <div className="font-display font-extrabold text-2xl mb-4" style={{ color: "var(--cyan-ink)" }}>{q.term}</div>
+        <div className="label-mono mb-1.5" style={{ color: "var(--ink-soft)" }}>Which meaning fits?</div>
+        <div className="font-display text-4xl mb-5" style={{ color: "var(--ink)", lineHeight: 1.1 }}>{q.term}</div>
         <div className="flex flex-col gap-2">
           {q.options.map((opt, oi) => {
             const isCorrect = oi === q.correctIndex;
