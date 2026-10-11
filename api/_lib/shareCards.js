@@ -10,6 +10,7 @@
 //  - The friend's link carries the parent's referral code, so a sign-up through a card counts like any invite
 //    (api/_lib/referrals.js).
 
+const { targetsForGrade, targetMode } = require("./masteryTargets");
 const crypto = require("node:crypto");
 const { ensureCode } = require("./referrals");
 
@@ -45,6 +46,21 @@ const label = (v, max) => {
   return t ? t.slice(0, max) : null;
 };
 
+// The skill on the card must suit the kind of piece: a story shows a WRITING skill, a reading exercise a READING skill. The AI
+// names its strongest skill from the whole list, so a story can come back tagged with a reading skill such as
+// "Comprehension Strategies"; then the next-step skill is used if it fits, and otherwise no skill is shown at all.
+function skillFor(sub, fb, kind) {
+  let targets = [];
+  try { targets = (targetsForGrade(sub.country, sub.grade_label, sub.tier) || {}).targets || []; } catch (e) { targets = []; }
+  for (const name of [fb.glowTarget, fb.growTarget]) {
+    const l = label(name, 80);
+    if (!l) continue;
+    const t = targets.find((x) => x.name === l) || { name: l };
+    if (targetMode(t) === kind) return l;
+  }
+  return null;
+}
+
 // What a finished piece contributes to its card.
 function fieldsFromSubmission(sub) {
   const fb = sub && sub.feedback;
@@ -55,7 +71,7 @@ function fieldsFromSubmission(sub) {
   return {
     kind,
     grade_label: label(sub.grade_label, 60),
-    skill: label(fb.glowTarget, 80),
+    skill: skillFor(sub, fb, kind),
     score: reading ? sub.score : null,
     total: reading ? sub.total_questions : null,
   };
@@ -79,7 +95,7 @@ async function createCard(supabase, user, { submissionId, name }, { siteUrl = "h
   if (!submissionId) throw httpError(400, "submissionId is required.");
   const display = cleanName(name);
   const { data: sub, error } = await supabase.from("submissions")
-    .select("id, kind, grade_label, score, total_questions, feedback").eq("id", submissionId).eq("profile_id", user.id).maybeSingle();
+    .select("id, kind, grade_label, country, tier, score, total_questions, feedback").eq("id", submissionId).eq("profile_id", user.id).maybeSingle();
   if (error) throw error;
   if (!sub) throw httpError(404, "That piece was not found.");
   const fields = fieldsFromSubmission(sub);

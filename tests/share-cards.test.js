@@ -100,11 +100,11 @@ test("sharing the same piece again keeps one link and just updates the name; the
 
 // ---------------------------------------------------------------- the public page and switching it off
 test("the public read returns only the listed fields, and nothing once it is switched off", async () => {
-  const db = fakeDb({ submissions: [piece({ kind: "reading", score: 3, total_questions: 5 })] });
+  const db = fakeDb({ submissions: [piece({ kind: "reading", score: 3, total_questions: 5, feedback: { glowTarget: "Inference", glow: "x" } })] });
   const { token } = await S.createCard(db, USER, { submissionId: "s1", name: "Maya" });
   const card = await S.viewCard(db, token);
   assert.deepEqual(Object.keys(card).sort(), [...S.CARD_FIELDS].sort());
-  assert.deepEqual(card, { name: "Maya", kind: "reading", year: "Year 5", skill: "Fronted adverbials", score: 3, total: 5, ref: "ABCD2345" });
+  assert.deepEqual(card, { name: "Maya", kind: "reading", year: "Year 5", skill: "Inference", score: 3, total: 5, ref: "ABCD2345" });
   assert.equal(await S.viewCard(db, "nonexistent1"), null);
   assert.equal(await S.viewCard(db, "short"), null, "a malformed token is not even looked up");
   assert.equal(await S.viewCard(db, "../../etc/pa"), null);
@@ -159,4 +159,26 @@ test("the share page is private by design: noindex, built with text nodes, robot
   const app = fs.readFileSync(path.join(ROOT, "app.html"), "utf8");
   assert.equal((app.match(/<ShareResultCard session=\{session\}/g) || []).length, 2, "offered after both writing and reading feedback");
   assert.match(app, /It never shows any writing, and you can switch it off at any time/);
+});
+
+// ---------------------------------------------------------------- the skill must suit the kind of piece
+const { targetsForGrade } = require("../api/_lib/masteryTargets");
+test("a story never shows a reading skill on its card, and a reading exercise never shows a writing skill", () => {
+  const AU = "🇦🇺 Australia";
+  const t = targetsForGrade(AU, "Year 7", "middle").targets;
+  const { targetMode } = require("../api/_lib/masteryTargets");
+  const reading = t.find((x) => targetMode(x) === "reading").name;
+  const writing = t.find((x) => targetMode(x) === "writing").name;
+  const base = { country: AU, grade_label: "Year 7", tier: "middle" };
+  // the AI praised a reading skill on a story: fall back to the next-step skill if that is a writing one
+  const a = S.fieldsFromSubmission({ ...base, kind: "writing", feedback: { glowTarget: reading, growTarget: writing } });
+  assert.equal(a.skill, writing);
+  // a writing skill that suits the piece is used as before
+  assert.equal(S.fieldsFromSubmission({ ...base, kind: "writing", feedback: { glowTarget: writing, growTarget: reading } }).skill, writing);
+  // neither skill suits: no skill is shown rather than a wrong one
+  assert.equal(S.fieldsFromSubmission({ ...base, kind: "writing", feedback: { glowTarget: reading, growTarget: reading } }).skill, null);
+  // and the other way round for reading
+  const r = S.fieldsFromSubmission({ ...base, kind: "reading", score: 3, total_questions: 5, feedback: { glowTarget: writing, growTarget: reading } });
+  assert.equal(r.skill, reading); assert.equal(r.score, 3);
+  assert.equal(S.fieldsFromSubmission({ ...base, kind: "reading", score: 3, total_questions: 5, feedback: { glowTarget: writing, growTarget: writing } }).skill, null);
 });
