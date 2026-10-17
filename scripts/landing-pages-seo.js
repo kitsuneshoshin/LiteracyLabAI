@@ -188,6 +188,46 @@ const PAGES = [
       ["Can I delete my child's data?", "Yes. Parents can review, export or permanently delete a child's data from the dashboard."],
     ],
   },
+  {
+    slug: "about-literacylab-ai",
+    title: "About LiteracyLab AI: what it is, how it works, and its limits",
+    description: "What LiteracyLab AI is, how its feedback is made, what it does with children's writing, what it cannot do, and how to contact us.",
+    h1: "About LiteracyLab AI",
+    lead: "LiteracyLab AI is an online literacy coach for children and students aged 5 to 18. This page says plainly what it is, how the feedback is made, what happens to a child's writing, and where its limits are.",
+    quick: "LiteracyLab AI reads a child's writing or reading answers and gives specific feedback matched to their school curriculum. It is an independent product, accounts are managed by a parent or guardian, and it is not affiliated with any exam board, government or school.",
+    body: `
+<h2>What it is</h2>
+<p>A child writes a piece, or answers questions on a reading passage, and LiteracyLab AI gives back one strength, one clear next step, a corrected version of the piece, and vocabulary to learn. Feedback is matched to the child's country and year: the UK, US, Australia, Canada, the Gulf, Singapore, and CEFR levels for English learners. See the <a href="/learn/how-it-works/">step-by-step walkthrough</a>.</p>
+<h2>How the feedback is made</h2>
+<ul>
+  <li>The feedback is written by a large language model (an AI), guided by instructions we wrote about the child's year, curriculum and chosen interests.</li>
+  <li>Each answer is checked by our own rules before it is shown, for example that quoted words really come from the child's piece and that a very short piece is not praised as if it were full-length.</li>
+  <li>Scores and exam-style bands are guides for practice, not exam results, and the AI can still make mistakes.</li>
+</ul>
+<h2>What happens to a child's writing</h2>
+<ul>
+  <li>A parent or guardian creates and manages every account. Children do not register on their own.</li>
+  <li>A submission is sent securely to an AI provider only to produce the feedback for that child. It is not sold or rented, and it is not used to train public AI models.</li>
+  <li>Parents can review, export or permanently delete a child's data from the dashboard.</li>
+</ul>
+<p>The full details are in the <a href="/privacy.html">privacy policy</a> and the <a href="/terms.html">terms of use</a>. A longer answer to the common worry is on our page about <a href="/learn/ai-writing-coach-for-kids/">AI writing coaches and safety</a>.</p>
+<h2>What it does not do</h2>
+<ul>
+  <li>It does not write a child's story or essay for them.</li>
+  <li>It does not replace a teacher, who knows the child in a way no tool does.</li>
+  <li>It does not give an exam mark, percentage or grade letter, and it is not affiliated with any exam board, government body or school.</li>
+</ul>
+<h2>Free resources</h2>
+<p>Alongside the app we publish free <a href="/learn/worksheets/">reading comprehension worksheets</a> with answer keys, a <a href="/learn/prompts/">writing prompt generator</a>, <a href="/learn/articles/">articles for parents</a> and year-by-year <a href="/learn/">curriculum guides</a>.</p>
+<h2>Contact</h2>
+<p>For help with an account or a question about the product, write to <b>support@literacylabai.com</b>. For privacy questions, write to <b>privacy@literacylabai.com</b>.</p>`,
+    cta: "Try it free",
+    faq: [
+      ["Who is LiteracyLab AI for?", "Parents and guardians of children and students aged 5 to 18, and English learners at any age. Accounts are created and managed by a parent or guardian."],
+      ["Is LiteracyLab AI free?", "There is a Free plan with 3 pieces a month and full feedback, no card needed. Paid plans add unlimited pieces, more learners, progress tracking and extra feedback sections."],
+      ["Is it affiliated with a school or exam board?", "No. It is an independent product and is not affiliated with any exam board, government or school."],
+    ],
+  },
 ];
 
 module.exports = { PAGES };

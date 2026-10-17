@@ -29,6 +29,7 @@ function buildArticle(a, { layout, breadcrumbLd, ctaBlock }) {
 ${a.sections.map(sectionHtml).join("\n")}
 <h2>Common questions</h2>
 ${a.faq.map(([q, ans]) => `<details class="faq-q"><summary>${esc(q)}</summary><p>${esc(ans)}</p></details>`).join("")}
+<p class="small">Last updated <time datetime="${LASTMOD}">${new Date(LASTMOD + "T00:00:00Z").toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" })}</time>.</p>
 ${ctaBlock("article-" + a.slug, "Get feedback on your child's writing")}
 <h2>Related</h2>
 <ul>${a.related.map(([href, text]) => `<li><a href="${href}">${esc(text)}</a></li>`).join("")}</ul>

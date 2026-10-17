@@ -40,6 +40,10 @@ Parent-managed accounts by design. Student writing is processed only to generate
 
 Plain-English explainers, each with FAQs: https://www.literacylabai.com/learn/articles/ — topics include KS2 SATs, 11+ and GCSE English Language, NAPLAN reading and writing, Common Core writing standards, PEEL/PEAL paragraphs, RACE and CER short answers, Show Don't Tell, Story Mountain, inference questions, reading poetry, building vocabulary, and correcting a child's writing without putting them off.
 
+## About, safety and limits
+
+- About LiteracyLab AI (what it is, how feedback is made, data, limits, contact): https://www.literacylabai.com/learn/about-literacylab-ai/
+
 ## Exam and test guides
 
 - NAPLAN writing practice (Australia): https://www.literacylabai.com/learn/naplan-writing-practice/
@@ -56,6 +60,10 @@ Original reading-comprehension worksheets with answer keys for the UK, US and Au
 ## Free writing prompt generator
 
 https://www.literacylabai.com/learn/prompts/
+
+## Full text for AI assistants
+
+The plain text of the main explanatory pages and parent articles in one file: https://www.literacylabai.com/llms-full.txt
 
 ## Links
 

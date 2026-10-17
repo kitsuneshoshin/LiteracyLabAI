@@ -5,7 +5,19 @@
 // statistics, guarantees or comparisons with other products.
 
 const SITE = "https://www.literacylabai.com";
-const LASTMOD = "2026-10-04";
+const LASTMOD = "2026-10-17";
+
+const QUICK = {
+  "writing-feedback-for-kids": "Good feedback on a child's writing names one thing that worked, gives one next step, and shows the piece corrected, at the right level for the child's year. LiteracyLab AI does this on every piece, matched to the child's own curriculum.",
+  "reading-comprehension-practice": "Free printable reading comprehension worksheets for UK Years 3 to 6, US Grades 3 to 6 and Australian Years 3 to 6 come with answer keys, and the LiteracyLab AI app gives online passages that explain every answer.",
+  "how-it-works": "You set up a learner (country, year, an interest), get a writing prompt or reading passage, and the child writes or answers. They get back a strength, one next step, a corrected version and vocabulary, matched to their curriculum.",
+  "naplan-writing-practice": "NAPLAN writing is one story or persuasive piece written to a prompt in Years 3, 5, 7 and 9. The best practice is writing whole pieces regularly and getting one specific piece of feedback on each. LiteracyLab AI offers that, with a free plan of 3 pieces a month.",
+  "ks2-sats-reading-practice": "The KS2 reading test is mostly about finding evidence in texts. Short, regular practice with explained answers works best: the free Year 6 worksheets here come with answer keys, and the app explains every answer online.",
+  "11-plus-english-practice": "The 11+ differs by area and school, so check each school's guidance. The skills underneath are comprehension, vocabulary, inference and writing, and they can be built at home with regular practice and feedback.",
+  "igcse-english-first-language-writing-feedback": "LiteracyLab AI gives IGCSE and O-Level students a strength, a next step and a corrected version of each piece. Premium adds exam-style bands from 1 to 4 as a guide, never an exam mark.",
+  "common-core-writing-feedback-for-parents": "Common Core writing has three kinds of piece: opinion, informative and narrative. Useful feedback names one strength and one next step, and LiteracyLab AI gives both matched to your child's grade.",
+  "ai-writing-coach-for-kids": "An AI writing coach reads what a child has written and responds with feedback. LiteracyLab AI never writes the story, accounts are managed by a parent, writing is not sold or used to train public AI models, and parents can delete data at any time."
+};
 
 const BASE_PAGES = [
   {
@@ -109,8 +121,10 @@ const BASE_PAGES = [
   },
 ];
 
-const PAGES = [...BASE_PAGES, ...require("./landing-pages-seo").PAGES];
+const PAGES = [...BASE_PAGES, ...require("./landing-pages-seo").PAGES].map((p) => ({ ...p, quick: p.quick || QUICK[p.slug] }));
+const QUICK_ANSWERS = QUICK;
 
+const niceDate = (iso) => new Date(iso + "T00:00:00Z").toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
 const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 const urlFor = (p) => `${SITE}/learn/${p.slug}/`;
 
@@ -126,9 +140,11 @@ function buildLandingFiles({ layout, breadcrumbLd, ctaBlock }) {
     ] };
     const body = `<div class="crumbs"><a href="/">Home</a> › <a href="/learn/">Guides</a> › ${esc(p.h1)}</div>
 <h1>${esc(p.h1)}</h1>
-<p class="lead">${esc(p.lead)}</p>${p.body}
+<p class="lead">${esc(p.lead)}</p>
+${p.quick ? `<p class="quick"><b>Short answer:</b> ${esc(p.quick)}</p>` : ""}${p.body}
 <h2>Common questions</h2>
 ${p.faq.map(([q, a]) => `<details class="faq-q"><summary>${esc(q)}</summary><p>${esc(a)}</p></details>`).join("")}
+<p class="small">Last updated <time datetime="${LASTMOD}">${niceDate(LASTMOD)}</time>.</p>
 ${ctaBlock(p.slug, p.cta)}
 <p class="small">${PAGES.filter((o) => o !== p).map((o) => `<a href="/learn/${o.slug}/">${esc(o.h1)}</a>`).join(" · ")}</p>`;
     files[`learn/${p.slug}/index.html`] = layout({ title: p.title, description: p.description, canonical: urlFor(p), jsonld, body });

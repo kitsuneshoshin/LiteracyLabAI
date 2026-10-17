@@ -149,7 +149,12 @@ test("every page tells the reader its limits: it is general information and the 
 });
 
 test("no child's real details can appear: pages contain no names, emails or personal data", () => {
-  for (const [rel, html] of pageFiles) assert.ok(!/@[a-z0-9-]+\.[a-z]{2,}/i.test(text(html)), `${rel}: looks like an email address`);
+  // The About page may show the company's own two published contact addresses (the same ones in the privacy policy and terms).
+  const COMPANY = /\b(support|privacy)@literacylabai\.com\b/g;
+  for (const [rel, html] of pageFiles) {
+    const t = rel.includes("about-literacylab-ai") ? text(html).replace(COMPANY, "") : text(html);
+    assert.ok(!/@[a-z0-9-]+\.[a-z]{2,}/i.test(t), `${rel}: looks like an email address`);
+  }
 });
 
 test("the homepage links to the guides, the app links from guides count as call-to-action clicks, and the app itself stays out of search", () => {

@@ -242,7 +242,7 @@ function layout({ title, description, canonical, jsonld, body, script, css }) {
 <style>${CSS}${css || ""}</style>
 <script type="application/ld+json">${JSON.stringify(jsonld)}</script>
 <script src="/analytics.js"></script>
-<link rel="stylesheet" href="/theme.css?v=9">
+<link rel="stylesheet" href="/theme.css?v=10">
 </head>
 <body>
 <div class="nav"><div class="nav-inner">
@@ -458,6 +458,7 @@ function buildAll() {
     groups.forEach((g, i) => { files[pathFor.page(g)] = buildPage(g, groups, i); urls.push(urlFor.page(g)); });
   });
   files["sitemap.xml"] = buildSitemap(urls);
+  files["llms-full.txt"] = require("./llms-full").buildLlmsFull(files, SITE);
   return { files, urls, regionGroups };
 }
 

@@ -1,0 +1,1783 @@
+# LiteracyLab AI: full text of key pages
+
+LiteracyLab AI is an online literacy coach for children and students aged 5 to 18, with feedback matched to the child's school curriculum. This file is the plain text of its main explanatory pages, for AI assistants and search tools. The short version is at https://www.literacylabai.com/llms.txt
+
+# About LiteracyLab AI: what it is, how it works, and its limits
+URL: https://www.literacylabai.com/learn/about-literacylab-ai/
+
+Home › Guides › About LiteracyLab AI
+
+About LiteracyLab AI
+
+LiteracyLab AI is an online literacy coach for children and students aged 5 to 18. This page says plainly what it is, how the feedback is made, what happens to a child's writing, and where its limits are.
+
+Short answer: LiteracyLab AI reads a child's writing or reading answers and gives specific feedback matched to their school curriculum. It is an independent product, accounts are managed by a parent or guardian, and it is not affiliated with any exam board, government or school.
+
+What it is
+
+A child writes a piece, or answers questions on a reading passage, and LiteracyLab AI gives back one strength, one clear next step, a corrected version of the piece, and vocabulary to learn. Feedback is matched to the child's country and year: the UK, US, Australia, Canada, the Gulf, Singapore, and CEFR levels for English learners. See the step-by-step walkthrough.
+
+How the feedback is made
+
+  - The feedback is written by a large language model (an AI), guided by instructions we wrote about the child's year, curriculum and chosen interests.
+
+  - Each answer is checked by our own rules before it is shown, for example that quoted words really come from the child's piece and that a very short piece is not praised as if it were full-length.
+
+  - Scores and exam-style bands are guides for practice, not exam results, and the AI can still make mistakes.
+
+What happens to a child's writing
+
+  - A parent or guardian creates and manages every account. Children do not register on their own.
+
+  - A submission is sent securely to an AI provider only to produce the feedback for that child. It is not sold or rented, and it is not used to train public AI models.
+
+  - Parents can review, export or permanently delete a child's data from the dashboard.
+
+The full details are in the privacy policy and the terms of use. A longer answer to the common worry is on our page about AI writing coaches and safety.
+
+What it does not do
+
+  - It does not write a child's story or essay for them.
+
+  - It does not replace a teacher, who knows the child in a way no tool does.
+
+  - It does not give an exam mark, percentage or grade letter, and it is not affiliated with any exam board, government body or school.
+
+Free resources
+
+Alongside the app we publish free reading comprehension worksheets with answer keys, a writing prompt generator, articles for parents and year-by-year curriculum guides.
+
+Contact
+
+For help with an account or a question about the product, write to support@literacylabai.com. For privacy questions, write to privacy@literacylabai.com.
+
+Common questions
+
+Who is LiteracyLab AI for?
+Parents and guardians of children and students aged 5 to 18, and English learners at any age. Accounts are created and managed by a parent or guardian.
+Is LiteracyLab AI free?
+There is a Free plan with 3 pieces a month and full feedback, no card needed. Paid plans add unlimited pieces, more learners, progress tracking and extra feedback sections.
+Is it affiliated with a school or exam board?
+No. It is an independent product and is not affiliated with any exam board, government or school.
+
+Last updated 17 October 2026.
+
+Writing feedback for kids: what good feedback looks like · Reading comprehension practice for kids · How LiteracyLab AI works · NAPLAN writing practice with feedback · KS2 SATs reading practice · 11+ English practice at home · IGCSE English First Language writing feedback · Common Core writing feedback for parents · An AI writing coach for kids: what parents should know
+
+---
+
+# AI writing coach for kids: is it safe, and does it write for them?
+URL: https://www.literacylabai.com/learn/ai-writing-coach-for-kids/
+
+Home › Guides › An AI writing coach for kids: what parents should know
+
+An AI writing coach for kids: what parents should know
+
+Parents are right to ask hard questions about AI and children. Here are straight answers: what an AI writing coach does, what happens to your child's work, and where its limits are.
+
+Short answer: An AI writing coach reads what a child has written and responds with feedback. LiteracyLab AI never writes the story, accounts are managed by a parent, writing is not sold or used to train public AI models, and parents can delete data at any time.
+
+What an AI writing coach does
+
+A child writes a piece, and the AI reads it and gives feedback: one thing that worked, one next step, and fixes for spelling and grammar. It responds to work the child has already done. LiteracyLab AI never writes their story for them, and the corrected version it shows is built from the child's own ideas and wording.
+
+Is it safe?
+
+  - Parent-managed accounts. A parent or guardian creates and manages every account. Children do not register on their own.
+
+  - No selling of writing. Submissions are used only to give feedback to that child. We do not sell or rent writing samples or personal data, and we do not use submissions to train public AI models.
+
+  - You can delete it. Parents can review, export or permanently delete a child's data from the dashboard.
+
+Read the full privacy policy for details.
+
+Will it make my child lazy?
+
+The design aims the other way. The feedback is one specific step at a time, so the child still has to do the writing and the revising. It also teaches a named technique, such as PEEL or Story Mountain, so the skill transfers to school work.
+
+How accurate is it?
+
+AI can be wrong. LiteracyLab AI checks its own output for obvious mistakes before showing it, and it says plainly when a piece is too short to judge. Scores and bands are guides, not exam results. If something looks wrong, tell your child's teacher or tell us through the feedback card in the app.
+
+Matched to the curriculum
+
+Feedback is pitched to your child's country and year, from the UK national curriculum to Common Core, the Australian Curriculum, Canada, Singapore, the Gulf and CEFR levels for English learners. See the full walkthrough or the year-by-year guides.
+
+Common questions
+
+Does the AI write the essay for my child?
+No. It responds to work your child has already written. The corrected version is built from their own ideas and wording.
+Does LiteracyLab AI use my child's writing to train AI?
+No. Submissions are used only to give feedback to that child and are not used to train public AI models.
+Can I delete my child's data?
+Yes. Parents can review, export or permanently delete a child's data from the dashboard.
+
+Last updated 17 October 2026.
+
+Writing feedback for kids: what good feedback looks like · Reading comprehension practice for kids · How LiteracyLab AI works · NAPLAN writing practice with feedback · KS2 SATs reading practice · 11+ English practice at home · IGCSE English First Language writing feedback · Common Core writing feedback for parents · About LiteracyLab AI
+
+---
+
+# How LiteracyLab AI works: feedback on writing and reading
+URL: https://www.literacylabai.com/learn/how-it-works/
+
+Home › Guides › How LiteracyLab AI works
+
+How LiteracyLab AI works
+
+LiteracyLab AI gives children and students feedback on their writing and reading, matched to their year and curriculum. This page explains each step so you know what to expect.
+
+Short answer: You set up a learner (country, year, an interest), get a writing prompt or reading passage, and the child writes or answers. They get back a strength, one next step, a corrected version and vocabulary, matched to their curriculum.
+
+1. Set up a learner
+
+You choose the country, the year group and an interest such as football, coding or animals. The interest is used to make explanations easier to picture. It is never the task itself.
+
+2. Get a task
+
+For writing, the app suggests a prompt for the year and a kind of writing (story, persuasive, explanation and so on). For reading, it gives a short passage with questions.
+
+3. Write or answer
+
+The child writes in the app, or answers the questions. Writing has a length limit suited to their year.
+
+4. Read the feedback
+
+For writing: a Glow (what worked), a Grow (one next step), highlights in their own text, a corrected version, vocabulary to try and a named writing technique such as PEEL or Story Mountain. For reading: why each answer is right or wrong, with the evidence from the passage.
+
+5. Watch progress
+
+Paid plans show a progress chart over time against the skills for their year.
+
+What it does not do
+
+  - It does not give an exam mark, percentage or grade letter. Bands and scores are guides, not a prediction.
+
+  - It is not a replacement for a teacher.
+
+  - It is not affiliated with any exam board or government.
+
+Plans
+
+The Free plan includes 3 pieces a month. Core and Premium add unlimited pieces, more learners, progress tracking and extra feedback sections. Current prices are on the home page. Plans are billed monthly and can be cancelled at any time.
+
+Privacy
+
+Read how children's information is handled in our privacy policy.
+
+Common questions
+
+Do I need a card to start?
+No. The Free plan does not need a card.
+Which countries are supported?
+The UK, US, Australia, Canada, the Gulf, Singapore and English learners.
+
+Last updated 17 October 2026.
+
+Writing feedback for kids: what good feedback looks like · Reading comprehension practice for kids · NAPLAN writing practice with feedback · KS2 SATs reading practice · 11+ English practice at home · IGCSE English First Language writing feedback · Common Core writing feedback for parents · An AI writing coach for kids: what parents should know · About LiteracyLab AI
+
+---
+
+# Writing feedback for kids: what good feedback looks like
+URL: https://www.literacylabai.com/learn/writing-feedback-for-kids/
+
+Home › Guides › Writing feedback for kids: what good feedback looks like
+
+Writing feedback for kids: what good feedback looks like
+
+A child writes a page and hands it over. What do you say? The most useful feedback is specific, short and about one thing at a time. Here is what that looks like, and how LiteracyLab AI does it for every piece.
+
+Short answer: Good feedback on a child's writing names one thing that worked, gives one next step, and shows the piece corrected, at the right level for the child's year. LiteracyLab AI does this on every piece, matched to the child's own curriculum.
+
+What helps a child improve
+
+  - One thing that worked, with the words quoted. "Good job" teaches nothing. "You made me nervous when you wrote the door creaked open" tells a child what to repeat.
+
+  - One next step, not a list. A page of corrections feels like failure. One clear step is something a child can actually do in their next piece.
+
+  - A fixed copy of their own work. Seeing their own sentences corrected teaches more than a rule in a textbook.
+
+  - The right level. Feedback pitched at the wrong age is either too easy to notice or too hard to use.
+
+What LiteracyLab AI gives back on each piece
+
+  - A Glow: what worked, tied to a skill from their year's curriculum, quoting their own words.
+
+  - A Grow: one specific next step, explained through an interest they chose when you set them up.
+
+  - Highlights in their text, a corrected version of the whole piece, and two vocabulary words to try.
+
+  - On the Premium plan: a spelling and grammar check, a whole-piece score out of 10, and for students aged 11 and over, a band from 1 to 4 against the assessment objectives for their year and country.
+
+It is honest about short pieces
+
+Feedback that praises everything is not feedback. If a student writes far less than is expected for their year, the score reflects that and the feedback says so plainly, then suggests how to develop the piece. The same rule applies in every country and year group the app supports.
+
+Which curriculum?
+
+Feedback is matched to the child's country and year: the UK national curriculum, US Common Core, the Australian Curriculum, Canada, Singapore, the Gulf (Cambridge) and English learners at CEFR levels. See the year-by-year guides for what children are working on at each age, or try the free writing prompt generator.
+
+Does it replace a teacher?
+
+No. It gives a child quick, specific feedback between lessons. Your child's teacher knows them in a way no tool does, and the feedback is a starting point for a conversation, not a grade.
+
+Common questions
+
+How much does it cost?
+The Free plan includes 3 pieces a month with no card needed. Paid plans are billed monthly and can be cancelled at any time.
+What ages is it for?
+Children and students from about 5 to 18, plus English learners, with feedback pitched to their year.
+
+Last updated 17 October 2026.
+
+Reading comprehension practice for kids · How LiteracyLab AI works · NAPLAN writing practice with feedback · KS2 SATs reading practice · 11+ English practice at home · IGCSE English First Language writing feedback · Common Core writing feedback for parents · An AI writing coach for kids: what parents should know · About LiteracyLab AI
+
+---
+
+# Reading comprehension practice for kids: free worksheets and a tool
+URL: https://www.literacylabai.com/learn/reading-comprehension-practice/
+
+Home › Guides › Reading comprehension practice for kids
+
+Reading comprehension practice for kids
+
+Reading comprehension is the skill of understanding what you read, not just reading the words. It grows with regular practice on short texts followed by questions that ask for evidence.
+
+Short answer: Free printable reading comprehension worksheets for UK Years 3 to 6, US Grades 3 to 6 and Australian Years 3 to 6 come with answer keys, and the LiteracyLab AI app gives online passages that explain every answer.
+
+Free printable worksheets
+
+We write our own passages and questions for ages 7 to 11, in the spelling, dates and curriculum words each country uses. Each worksheet is a printable PDF with an answer key, and you mark it yourself.
+
+  - All free reading worksheets: UK (Years 3 to 6), US (Grades 3 to 6) and Australia (Years 3 to 6).
+
+What the questions practise
+
+  - Retrieval: finding a fact in the text.
+
+  - Vocabulary: working out what a word means from the sentence around it.
+
+  - Inference: reading between the lines, with evidence.
+
+  - Summary: saying what a text is about in a few words.
+
+How to use a worksheet at home
+
+  - Read the passage together once, then let your child answer on their own.
+
+  - Ask "How do you know?" and have them point to the line that proves it.
+
+  - Keep it short. One worksheet a few times a week beats a long session.
+
+Online reading practice with explanations
+
+In the LiteracyLab AI app, a child reads a short passage written for their year, answers questions, and gets feedback that explains why each answer is right or wrong, with the line from the passage that shows it. Passages and questions are matched to their year and country.
+
+Common questions
+
+Are the worksheets free?
+Yes. They are free to print, with no sign-up.
+Which years are covered?
+Years 3 to 6 in the UK and Australia and Grades 3 to 6 in the US. The app covers more year groups.
+
+Last updated 17 October 2026.
+
+Writing feedback for kids: what good feedback looks like · How LiteracyLab AI works · NAPLAN writing practice with feedback · KS2 SATs reading practice · 11+ English practice at home · IGCSE English First Language writing feedback · Common Core writing feedback for parents · An AI writing coach for kids: what parents should know · About LiteracyLab AI
+
+---
+
+# NAPLAN writing practice for Years 3, 5, 7 and 9, with feedback
+URL: https://www.literacylabai.com/learn/naplan-writing-practice/
+
+Home › Guides › NAPLAN writing practice with feedback
+
+NAPLAN writing practice with feedback
+
+NAPLAN writing is a single timed piece, a story or a persuasive text, written to a prompt. The best practice is writing real pieces regularly and getting specific feedback on each one. Here is how to do that at home.
+
+Short answer: NAPLAN writing is one story or persuasive piece written to a prompt in Years 3, 5, 7 and 9. The best practice is writing whole pieces regularly and getting one specific piece of feedback on each. LiteracyLab AI offers that, with a free plan of 3 pieces a month.
+
+What the NAPLAN writing task asks for
+
+Students in Years 3, 5, 7 and 9 write one piece to a prompt, and it is marked against published criteria for things like audience, ideas, structure, vocabulary, sentence structure, punctuation and spelling. The exact format and timing can change from year to year, so check the National Assessment Program website for the current details. Our NAPLAN writing explained article walks through it in plain English.
+
+How to practise at home
+
+  - Write whole pieces, not just exercises. A short story or persuasive piece each week teaches planning, pacing and finishing.
+
+  - Get feedback on one thing at a time. One strength to repeat and one next step beats a page of corrections.
+
+  - Practise both kinds of writing. Alternate narrative and persuasive pieces so neither feels new on the day.
+
+  - Read the piece aloud. Children catch missing words and long, tangled sentences by ear.
+
+How LiteracyLab AI helps
+
+  - Pick story or persuasive writing, with a prompt written for your child's year.
+
+  - On Premium, tick "Word it like a NAPLAN task" (Australia, Years 3 to 9) to get a prompt worded the way an exam task is.
+
+  - Each piece comes back with a Glow (what worked), a Grow (one next step), highlights in their own text, a corrected version of the piece and vocabulary to try.
+
+  - Premium adds a spelling and grammar check and an overall score out of 10 for the whole piece.
+
+What it does not do
+
+LiteracyLab AI is not affiliated with ACARA or any government body, and it does not give a NAPLAN score or band. Scores and bands in the app are practice guides, not a prediction of a result. Your child's teacher knows their work best.
+
+Free reading practice too
+
+NAPLAN also tests reading. Our free reading worksheets for Years 3 to 6 in Australia come with answer keys, and the NAPLAN reading article explains the test. See also the year-by-year Australian curriculum guides.
+
+Common questions
+
+Which years does NAPLAN writing cover?
+NAPLAN is sat in Years 3, 5, 7 and 9. LiteracyLab AI supports writing practice for Australian students across the primary and secondary years.
+Does LiteracyLab AI give a NAPLAN score?
+No. It gives feedback and a practice score out of 10 on Premium, which is a guide for practice, not a NAPLAN result or band.
+Is there a free option?
+Yes. The Free plan includes 3 pieces a month with full feedback and needs no card.
+
+Last updated 17 October 2026.
+
+Writing feedback for kids: what good feedback looks like · Reading comprehension practice for kids · How LiteracyLab AI works · KS2 SATs reading practice · 11+ English practice at home · IGCSE English First Language writing feedback · Common Core writing feedback for parents · An AI writing coach for kids: what parents should know · About LiteracyLab AI
+
+---
+
+# KS2 SATs reading practice: free worksheets and online feedback
+URL: https://www.literacylabai.com/learn/ks2-sats-reading-practice/
+
+Home › Guides › KS2 SATs reading practice
+
+KS2 SATs reading practice
+
+The KS2 reading test asks children to read several texts and answer questions on them, mostly by finding evidence in the text. Short, regular practice with explained answers works better than one big cram.
+
+Short answer: The KS2 reading test is mostly about finding evidence in texts. Short, regular practice with explained answers works best: the free Year 6 worksheets here come with answer keys, and the app explains every answer online.
+
+What the KS2 reading test looks at
+
+Children read fiction, non-fiction and sometimes poetry, then answer questions that test retrieving facts, working out what words mean, summarising, and making inferences with evidence. A scaled score of 100 means the expected standard. Our KS2 SATs explained article covers the format in plain English, and you should always check the government's current guidance for the details.
+
+A simple routine for Years 5 and 6
+
+  - Little and often: two or three short sessions a week.
+
+  - Always ask "how do you know?" and have your child point to the line that proves their answer.
+
+  - Look at the wrong answers. Understanding why an answer was wrong is where most of the learning happens.
+
+  - Mix the question types. Retrieval, vocabulary, inference and summary all come up.
+
+Free printable practice
+
+Our free reading worksheets for UK Years 3 to 6 each have a passage, questions and an answer key. You mark them yourself. There is no sign-up.
+
+Online practice that explains every answer
+
+In the LiteracyLab AI app, a child reads a passage written for their year and answers questions in several styles: multiple choice, true, false or not given, "which line proves it", putting events in order, matching words to meanings and filling a gap. After submitting, each answer is explained, with the line from the passage that shows it. On Premium, Years 3 and above also get a short written question marked by the AI.
+
+What it does not do
+
+LiteracyLab AI is not a SATs paper and does not give a SATs score. The passages are our own, written for each year. Use them alongside your child's school work, not instead of it.
+
+Common questions
+
+Are these real SATs papers?
+No. The passages and questions are our own, written for each year. Past papers are published by the government.
+Is it free?
+The worksheets are free to print with no sign-up. The app has a Free plan with 3 pieces a month and needs no card.
+What year is it for?
+Reading practice is available across the primary years, with free worksheets for Years 3 to 6.
+
+Last updated 17 October 2026.
+
+Writing feedback for kids: what good feedback looks like · Reading comprehension practice for kids · How LiteracyLab AI works · NAPLAN writing practice with feedback · 11+ English practice at home · IGCSE English First Language writing feedback · Common Core writing feedback for parents · An AI writing coach for kids: what parents should know · About LiteracyLab AI
+
+---
+
+# 11+ English practice at home: comprehension and writing
+URL: https://www.literacylabai.com/learn/11-plus-english-practice/
+
+Home › Guides › 11+ English practice at home
+
+11+ English practice at home
+
+The 11+ looks different depending on where you live and which schools you apply to. Whatever the format, the same skills sit underneath it: understanding what is read, a wide vocabulary and clear writing.
+
+Short answer: The 11+ differs by area and school, so check each school's guidance. The skills underneath are comprehension, vocabulary, inference and writing, and they can be built at home with regular practice and feedback.
+
+Check what your target schools ask for
+
+Different areas and independent schools use different 11+ papers, and some include writing while others test only multiple choice. Check each school's own guidance first. Our 11+ English explained article sets out what varies.
+
+The skills worth building from Year 4
+
+  - Comprehension: reading a passage closely and answering with evidence.
+
+  - Vocabulary: learning new words in context and using them in their own writing.
+
+  - Inference: working out what is meant but not said.
+
+  - Writing: planning a story or an argument and finishing it with a clear ending.
+
+How LiteracyLab AI fits in
+
+  - Free reading worksheets for Years 3 to 6 with answer keys.
+
+  - Online passages that explain every answer, including, on Premium, a short written question marked by the AI from Year 3.
+
+  - Writing feedback on stories and persuasive pieces: a strength, a next step and a corrected version of their own work.
+
+  - A vocabulary bank that builds from every word your child is taught, with flashcards and a quiz.
+
+What it does not do
+
+LiteracyLab AI does not replicate any particular 11+ exam, and it does not predict a pass or a score. It is a way to practise reading and writing regularly, with feedback, alongside whatever exam preparation you choose.
+
+Common questions
+
+Does LiteracyLab AI follow the 11+ exam format?
+No. It builds the underlying reading, vocabulary and writing skills with practice that matches your child's school year, and does not copy any 11+ paper.
+Can it replace a tutor?
+It gives quick, specific feedback between lessons. A tutor or teacher knows your child in a way no tool does.
+
+Last updated 17 October 2026.
+
+Writing feedback for kids: what good feedback looks like · Reading comprehension practice for kids · How LiteracyLab AI works · NAPLAN writing practice with feedback · KS2 SATs reading practice · IGCSE English First Language writing feedback · Common Core writing feedback for parents · An AI writing coach for kids: what parents should know · About LiteracyLab AI
+
+---
+
+# IGCSE English First Language writing feedback for students
+URL: https://www.literacylabai.com/learn/igcse-english-first-language-writing-feedback/
+
+Home › Guides › IGCSE English First Language writing feedback
+
+IGCSE English First Language writing feedback
+
+For Cambridge IGCSE and O-Level English, the writing skills that earn marks are clear, accurate and well-organised prose. Regular practice with specific feedback is the fastest way to build them.
+
+Short answer: LiteracyLab AI gives IGCSE and O-Level students a strength, a next step and a corrected version of each piece. Premium adds exam-style bands from 1 to 4 as a guide, never an exam mark.
+
+What students are working towards
+
+The Cambridge IGCSE First Language English syllabus (0500) assesses reading and writing, including directed writing and composition. Check the current syllabus and mark schemes on the Cambridge International website, because details can change.
+
+What helps a student improve
+
+  - Write full pieces under realistic conditions, then review them.
+
+  - Fix one thing at a time: structure, then accuracy, then style.
+
+  - Learn from a model. Seeing a strong response to the same task teaches more than a rule.
+
+What LiteracyLab AI gives back
+
+  - A Glow and a Grow tied to named skills for their year, quoting their own words.
+
+  - A corrected, improved version of the whole piece.
+
+  - On Premium: a spelling and grammar check, a score out of 10 for the whole piece, an extended second next step, and for students aged 11 and over, a band from 1 to 4 against the published writing assessment objectives for their year and region, with evidence quoted from their work.
+
+  - A model response and the framework used (for example PEEL or PEAL) shown beside the student's own.
+
+What it does not do
+
+LiteracyLab AI is not affiliated with Cambridge, and bands are guides, not predictions. It never produces a raw exam mark, a percentage or a grade letter. Your teacher's marking is the one that counts.
+
+See the year-by-year guides for the UAE and Gulf and Singapore, and our GCSE English Language explained article for the UK equivalent.
+
+Common questions
+
+Does it mark to the Cambridge mark scheme?
+No. It gives exam-style bands against the published writing objectives as a guide. It does not produce an exam mark, percentage or grade.
+Which students is this for?
+Students in the IGCSE and O-Level years, in the Gulf, Singapore and elsewhere. Premium bands are for students aged 11 and over.
+
+Last updated 17 October 2026.
+
+Writing feedback for kids: what good feedback looks like · Reading comprehension practice for kids · How LiteracyLab AI works · NAPLAN writing practice with feedback · KS2 SATs reading practice · 11+ English practice at home · Common Core writing feedback for parents · An AI writing coach for kids: what parents should know · About LiteracyLab AI
+
+---
+
+# Common Core writing feedback for parents, Grades K to 12
+URL: https://www.literacylabai.com/learn/common-core-writing-feedback-for-parents/
+
+Home › Guides › Common Core writing feedback for parents
+
+Common Core writing feedback for parents
+
+Common Core writing asks children to write three kinds of piece, opinion, informative and narrative, with more independence each year. Here is what to look for and how to help.
+
+Short answer: Common Core writing has three kinds of piece: opinion, informative and narrative. Useful feedback names one strength and one next step, and LiteracyLab AI gives both matched to your child's grade.
+
+The three kinds of writing
+
+  - Opinion and argument: state a view and support it with reasons and evidence.
+
+  - Informative and explanatory: explain a topic clearly with facts and detail.
+
+  - Narrative: tell a real or imagined story with a beginning, middle and end.
+
+Our Common Core writing standards explained article goes through each in plain English. Your state may use its own version of the standards, so check your school's guidance.
+
+How to give useful feedback at home
+
+  - Quote one thing that worked and say why.
+
+  - Choose one next step, not five.
+
+  - Ask your child to read the piece aloud and fix what they hear.
+
+What LiteracyLab AI does
+
+Choose the US and your child's grade, then pick a kind of writing, such as a story or a persuasive piece. Each piece comes back with a Glow tied to a skill from their grade's standards, a Grow with one next step explained through an interest they chose, highlights in their text, a corrected version and vocabulary to try. Free reading worksheets for Grades 3 to 6 come with answer keys. Browse the grade-by-grade guides.
+
+What it does not do
+
+LiteracyLab AI is not affiliated with any state or testing company and does not give a state test score. It is practice and feedback, not a replacement for your child's teacher.
+
+Common questions
+
+Is this aligned to Common Core?
+Feedback is matched to the Common Core writing and reading skills for your child's grade. Your state may use its own version of the standards.
+Is it free?
+The Free plan includes 3 pieces a month with full feedback and needs no card.
+
+Last updated 17 October 2026.
+
+Writing feedback for kids: what good feedback looks like · Reading comprehension practice for kids · How LiteracyLab AI works · NAPLAN writing practice with feedback · KS2 SATs reading practice · 11+ English practice at home · IGCSE English First Language writing feedback · An AI writing coach for kids: what parents should know · About LiteracyLab AI
+
+---
+
+# 11+ English explained: what is tested and how to prepare
+URL: https://www.literacylabai.com/learn/articles/11-plus-english-explained/
+
+Home › Guides › Articles for parents › 11+ English explained: what is tested and how to prepare
+
+11+ English explained: what is tested and how to prepare
+
+The 11+ is the entrance test some areas of England use to select pupils for grammar and other selective secondary schools. There is no single national 11+, so the first and most important step is to find out exactly what your area and your chosen schools use. This guide explains the English side in general terms.
+
+It varies by area and school
+The format, the subjects and the test provider differ between areas, groups of schools and sometimes individual schools. Some tests include English, maths, verbal reasoning and non-verbal reasoning, and others use only some of these. Some use multiple-choice answer sheets, and some use written answers. Some are set by a national test provider, and others are written locally. Because of all this, general 11+ books and websites are a guide only.
+The best sources are always the websites of the schools you are interested in, and your local authority's admissions information. They will tell you which tests, which subjects, which dates and how places are decided.
+
+Key dates to know
+The tests are usually taken in the autumn term of Year 6, often in September or early October, and many schools ask families to register in advance over the summer. Separately, the application for a secondary school place in England is made through your local authority, opens on 1 September and closes on 31 October for entry the following September. Offers are sent on National Offer Day in early March. Check your area's own timetable, because registration and test dates differ.
+
+What the English paper usually covers
+Where there is an English paper, it commonly includes some or all of the following:
+- Reading comprehension: a passage followed by questions that check understanding, inference and vocabulary.
+- Vocabulary: word meanings, synonyms and antonyms, and choosing the right word in context.
+- Grammar, punctuation and spelling, for example choosing the correct form, spotting errors or completing sentences.
+- Writing, in some areas, which may be a short piece such as a story, description or argument, written in a set time.
+
+Why reading comprehension matters most
+Comprehension and vocabulary reward the same habits: reading widely, noticing how words are used and being able to say how you know. The passages can be harder than children are used to, and may include older or more formal language. Children who are used to reading a range of fiction and non-fiction cope better.
+
+A calm preparation plan
+- Start with the schools' own information, and find out which provider and format to prepare for.
+- Build a daily reading habit of twenty minutes or so. Include non-fiction and some older writing.
+- Keep a vocabulary notebook of new words your child meets, with a short meaning and a sentence. Revisit a few each week.
+- Practise comprehension in short sessions, and ask how they know each answer.
+- Once the format is familiar, add occasional timed practice with sample or past papers from the named provider. Mark them together and talk about mistakes.
+- If writing is tested, practise planning and finishing a short piece in a set time, and rereading it.
+
+Common mistakes to avoid
+- Starting too early and too intensively. Months of gentle routine usually serve a child better than a last-minute burst.
+- Drilling past papers without discussing mistakes. The learning is in understanding why an answer was wrong.
+- Ignoring vocabulary. Many wrong answers come from not knowing a single word.
+- Rushing. Many children lose marks by not reading the question or passage carefully.
+
+Keeping perspective
+The 11+ is one route among several, and many excellent schools do not use it. Children who are tired or anxious do worse than they should. A steady, modest routine, with plenty of time for play and rest, is kinder and usually more useful. Whatever the outcome, a child who has built a reading habit and a stronger vocabulary has gained something real.
+
+Common questions
+
+Is there one national 11+?
+No. It depends on the area and the school, so check with the schools you are interested in and your local authority.
+When is it taken?
+Usually in the autumn term of Year 6, often in September or early October, though some areas differ.
+When do I apply for a secondary school place?
+Applications to your local authority open on 1 September and close on 31 October for entry the following September. Check your authority's own dates.
+Does every 11+ include writing?
+No. Many tests have only comprehension, vocabulary and grammar. Some include a short writing task.
+
+Last updated 8 October 2026.
+
+Related
+
+- UK guides by year
+- Helping with reading comprehension at home
+- Free reading comprehension worksheets
+- Reading comprehension practice
+- How much should my child write?
+
+All articles for parents · All guides
+
+---
+
+# How to build vocabulary at home: word parts and the Frayer card
+URL: https://www.literacylabai.com/learn/articles/build-vocabulary-at-home/
+
+Home › Guides › Articles for parents › How to build vocabulary at home: word parts and the Frayer card
+
+How to build vocabulary at home: word parts and the Frayer card
+
+Children learn most new words by meeting them often, in context, and by using them. A few simple habits at home speed this up: looking at word parts, making a small card for each new word, and coming back to it after a few days.
+
+Learn a few words at a time
+Three or four words a week is plenty. Choose words from what your child is reading or writing so they matter to them, and keep a small list on the fridge or in a notebook.
+
+Look at word parts
+Many long words are built from small parts. Knowing a few of them lets a child guess new words.
+- Prefixes at the start: un- means not (unhappy), re- means again (rebuild), pre- means before (preview).
+- Suffixes at the end: -ful means full of (hopeful), -less means without (careless), -er often means a person who (teacher).
+- Roots in the middle: port means carry (transport, portable), bio means life (biology).
+
+Use context clues
+When your child meets an unknown word, cover it and ask what word would fit in its place. The sentences around it often give the meaning: "The ground was parched and cracked, and not a drop of rain had fallen for weeks." Parched must mean very dry.
+
+Make a Frayer card
+A Frayer card is a small four-box card for one word. It makes a child think about the word from several sides.
+- Definition: what it means, in their own words.
+- Characteristics: facts or features about the word.
+- Examples: things that fit the word.
+- Non-examples: things that do not fit, which is where much of the understanding is built.
+
+Use it, then come back to it
+A new word sticks when it is used. Ask your child to say or write a sentence with it, then spot it again over the next few days. A few minutes of flashcard review, a day later and then a few days later, works better than one long session.
+
+Where it shows up in LiteracyLab AI
+Every piece of feedback gives new words. On Core and Premium they collect in a vocabulary bank with flashcards and a short self-test quiz, and the progress follows the learner between devices. For the primary years, each word also comes with Frayer details.
+
+Common questions
+
+How many new words should my child learn each week?
+Three or four, used properly, is more useful than a long list that is forgotten.
+Does reading more help?
+Yes, because children meet words in context. Talking about the words and using them in their own sentences makes it stronger.
+
+Last updated 8 October 2026.
+
+Related
+
+- Helping with reading comprehension at home
+- What good writing feedback looks like
+- Free reading comprehension worksheets
+- How LiteracyLab AI works
+
+All articles for parents · All guides
+
+---
+
+# Common Core writing standards explained for parents
+URL: https://www.literacylabai.com/learn/articles/common-core-writing-standards-explained/
+
+Home › Guides › Articles for parents › Common Core writing standards explained for parents
+
+Common Core writing standards explained for parents
+
+The Common Core State Standards for English describe what US students should be able to do in writing at each grade. Not every state uses them in the same way, and some have replaced or adapted them, so check your own state's standards and your child's school. This guide explains the main ideas in plain terms.
+
+The three kinds of writing
+The first three writing standards, called W.1 to W.3, describe three kinds of writing students are expected to do at every grade:
+- Opinion and argument (W.1): state a point of view or claim and support it with reasons and evidence. In Kindergarten to Grade 5 this is called opinion writing, and from Grade 6 it is called argument writing.
+- Informative and explanatory (W.2): examine a topic and explain ideas and information clearly.
+- Narrative (W.3): develop real or imagined experiences or events using effective technique, descriptive details and a clear sequence of events.
+A fourth idea sits behind all of these: students are expected to write routinely, over longer periods for research and revision and over shorter periods in a single sitting, for many purposes and audiences.
+
+How opinion writing starts: Grade 3
+In Grade 3 the standard asks students to write opinion pieces on topics or texts, supporting a point of view with reasons. It has four parts. Students introduce the topic or text, state an opinion and organise a list of reasons. They give reasons that support the opinion. They use linking words and phrases such as because, therefore, since and for example to connect the opinion and the reasons. And they provide a concluding statement or section.
+A Grade 3 example: "I think our class should have a pet. First, a pet would teach us to be responsible. For example, we would take turns feeding it. Also, it would make our classroom friendlier. That is why our class should have a pet."
+
+How argument writing develops: Grades 6 to 12
+In Grade 6 the standard changes to writing arguments to support claims with clear reasons and relevant evidence. By Grades 9 and 10 students are asked to write arguments to support claims in an analysis of substantive topics or texts, using valid reasoning and relevant and sufficient evidence. In practice, that means students:
+- Introduce precise claims and distinguish them from alternate or opposing claims.
+- Develop claims and counterclaims fairly, supplying evidence for each and pointing out strengths and limitations of both.
+- Use words, phrases and clauses to link the major sections of the text and show relationships between claims, reasons and evidence.
+- Establish and maintain a formal style and objective tone.
+- Provide a concluding statement or section that follows from the argument.
+
+Informative and narrative writing
+Informative writing starts with naming a topic and supplying facts and details, and grows into organising information into categories, using precise language and domain-specific vocabulary, and drawing on evidence from sources. Narrative writing starts with recounting events in order and adding details and feelings, and grows into using dialogue, pacing, description and reflection to develop characters and situations.
+
+How to help at home: Kindergarten to Grade 2
+- Ask for opinions with reasons: "Which animal do you like best, and why?" Write one sentence together.
+- Let your child draw first, then label and describe the drawing in a sentence.
+- Read stories and ask what happened first, next and last.
+
+How to help at home: Grades 3 to 5
+- Ask for a reason every time your child gives an opinion, then ask for an example.
+- Practise linking words such as because, for example and therefore, in speaking first, then in writing.
+- For explanations, ask your child to teach you something they know, then write it in order.
+- For stories, plan a beginning, a problem and an ending before writing.
+
+How to help at home: Grades 6 to 12
+- Ask your child to argue the opposite side of a topic for a minute, then to say which side is stronger and why. This builds the habit of counterclaims.
+- Practise building each paragraph with a point, evidence and explanation. Our PEEL and PEAL article shows how.
+- Encourage using evidence from what they read, since the standards ask for evidence from texts as well as claims.
+- Read their writing aloud together to check tone and flow.
+
+Reading standards sit alongside
+The same standards also ask students to cite textual evidence in what they read. This is why good writing practice and good reading practice help each other. A student who can find and quote the best evidence in a text is better at using evidence in their own argument.
+
+What the standards do not tell you
+The standards describe what students should be able to do, not how long a piece should be or how it will be marked on a particular state test. For those details, look at your state's own assessment information and ask your child's teacher what the class is working on.
+
+Common questions
+
+Does every state use Common Core?
+States adopted and adapted the standards differently, and some have replaced them. Check your state's standards.
+What is the difference between opinion and argument writing?
+In Kindergarten to Grade 5, students write opinion pieces with reasons. From Grade 6 they write arguments with claims, evidence and reasoning, and later address opposing claims.
+What are linking words?
+Words and phrases such as because, therefore, since and for example that connect an opinion to its reasons.
+How long should a student's writing be?
+The standards do not set lengths. See our article on how much a child should write for practical targets.
+
+Last updated 8 October 2026.
+
+Related
+
+- US guides by grade
+- PEEL and PEAL paragraphs explained
+- How much should my child write?
+- Free writing prompt generator
+- What good writing feedback looks like
+
+All articles for parents · All guides
+
+---
+
+# Comparing two texts: how to help a child
+URL: https://www.literacylabai.com/learn/articles/comparing-two-texts-how-to-help-a-child/
+
+Home › Guides › Articles for parents › Comparing two texts: how to help a child
+
+Comparing two texts: how to help a child
+
+Some reading tasks give two short texts on the same topic, often called Text A and Text B, and ask how they are similar or different. These questions test whether a child can hold two ideas in mind at once, which takes practice.
+
+Read each text on its own first
+Ask your child to read Text A and say in one sentence what it is about, then do the same for Text B. Do not compare until each is clear.
+
+Then look at the same four things in each
+- Purpose: is it trying to inform, persuade, entertain or describe?
+- Audience: who is it written for?
+- Viewpoint: what does the writer think or feel about the topic?
+- Features: facts or opinions, a personal voice or a neutral one, a story or a list.
+
+Use a simple two-column note
+Draw two columns, one for each text, with the four things above down the side. Fill in a few words for each. The gaps and matches are the similarities and differences.
+
+Sentence starters that help
+- Both texts say that...
+- Text A focuses on... whereas Text B focuses on...
+- The writers agree that... but they differ on...
+- Text A uses facts to... while Text B uses personal experience to...
+
+Support every point with evidence
+As with any reading answer, ask "how do you know?" A good comparison names something in each text, in the writer's words or a close detail.
+
+Common mistakes
+- Summarising one text and forgetting the other.
+- Saying they are "different" without saying how.
+- Comparing small details when the main purposes or viewpoints are the real difference.
+
+Where it shows up in LiteracyLab AI
+Reading practice includes passages made of two texts, marked Text A and Text B, with questions about how they connect.
+
+Common questions
+
+How much should my child write?
+Two or three clear sentences naming one similarity or difference and the evidence in each text are usually enough.
+Do the texts always disagree?
+No. Sometimes they agree on a fact but differ in tone or audience.
+
+Last updated 8 October 2026.
+
+Related
+
+- Helping with reading comprehension at home
+- Helping with inference questions
+- How to read a table or graph question
+- Free reading comprehension worksheets
+
+All articles for parents · All guides
+
+---
+
+# How to correct your child's writing without putting them off
+URL: https://www.literacylabai.com/learn/articles/correct-your-childs-writing-without-putting-them-off/
+
+Home › Guides › Articles for parents › How to correct your child's writing without putting them off
+
+How to correct your child's writing without putting them off
+
+A page covered in red pen can make a child decide they are bad at writing. Good feedback does the opposite: it shows them what already works and gives them one clear thing to try next.
+
+Read it as a reader first
+Before you look for mistakes, read the piece the way you would read a story or a letter. Then tell them what you noticed: a line that made you smile, a detail you could picture, a reason that convinced you.
+
+Praise something specific
+"Good job" tells a child nothing. "I could really see the dark kitchen when you wrote the floor creaked" tells them exactly what to do again. Quote their words back to them.
+
+Choose one thing to improve
+Pick the single change that would help most: adding a reason, starting sentences in different ways, or finishing with a clear ending. One step is something a child can actually do in the next piece. A list of ten corrections feels like failure.
+
+Leave most spelling for later
+Unless the piece is for a spelling test, pick two or three words to fix together and let the rest go. Children who worry about spelling often write shorter, safer sentences. You can come back to spelling in a separate, low-pressure way.
+
+Let them fix it themselves
+Ask them to reread the sentence aloud and see what they would change. Children often hear a missing full stop or a clumsy phrase when they read it out. When they find it themselves, it sticks.
+
+Show a corrected copy
+Seeing their own sentences polished teaches more than a rule in a textbook. Write out a corrected version of one paragraph beside theirs, keeping their ideas and voice, and let them compare.
+
+Common questions
+
+Should I correct every mistake?
+No. Fixing everything at once is discouraging and hard to learn from. Choose one improvement and two or three words.
+My child will not rewrite anything. What can I do?
+Try rewriting only one sentence together. Small wins build the habit.
+
+Last updated 8 October 2026.
+
+Related
+
+- What good writing feedback looks like
+- Free writing prompt generator
+- How LiteracyLab AI works
+
+All articles for parents · All guides
+
+---
+
+# GCSE English Language explained: the six assessment objectives
+URL: https://www.literacylabai.com/learn/articles/gcse-english-language-explained/
+
+Home › Guides › Articles for parents › GCSE English Language explained: the six assessment objectives
+
+GCSE English Language explained: the six assessment objectives
+
+GCSE English Language is marked against six assessment objectives, usually shortened to AO1 to AO6. Knowing what they mean, and how they appear in each paper, shows you exactly what examiners are looking for. This guide uses the AQA specification, the most widely taught. Other exam boards have similar objectives but different paper structures, so check your own board's specification.
+
+The two papers
+AQA GCSE English Language has two papers. Each paper lasts 1 hour 45 minutes, is worth 80 marks and counts for half of the GCSE. Each has a reading section followed by a writing section.
+Paper 1, Explorations in Creative Reading and Writing, uses a fiction extract for reading and asks for narrative or descriptive writing. Paper 2, Writers' Viewpoints and Perspectives, uses two non-fiction texts, from different times, for reading and asks for writing that gives the student's own viewpoint on a topic. Grades are reported on a 9 to 1 scale, where 9 is the highest.
+
+Paper 1, question by question
+- Question 1 (4 marks): find and list four pieces of information from a short part of the text. This is AO1.
+- Question 2 (8 marks): analyse how the writer uses language to create an effect. This is AO2.
+- Question 3 (8 marks): analyse how the writer uses structure, such as shifts in focus, to hold the reader's interest. This is AO2.
+- Question 4 (20 marks): evaluate how far you agree with a statement about the text, using evidence. This is AO4.
+- Question 5 (40 marks): a descriptive or narrative writing task, with 24 marks for content and organisation (AO5) and 16 marks for technical accuracy (AO6).
+
+Paper 2, question by question
+- Question 1 (4 marks): choose which statements are true. This is AO1.
+- Question 2 (8 marks): write a summary of the differences between the two texts. This is AO1.
+- Question 3 (12 marks): analyse how the writer uses language in one text. This is AO2.
+- Question 4 (16 marks): compare the writers' perspectives and how they convey them across both texts. This is AO3.
+- Question 5 (40 marks): a viewpoint writing task such as an article, speech or letter, with 24 marks for content and organisation (AO5) and 16 marks for technical accuracy (AO6).
+
+The reading objectives (AO1 to AO4)
+- AO1: identify and interpret explicit and implicit information and ideas, and select and synthesise evidence from different texts.
+- AO2: explain, comment on and analyse how writers use language and structure to achieve effects and influence readers, using relevant terminology.
+- AO3: compare writers' ideas and perspectives, as well as how these are conveyed, across two or more texts.
+- AO4: evaluate texts critically and support this with appropriate textual references.
+
+The writing objectives (AO5 and AO6)
+- AO5: communicate clearly, effectively and imaginatively, selecting and adapting tone, style and register for different forms, purposes and audiences, and organise information and ideas, using structural and grammatical features to support coherence and cohesion.
+- AO6: use a range of vocabulary and sentence structures for clarity, purpose and effect, with accurate spelling and punctuation.
+In plain terms, AO5 asks whether the writing is well planned, fits its purpose and reads well. AO6 asks whether the language is varied and the spelling and punctuation are accurate. Because AO6 carries 16 of the 40 marks in each writing question, accuracy is worth real effort.
+
+How to help with reading questions
+- For short retrieval questions, practise finding exact details and not adding opinions.
+- For language questions, teach a simple routine: quote a short phrase, name the technique if you can, say what it makes the reader think or feel, and say why the writer chose it.
+- For structure questions, practise noticing how a text begins, where the focus shifts and how it ends, and what effect each choice has.
+- For comparison, practise writing one sentence that links the two writers' views before giving evidence from each.
+- For evaluation, practise forming a clear judgement, then proving it with short quotations.
+
+How to help with writing questions
+- Plan for five minutes. For narrative, plan a beginning, a build-up, a turning point and an ending. For viewpoint writing, plan three clear points and a strong opening and ending.
+- Choose a tone and register that fits the form and audience. A speech sounds different from a letter to a newspaper.
+- Use a range of sentence types and vary the openings. Paragraph clearly.
+- Save five minutes to check spelling, punctuation and missing words.
+- For viewpoint writing, build each point as a paragraph using the PEEL or PEAL pattern.
+
+Revision tips that help
+- Use the exam board's past papers and mark schemes. They show what top answers look like.
+- Practise a single question type at a time, rather than whole papers only.
+- Ask a teacher or tutor to mark one answer in detail, then redo it.
+- Read widely. Newspaper articles, speeches and good fiction all build the range of language needed.
+- Keep a list of useful terms, such as simile, metaphor, tone, perspective, structure and shift, with an example of each.
+
+A note on feedback tools
+Reading objectives such as AO2 and AO3 are judged on how a student responds to texts, so they can only be judged from reading answers, not from a student's own essay. LiteracyLab AI bands a piece of writing on the writing objectives and leaves the reading ones to its reading practice. It gives bands, not marks, and it is not a replacement for the feedback of a teacher who knows the student and the exam board's own mark scheme.
+
+Common questions
+
+Are the objectives the same for every exam board?
+They are very similar across boards, but the paper structures and mark totals differ. Check your board's specification.
+How are grades reported?
+On a 9 to 1 scale, with 9 the highest.
+How many marks are there for accuracy in the writing questions?
+In AQA, 16 of the 40 marks in each writing question are for technical accuracy (AO6).
+Where can I see past papers?
+Past papers and mark schemes are published on the exam board's website.
+
+Last updated 8 October 2026.
+
+Related
+
+- UK guides by year
+- PEEL and PEAL paragraphs explained
+- What good writing feedback looks like
+- How LiteracyLab AI works
+- Helping with spelling mistakes
+
+All articles for parents · All guides
+
+---
+
+# Helping a child who makes lots of spelling and punctuation mistakes
+URL: https://www.literacylabai.com/learn/articles/help-a-child-who-makes-lots-of-spelling-mistakes/
+
+Home › Guides › Articles for parents › Helping a child who makes lots of spelling and punctuation mistakes
+
+Helping a child who makes lots of spelling and punctuation mistakes
+
+Lots of spelling and punctuation mistakes can worry parents, but they are fixable. The key is to work on a few things at a time, keep it low-pressure, and not let mistakes stop your child from writing.
+
+Separate ideas from accuracy
+Praise the ideas first, always. Treat spelling and punctuation as a separate job done afterwards, like proofreading. Children who are afraid of mistakes tend to write less and use only words they can spell.
+
+Fix the common ones first
+- Capital letters at the start of sentences and for names, and the word I.
+- Full stops at the end of sentences. Reading aloud shows where the breaks are.
+- Common words they use often, such as because, friend and said.
+- Apostrophes for short forms like don't, before the harder uses.
+
+Pick two or three words at a time
+Choose the words that appear most in their writing and practise those. Look, say, cover, write, check works well: look at the word, say it by syllables, cover it, write it from memory, then check.
+
+Use their own writing
+Words from their own work matter more to them than a list. Keep a small "my words" page and add two or three each week.
+
+Read it aloud
+Reading their writing aloud, exactly as written, helps a child catch missing words and punctuation. Do it together and let them make the fixes.
+
+When to ask for more help
+If spelling and writing are very hard compared with other work, or your child is distressed by it, talk to their teacher. Some children benefit from extra support, and an early conversation helps.
+
+Common questions
+
+Should I correct every spelling mistake?
+No. Choose two or three words and fix those together.
+Does reading more help spelling?
+It helps, because children meet words in context, but it works best alongside short, regular practice of common words.
+
+Last updated 8 October 2026.
+
+Related
+
+- What good writing feedback looks like
+- How LiteracyLab AI works
+- All year-by-year guides
+
+All articles for parents · All guides
+
+---
+
+# How to help your child with reading comprehension at home
+URL: https://www.literacylabai.com/learn/articles/help-with-reading-comprehension-at-home/
+
+Home › Guides › Articles for parents › How to help your child with reading comprehension at home
+
+How to help your child with reading comprehension at home
+
+Reading comprehension is understanding what you read, not just saying the words. It grows with short, regular practice and good questions. Here is a simple routine that works for most children aged 7 to 12.
+
+Start with a short text
+Pick something about half a page long that your child finds at least a little interesting: a story, a news item for children, a page from a non-fiction book. A short text lets you finish in ten minutes, which makes it easy to do again tomorrow.
+
+Read it twice
+Let your child read it aloud or silently once. Then ask them to read it again with a pencil, underlining any word they are unsure of. The second read is where most of the understanding happens.
+
+Ask four kinds of question
+- Find it: "What colour was the door?" The answer is written in the text.
+- Word meaning: "What does reluctant mean here?" Show them how to use the sentence around the word to work it out.
+- Read between the lines (inference): "Why do you think Sam kept checking the window?" The text does not say, so they need a clue and a reason.
+- Sum it up: "Tell me what this was about in one sentence."
+
+Always ask "how do you know?"
+This one question builds the habit that school tests reward: pointing to the line that proves your answer. If they say "Sam was nervous", ask which words showed it. A child who can answer that is reading closely.
+
+Keep it kind and short
+Ten to fifteen minutes, a few times a week, beats one long session. If your child gets something wrong, read the sentence together and look for the clue instead of giving the answer. Praise the specific thing they did well, such as finding the right line.
+
+Where to find texts
+Library books, children's news sites and our own free printable worksheets all work. Each of our worksheets has an original passage, questions of the four kinds above and an answer key, so you can mark it yourself.
+
+Common questions
+
+How long should a session be?
+Ten to fifteen minutes is plenty. Little and often works better than one long sitting.
+What if my child can read fluently but still misses questions?
+That is common. Fluent reading and understanding are different skills. Slow down, reread, and practise asking how they know each answer.
+
+Last updated 8 October 2026.
+
+Related
+
+- Free reading comprehension worksheets
+- Reading comprehension practice
+- All year-by-year guides
+
+All articles for parents · All guides
+
+---
+
+# How to help your child with inference questions (reading between the lines)
+URL: https://www.literacylabai.com/learn/articles/help-your-child-with-inference-questions/
+
+Home › Guides › Articles for parents › How to help your child with inference questions (reading between the lines)
+
+How to help your child with inference questions (reading between the lines)
+
+An inference is something the text suggests but does not say. Many children can find a fact that is written down and still lose marks on questions that ask why, how someone feels or what a writer suggests. The skill can be taught, and it starts with noticing clues.
+
+What an inference is
+Read this sentence: "Sam checked the window again and chewed his fingernail." The text never says Sam is nervous or waiting for someone, but a reader works it out from the clues. An inference is a clue from the text plus something you already know.
+
+Teach the three-part routine
+- The text says: Sam checked the window again and chewed his fingernail.
+- I know that: people look out of windows and bite their nails when they are waiting or worried.
+- So I think: Sam is anxious about someone arriving.
+Saying the three parts out loud makes the thinking visible, and it is exactly the habit that earns marks on written answers.
+
+Spot an inference question
+Look for question words such as why do you think, how does the character feel, what does this suggest, what can you tell about, or what is the writer implying. If the answer could not be underlined in the text, it is probably an inference.
+
+Practise with everyday things
+You do not need a book. Describe a scene and ask what is going on: "A wet umbrella is dripping by the door and the kettle is on." Or look at a photo and ask what happened just before it. Children enjoy this like a detective game.
+
+Always point to the clue
+Ask "which words made you think that?" An inference without a clue is only a guess. A strong answer names the feeling or idea and quotes or points to the words that suggest it.
+
+Common slips
+- Answering from their own life instead of the text: "I'd be scared" is not about the character.
+- Staying too vague: "he was sad" scores less than "he was lonely, because he ate alone and did not look up".
+- Retelling what happens instead of saying what it suggests.
+
+Common questions
+
+What if there is more than one possible answer?
+Several answers can be sensible. Choose the one with the strongest clue in the text, and be ready to say what the clue is.
+Can inference be practised before a child reads fluently?
+Yes. Pictures and stories read aloud work well, because the thinking is the same.
+
+Last updated 8 October 2026.
+
+Related
+
+- Helping with reading comprehension at home
+- True, False, Not Given questions explained
+- NAPLAN reading explained
+- Free reading comprehension worksheets
+- Reading comprehension practice
+
+All articles for parents · All guides
+
+---
+
+# Helping a child read poetry without the fear
+URL: https://www.literacylabai.com/learn/articles/helping-a-child-read-poetry/
+
+Home › Guides › Articles for parents › Helping a child read poetry without the fear
+
+Helping a child read poetry without the fear
+
+Poetry makes many children, and many parents, nervous because it seems to have a hidden answer. It does not. A poem is read like any text: closely, with attention to the words, and with the confidence to say what you think and why.
+
+Read it aloud twice
+Read the poem out loud once for the sound and again for the meaning. Poems are written to be heard, and reading aloud shows rhythm, rhyme and where the lines pause.
+
+Ask what it is about first
+Before looking for devices, ask your child to say in a sentence what is happening or what is being described. Then ask how the poem makes them feel.
+
+Notice a few devices
+- Simile: compares two things using like or as. "Her voice was like a bell."
+- Metaphor: says one thing is another. "The classroom was a zoo."
+- Personification: gives human qualities to something that is not human. "The wind whispered."
+- Rhyme and rhythm: the sound pattern at the end of lines and the beat inside them.
+- Line breaks: where the poet chooses to stop a line, which can slow or surprise the reader.
+
+Always ask about the effect
+Spotting a simile earns little on its own. The better question is what it does: what picture does it give, and how does it change how we feel about the subject? Practise the sentence "The poet uses ... to show..."
+
+Accept more than one idea
+Poems can mean more than one thing. A reading is sound if the words of the poem support it, so ask "which words make you say that?" instead of hunting for a single correct meaning.
+
+Try writing a tiny poem
+Four lines about something at home, using one simile, is enough. Writing even a short poem shows a child how a poet chooses words, and it makes reading poems less strange.
+
+Common questions
+
+My child says poems are boring. What can I do?
+Try funny poems, song lyrics and short poems about things they care about, and read them aloud with some drama.
+Does a poem have to rhyme?
+No. Many poems do not rhyme. They rely on images, rhythm and line breaks instead.
+
+Last updated 8 October 2026.
+
+Related
+
+- Helping with reading comprehension at home
+- Helping with inference questions
+- Free reading comprehension worksheets
+- Free writing prompt generator
+
+All articles for parents · All guides
+
+---
+
+# How much should my child write? Length by year group
+URL: https://www.literacylabai.com/learn/articles/how-much-should-my-child-write/
+
+Home › Guides › Articles for parents › How much should my child write? Length by year group
+
+How much should my child write? Length by year group
+
+There is no single correct length for a child's writing, and most curricula do not set one. But a rough target helps you judge whether a piece is thin, about right or long enough to show what a child can do.
+
+Why length matters, and why it does not
+A very short piece gives very little to work with. A child who writes two sentences has not had the chance to organise ideas, support a point or finish properly. On the other hand, a long piece is not automatically good: padding and repetition do not help.
+Think of length as a minimum that gives room to show skill, not a goal in itself.
+
+Practical targets we use
+These are the practice targets LiteracyLab AI uses to judge whether a piece is short for the year. They are our own sensible guides built from exam and curriculum guidance where it exists, not rules set by a school or exam board.
+- UK: Year 3 about 80 words, Year 4 about 120, Year 5 about 160, Year 6 about 250.
+- US: Grade 3 about 150 words, Grade 4 about 200, Grade 5 about 250, Grade 6 about 300.
+- Australia: Year 3 about 130 words, Year 4 about 170, Year 5 about 210, Year 6 about 260.
+- Older students write more, for example around 450 words for UK Year 11 and about 650 for Australian Year 11.
+
+What if my child is well below that?
+That is normal, especially for children who find writing hard. Aim to build up gradually: first add one more sentence with a reason, then one with an example. Praise the extra sentence, not the word count.
+
+What if my child writes a lot but it is hard to follow?
+Length is not the problem then. Help them plan in three or four short points before writing, and read the piece aloud together to find where it loses the thread.
+
+Check what the task asks
+Exams and class tasks often give their own guidance on length or time. If your child's teacher has given a target, use that.
+
+Common questions
+
+Do schools set a word count?
+Some tasks and exams give guidance, but most curricula describe writing in words rather than numbers. Check with the teacher.
+Is longer always better?
+No. A focused piece with clear reasons beats a long one that repeats itself.
+
+Last updated 8 October 2026.
+
+Related
+
+- UK guides by year
+- US guides by grade
+- Australian guides by year
+- Free writing prompt generator
+
+All articles for parents · All guides
+
+---
+
+# How to read a table or graph question
+URL: https://www.literacylabai.com/learn/articles/how-to-read-a-table-or-graph-question/
+
+Home › Guides › Articles for parents › How to read a table or graph question
+
+How to read a table or graph question
+
+Reading questions are not always about stories. Children are also asked about tables, bar charts and other data. These questions are quite mechanical, which makes them a good way to build confidence if your child follows the same steps each time.
+
+Step one: read the title and labels
+Before looking at any numbers, find what the table or chart is about. Read the title, the column headings or axis labels, and the units, such as centimetres, minutes or number of children.
+
+Step two: read the question twice
+Underline what is being asked. Is it one value, a comparison, a total, a difference or a trend? Many wrong answers come from answering a slightly different question, such as giving the total when the difference was asked.
+
+Step three: find the right row or bar
+Use a finger or a ruler to follow the row across or the bar up to the number. Check you are in the right row and the right column before you read the value.
+
+Step four: do the maths and check it
+If the question asks for a total, difference or comparison, write the calculation. Then ask whether the answer makes sense next to the data. If one bar is much taller than another, the biggest value should match it.
+
+Watch for common traps
+- Reading the wrong row or column.
+- Ignoring the units, for example reading minutes as hours.
+- Scales that do not start at zero or count in twos or fives.
+- Answering with the label instead of the value, or the other way round.
+
+Practise with real things
+Sports tables, weather charts, bus timetables and recipe quantities are all data. Ask a question about one each day, such as which day had the most rain, and have your child explain how they found it.
+
+Where it shows up in LiteracyLab AI
+Reading practice includes passages that are a data table or a bar chart, so students answer questions about data as well as stories and articles.
+
+Common questions
+
+Why do children find graph questions hard?
+Often because they rush to the numbers and skip the title, labels and units, which is where the meaning is.
+What if my child is not confident with maths?
+These questions mostly need careful reading and simple arithmetic. Practising the steps builds confidence.
+
+Last updated 8 October 2026.
+
+Related
+
+- Helping with reading comprehension at home
+- Helping with inference questions
+- Free reading comprehension worksheets
+- Reading comprehension practice
+
+All articles for parents · All guides
+
+---
+
+# KS2 SATs reading and writing explained for parents (England)
+URL: https://www.literacylabai.com/learn/articles/ks2-sats-reading-and-writing-explained/
+
+Home › Guides › Articles for parents › KS2 SATs reading and writing explained for parents (England)
+
+KS2 SATs reading and writing explained for parents (England)
+
+In England, children take national tests at the end of Key Stage 2 in Year 6, usually called SATs. This guide covers the English parts: the reading test, the grammar, punctuation and spelling tests, and how writing is assessed. Dates and formats can change, so confirm current details with your school or the government's published guidance.
+
+What children take, and when
+The tests take place in the same week in May each year. The English tests are the reading test, a grammar and punctuation test, and a spelling test, alongside the maths tests. Writing is not tested in this way. It is assessed by the teacher, which is covered below.
+
+The reading test
+The reading test is a single paper of 60 minutes. It has three texts of different kinds, usually a mix of different kinds of text, with questions on each. In total the paper is worth 50 marks, and the questions are a mix of multiple choice, short written answers and longer written answers worth one to three marks.
+The questions test several skills:
+- Finding and recording information that is stated in the text.
+- Working out what a word or phrase means in context.
+- Making inferences, which means reading between the lines, and explaining them with evidence.
+- Explaining how the writer's choices affect the reader.
+- Summarising a section, or comparing ideas.
+Inference and retrieval questions make up a large share of the paper, which is why asking "how do you know?" at home is such useful practice.
+
+Grammar, punctuation and spelling
+There is a 45-minute grammar and punctuation paper, covering things like word classes, clauses, tenses and punctuation marks. There is also a separate short spelling test of 20 words, which takes about 15 minutes and is read aloud to the children.
+
+How results are reported
+Each child's marks are turned into a scaled score. A scaled score of 100 or more means the child has met the expected standard in that test. The lowest score is 80 and the highest is 120. Scaled scores exist so that results can be compared fairly from year to year, because individual papers vary a little in difficulty. Parents receive their child's results from the school.
+
+How writing is assessed
+There is no SATs writing test. Instead, the class teacher judges your child's writing using work collected across Year 6, in different subjects as well as English, against national standards. There are three possible judgements: working towards the expected standard, working at the expected standard, and working at greater depth. Schools' judgements are checked through a process of moderation.
+This has an important consequence for parents. Because the judgement comes from a body of work, regular, good-quality writing across the year matters more than any single piece. It is also worth asking the teacher what they are looking for.
+
+Helping with reading at home
+- Practise the five question types above on short texts. Ten to fifteen minutes, a few times a week, is plenty.
+- Ask "how do you know?" Pointing to the line that proves an answer is the key habit.
+- Build stamina with longer texts. A paper with three texts in 60 minutes works out at roughly twenty minutes per text, so practise reading a text and answering questions in about that time, occasionally.
+- Teach children to read the question first, then find the answer. Underline key words in the question.
+- Encourage wide reading. Children who read widely meet more words and ideas, which helps with every question type.
+
+Helping with grammar, punctuation and spelling
+- Learn the terms in short bursts: noun, verb, adjective, adverb, conjunction, clause, and so on. Use examples from your child's own writing.
+- For spelling, practise the words the class is given, and spend a few minutes a day on patterns such as common prefixes, suffixes and endings.
+- Remember the spelling test is only 20 words. Practise saying words by syllables and writing them from memory.
+
+Helping with writing at home
+Encourage a short piece each week in a different form, such as a story, a letter, a diary entry or an explanation. Give one piece of feedback each time and let your child rewrite one paragraph. Our free prompt generator gives you ideas to start from.
+
+Keeping it calm
+Children pick up on adult worry. Present the tests as a chance to show what they have learned, keep routines normal, and make sure they are sleeping and eating well in test week. The results are a snapshot used by the school and, later, by their secondary school, and they say nothing about your child's worth.
+
+Common questions
+
+What does a scaled score of 100 mean?
+It means the child has met the expected standard in that test. Scores run from 80 to 120.
+Is writing tested in the SATs?
+No. Writing is assessed by the teacher using work from across Year 6.
+How long is the reading test?
+60 minutes, with three texts and 50 marks in total.
+How can I see sample papers?
+Past papers and the test frameworks are published on the government's website, and your school can share practice material.
+
+Last updated 8 October 2026.
+
+Related
+
+- UK guides by year
+- Helping with reading comprehension at home
+- Free reading comprehension worksheets
+- Helping with spelling mistakes
+- Free writing prompt generator
+
+All articles for parents · All guides
+
+---
+
+# NAPLAN reading explained for parents (Years 3, 5, 7 and 9)
+URL: https://www.literacylabai.com/learn/articles/naplan-reading-explained/
+
+Home › Guides › Articles for parents › NAPLAN reading explained for parents (Years 3, 5, 7 and 9)
+
+NAPLAN reading explained for parents (Years 3, 5, 7 and 9)
+
+NAPLAN reading checks how well students in Years 3, 5, 7 and 9 understand what they read. This guide explains what the test looks like, what the results mean and how to help at home without adding pressure. Details change from year to year, so confirm them with your child's school or the National Assessment Program website (nap.edu.au).
+
+When it happens
+NAPLAN is held in March each year, in Term 1, for every student in Years 3, 5, 7 and 9. Reading is one of the tests, alongside writing, language conventions (spelling, grammar and punctuation) and numeracy. Schools tell families the timetable for their own students.
+
+How the test is delivered
+Students take the reading test on a computer. The test is tailored: after an opening set of questions, a student is given a next set that is harder or easier depending on how they went. That means two children in the same class can see different questions. This is designed so that the test can measure a wide range of ability more precisely, so a child who sees easier questions has not failed.
+
+What students read
+Students read a range of texts: informative texts such as an article, imaginative texts such as a story or poem, and persuasive texts that argue a point of view. The texts get longer and more complex in the older years.
+
+What the questions ask
+Most questions are multiple choice, and some are interactive, for example choosing or dragging words or sentences. Across the years the thinking moves from finding information that is stated, to working out the meaning of words from the sentence around them, to inference (understanding what the text suggests but does not say), and in the older years to comparing ideas and judging how a writer persuades.
+
+How results are described
+NAPLAN results are reported in four proficiency levels for each area: Exceeding, Strong, Developing and Needs additional support. Strong means a student is meeting a challenging but reasonable expectation for their year. The results are a snapshot of how a student went on one day, so they are best used alongside what the teacher sees through the year.
+
+Practising at home
+- Read a short text together a few times a week, then ask the four kinds of question: find it, word meaning, read between the lines and sum it up.
+- Always ask "how do you know?" so your child points to the words that prove an answer.
+- Let your child read some texts on a screen, so the format feels familiar.
+- Try the practice material and demonstration site on the National Assessment Program website, which uses the same online platform as the test.
+- Keep it short and calm. Ten to fifteen minutes is plenty.
+
+On the day
+Good sleep and a normal breakfast matter more than last-minute cramming. Remind your child to read every question in full, to look back at the text for the answer instead of guessing from memory, and to cross out answers that are clearly wrong before choosing.
+
+Common questions
+
+Does my child need to study for NAPLAN reading?
+Not in a heavy way. Regular reading, talking about books and short comprehension practice are enough for most children, and the test is not a pass or fail.
+Why did my child get different questions from their friend?
+The online test is tailored, so the questions a student sees depend on how they answer the opening ones.
+
+Last updated 8 October 2026.
+
+Related
+
+- NAPLAN writing explained
+- Helping with reading comprehension at home
+- Helping with inference questions
+- Free reading comprehension worksheets
+- Reading comprehension practice
+
+All articles for parents · All guides
+
+---
+
+# NAPLAN writing explained for parents (Years 3, 5, 7 and 9)
+URL: https://www.literacylabai.com/learn/articles/naplan-writing-explained/
+
+Home › Guides › Articles for parents › NAPLAN writing explained for parents (Years 3, 5, 7 and 9)
+
+NAPLAN writing explained for parents (Years 3, 5, 7 and 9)
+
+NAPLAN is the national literacy and numeracy assessment taken by students in Years 3, 5, 7 and 9 in Australia. This guide covers the writing test: what children are asked to do, how it is marked, what the results mean and how to help at home without adding pressure. Dates and formats can change, so confirm current details with your school or the national NAPLAN website.
+
+When it happens and who takes it
+NAPLAN is held in March, in Term 1, over a test window of about two weeks. Every student in Years 3, 5, 7 and 9 takes the same set of tests: reading, writing, language conventions (spelling, grammar and punctuation) and numeracy. In recent years Year 3 students have written their response on paper, and students in Years 5, 7 and 9 have written on a computer. Your school will tell you which applies and when your child's sessions are.
+
+What the writing task looks like
+Students are given a writing prompt and asked to write one kind of text: either a narrative (a story) or a persuasive piece (an argument). Students do not get to choose which one on the day, so it helps to be comfortable with both. The prompts for Years 3 and 5 are different from those for Years 7 and 9, though they are designed to be of similar difficulty.
+Writing is timed at 40 minutes in Year 3 and 42 minutes in Years 5, 7 and 9. That is not long, which is why planning and finishing matter so much.
+
+How the writing is marked
+Trained markers score each response using a rubric with ten criteria. Each criterion has its own scale, and the scores are then combined. The ten criteria are:
+- Audience: does the writer orient and engage the reader?
+- Text structure: does the piece have a clear beginning, middle and end, suited to the kind of writing?
+- Ideas: are the ideas relevant, well chosen and developed?
+- Character and setting (narrative) or persuasive devices (persuasive): the one criterion that changes with the text type.
+- Vocabulary: is the word choice varied and precise?
+- Cohesion: do ideas link together, with connecting words and a clear thread?
+- Paragraphing: is the writing grouped into sensible paragraphs?
+- Sentence structure: is there a mix of correct, well-built sentences?
+- Punctuation: are full stops, capital letters, commas and so on used correctly?
+- Spelling: are words spelt correctly, including more difficult ones?
+The national program publishes marking guides for both text types, so you can read exactly what markers look for.
+
+How results are described
+Since 2023, NAPLAN results are reported in four proficiency levels for each area tested: Exceeding, Strong, Developing and Needs additional support.
+Strong means a student is meeting challenging but reasonable expectations for their year. Exceeding means they are above that. Developing means they are working towards expectations. Needs additional support means they are not yet meeting expectations and would benefit from extra help. There is no pass mark, and a Developing result is information about where to focus, not a failure. Families receive an individual student report, and the report is a snapshot of one test on one day.
+
+A simple plan for a narrative
+A story marked on these criteria needs a shape. Spend the first three or four minutes planning on rough paper or in a notes box:
+- Who is the main character, and where are they? (Character and setting.)
+- What is the problem or surprise that sets things moving?
+- What is the most exciting moment, and how is it solved?
+- How does it end, and how does the character feel now?
+Our Story Mountain article shows this planning method with an example, and our show, don't tell article helps with the vocabulary and detail that make characters and settings come alive.
+
+A simple plan for a persuasive piece
+A persuasive piece needs a clear position and reasons. A reliable plan is one sentence stating the position, two or three reasons each with an example or explanation, and a closing sentence that restates the view. Persuasive devices include a rhetorical question, a confident opening, strong words such as essential or unfair, and addressing the reader directly. A good habit is to build each reason as a short paragraph using the PEEL or PEAL pattern.
+
+Practising at home
+- Practise one text type at a time, then alternate. A short piece twice a week beats one long session.
+- Use made-up prompts of your own to start with. For example: "The best day of the year" for a story, or "Should every school have a garden?" for a persuasive piece.
+- Do some practice untimed, so your child can focus on ideas and structure, and some timed, so they learn to finish in the time.
+- Always leave the last two minutes for rereading. Look for missing full stops, capital letters and words that were left out.
+- Give one piece of feedback each time, not ten. One clear thing to improve is something a child can do next time.
+
+Common problems and how to fix them
+- No plan: the piece starts well and wanders. Fix with a two-minute plan every time.
+- No ending: the writer runs out of time. Plan the ending before starting, and if time is short, write a one-line ending.
+- One long block of text: show where paragraphs begin, for example when time, place or idea changes.
+- Repeated simple sentences: practise combining two short sentences, and starting sentences in different ways.
+- Careless spelling of easy words: leave time to reread.
+
+Keeping it in proportion
+NAPLAN is one short snapshot, and the best preparation is regular reading and writing through the year, with some familiarity with the format. Tell your child it is a chance to show what they can do, and that the result is information for their teachers and for you, not a judgement of them.
+
+Common questions
+
+Is there a pass mark?
+No. Results are described in four levels. Strong means meeting challenging but reasonable expectations for the year.
+Which kinds of writing are tested?
+Narrative and persuasive writing. The prompt tells students which one to write, and they do not choose.
+How long is the writing test?
+40 minutes in Year 3 and 42 minutes in Years 5, 7 and 9. Your school will confirm the timetable.
+Can my child see past papers?
+The national program publishes example tests and marking guides on its website, and your school may have practice material too.
+
+Last updated 8 October 2026.
+
+Related
+
+- Australian guides by year
+- Story Mountain explained
+- PEEL and PEAL paragraphs explained
+- Show, don't tell explained
+- Free writing prompt generator
+
+All articles for parents · All guides
+
+---
+
+# PEEL and PEAL paragraphs explained, with an example
+URL: https://www.literacylabai.com/learn/articles/peel-and-peal-paragraphs-explained/
+
+Home › Guides › Articles for parents › PEEL and PEAL paragraphs explained, with an example
+
+PEEL and PEAL paragraphs explained, with an example
+
+PEEL and PEAL are two simple ways to build a paragraph that proves a point. They are used in many schools for essays and argument writing. Each letter is one job the paragraph has to do.
+
+PEEL
+Point, Evidence, Explain, Link.
+- Point: say what you are arguing in one sentence.
+- Evidence: give a fact, quote or example that backs it up.
+- Explain: say what the evidence shows and why it supports the point.
+- Link: connect back to the question or on to the next idea.
+
+PEAL
+The same idea with Analysis in place of Explain. Analysis means saying why the evidence matters and what effect it has, not just what it shows. It is used a lot when writing about texts and when building arguments.
+
+A worked example
+Question: should children have less homework?
+- Point: Children should have less homework because they need time to rest.
+- Evidence: A school day is already about six hours of learning, and many children also have clubs and chores.
+- Analysis: Tired children find it harder to concentrate, so extra homework late in the evening may teach them less than the same time asleep.
+- Link: Therefore a lighter homework load would help children learn better, not worse.
+
+Common mistakes
+- Writing the point and the evidence but skipping the explanation, which is where most marks are earned.
+- Choosing evidence that does not really prove the point.
+- Forgetting to link back, so the paragraph ends without a conclusion.
+
+Practise it
+Pick a simple question, such as the example above, and write one paragraph using each part in turn. Then label the four parts with different coloured pencils. LiteracyLab AI shows the framework labelled in a student's own response and in a model response for the same task.
+
+Common questions
+
+What is the difference between PEEL and PEAL?
+Only the third letter. Explain says what the evidence shows, and Analysis goes further to say why it matters and its effect.
+Does every paragraph need all four parts?
+In a structured essay it is a good habit. Writers can vary the order once they are confident.
+
+Last updated 8 October 2026.
+
+Related
+
+- What good writing feedback looks like
+- How LiteracyLab AI works
+- Free writing prompt generator
+
+All articles for parents · All guides
+
+---
+
+# Persuasive devices (AFOREST) explained, with examples
+URL: https://www.literacylabai.com/learn/articles/persuasive-devices-aforest-explained/
+
+Home › Guides › Articles for parents › Persuasive devices (AFOREST) explained, with examples
+
+Persuasive devices (AFOREST) explained, with examples
+
+AFOREST is a memory aid many schools use for persuasive writing. Each letter is a device that can make an argument more convincing. Children often learn the list quickly and then use every device at once, so the real skill is choosing a few and using them well.
+
+What the letters stand for
+Here is each device with an invented example for the topic "Should children walk to school?"
+- Alliteration: words that start with the same sound. "Safe, sensible strolls to school."
+- Facts: things that can be checked. "Walking is free, and cars add to traffic outside the gates."
+- Opinion: what the writer believes, stated with confidence. "I strongly believe walking is the best start to the day."
+- Rhetorical question: a question asked for effect, not an answer. "Who would not want a calmer, quieter morning?"
+- Emotive language: words that make the reader feel something. "Children deserve to arrive happy, not rushed and anxious."
+- Statistics: numbers that back a point. In a child's piece, only use a number they really know. Otherwise say "many" or "most".
+- Triple: three words or ideas together. "Healthy, cheap and fun."
+
+Choose three or four
+A paragraph with every device in it sounds forced. Ask your child to pick the three or four that suit their argument and place them where they matter most: a rhetorical question to open, a fact to prove a reason, a triple near the end.
+
+Devices need reasons
+Devices decorate an argument but do not replace one. Check that the piece still has a clear position and reasons with explanations. A strong persuasive piece with a few devices beats a weak one with many.
+
+Keep facts honest
+Children sometimes invent figures to sound convincing. Teach them that a made-up number is not a fact. If they do not know a figure, they can say "many children" or give an example they know to be true.
+
+Practise at home
+Pick a small argument, such as a later bedtime or a class pet, and ask for three sentences, each using a different device. Then read them aloud and ask which one sounded most convincing and why.
+
+Where it shows up in LiteracyLab AI
+For persuasive pieces from the upper primary years, the feedback includes an AFOREST check: which devices the writer used, quoting the exact words from their own piece, and one device they could try next.
+
+Common questions
+
+Does every persuasive piece need all seven?
+No. Using a few well-chosen devices is better than using all of them.
+Is AFOREST used everywhere?
+It is a teaching aid, not a rule of any exam. Schools use different memory aids, so ask your child's teacher which they use.
+
+Last updated 8 October 2026.
+
+Related
+
+- PEEL and PEAL paragraphs explained
+- What good writing feedback looks like
+- Free writing prompt generator
+- How LiteracyLab AI works
+
+All articles for parents · All guides
+
+---
+
+# RACE and CER: how to write a good short answer
+URL: https://www.literacylabai.com/learn/articles/race-and-cer-short-answers-explained/
+
+Home › Guides › Articles for parents › RACE and CER: how to write a good short answer
+
+RACE and CER: how to write a good short answer
+
+Short-answer questions ask a child to answer a question about a text in a few sentences. Two simple structures, RACE and CER, give them a pattern to follow so the answer is complete and supported by the text.
+
+RACE
+Restate, Answer, Cite, Explain.
+- Restate: turn the question into the start of your answer.
+- Answer: give your answer clearly.
+- Cite: back it up with evidence from the text, using a quote or close detail.
+- Explain: say how the evidence proves your answer.
+
+A worked example
+Question: Why did Mia hide the letter?
+- Restate: Mia hid the letter because
+- Answer: she did not want her brother to read it.
+- Cite: The text says she "slid it under her pillow the moment she heard footsteps".
+- Explain: This shows she was worried about being caught, so she wanted to keep it secret.
+
+CER
+Claim, Evidence, Reasoning. It is the same idea in three steps and is often used in older years and in science.
+- Claim: your answer in one sentence.
+- Evidence: the fact, quote or detail that supports it.
+- Reasoning: the link that explains why the evidence supports the claim.
+
+Which one to use
+Use whichever your child's school uses. RACE suits younger students because the first step, restating the question, gets them started. CER suits older students who are ready to think more about the reasoning step.
+
+Common mistakes
+- Skipping Explain or Reasoning. A quote on its own is not an answer.
+- Quotes that are too long. Choose the few words that prove the point.
+- Evidence that does not match the claim. Ask: does this really show what I said?
+
+Where it shows up in LiteracyLab AI
+On Premium, the reading practice includes one short written answer marked out of two or three with the reason. The structure it teaches is RACE for primary and middle years and CER for high school, and you can see which parts the student used.
+
+Common questions
+
+How long should a short answer be?
+Two to four sentences is usual. It is long enough to cover each step and short enough to finish in the time.
+Do I mark it myself?
+Yes, at home you can check each step in turn: did they restate, answer, cite and explain?
+
+Last updated 8 October 2026.
+
+Related
+
+- Helping with reading comprehension at home
+- Helping with inference questions
+- PEEL and PEAL paragraphs explained
+- Reading comprehension practice
+
+All articles for parents · All guides
+
+---
+
+# Show, don't tell: how to teach it with simple examples
+URL: https://www.literacylabai.com/learn/articles/show-dont-tell-explained/
+
+Home › Guides › Articles for parents › Show, don't tell: how to teach it with simple examples
+
+Show, don't tell: how to teach it with simple examples
+
+Show, don't tell is advice every writing teacher gives. Instead of naming a feeling or a fact, describe what a reader would see, hear or feel that proves it.
+
+Telling versus showing
+Telling names it: She was scared. Showing makes the reader work it out: Her hands shook as she reached for the door handle. The second version feels more real because the reader notices the clue themselves.
+
+More examples
+- Telling: It was a hot day. Showing: The pavement burned through my sandals and the ice cream ran down my wrist.
+- Telling: He was angry. Showing: He slammed the door so hard the picture on the wall rattled.
+- Telling: The room was messy. Showing: Clothes covered the floor, and a cereal bowl balanced on the stack of books.
+
+Simple exercises
+- Pick a feeling card (nervous, proud, bored) and write two sentences that show it without using the word.
+- Take a sentence from their own writing that says a feeling and rewrite it using what the character does or sees.
+- Use the five senses: ask what the character sees, hears, smells, touches and tastes.
+
+When telling is fine
+Showing everything makes writing slow. Use telling for quick facts, and save showing for the moments that matter most.
+
+A tip for feedback
+When reading your child's writing, circle one sentence that tells and ask: what would we see if this were true? Let them rewrite just that sentence.
+
+Common questions
+
+What ages is this for?
+Children can start from about 7 with simple examples, and it stays useful through secondary school.
+Should every sentence show?
+No. Show the important moments and tell the rest quickly.
+
+Last updated 8 October 2026.
+
+Related
+
+- What good writing feedback looks like
+- Free writing prompt generator
+- All year-by-year guides
+
+All articles for parents · All guides
+
+---
+
+# Story Mountain explained: planning a story step by step
+URL: https://www.literacylabai.com/learn/articles/story-mountain-explained/
+
+Home › Guides › Articles for parents › Story Mountain explained: planning a story step by step
+
+Story Mountain explained: planning a story step by step
+
+The Story Mountain is a simple way to plan a story so it has a shape. Picture a mountain: the story climbs to an exciting peak and then comes back down. Children aged about 7 to 12 use it in many schools.
+
+The five parts
+- Opening: introduce who and where.
+- Build-up: something starts to happen, and the tension grows.
+- Climax: the most exciting or tense moment, the top of the mountain.
+- Resolution: the problem gets sorted out.
+- Ending: how things settle, and how the character feels now.
+
+A tiny example
+- Opening: Mia is camping with her dad by a lake.
+- Build-up: At night she hears a rustling outside the tent.
+- Climax: She unzips the tent and sees two glowing eyes.
+- Resolution: It is a hedgehog looking for crumbs.
+- Ending: Mia laughs, shares a biscuit and falls asleep.
+
+How to use it
+Draw a mountain on paper and write one line at each point before your child writes the story. Planning takes two minutes and fixes the most common problem in children's stories: a lot of build-up and then a rushed ending.
+
+Common problems
+- No problem: the story is just a list of things that happened. Ask what goes wrong.
+- A climax that is not very exciting. Ask what the worst thing that could happen is.
+- An abrupt ending. Ask how the character feels at the end and what has changed.
+
+Make it their own
+Once they can use the mountain, encourage them to change it: start in the middle of the action or end on a surprise. Structure is a starting point, not a cage.
+
+Common questions
+
+What age is the Story Mountain for?
+It is most often used with children of about 7 to 12, but the idea works for any age.
+Does every story need all five parts?
+For planning, yes. Later they can vary or combine parts.
+
+Last updated 8 October 2026.
+
+Related
+
+- Free writing prompt generator
+- What good writing feedback looks like
+- All year-by-year guides
+
+All articles for parents · All guides
+
+---
+
+# True, False, Not Given questions explained
+URL: https://www.literacylabai.com/learn/articles/true-false-not-given-questions-explained/
+
+Home › Guides › Articles for parents › True, False, Not Given questions explained
+
+True, False, Not Given questions explained
+
+In these questions a child reads a passage and then decides whether each statement is true, false or not given. Children usually find True and False straightforward. The tricky one is Not Given, which means the passage does not say.
+
+What each answer means
+- True: the passage says this, in the same meaning, perhaps in different words.
+- False: the passage says the opposite.
+- Not Given: the passage does not say either way.
+
+A worked example
+Passage: "Ella's bakery opens at seven in the morning and sells bread and cakes."
+- "The bakery sells bread." True, because the passage says so.
+- "The bakery opens at nine." False, because the passage says seven.
+- "The bakery sells cheese." Not Given, because the passage does not mention cheese.
+
+A routine for every statement
+- Find the part of the passage the statement is about.
+- Ask: does the passage say this, say the opposite, or say nothing about it?
+- Choose True, False or Not Given from your answer, and be ready to point to the words.
+
+The trap: using what you already know
+Many children answer from their own knowledge. A child might think "most bakeries sell cheese rolls, so True." The question only asks what this passage says. If it is not written, it is Not Given, however likely it seems.
+
+False versus Not Given
+False needs a line that contradicts the statement. If you cannot point to a contradicting line, the answer is probably Not Given. Ask your child to find the line each time.
+
+Practise at home
+Read a short paragraph and write three statements together, one of each kind. Swap with your child and let them write the next three for you. Making questions is a good way to understand them.
+
+Common questions
+
+Where do these questions appear?
+In some school reading tasks and in English-language tests for older students. Check what your child's own tests use.
+Why is Not Given hard?
+Because it asks a child to notice the absence of information, which goes against the habit of filling gaps with what they know.
+
+Last updated 8 October 2026.
+
+Related
+
+- Helping with inference questions
+- Helping with reading comprehension at home
+- Free reading comprehension worksheets
+- Reading comprehension practice
+
+All articles for parents · All guides
