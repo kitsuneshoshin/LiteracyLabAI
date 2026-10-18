@@ -9,9 +9,9 @@ const TOKEN_URL = "https://oauth2.googleapis.com/token";
 const b64url = (v) => Buffer.from(typeof v === "string" ? v : JSON.stringify(v)).toString("base64url");
 
 // A short-lived sign-in token, from a signed request (a JWT) that only the key's holder can make.
-async function getAccessToken(creds, fetchImpl = fetch, nowSec = Math.floor(Date.now() / 1000)) {
+async function getAccessToken(creds, fetchImpl = fetch, nowSec = Math.floor(Date.now() / 1000), scope = SCOPE) {
   const header = b64url({ alg: "RS256", typ: "JWT" });
-  const claims = b64url({ iss: creds.client_email, scope: SCOPE, aud: TOKEN_URL, iat: nowSec, exp: nowSec + 3000 });
+  const claims = b64url({ iss: creds.client_email, scope, aud: TOKEN_URL, iat: nowSec, exp: nowSec + 3000 });
   const signature = crypto.createSign("RSA-SHA256").update(`${header}.${claims}`).sign(creds.private_key).toString("base64url");
   const res = await fetchImpl(TOKEN_URL, {
     method: "POST",

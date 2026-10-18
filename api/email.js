@@ -16,6 +16,7 @@ const { buildAnyEmail, ALL_EMAIL_KEYS, sampleContext } = require("./_lib/emailAn
 //   rating       POST  a thumbs up/down on a piece of feedback (was api/commit.js)
 //   qa           GET   the weekly marking-quality check (called by Vercel Cron)
 //   ga           GET   Google Analytics numbers for the dashboard (admin or cron secret)
+//   gsc          GET   Google Search Console numbers: the searches that bring people in (admin or cron secret)
 //   stats        GET   delivery, open and click numbers per email subject (admin or cron secret)
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -122,11 +123,8 @@ async function handleQa(req, res) {
 // The site's visitors, sessions, sources and pages from Google Analytics, for the owner's dashboard.
 // Closed to everyone but the cron secret or a signed-in admin. Needs GA_SERVICE_ACCOUNT_JSON (a read-only
 // service account's key) and GA_PROPERTY_ID; without them it says how to switch it on.
-async function handleGa(req, res) {
-  if (req.method !== "GET") {
-    res.setHeader("Allow", "GET");
-    return res.status(405).json({ error: "Method not allowed." });
-  }
+// The cron secret, or a signed-in admin. Used by the read-only numbers for the dashboard (ga, gsc).
+async function isCronOrAdmin(req) {
   const secret = process.env.CRON_SECRET;
   const bearer = (req.headers && req.headers.authorization) || "";
   let allowed = Boolean(secret) && bearer === `Bearer ${secret}`;
@@ -137,7 +135,36 @@ async function handleGa(req, res) {
       allowed = admins.includes(String(user.email || "").toLowerCase());
     } catch (e) { allowed = false; }
   }
-  if (!allowed) return res.status(401).json({ error: "Unauthorized." });
+  return allowed;
+}
+
+// Search Console numbers for the dashboard: the searches that bring people to the site. Same account and key as the
+// Analytics feed; the account also needs to be a user on the Search Console property.
+async function handleGsc(req, res) {
+  if (req.method !== "GET") {
+    res.setHeader("Allow", "GET");
+    return res.status(405).json({ error: "Method not allowed." });
+  }
+  if (!(await isCronOrAdmin(req))) return res.status(401).json({ error: "Unauthorized." });
+  if (!process.env.GA_SERVICE_ACCOUNT_JSON) {
+    return res.status(200).json({ available: false, reason: "Add GA_SERVICE_ACCOUNT_JSON (the read-only service account key) in Vercel to see Search Console numbers here." });
+  }
+  const { fetchSearchSummary, DEFAULT_SITE } = require("./_lib/gscReport");
+  try {
+    const summary = await fetchSearchSummary({ rawCreds: process.env.GA_SERVICE_ACCOUNT_JSON, siteUrl: process.env.GSC_SITE_URL || DEFAULT_SITE });
+    return res.status(200).json({ available: true, ...summary });
+  } catch (err) {
+    // A setup gap (the account is not yet a user on the property, or the API is off) is explained, not a server error.
+    return res.status(200).json({ available: false, reason: String(err && err.message || err) });
+  }
+}
+
+async function handleGa(req, res) {
+  if (req.method !== "GET") {
+    res.setHeader("Allow", "GET");
+    return res.status(405).json({ error: "Method not allowed." });
+  }
+  if (!(await isCronOrAdmin(req))) return res.status(401).json({ error: "Unauthorized." });
   if (!process.env.GA_SERVICE_ACCOUNT_JSON || !process.env.GA_PROPERTY_ID) {
     return res.status(200).json({ available: false, reason: "Add GA_SERVICE_ACCOUNT_JSON (the read-only service account key) and GA_PROPERTY_ID in Vercel to see Google Analytics numbers here." });
   }
@@ -385,6 +412,7 @@ module.exports = async function handler(req, res) {
     if (action === "qa") return await handleQa(req, res);
     if (action === "stats") return await handleStats(req, res);
     if (action === "ga") return await handleGa(req, res);
+    if (action === "gsc") return await handleGsc(req, res);
     if (action === "test") return await handleTest(req, res);
     if (action === "unsubscribe") return await handleUnsubscribe(req, res);
     if (action === "feedback") return await handleFeedback(req, res);
