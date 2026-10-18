@@ -72,6 +72,15 @@ async function handleCron(req, res) {
     adminEmails,
   });
   const report = { mode: live ? "live" : "dry-run", missingSettings: missing, emailLiveFlag: process.env.EMAIL_LIVE === "true", ...summary };
+  // Also keep the day's Analytics and Search Console numbers for the dashboard (a second cron job is not available).
+  // Never lets a Google hiccup affect the email run.
+  try {
+    const { fetchSummary } = require("./_lib/gaReport");
+    const { fetchSearchSummary, DEFAULT_SITE } = require("./_lib/gscReport");
+    report.metrics = await require("./_lib/metricsCache").refreshMetricsCache({ supabase: getSupabaseAdmin(), fetchSummary, fetchSearchSummary, defaultSite: DEFAULT_SITE });
+  } catch (err) {
+    report.metrics = { error: String((err && err.message) || err) };
+  }
   // In the deployment logs too, so a dry run can be checked without calling the endpoint.
   console.log("free-email-run", JSON.stringify(report));
   return res.status(200).json(report);

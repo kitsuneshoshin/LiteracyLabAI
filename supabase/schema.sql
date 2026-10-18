@@ -282,6 +282,18 @@ alter table public.qa_runs enable row level security;
 create index if not exists qa_runs_created_idx on public.qa_runs (created_at desc);
 
 -- ---------------------------------------------------------------------------
+-- Daily copy of the Google Analytics and Search Console numbers (written by the
+-- daily cron in api/email.js, read by the owner's dashboard refresh). Site-wide
+-- statistics only, nothing about any customer. RLS on with no policy.
+-- ---------------------------------------------------------------------------
+create table if not exists public.site_metrics (
+  key text primary key,
+  data jsonb not null,
+  updated_at timestamptz not null default now()
+);
+alter table public.site_metrics enable row level security;
+
+-- ---------------------------------------------------------------------------
 -- OpenAI usage per day and model (api/_lib/aiUsage.js, written on every AI call): the call
 -- count, tokens and an estimated cost. Holds no customer content. Days are UTC. RLS on with no
 -- policy, like every table here; only the server (service role) reads or writes.
