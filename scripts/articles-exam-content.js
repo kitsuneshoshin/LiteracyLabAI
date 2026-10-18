@@ -112,10 +112,16 @@ const EXAM = {
 
   "11-plus-english-explained": {
     slug: "11-plus-english-explained",
-    title: "11+ English explained: what is tested and how to prepare",
-    description: "A plain guide to the English part of the 11+ in England: what is tested, why papers differ by area, key dates, and how to prepare without overdoing it.",
-    lead: "The 11+ is the entrance test some areas of England use to select pupils for grammar and other selective secondary schools. There is no single national 11+, so the first and most important step is to find out exactly what your area and your chosen schools use. This guide explains the English side in general terms.",
+    title: "11 plus English (11+): what is tested and how to prepare",
+    description: "What the 11 plus English paper covers in England: comprehension, vocabulary, grammar and writing, why tests differ by area, key dates, and how to prepare calmly.",
+    lead: "The 11 plus (11+) is the entrance test some areas of England use to select pupils for grammar and other selective secondary schools. There is no single national 11+, so the first and most important step is to find out exactly what your area and your chosen schools use. This guide explains the English side in general terms.",
     sections: [
+      { h: "11 plus English at a glance", ul: [
+        "What it is: the English part of the 11 plus, the selective-school entrance test taken in Year 6 in some areas of England.",
+        "What it usually covers: reading comprehension, vocabulary, grammar, punctuation and spelling, and sometimes a short piece of writing.",
+        "When: usually the autumn term of Year 6, often September or early October.",
+        "The key step: find out which provider and format your chosen schools use, because there is no single national test.",
+        "How to prepare: a daily reading habit, a vocabulary notebook and short comprehension sessions, with timed practice added later."] },
       { h: "It varies by area and school", p: ["The format, the subjects and the test provider differ between areas, groups of schools and sometimes individual schools. Some tests include English, maths, verbal reasoning and non-verbal reasoning, and others use only some of these. Some use multiple-choice answer sheets, and some use written answers. Some are set by a national test provider, and others are written locally. Because of all this, general 11+ books and websites are a guide only.", "The best sources are always the websites of the schools you are interested in, and your local authority's admissions information. They will tell you which tests, which subjects, which dates and how places are decided."] },
       { h: "Key dates to know", p: ["The tests are usually taken in the autumn term of Year 6, often in September or early October, and many schools ask families to register in advance over the summer. Separately, the application for a secondary school place in England is made through your local authority, opens on 1 September and closes on 31 October for entry the following September. Offers are sent on National Offer Day in early March. Check your area's own timetable, because registration and test dates differ."] },
       { h: "What the English paper usually covers", p: ["Where there is an English paper, it commonly includes some or all of the following:"], ul: [
@@ -139,6 +145,8 @@ const EXAM = {
       { h: "Keeping perspective", p: ["The 11+ is one route among several, and many excellent schools do not use it. Children who are tired or anxious do worse than they should. A steady, modest routine, with plenty of time for play and rest, is kinder and usually more useful. Whatever the outcome, a child who has built a reading habit and a stronger vocabulary has gained something real."] },
     ],
     faq: [
+      ["What is on the 11 plus English paper?", "It varies, but commonly includes reading comprehension, vocabulary, and grammar, punctuation and spelling. Some areas also set a short piece of writing."],
+      ["How do I prepare my child for 11+ English?", "Build a daily reading habit, keep a vocabulary notebook, practise comprehension in short sessions and talk about how each answer was found. Add timed practice with papers from the named test provider once the format is familiar."],
       ["Is there one national 11+?", "No. It depends on the area and the school, so check with the schools you are interested in and your local authority."],
       ["When is it taken?", "Usually in the autumn term of Year 6, often in September or early October, though some areas differ."],
       ["When do I apply for a secondary school place?", "Applications to your local authority open on 1 September and close on 31 October for entry the following September. Check your authority's own dates."],
