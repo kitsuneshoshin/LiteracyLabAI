@@ -223,9 +223,9 @@ function buildHubPage(ctx) {
   const list = published();
   const regions = [...new Set(list.map((s) => s.region))].sort((x, y) => REGION[x].order - REGION[y].order);
   const names = levelsSummary(list);
-  const title = regions.length > 2 ? "Free reading comprehension worksheets for the UK, US and Australia" : regions.length > 1 ? `Free reading comprehension worksheets: ${joinAnd(names)}` : "Free printable reading comprehension worksheets, Years 3 to 6 (UK)";
+  const title = regions.length > 2 ? "Free printable reading worksheets for children, with answers" : regions.length > 1 ? `Free reading comprehension worksheets: ${joinAnd(names)}` : "Free printable reading comprehension worksheets, Years 3 to 6 (UK)";
   const description = regions.length > 2
-    ? "Free printable reading comprehension worksheets for UK Years 3 to 6, US Grades 3 to 6 and Australian Years 3 to 6, with original passages and answer keys in PDF."
+    ? "Free printable reading worksheets for children: comprehension passages for UK, US and Australian Years 3 to 6, with answer keys in PDF."
     : regions.length > 1
       ? "Free printable reading comprehension worksheets for UK Years 3 to 6 and US Grades 3 to 6, with original passages, questions and answer keys in PDF. No sign-up."
       : "Free printable reading comprehension worksheets for UK Years 3 to 6: original passages, questions and answer keys, in PDF. No sign-up needed.";
@@ -245,8 +245,8 @@ function buildHubPage(ctx) {
   }).join("\n");
   const guides = joinAnd(regions.map((k) => `<a href="/learn/${k}/">${REGION[k].gradeNoun}-by-${REGION[k].gradeNoun} ${REGION[k].short} guides</a>`));
   const body = `<div class="crumbs"><a href="/">Home</a> › <a href="/learn/">Guides</a> › Worksheets</div>
-<h1>Free printable reading comprehension worksheets</h1>
-<p class="lead">Original passages with questions and a full answer key, written for ${esc(joinAnd(levelsSummary(list)))}. Read online or print the PDF. Each one builds the reading skills children are tested on, and there is no sign-up.</p>
+<h1>Free printable reading worksheets for children</h1>
+<p class="lead">Free reading comprehension worksheets: original passages with questions and a full answer key, written for ${esc(joinAnd(levelsSummary(list)))}. Read online or print the PDF. Each one builds the reading skills children are tested on, and there is no sign-up.</p>
 ${sections}
 <h2>How to use them</h2>
 <ul>

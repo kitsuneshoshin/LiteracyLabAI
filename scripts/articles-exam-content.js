@@ -149,10 +149,17 @@ const EXAM = {
 
   "gcse-english-language-explained": {
     slug: "gcse-english-language-explained",
-    title: "GCSE English Language explained: the six assessment objectives",
-    description: "How GCSE English Language is assessed in England: both papers question by question, the six objectives (AO1 to AO6), and how to help a teenager.",
+    title: "GCSE English Language assessment objectives (AO1 to AO6) explained",
+    description: "The GCSE English Language assessment objectives AO1 to AO6 in plain English, with what each one means, which questions test it and how to help a teenager.",
     lead: "GCSE English Language is marked against six assessment objectives, usually shortened to AO1 to AO6. Knowing what they mean, and how they appear in each paper, shows you exactly what examiners are looking for. This guide uses the AQA specification, the most widely taught. Other exam boards have similar objectives but different paper structures, so check your own board's specification.",
     sections: [
+      { h: "The GCSE English Language assessment objectives at a glance", ul: [
+        "AO1 (reading): find and understand information and ideas, and pick evidence from the text or texts.",
+        "AO2 (reading): explain how the writer uses language and structure to affect the reader.",
+        "AO3 (reading): compare what two writers think and how they show it.",
+        "AO4 (reading): judge how well a text works, backed up by quotations.",
+        "AO5 (writing): content and organisation: writing that fits its purpose and audience and is well structured.",
+        "AO6 (writing): technical accuracy: varied vocabulary and sentences, with correct spelling and punctuation."], extra: "AO1 to AO4 are the reading objectives and AO5 and AO6 are the writing objectives. The sections below show which question tests each one." },
       { h: "The two papers", p: ["AQA GCSE English Language has two papers. Each paper lasts 1 hour 45 minutes, is worth 80 marks and counts for half of the GCSE. Each has a reading section followed by a writing section.", "Paper 1, Explorations in Creative Reading and Writing, uses a fiction extract for reading and asks for narrative or descriptive writing. Paper 2, Writers' Viewpoints and Perspectives, uses two non-fiction texts, from different times, for reading and asks for writing that gives the student's own viewpoint on a topic. Grades are reported on a 9 to 1 scale, where 9 is the highest."] },
       { h: "Paper 1, question by question", ul: [
         "Question 1 (4 marks): find and list four pieces of information from a short part of the text. This is AO1.",
@@ -195,6 +202,8 @@ const EXAM = {
       { h: "A note on feedback tools", p: ["Reading objectives such as AO2 and AO3 are judged on how a student responds to texts, so they can only be judged from reading answers, not from a student's own essay. LiteracyLab AI bands a piece of writing on the writing objectives and leaves the reading ones to its reading practice. It gives bands, not marks, and it is not a replacement for the feedback of a teacher who knows the student and the exam board's own mark scheme."] },
     ],
     faq: [
+      ["What are the GCSE English Language assessment objectives?", "There are six. AO1 to AO4 are for reading (finding information, analysing language and structure, comparing texts and evaluating) and AO5 and AO6 are for writing (content and organisation, then technical accuracy)."],
+      ["What do AO5 and AO6 mean in English Language?", "AO5 is content and organisation: writing that suits its purpose and reader and is well planned. AO6 is technical accuracy: a range of vocabulary and sentence structures, with accurate spelling and punctuation. In AQA, AO5 is worth 24 marks and AO6 is worth 16 marks in each writing question."],
       ["Are the objectives the same for every exam board?", "They are very similar across boards, but the paper structures and mark totals differ. Check your board's specification."],
       ["How are grades reported?", "On a 9 to 1 scale, with 9 the highest."],
       ["How many marks are there for accuracy in the writing questions?", "In AQA, 16 of the 40 marks in each writing question are for technical accuracy (AO6)."],
