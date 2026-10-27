@@ -315,6 +315,7 @@ const ARTICLES = [
 // The five exam explainers are written out in full in articles-exam-content.js.
 const { EXAM } = require("./articles-exam-content");
 const { MORE } = require("./articles-more-content");
-const ALL = ARTICLES.map((a) => EXAM[a.slug] || a).concat(MORE);
+const { SEARCH } = require("./articles-search-content");
+const ALL = ARTICLES.map((a) => EXAM[a.slug] || a).concat(MORE, SEARCH);
 
 module.exports = { ARTICLES: ALL, LINKS };

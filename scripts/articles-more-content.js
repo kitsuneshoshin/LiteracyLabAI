@@ -13,6 +13,7 @@ const LINKS = {
   comprehension: ["/learn/articles/help-with-reading-comprehension-at-home/", "Helping with reading comprehension at home"],
   naplanWriting: ["/learn/articles/naplan-writing-explained/", "NAPLAN writing explained"],
   naplanReading: ["/learn/articles/naplan-reading-explained/", "NAPLAN reading explained"],
+  naplanResults: ["/learn/articles/how-to-read-naplan-results/", "How to read NAPLAN results"],
   inference: ["/learn/articles/help-your-child-with-inference-questions/", "Helping with inference questions"],
   aforest: ["/learn/articles/persuasive-devices-aforest-explained/", "Persuasive devices (AFOREST) explained"],
   race: ["/learn/articles/race-and-cer-short-answers-explained/", "RACE and CER short answers explained"],
@@ -49,7 +50,7 @@ const MORE = [
       ["Does my child need to study for NAPLAN reading?", "Not in a heavy way. Regular reading, talking about books and short comprehension practice are enough for most children, and the test is not a pass or fail."],
       ["Why did my child get different questions from their friend?", "The online test is tailored, so the questions a student sees depend on how they answer the opening ones."],
     ],
-    related: rel("naplanWriting", "comprehension", "inference", "worksheets", "reading"),
+    related: rel("naplanWriting", "naplanResults", "comprehension", "inference", "worksheets"),
   },
   {
     slug: "help-your-child-with-inference-questions",

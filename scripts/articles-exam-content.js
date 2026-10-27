@@ -11,6 +11,7 @@ const LINKS = {
   reading: ["/learn/reading-comprehension-practice/", "Reading comprehension practice"],
   how: ["/learn/how-it-works/", "How LiteracyLab AI works"],
   uk: ["/learn/uk/", "UK guides by year"],
+  naplanResults: ["/learn/articles/how-to-read-naplan-results/", "How to read NAPLAN results"],
   us: ["/learn/us/", "US guides by grade"],
   au: ["/learn/australia/", "Australian guides by year"],
   peel: ["/learn/articles/peel-and-peal-paragraphs-explained/", "PEEL and PEAL paragraphs explained"],
@@ -69,7 +70,7 @@ const EXAM = {
       ["How long is the writing test?", "40 minutes in Year 3 and 42 minutes in Years 5, 7 and 9. Your school will confirm the timetable."],
       ["Can my child see past papers?", "The national program publishes example tests and marking guides on its website, and your school may have practice material too."],
     ],
-    related: rel("au", "mountain", "peel", "show", "prompts"),
+    related: rel("au", "mountain", "peel", "show", "prompts", "naplanResults"),
   },
 
   "ks2-sats-reading-and-writing-explained": {
