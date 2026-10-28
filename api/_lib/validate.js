@@ -510,12 +510,23 @@ function dropGlowsQuotingMisspellings(parsed) {
   return parsed;
 }
 
+// A "spelling" fix whose quote only appears INSIDE a longer word (quote "recieve" matching nothing but
+// "recieved", or quote "he" matching "the") would point at a word the student spelled correctly.
+// Only applies when the quote starts and ends with a letter or digit, so punctuation quotes are untouched.
+function occursAsWholeWords(normalizedText, quote) {
+  const q = normalizeForMatch(quote);
+  if (!/^[\p{L}\p{N}].*[\p{L}\p{N}]$|^[\p{L}\p{N}]$/su.test(q)) return true;
+  const re = new RegExp(`(?<![\\p{L}\\p{N}])${q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(?![\\p{L}\\p{N}])`, "u");
+  return re.test(normalizedText);
+}
+
 function dropInvalidSpellingGrammar(parsed, submittedText, country) {
   if (!parsed || !Array.isArray(parsed.spellingGrammar) || !submittedText) return parsed;
   const normalizedText = normalizeForMatch(submittedText);
   const kept = parsed.spellingGrammar.filter((item) =>
     checkString(item?.quote, 1, 200) && checkString(item?.correction, 1, 240) &&
     normalizedText.includes(normalizeForMatch(item.quote)) &&
+    (item.type !== "spelling" || occursAsWholeWords(normalizedText, item.quote)) &&
     foldLookalikes(item.correction) !== foldLookalikes(item.quote) &&
     !addsPunctuationAlreadyThere(item, submittedText) &&
     !require("./regional").isRegionalVariantOnly(item.quote, item.correction, country));
@@ -525,6 +536,11 @@ function dropInvalidSpellingGrammar(parsed, submittedText, country) {
     if (Number.isInteger(parsed.spellingGrammarTotal)) {
       parsed.spellingGrammarTotal = Math.max(kept.length, parsed.spellingGrammarTotal - dropped);
     }
+  }
+  // The honest total can never exceed the number of words in the piece.
+  if (Number.isInteger(parsed.spellingGrammarTotal)) {
+    const words = wordsOf(submittedText).length;
+    parsed.spellingGrammarTotal = Math.max(parsed.spellingGrammar.length, Math.min(parsed.spellingGrammarTotal, words));
   }
   return parsed;
 }

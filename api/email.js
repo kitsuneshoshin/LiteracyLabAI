@@ -373,7 +373,7 @@ async function handleRating(req, res) {
   const user = await requireUser(req);
   const supabase = getSupabaseAdmin();
   const body = parseBody(req);
-  const { submissionId, helpfulRating, feedbackText } = body;
+  const { submissionId, helpfulRating, feedbackText, mistake } = body;
 
   if (!submissionId) return res.status(400).json({ error: "submissionId is required." });
   if (helpfulRating && !["up", "down"].includes(helpfulRating)) {
@@ -399,11 +399,15 @@ async function handleRating(req, res) {
   // triaged and shows up in the owner's Backlog. Never allowed to fail the
   // rating itself: the commitment row above is what the app relies on.
   const text = typeof feedbackText === "string" ? feedbackText.trim() : "";
-  if (text || helpfulRating === "down") {
+  // A "report a mistake" is filed as a bug and names its submission, so the feedback
+  // being complained about can be found and read.
+  if (text || helpfulRating === "down" || mistake === true) {
     try {
+      const reportedMistake = mistake === true;
+      const message = reportedMistake ? `MISTAKE REPORT: ${text}${text ? " " : ""}[submission ${submissionId}]` : (text || null);
       const { error: fbErr } = await supabase.from("feedback").insert({
         profile_id: user.id, source: "app", email_key: `app-${submission.kind === "reading" ? "reading" : "writing"}`,
-        rating: helpfulRating || null, category: "other", message: text || null, contact_ok: false,
+        rating: helpfulRating || (reportedMistake ? "down" : null), category: reportedMistake ? "bug" : "other", message, contact_ok: false,
       });
       if (fbErr) console.error("Saving in-app feedback to the backlog failed:", fbErr.message);
     } catch (err) {
