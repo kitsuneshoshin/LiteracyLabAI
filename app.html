@@ -3111,13 +3111,21 @@ function OverallScorePanel({ feedback }){
   const score = feedback?.overallScore;
   if (score == null) return null;
   const color = score >= 8 ? "var(--good)" : score >= 5 ? "var(--gold-ink)" : "var(--bad)";
+  // The reason is one long paragraph; lead with its first sentence as the verdict and keep the rest as quieter detail.
+  const reason = typeof feedback?.scoreReason === "string" ? feedback.scoreReason.trim() : "";
+  const split = reason.match(/^(.+?[.!?])(?:\s+([\s\S]*))?$/);
+  const reasonHead = split ? split[1] : reason;
+  const reasonRest = split && split[2] ? split[2].trim() : "";
   return (
     <div className="card p-5 sm:p-6 flex items-center gap-5" style={{ borderLeft: "4px solid " + color }}>
       <ScoreRing score={score} total={10} label="score" />
       <div className="min-w-0">
         <div className="label-mono mb-1.5" style={{ color: "var(--ink-soft)" }}>Overall score</div>
-        {feedback?.scoreReason && (
-          <p className="text-[15.5px] leading-[1.55] font-read" style={{ color: "var(--ink)" }}>{feedback.scoreReason}</p>
+        {reasonHead && (
+          <p className="text-[18px] leading-[1.45] font-read" style={{ color: "var(--ink)", fontWeight: 600 }}>{reasonHead}</p>
+        )}
+        {reasonRest && (
+          <p className="text-[14px] leading-[1.55] mt-1.5" style={{ color: "var(--ink-soft)" }}>{reasonRest}</p>
         )}
       </div>
     </div>
@@ -3144,9 +3152,17 @@ function FeedbackPanel({ tier, gradeLabel, country, interest, confidence, motiva
     : vocabFor(interest, tier, country);
 
   return (
-    <div className="animate-float-in grid lg:grid-cols-5 gap-4 items-start">
-     <div className="lg:col-span-3 flex flex-col gap-4 min-w-0">
+    <div className="animate-float-in flex flex-col gap-4 min-w-0">
       <OverallScorePanel feedback={feedback} />
+
+      <FeedbackNote tone="grow" kicker="Your next step" tag={"explained through " + interestLabel}>
+        <p className="text-[17px] leading-[1.6] font-read" style={{ color: "var(--ink)" }}>{grow}</p>
+        <GrowNextBlock feedback={feedback} />
+      </FeedbackNote>
+
+      <FeedbackNote tone="glow" kicker="What you did well">
+        <p className="text-[16px] leading-[1.6] font-read" style={{ color: "var(--ink)" }}>{glow}</p>
+      </FeedbackNote>
 
       {submittedText && feedback?.highlights && (
         <div className="card p-5 sm:p-6">
@@ -3158,11 +3174,6 @@ function FeedbackPanel({ tier, gradeLabel, country, interest, confidence, motiva
         </div>
       )}
 
-      <ResponsesPanel feedback={feedback} />
-      <FrameworkTipPanel feedback={feedback} />
-      <DevicesPanel feedback={feedback} />
-     </div>
-     <div className="lg:col-span-2 flex flex-col gap-4 min-w-0">
       <ExpandAllBar />
       <SpellingGrammarPanel feedback={feedback} />
 
@@ -3172,15 +3183,9 @@ function FeedbackPanel({ tier, gradeLabel, country, interest, confidence, motiva
           onSeePlans={onSeePlans} />
       )}
 
-      <FeedbackNote tone="glow" kicker="Glow · what you did well">
-        <p className="text-[17px] leading-[1.6] font-read" style={{ color: "var(--ink)" }}>{glow}</p>
-      </FeedbackNote>
-
-      <FeedbackNote tone="grow" kicker="Grow · your next step" tag={"explained through " + interestLabel}>
-        <p className="text-[17px] leading-[1.6] font-read" style={{ color: "var(--ink)" }}>{grow}</p>
-        <GrowNextBlock feedback={feedback} />
-      </FeedbackNote>
-
+      <ResponsesPanel feedback={feedback} />
+      <FrameworkTipPanel feedback={feedback} />
+      <DevicesPanel feedback={feedback} />
       <ExamTechniquePanel feedback={feedback} />
 
       <Collapsible id="vocab" defaultOpen={false} borderColor="var(--border)" iconBg="var(--cyan-tint)" iconColor="var(--cyan-ink)"
@@ -3200,7 +3205,6 @@ function FeedbackPanel({ tier, gradeLabel, country, interest, confidence, motiva
       )}
       <ThumbsFeedback context="writing feedback" session={session} submissionId={submissionId} backendLive={backendLive} />
       <ShareResultCard session={session} backendLive={backendLive} submissionId={submissionId} />
-     </div>
     </div>
   );
 }
@@ -4369,7 +4373,7 @@ function Workspace({ plan, country, gradeIdx, setGradeIdx, tier, setTierOverride
         // stretched full-bleed, same reasoning as a body-text column anywhere
         // else: a line of prose that runs the full width of a wide screen is
         // harder to read, not easier.
-        <div className={"mx-auto flex flex-col gap-4 " + (exerciseType === "writing" || (readingBankEntry && Array.isArray(backendFeedback?.questionReview) && backendFeedback.questionReview.length > 0) ? "max-w-6xl" : "max-w-3xl")}>
+        <div className={"mx-auto flex flex-col gap-4 " + (exerciseType !== "writing" && (readingBankEntry && Array.isArray(backendFeedback?.questionReview) && backendFeedback.questionReview.length > 0) ? "max-w-6xl" : "max-w-3xl")}>
           {exerciseType === "writing" ? (
             <>
               <SubmissionRecap tier={tier} title={meta?.title || "Your story"} words={words} onNew={handleNew} />
