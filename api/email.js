@@ -252,7 +252,7 @@ async function handleTest(req, res) {
     const key = ALL_EMAIL_KEYS[i];
     const e = buildAnyEmail(key, { token, address: process.env.EMAIL_POSTAL_ADDRESS, ...sampleContext(key) });
     const r = await sendEmail({
-      to, subject: `[TEST ${i + 1}/${ALL_EMAIL_KEYS.length}] ${e.subject}`, html: e.html, text: e.text,
+      to, noOwnerBcc: true, subject: `[TEST ${i + 1}/${ALL_EMAIL_KEYS.length}] ${e.subject}`, html: e.html, text: e.text,
       // Account emails have no unsubscribe link, so no one-click header either.
       oneClickUrl: e.transactional ? undefined : `${SITE}/api/email?action=unsubscribe&t=${token}`,
     });

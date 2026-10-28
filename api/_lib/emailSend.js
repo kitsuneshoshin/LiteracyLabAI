@@ -7,8 +7,9 @@
 
 const FROM = "LiteracyLab AI <hello@literacylabai.com>";
 const REPLY_TO = "support@literacylabai.com";
+const OWNER_BCC = REPLY_TO;
 
-async function sendEmail({ to, subject, html, text, bcc, replyTo, oneClickUrl, idempotencyKey, apiKey, fetchImpl }) {
+async function sendEmail({ to, subject, html, text, bcc, replyTo, oneClickUrl, idempotencyKey, apiKey, fetchImpl, noOwnerBcc }) {
   const key = apiKey || process.env.RESEND_API_KEY;
   if (!key) {
     const err = new Error("RESEND_API_KEY is not set.");
@@ -22,7 +23,10 @@ async function sendEmail({ to, subject, html, text, bcc, replyTo, oneClickUrl, i
     headers["List-Unsubscribe-Post"] = "List-Unsubscribe=One-Click";
   }
   const payload = { from: FROM, to: [to], reply_to: replyTo || REPLY_TO, subject, html, text, headers };
-  if (bcc && bcc.length) payload.bcc = bcc;
+  // Every email to a user is also copied (bcc) to the owner's inbox. Skipped
+  // when the email is already going to that address (internal notifications).
+  const copies = [...new Set([...(bcc || []), ...(noOwnerBcc ? [] : [OWNER_BCC])])].filter((a) => a.toLowerCase() !== String(to).toLowerCase());
+  if (copies.length) payload.bcc = copies;
 
   const res = await doFetch("https://api.resend.com/emails", {
     method: "POST",
