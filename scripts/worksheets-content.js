@@ -111,7 +111,8 @@ const SHEETS = [
 ];
 
 const { MORE } = require("./worksheets-content-2.js");
+const { UK2 } = require("./worksheets-content-uk2.js");
 const { US } = require("./worksheets-content-us.js");
 const { AU } = require("./worksheets-content-au.js");
 
-module.exports = { SHEETS: SHEETS.concat(MORE, US, AU) };
+module.exports = { SHEETS: SHEETS.concat(MORE, UK2, US, AU) };

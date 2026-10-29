@@ -14,20 +14,20 @@ const ROOT = path.join(__dirname, "..");
 const SHEETS = W.SHEETS;
 const TYPES = ["retrieval", "vocabulary", "inference", "explain", "order", "summary", "language", "opinion", "quote"];
 const COUNTRY_KEY = Object.fromEntries(Object.entries(W.REGION).map(([k, r]) => [k, r.countryKey]));
-const PER_LEVEL = { uk: 3, us: 2, australia: 2 };
+const PER_LEVEL = { uk: 5, us: 2, australia: 2 };
 const norm = (s) => s.toLowerCase().replace(/[‘’]/g, "'").replace(/[“”]/g, '"');
 const passageText = (s) => s.passage.map((p) => (p.h ? p.h + " " : "") + p.p).join(" ");
 const sentences = (s) => s.passage.map((p) => p.p).join(" ").split(/(?<=[.!?])["”]?\s+/).filter(Boolean);
 const of = (region) => SHEETS.filter((s) => s.region === region);
 // Quoted text that is deliberately NOT from the passage: a definition used in a question,
 // an alternative answer we accept, or a worked example of a good answer.
-const NOT_FROM_PASSAGE = ["flew up smoothly and powerfully", "wax tablets", "wonderful", "An owl has big eyes that let in lots of light, so it can see in the dark."];
+const NOT_FROM_PASSAGE = ["flew up smoothly and powerfully", "wax tablets", "wonderful", "went quickly", "hurries", "pulled off with effort", "fighting", "able to grow plants well", "signalled to come over", "keeps", "moved without a sound or with ease", "An owl has big eyes that let in lots of light, so it can see in the dark."];
 // A UK Year 4 child (8 to 9) reads at about a US Grade 3 level, so the bands step up accordingly.
 const SENTENCE_CAP = { uk: { 3: 12, 4: 15, 5: 17, 6: 20 }, us: { 3: 15, 4: 17, 5: 19, 6: 20 }, australia: { 3: 15, 4: 17, 5: 19, 6: 20 } };
 const WORDS = { uk: { 3: [150, 240], 4: [170, 270], 5: [260, 400], 6: [300, 480] }, us: { 3: [170, 270], 4: [250, 380], 5: [280, 420], 6: [300, 480] }, australia: { 3: [170, 270], 4: [250, 380], 5: [280, 420], 6: [300, 480] } };
 
-test("the sheets: UK Years 3 to 6 (three each), US Grades 3 to 6 and Australian Years 3 to 6 (two each), all with unique ids", () => {
-  assert.equal(SHEETS.length, 12 + 8 + 8);
+test("the sheets: UK Years 3 to 6 (five each), US Grades 3 to 6 and Australian Years 3 to 6 (two each), all with unique ids", () => {
+  assert.equal(SHEETS.length, 20 + 8 + 8);
   assert.equal(new Set(SHEETS.map((s) => s.id)).size, SHEETS.length);
   for (const region of ["uk", "us", "australia"]) {
     for (const y of [3, 4, 5, 6]) assert.equal(of(region).filter((s) => W.yearNum(s.year) === y).length, PER_LEVEL[region], `${region} ${y}`);
