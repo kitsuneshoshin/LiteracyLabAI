@@ -3809,7 +3809,7 @@ function ReadingFeedbackPanel({ tier, country, interest, confidence, motivation,
   const isPoem = split && /poem/i.test(String(bank.textType || ""));
   const marked = feedback?.shortAnswer && typeof feedback.shortAnswer === "object" && Number.isInteger(feedback.shortAnswer.awarded) ? feedback.shortAnswer : null;
   const glowCard = (
-    <FeedbackNote tone="glow" kicker="Glow · what you did well" tag={pct + "% correct"}>
+    <FeedbackNote tone="glow" kicker="What you did well" tag={pct + "% correct"}>
       <p className="text-[17px] leading-[1.6] font-read" style={{ color: "var(--ink)" }}>{glow}</p>
     </FeedbackNote>
   );
@@ -3845,7 +3845,7 @@ function ReadingFeedbackPanel({ tier, country, interest, confidence, motivation,
         )}
       </div>
       <div className="mt-4 pt-4 border-t" style={{ borderColor: "var(--border-soft)" }}>
-        <div className="label-mono mb-1.5" style={{ color: "var(--good)", fontWeight: 700 }}>Glow · what you did well</div>
+        <div className="label-mono mb-1.5" style={{ color: "var(--good)", fontWeight: 700 }}>What you did well</div>
         <p className="text-[17px] leading-[1.6] font-read" style={{ color: "var(--ink)" }}>{glow}</p>
       </div>
     </div>
@@ -3869,7 +3869,7 @@ function ReadingFeedbackPanel({ tier, country, interest, confidence, motivation,
       {split && <div className="lg:col-span-2 min-w-0">{passageCard}</div>}
       <div className={split ? "lg:col-span-3 flex flex-col gap-4 min-w-0" : "contents"}>
 
-      <FeedbackNote tone="grow" kicker="Grow · your next step" tag={"explained through " + interestLabel}>
+      <FeedbackNote tone="grow" kicker="Your next step" tag={"explained through " + interestLabel}>
         <p className="text-[17px] leading-[1.6] font-read" style={{ color: "var(--ink)" }}>{grow}</p>
         <GrowNextBlock feedback={feedback} />
       </FeedbackNote>
@@ -4397,8 +4397,8 @@ function Workspace({ plan, country, gradeIdx, setGradeIdx, tier, setTierOverride
           ) : null}
         </div>
       ) : (
-        <div className="grid lg:grid-cols-5 gap-6">
-          <div className="lg:col-span-3 flex flex-col gap-4">
+        <div className="mx-auto flex flex-col gap-4 max-w-3xl">
+          <div className="flex flex-col gap-4 min-w-0">
             {(exerciseType === "writing" && backendLive && (writingLoading || !meta)) ? (
               <div className="card p-10 flex flex-col items-center justify-center text-center gap-3 min-h-[300px]">
                 {locked ? (
@@ -4416,7 +4416,7 @@ function Workspace({ plan, country, gradeIdx, setGradeIdx, tier, setTierOverride
                 ) : (
                   <>
                     <span className="label-mono" style={{ color: "var(--ink-soft)" }}>A prompt, made for you</span>
-                    <div className="font-display text-3xl" style={{ color: "var(--ink)" }}>Ready for a {TIER_META[tier].label.toLowerCase()} prompt?</div>
+                    <div className="font-display text-3xl" style={{ color: "var(--ink)" }}>Ready for {/^[aeiou]/i.test(TIER_META[tier].label) ? "an" : "a"} {TIER_META[tier].label.toLowerCase()} prompt?</div>
                     <p className="text-[13px] max-w-[30ch]" style={{ color: "var(--ink-faint)" }}>This uses 1 of your {total === 999 ? "" : `${total - used} remaining `}submissions.</p>
                     <FocusPicker kind="writing" tier={tier} country={country} gradeLabel={gradeLabel} premium={premium} value={writingFocus} onChange={changeWritingFocus} onSeePlans={onSeePlans} />
                     <button onClick={()=>requestNewWritingPrompt()}
@@ -4450,7 +4450,7 @@ function Workspace({ plan, country, gradeIdx, setGradeIdx, tier, setTierOverride
                 ) : (
                   <>
                     <span className="label-mono" style={{ color: "var(--ink-soft)" }}>A passage, made for you</span>
-                    <div className="font-display text-3xl" style={{ color: "var(--ink)" }}>Ready for a {TIER_META[tier].label.toLowerCase()} passage?</div>
+                    <div className="font-display text-3xl" style={{ color: "var(--ink)" }}>Ready for {/^[aeiou]/i.test(TIER_META[tier].label) ? "an" : "a"} {TIER_META[tier].label.toLowerCase()} passage?</div>
                     <p className="text-[13px] max-w-[30ch]" style={{ color: "var(--ink-faint)" }}>This uses 1 of your {total === 999 ? "" : `${total - used} remaining `}submissions.</p>
                     <FocusPicker kind="reading" tier={tier} country={country} gradeLabel={gradeLabel} premium={premium} value={readingFocus} onChange={changeReadingFocus} onSeePlans={onSeePlans} />
                     <button onClick={()=>requestNewPassage()}
@@ -4469,27 +4469,21 @@ function Workspace({ plan, country, gradeIdx, setGradeIdx, tier, setTierOverride
             )}
           </div>
 
-          <div className="lg:col-span-2 flex flex-col gap-4 lg:self-start">
-            {/* self-start: without it, this column stretches to match the
-                left column's grid-row height (CSS Grid's default), which is
-                barely noticeable next to the compact writing editor but
-                leaves a huge empty box below this short placeholder card
-                once a reading passage + 5 questions makes the left column
-                much taller. */}
-            <div className="card p-6 flex flex-col items-center justify-center text-center gap-3 min-h-[220px]" style={{ borderStyle: submitError ? "solid" : "dashed", borderColor: submitError ? "var(--bad)" : undefined }}>
-              {submitError ? (
-                <div className="w-11 h-11 rounded-full grid place-items-center" style={{ background: "var(--bad-tint)", color: "var(--bad)" }}>
-                  <IconAlert size={20} strokeWidth={2} />
-                </div>
-              ) : (
-                <span className="label-mono" style={{ color: "var(--ink-soft)" }}>FIG.2 &nbsp; Your feedback</span>
-              )}
-              <div className="font-display text-2xl" style={{ color: "var(--ink)" }}>{submitError ? "Couldn't generate feedback" : "Key Takeaways will appear here"}</div>
-              <p className="text-[13px] max-w-[28ch]" style={{ color: "var(--ink-faint)" }}>
-                {submitError || `${exerciseType === "writing" ? `Submit your ${tier === "high" ? "essay" : "story"}` : "Check your understanding"} to see personalised feedback from LiteracyLab AI.`}
-              </p>
+          {/* The empty "feedback will appear here" card used to take half the screen. Now only a failed submit gets a card;
+              otherwise one quiet line says what the learner will get. */}
+          {submitError ? (
+            <div className="card p-6 flex flex-col items-center justify-center text-center gap-3" style={{ borderColor: "var(--bad)" }}>
+              <div className="w-11 h-11 rounded-full grid place-items-center" style={{ background: "var(--bad-tint)", color: "var(--bad)" }}>
+                <IconAlert size={20} strokeWidth={2} />
+              </div>
+              <div className="font-display text-2xl" style={{ color: "var(--ink)" }}>Couldn't generate feedback</div>
+              <p className="text-[13px] max-w-[40ch]" style={{ color: "var(--ink-faint)" }}>{submitError}</p>
             </div>
-          </div>
+          ) : (
+            <p className="text-[13px] text-center" style={{ color: "var(--ink-faint)" }}>
+              {exerciseType === "writing" ? `Submit your ${tier === "high" ? "essay" : "story"}` : "Check your answers"} to get a score, your next step and what you did well.
+            </p>
+          )}
         </div>
       )}
 
