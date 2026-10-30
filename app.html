@@ -3053,7 +3053,7 @@ function AnnotatedText({ text, highlights, revisedStory }){
 
   return (
     <div>
-      <p className="whitespace-pre-wrap font-read text-[14.5px] leading-relaxed" style={{ color: "var(--ink)" }}>{parts}</p>
+      <p className="whitespace-pre-wrap font-read text-[14.5px] leading-relaxed max-w-[75ch]" style={{ color: "var(--ink)" }}>{parts}</p>
       <div className="flex items-center gap-3 mt-3 text-[11px] font-semibold" style={{ color: "var(--ink-faint)" }}>
         <span className="inline-flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full" style={{ background: "var(--good)" }} />Glow</span>
         <span className="inline-flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full" style={{ background: "var(--bad)" }} />Grow</span>
@@ -3077,7 +3077,7 @@ function AnnotatedText({ text, highlights, revisedStory }){
               <mark className="rounded px-1" style={{ background: "var(--good)", color: "var(--on-solid)" }}>highlighted</mark> = what changed
             </span>
           </div>
-          <p className="whitespace-pre-wrap font-read text-[14.5px] leading-relaxed" style={{ color: "var(--ink)" }}>{revisedParts}</p>
+          <p className="whitespace-pre-wrap font-read text-[14.5px] leading-relaxed max-w-[75ch]" style={{ color: "var(--ink)" }}>{revisedParts}</p>
         </div>
       )}
     </div>
@@ -3155,14 +3155,20 @@ function FeedbackPanel({ tier, gradeLabel, country, interest, confidence, motiva
     <div className="animate-float-in flex flex-col gap-4 min-w-0">
       <OverallScorePanel feedback={feedback} />
 
-      <FeedbackNote tone="grow" kicker="Your next step" tag={"explained through " + interestLabel}>
-        <p className="text-[17px] leading-[1.6] font-read" style={{ color: "var(--ink)" }}>{grow}</p>
-        <GrowNextBlock feedback={feedback} />
-      </FeedbackNote>
-
-      <FeedbackNote tone="glow" kicker="What you did well">
-        <p className="text-[16px] leading-[1.6] font-read" style={{ color: "var(--ink)" }}>{glow}</p>
-      </FeedbackNote>
+      {/* Side by side from tablet width up (next step gets the larger share); stacked on a phone. */}
+      <div className="grid md:grid-cols-5 gap-4 items-start">
+        <div className="md:col-span-3 min-w-0">
+          <FeedbackNote tone="grow" kicker="Your next step" tag={"explained through " + interestLabel}>
+            <p className="text-[17px] leading-[1.6] font-read" style={{ color: "var(--ink)" }}>{grow}</p>
+            <GrowNextBlock feedback={feedback} />
+          </FeedbackNote>
+        </div>
+        <div className="md:col-span-2 min-w-0">
+          <FeedbackNote tone="glow" kicker="What you did well">
+            <p className="text-[16px] leading-[1.6] font-read" style={{ color: "var(--ink)" }}>{glow}</p>
+          </FeedbackNote>
+        </div>
+      </div>
 
       {submittedText && feedback?.highlights && (
         <div className="card p-5 sm:p-6">
@@ -3175,6 +3181,8 @@ function FeedbackPanel({ tier, gradeLabel, country, interest, confidence, motiva
       )}
 
       <ExpandAllBar />
+      {/* The extra sections sit two to a row on a laptop or bigger screen so they use the width; one column below that. */}
+      <div className="grid lg:grid-cols-2 gap-4 items-start [&>*]:min-w-0">
       <SpellingGrammarPanel feedback={feedback} />
 
       {premiumSectionsLocked && (
@@ -3193,6 +3201,7 @@ function FeedbackPanel({ tier, gradeLabel, country, interest, confidence, motiva
         teaser={vocabList.map(([term])=>term).join(", ")}>
         <VocabList items={vocabList} />
       </Collapsible>
+      </div>
 
       {onPractise && (
         <div className="card p-4 sm:p-5 flex items-center justify-between gap-3 flex-wrap">
@@ -3866,7 +3875,8 @@ function ReadingFeedbackPanel({ tier, country, interest, confidence, motivation,
     <div className="animate-float-in flex flex-col gap-4">
       {split ? hero : glowCard}
       <div className={split ? "grid lg:grid-cols-5 gap-4 items-start" : "contents"}>
-      {split && <div className="lg:col-span-2 min-w-0">{passageCard}</div>}
+      {/* On a phone the passage goes after the review so the next step isn't pushed down the page; beside it from laptop width. */}
+      {split && <div className="lg:col-span-2 min-w-0 order-last lg:order-none">{passageCard}</div>}
       <div className={split ? "lg:col-span-3 flex flex-col gap-4 min-w-0" : "contents"}>
 
       <FeedbackNote tone="grow" kicker="Your next step" tag={"explained through " + interestLabel}>
@@ -4373,7 +4383,7 @@ function Workspace({ plan, country, gradeIdx, setGradeIdx, tier, setTierOverride
         // stretched full-bleed, same reasoning as a body-text column anywhere
         // else: a line of prose that runs the full width of a wide screen is
         // harder to read, not easier.
-        <div className={"mx-auto flex flex-col gap-4 " + (exerciseType !== "writing" && (readingBankEntry && Array.isArray(backendFeedback?.questionReview) && backendFeedback.questionReview.length > 0) ? "max-w-6xl" : "max-w-3xl")}>
+        <div className={"mx-auto flex flex-col gap-4 " + (exerciseType !== "writing" && (readingBankEntry && Array.isArray(backendFeedback?.questionReview) && backendFeedback.questionReview.length > 0) ? "max-w-7xl" : exerciseType === "writing" ? "max-w-4xl" : "max-w-3xl")}>
           {exerciseType === "writing" ? (
             <>
               <SubmissionRecap tier={tier} title={meta?.title || "Your story"} words={words} onNew={handleNew} />
