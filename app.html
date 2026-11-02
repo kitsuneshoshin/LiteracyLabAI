@@ -4928,12 +4928,13 @@ function ReadingExercise({ bank, answers, setAnswers, allAnswered, phase, onSubm
     <div className="relative">
       {phase === "analyzing" && <AnalyzingOverlay />}
       <div className="flex flex-col gap-4">
-        <div className="card p-0 overflow-hidden min-w-0">
+        {/* Pinned under the site header on laptops and desktops so the text stays in view while the questions scroll past; it scrolls normally on phones and tablets. */}
+        <div className="card p-0 overflow-hidden min-w-0 lg:sticky lg:top-[76px] lg:z-20" style={{ borderColor: "var(--border-strong)" }}>
           <div className="px-5 sm:px-6 pt-5 pb-4 border-b" style={{ borderColor: "var(--border-soft)" }}>
             <SectionLabel>Reading comprehension · {bank.skill}{bank.textType ? " · " + bank.textType : ""}</SectionLabel>
             <h3 className="font-display font-semibold text-lg mt-0.5" style={{ color: "var(--ink)" }}>{bank.title}</h3>
           </div>
-          <div className={"font-read text-[15px] px-5 sm:px-6 pt-4 pb-5 leading-relaxed " + (longPassage ? "xl:columns-2 xl:gap-10" : "")} style={{ color: "var(--ink)" }}><PassageView bank={bank} /></div>
+          <div className={"font-read text-[15px] px-5 sm:px-6 pt-4 pb-5 leading-relaxed " + (longPassage ? "lg:max-h-[34vh] lg:overflow-y-auto xl:max-h-none xl:overflow-visible xl:columns-2 xl:gap-10" : "lg:max-h-[34vh] lg:overflow-y-auto")} style={{ color: "var(--ink)" }}><PassageView bank={bank} /></div>
         </div>
         <div className="card p-0 overflow-hidden min-w-0">
           <div className="px-5 sm:px-6 pb-5 pt-5 grid xl:grid-cols-2 gap-x-10 gap-y-6 items-start">
