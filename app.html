@@ -2259,7 +2259,11 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
   }
   async function handleDeleteAccount(){
     if (!backendLive) return;
-    if (!window.confirm("Permanently delete your entire LiteracyLab AI account? This deletes every learner profile, all writing and reading history, and cancels any active subscription. This cannot be undone.")) return;
+    const hasSubscription = paid && plan !== "admin";
+    const warning = hasSubscription
+      ? `You are on the ${meta.label} plan. Deleting your account will IMMEDIATELY cancel your paid subscription with no refund, and permanently delete every learner profile and all writing and reading history. If you only want to remove one child, cancel this and use "Remove ${displayName || "this learner"} from this account" instead. This cannot be undone. Delete everything?`
+      : "Permanently delete your entire LiteracyLab AI account? This deletes every learner profile and all writing and reading history. This cannot be undone.";
+    if (!window.confirm(warning)) return;
     try {
       await authedFetch(session, "/api/account", { method: "DELETE" });
       await supabaseClient.auth.signOut();
@@ -2670,7 +2674,7 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
                   Export my account data
                 </button>
               </Tooltip>
-              <Tooltip text="Permanently deletes every learner profile and all history on this account, and cancels any active subscription. Immediate and cannot be undone.">
+              <Tooltip text="Permanently deletes the whole account: every learner profile and all history, and immediately cancels any paid subscription with no refund. To remove just one child, use the remove button above instead. Cannot be undone.">
                 <button onClick={handleDeleteAccount} className="focus-ring text-[13px] font-semibold underline py-3" style={{ color: "var(--bad)" }}>
                   Delete my entire account
                 </button>
