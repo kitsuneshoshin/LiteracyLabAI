@@ -4429,7 +4429,7 @@ function Workspace({ plan, country, gradeIdx, setGradeIdx, tier, setTierOverride
           ) : null}
         </div>
       ) : (
-        <div className={"mx-auto flex flex-col gap-4 " + (exerciseType === "reading" && readingBankEntry && !readingLoading ? "max-w-none" : exerciseType === "writing" ? "max-w-4xl" : "max-w-3xl")}>
+        <div className="mx-auto flex flex-col gap-4 max-w-none">
           <div className="flex flex-col gap-4 min-w-0">
             {(exerciseType === "writing" && backendLive && (writingLoading || !meta)) ? (
               <div className="card p-10 flex flex-col items-center justify-center text-center gap-3 min-h-[300px]">
@@ -4460,11 +4460,11 @@ function Workspace({ plan, country, gradeIdx, setGradeIdx, tier, setTierOverride
                 )}
               </div>
             ) : exerciseType === "writing" ? (
-              <TierEditor
+              <div className="w-full max-w-5xl mx-auto min-w-0"><TierEditor
                 tier={tier} meta={meta} text={text} setText={setText} words={words}
                 phase={phase} onSubmit={handleSubmit} onNew={handleNew} locked={locked} onSeePlans={onSeePlans}
                 interests={interests} activeInterest={activeInterest} setActiveInterest={setActiveInterest}
-              />
+              /></div>
             ) : (backendLive && (readingLoading || !readingBankEntry)) ? (
               <div className="card p-10 flex flex-col items-center justify-center text-center gap-3 min-h-[300px]">
                 {locked ? (
