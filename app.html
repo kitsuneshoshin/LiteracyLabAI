@@ -1677,7 +1677,7 @@ function VocabularyBank({ session, childId, backendLive, onSeePlans, displayName
                   {v.characteristics && <p className="text-[12.5px] leading-snug" style={{ color: "var(--ink-soft)" }}><span className="font-semibold" style={{ color: "var(--ink)" }}>It is: </span>{v.characteristics}</p>}
                   {v.nonExample && <p className="text-[12.5px] leading-snug" style={{ color: "var(--ink-soft)" }}><span className="font-semibold" style={{ color: "var(--bad)" }}>Not: </span>{v.nonExample}</p>}
                   {v.trick && <p className="text-[12.5px] leading-snug" style={{ color: "var(--cyan-ink)" }}><span className="font-semibold">Word trick: </span>{v.trick}</p>}
-                  <div className="mt-1">
+                  <div className="mt-auto pt-1.5">
                     {vocabBoxOf(boxes, v.term) === VOCAB_BOXES - 1
                       ? <button type="button" onClick={()=>setWordBox(v.term, 1)} className="focus-ring text-[12px] font-semibold underline" style={{ color: "var(--ink-soft)" }}>Bring back to practice</button>
                       : <button type="button" onClick={()=>setWordBox(v.term, VOCAB_BOXES - 1)} className="focus-ring inline-flex items-center gap-1 rounded-full border px-3 py-1 text-[12px] font-semibold" style={{ borderColor: "var(--good)", color: "var(--good)", background: "var(--good-tint)" }}><IconCheck size={12} strokeWidth={2.6} /> I know this</button>}
