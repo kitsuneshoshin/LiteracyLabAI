@@ -5,7 +5,8 @@ const path = require("node:path");
 
 // The rotation logic lives in app.html (there's no build step), so this runs
 // the REAL function by reading its source out of that file.
-const APP = fs.readFileSync(path.join(__dirname, "..", "app.html"), "utf8");
+// app.html is checked out with Windows line endings on some machines; these searches expect plain ones.
+const APP = fs.readFileSync(path.join(__dirname, "..", "app.html"), "utf8").replace(/\r\n/g, "\n");
 const start = APP.indexOf("function pickInterestForNewPiece");
 assert.ok(start >= 0, "pickInterestForNewPiece not found in app.html");
 const end = APP.indexOf("\n}\n", start) + 3;

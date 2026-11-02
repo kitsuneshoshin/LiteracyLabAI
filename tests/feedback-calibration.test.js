@@ -382,7 +382,8 @@ test("a non-Premium plan never receives the model response or the framework labe
 
 // ------------------------------------------------------------ screen
 
-const APP = require("node:fs").readFileSync(require("node:path").join(__dirname, "..", "app.html"), "utf8");
+// app.html is checked out with Windows line endings on some machines; these searches expect plain ones.
+const APP = require("node:fs").readFileSync(require("node:path").join(__dirname, "..", "app.html"), "utf8").replace(/\r\n/g, "\n");
 
 test("screen: the revised piece is called a response, not a story, and the framework panel is wired in", () => {
   assert.ok(APP.includes("Your response, corrected and improved") && APP.includes("Your response, revised"));
