@@ -3144,10 +3144,10 @@ function OverallScorePanel({ feedback }){
       <div className="min-w-0">
         <div className="label-mono mb-1.5" style={{ color: "var(--ink-soft)" }}>Overall score</div>
         {reasonHead && (
-          <p className="text-[16px] sm:text-[17px] leading-[1.5] font-read" style={{ color: "var(--ink)", fontWeight: 500 }}>{reasonHead}</p>
+          <p className="text-[16px] sm:text-[17px] leading-[1.5] font-read max-w-[90ch]" style={{ color: "var(--ink)", fontWeight: 500 }}>{reasonHead}</p>
         )}
         {reasonRest && (
-          <p className="text-[14px] leading-[1.55] mt-1.5" style={{ color: "var(--ink-soft)" }}>{reasonRest}</p>
+          <p className="text-[14px] leading-[1.55] mt-1.5 max-w-[90ch]" style={{ color: "var(--ink-soft)" }}>{reasonRest}</p>
         )}
       </div>
     </div>
@@ -4405,7 +4405,7 @@ function Workspace({ plan, country, gradeIdx, setGradeIdx, tier, setTierOverride
         // stretched full-bleed, same reasoning as a body-text column anywhere
         // else: a line of prose that runs the full width of a wide screen is
         // harder to read, not easier.
-        <div className={"mx-auto flex flex-col gap-4 " + (exerciseType !== "writing" && (readingBankEntry && Array.isArray(backendFeedback?.questionReview) && backendFeedback.questionReview.length > 0) ? "max-w-7xl" : exerciseType === "writing" ? "max-w-5xl" : "max-w-3xl")}>
+        <div className={"mx-auto flex flex-col gap-4 " + (exerciseType !== "writing" && (readingBankEntry && Array.isArray(backendFeedback?.questionReview) && backendFeedback.questionReview.length > 0) ? "max-w-none" : exerciseType === "writing" ? "max-w-none" : "max-w-3xl")}>
           {exerciseType === "writing" ? (
             <>
               <SubmissionRecap tier={tier} title={meta?.title || "Your story"} words={words} onNew={handleNew} />
@@ -4429,7 +4429,7 @@ function Workspace({ plan, country, gradeIdx, setGradeIdx, tier, setTierOverride
           ) : null}
         </div>
       ) : (
-        <div className={"mx-auto flex flex-col gap-4 " + (exerciseType === "reading" && readingBankEntry && !readingLoading ? "max-w-7xl" : exerciseType === "writing" ? "max-w-4xl" : "max-w-3xl")}>
+        <div className={"mx-auto flex flex-col gap-4 " + (exerciseType === "reading" && readingBankEntry && !readingLoading ? "max-w-none" : exerciseType === "writing" ? "max-w-4xl" : "max-w-3xl")}>
           <div className="flex flex-col gap-4 min-w-0">
             {(exerciseType === "writing" && backendLive && (writingLoading || !meta)) ? (
               <div className="card p-10 flex flex-col items-center justify-center text-center gap-3 min-h-[300px]">
