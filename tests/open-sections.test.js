@@ -47,8 +47,8 @@ test("the writing result opens on what helps most and keeps the rest one tap awa
   for (const id of ["exam", "framework", "devices", "vocab"]) assert.equal(defaultOf(id), "false", id);
 });
 
-test("the reading result keeps the question-by-question review open and folds the rest", () => {
-  assert.equal(defaultOf("review"), "true");
+test("the reading result starts with every section closed; Open all sections opens them", () => {
+  assert.equal(defaultOf("review"), "false", "owner asked for the review to start closed like the rest");
   assert.equal(defaultOf("strategy"), "false");
 });
 
