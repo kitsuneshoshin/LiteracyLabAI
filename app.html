@@ -1577,7 +1577,7 @@ function VocabularyBank({ session, childId, backendLive, onSeePlans, displayName
     .sort((a, b) => sort === "az" ? vocabTermKey(a.term).localeCompare(vocabTermKey(b.term)) : sort === "practise" ? vocabBoxOf(boxes, a.term) - vocabBoxOf(boxes, b.term) : 0);
 
   return (
-    <div className="max-w-5xl mx-auto flex flex-col gap-4">
+    <div className="max-w-none mx-auto flex flex-col gap-4">
       <div className="card p-5 sm:p-6">
         <div className="flex flex-col sm:flex-row sm:items-center gap-4 justify-between">
           <div className="min-w-0">
@@ -1665,7 +1665,7 @@ function VocabularyBank({ session, childId, backendLive, onSeePlans, displayName
               {query.trim() ? <>No words match "{query}".</> : <>You know every word on your list. Nice work. New words will appear after your next piece, or <button type="button" onClick={()=>setShowKnown(true)} className="focus-ring underline font-semibold" style={{ color: "var(--ink-soft)" }}>show the {known} you know</button>.</>}
             </div>
           ) : (
-            <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-3">
+            <div className="grid sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-3">
               {shown.map((v) => (
                 <div key={v.term} className="card p-4 flex flex-col gap-1.5" style={{ borderColor: "var(--border)" }}>
                   <div className="flex items-center justify-between gap-2">
@@ -4405,7 +4405,7 @@ function Workspace({ plan, country, gradeIdx, setGradeIdx, tier, setTierOverride
         // stretched full-bleed, same reasoning as a body-text column anywhere
         // else: a line of prose that runs the full width of a wide screen is
         // harder to read, not easier.
-        <div className={"mx-auto flex flex-col gap-4 " + (exerciseType !== "writing" && (readingBankEntry && Array.isArray(backendFeedback?.questionReview) && backendFeedback.questionReview.length > 0) ? "max-w-none" : exerciseType === "writing" ? "max-w-none" : "max-w-3xl")}>
+        <div className="mx-auto flex flex-col gap-4 max-w-none">
           {exerciseType === "writing" ? (
             <>
               <SubmissionRecap tier={tier} title={meta?.title || "Your story"} words={words} onNew={handleNew} />
