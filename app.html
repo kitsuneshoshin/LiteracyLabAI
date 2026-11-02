@@ -3432,7 +3432,7 @@ function SpellingGrammarPanel({ feedback }){
   const total = Number.isInteger(feedback?.spellingGrammarTotal) ? feedback.spellingGrammarTotal : items.length;
   const moreThanShown = total > items.length;
   return (
-    <Collapsible id="spelling" defaultOpen={!clean} borderColor="var(--border)"
+    <Collapsible id="spelling" defaultOpen={false} borderColor="var(--border)"
       iconBg={clean ? "var(--good-tint)" : "var(--gold-tint)"} iconColor={clean ? "var(--good)" : "var(--gold-ink)"}
       icon={clean ? <IconCheck size={15} strokeWidth={2.4} /> : <IconAlert size={15} strokeWidth={2.2} />}
       title="Spelling & grammar check"
@@ -3608,7 +3608,7 @@ function ResponsesPanel({ feedback }){
   const used = new Set(revisedLabels.map(l=>l.part));
   const missing = parts.filter(p=>!used.has(p.name));
   return (
-    <Collapsible id="responses" defaultOpen={true} borderColor="var(--navy)" iconBg="var(--navy-tint)" iconColor="var(--ink)"
+    <Collapsible id="responses" defaultOpen={false} borderColor="var(--navy)" iconBg="var(--navy-tint)" iconColor="var(--ink)"
       icon={<IconGrid size={15} strokeWidth={2.2} />} title={`See ${info.name} at work`}
       teaser="In your response, and in a model response">
       <p className="text-[13px] mb-3" style={{ color: "var(--ink-faint)" }}>{info.description}</p>

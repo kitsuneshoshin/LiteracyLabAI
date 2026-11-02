@@ -41,10 +41,8 @@ function defaultOf(id) {
   return m[1];
 }
 
-test("the writing result opens on what helps most and keeps the rest one tap away", () => {
-  assert.equal(defaultOf("responses"), "true", "the rewrite and model response are what Premium is for");
-  assert.equal(defaultOf("spelling"), "!clean", "spelling opens only when it found something");
-  for (const id of ["exam", "framework", "devices", "vocab"]) assert.equal(defaultOf(id), "false", id);
+test("the writing result starts with every section closed; Open all sections opens them", () => {
+  for (const id of ["responses", "spelling", "exam", "framework", "devices", "vocab"]) assert.equal(defaultOf(id), "false", id);
 });
 
 test("the reading result starts with every section closed; Open all sections opens them", () => {
