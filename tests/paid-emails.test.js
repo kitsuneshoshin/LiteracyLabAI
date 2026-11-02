@@ -342,6 +342,26 @@ test("billing: a cancellation scheduled for the end of the period says when acce
   assert.match(r2.sent[0].html, /Your account has moved to the Free plan\./);
 }));
 
+test("billing: the reason given when cancelling is saved to the feedback backlog once, and nothing is saved when none was given", () => withEnv(LIVE, async () => {
+  const tables = { ...billingWorld(), feedback: [] };
+  const r = recorder();
+  const sub = { id: "sub_1", cancel_at_period_end: true, current_period_end: 1790000000, status: "active", cancellation_details: { feedback: "too_expensive", comment: "Great, but pricey." } };
+  await notifyBillingEvent({ event: ev("customer.subscription.updated", sub, { cancel_at_period_end: false }), supabase: fakeDb(tables), after: { plan: "premium" }, before: BEFORE, send: r.send });
+  assert.equal(tables.feedback.length, 1);
+  assert.equal(tables.feedback[0].profile_id, "p1");
+  assert.equal(tables.feedback[0].email_key, "cancel:sub_1");
+  assert.match(tables.feedback[0].message, /It costs too much/);
+  assert.match(tables.feedback[0].message, /Great, but pricey\./);
+
+  // the later deleted event for the same subscription does not add a second row
+  await notifyBillingEvent({ event: ev("customer.subscription.deleted", { ...sub, status: "canceled" }, undefined, "evt_2"), supabase: fakeDb(tables), after: { plan: "free" }, before: BEFORE, send: r.send });
+  assert.equal(tables.feedback.length, 1);
+
+  const t2 = { ...billingWorld(), feedback: [] };
+  await notifyBillingEvent({ event: ev("customer.subscription.deleted", { id: "sub_2", status: "canceled" }), supabase: fakeDb(t2), after: { plan: "free" }, before: BEFORE, send: r.send });
+  assert.equal(t2.feedback.length, 0);
+}));
+
 test("billing: a payment failing (active to past due) sends the failed-payment email once per billing period", () => withEnv(LIVE, async () => {
   const tables = billingWorld({ kids: 1 });
   const r = recorder();

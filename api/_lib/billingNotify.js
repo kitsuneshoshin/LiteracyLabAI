@@ -56,6 +56,36 @@ async function sendBillingEmail({ supabase, profile, key, dedupeKey, ctx = {}, s
   }
 }
 
+const CANCEL_REASONS = {
+  too_expensive: "It costs too much", missing_features: "It's missing features I need", switched_service: "I switched to another service",
+  unused: "I don't use it enough", customer_service: "Unhappy with customer service", too_complex: "It's too complicated", low_quality: "Quality wasn't good enough", other: "Other",
+};
+
+// What Stripe's cancellation survey (shown in the customer portal) captured, saved
+// into the feedback backlog. Stripe reports the answer on the subscription as
+// cancellation_details. Once per subscription, and never allowed to throw.
+async function recordCancellationFeedback({ supabase, profile, subscription }) {
+  try {
+    const details = (subscription && subscription.cancellation_details) || {};
+    const reason = details.feedback ? (CANCEL_REASONS[details.feedback] || details.feedback) : null;
+    const comment = typeof details.comment === "string" ? details.comment.trim() : "";
+    if (!profile || !profile.id || (!reason && !comment)) return "skipped: no reason given";
+
+    const key = `cancel:${subscription.id}`;
+    const { data: existing } = await supabase.from("feedback").select("id").eq("profile_id", profile.id).eq("email_key", key).maybeSingle();
+    if (existing) return "skipped: already recorded";
+
+    const message = `CANCELLED (${profile.plan || "paid"} plan). Reason: ${reason || "none chosen"}.${comment ? ` They wrote: ${comment}` : ""}`.slice(0, 2000);
+    const { error } = await supabase.from("feedback").insert({
+      profile_id: profile.id, source: "stripe", email_key: key, rating: "down", category: "other", message, contact_ok: false,
+    });
+    return error ? `error: ${error.message}` : "recorded";
+  } catch (err) {
+    console.error("Saving cancellation feedback failed:", err.message);
+    return `error: ${err.message}`;
+  }
+}
+
 /**
  * event: the Stripe event. after: { profileId, plan } describing the profile
  * once the webhook has updated it. before: the profile row as it was before
@@ -79,6 +109,7 @@ async function notifyBillingEvent({ event, supabase, after, before, send }) {
     // Cancelled now, or scheduled to end at the period's close
     const scheduled = event.type === "customer.subscription.updated" && object.cancel_at_period_end === true && previous.cancel_at_period_end === false;
     if (scheduled || event.type === "customer.subscription.deleted") {
+      await recordCancellationFeedback({ supabase, profile, subscription: object });
       out.push(await sendBillingEmail({
         supabase, profile, key: "bill-cancel", dedupeKey: `bill-cancel:${object.id}`,
         ctx: { endDate: scheduled && object.current_period_end ? dateText(object.current_period_end) : null }, send,
@@ -105,4 +136,4 @@ async function notifyBillingEvent({ event, supabase, after, before, send }) {
   return out;
 }
 
-module.exports = { notifyBillingEvent, sendBillingEmail, emailsLive };
+module.exports = { notifyBillingEvent, sendBillingEmail, recordCancellationFeedback, emailsLive };
