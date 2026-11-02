@@ -4548,7 +4548,7 @@ function Workspace({ plan, country, gradeIdx, setGradeIdx, tier, setTierOverride
 
 function AnalyzingOverlay(){
   return (
-    <div className="absolute inset-0 z-10 grid place-items-center rounded-[20px]" style={{ background: "color-mix(in srgb, var(--surface) 88%, transparent)", backdropFilter: "blur(2px)" }}>
+    <div className="absolute inset-0 z-10 grid place-items-center rounded-[20px]" style={{ background: "color-mix(in srgb, var(--surface) 88%, transparent)", backdropFilter: "blur(2px)", WebkitBackdropFilter: "blur(2px)" }}>
       <div className="flex flex-col items-center gap-4 px-6 text-center">
         <div className="relative w-14 h-14 rounded-full grid place-items-center analyzing-pulse" style={{ background: "var(--cyan-tint)" }}>
           <IconSparkle size={24} strokeWidth={2} className="animate-spin-slow" style={{ color: "var(--cyan-ink)" }} />
