@@ -4460,7 +4460,7 @@ function Workspace({ plan, country, gradeIdx, setGradeIdx, tier, setTierOverride
                 )}
               </div>
             ) : exerciseType === "writing" ? (
-              <div className="w-full max-w-5xl mx-auto min-w-0"><TierEditor
+              <div className="w-full min-w-0"><TierEditor
                 tier={tier} meta={meta} text={text} setText={setText} words={words}
                 phase={phase} onSubmit={handleSubmit} onNew={handleNew} locked={locked} onSeePlans={onSeePlans}
                 interests={interests} activeInterest={activeInterest} setActiveInterest={setActiveInterest}
@@ -4921,21 +4921,22 @@ function ReadingExercise({ bank, answers, setAnswers, allAnswered, phase, onSubm
   const disabled = phase === "analyzing" || locked;
   const isPoem = /poem/i.test(String(bank.textType || ""));
   const answeredCount = bank.questions.filter((q, i) => qIsAuto(q) && qIsAnswered(q, answers[i])).length;
-  // Passage beside the questions from laptop width up (the passage stays in view while you answer, like an exam paper);
-  // stacked on tablets and phones, passage first.
+  // The passage runs across the page and the questions sit underneath it. On wide screens a long passage flows into two
+  // columns (so lines stay a readable length) and the questions lay out two across.
+  const longPassage = String(bank.passage || "").trim().split(/\s+/).length > 110 && !isPoem;
   return (
     <div className="relative">
       {phase === "analyzing" && <AnalyzingOverlay />}
-      <div className="grid lg:grid-cols-5 gap-4 items-start">
-        <div className="card p-0 overflow-hidden lg:col-span-2 min-w-0 lg:sticky lg:top-4">
+      <div className="flex flex-col gap-4">
+        <div className="card p-0 overflow-hidden min-w-0">
           <div className="px-5 sm:px-6 pt-5 pb-4 border-b" style={{ borderColor: "var(--border-soft)" }}>
             <SectionLabel>Reading comprehension · {bank.skill}{bank.textType ? " · " + bank.textType : ""}</SectionLabel>
             <h3 className="font-display font-semibold text-lg mt-0.5" style={{ color: "var(--ink)" }}>{bank.title}</h3>
           </div>
-          <div className="font-read text-[15px] px-5 sm:px-6 pt-4 pb-5 leading-relaxed lg:max-h-[calc(100vh-9rem)] lg:overflow-y-auto" style={{ color: "var(--ink)" }}><PassageView bank={bank} /></div>
+          <div className={"font-read text-[15px] px-5 sm:px-6 pt-4 pb-5 leading-relaxed " + (longPassage ? "xl:columns-2 xl:gap-10" : "")} style={{ color: "var(--ink)" }}><PassageView bank={bank} /></div>
         </div>
-        <div className="card p-0 overflow-hidden lg:col-span-3 min-w-0">
-          <div className="px-5 sm:px-6 pb-5 pt-5 flex flex-col gap-5">
+        <div className="card p-0 overflow-hidden min-w-0">
+          <div className="px-5 sm:px-6 pb-5 pt-5 grid xl:grid-cols-2 gap-x-10 gap-y-6 items-start">
             {bank.questions.map((q,qi)=>(
               <ReadingQuestion key={qi} q={q} qi={qi} answer={answers[qi]} revealed={phase === "done"} disabled={disabled}
                 setAnswer={(v)=>setAnswers(prev=>{ const next = { ...prev }; if (v == null) delete next[qi]; else next[qi] = v; return next; })} />
