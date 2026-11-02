@@ -3687,7 +3687,7 @@ function QuestionReviewPanel({ feedback, questions, answers, passageBank, shownQ
   const autoTotal = qAutoCount(questions);
   const marked = feedback?.shortAnswer && typeof feedback.shortAnswer === "object" ? feedback.shortAnswer : null;
   return (
-    <Collapsible id="review" defaultOpen={true} borderColor="var(--border)" iconBg="var(--good-tint)" iconColor="var(--good)"
+    <Collapsible id="review" defaultOpen={false} borderColor="var(--border)" iconBg="var(--good-tint)" iconColor="var(--good)"
       icon={<IconBookOpenCheck size={16} strokeWidth={2.2} />} title="Question by question"
       teaser={`${rightCount} of ${autoTotal} right`}>
       <div className="flex flex-col gap-3 xl:block xl:columns-2 xl:gap-5 [&>*]:break-inside-avoid xl:[&>*]:mb-3">
