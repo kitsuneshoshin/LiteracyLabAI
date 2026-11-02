@@ -4016,54 +4016,92 @@ function cleanFocus(kind, tier, v){
   return out;
 }
 
-function FocusPicker({ kind, tier, country, gradeLabel, premium, value, onChange, onSeePlans }){
+function FocusPicker({ kind, tier, country, gradeLabel, premium, value, onChange, onSeePlans, children }){
   const v = cleanFocus(kind, tier, value);
-  const chip = (on, label, onClick, tag, key) => (
+  // One card per choice: an icon, a name and a line saying what it is. "Surprise me" comes first.
+  const card = (on, name, blurb, Ic, onClick, tag, key) => (
     <button key={key} type="button" aria-pressed={on} onClick={onClick}
-      className="focus-ring rounded-full border px-3 py-1.5 text-[13px] font-semibold inline-flex items-center gap-1.5"
-      style={ on ? { background: "var(--cyan-tint)", borderColor: "var(--cyan)", color: "var(--cyan-ink)" } : { borderColor: "var(--border)", color: "var(--ink-soft)", background: "var(--surface)" } }>
-      {label}{tag && <span className="text-[10.5px] font-bold uppercase tracking-wide rounded-full px-1.5 py-0.5" style={{ background: "var(--gold-tint)", color: "var(--gold-ink)" }}>{tag}</span>}
+      className="focus-ring relative text-left rounded-xl border p-3 flex flex-col gap-1 h-full"
+      style={ on ? { background: "var(--cyan-tint)", borderColor: "var(--cyan)", borderWidth: 1.5, color: "var(--cyan-ink)" } : { borderColor: "var(--border)", color: "var(--ink)", background: "var(--surface)" } }>
+      <span className="flex items-center justify-between gap-2">
+        <Ic size={20} strokeWidth={1.8} style={{ color: on ? "var(--cyan-ink)" : "var(--ink-soft)" }} />
+        {tag && <span className="text-[10px] font-bold uppercase tracking-wide rounded-full px-1.5 py-0.5" style={{ background: "var(--gold-tint)", color: "var(--gold-ink)" }}>{tag}</span>}
+      </span>
+      <span className="text-[14px] font-semibold leading-tight">{name}</span>
+      <span className="text-[12px] leading-snug" style={{ color: on ? "var(--cyan-ink)" : "var(--ink-soft)" }}>{blurb}</span>
     </button>
   );
+  const grid = "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5";
   if (kind === "writing") {
     const exam = focusExamName(country, gradeLabel);
     return (
-      <div className="w-full max-w-md flex flex-col items-center gap-2.5 mt-1" role="group" aria-label="What would you like to write?">
-        <div className="text-[12px] font-bold uppercase tracking-wide" style={{ color: "var(--ink-faint)" }}>What would you like to write?</div>
-        <div className="flex flex-wrap justify-center gap-1.5">
-          {chip(!v.genre, "Surprise me", () => onChange({ ...v, genre: undefined }), null, "any")}
-          {(FOCUS_GENRES[tier] || []).map((g) => chip(v.genre === g, focusGenreLabel(country, g), () => onChange({ ...v, genre: g }), focusGenreTag(country, gradeLabel, g), g))}
+      <div className="w-full flex flex-col gap-4" role="group" aria-label="What would you like to write?">
+        <div className={grid}>
+          {card(!v.genre, "Surprise me", "We pick for you", IconDice, () => onChange({ ...v, genre: undefined }), null, "any")}
+          {(FOCUS_GENRES[tier] || []).map((g) => { const m = FOCUS_GENRE_CARD[g] || {}; return card(v.genre === g, focusGenreLabel(country, g), m.blurb || "", m.icon || IconPen, () => onChange({ ...v, genre: g }), focusGenreTag(country, gradeLabel, g), g); })}
         </div>
-        {exam && (premium ? (
-          <label className="flex items-center gap-2 text-[13px] font-medium" style={{ color: "var(--ink-soft)" }}>
-            <input type="checkbox" checked={!!v.examStyle} onChange={(e) => onChange({ ...v, examStyle: e.target.checked ? true : undefined })} style={{ width: 16, height: 16 }} />
-            Word it like a {exam} task
-          </label>
-        ) : (
-          <button type="button" onClick={onSeePlans} className="focus-ring inline-flex items-center gap-1.5 text-[12.5px] font-semibold underline" style={{ color: "var(--ink-faint)" }}>
-            <IconLock size={12} /> {exam}-style prompts are on Premium
-          </button>
-        ))}
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <div>
+            {exam && (premium ? (
+              <button type="button" role="switch" aria-checked={!!v.examStyle} onClick={() => onChange({ ...v, examStyle: v.examStyle ? undefined : true })}
+                className="focus-ring inline-flex items-center gap-2 text-[13px] font-medium" style={{ color: "var(--ink-soft)" }}>
+                <span className="relative inline-block rounded-full shrink-0" style={{ width: 36, height: 20, background: v.examStyle ? "var(--cyan)" : "var(--border-strong, var(--border))", transition: "background .15s" }}>
+                  <span className="absolute rounded-full" style={{ top: 2, left: v.examStyle ? 18 : 2, width: 16, height: 16, background: "var(--surface)", transition: "left .15s" }} />
+                </span>
+                Word it like a {exam} task
+              </button>
+            ) : (
+              <button type="button" onClick={onSeePlans} className="focus-ring inline-flex items-center gap-1.5 text-[12.5px] font-semibold underline" style={{ color: "var(--ink-faint)" }}>
+                <IconLock size={12} /> {exam}-style prompts are on Premium
+              </button>
+            ))}
+          </div>
+          {children}
+        </div>
       </div>
     );
   }
   return (
-    <div className="w-full max-w-md flex flex-col items-center gap-2.5 mt-1" role="group" aria-label="What would you like to read?">
-      <div className="text-[12px] font-bold uppercase tracking-wide" style={{ color: "var(--ink-faint)" }}>What would you like to read?</div>
-      <div className="flex flex-wrap justify-center gap-1.5">
-        {chip(!v.textType, "Surprise me", () => onChange({ ...v, textType: undefined }), null, "any")}
-        {(FOCUS_TEXT_TYPES[tier] || []).map((t) => chip(v.textType === t, capFirst(t), () => onChange({ ...v, textType: t }), null, t))}
+    <div className="w-full flex flex-col gap-4" role="group" aria-label="What would you like to read?">
+      <div className={grid}>
+        {card(!v.textType, "Surprise me", "We pick for you", IconDice, () => onChange({ ...v, textType: undefined }), null, "any")}
+        {(FOCUS_TEXT_TYPES[tier] || []).map((t) => { const m = focusTextCard(t); return card(v.textType === t, capFirst(t), m.blurb, m.icon, () => onChange({ ...v, textType: t }), null, t); })}
       </div>
-      <label className="flex items-center gap-2 text-[13px] font-medium" style={{ color: "var(--ink-soft)" }}>
-        Skill to work on
-        <select value={v.skill || ""} onChange={(e) => onChange({ ...v, skill: e.target.value || undefined })} className="focus-ring rounded-full border px-3 py-1.5 text-[13px]"
-          style={{ borderColor: "var(--border)", background: "var(--surface)", color: "var(--ink)" }}>
-          <option value="">Any</option>
-          {(FOCUS_SKILLS_BY_TIER[tier] || []).map((k) => <option key={k} value={k}>{FOCUS_SKILLS[k]}</option>)}
-        </select>
-      </label>
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        <label className="flex items-center gap-2 text-[13px] font-medium" style={{ color: "var(--ink-soft)" }}>
+          Skill to work on
+          <select value={v.skill || ""} onChange={(e) => onChange({ ...v, skill: e.target.value || undefined })} className="focus-ring rounded-full border px-3 py-1.5 text-[13px]"
+            style={{ borderColor: "var(--border)", background: "var(--surface)", color: "var(--ink)" }}>
+            <option value="">Any</option>
+            {(FOCUS_SKILLS_BY_TIER[tier] || []).map((k) => <option key={k} value={k}>{FOCUS_SKILLS[k]}</option>)}
+          </select>
+        </label>
+        {children}
+      </div>
     </div>
   );
+}
+// What each card says and which icon it wears. Kept apart from the lists above, which must match the server exactly.
+const FOCUS_GENRE_CARD = {
+  narrative: { blurb: "Characters, a problem, an ending", icon: IconBook },
+  descriptive: { blurb: "Paint a picture in words", icon: IconPalette },
+  persuasive: { blurb: "Convince the reader", icon: IconTarget },
+  analytical: { blurb: "Explain how or why", icon: IconLightbulb },
+};
+function focusTextCard(t){
+  const k = String(t || "").toLowerCase();
+  if (/poem/.test(k)) return { blurb: "Rhythm and imagery", icon: IconFeather };
+  if (/instruction/.test(k)) return { blurb: "Steps to follow", icon: IconCheck };
+  if (/diary|letter/.test(k)) return { blurb: "A personal voice", icon: IconPen };
+  if (/table/.test(k)) return { blurb: "Read the numbers", icon: IconGrid };
+  if (/chart/.test(k)) return { blurb: "Read the chart", icon: IconTrend };
+  if (/two/.test(k)) return { blurb: "Compare them", icon: IconBookOpenCheck };
+  if (/speech/.test(k)) return { blurb: "Words made to be heard", icon: IconMic };
+  if (/persuasive|opinion/.test(k)) return { blurb: "Arguments and opinions", icon: IconTarget };
+  if (/news|magazine|article/.test(k)) return { blurb: "Real-world reporting", icon: IconLandmark };
+  if (/information/.test(k)) return { blurb: "Facts about a topic", icon: IconLightbulb };
+  if (/extract/.test(k)) return { blurb: "A scene from a story", icon: IconBook };
+  return { blurb: "Characters and a problem", icon: IconBook };
 }
 
 function Workspace({ plan, country, gradeIdx, setGradeIdx, tier, setTierOverride, interests, confidenceWriting, confidenceReading, motivation, used, total, onSubmit, session, backendLive, childId, children_, onSwitchChild, onMakeUsable, activeChangeAvailableAt, onSeePlans, displayName }){
@@ -4447,15 +4485,20 @@ function Workspace({ plan, country, gradeIdx, setGradeIdx, tier, setTierOverride
                   </>
                 ) : (
                   <>
-                    <span className="label-mono" style={{ color: "var(--ink-soft)" }}>A prompt, made for you</span>
-                    <div className="font-display text-3xl" style={{ color: "var(--ink)" }}>Ready for {/^[aeiou]/i.test(TIER_META[tier].label) ? "an" : "a"} {TIER_META[tier].label.toLowerCase()} prompt?</div>
-                    <p className="text-[13px] max-w-[30ch]" style={{ color: "var(--ink-faint)" }}>This uses 1 of your {total === 999 ? "" : `${total - used} remaining `}submissions.</p>
-                    <FocusPicker kind="writing" tier={tier} country={country} gradeLabel={gradeLabel} premium={premium} value={writingFocus} onChange={changeWritingFocus} onSeePlans={onSeePlans} />
-                    <button onClick={()=>requestNewWritingPrompt()}
-                      className="focus-ring inline-flex items-center gap-1.5 rounded-full px-7 py-3 text-[15px] font-bold mt-2"
-                      style={{ background: "var(--cyan)", color: "var(--on-solid)" }}>
-                      Get my prompt
-                    </button>
+                    <div className="w-full text-left flex flex-col gap-4">
+                      <div>
+                        <span className="label-mono" style={{ color: "var(--ink-soft)" }}>A prompt, made for you</span>
+                        <div className="font-display text-2xl sm:text-3xl mt-1" style={{ color: "var(--ink)" }}>What would you like to write today?</div>
+                        <p className="text-[13px] mt-1" style={{ color: "var(--ink-faint)" }}>Pick a type, or let us surprise you. This uses 1 of your {total === 999 ? "" : `${total - used} remaining `}submissions.</p>
+                      </div>
+                      <FocusPicker kind="writing" tier={tier} country={country} gradeLabel={gradeLabel} premium={premium} value={writingFocus} onChange={changeWritingFocus} onSeePlans={onSeePlans}>
+                        <button onClick={()=>requestNewWritingPrompt()}
+                          className="focus-ring inline-flex items-center gap-1.5 rounded-full px-6 py-3 text-[15px] font-bold"
+                          style={{ background: "var(--cyan)", color: "var(--on-solid)" }}>
+                          Get my prompt <IconArrowRight size={15} />
+                        </button>
+                      </FocusPicker>
+                    </div>
                   </>
                 )}
               </div>
@@ -4481,15 +4524,20 @@ function Workspace({ plan, country, gradeIdx, setGradeIdx, tier, setTierOverride
                   </>
                 ) : (
                   <>
-                    <span className="label-mono" style={{ color: "var(--ink-soft)" }}>A passage, made for you</span>
-                    <div className="font-display text-3xl" style={{ color: "var(--ink)" }}>Ready for {/^[aeiou]/i.test(TIER_META[tier].label) ? "an" : "a"} {TIER_META[tier].label.toLowerCase()} passage?</div>
-                    <p className="text-[13px] max-w-[30ch]" style={{ color: "var(--ink-faint)" }}>This uses 1 of your {total === 999 ? "" : `${total - used} remaining `}submissions.</p>
-                    <FocusPicker kind="reading" tier={tier} country={country} gradeLabel={gradeLabel} premium={premium} value={readingFocus} onChange={changeReadingFocus} onSeePlans={onSeePlans} />
-                    <button onClick={()=>requestNewPassage()}
-                      className="focus-ring inline-flex items-center gap-1.5 rounded-full px-7 py-3 text-[15px] font-bold mt-2"
-                      style={{ background: "var(--cyan)", color: "var(--on-solid)" }}>
-                      Get my passage
-                    </button>
+                    <div className="w-full text-left flex flex-col gap-4">
+                      <div>
+                        <span className="label-mono" style={{ color: "var(--ink-soft)" }}>A passage, made for you</span>
+                        <div className="font-display text-2xl sm:text-3xl mt-1" style={{ color: "var(--ink)" }}>What would you like to read today?</div>
+                        <p className="text-[13px] mt-1" style={{ color: "var(--ink-faint)" }}>Pick a type, or let us surprise you. This uses 1 of your {total === 999 ? "" : `${total - used} remaining `}submissions.</p>
+                      </div>
+                      <FocusPicker kind="reading" tier={tier} country={country} gradeLabel={gradeLabel} premium={premium} value={readingFocus} onChange={changeReadingFocus} onSeePlans={onSeePlans}>
+                        <button onClick={()=>requestNewPassage()}
+                          className="focus-ring inline-flex items-center gap-1.5 rounded-full px-6 py-3 text-[15px] font-bold"
+                          style={{ background: "var(--cyan)", color: "var(--on-solid)" }}>
+                          Get my passage <IconArrowRight size={15} />
+                        </button>
+                      </FocusPicker>
+                    </div>
                   </>
                 )}
               </div>
