@@ -2288,7 +2288,7 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
   // (it used to get only a sentence about Premium and no way to act on it),
   // Premium/Pro/Admin have nothing left to upgrade to.
   const PLAN_CARDS = [
-                    { tier: "core", name: "Core", price: PLAN_META.core.price, sub: "One learner", features: ["Unlimited writing & reading submissions", "26-week progress trend chart", "Anonymous ranking in their year group", "Full activity history", "Vocabulary bank with flashcards, a quiz and progress saved across devices"] },
+                    { tier: "core", name: "Core", price: PLAN_META.core.price, sub: "One learner", features: ["Unlimited writing & reading submissions", "26-week progress trend chart", "Anonymous ranking in their year group", "Full history: reopen any past piece", "Vocabulary bank with flashcards, a quiz and progress saved across devices"] },
                     { tier: "premium", name: "Premium", price: PLAN_META.premium.price, sub: "Up to 6 learners", features: ["Everything in Core, for the whole household", "Extended feedback: a second, harder next step", "Your response rewritten and a model response, with the framework shown in both", "A short written answer in reading, marked out of 2 or 3", "Exam-style prompts: NAPLAN, KS2 SATs, KS3, GCSE and US state tests", "Spelling & grammar check and a score out of 10 on every piece", "Exam-technique scoring against real assessment objectives (ages 11+)"] },
   ];
   const upsellCards = plan === "free" ? PLAN_CARDS : plan === "core" ? PLAN_CARDS.filter(c => c.tier === "premium") : [];

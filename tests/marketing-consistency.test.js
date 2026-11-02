@@ -70,7 +70,7 @@ test("pricing table: submissions, learners and history match plans.js", () => {
   assert.equal(learners[0].text, String(PLANS.free.maxLearners));
   assert.equal(learners[1].text, String(PLANS.core.maxLearners));
   assert.match(learners[2].text, new RegExp(String(PLANS.premium.maxLearners)));
-  const history = rowFor("Full activity history");
+  const history = rowFor("Reopen past work & feedback");
   assert.match(history[0].text, new RegExp(String(PLANS.free.recentHistoryLimit)), "Free's history limit");
   assert.match(history[1].text, /Full/);
   assert.match(history[2].text, /Full/);
