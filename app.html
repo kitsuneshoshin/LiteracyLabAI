@@ -1969,7 +1969,7 @@ function FeedbackCard({ session, backendLive }){
   );
 }
 
-function ActivityHistory({ recent, historyLimit, displayName }){
+function ActivityHistory({ recent, historyLimit, displayName, session, onOpen }){
   const [expanded, setExpanded] = useState(false);
   const rows = recent || [];
   if (rows.length === 0) {
@@ -1984,7 +1984,10 @@ function ActivityHistory({ recent, historyLimit, displayName }){
   return (
     <>
       <div className="flex flex-col">
-        {shown.map((r, i)=>(
+        {shown.map((r, i)=>{
+          // Only a finished piece has anything to open: one that was started and never submitted has no writing or feedback saved.
+          const openable = !!onOpen && (r.kind === "writing" ? !!r.glowSnippet : r.score != null);
+          return (
           <div key={r.id} className="flex items-start gap-3 py-3" style={ i > 0 ? { borderTop: "1px solid var(--border-soft)" } : {} }>
             <div className="w-7 h-7 rounded-full grid place-items-center shrink-0 mt-0.5"
               style={{ background: r.kind === "writing" ? "var(--navy-tint)" : "var(--cyan-tint)", color: r.kind === "writing" ? "var(--ink)" : "var(--cyan-ink)" }}>
@@ -2012,10 +2015,18 @@ function ActivityHistory({ recent, historyLimit, displayName }){
               </div>
               {r.glowSnippet
                 ? <p className="text-[12.5px] mt-1 leading-snug" style={{ color: "var(--ink-soft)" }}>{r.glowSnippet}</p>
-                : <p className="text-[12.5px] mt-1 italic" style={{ color: "var(--ink-faint)" }}>Started but not submitted.</p>}
+                : r.kind === "reading" && r.score != null
+                  ? null
+                  : <p className="text-[12.5px] mt-1 italic" style={{ color: "var(--ink-faint)" }}>Started but not submitted.</p>}
+              {openable && (
+                <button onClick={()=>onOpen(r.id)} className="focus-ring mt-1.5 inline-flex items-center gap-1 text-[12.5px] font-semibold py-1" style={{ color: "var(--cyan-ink)" }}>
+                  {r.kind === "writing" ? "View writing & feedback" : "View answers & feedback"} <IconArrowRight size={12} />
+                </button>
+              )}
             </div>
           </div>
-        ))}
+          );
+        })}
       </div>
       {rows.length > HISTORY_PAGE && (
         <button onClick={()=>setExpanded(v=>!v)} className="focus-ring mt-3 pt-3 border-t w-full text-[12.5px] font-semibold text-left" style={{ borderColor: "var(--border-soft)", color: "var(--cyan-ink)" }}>
@@ -2030,6 +2041,76 @@ function ActivityHistory({ recent, historyLimit, displayName }){
         </div>
       )}
     </>
+  );
+}
+
+// A past piece reopened from the activity list: the learner's own writing (or reading answers) and the feedback they
+// were given at the time, loaded on demand from api/history.js and drawn with the same panels as right after submitting.
+function PastPiece({ session, childId, submissionId, displayName, onClose }){
+  const [d, setD] = useState(null);
+  const [err, setErr] = useState("");
+  useEffect(() => {
+    let live = true;
+    setD(null); setErr("");
+    authedFetch(session, `/api/history?childId=${childId}&submissionId=${submissionId}`, { cache: "no-store" })
+      .then((x) => { if (live) setD(x); })
+      .catch((e) => { if (live) setErr((e && e.message) || "Couldn't load this piece."); });
+    return () => { live = false; };
+  }, [session, childId, submissionId]);
+  useEffect(() => {
+    const onKey = (e) => { if (e.key === "Escape") onClose(); };
+    window.addEventListener("keydown", onKey);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { window.removeEventListener("keydown", onKey); document.body.style.overflow = prev; };
+  }, [onClose]);
+
+  const fmt = (iso) => new Date(iso).toLocaleDateString(undefined, { day: "numeric", month: "long", year: "numeric" });
+  const known = d && GRADE_DATA[d.country] && d.feedback;
+  const isWriting = d && d.kind === "writing";
+  const title = d ? (isWriting ? (d.prompt && d.prompt.title) : (d.passage && d.passage.title)) : null;
+  const questions = d && d.passage && Array.isArray(d.passage.questions) ? d.passage.questions : [];
+  return (
+    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto p-3 sm:p-6" style={{ background: "rgba(10,20,40,0.55)" }}
+      onClick={(e)=>{ if (e.target === e.currentTarget) onClose(); }} role="dialog" aria-modal="true" aria-label="Past piece">
+      <div className="w-full max-w-3xl rounded-2xl p-4 sm:p-6 my-2" style={{ background: "var(--bg)" }}>
+        <div className="flex items-start justify-between gap-3 mb-4">
+          <div className="min-w-0">
+            <div className="label-mono mb-1" style={{ color: "var(--ink-soft)" }}>
+              {displayName || "Your learner"}'s {d ? (isWriting ? "writing" : "reading") : "piece"}{d ? " · " + fmt(d.createdAt) : ""}
+            </div>
+            {title && <h2 className="font-display text-2xl" style={{ color: "var(--ink)" }}>{title}</h2>}
+          </div>
+          <button onClick={onClose} className="focus-ring shrink-0 rounded-full px-4 py-2 text-sm font-bold" style={{ background: "var(--navy-tint)", color: "var(--ink)" }}>Close</button>
+        </div>
+        {err && <div className="text-sm py-6 text-center" style={{ color: "var(--bad)" }}>{err}</div>}
+        {!d && !err && <div className="text-sm py-10 text-center" style={{ color: "var(--ink-faint)" }}>Loading…</div>}
+        {d && !known && <div className="text-sm py-6 text-center" style={{ color: "var(--ink-faint)" }}>This piece was started but never submitted, so there is no feedback to show.</div>}
+        {known && isWriting && (
+          <div className="flex flex-col gap-4">
+            {d.prompt && d.prompt.prompt && (
+              <div className="card p-4 sm:p-5">
+                <div className="label-mono mb-1.5" style={{ color: "var(--ink-soft)" }}>The prompt</div>
+                <p className="text-[15px] leading-[1.6] font-read" style={{ color: "var(--ink)" }}>{d.prompt.prompt}</p>
+              </div>
+            )}
+            {d.text && !d.feedback.highlights && (
+              <div className="card p-4 sm:p-5">
+                <div className="label-mono mb-1.5" style={{ color: "var(--ink-soft)" }}>{displayName || "Their"} writing{d.wordCount != null ? " · " + d.wordCount + " words" : ""}</div>
+                <p className="text-[15px] leading-[1.7] font-read" style={{ color: "var(--ink)", whiteSpace: "pre-wrap" }}>{d.text}</p>
+              </div>
+            )}
+            <FeedbackPanel tier={d.tier} gradeLabel={d.gradeLabel || ""} country={d.country} interest={d.interest} confidence={null} motivation={null} seed={d.wordCount || 0}
+              feedback={d.feedback} submissionId={d.id} session={session} backendLive={true} submittedText={d.text} onSeePlans={null} onPractise={null} />
+          </div>
+        )}
+        {known && !isWriting && d.score != null && d.totalQuestions > 0 && questions.length > 0 && (
+          <ReadingFeedbackPanel tier={d.tier} country={d.country} interest={d.interest} confidence={null} motivation={null} score={d.score} totalQ={d.totalQuestions}
+            feedback={d.feedback} submissionId={d.id} session={session} backendLive={true}
+            questions={questions} answers={Array.isArray(d.answers) ? d.answers : []} bank={d.passage} onNew={null} onPractise={null} />
+        )}
+      </div>
+    </div>
   );
 }
 
@@ -2182,6 +2263,7 @@ function ChildSwitcher({ children_, activeChildId, onSwitchChild, onAddChild, sh
 // header's Account menu, so the overview stays about progress and the
 // settings/billing forms get a screen to themselves.
 function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests, toggleInterest, confidenceWriting, setConfidenceWriting, confidenceReading, setConfidenceReading, motivation, setMotivation, displayName, setDisplayName, avatarId, setAvatarId, children_, activeChildId, onSwitchChild, onAddChild, onRemoveChild, onMakeUsable, activeChangeAvailableAt, used, total, plan, session, setView, history, progress, peerStats, backendLive, needsOnboarding, onCompleteOnboarding, page = "overview" }){
+  const [openPieceId, setOpenPieceId] = useState(null);
   const showOverview = page === "overview";
   const showProfile = page === "profile";
   const showPlan = page === "plan";
@@ -2513,9 +2595,11 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
             </p>
             {!history
               ? <div className="text-sm py-6 text-center" style={{ color: "var(--ink-faint)" }}>Loading…</div>
-              : <ActivityHistory recent={history.recent} historyLimit={history.historyLimit} displayName={displayName} />}
+              : <ActivityHistory recent={history.recent} historyLimit={history.historyLimit} displayName={displayName} session={session} onOpen={setOpenPieceId} />}
           </div>
         )}
+
+        {openPieceId && <PastPiece session={session} childId={activeChildId} submissionId={openPieceId} displayName={displayName} onClose={()=>setOpenPieceId(null)} />}
 
         <InviteFriendCard session={session} backendLive={backendLive} plan={plan} />
 

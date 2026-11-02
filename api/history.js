@@ -31,8 +31,46 @@ module.exports = async function handler(req, res) {
       const saved = await writeVocabProgress(supabase, user.id, child.id, body.updates);
       return res.status(200).json({ saved });
     }
-    const { childId, quiz, count } = req.query;
+    const { childId, quiz, count, submissionId } = req.query;
     if (!childId) return res.status(400).json({ error: "childId is required." });
+
+    // One past piece in full - what the learner wrote (or read and answered) and the feedback they were given - so the
+    // activity list can be opened rather than only skimmed. Kept to the pieces the activity list itself shows: a free
+    // plan's list is its last 10, so only those can be opened.
+    if (submissionId) {
+      const { capabilities: caps } = await getMonthlyUsage(supabase, user.id);
+      const { data: visible, error: visErr } = await supabase
+        .from("submissions")
+        .select("id")
+        .eq("profile_id", user.id)
+        .eq("child_id", childId)
+        .order("created_at", { ascending: false })
+        .limit(caps.recentHistoryLimit);
+      if (visErr) throw visErr;
+      if (!(visible || []).some((s) => s.id === submissionId)) return res.status(404).json({ error: "That piece wasn't found in this learner's history." });
+      const { data: row, error: rowErr } = await supabase
+        .from("submissions")
+        .select("id, kind, tier, country, grade_label, interest, content, score, total_questions, word_count, feedback, created_at")
+        .eq("id", submissionId)
+        .eq("profile_id", user.id)
+        .eq("child_id", childId)
+        .maybeSingle();
+      if (rowErr) throw rowErr;
+      if (!row) return res.status(404).json({ error: "That piece wasn't found in this learner's history." });
+      let feedback = row.feedback && !row.feedback._pending ? row.feedback : null;
+      // Same rule as the activity list: a plan without the whole-piece score doesn't see one on older pieces either.
+      if (feedback && caps.overallScore === false) feedback = { ...feedback, overallScore: null };
+      res.setHeader("Cache-Control", "no-store");
+      return res.status(200).json({
+        id: row.id, kind: row.kind, tier: row.tier, country: row.country, gradeLabel: row.grade_label, interest: row.interest,
+        createdAt: row.created_at, score: row.score, totalQuestions: row.total_questions, wordCount: row.word_count,
+        prompt: row.content?.generatedPrompt || null,
+        text: typeof row.content?.text === "string" ? row.content.text : null,
+        passage: row.content?.generatedPassage || null,
+        answers: row.content?.answers || null,
+        feedback,
+      });
+    }
 
     // The headline stats (streak, words, average score) stay on every plan -
     // they're what makes the free tier worth returning to. The 26-week trend
