@@ -31,12 +31,13 @@ test("brand colours match the app's own tokens", () => {
   assert.equal(BRAND.gold, token("gold"), "gold");
 });
 
-test("every email carries the LiteracyLab AI header: logo, wordmark with a wine AI, accent bar", () => {
+test("every email carries the LiteracyLab AI header: logo, wordmark in a wine header band", () => {
   const { html } = buildEmail(base);
   assert.ok(html.includes(BRAND.logoUrl), "logo image");
   assert.match(html, /alt="LiteracyLab AI"/);
-  assert.match(html, /LiteracyLab <span class="ll-ai" style="color:#552830;">AI<\/span>/);
-  assert.ok(html.includes("background:#7A3B45"), "wine accent bar and button");
+  assert.match(html, /LiteracyLab <span class="ll-hdai" style="color:#E9E2D2;">AI<\/span>/);
+  assert.match(html, /class="ll-hd" style="background:#7A3B45;border-radius:14px 14px 0 0/, "wine header band");
+  assert.ok(html.includes("background:#7A3B45"), "wine band and button");
   assert.ok(BRAND.logoUrl.startsWith("https://"), "images must be absolute https URLs");
 });
 

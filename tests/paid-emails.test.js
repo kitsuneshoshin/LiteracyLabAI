@@ -84,7 +84,7 @@ for (const key of PAID_EMAIL_KEYS) {
   test(`${key}: on brand, with the feedback link and address, and the right unsubscribe behaviour`, () => {
     const e = buildAnyEmail(key, { token: TOKEN, address: "1 Example St", ...sampleContext(key) });
     assert.ok(e.subject.length > 5 && e.subject.length <= 70, `subject length ${e.subject.length}`);
-    assert.ok(e.html.includes("LiteracyLab <span class=\"ll-ai\""), "header wordmark");
+    assert.ok(e.html.includes("LiteracyLab <span class=\"ll-hdai\""), "header wordmark");
     assert.ok(e.html.includes("#7A3B45"), "brand wine");
     assert.ok(e.html.includes("1 Example St"), "postal address");
     if (isTransactional(key)) {

@@ -96,12 +96,13 @@ function feedbackRow(baseUrl) {
  * @param {object} c
  * @param {string} c.subject        the subject line (also the <title>)
  * @param {string} c.preheader      the grey preview text shown after the subject in the inbox
- * @param {string} c.heading
+ * @param {string} [c.heading]   omitted for a personal reply, which opens with a greeting instead
  * @param {string[]} c.paragraphs   plain text, escaped here
  * @param {{title,text}[]} [c.steps]
  * @param {{label,value,pct}[]} [c.meters]  progress bars shown under the paragraphs (for example days practised this week)
  * @param {{label,url}} [c.cta]
  * @param {string} [c.note]
+ * @param {string} [c.signOff]     a closing line under everything else, e.g. the team name on a support reply
  * @param {string} [c.campaign]     tags links for analytics, e.g. "free_welcome"
  * @param {string} c.reason         why they are receiving it (footer)
  * @param {string} [c.unsubscribeUrl]  required for anything that is not an account/billing email
@@ -112,12 +113,13 @@ function feedbackRow(baseUrl) {
 function buildEmail(c) {
   const ctaUrl = c.cta ? tagLink(c.cta.url, c.campaign) : null;
   const body = [
-    `<h1 class="ll-ink" style="margin:0 0 18px;font-family:${FONT_SANS};font-size:26px;line-height:1.25;font-weight:700;color:${BRAND.ink};">${esc(c.heading)}</h1>`,
+    c.heading ? `<h1 class="ll-ink" style="margin:0 0 18px;font-family:${FONT_SANS};font-size:26px;line-height:1.25;font-weight:700;color:${BRAND.ink};">${esc(c.heading)}</h1>` : "",
     ...(c.paragraphs || []).map(paragraph),
     ...(c.meters && c.meters.length ? [meterBlock(c.meters)] : []),
     c.steps ? stepsBlock(c.steps) : "",
     c.cta ? button(c.cta.label, ctaUrl) : "",
     c.note ? noteBox(c.note) : "",
+    c.signOff ? `<p class="ll-ink" style="margin:20px 0 16px;font-family:${FONT_SANS};font-size:16px;line-height:1.65;color:${BRAND.ink};">${esc(c.signOff)}</p>` : "",
     c.feedbackUrl && c.feedbackStyle === "row" ? feedbackRow(c.feedbackUrl) : "",
   ].join("\n");
   // Every email gets the quiet footer line; only the ones that ask for it get the rating row above.
@@ -139,7 +141,7 @@ function buildEmail(c) {
 <title>${esc(c.subject)}</title>
 <link href="${esc(GOOGLE_FONTS)}" rel="stylesheet">
 <style>
-  @media (max-width: 620px) { .ll-wrap { width: 100% !important; } .ll-pad { padding: 24px 20px !important; } }
+  @media (max-width: 620px) { .ll-wrap { width: 100% !important; } .ll-pad { padding: 24px 20px !important; } .ll-hd { padding: 16px 20px !important; } }
   @media (prefers-color-scheme: dark) {
     .ll-bg { background: ${BRAND.dark.bg} !important; }
     .ll-card { background: ${BRAND.dark.surface} !important; border-color: ${BRAND.dark.border} !important; }
@@ -152,6 +154,9 @@ function buildEmail(c) {
     .ll-rule { border-color: ${BRAND.dark.border} !important; }
     .ll-ai { color: ${BRAND.dark.wineInk} !important; }
     .ll-bar { background: ${BRAND.dark.wine} !important; }
+    .ll-hd { background: ${BRAND.dark.wineTint} !important; }
+    .ll-hdtxt { color: ${BRAND.dark.ink} !important; }
+    .ll-hdai { color: ${BRAND.dark.wineInk} !important; }
   }
 </style>
 </head>
@@ -160,16 +165,15 @@ function buildEmail(c) {
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" class="ll-bg" style="background:${BRAND.bg};">
   <tr><td align="center" style="padding:24px 12px 40px;">
     <table role="presentation" width="600" cellpadding="0" cellspacing="0" class="ll-wrap" style="width:600px;max-width:100%;">
-      <!-- Header -->
-      <tr><td class="ll-bar" height="4" style="height:4px;line-height:4px;font-size:0;background:${BRAND.wine};border-radius:4px 4px 0 0;">&nbsp;</td></tr>
-      <tr><td style="padding:18px 8px 18px;">
+      <!-- Header: one solid wine band, with the card tucked directly under it -->
+      <tr><td class="ll-hd" style="background:${BRAND.wine};border-radius:14px 14px 0 0;padding:18px 36px;">
         <table role="presentation" cellpadding="0" cellspacing="0"><tr>
-          <td valign="middle" style="padding-right:12px;"><a href="${SITE}" style="text-decoration:none;"><img src="${BRAND.logoUrl}" width="48" height="48" alt="LiteracyLab AI" style="display:block;border:0;border-radius:10px;"></a></td>
-          <td valign="middle"><a href="${SITE}" class="ll-ink" style="text-decoration:none;font-family:${FONT_SANS};font-size:24px;font-weight:700;letter-spacing:-0.2px;color:${BRAND.ink};">LiteracyLab <span class="ll-ai" style="color:${BRAND.wineInk};">AI</span></a></td>
+          <td valign="middle" style="padding-right:12px;"><a href="${SITE}" style="text-decoration:none;"><img src="${BRAND.logoUrl}" width="44" height="44" alt="LiteracyLab AI" style="display:block;border:0;border-radius:10px;"></a></td>
+          <td valign="middle"><a href="${SITE}" class="ll-hdtxt" style="text-decoration:none;font-family:${FONT_SANS};font-size:22px;font-weight:700;letter-spacing:-0.2px;color:#FFFFFF;">LiteracyLab <span class="ll-hdai" style="color:${BRAND.goldTint};">AI</span></a></td>
         </tr></table>
       </td></tr>
       <!-- Card -->
-      <tr><td class="ll-card ll-pad" style="background:${BRAND.surface};border:1px solid ${BRAND.border};border-radius:14px;padding:36px 36px 28px;">
+      <tr><td class="ll-card ll-pad" style="background:${BRAND.surface};border:1px solid ${BRAND.border};border-top:0;border-radius:0 0 14px 14px;padding:36px 36px 28px;">
 ${body}
       </td></tr>
       <!-- Footer -->
@@ -189,13 +193,13 @@ ${body}
   const text = [
     BRAND.name.toUpperCase(),
     "",
-    c.heading,
-    "",
+    ...(c.heading ? [c.heading, ""] : []),
     ...(c.paragraphs || []).flatMap((p) => [p, ""]),
     ...(c.meters && c.meters.length ? c.meters.filter((m) => m && m.label && Number.isFinite(m.pct)).map((m) => `${m.label}: ${m.value}`).concat([""]) : []),
     ...(c.steps ? c.steps.flatMap((s, i) => [`${i + 1}. ${s.title} - ${s.text}`]).concat([""]) : []),
     ...(c.cta ? [`${c.cta.label}: ${ctaUrl}`, ""] : []),
     ...(c.note ? [c.note, ""] : []),
+    ...(c.signOff ? [c.signOff, ""] : []),
     ...(c.feedbackUrl && c.feedbackStyle === "row" ? [`Was this email useful? Yes: ${c.feedbackUrl}${c.feedbackUrl.indexOf("?") === -1 ? "?" : "&"}r=up | No: ${c.feedbackUrl}${c.feedbackUrl.indexOf("?") === -1 ? "?" : "&"}r=down`, ""] : []),
     "--",
     c.reason,

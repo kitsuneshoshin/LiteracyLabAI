@@ -83,7 +83,7 @@ for (const key of FREE_EMAIL_KEYS) {
   test(`${key}: on brand, with unsubscribe, feedback link, address and analytics tags`, () => {
     const e = buildFreeEmail(key, { token: TOKEN, address: "1 Example St", stats: { pieces: 2, words: 340 } });
     assert.ok(e.subject.length > 5 && e.subject.length <= 70, `subject length ${e.subject.length}`);
-    assert.ok(e.html.includes(`LiteracyLab <span class="ll-ai"`), "header wordmark");
+    assert.ok(e.html.includes(`LiteracyLab <span class="ll-hdai"`), "header wordmark");
     assert.ok(e.html.includes("#7A3B45"), "brand wine");
     assert.ok(e.html.includes(`${SITE}/unsubscribe?t=${TOKEN}`), "unsubscribe link");
     assert.ok(e.html.includes(`${SITE}/feedback?e=${key}&amp;t=${TOKEN}&amp;r=more`), "every email links to the feedback page, carrying the email and token");
