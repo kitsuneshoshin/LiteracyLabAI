@@ -44,18 +44,48 @@ function tagLink(url, campaign) {
   return url + sep + "utm_source=email&utm_medium=lifecycle&utm_campaign=" + encodeURIComponent(campaign);
 }
 
-function paragraph(text) {
-  return `<p style="margin:0 0 16px;font-family:${FONT_SANS};font-size:16px;line-height:1.65;color:${BRAND.ink};" class="ll-ink">${esc(text)}</p>`;
+// Light formatting for a hand-written reply: **bold**, [label](https://link), bare https:// links and line breaks.
+// Everything is escaped first, and only http(s) links are made clickable, so nothing typed can inject markup.
+// Only used when an email asks for it (c.rich); the automated emails keep their text exactly as written.
+function rich(text) {
+  return esc(text)
+    .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, (m, l, u) => `<a href="${u}" class="ll-link" style="color:${BRAND.wine};text-decoration:underline;">${l}</a>`)
+    .replace(/(^|[\s(])(https?:\/\/[^\s<)]+)/g, (m, pre, u) => `${pre}<a href="${u}" class="ll-link" style="color:${BRAND.wine};text-decoration:underline;">${u}</a>`)
+    .replace(/\*\*([^*\n]+)\*\*/g, '<strong style="font-weight:600;">$1</strong>')
+    .replace(/\n/g, "<br>");
+}
+const plain = (text) => String(text == null ? "" : text).replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, "$1 ($2)").replace(/\*\*([^*\n]+)\*\*/g, "$1");
+
+function paragraph(text, isRich) {
+  return `<p style="margin:0 0 16px;font-family:${FONT_SANS};font-size:16px;line-height:1.65;color:${BRAND.ink};" class="ll-ink">${isRich ? rich(text) : esc(text)}</p>`;
 }
 
-function stepsBlock(steps) {
-  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:8px 0 20px;">${steps.map((s, i) => `
+function bulletsBlock(items, isRich) {
+  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 16px;">${items.map((t) => `
+    <tr>
+      <td width="22" valign="top" class="ll-ink" style="padding:0 0 8px;font-family:${FONT_SANS};font-size:16px;line-height:1.65;color:${BRAND.wine};">&bull;</td>
+      <td valign="top" class="ll-ink" style="padding:0 0 8px;font-family:${FONT_SANS};font-size:16px;line-height:1.65;color:${BRAND.ink};">${isRich ? rich(t) : esc(t)}</td>
+    </tr>`).join("")}
+  </table>`;
+}
+
+// A step is a plain string, or { title, text } where either part may be left out.
+const stepParts = (s) => (s && typeof s === "object" ? { title: s.title || "", text: s.text || "" } : { title: String(s == null ? "" : s), text: "" });
+
+function stepsBlock(steps, isRich) {
+  const f = isRich ? rich : esc;
+  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:8px 0 20px;">${steps.map((raw, i) => {
+    const st = stepParts(raw);
+    const title = st.title ? `<strong style="font-weight:600;">${f(st.title)}</strong>` : "";
+    const text = st.text ? `<span class="ll-soft" style="color:${BRAND.inkSoft};">${f(st.text)}</span>` : "";
+    return `
     <tr>
       <td width="40" valign="top" style="padding:0 0 14px;">
         <div class="ll-num" style="width:28px;height:28px;border-radius:14px;background:${BRAND.wineTint};color:${BRAND.wineInk};font-family:${FONT_SANS};font-size:14px;font-weight:700;line-height:28px;text-align:center;">${i + 1}</div>
       </td>
-      <td valign="top" style="padding:2px 0 14px;font-family:${FONT_SANS};font-size:16px;line-height:1.55;color:${BRAND.ink};" class="ll-ink"><strong style="font-weight:600;">${esc(s.title)}</strong><br><span class="ll-soft" style="color:${BRAND.inkSoft};">${esc(s.text)}</span></td>
-    </tr>`).join("")}
+      <td valign="top" style="padding:2px 0 14px;font-family:${FONT_SANS};font-size:16px;line-height:1.55;color:${BRAND.ink};" class="ll-ink">${title}${title && text ? "<br>" : ""}${text}</td>
+    </tr>`;
+  }).join("")}
   </table>`;
 }
 
@@ -79,8 +109,8 @@ function meterBlock(meters) {
   return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:12px 0 8px;">${rows.join("\n")}</table>`;
 }
 
-function noteBox(text) {
-  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:20px 0 4px;"><tr><td class="ll-tint" style="background:${BRAND.wineTint};border-radius:10px;padding:14px 18px;font-family:${FONT_SANS};font-size:14px;line-height:1.6;color:${BRAND.wineInk};">${esc(text)}</td></tr></table>`;
+function noteBox(text, isRich) {
+  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:20px 0 4px;"><tr><td class="ll-tint" style="background:${BRAND.wineTint};border-radius:10px;padding:14px 18px;font-family:${FONT_SANS};font-size:14px;line-height:1.6;color:${BRAND.wineInk};">${isRich ? rich(text) : esc(text)}</td></tr></table>`;
 }
 
 // "Was this email useful?" row: one click records a thumbs up or down, and
@@ -90,6 +120,28 @@ function feedbackRow(baseUrl) {
   const join = baseUrl.indexOf("?") === -1 ? "?" : "&";
   const link = (label, extra) => `<a href="${esc(baseUrl + join + extra)}" class="ll-ai" style="color:${BRAND.wineInk};font-weight:600;text-decoration:none;">${label}</a>`;
   return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:24px 0 0;"><tr><td class="ll-soft ll-rule" style="border-top:1px solid ${BRAND.border};padding-top:16px;font-family:${FONT_SANS};font-size:14px;line-height:1.6;color:${BRAND.inkSoft};">Was this email useful? ${link("Yes", "r=up")} &nbsp;·&nbsp; ${link("No", "r=down")} &nbsp;·&nbsp; ${link("Tell us more", "r=more")}</td></tr></table>`;
+}
+
+// One piece of a reply, in the order it was written: { p }, { bullets }, { steps }, { note } or { cta }.
+function renderBlock(b, isRich, campaign) {
+  if (!b || typeof b !== "object") return "";
+  if (b.p != null) return paragraph(b.p, isRich);
+  if (b.bullets) return bulletsBlock(b.bullets, isRich);
+  if (b.steps) return stepsBlock(b.steps, isRich);
+  if (b.note != null) return noteBox(b.note, isRich);
+  if (b.cta) return button(b.cta.label, tagLink(b.cta.url, campaign));
+  return "";
+}
+
+function blockText(b, rich, campaign) {
+  if (!b || typeof b !== "object") return [];
+  const f = rich ? plain : (x) => String(x);
+  if (b.p != null) return [f(b.p), ""];
+  if (b.bullets) return b.bullets.map((t) => "- " + f(t)).concat([""]);
+  if (b.steps) return b.steps.map((raw, i) => { const st = stepParts(raw); return `${i + 1}. ${[f(st.title), f(st.text)].filter(Boolean).join(" - ")}`; }).concat([""]);
+  if (b.note != null) return [f(b.note), ""];
+  if (b.cta) return [`${b.cta.label}: ${tagLink(b.cta.url, campaign)}`, ""];
+  return [];
 }
 
 /**
@@ -102,6 +154,9 @@ function feedbackRow(baseUrl) {
  * @param {{label,value,pct}[]} [c.meters]  progress bars shown under the paragraphs (for example days practised this week)
  * @param {{label,url}} [c.cta]
  * @param {string} [c.note]
+ * @param {string[]} [c.bullets]  a bulleted list shown after the paragraphs
+ * @param {object[]} [c.blocks]   instead of paragraphs/bullets/steps/cta/note: pieces shown in the order given, each { p } | { bullets } | { steps } | { note } | { cta }
+ * @param {boolean} [c.rich]      allow **bold**, [label](https://link), bare https links and line breaks in the text
  * @param {string} [c.signOff]     a closing line under everything else, e.g. the team name on a support reply
  * @param {string} [c.campaign]     tags links for analytics, e.g. "free_welcome"
  * @param {string} c.reason         why they are receiving it (footer)
@@ -114,11 +169,16 @@ function buildEmail(c) {
   const ctaUrl = c.cta ? tagLink(c.cta.url, c.campaign) : null;
   const body = [
     c.heading ? `<h1 class="ll-ink" style="margin:0 0 18px;font-family:${FONT_SANS};font-size:26px;line-height:1.25;font-weight:700;color:${BRAND.ink};">${esc(c.heading)}</h1>` : "",
-    ...(c.paragraphs || []).map(paragraph),
-    ...(c.meters && c.meters.length ? [meterBlock(c.meters)] : []),
-    c.steps ? stepsBlock(c.steps) : "",
-    c.cta ? button(c.cta.label, ctaUrl) : "",
-    c.note ? noteBox(c.note) : "",
+    ...(c.blocks
+      ? c.blocks.map((blk) => renderBlock(blk, c.rich, c.campaign))
+      : [
+        ...(c.paragraphs || []).map((t) => paragraph(t, c.rich)),
+        ...(c.bullets && c.bullets.length ? [bulletsBlock(c.bullets, c.rich)] : []),
+        ...(c.meters && c.meters.length ? [meterBlock(c.meters)] : []),
+        c.steps ? stepsBlock(c.steps, c.rich) : "",
+        c.cta ? button(c.cta.label, ctaUrl) : "",
+        c.note ? noteBox(c.note, c.rich) : "",
+      ]),
     c.signOff ? `<p class="ll-ink" style="margin:20px 0 16px;font-family:${FONT_SANS};font-size:16px;line-height:1.65;color:${BRAND.ink};">${esc(c.signOff)}</p>` : "",
     c.feedbackUrl && c.feedbackStyle === "row" ? feedbackRow(c.feedbackUrl) : "",
   ].join("\n");
@@ -157,6 +217,7 @@ function buildEmail(c) {
     .ll-hd { background: ${BRAND.dark.wineTint} !important; }
     .ll-hdtxt { color: ${BRAND.dark.ink} !important; }
     .ll-hdai { color: ${BRAND.dark.wineInk} !important; }
+    .ll-link { color: ${BRAND.dark.wineInk} !important; }
   }
 </style>
 </head>
@@ -194,11 +255,12 @@ ${body}
     BRAND.name.toUpperCase(),
     "",
     ...(c.heading ? [c.heading, ""] : []),
-    ...(c.paragraphs || []).flatMap((p) => [p, ""]),
-    ...(c.meters && c.meters.length ? c.meters.filter((m) => m && m.label && Number.isFinite(m.pct)).map((m) => `${m.label}: ${m.value}`).concat([""]) : []),
-    ...(c.steps ? c.steps.flatMap((s, i) => [`${i + 1}. ${s.title} - ${s.text}`]).concat([""]) : []),
-    ...(c.cta ? [`${c.cta.label}: ${ctaUrl}`, ""] : []),
-    ...(c.note ? [c.note, ""] : []),
+    ...(c.blocks ? c.blocks.flatMap((blk) => blockText(blk, c.rich, c.campaign)) : (c.paragraphs || []).flatMap((p) => [c.rich ? plain(p) : p, ""])),
+    ...(!c.blocks && c.bullets && c.bullets.length ? c.bullets.map((t) => "- " + (c.rich ? plain(t) : t)).concat([""]) : []),
+    ...(c.blocks ? [] : c.meters && c.meters.length ? c.meters.filter((m) => m && m.label && Number.isFinite(m.pct)).map((m) => `${m.label}: ${m.value}`).concat([""]) : []),
+    ...(!c.blocks && c.steps ? c.steps.map((raw, i) => { const st = stepParts(raw); const f = c.rich ? plain : String; return `${i + 1}. ${[f(st.title), f(st.text)].filter(Boolean).join(" - ")}`; }).concat([""]) : []),
+    ...(!c.blocks && c.cta ? [`${c.cta.label}: ${ctaUrl}`, ""] : []),
+    ...(!c.blocks && c.note ? [c.rich ? plain(c.note) : c.note, ""] : []),
     ...(c.signOff ? [c.signOff, ""] : []),
     ...(c.feedbackUrl && c.feedbackStyle === "row" ? [`Was this email useful? Yes: ${c.feedbackUrl}${c.feedbackUrl.indexOf("?") === -1 ? "?" : "&"}r=up | No: ${c.feedbackUrl}${c.feedbackUrl.indexOf("?") === -1 ? "?" : "&"}r=down`, ""] : []),
     "--",
