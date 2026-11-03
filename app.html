@@ -3345,18 +3345,7 @@ const EXAM_BAND_META = {
 // wall of boxes) - the student/parent controls what stays open, and each
 // header always shows a one-line teaser so a collapsed section still
 // visibly "does something" rather than looking like it vanished.
-// ---- Remembered open/closed. A section the learner opens (or closes) stays that way next time, per section, on this
-// device. Where nothing is remembered, or the browser blocks storage, the section's own default applies.
-function readOpenChoice(id, fallback){
-  if (!id) return fallback;
-  try { const v = localStorage.getItem("ll_open_" + id); return v === "1" ? true : v === "0" ? false : fallback; } catch (e) { return fallback; }
-}
-function saveOpenChoice(id, open){
-  if (!id) return;
-  try { localStorage.setItem("ll_open_" + id, open ? "1" : "0"); } catch (e) { /* not remembered, still works */ }
-}
-
-// One button that opens or closes every section on the page (it does not change what is remembered).
+// One button that opens or closes every section on the page. Every result starts with its sections closed.
 function ExpandAllBar(){
   const [allOpen, setAllOpen] = useState(false);
   return (
@@ -3370,8 +3359,9 @@ function ExpandAllBar(){
 }
 
 function Collapsible({ id, icon, iconBg, iconColor, title, teaser, borderColor, defaultOpen, staticOpen, children }){
-  const [openState, setOpenState] = useState(() => readOpenChoice(id, defaultOpen));
-  const setOpen = (fn) => setOpenState((prev) => { const next = typeof fn === "function" ? fn(prev) : fn; saveOpenChoice(id, next); return next; });
+  // Nothing is remembered between visits: each result starts with the section's own default (closed, for every section).
+  const [openState, setOpenState] = useState(!!defaultOpen);
+  const setOpen = setOpenState;
   useEffect(() => {
     const onAll = (e) => setOpenState(!!e.detail);
     window.addEventListener("ll-set-all-sections", onAll);

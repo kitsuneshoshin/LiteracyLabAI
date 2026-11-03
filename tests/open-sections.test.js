@@ -3,35 +3,14 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
 
-// Which sections of a result are open when it first appears, and that a learner's choice is remembered.
-// The helpers are copied out of app.html (one in-browser script) and run here.
-const APP = fs.readFileSync(path.join(__dirname, "..", "app.html"), "utf8");
-const a = APP.indexOf("function readOpenChoice"), b = APP.indexOf("// One button that opens or closes every section");
-assert.ok(a > 0 && b > a);
-const load = (storage) => new Function("localStorage", APP.slice(a, b) + "\nreturn { readOpenChoice, saveOpenChoice };")(storage);
-const mem = () => { const m = {}; return { getItem: (k) => (k in m ? m[k] : null), setItem: (k, v) => { m[k] = String(v); }, m }; };
+// Which sections of a result are open when it first appears. Every section starts closed, and nothing is remembered
+// between visits, so a customer always meets a result the same way and opens what they want.
+const APP = fs.readFileSync(path.join(__dirname, "..", "app.html"), "utf8").replace(/\r\n/g, "\n");
 
-test("a section's own default applies until the learner chooses, and then their choice wins", () => {
-  const st = mem(); const { readOpenChoice, saveOpenChoice } = load(st);
-  assert.equal(readOpenChoice("exam", false), false);
-  assert.equal(readOpenChoice("responses", true), true);
-  saveOpenChoice("exam", true);
-  assert.equal(readOpenChoice("exam", false), true, "opened once, stays open");
-  saveOpenChoice("responses", false);
-  assert.equal(readOpenChoice("responses", true), false, "closed once, stays closed");
-  assert.equal(readOpenChoice("vocab", false), false, "other sections are untouched");
-});
-
-test("a section with no id, garbage in the store, or a blocked store just uses its default", () => {
-  const st = mem(); const { readOpenChoice, saveOpenChoice } = load(st);
-  assert.equal(readOpenChoice(undefined, true), true);
-  assert.doesNotThrow(() => saveOpenChoice(undefined, true));
-  assert.deepEqual(st.m, {}, "nothing saved without an id");
-  st.m.ll_open_exam = "banana";
-  assert.equal(readOpenChoice("exam", true), true);
-  const blocked = load({ getItem() { throw new Error("blocked"); }, setItem() { throw new Error("blocked"); } });
-  assert.equal(blocked.readOpenChoice("exam", true), true);
-  assert.doesNotThrow(() => blocked.saveOpenChoice("exam", false));
+test("open or closed is not remembered between visits", () => {
+  assert.ok(!APP.includes("ll_open_"), "no saved open/closed state");
+  assert.ok(!APP.includes("readOpenChoice") && !APP.includes("saveOpenChoice"));
+  assert.match(APP, /function Collapsible\([^)]*\)\{\s*\/\/[^\n]*\n\s*const \[openState, setOpenState\] = useState\(!!defaultOpen\);/);
 });
 
 // What is open on first view, read from the page source so the choices cannot drift from what was agreed.
