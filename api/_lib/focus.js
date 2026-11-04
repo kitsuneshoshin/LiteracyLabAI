@@ -1,7 +1,7 @@
 // "Choose your focus": what a learner can ask to practise, instead of a surprise.
 //
 //   Writing: the kind of piece (a story, a description, a persuasive piece, an analysis), from the kinds that suit the age.
-//            Premium can also ask for the prompt in the style of their exam (NAPLAN, GCSE, a US state test).
+//            Premium can also ask for the prompt in the style of their exam (NAPLAN, EQAO, PSLE, GCSE, IGCSE, a US state test, a CEFR task).
 //   Reading: the kind of text (story, poem, article, a table or chart, two texts...) and a comprehension skill to work on.
 //
 // Everything a learner can choose is checked here against these lists, so nothing from the browser is ever put into a prompt
@@ -52,12 +52,53 @@ function gradeNumber(gradeLabel) {
   const m = String(gradeLabel || "").match(/(?:year|grade)\s*(\d{1,2})\b/i);
   return m ? Number(m[1]) : null;
 }
+// Singapore, the UAE and English learners label their years differently ("Primary 5", "Cambridge Primary 4", "B1 Intermediate").
+function labelNumber(label, re) {
+  const m = String(label || "").trim().match(re);
+  return m ? Number(m[1]) : null;
+}
+// One short stem per CEFR level: what a task at that level asks for (word counts follow the usual Cambridge English task sizes).
+const CEFR_STYLE = {
+  A1: "a very short, simple writing task: one or two lines of instruction about a familiar topic (yourself, your family, your day), asking for a few short sentences of about 20 to 30 words",
+  A2: "a short everyday writing task of about 25 to 35 words, such as a message or a note to a friend, with two or three things to include",
+  B1: "a writing task of about 100 words, such as an email or a short story, with a clear situation and a few points to cover",
+  B2: "a writing task of about 140 to 190 words, such as an article, an essay, a review or an informal letter, with a clear situation, audience and purpose",
+  C1: "a writing task of about 220 to 260 words, such as an essay or a report, where the writer has to give an opinion, weigh up ideas and choose a suitable formal or semi-formal register",
+  C2: "a demanding writing task of about 240 to 280 words, such as an essay, a review or a report, asking for a precise, well-organised and nuanced answer in a register suited to the reader",
+};
 function examStyleFor(country, gradeLabel) {
   const c = String(country || "");
+  const label = String(gradeLabel || "");
+  if (/Singapore/.test(c)) {
+    const p = labelNumber(label, /^Primary\s*(\d{1,2})$/i);
+    if (p != null && p >= 4 && p <= 6) return { name: "PSLE English", style: "the way a PSLE English continuous-writing task is worded: a theme or a set of pictures to build a story around, with a short instruction, for a timed composition of at least 150 words" };
+    if (labelNumber(label, /^Secondary\s*([1-3])$/i) != null || /^O-Level\s*\/\s*IGCSE\s*Yr\s*[45]$/i.test(label)) {
+      return { name: "O-Level English Paper 1", style: "the way a Singapore secondary English writing paper is worded: a short instruction with a theme, a title or a viewpoint, asking for a narrative, a descriptive or a discursive piece" };
+    }
+    return null;
+  }
+  if (/UAE|GCC/.test(c)) {
+    const p = labelNumber(label, /^Cambridge Primary\s*(\d)$/i);
+    if (p != null && p >= 4 && p <= 6) return { name: "Cambridge Primary Checkpoint", style: "the way a Cambridge Primary English writing task is worded: a clear purpose and audience, in simple language a child of this age can follow" };
+    if (labelNumber(label, /^Lower Secondary\s*([7-9])$/i) != null) return { name: "Cambridge Lower Secondary Checkpoint", style: "the way a Cambridge Lower Secondary English writing task is worded: a clear purpose, audience and form, such as an article, a letter or a story" };
+    if (/^IGCSE Year\s*1[01]$/i.test(label)) return { name: "IGCSE English First Language", style: "the way an IGCSE English First Language writing question is worded: a topic or a viewpoint, and a clear form (a descriptive or narrative piece, an article, a letter or a speech)" };
+    if (/^A(S)? Level\b/i.test(label)) return { name: "Cambridge AS and A Level English", style: "the way a Cambridge AS and A Level English writing task is worded: a topic or a statement, and a clear form (a discursive, a narrative or a descriptive piece) for a timed response" };
+    return null;
+  }
+  if (/ESL|Global/.test(c)) {
+    const m = label.match(/^(A1|A2|B1|B2|C1|C2)\b/i);
+    if (!m) return null;
+    const level = m[1].toUpperCase();
+    return { name: "CEFR writing task", style: CEFR_STYLE[level] + ", at " + level + " level, with simple clear wording for the instruction" };
+  }
   const n = gradeNumber(gradeLabel);
   if (n == null) return null;
   if (/Australia/.test(c) && n >= 3 && n <= 9) {
     return { name: "NAPLAN", style: "a short stimulus (a topic, a statement or a question) followed by a plain instruction, written the way a NAPLAN writing task is, for a timed response" };
+  }
+  if (/Canada/.test(c)) {
+    if (n >= 3 && n <= 9) return { name: "EQAO", style: "the way an Ontario EQAO writing task is worded: a short situation or topic and a clear instruction about what to write, in plain language for a timed response" };
+    if (n === 10) return { name: "OSSLT", style: "the way the Ontario Secondary School Literacy Test words its writing tasks: a short situation, and an instruction to write a news report or a series of paragraphs giving an opinion, supported with reasons and examples" };
   }
   if (/United Kingdom/.test(c)) {
     if (n >= 10 && n <= 11) return { name: "GCSE English Language", style: "the way a GCSE English Language writing question is worded: a situation or a viewpoint, and a clear form (a description, a story, an article, a letter or a speech)" };

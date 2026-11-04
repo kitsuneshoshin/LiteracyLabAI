@@ -39,7 +39,25 @@ test("the exam a learner is likely preparing for follows their country and year,
   assert.equal(F.examStyleFor(UK, "Reception"), null);
   assert.equal(F.examStyleFor(US, "Grade 7").name, "state test (Common Core)");
   assert.equal(F.examStyleFor(US, "Kindergarten"), null);
-  assert.equal(F.examStyleFor(CA, "Grade 7"), null, "no clear exam: nothing offered");
+  assert.equal(F.examStyleFor(CA, "Grade 7").name, "EQAO");
+  assert.equal(F.examStyleFor(CA, "Grade 10").name, "OSSLT");
+  assert.equal(F.examStyleFor(CA, "Grade 12"), null, "no clear exam after Grade 10");
+  assert.equal(F.examStyleFor(CA, "Kindergarten"), null);
+  const SG = "🇸🇬 Singapore & SE Asia", AE = "🇦🇪 UAE & GCC Hubs", ESL = "🌐 Global ESL Mode";
+  assert.equal(F.examStyleFor(SG, "Primary 6").name, "PSLE English");
+  assert.equal(F.examStyleFor(SG, "Primary 2"), null);
+  assert.equal(F.examStyleFor(SG, "Secondary 2").name, "O-Level English Paper 1");
+  assert.equal(F.examStyleFor(SG, "O-Level / IGCSE Yr 5").name, "O-Level English Paper 1");
+  assert.equal(F.examStyleFor(SG, "IB Diploma Yr 1"), null);
+  assert.equal(F.examStyleFor(AE, "Cambridge Primary 5").name, "Cambridge Primary Checkpoint");
+  assert.equal(F.examStyleFor(AE, "Cambridge Primary 2"), null);
+  assert.equal(F.examStyleFor(AE, "Lower Secondary 8").name, "Cambridge Lower Secondary Checkpoint");
+  assert.equal(F.examStyleFor(AE, "IGCSE Year 11").name, "IGCSE English First Language");
+  assert.equal(F.examStyleFor(AE, "A Level (Yr 13)").name, "Cambridge AS and A Level English");
+  for (const lvl of ["A1 Beginner", "A2 Elementary", "B1 Intermediate", "B2 Upper-Intermediate", "C1 Advanced", "C2 Proficient"]) {
+    const e = F.examStyleFor(ESL, lvl); assert.equal(e.name, "CEFR writing task"); assert.ok(e.style.includes(lvl.slice(0, 2)), lvl);
+  }
+  assert.equal(F.examStyleFor(ESL, "Year 5"), null);
   assert.equal(F.examStyleFor(undefined, "Year 5"), null); assert.equal(F.examStyleFor(AU, undefined), null);
   for (const c of [UK, AU, US]) for (const n of [3, 7, 11]) { const e = F.examStyleFor(c, "Year " + n) || F.examStyleFor(c, "Grade " + n); if (e) assert.ok(e.style.length > 40 && e.name.length > 3); }
 });
@@ -63,7 +81,9 @@ test("the exam style is Premium only, only where there is an exam, and only when
   assert.equal(wf("elementary", "admin", ask).exam.name, "NAPLAN");
   assert.equal(wf("elementary", "free", ask).exam, null);
   assert.equal(wf("elementary", "core", ask).exam, null, "Core does not have it");
-  assert.equal(wf("elementary", "premium", ask, CA, "Grade 5").exam, null, "no exam for this country");
+  assert.equal(wf("elementary", "premium", ask, CA, "Grade 5").exam.name, "EQAO");
+  assert.equal(wf("elementary", "premium", ask, CA, "Grade 12").exam, null, "no exam for this year");
+  assert.equal(wf("elementary", "core", ask, CA, "Grade 5").exam, null, "Core does not have it");
   for (const bad of ["true", 1, "yes", {}, [], null, false]) assert.equal(wf("elementary", "premium", { examStyle: bad }).exam, null, JSON.stringify(bad));
   assert.equal(wf("elementary", "premium", ask).genre, "persuasive", "the kind of writing is still kept");
 });
@@ -167,7 +187,9 @@ test("through the endpoint: the exam style is only given to Premium, and only wh
     assert.equal(r.res.statusCode, 200, plan);
     assert.doesNotMatch(r.seen[0], /NAPLAN/, plan); assert.equal(r.res.body.examStyle, null, plan);
   }
-  const none = await writingPrompt("premium", "elementary", CA, "Grade 5", ask);
+  const ca = await writingPrompt("premium", "elementary", CA, "Grade 5", ask);
+  assert.match(ca.seen[0], /practice for the EQAO/); assert.equal(ca.res.body.examStyle, "EQAO");
+  const none = await writingPrompt("premium", "elementary", CA, "Grade 12", ask);
   assert.doesNotMatch(none.seen[0], /practice for the/); assert.equal(none.res.body.examStyle, null);
 });
 
@@ -249,8 +271,8 @@ test("the buttons on the page offer exactly what the server accepts", () => {
 });
 
 test("the page and the server agree on which exam a learner is preparing for", () => {
-  for (const country of [UK, AU, US, CA, "🇸🇬 Singapore & SE Asia", "🌐 Global ESL Mode"]) {
-    for (const label of ["Reception", "Foundation", "Kindergarten", "Year 2", "Year 3", "Year 5", "Year 6", "Year 7", "Year 9", "Year 10", "Year 11", "Year 12", "Grade 3", "Grade 8", "Grade 12", "Primary 4", "A2 Elementary", "", undefined]) {
+  for (const country of [UK, AU, US, CA, "🇸🇬 Singapore & SE Asia", "🇦🇪 UAE & GCC Hubs", "🌐 Global ESL Mode"]) {
+    for (const label of ["Primary 6", "Secondary 2", "O-Level / IGCSE Yr 4", "IB Diploma Yr 1", "Cambridge Primary 5", "Lower Secondary 8", "IGCSE Year 11", "AS Level (Yr 12)", "A Level (Yr 13)", "A1 Beginner", "B2 Upper-Intermediate", "C2 Proficient", "Grade 10", "Reception", "Foundation", "Kindergarten", "Year 2", "Year 3", "Year 5", "Year 6", "Year 7", "Year 9", "Year 10", "Year 11", "Year 12", "Grade 3", "Grade 8", "Grade 12", "Primary 4", "A2 Elementary", "", undefined]) {
       const server = F.examStyleFor(country, label);
       assert.equal(P.focusExamName(country, label), server ? server.name : null, `${country} ${label}`);
     }
