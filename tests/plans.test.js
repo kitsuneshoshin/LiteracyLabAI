@@ -74,6 +74,30 @@ test("planForPriceId maps each configured price to its own tier and nothing else
   }
 });
 
+test("the multi-currency prices resolve to the same tiers, are used for new checkouts, and the original prices still resolve", () => {
+  const saved = { ...process.env };
+  process.env.STRIPE_PRICE_ID_CORE = "price_core_old";
+  process.env.STRIPE_PRICE_ID_PREMIUM = "price_premium_old";
+  process.env.STRIPE_PRICE_ID_CORE_LOCAL = "price_core_new";
+  process.env.STRIPE_PRICE_ID_PREMIUM_LOCAL = "price_premium_new";
+  delete process.env.STRIPE_PRICE_ID;
+  try {
+    assert.equal(planForPriceId("price_core_old"), "core");
+    assert.equal(planForPriceId("price_core_new"), "core");
+    assert.equal(planForPriceId("price_premium_old"), "premium");
+    assert.equal(planForPriceId("price_premium_new"), "premium");
+    assert.equal(planForPriceId("price_other"), null);
+    assert.equal(priceIdForPlan("core"), "price_core_new");
+    assert.equal(priceIdForPlan("premium"), "price_premium_new");
+    delete process.env.STRIPE_PRICE_ID_CORE_LOCAL;
+    delete process.env.STRIPE_PRICE_ID_PREMIUM_LOCAL;
+    assert.equal(priceIdForPlan("core"), "price_core_old", "without the new prices, checkouts use the original ones");
+    assert.equal(priceIdForPlan("premium"), "price_premium_old");
+  } finally {
+    process.env = saved;
+  }
+});
+
 test("the pre-split STRIPE_PRICE_ID still resolves, so existing subscribers don't lose access", () => {
   const saved = { ...process.env };
   process.env.STRIPE_PRICE_ID = "price_legacy";

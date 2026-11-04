@@ -134,7 +134,7 @@ const CONTENT = {
       "If you'd like to keep going now, Core gives unlimited pieces, a 26-week progress trend, anonymous ranking within their year group, the vocabulary bank with self-test quizzes, and your full activity history.",
     ],
     cta: { label: "See the Core plan", url: SITE + "/app.html" },
-    note: "Core is 9.99 a month in your local currency. Cancel any time.",
+    note: "Core is US$9.99 a month, with local prices in other currencies shown at checkout. Cancel any time.",
     reason: "You're receiving this because you're on the LiteracyLab AI Free plan.",
   }),
   "free-reset": () => ({

@@ -1,17 +1,24 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
-const { AMOUNTS, SYMBOLS, currencyForTimeZone, priceLabel } = require("../pricing");
+const { AMOUNTS, LOCAL_AMOUNTS, SYMBOLS, currencyForTimeZone, priceLabel } = require("../pricing");
 
 // pricing.js has to guess the currency Stripe will charge. Stripe charges
 // the customer's local currency if the price has it, and USD otherwise, so
 // every case below mirrors that rule. A wrong guess never changes the
 // amount (it's 9.99 / 15.99 everywhere), but it would show a parent the
-// wrong symbol right before checkout.
+// wrong symbol right before checkout. (Where a currency has its own amount, a
+// wrong guess shows the wrong amount too, which is why Stripe shows the exact
+// price again at checkout.)
 
-test("every currency uses the same two numbers", () => {
+test("US$, A$, £, €, C$ and S$ use the same two numbers; NZ, Hong Kong, South Africa and India have their own", () => {
   assert.equal(AMOUNTS.core, "9.99");
   assert.equal(AMOUNTS.premium, "15.99");
-  assert.deepEqual(Object.keys(SYMBOLS).sort(), ["AUD", "CAD", "EUR", "GBP", "SGD", "USD"]);
+  assert.deepEqual(Object.keys(SYMBOLS).sort(), ["AUD", "CAD", "EUR", "GBP", "HKD", "INR", "NZD", "SGD", "USD", "ZAR"]);
+  assert.deepEqual(Object.keys(LOCAL_AMOUNTS).sort(), ["HKD", "INR", "NZD", "ZAR"]);
+  for (const [cur, a] of Object.entries(LOCAL_AMOUNTS)) {
+    assert.ok(Number(a.premium) > Number(a.core), cur + ": Premium costs more than Core");
+    assert.ok(Number(a.premium) < 2 * Number(a.core), cur + ": Premium is cheaper than two Cores");
+  }
 });
 
 test("each priced market gets its own currency", () => {
@@ -24,6 +31,12 @@ test("each priced market gets its own currency", () => {
   assert.equal(currencyForTimeZone("Europe/Paris"), "EUR");
   assert.equal(currencyForTimeZone("Europe/Dublin"), "EUR");
   assert.equal(currencyForTimeZone("America/New_York"), "USD");
+  assert.equal(currencyForTimeZone("Pacific/Auckland"), "NZD");
+  assert.equal(currencyForTimeZone("Pacific/Chatham"), "NZD");
+  assert.equal(currencyForTimeZone("Asia/Hong_Kong"), "HKD");
+  assert.equal(currencyForTimeZone("Africa/Johannesburg"), "ZAR");
+  assert.equal(currencyForTimeZone("Asia/Kolkata"), "INR");
+  assert.equal(currencyForTimeZone("Asia/Calcutta"), "INR");
 });
 
 test("UAE and GCC pay in US$, as decided", () => {
@@ -33,7 +46,7 @@ test("UAE and GCC pay in US$, as decided", () => {
 });
 
 test("any unlisted country falls back to US$, matching Stripe's fallback", () => {
-  for (const tz of ["Asia/Kolkata", "Asia/Kuala_Lumpur", "Pacific/Auckland", "Africa/Lagos", "America/Sao_Paulo"]) {
+  for (const tz of ["Asia/Kuala_Lumpur", "Africa/Lagos", "Africa/Nairobi", "America/Sao_Paulo"]) {
     assert.equal(currencyForTimeZone(tz), "USD", tz);
   }
 });
@@ -64,6 +77,17 @@ test("labels combine the symbol with the shared amount", () => {
   assert.equal(priceLabel("premium", "GBP"), "£15.99");
   assert.equal(priceLabel("core", "USD"), "US$9.99");
   assert.equal(priceLabel("premium", "EUR"), "€15.99");
+});
+
+test("labels for the currencies with their own amounts use those amounts", () => {
+  assert.equal(priceLabel("core", "NZD"), "NZ$12.99");
+  assert.equal(priceLabel("premium", "NZD"), "NZ$19.99");
+  assert.equal(priceLabel("core", "HKD"), "HK$59");
+  assert.equal(priceLabel("premium", "HKD"), "HK$89");
+  assert.equal(priceLabel("core", "ZAR"), "R109");
+  assert.equal(priceLabel("premium", "ZAR"), "R179");
+  assert.equal(priceLabel("core", "INR"), "₹499");
+  assert.equal(priceLabel("premium", "INR"), "₹799");
 });
 
 // ------------------------------------------------------------------ claims the site makes about its own prices

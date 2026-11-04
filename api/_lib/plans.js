@@ -66,10 +66,16 @@ function capabilitiesFor(plan) {
 // Maps a Stripe Price ID back to the tier it sells. Returns null for an
 // unrecognised price so the webhook can log rather than silently granting
 // the wrong tier - a misconfigured env var should be loud, not generous.
+//
+// Each plan can have two prices. STRIPE_PRICE_ID_CORE / _PREMIUM are the original
+// prices that existing subscribers are on. STRIPE_PRICE_ID_CORE_LOCAL / _PREMIUM_LOCAL,
+// when set, are the newer prices that also carry New Zealand, Hong Kong, South Africa
+// and India amounts; new checkouts use those, and both resolve to the same tier.
+// Stripe cannot add a currency to a price that already has subscribers.
 function planForPriceId(priceId) {
   if (!priceId) return null;
-  if (priceId === process.env.STRIPE_PRICE_ID_CORE) return "core";
-  if (priceId === process.env.STRIPE_PRICE_ID_PREMIUM) return "premium";
+  if (priceId === process.env.STRIPE_PRICE_ID_CORE || priceId === process.env.STRIPE_PRICE_ID_CORE_LOCAL) return "core";
+  if (priceId === process.env.STRIPE_PRICE_ID_PREMIUM || priceId === process.env.STRIPE_PRICE_ID_PREMIUM_LOCAL) return "premium";
   // The original single-tier env var, kept so an existing subscription
   // created against it keeps resolving after the tier split.
   if (priceId === process.env.STRIPE_PRICE_ID) return "premium";
@@ -86,8 +92,8 @@ function planForPriceId(priceId) {
 // fail loudly with "set STRIPE_PRICE_ID_PREMIUM", which is a far better
 // outcome than a silent mispricing nobody notices for weeks.
 function priceIdForPlan(plan) {
-  if (plan === "core") return process.env.STRIPE_PRICE_ID_CORE;
-  if (plan === "premium") return process.env.STRIPE_PRICE_ID_PREMIUM;
+  if (plan === "core") return process.env.STRIPE_PRICE_ID_CORE_LOCAL || process.env.STRIPE_PRICE_ID_CORE;
+  if (plan === "premium") return process.env.STRIPE_PRICE_ID_PREMIUM_LOCAL || process.env.STRIPE_PRICE_ID_PREMIUM;
   return null;
 }
 
