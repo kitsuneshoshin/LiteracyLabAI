@@ -386,9 +386,15 @@
   /* pricing */
   /* Equal-height cards with the buttons on one line: the eye compares plans
      across a row, so the price, list and button of each should line up. */
-  .pricing{ display:grid; grid-template-columns: repeat(3, 1fr); gap: 20px; max-width: 1040px; margin: 0 auto; align-items:stretch; }
-  @media (max-width: 900px){ .pricing{ grid-template-columns: 1fr; max-width: 460px; } }
+  /* The pricing cards and the comparison table below them share one grid: they fill the page container (the same width
+     as the header and every other section) and use the same gap, so each plan's column lines up under its card.
+     Both switch to a single column together, at 720px. */
+  :root{ --plan-gap: 20px; }
+  @media (max-width: 900px){ :root{ --plan-gap: 12px; } }
+  .pricing{ display:grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--plan-gap); width:100%; margin: 0 auto; align-items:stretch; }
+  @media (max-width: 720px){ .pricing{ grid-template-columns: 1fr; gap: 20px; } }
   .price-card{ display:flex; flex-direction:column; border:1px solid var(--border); border-radius:8px; padding: 30px 26px; background: var(--surface); }
+  @media (min-width: 721px) and (max-width: 900px){ .price-card{ padding: 24px 18px; } .price-card.pro{ padding: 23px 17px !important; } }
   .price-card.pro{ border:2px solid var(--gold); padding: 29px 25px; position:relative; background: linear-gradient(180deg, var(--gold-tint), var(--surface) 55%); box-shadow: 0 10px 30px -12px rgba(0,0,0,.25); }
   .price-card.pro::before{ content:"MOST POPULAR"; position:absolute; top:-12px; left:50%; transform:translateX(-50%); white-space:nowrap; background: var(--gold); color: var(--on-solid); font-family:"Lexend",sans-serif; font-size:10.5px; font-weight:800; letter-spacing:.06em; padding:4px 12px; border-radius:999px; }
   .price-card .price-list{ flex:1; }
@@ -406,7 +412,7 @@
      differences, so this is the full side-by-side for anyone deciding
      between Core and Premium. On a phone it becomes
      compact cards (see the media query below) instead of scrolling sideways. */
-  .plan-table-scroll{ max-width:1040px; margin:48px auto 0; overflow-x:auto; -webkit-overflow-scrolling:touch; border:1px solid var(--border); border-radius:8px; background:var(--surface); }
+  .plan-table-scroll{ width:100%; margin:48px auto 0; overflow-x:auto; -webkit-overflow-scrolling:touch; border:1px solid var(--border); border-radius:8px; background:var(--surface); }
   .plan-table{ width:100%; min-width:640px; border-collapse:collapse; font-family:"Lexend",sans-serif; }
   .plan-table th, .plan-table td{ padding:14px 16px; text-align:left; font-size:13.5px; border-top:1px solid var(--border-soft); vertical-align:top; }
   .plan-table thead th{ border-top:0; background:var(--surface-2); font-size:12.5px; font-weight:700; letter-spacing:.03em; }
@@ -508,7 +514,7 @@
 (function(){ try { var m = /[?&]ref=([A-Za-z0-9]{6,12})(&|$)/.exec(location.search); if (m) localStorage.setItem("ll_ref", m[1].toUpperCase()); } catch (e) {} })();
 </script>
 <link rel="stylesheet" href="/theme.css?v=11">
-<link rel="stylesheet" href="/home.css?v=13">
+<link rel="stylesheet" href="/home.css?v=14">
 </head>
 <body>
 
