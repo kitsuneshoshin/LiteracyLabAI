@@ -44,7 +44,7 @@ const BASE_PAGES = [
 <h2>It is honest about short pieces</h2>
 <p>Feedback that praises everything is not feedback. If a student writes far less than is expected for their year, the score reflects that and the feedback says so plainly, then suggests how to develop the piece. The same rule applies in every country and year group the app supports.</p>
 <h2>Which curriculum?</h2>
-<p>Feedback is matched to the child's country and year: the UK national curriculum, US Common Core, the Australian Curriculum, Canada, Singapore, the Gulf (Cambridge) and English learners at CEFR levels. See the <a href="/learn/">year-by-year guides</a> for what children are working on at each age, or <a href="/learn/prompts/">try the free writing prompt generator</a>.</p>
+<p>Feedback is matched to the child's country and year: the UK national curriculum, US Common Core, the Australian Curriculum, Canada, New Zealand, Ireland, Singapore, the Gulf (Cambridge) and English learners at CEFR levels. See the <a href="/learn/">year-by-year guides</a> for what children are working on at each age, or <a href="/learn/prompts/">try the free writing prompt generator</a>.</p>
 <h2>Does it replace a teacher?</h2>
 <p>No. It gives a child quick, specific feedback between lessons. Your child's teacher knows them in a way no tool does, and the feedback is a starting point for a conversation, not a grade.</p>`,
     cta: "Get feedback on a piece of writing",
@@ -116,7 +116,7 @@ const BASE_PAGES = [
     cta: "Try it free",
     faq: [
       ["Do I need a card to start?", "No. The Free plan does not need a card."],
-      ["Which countries are supported?", "The UK, US, Australia, Canada, the Gulf, Singapore and English learners."],
+      ["Which countries are supported?", "The UK, US, Australia, Canada, New Zealand, Ireland, the Gulf, Singapore and English learners."],
     ],
   },
 ];

@@ -15,7 +15,7 @@ Short answer: LiteracyLab AI reads a child's writing or reading answers and give
 
 What it is
 
-A child writes a piece, or answers questions on a reading passage, and LiteracyLab AI gives back one strength, one clear next step, a corrected version of the piece, and vocabulary to learn. Feedback is matched to the child's country and year: the UK, US, Australia, Canada, the Gulf, Singapore, and CEFR levels for English learners. See the step-by-step walkthrough.
+A child writes a piece, or answers questions on a reading passage, and LiteracyLab AI gives back one strength, one clear next step, a corrected version of the piece, and vocabulary to learn. Feedback is matched to the child's country and year: the UK, US, Australia, Canada, New Zealand, Ireland, the Gulf, Singapore, and CEFR levels for English learners. See the step-by-step walkthrough.
 
 How the feedback is made
 
@@ -101,7 +101,7 @@ AI can be wrong. LiteracyLab AI checks its own output for obvious mistakes befor
 
 Matched to the curriculum
 
-Feedback is pitched to your child's country and year, from the UK national curriculum to Common Core, the Australian Curriculum, Canada, Singapore, the Gulf and CEFR levels for English learners. See the full walkthrough or the year-by-year guides.
+Feedback is pitched to your child's country and year, from the UK national curriculum to Common Core, the Australian Curriculum, Canada, New Zealand, Ireland, Singapore, the Gulf and CEFR levels for English learners. See the full walkthrough or the year-by-year guides.
 
 Common questions
 
@@ -170,7 +170,7 @@ Common questions
 Do I need a card to start?
 No. The Free plan does not need a card.
 Which countries are supported?
-The UK, US, Australia, Canada, the Gulf, Singapore and English learners.
+The UK, US, Australia, Canada, New Zealand, Ireland, the Gulf, Singapore and English learners.
 
 Last updated 17 October 2026.
 
@@ -215,7 +215,7 @@ Feedback that praises everything is not feedback. If a student writes far less t
 
 Which curriculum?
 
-Feedback is matched to the child's country and year: the UK national curriculum, US Common Core, the Australian Curriculum, Canada, Singapore, the Gulf (Cambridge) and English learners at CEFR levels. See the year-by-year guides for what children are working on at each age, or try the free writing prompt generator.
+Feedback is matched to the child's country and year: the UK national curriculum, US Common Core, the Australian Curriculum, Canada, New Zealand, Ireland, Singapore, the Gulf (Cambridge) and English learners at CEFR levels. See the year-by-year guides for what children are working on at each age, or try the free writing prompt generator.
 
 Does it replace a teacher?
 

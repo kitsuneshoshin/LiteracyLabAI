@@ -493,6 +493,54 @@ const MASTERY_TARGETS_CEFR_BY_GRADE = {
   ],
 };
 
+// New Zealand and Ireland. Neither national curriculum site could be read when these were added, so (like Ontario's Grades
+// 9-12 above) every target is cited at the level of the strand and year band that is published - "Writing" or "Reading",
+// plus the phase or class - and never to a numbered outcome that was not checked. A learner's real mastery is still
+// computed from their own submissions; only the citation is this coarse.
+function strandTargets(source, label, rows) {
+  return rows.map(([name, strand]) => ({ name, standard: `${source} · ${strand} · ${label}` }));
+}
+
+// New Zealand Curriculum (English learning area, refreshed 2024-25). Years 1-3 are Phase 1 and Years 4-6 Phase 2; from
+// Year 7 the labels below are year bands. Years 11-13 are assessed through NCEA, so they are cited as NCEA English.
+const NZ_PHASE_1 = [["Writing Clear Sentences With Full Stops", "Writing"], ["Telling & Describing Things in Order", "Writing"], ["Understanding & Retelling Texts", "Reading"]];
+const NZ_PHASE_2 = [["Organising Ideas Into Paragraphs", "Writing"], ["Choosing Precise Words & Varying Sentences", "Writing"], ["Inferring & Using Evidence From Texts", "Reading"]];
+const NZ_MIDDLE = [["Writing for a Purpose & Audience", "Writing"], ["Accurate Spelling, Grammar & Punctuation", "Writing"], ["Analysing Language & Ideas in Texts", "Reading"]];
+const NZ_SENIOR_LOWER = [["Developing & Structuring Arguments", "Writing"], ["Crafting Language for Effect", "Writing"], ["Reading Closely & Supporting Interpretations", "Reading"]];
+const NZ_NCEA = [["Developing & Structuring an Argument", "Writing"], ["Controlling Language & Style", "Writing"], ["Close Reading & Critical Analysis", "Reading"]];
+const MASTERY_TARGETS_NZ_BY_GRADE = {};
+for (let y = 1; y <= 13; y++) {
+  const label = `Year ${y}`;
+  const source = "NZ Curriculum English";
+  if (y <= 3) MASTERY_TARGETS_NZ_BY_GRADE[label] = strandTargets(source, "Phase 1 (Years 1-3)", NZ_PHASE_1);
+  else if (y <= 6) MASTERY_TARGETS_NZ_BY_GRADE[label] = strandTargets(source, "Phase 2 (Years 4-6)", NZ_PHASE_2);
+  else if (y <= 8) MASTERY_TARGETS_NZ_BY_GRADE[label] = strandTargets(source, "Years 7-8", NZ_MIDDLE);
+  else if (y <= 10) MASTERY_TARGETS_NZ_BY_GRADE[label] = strandTargets(source, "Years 9-10", NZ_SENIOR_LOWER);
+  else MASTERY_TARGETS_NZ_BY_GRADE[label] = strandTargets("NCEA English", `Year ${y}`, NZ_NCEA);
+}
+
+// Ireland: the Primary Language Curriculum (Junior Infants to 6th Class), the Junior Cycle English specification
+// (1st-3rd Year) and Leaving Certificate English (5th and 6th Year). Transition Year has no set English syllabus.
+const IE_PRIMARY_EARLY = [["Writing Simple Sentences & Using Full Stops", "Writing"], ["Writing About Experiences & Ideas", "Writing"], ["Understanding & Talking About Texts", "Reading"]];
+const IE_PRIMARY = [["Writing for Different Purposes & Audiences", "Writing"], ["Spelling, Grammar & Punctuation", "Writing"], ["Understanding & Responding to Texts", "Reading"]];
+const IE_JUNIOR_CYCLE = [["Writing for Purpose & Audience", "Writing"], ["Accuracy, Style & Conventions", "Writing"], ["Reading Closely & Responding to Texts", "Reading"]];
+const IE_LEAVING_CERT = [["Composing for a Purpose & Audience", "Writing"], ["Control of Language & Accuracy", "Writing"], ["Comprehending & Analysing Texts", "Reading"]];
+const MASTERY_TARGETS_IE_BY_GRADE = {
+  "Junior Infants": strandTargets("Primary Language Curriculum", "Junior Infants", IE_PRIMARY_EARLY),
+  "Senior Infants": strandTargets("Primary Language Curriculum", "Senior Infants", IE_PRIMARY_EARLY),
+  "1st Class": strandTargets("Primary Language Curriculum", "1st Class", IE_PRIMARY_EARLY),
+  "2nd Class": strandTargets("Primary Language Curriculum", "2nd Class", IE_PRIMARY_EARLY),
+  "3rd Class": strandTargets("Primary Language Curriculum", "3rd Class", IE_PRIMARY),
+  "4th Class": strandTargets("Primary Language Curriculum", "4th Class", IE_PRIMARY),
+  "5th Class": strandTargets("Primary Language Curriculum", "5th Class", IE_PRIMARY),
+  "6th Class": strandTargets("Primary Language Curriculum", "6th Class", IE_PRIMARY),
+  "1st Year": strandTargets("Junior Cycle English", "1st Year", IE_JUNIOR_CYCLE),
+  "2nd Year": strandTargets("Junior Cycle English", "2nd Year", IE_JUNIOR_CYCLE),
+  "3rd Year": strandTargets("Junior Cycle English", "3rd Year", IE_JUNIOR_CYCLE),
+  "5th Year": strandTargets("Leaving Certificate English", "5th Year", IE_LEAVING_CERT),
+  "6th Year": strandTargets("Leaving Certificate English", "6th Year", IE_LEAVING_CERT),
+};
+
 // Countries mapped at individual-year granularity. Anything not listed
 // here still works via targetsFor()'s tier-level buckets — this is an
 // additive, per-country upgrade, not a replacement.
@@ -504,6 +552,8 @@ const GRADE_MAPPED_TARGETS = {
   "🇦🇪 UAE & GCC Hubs": MASTERY_TARGETS_AE_BY_GRADE,
   "🇸🇬 Singapore & SE Asia": MASTERY_TARGETS_SG_BY_GRADE,
   "🌐 Global ESL Mode": MASTERY_TARGETS_CEFR_BY_GRADE,
+  "🇳🇿 New Zealand": MASTERY_TARGETS_NZ_BY_GRADE,
+  "🇮🇪 Ireland": MASTERY_TARGETS_IE_BY_GRADE,
 };
 
 // Grades a country's own curriculum body doesn't set at all (Reception's
@@ -518,6 +568,7 @@ const GRADE_APPROXIMATIONS = {
   "🇦🇺 Australia": { "Year 11": "Year 10", "Year 12": "Year 10" },
   "🇬🇧 United Kingdom": { "Reception": "Year 1", "Year 12": "Year 11", "Year 13": "Year 11" },
   "🇨🇦 Canada": { "Kindergarten": "Grade 1" },
+  "🇮🇪 Ireland": { "Transition Year": "3rd Year" },
   "🇦🇪 UAE & GCC Hubs": { "AS Level (Yr 12)": "IGCSE Year 11", "A Level (Yr 13)": "IGCSE Year 11" },
   "🇸🇬 Singapore & SE Asia": { "IB Diploma Yr 1": "O-Level / IGCSE Yr 5", "IB Diploma Yr 2": "O-Level / IGCSE Yr 5" },
 };
@@ -569,7 +620,7 @@ module.exports = {
   MASTERY_TARGETS_UK, MASTERY_TARGETS_US, MASTERY_TARGETS_AU, MASTERY_TARGETS_GENERIC,
   MASTERY_TARGETS_AU_BY_GRADE, MASTERY_TARGETS_UK_BY_GRADE, MASTERY_TARGETS_US_BY_GRADE,
   MASTERY_TARGETS_CA_BY_GRADE, MASTERY_TARGETS_AE_BY_GRADE, MASTERY_TARGETS_SG_BY_GRADE,
-  MASTERY_TARGETS_CEFR_BY_GRADE,
+  MASTERY_TARGETS_CEFR_BY_GRADE, MASTERY_TARGETS_NZ_BY_GRADE, MASTERY_TARGETS_IE_BY_GRADE,
   GRADE_MAPPED_TARGETS, GRADE_APPROXIMATIONS,
   MAPPED_TARGETS, isMappedCountry, targetsFor, targetsForGrade,
 };

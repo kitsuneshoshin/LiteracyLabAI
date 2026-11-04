@@ -280,7 +280,7 @@ test("country flags on the guides are small images (flag emoji show as two lette
   }
   const hub = built.files["learn/index.html"];
   const flags = [...hub.matchAll(/<img class="flag" src="https:\/\/flagcdn\.com\/20x15\/([a-z]{2})\.png"/g)].map((m) => m[1]);
-  assert.deepEqual(flags.sort(), ["ae", "au", "ca", "gb", "sg", "us"]);
+  assert.deepEqual(flags.sort(), ["ae", "au", "ca", "gb", "ie", "nz", "sg", "us"]);
   assert.ok(hub.includes("flag-globe"), "English learners keep the globe");
   assert.match(built.files["learn/uk/index.html"], /<h1><img class="flag" src="https:\/\/flagcdn\.com\/20x15\/gb\.png"/);
   for (const m of hub.matchAll(/<img class="flag"[^>]*>/g)) assert.ok(/alt=""/.test(m[0]) && /width="20" height="15"/.test(m[0]), "decorative, sized, no layout shift");

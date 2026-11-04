@@ -420,6 +420,8 @@ const COUNTRIES = [
   "🇺🇸 United States",
   "🇦🇺 Australia",
   "🇨🇦 Canada",
+  "🇳🇿 New Zealand",
+  "🇮🇪 Ireland",
   "🇦🇪 UAE & GCC Hubs",
   "🇸🇬 Singapore & SE Asia",
   "🌐 Global ESL Mode",
@@ -447,6 +449,7 @@ function pickInterestForNewPiece({ interests, validForTier, last, fallback, rand
 const COUNTRY_FLAG_CODE = {
   "🇬🇧 United Kingdom": "gb", "🇺🇸 United States": "us", "🇦🇺 Australia": "au",
   "🇨🇦 Canada": "ca", "🇦🇪 UAE & GCC Hubs": "ae", "🇸🇬 Singapore & SE Asia": "sg",
+  "🇳🇿 New Zealand": "nz", "🇮🇪 Ireland": "ie",
 };
 function stripFlag(country) {
   return (country || "").replace(/^\S+\s/, "");
@@ -471,6 +474,8 @@ const GRADE_DATA = {
   "🇺🇸 United States":  { curriculum: "Common Core State Standards / AP", grades: ["Kindergarten","Grade 1","Grade 2","Grade 3","Grade 4","Grade 5","Grade 6","Grade 7","Grade 8","Grade 9","Grade 10","Grade 11","Grade 12"], tiers: [3,6,9,13] },
   "🇦🇺 Australia":      { curriculum: "ACARA Curriculum Standards", grades: ["Foundation","Year 1","Year 2","Year 3","Year 4","Year 5","Year 6","Year 7","Year 8","Year 9","Year 10","Year 11","Year 12"], tiers: [3,7,10,13] },
   "🇨🇦 Canada":         { curriculum: "Provincial Language Arts Benchmarks", grades: ["Kindergarten","Grade 1","Grade 2","Grade 3","Grade 4","Grade 5","Grade 6","Grade 7","Grade 8","Grade 9","Grade 10","Grade 11","Grade 12"], tiers: [3,6,9,13] },
+  "🇳🇿 New Zealand":    { curriculum: "New Zealand Curriculum (English) / NCEA", grades: ["Year 1","Year 2","Year 3","Year 4","Year 5","Year 6","Year 7","Year 8","Year 9","Year 10","Year 11","Year 12","Year 13"], tiers: [3,6,9,13] },
+  "🇮🇪 Ireland":        { curriculum: "Irish Primary Language Curriculum, Junior Cycle & Leaving Certificate", grades: ["Junior Infants","Senior Infants","1st Class","2nd Class","3rd Class","4th Class","5th Class","6th Class","1st Year","2nd Year","3rd Year","Transition Year","5th Year","6th Year"], tiers: [4,8,10,14] },
   "🇦🇪 UAE & GCC Hubs": { curriculum: "Cambridge IGCSE & IB Primary/Middle Years", grades: ["Cambridge Primary 1","Cambridge Primary 2","Cambridge Primary 3","Cambridge Primary 4","Cambridge Primary 5","Cambridge Primary 6","Lower Secondary 7","Lower Secondary 8","Lower Secondary 9","IGCSE Year 10","IGCSE Year 11","AS Level (Yr 12)","A Level (Yr 13)"], tiers: [3,6,9,13] },
   "🇸🇬 Singapore & SE Asia": { curriculum: "Cambridge Academic & IB Pathway", grades: ["Primary 1","Primary 2","Primary 3","Primary 4","Primary 5","Primary 6","Secondary 1","Secondary 2","Secondary 3","O-Level / IGCSE Yr 4","O-Level / IGCSE Yr 5","IB Diploma Yr 1","IB Diploma Yr 2"], tiers: [3,6,9,13] },
   "🌐 Global ESL Mode": { curriculum: "CEFR Alignment: A1 Beginner to C2 Proficient", grades: ["A1 Beginner","A2 Elementary","B1 Intermediate","B2 Upper-Intermediate","C1 Advanced","C2 Proficient"], tiers: [1,2,4,6] },
@@ -638,6 +643,8 @@ const SPORT_BY_COUNTRY = {
   "🇺🇸 United States": "Basketball",
   "🇦🇺 Australia": "Swimming",
   "🇨🇦 Canada": "Soccer",
+  "🇳🇿 New Zealand": "Rugby",
+  "🇮🇪 Ireland": "Gaelic football",
   "🇦🇪 UAE & GCC Hubs": "Football",
   "🇸🇬 Singapore & SE Asia": "Badminton",
   "🌐 Global ESL Mode": "Football",
@@ -855,6 +862,17 @@ const GRADE_WORD_TARGETS = {
     "Kindergarten": 10, "Grade 1": 30, "Grade 2": 60, "Grade 3": 140, "Grade 4": 190,
     "Grade 5": 240, "Grade 6": 290, "Grade 7": 340, "Grade 8": 390, "Grade 9": 440,
     "Grade 10": 490, "Grade 11": 580, "Grade 12": 700,
+  },
+  "🇳🇿 New Zealand": {
+    "Year 1": 20, "Year 2": 40, "Year 3": 80, "Year 4": 130, "Year 5": 170, "Year 6": 220,
+    "Year 7": 280, "Year 8": 330, "Year 9": 380, "Year 10": 430,
+    "Year 11": 500, "Year 12": 600, "Year 13": 700,
+  },
+  "🇮🇪 Ireland": {
+    "Junior Infants": 10, "Senior Infants": 20, "1st Class": 30, "2nd Class": 60,
+    "3rd Class": 100, "4th Class": 140, "5th Class": 190, "6th Class": 240,
+    "1st Year": 300, "2nd Year": 350, "3rd Year": 400, "Transition Year": 450,
+    "5th Year": 600, "6th Year": 750,
   },
   "🇦🇪 UAE & GCC Hubs": {
     "Cambridge Primary 1": 15, "Cambridge Primary 2": 30, "Cambridge Primary 3": 50,
@@ -1152,6 +1170,7 @@ function approximationNote(country, gradeLabel, from){
   const c = country || "";
   if (/Australia/.test(c)) return gradeLabel + " is set by each state or territory rather than the national curriculum, so these targets use the national " + from + " standards, the last year that has them.";
   if (/United Kingdom/.test(c) && /Year 1[23]/.test(gradeLabel)) return gradeLabel + " (A-level) is set by each exam board, so these targets use the " + from + " (GCSE) objectives, the closest set that applies to every learner.";
+  if (/Ireland/.test(c) && /Transition/.test(gradeLabel)) return "Transition Year has no set English syllabus, so these targets use the " + from + " (Junior Cycle) objectives, the closest set that applies.";
   if (/UAE|GCC/.test(c)) return gradeLabel + " is set by the exam board, so these targets use the " + from + " objectives, the closest set that applies to every learner.";
   if (/Singapore/.test(c)) return gradeLabel + " is set by the exam board, so these targets use the " + from + " objectives, the closest set that applies to every learner.";
   if (/Kindergarten|Reception/.test(gradeLabel)) return gradeLabel + " has no separate written standard for this skill, so these targets start from " + from + ".";
@@ -2273,7 +2292,7 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
   const MAPPED_TARGETS = { "🇬🇧 United Kingdom": MASTERY_TARGETS_UK, "🇺🇸 United States": MASTERY_TARGETS_US, "🇦🇺 Australia": MASTERY_TARGETS_AU };
   const MAPPED_BADGE = {
     "🇬🇧 United Kingdom": "DfE & AQA verified", "🇺🇸 United States": "Common Core & AP verified", "🇦🇺 Australia": "Australian Curriculum verified",
-    "🇨🇦 Canada": "Ontario Curriculum verified", "🇦🇪 UAE & GCC Hubs": "Cambridge & IGCSE verified",
+    "🇨🇦 Canada": "Ontario Curriculum verified", "🇳🇿 New Zealand": "NZ Curriculum aligned", "🇮🇪 Ireland": "Irish curricula aligned", "🇦🇪 UAE & GCC Hubs": "Cambridge & IGCSE verified",
     "🇸🇬 Singapore & SE Asia": "Cambridge & IGCSE verified", "🌐 Global ESL Mode": "CEFR levels verified",
   };
   // Demo mode (no backend) only has static data for the 3 originally-mapped
@@ -2289,7 +2308,7 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
   // Premium/Pro/Admin have nothing left to upgrade to.
   const PLAN_CARDS = [
                     { tier: "core", name: "Core", price: PLAN_META.core.price, sub: "One learner", features: ["Unlimited writing & reading submissions", "26-week progress trend chart", "Anonymous ranking in their year group", "Full history: reopen any past piece", "Vocabulary bank with flashcards, a quiz and progress saved across devices"] },
-                    { tier: "premium", name: "Premium", price: PLAN_META.premium.price, sub: "Up to 6 learners", features: ["Everything in Core, for the whole household", "Extended feedback: a second, harder next step", "Your response rewritten and a model response, with the framework shown in both", "A short written answer in reading, marked out of 2 or 3", "Exam-style prompts: NAPLAN, KS2 SATs, KS3, GCSE, EQAO, PSLE, IGCSE, US state tests and CEFR writing tasks", "Spelling & grammar check and a score out of 10 on every piece", "Exam-technique scoring against real assessment objectives (ages 11+)"] },
+                    { tier: "premium", name: "Premium", price: PLAN_META.premium.price, sub: "Up to 6 learners", features: ["Everything in Core, for the whole household", "Extended feedback: a second, harder next step", "Your response rewritten and a model response, with the framework shown in both", "A short written answer in reading, marked out of 2 or 3", "Exam-style prompts: NAPLAN, KS2 SATs, KS3, GCSE, EQAO, PSLE, IGCSE, NCEA, Leaving Cert, US state tests and CEFR writing tasks", "Spelling & grammar check and a score out of 10 on every piece", "Exam-technique scoring against real assessment objectives (ages 11+)"] },
   ];
   const upsellCards = plan === "free" ? PLAN_CARDS : plan === "core" ? PLAN_CARDS.filter(c => c.tier === "premium") : [];
 
@@ -4049,10 +4068,12 @@ function focusExamName(country, gradeLabel){
     if (/^A(S)? Level\b/i.test(label)) return "Cambridge AS and A Level English";
     return null;
   }
+  if (/Ireland/.test(c)) return /^[123](st|nd|rd) Year$/i.test(label) ? "Junior Cycle English" : /^[56]th Year$/i.test(label) ? "Leaving Certificate English" : null;
   if (/ESL|Global/.test(c)) return /^(A1|A2|B1|B2|C1|C2)\b/i.test(label) ? "CEFR writing task" : null;
   const n = focusGradeNumber(gradeLabel);
   if (n == null) return null;
   if (/Australia/.test(c) && n >= 3 && n <= 9) return "NAPLAN";
+  if (/New Zealand/.test(c) && n >= 11 && n <= 13) return "NCEA English";
   if (/Canada/.test(c)) { if (n >= 3 && n <= 9) return "EQAO"; if (n === 10) return "OSSLT"; }
   if (/United Kingdom/.test(c)) { if (n >= 10 && n <= 11) return "GCSE English Language"; if (n >= 7 && n <= 9) return "KS3 English"; if (n >= 3 && n <= 6) return "KS2 SATs"; }
   if (/United States/.test(c) && n >= 3 && n <= 12) return "state test (Common Core)";

@@ -11,13 +11,13 @@ const { targetsForGrade } = require("../api/_lib/masteryTargets");
 
 // Spelling and wording follow the learner's country: "colour" is right in Australia and wrong in the United States.
 
-const UK = "🇬🇧 United Kingdom", AU = "🇦🇺 Australia", US = "🇺🇸 United States", CA = "🇨🇦 Canada", AE = "🇦🇪 UAE & GCC Hubs", SG = "🇸🇬 Singapore & SE Asia", ESL = "🌐 Global ESL Mode";
+const UK = "🇬🇧 United Kingdom", AU = "🇦🇺 Australia", US = "🇺🇸 United States", CA = "🇨🇦 Canada", AE = "🇦🇪 UAE & GCC Hubs", SG = "🇸🇬 Singapore & SE Asia", ESL = "🌐 Global ESL Mode", NZ = "🇳🇿 New Zealand", IE = "🇮🇪 Ireland";
 
 test("every country the site offers has a spelling convention, and the right one", () => {
   const app = fs.readFileSync(path.join(__dirname, "..", "app.html"), "utf8");
   const countries = [...app.slice(app.indexOf("const GRADE_DATA = {"), app.indexOf("const TIER_KEYS")).matchAll(/^ {2}"([^"]+)":/gm)].map((m) => m[1]);
-  assert.equal(countries.length, 7, "all seven offered");
-  const expected = { [UK]: "uk", [US]: "us", [AU]: "uk", [CA]: "ca", [AE]: "uk", [SG]: "uk", [ESL]: "any" };
+  assert.equal(countries.length, 9, "all nine offered");
+  const expected = { [UK]: "uk", [US]: "us", [AU]: "uk", [CA]: "ca", [NZ]: "uk", [IE]: "uk", [AE]: "uk", [SG]: "uk", [ESL]: "any" };
   for (const c of countries) assert.equal(R.conventionFor(c), expected[c], c);
   assert.equal(R.conventionFor(undefined), "any"); assert.equal(R.conventionFor("Narnia"), "any");
 });

@@ -1,7 +1,7 @@
 // "Choose your focus": what a learner can ask to practise, instead of a surprise.
 //
 //   Writing: the kind of piece (a story, a description, a persuasive piece, an analysis), from the kinds that suit the age.
-//            Premium can also ask for the prompt in the style of their exam (NAPLAN, EQAO, PSLE, GCSE, IGCSE, a US state test, a CEFR task).
+//            Premium can also ask for the prompt in the style of their exam (NAPLAN, EQAO, PSLE, GCSE, IGCSE, NCEA, the Leaving Cert, a US state test, a CEFR task).
 //   Reading: the kind of text (story, poem, article, a table or chart, two texts...) and a comprehension skill to work on.
 //
 // Everything a learner can choose is checked here against these lists, so nothing from the browser is ever put into a prompt
@@ -85,6 +85,11 @@ function examStyleFor(country, gradeLabel) {
     if (/^A(S)? Level\b/i.test(label)) return { name: "Cambridge AS and A Level English", style: "the way a Cambridge AS and A Level English writing task is worded: a topic or a statement, and a clear form (a discursive, a narrative or a descriptive piece) for a timed response" };
     return null;
   }
+  if (/Ireland/.test(c)) {
+    if (/^[123](st|nd|rd) Year$/i.test(label)) return { name: "Junior Cycle English", style: "the way a Junior Cycle English written task is worded: a topic or a situation and a clear form, such as a speech, an article, a letter or a short story" };
+    if (/^[56]th Year$/i.test(label)) return { name: "Leaving Certificate English", style: "the way a Leaving Certificate English Paper 1 composition is worded: a title or a prompt, with a choice of forms such as a personal essay, a speech, a short story, a magazine article or a news report, for a timed response" };
+    return null;
+  }
   if (/ESL|Global/.test(c)) {
     const m = label.match(/^(A1|A2|B1|B2|C1|C2)\b/i);
     if (!m) return null;
@@ -95,6 +100,9 @@ function examStyleFor(country, gradeLabel) {
   if (n == null) return null;
   if (/Australia/.test(c) && n >= 3 && n <= 9) {
     return { name: "NAPLAN", style: "a short stimulus (a topic, a statement or a question) followed by a plain instruction, written the way a NAPLAN writing task is, for a timed response" };
+  }
+  if (/New Zealand/.test(c) && n >= 11 && n <= 13) {
+    return { name: "NCEA English", style: "the way an NCEA English writing task is worded: a topic or a statement, and an instruction to write a clear, developed response (a creative piece or a formal essay) in a timed assessment" };
   }
   if (/Canada/.test(c)) {
     if (n >= 3 && n <= 9) return { name: "EQAO", style: "the way an Ontario EQAO writing task is worded: a short situation or topic and a clear instruction about what to write, in plain language for a timed response" };

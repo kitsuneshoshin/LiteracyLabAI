@@ -180,7 +180,7 @@ const PAGES = [
 <h2>How accurate is it?</h2>
 <p>AI can be wrong. LiteracyLab AI checks its own output for obvious mistakes before showing it, and it says plainly when a piece is too short to judge. Scores and bands are guides, not exam results. If something looks wrong, tell your child's teacher or tell us through the feedback card in the app.</p>
 <h2>Matched to the curriculum</h2>
-<p>Feedback is pitched to your child's country and year, from the UK national curriculum to Common Core, the Australian Curriculum, Canada, Singapore, the Gulf and CEFR levels for English learners. See the <a href="/learn/how-it-works/">full walkthrough</a> or the <a href="/learn/">year-by-year guides</a>.</p>`,
+<p>Feedback is pitched to your child's country and year, from the UK national curriculum to Common Core, the Australian Curriculum, Canada, New Zealand, Ireland, Singapore, the Gulf and CEFR levels for English learners. See the <a href="/learn/how-it-works/">full walkthrough</a> or the <a href="/learn/">year-by-year guides</a>.</p>`,
     cta: "Try it free",
     faq: [
       ["Does the AI write the essay for my child?", "No. It responds to work your child has already written. The corrected version is built from their own ideas and wording."],
@@ -197,7 +197,7 @@ const PAGES = [
     quick: "LiteracyLab AI reads a child's writing or reading answers and gives specific feedback matched to their school curriculum. It is an independent product, accounts are managed by a parent or guardian, and it is not affiliated with any exam board, government or school.",
     body: `
 <h2>What it is</h2>
-<p>A child writes a piece, or answers questions on a reading passage, and LiteracyLab AI gives back one strength, one clear next step, a corrected version of the piece, and vocabulary to learn. Feedback is matched to the child's country and year: the UK, US, Australia, Canada, the Gulf, Singapore, and CEFR levels for English learners. See the <a href="/learn/how-it-works/">step-by-step walkthrough</a>.</p>
+<p>A child writes a piece, or answers questions on a reading passage, and LiteracyLab AI gives back one strength, one clear next step, a corrected version of the piece, and vocabulary to learn. Feedback is matched to the child's country and year: the UK, US, Australia, Canada, New Zealand, Ireland, the Gulf, Singapore, and CEFR levels for English learners. See the <a href="/learn/how-it-works/">step-by-step walkthrough</a>.</p>
 <h2>How the feedback is made</h2>
 <ul>
   <li>The feedback is written by a large language model (an AI), guided by instructions we wrote about the child's year, curriculum and chosen interests.</li>

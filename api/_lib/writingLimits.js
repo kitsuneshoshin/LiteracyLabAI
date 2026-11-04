@@ -33,6 +33,17 @@ const GRADE_WORD_TARGETS = {
     "Grade 5": 240, "Grade 6": 290, "Grade 7": 340, "Grade 8": 390, "Grade 9": 440,
     "Grade 10": 490, "Grade 11": 580, "Grade 12": 700,
   },
+  "🇳🇿 New Zealand": {
+    "Year 1": 20, "Year 2": 40, "Year 3": 80, "Year 4": 130, "Year 5": 170, "Year 6": 220,
+    "Year 7": 280, "Year 8": 330, "Year 9": 380, "Year 10": 430,
+    "Year 11": 500, "Year 12": 600, "Year 13": 700,
+  },
+  "🇮🇪 Ireland": {
+    "Junior Infants": 10, "Senior Infants": 20, "1st Class": 30, "2nd Class": 60,
+    "3rd Class": 100, "4th Class": 140, "5th Class": 190, "6th Class": 240,
+    "1st Year": 300, "2nd Year": 350, "3rd Year": 400, "Transition Year": 450,
+    "5th Year": 600, "6th Year": 750,
+  },
   "🇦🇪 UAE & GCC Hubs": {
     "Cambridge Primary 1": 15, "Cambridge Primary 2": 30, "Cambridge Primary 3": 50,
     "Cambridge Primary 4": 80, "Cambridge Primary 5": 110, "Cambridge Primary 6": 150,

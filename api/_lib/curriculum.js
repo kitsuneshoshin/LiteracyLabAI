@@ -10,6 +10,8 @@ const CURRICULUM_LABEL = {
   "🇺🇸 United States": "Common Core State Standards / AP",
   "🇦🇺 Australia": "Australian Curriculum v9.0 (ACARA)",
   "🇨🇦 Canada": "Ontario Curriculum (Language / English)",
+  "🇳🇿 New Zealand": "New Zealand Curriculum (English) / NCEA",
+  "🇮🇪 Ireland": "Irish Primary Language Curriculum / Junior Cycle / Leaving Certificate English",
   "🇦🇪 UAE & GCC Hubs": "Cambridge Primary/Lower Secondary English & IGCSE",
   "🇸🇬 Singapore & SE Asia": "Cambridge Primary/Lower Secondary English & IGCSE",
   "🌐 Global ESL Mode": "CEFR: Common European Framework of Reference",
@@ -19,7 +21,7 @@ function curriculumLabel(country) {
   return CURRICULUM_LABEL[country] || "this region's general literacy expectations";
 }
 
-// UK, US, Australia, Canada, UAE/GCC, Singapore and the Global ESL/CEFR
+// UK, US, Australia, Canada, New Zealand, Ireland, UAE/GCC, Singapore and the Global ESL/CEFR
 // mode are all mapped to real, individually-cited standards now (see
 // masteryTargets.js for exactly how each was verified). Any country not
 // listed there must be told to stay generic rather than invent a fake
