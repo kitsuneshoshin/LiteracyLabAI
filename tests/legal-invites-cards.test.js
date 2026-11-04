@@ -16,7 +16,7 @@ test("the Privacy Policy says what invites and shared cards store, that cards sh
   assert.match(p, /switch a card off at any time and it stops working straight away/);
   assert.match(p, /Deleting your account deletes your cards/);
   assert.match(p, /A shared result card is kept until you switch it off or delete your account/);
-  assert.match(p, /Last updated: 9 October 2026/);
+  assert.match(p, /Last updated: 4 November 2026/);
 });
 
 test("the Terms cover invite rewards and the misuse rule, and numbering for every other section is unchanged", () => {
