@@ -161,3 +161,20 @@ h1, h2,
 /* A short, direct answer at the top of a guide page: the sentence a reader (or an AI assistant) most needs. */
 .quick{ margin: 0 0 24px; padding: 14px 18px; border-left: 4px solid var(--accent); background: var(--surface); border-radius: 4px; font-size: 17px; line-height: 1.55; }
 .quick b{ font-family: var(--mono-label); font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent-ink); font-weight: 700; margin-right: 6px; }
+
+/* Responsive safety net, shared by every page: stop iOS enlarging text on rotate, let long words and URLs wrap
+   instead of pushing the page sideways, scale guide headings down on phones, and keep media inside its column. */
+html{ -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+img, svg, video, canvas, iframe{ max-width: 100%; }
+img, video{ height: auto; }
+.doc, .doc h1, .doc h2, .doc h3, .doc p, .doc li, .card, .quick, .faq-q summary{ overflow-wrap: anywhere; }
+table{ max-width: 100%; }
+@media (max-width: 640px){
+  .doc h1{ font-size: clamp(30px, 9vw, 40px); }
+  .doc h2{ font-size: clamp(24px, 7vw, 28px); margin-top: 32px; }
+  .faq-q summary{ font-size: 20px; }
+  .faq-q p{ padding-right: 0; }
+}
+@media (max-width: 480px){
+  .btn{ white-space: normal; text-align: center; }
+}
