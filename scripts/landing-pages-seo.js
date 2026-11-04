@@ -224,7 +224,7 @@ const PAGES = [
     cta: "Try it free",
     faq: [
       ["Who is LiteracyLab AI for?", "Parents and guardians of children and students aged 5 to 18, and English learners at any age. Accounts are created and managed by a parent or guardian."],
-      ["Is LiteracyLab AI free?", "There is a Free plan with 3 pieces a month and full feedback, no card needed. Paid plans add unlimited pieces, more learners, progress tracking and extra feedback sections."],
+      ["Is LiteracyLab AI free?", "There is a Free plan with 3 pieces a month and full feedback, no card needed. Core adds unlimited pieces for one learner and progress tracking. Premium adds up to 6 learners and extra feedback sections."],
       ["Is it affiliated with a school or exam board?", "No. It is an independent product and is not affiliated with any exam board, government or school."],
     ],
   },

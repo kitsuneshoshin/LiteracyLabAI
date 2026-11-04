@@ -56,11 +56,11 @@ Common questions
 Who is LiteracyLab AI for?
 Parents and guardians of children and students aged 5 to 18, and English learners at any age. Accounts are created and managed by a parent or guardian.
 Is LiteracyLab AI free?
-There is a Free plan with 3 pieces a month and full feedback, no card needed. Paid plans add unlimited pieces, more learners, progress tracking and extra feedback sections.
+There is a Free plan with 3 pieces a month and full feedback, no card needed. Core adds unlimited pieces for one learner and progress tracking. Premium adds up to 6 learners and extra feedback sections.
 Is it affiliated with a school or exam board?
 No. It is an independent product and is not affiliated with any exam board, government or school.
 
-Last updated 17 October 2026.
+Last updated 4 November 2026.
 
 Writing feedback for kids: what good feedback looks like · Reading comprehension practice for kids · How LiteracyLab AI works · NAPLAN writing practice with feedback · KS2 SATs reading practice · 11+ English practice at home · IGCSE English First Language writing feedback · Common Core writing feedback for parents · An AI writing coach for kids: what parents should know
 
@@ -112,7 +112,7 @@ No. Submissions are used only to give feedback to that child and are not used to
 Can I delete my child's data?
 Yes. Parents can review, export or permanently delete a child's data from the dashboard.
 
-Last updated 17 October 2026.
+Last updated 4 November 2026.
 
 Writing feedback for kids: what good feedback looks like · Reading comprehension practice for kids · How LiteracyLab AI works · NAPLAN writing practice with feedback · KS2 SATs reading practice · 11+ English practice at home · IGCSE English First Language writing feedback · Common Core writing feedback for parents · About LiteracyLab AI
 
@@ -131,48 +131,60 @@ Short answer: You set up a learner (country, year, an interest), get a writing p
 
 1. Set up a learner
 
-You choose the country, the year group and an interest such as football, coding or animals. The interest is used to make explanations easier to picture. It is never the task itself.
+A parent or guardian creates the account and adds a learner. You choose the country, the year group (or CEFR level for English learners) and an interest such as football, coding or animals. The interest is used to make explanations easier to picture. It is never the task itself.
 
 2. Get a task
 
-For writing, the app suggests a prompt for the year and a kind of writing (story, persuasive, explanation and so on). For reading, it gives a short passage with questions.
+For writing, the app suggests a prompt for the year and a kind of writing (story, persuasive, explanation and so on), and you can choose what to practise. For reading, it generates a short passage for the year, such as a story, poem, article, speech or data table, with questions in seven styles: multiple choice, true, false or not given, "which line proves it", putting events in order, matching words to meanings, filling a gap and more.
 
 3. Write or answer
 
-The child writes in the app, or answers the questions. Writing has a length limit suited to their year.
+The child writes in the app, or answers the questions. Writing has a target length suited to their year, taken from the curriculum.
 
 4. Read the feedback
 
-For writing: a Glow (what worked), a Grow (one next step), highlights in their own text, a corrected version, vocabulary to try and a named writing technique such as PEEL or Story Mountain. For reading: why each answer is right or wrong, with the evidence from the passage.
+For writing: a Glow (what worked), a Grow (one next step), highlights in their own text with rewrites, vocabulary to try and a named writing technique such as PEEL or Story Mountain, taught from their own words. For reading: why each answer is right or wrong, with the line from the passage that shows it. The app never writes the piece for the child.
 
 5. Watch progress
 
-Paid plans show a progress chart over time against the skills for their year.
+Every plan shows a streak, words written and a skill breakdown. Core and Premium add a 26-week progress trend, a vocabulary bank with flashcards and a quiz, and full history of past work. The Free plan reopens the last 10 pieces.
+
+What Premium adds
+
+Premium adds a second, harder next step, a spelling and grammar check, an overall score out of 10 with the reason, a model response shown next to the child's own, a short written answer in reading comprehension marked by AI, exam-style prompts, and for students aged 11 and over, a band from 1 to 4 against the published assessment objectives for their year and region. It also covers up to 6 learners on one account.
 
 What it does not do
 
   - It does not give an exam mark, percentage or grade letter. Bands and scores are guides, not a prediction.
 
-  - It is not a replacement for a teacher.
+  - It is not a replacement for a teacher, and the AI can make mistakes.
 
   - It is not affiliated with any exam board or government.
 
 Plans
 
-The Free plan includes 3 pieces a month. Core and Premium add unlimited pieces, more learners, progress tracking and extra feedback sections. Current prices are on the home page. Plans are billed monthly and can be cancelled at any time.
+The Free plan includes 3 pieces a month, with full Glow, Grow, highlights and vocabulary feedback, and needs no card. Core adds unlimited pieces for one learner, the progress trend and the vocabulary bank. Premium adds up to 6 learners and the extra feedback above. Current prices are on the home page. Plans are billed monthly and can be cancelled at any time.
 
 Privacy
 
-Read how children's information is handled in our privacy policy.
+Read how children's information is handled in our privacy policy. Parents can export or delete all of an account's data from the dashboard.
 
 Common questions
 
 Do I need a card to start?
-No. The Free plan does not need a card.
+No. The Free plan does not need a card and includes 3 pieces a month.
 Which countries are supported?
 The UK, US, Australia, Canada, New Zealand, Ireland, the Gulf, Singapore and English learners.
+Does LiteracyLab AI write the story for my child?
+No. It only responds to work the child has already done, with one strength, one next step and a corrected version.
+How many children can use one account?
+The Free and Core plans cover one learner. Premium covers up to 6 learners on one account, each with their own country, year and progress.
+Does it give an exam mark or grade?
+No. It never gives a raw exam mark, percentage or grade letter. Premium gives a band from 1 to 4 and a score out of 10 as practice guides.
+Who manages the account?
+A parent or guardian. Children do not register independently.
 
-Last updated 17 October 2026.
+Last updated 4 November 2026.
 
 Writing feedback for kids: what good feedback looks like · Reading comprehension practice for kids · NAPLAN writing practice with feedback · KS2 SATs reading practice · 11+ English practice at home · IGCSE English First Language writing feedback · Common Core writing feedback for parents · An AI writing coach for kids: what parents should know · About LiteracyLab AI
 
@@ -228,7 +240,7 @@ The Free plan includes 3 pieces a month with no card needed. Paid plans are bill
 What ages is it for?
 Children and students from about 5 to 18, plus English learners, with feedback pitched to their year.
 
-Last updated 17 October 2026.
+Last updated 4 November 2026.
 
 Reading comprehension practice for kids · How LiteracyLab AI works · NAPLAN writing practice with feedback · KS2 SATs reading practice · 11+ English practice at home · IGCSE English First Language writing feedback · Common Core writing feedback for parents · An AI writing coach for kids: what parents should know · About LiteracyLab AI
 
@@ -280,7 +292,7 @@ Yes. They are free to print, with no sign-up.
 Which years are covered?
 Years 3 to 6 in the UK and Australia and Grades 3 to 6 in the US. The app covers more year groups.
 
-Last updated 17 October 2026.
+Last updated 4 November 2026.
 
 Writing feedback for kids: what good feedback looks like · How LiteracyLab AI works · NAPLAN writing practice with feedback · KS2 SATs reading practice · 11+ English practice at home · IGCSE English First Language writing feedback · Common Core writing feedback for parents · An AI writing coach for kids: what parents should know · About LiteracyLab AI
 
@@ -338,7 +350,7 @@ No. It gives feedback and a practice score out of 10 on Premium, which is a guid
 Is there a free option?
 Yes. The Free plan includes 3 pieces a month with full feedback and needs no card.
 
-Last updated 17 October 2026.
+Last updated 4 November 2026.
 
 Writing feedback for kids: what good feedback looks like · Reading comprehension practice for kids · How LiteracyLab AI works · KS2 SATs reading practice · 11+ English practice at home · IGCSE English First Language writing feedback · Common Core writing feedback for parents · An AI writing coach for kids: what parents should know · About LiteracyLab AI
 
@@ -390,7 +402,7 @@ The worksheets are free to print with no sign-up. The app has a Free plan with 3
 What year is it for?
 Reading practice is available across the primary years, with free worksheets for Years 3 to 6.
 
-Last updated 17 October 2026.
+Last updated 4 November 2026.
 
 Writing feedback for kids: what good feedback looks like · Reading comprehension practice for kids · How LiteracyLab AI works · NAPLAN writing practice with feedback · 11+ English practice at home · IGCSE English First Language writing feedback · Common Core writing feedback for parents · An AI writing coach for kids: what parents should know · About LiteracyLab AI
 
@@ -442,7 +454,7 @@ No. It builds the underlying reading, vocabulary and writing skills with practic
 Can it replace a tutor?
 It gives quick, specific feedback between lessons. A tutor or teacher knows your child in a way no tool does.
 
-Last updated 17 October 2026.
+Last updated 4 November 2026.
 
 Writing feedback for kids: what good feedback looks like · Reading comprehension practice for kids · How LiteracyLab AI works · NAPLAN writing practice with feedback · KS2 SATs reading practice · IGCSE English First Language writing feedback · Common Core writing feedback for parents · An AI writing coach for kids: what parents should know · About LiteracyLab AI
 
@@ -494,7 +506,7 @@ No. It gives exam-style bands against the published writing objectives as a guid
 Which students is this for?
 Students in the IGCSE and O-Level years, in the Gulf, Singapore and elsewhere. Premium bands are for students aged 11 and over.
 
-Last updated 17 October 2026.
+Last updated 4 November 2026.
 
 Writing feedback for kids: what good feedback looks like · Reading comprehension practice for kids · How LiteracyLab AI works · NAPLAN writing practice with feedback · KS2 SATs reading practice · 11+ English practice at home · Common Core writing feedback for parents · An AI writing coach for kids: what parents should know · About LiteracyLab AI
 
@@ -544,7 +556,7 @@ Feedback is matched to the Common Core writing and reading skills for your child
 Is it free?
 The Free plan includes 3 pieces a month with full feedback and needs no card.
 
-Last updated 17 October 2026.
+Last updated 4 November 2026.
 
 Writing feedback for kids: what good feedback looks like · Reading comprehension practice for kids · How LiteracyLab AI works · NAPLAN writing practice with feedback · KS2 SATs reading practice · 11+ English practice at home · IGCSE English First Language writing feedback · An AI writing coach for kids: what parents should know · About LiteracyLab AI
 

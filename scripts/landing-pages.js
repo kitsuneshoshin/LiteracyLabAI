@@ -5,7 +5,7 @@
 // statistics, guarantees or comparisons with other products.
 
 const SITE = "https://www.literacylabai.com";
-const LASTMOD = "2026-10-17";
+const LASTMOD = "2026-11-04";
 
 const QUICK = {
   "writing-feedback-for-kids": "Good feedback on a child's writing names one thing that worked, gives one next step, and shows the piece corrected, at the right level for the child's year. LiteracyLab AI does this on every piece, matched to the child's own curriculum.",
@@ -89,34 +89,40 @@ const BASE_PAGES = [
   {
     slug: "how-it-works",
     title: "How LiteracyLab AI works: feedback on writing and reading",
-    description: "How LiteracyLab AI works step by step: set up a learner, get a prompt, write or read, then receive feedback matched to their year and curriculum.",
+    description: "How LiteracyLab AI works step by step: set up a learner, get a prompt or passage, write or answer, then get feedback matched to their curriculum. Free plan, no card.",
     h1: "How LiteracyLab AI works",
     lead: "LiteracyLab AI gives children and students feedback on their writing and reading, matched to their year and curriculum. This page explains each step so you know what to expect.",
     body: `
 <h2>1. Set up a learner</h2>
-<p>You choose the country, the year group and an interest such as football, coding or animals. The interest is used to make explanations easier to picture. It is never the task itself.</p>
+<p>A parent or guardian creates the account and adds a learner. You choose the country, the year group (or CEFR level for English learners) and an interest such as football, coding or animals. The interest is used to make explanations easier to picture. It is never the task itself.</p>
 <h2>2. Get a task</h2>
-<p>For writing, the app suggests a prompt for the year and a kind of writing (story, persuasive, explanation and so on). For reading, it gives a short passage with questions.</p>
+<p>For writing, the app suggests a prompt for the year and a kind of writing (story, persuasive, explanation and so on), and you can choose what to practise. For reading, it generates a short passage for the year, such as a story, poem, article, speech or data table, with questions in seven styles: multiple choice, true, false or not given, "which line proves it", putting events in order, matching words to meanings, filling a gap and more.</p>
 <h2>3. Write or answer</h2>
-<p>The child writes in the app, or answers the questions. Writing has a length limit suited to their year.</p>
+<p>The child writes in the app, or answers the questions. Writing has a target length suited to their year, taken from the curriculum.</p>
 <h2>4. Read the feedback</h2>
-<p>For writing: a Glow (what worked), a Grow (one next step), highlights in their own text, a corrected version, vocabulary to try and a named writing technique such as PEEL or Story Mountain. For reading: why each answer is right or wrong, with the evidence from the passage.</p>
+<p>For writing: a Glow (what worked), a Grow (one next step), highlights in their own text with rewrites, vocabulary to try and a named writing technique such as PEEL or Story Mountain, taught from their own words. For reading: why each answer is right or wrong, with the line from the passage that shows it. The app never writes the piece for the child.</p>
 <h2>5. Watch progress</h2>
-<p>Paid plans show a progress chart over time against the skills for their year.</p>
+<p>Every plan shows a streak, words written and a skill breakdown. Core and Premium add a 26-week progress trend, a vocabulary bank with flashcards and a quiz, and full history of past work. The Free plan reopens the last 10 pieces.</p>
+<h2>What Premium adds</h2>
+<p>Premium adds a second, harder next step, a spelling and grammar check, an overall score out of 10 with the reason, a model response shown next to the child's own, a short written answer in reading comprehension marked by AI, exam-style prompts, and for students aged 11 and over, a band from 1 to 4 against the published assessment objectives for their year and region. It also covers up to 6 learners on one account.</p>
 <h2>What it does not do</h2>
 <ul>
   <li>It does not give an exam mark, percentage or grade letter. Bands and scores are guides, not a prediction.</li>
-  <li>It is not a replacement for a teacher.</li>
+  <li>It is not a replacement for a teacher, and the AI can make mistakes.</li>
   <li>It is not affiliated with any exam board or government.</li>
 </ul>
 <h2>Plans</h2>
-<p>The Free plan includes 3 pieces a month. Core and Premium add unlimited pieces, more learners, progress tracking and extra feedback sections. Current prices are on the <a href="/#pricing">home page</a>. Plans are billed monthly and can be cancelled at any time.</p>
+<p>The Free plan includes 3 pieces a month, with full Glow, Grow, highlights and vocabulary feedback, and needs no card. Core adds unlimited pieces for one learner, the progress trend and the vocabulary bank. Premium adds up to 6 learners and the extra feedback above. Current prices are on the <a href="/#pricing">home page</a>. Plans are billed monthly and can be cancelled at any time.</p>
 <h2>Privacy</h2>
-<p>Read how children's information is handled in our <a href="/privacy.html">privacy policy</a>.</p>`,
-    cta: "Try it free",
+<p>Read how children's information is handled in our <a href="/privacy.html">privacy policy</a>. Parents can export or delete all of an account's data from the dashboard.</p>`,
+cta: "Try it free",
     faq: [
-      ["Do I need a card to start?", "No. The Free plan does not need a card."],
+      ["Do I need a card to start?", "No. The Free plan does not need a card and includes 3 pieces a month."],
       ["Which countries are supported?", "The UK, US, Australia, Canada, New Zealand, Ireland, the Gulf, Singapore and English learners."],
+      ["Does LiteracyLab AI write the story for my child?", "No. It only responds to work the child has already done, with one strength, one next step and a corrected version."],
+      ["How many children can use one account?", "The Free and Core plans cover one learner. Premium covers up to 6 learners on one account, each with their own country, year and progress."],
+      ["Does it give an exam mark or grade?", "No. It never gives a raw exam mark, percentage or grade letter. Premium gives a band from 1 to 4 and a score out of 10 as practice guides."],
+      ["Who manages the account?", "A parent or guardian. Children do not register independently."],
     ],
   },
 ];
