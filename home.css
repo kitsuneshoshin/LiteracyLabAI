@@ -167,3 +167,23 @@ section{ padding-block: 88px; }
 .plan-table td svg{ stroke-width: 2.8; }
 .plan-table th[scope="row"]{ color: var(--ink); }
 .plan-table thead th span{ color: var(--ink); opacity: 0.85; }
+
+/* Desktop: the table shares the pricing cards' three-column grid (same width, same 20px gap), so Free, Core and
+   Premium line up directly under their cards. Each feature name sits on a line of its own with the three answers
+   beneath it. The Core highlight is painted as one continuous band behind the rows. Phones keep the card layout above. */
+@media (min-width: 721px){
+  .plan-table{ --c1: calc((100% - 40px) / 3 + 20px); --c2: calc((100% - 40px) * 2 / 3 + 20px); --best: color-mix(in srgb, var(--accent) 7%, transparent); }
+  .plan-table-scroll{ overflow: visible; }
+  .plan-table, .plan-table thead, .plan-table tbody{ display: block; min-width: 0; }
+  .plan-table tr{ display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); column-gap: 20px; background: linear-gradient(to right, transparent var(--c1), var(--best) var(--c1) var(--c2), transparent var(--c2)); }
+  .plan-table .col-best, .plan-table thead .col-best{ background: transparent; }
+  .plan-table thead th:first-child{ position: absolute; width: 1px; height: 1px; padding: 0; border: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .plan-table tbody tr:not(.group-head){ border-top: 1px solid var(--border-soft); }
+  .plan-table tbody tr.group-head{ display: block; background: none; border-top: 0; }
+  .plan-table tbody tr.group-head + tr{ border-top: 0; }
+  .plan-table th[scope="row"]{ grid-column: 1 / -1; width: auto; padding: 16px 16px 2px; border-top: 0; }
+  .plan-table td{ width: auto; padding: 6px 16px 16px; border-top: 0; }
+  .plan-table thead tr{ border-bottom: 1px solid var(--ink); }
+  .plan-table thead th{ border-bottom: 0; }
+  .plan-table tbody tr.group-head th{ display: block; padding: 18px 16px; }
+}
