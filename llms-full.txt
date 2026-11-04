@@ -878,14 +878,14 @@ All articles for parents · All guides
 
 ---
 
-# GCSE English Language assessment objectives (AO1 to AO6) explained
+# GCSE English Language assessment objectives: AO1 to AO6 (AQA)
 URL: https://www.literacylabai.com/learn/articles/gcse-english-language-explained/
 
-Home › Guides › Articles for parents › GCSE English Language assessment objectives (AO1 to AO6) explained
+Home › Guides › Articles for parents › GCSE English Language assessment objectives: AO1 to AO6 (AQA)
 
-GCSE English Language assessment objectives (AO1 to AO6) explained
+GCSE English Language assessment objectives: AO1 to AO6 (AQA)
 
-GCSE English Language is marked against six assessment objectives, usually shortened to AO1 to AO6. Knowing what they mean, and how they appear in each paper, shows you exactly what examiners are looking for. This guide uses the AQA specification, the most widely taught. Other exam boards have similar objectives but different paper structures, so check your own board's specification.
+GCSE English Language is marked against six assessment objectives, usually shortened to AO1 to AO6: AO1 to AO4 for reading, and AO5 (content and organisation) and AO6 (technical accuracy) for writing. Knowing what they mean, and how they appear in each paper, shows you exactly what examiners are looking for. This guide uses the AQA specification, the most widely taught. Other exam boards have similar objectives but different paper structures, so check your own board's specification.
 
 The GCSE English Language assessment objectives at a glance
 - AO1 (reading): find and understand information and ideas, and pick evidence from the text or texts.
@@ -955,6 +955,10 @@ What are the GCSE English Language assessment objectives?
 There are six. AO1 to AO4 are for reading (finding information, analysing language and structure, comparing texts and evaluating) and AO5 and AO6 are for writing (content and organisation, then technical accuracy).
 What do AO5 and AO6 mean in English Language?
 AO5 is content and organisation: writing that suits its purpose and reader and is well planned. AO6 is technical accuracy: a range of vocabulary and sentence structures, with accurate spelling and punctuation. In AQA, AO5 is worth 24 marks and AO6 is worth 16 marks in each writing question.
+What does AO6 mean in GCSE English Language?
+AO6 is technical accuracy in writing: using a range of vocabulary and sentence structures, with accurate spelling and punctuation. In AQA it carries 16 of the 40 marks in Question 5 on each paper.
+Which assessment objectives are tested on each paper?
+Both papers test AO1 and AO2 in reading and AO5 and AO6 in writing. Paper 1 adds AO4 (evaluating) and Paper 2 adds AO3 (comparing two texts).
 Are the objectives the same for every exam board?
 They are very similar across boards, but the paper structures and mark totals differ. Check your board's specification.
 How are grades reported?
