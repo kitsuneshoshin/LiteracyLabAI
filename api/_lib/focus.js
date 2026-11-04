@@ -1,7 +1,7 @@
 // "Choose your focus": what a learner can ask to practise, instead of a surprise.
 //
 //   Writing: the kind of piece (a story, a description, a persuasive piece, an analysis), from the kinds that suit the age.
-//            Premium can also ask for the prompt in the style of their exam (NAPLAN, EQAO, PSLE, GCSE, IGCSE, NCEA, the Leaving Cert, a US state test, a CEFR task).
+//            Premium can also ask for the prompt in the style of their exam (NAPLAN, EQAO, PSLE, GCSE, IGCSE, NCEA, the Leaving Cert, CBSE, NSC, HKDSE, a US state test, a CEFR task).
 //   Reading: the kind of text (story, poem, article, a table or chart, two texts...) and a comprehension skill to work on.
 //
 // Everything a learner can choose is checked here against these lists, so nothing from the browser is ever put into a prompt
@@ -85,6 +85,16 @@ function examStyleFor(country, gradeLabel) {
     if (/^A(S)? Level\b/i.test(label)) return { name: "Cambridge AS and A Level English", style: "the way a Cambridge AS and A Level English writing task is worded: a topic or a statement, and a clear form (a discursive, a narrative or a descriptive piece) for a timed response" };
     return null;
   }
+  if (/India/.test(c)) {
+    const k = labelNumber(label, /^Class\s*(\d{1,2})$/i);
+    if (k != null && k >= 9 && k <= 10) return { name: "CBSE Class 10 English", style: "the way a CBSE Class 10 English writing task is worded: a short situation, and an instruction to write a clear form such as a formal letter, an article, a story or a notice within a word limit" };
+    if (k != null && k >= 11 && k <= 12) return { name: "CBSE Class 12 English", style: "the way a CBSE Class 12 English writing task is worded: a short situation, and an instruction to write a clear form such as a formal letter, a report, an article or a speech within a word limit" };
+    return null;
+  }
+  if (/Hong Kong/.test(c)) {
+    if (labelNumber(label, /^Secondary\s*([4-6])$/i) != null) return { name: "HKDSE English Language", style: "the way an HKDSE English Language Paper 2 writing task is worded: a short situation or stimulus, and an instruction to write a stated text type (such as a letter, an article, a speech or a story) for a stated audience" };
+    return null;
+  }
   if (/Ireland/.test(c)) {
     if (/^[123](st|nd|rd) Year$/i.test(label)) return { name: "Junior Cycle English", style: "the way a Junior Cycle English written task is worded: a topic or a situation and a clear form, such as a speech, an article, a letter or a short story" };
     if (/^[56]th Year$/i.test(label)) return { name: "Leaving Certificate English", style: "the way a Leaving Certificate English Paper 1 composition is worded: a title or a prompt, with a choice of forms such as a personal essay, a speech, a short story, a magazine article or a news report, for a timed response" };
@@ -103,6 +113,9 @@ function examStyleFor(country, gradeLabel) {
   }
   if (/New Zealand/.test(c) && n >= 11 && n <= 13) {
     return { name: "NCEA English", style: "the way an NCEA English writing task is worded: a topic or a statement, and an instruction to write a clear, developed response (a creative piece or a formal essay) in a timed assessment" };
+  }
+  if (/South Africa/.test(c) && n >= 10 && n <= 12) {
+    return { name: "NSC English", style: "the way a South African NSC English writing paper is worded: a choice of essay topics (narrative, descriptive, reflective, argumentative or discursive) and a transactional text such as a formal letter, a speech, a review or a newspaper article" };
   }
   if (/Canada/.test(c)) {
     if (n >= 3 && n <= 9) return { name: "EQAO", style: "the way an Ontario EQAO writing task is worded: a short situation or topic and a clear instruction about what to write, in plain language for a timed response" };

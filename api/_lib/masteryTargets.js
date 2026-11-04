@@ -541,6 +541,46 @@ const MASTERY_TARGETS_IE_BY_GRADE = {
   "6th Year": strandTargets("Leaving Certificate English", "6th Year", IE_LEAVING_CERT),
 };
 
+// India, South Africa and Hong Kong, cited at the same coarse level as New Zealand and Ireland above: the published strand
+// ("Writing", "Reading", or South Africa's own strand names) and the stage the year belongs to, never a numbered outcome that
+// was not checked. India: NCERT / CBSE English by stage (Foundational, Preparatory, Middle, Secondary, Senior Secondary).
+// South Africa: the CAPS English strands by phase. Hong Kong: the Education Bureau's key stages, then HKDSE English Language.
+const IN_SECONDARY = [["Writing Letters, Notices & Short Texts", "Writing"], ["Writing Articles, Reports & Essays", "Writing"], ["Reading Closely & Responding to Texts", "Reading"]];
+const IN_SENIOR = [["Writing Articles, Reports & Essays", "Writing"], ["Controlling Language & Style", "Writing"], ["Close Reading & Critical Analysis", "Reading"]];
+const MASTERY_TARGETS_IN_BY_GRADE = {};
+for (let c = 1; c <= 12; c++) {
+  const label = `Class ${c}`;
+  const src = "NCERT / CBSE English";
+  if (c <= 2) MASTERY_TARGETS_IN_BY_GRADE[label] = strandTargets(src, "Classes 1-2 (Foundational)", IE_PRIMARY_EARLY);
+  else if (c <= 5) MASTERY_TARGETS_IN_BY_GRADE[label] = strandTargets(src, "Classes 3-5 (Preparatory)", IE_PRIMARY);
+  else if (c <= 8) MASTERY_TARGETS_IN_BY_GRADE[label] = strandTargets(src, "Classes 6-8 (Middle)", NZ_MIDDLE);
+  else if (c <= 10) MASTERY_TARGETS_IN_BY_GRADE[label] = strandTargets(src, "Classes 9-10 (Secondary)", IN_SECONDARY);
+  else MASTERY_TARGETS_IN_BY_GRADE[label] = strandTargets(src, "Classes 11-12 (Senior Secondary)", IN_SENIOR);
+}
+
+const ZA_WRITE = "Writing & Presenting", ZA_READ = "Reading & Viewing", ZA_LANG = "Language Structures & Conventions";
+const ZA_FOUNDATION = [["Writing Simple Sentences & Using Full Stops", ZA_WRITE], ["Writing About Experiences & Ideas", ZA_WRITE], ["Understanding & Talking About Texts", ZA_READ]];
+const ZA_INTERMEDIATE = [["Writing for Different Purposes & Audiences", ZA_WRITE], ["Using Language Structures & Conventions", ZA_LANG], ["Understanding & Responding to Texts", ZA_READ]];
+const ZA_SENIOR = [["Writing for a Purpose & Audience", ZA_WRITE], ["Using Language Structures & Conventions", ZA_LANG], ["Analysing Language & Ideas in Texts", ZA_READ]];
+const ZA_FET = [["Writing Essays & Transactional Texts", ZA_WRITE], ["Using Language Structures & Conventions", ZA_LANG], ["Close Reading & Critical Analysis", ZA_READ]];
+const MASTERY_TARGETS_ZA_BY_GRADE = {};
+["Grade R", "Grade 1", "Grade 2", "Grade 3"].forEach((g) => { MASTERY_TARGETS_ZA_BY_GRADE[g] = strandTargets("CAPS English", "Foundation Phase (Grades R-3)", ZA_FOUNDATION); });
+["Grade 4", "Grade 5", "Grade 6"].forEach((g) => { MASTERY_TARGETS_ZA_BY_GRADE[g] = strandTargets("CAPS English", "Intermediate Phase (Grades 4-6)", ZA_INTERMEDIATE); });
+["Grade 7", "Grade 8", "Grade 9"].forEach((g) => { MASTERY_TARGETS_ZA_BY_GRADE[g] = strandTargets("CAPS English", "Senior Phase (Grades 7-9)", ZA_SENIOR); });
+["Grade 10", "Grade 11", "Grade 12"].forEach((g) => { MASTERY_TARGETS_ZA_BY_GRADE[g] = strandTargets("CAPS English", "FET Phase (Grades 10-12)", ZA_FET); });
+
+const HK_SENIOR = [["Writing Articles, Reports & Essays", "Writing"], ["Controlling Language & Style", "Writing"], ["Close Reading & Critical Analysis", "Reading"]];
+const MASTERY_TARGETS_HK_BY_GRADE = {};
+for (let p = 1; p <= 6; p++) {
+  const [label, rows, stage] = p <= 3 ? [`Primary ${p}`, IE_PRIMARY_EARLY, "Key Stage 1 (Primary 1-3)"] : [`Primary ${p}`, IE_PRIMARY, "Key Stage 2 (Primary 4-6)"];
+  MASTERY_TARGETS_HK_BY_GRADE[label] = strandTargets("HK English Language Curriculum", stage, rows);
+}
+for (let s = 1; s <= 6; s++) {
+  MASTERY_TARGETS_HK_BY_GRADE[`Secondary ${s}`] = s <= 3
+    ? strandTargets("HK English Language Curriculum", "Key Stage 3 (Secondary 1-3)", NZ_MIDDLE)
+    : strandTargets("HKDSE English Language", "Key Stage 4 (Secondary 4-6)", HK_SENIOR);
+}
+
 // Countries mapped at individual-year granularity. Anything not listed
 // here still works via targetsFor()'s tier-level buckets — this is an
 // additive, per-country upgrade, not a replacement.
@@ -554,6 +594,9 @@ const GRADE_MAPPED_TARGETS = {
   "🌐 Global ESL Mode": MASTERY_TARGETS_CEFR_BY_GRADE,
   "🇳🇿 New Zealand": MASTERY_TARGETS_NZ_BY_GRADE,
   "🇮🇪 Ireland": MASTERY_TARGETS_IE_BY_GRADE,
+  "🇮🇳 India": MASTERY_TARGETS_IN_BY_GRADE,
+  "🇿🇦 South Africa": MASTERY_TARGETS_ZA_BY_GRADE,
+  "🇭🇰 Hong Kong": MASTERY_TARGETS_HK_BY_GRADE,
 };
 
 // Grades a country's own curriculum body doesn't set at all (Reception's
@@ -621,6 +664,7 @@ module.exports = {
   MASTERY_TARGETS_AU_BY_GRADE, MASTERY_TARGETS_UK_BY_GRADE, MASTERY_TARGETS_US_BY_GRADE,
   MASTERY_TARGETS_CA_BY_GRADE, MASTERY_TARGETS_AE_BY_GRADE, MASTERY_TARGETS_SG_BY_GRADE,
   MASTERY_TARGETS_CEFR_BY_GRADE, MASTERY_TARGETS_NZ_BY_GRADE, MASTERY_TARGETS_IE_BY_GRADE,
+  MASTERY_TARGETS_IN_BY_GRADE, MASTERY_TARGETS_ZA_BY_GRADE, MASTERY_TARGETS_HK_BY_GRADE,
   GRADE_MAPPED_TARGETS, GRADE_APPROXIMATIONS,
   MAPPED_TARGETS, isMappedCountry, targetsFor, targetsForGrade,
 };

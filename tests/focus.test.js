@@ -67,6 +67,18 @@ test("the exam a learner is likely preparing for follows their country and year,
   assert.equal(F.examStyleFor(IE, "6th Year").name, "Leaving Certificate English");
   assert.equal(F.examStyleFor(IE, "Transition Year"), null);
   assert.equal(F.examStyleFor(IE, "5th Class"), null);
+  const IN = "🇮🇳 India", ZA = "🇿🇦 South Africa", HK = "🇭🇰 Hong Kong";
+  assert.equal(F.examStyleFor(IN, "Class 10").name, "CBSE Class 10 English");
+  assert.equal(F.examStyleFor(IN, "Class 9").name, "CBSE Class 10 English");
+  assert.equal(F.examStyleFor(IN, "Class 12").name, "CBSE Class 12 English");
+  assert.equal(F.examStyleFor(IN, "Class 6"), null);
+  assert.equal(F.examStyleFor(ZA, "Grade 12").name, "NSC English");
+  assert.equal(F.examStyleFor(ZA, "Grade 10").name, "NSC English");
+  assert.equal(F.examStyleFor(ZA, "Grade 9"), null);
+  assert.equal(F.examStyleFor(ZA, "Grade R"), null);
+  assert.equal(F.examStyleFor(HK, "Secondary 5").name, "HKDSE English Language");
+  assert.equal(F.examStyleFor(HK, "Secondary 3"), null);
+  assert.equal(F.examStyleFor(HK, "Primary 6"), null);
   assert.equal(F.examStyleFor(undefined, "Year 5"), null); assert.equal(F.examStyleFor(AU, undefined), null);
   for (const c of [UK, AU, US]) for (const n of [3, 7, 11]) { const e = F.examStyleFor(c, "Year " + n) || F.examStyleFor(c, "Grade " + n); if (e) assert.ok(e.style.length > 40 && e.name.length > 3); }
 });
@@ -280,8 +292,8 @@ test("the buttons on the page offer exactly what the server accepts", () => {
 });
 
 test("the page and the server agree on which exam a learner is preparing for", () => {
-  for (const country of [UK, AU, US, CA, "🇸🇬 Singapore & SE Asia", "🇦🇪 UAE & GCC Hubs", "🌐 Global ESL Mode", "🇳🇿 New Zealand", "🇮🇪 Ireland"]) {
-    for (const label of ["Year 13", "1st Year", "3rd Year", "5th Year", "6th Year", "Transition Year", "3rd Class", "Junior Infants", "Primary 6", "Secondary 2", "O-Level / IGCSE Yr 4", "IB Diploma Yr 1", "Cambridge Primary 5", "Lower Secondary 8", "IGCSE Year 11", "AS Level (Yr 12)", "A Level (Yr 13)", "A1 Beginner", "B2 Upper-Intermediate", "C2 Proficient", "Grade 10", "Reception", "Foundation", "Kindergarten", "Year 2", "Year 3", "Year 5", "Year 6", "Year 7", "Year 9", "Year 10", "Year 11", "Year 12", "Grade 3", "Grade 8", "Grade 12", "Primary 4", "A2 Elementary", "", undefined]) {
+  for (const country of [UK, AU, US, CA, "🇸🇬 Singapore & SE Asia", "🇦🇪 UAE & GCC Hubs", "🌐 Global ESL Mode", "🇳🇿 New Zealand", "🇮🇪 Ireland", "🇮🇳 India", "🇿🇦 South Africa", "🇭🇰 Hong Kong"]) {
+    for (const label of ["Class 3", "Class 10", "Class 12", "Grade R", "Secondary 4", "Secondary 6", "Primary 2", "Year 13", "1st Year", "3rd Year", "5th Year", "6th Year", "Transition Year", "3rd Class", "Junior Infants", "Primary 6", "Secondary 2", "O-Level / IGCSE Yr 4", "IB Diploma Yr 1", "Cambridge Primary 5", "Lower Secondary 8", "IGCSE Year 11", "AS Level (Yr 12)", "A Level (Yr 13)", "A1 Beginner", "B2 Upper-Intermediate", "C2 Proficient", "Grade 10", "Reception", "Foundation", "Kindergarten", "Year 2", "Year 3", "Year 5", "Year 6", "Year 7", "Year 9", "Year 10", "Year 11", "Year 12", "Grade 3", "Grade 8", "Grade 12", "Primary 4", "A2 Elementary", "", undefined]) {
       const server = F.examStyleFor(country, label);
       assert.equal(P.focusExamName(country, label), server ? server.name : null, `${country} ${label}`);
     }

@@ -44,6 +44,18 @@ const GRADE_WORD_TARGETS = {
     "1st Year": 300, "2nd Year": 350, "3rd Year": 400, "Transition Year": 450,
     "5th Year": 600, "6th Year": 750,
   },
+  "🇮🇳 India": {
+    "Class 1": 20, "Class 2": 40, "Class 3": 70, "Class 4": 100, "Class 5": 140, "Class 6": 180,
+    "Class 7": 220, "Class 8": 260, "Class 9": 300, "Class 10": 350, "Class 11": 420, "Class 12": 500,
+  },
+  "🇿🇦 South Africa": {
+    "Grade R": 10, "Grade 1": 20, "Grade 2": 40, "Grade 3": 70, "Grade 4": 100, "Grade 5": 140, "Grade 6": 180,
+    "Grade 7": 230, "Grade 8": 270, "Grade 9": 310, "Grade 10": 350, "Grade 11": 400, "Grade 12": 450,
+  },
+  "🇭🇰 Hong Kong": {
+    "Primary 1": 15, "Primary 2": 30, "Primary 3": 60, "Primary 4": 90, "Primary 5": 120, "Primary 6": 150,
+    "Secondary 1": 200, "Secondary 2": 250, "Secondary 3": 300, "Secondary 4": 350, "Secondary 5": 400, "Secondary 6": 450,
+  },
   "🇦🇪 UAE & GCC Hubs": {
     "Cambridge Primary 1": 15, "Cambridge Primary 2": 30, "Cambridge Primary 3": 50,
     "Cambridge Primary 4": 80, "Cambridge Primary 5": 110, "Cambridge Primary 6": 150,

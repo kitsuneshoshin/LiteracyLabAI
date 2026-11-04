@@ -31,6 +31,9 @@ const GRADE_DATA = {
   "🇨🇦 Canada": { grades: ["Kindergarten", "Grade 1", "Grade 2", "Grade 3", "Grade 4", "Grade 5", "Grade 6", "Grade 7", "Grade 8", "Grade 9", "Grade 10", "Grade 11", "Grade 12"], tiers: [3, 6, 9, 13] },
   "🇳🇿 New Zealand": { grades: ["Year 1", "Year 2", "Year 3", "Year 4", "Year 5", "Year 6", "Year 7", "Year 8", "Year 9", "Year 10", "Year 11", "Year 12", "Year 13"], tiers: [3, 6, 9, 13] },
   "🇮🇪 Ireland": { grades: ["Junior Infants", "Senior Infants", "1st Class", "2nd Class", "3rd Class", "4th Class", "5th Class", "6th Class", "1st Year", "2nd Year", "3rd Year", "Transition Year", "5th Year", "6th Year"], tiers: [4, 8, 10, 14] },
+  "🇮🇳 India": { grades: ["Class 1", "Class 2", "Class 3", "Class 4", "Class 5", "Class 6", "Class 7", "Class 8", "Class 9", "Class 10", "Class 11", "Class 12"], tiers: [3, 6, 9, 12] },
+  "🇿🇦 South Africa": { grades: ["Grade R", "Grade 1", "Grade 2", "Grade 3", "Grade 4", "Grade 5", "Grade 6", "Grade 7", "Grade 8", "Grade 9", "Grade 10", "Grade 11", "Grade 12"], tiers: [3, 7, 10, 13] },
+  "🇭🇰 Hong Kong": { grades: ["Primary 1", "Primary 2", "Primary 3", "Primary 4", "Primary 5", "Primary 6", "Secondary 1", "Secondary 2", "Secondary 3", "Secondary 4", "Secondary 5", "Secondary 6"], tiers: [3, 6, 9, 12] },
   "🇦🇪 UAE & GCC Hubs": { grades: ["Cambridge Primary 1", "Cambridge Primary 2", "Cambridge Primary 3", "Cambridge Primary 4", "Cambridge Primary 5", "Cambridge Primary 6", "Lower Secondary 7", "Lower Secondary 8", "Lower Secondary 9", "IGCSE Year 10", "IGCSE Year 11", "AS Level (Yr 12)", "A Level (Yr 13)"], tiers: [3, 6, 9, 13] },
   "🇸🇬 Singapore & SE Asia": { grades: ["Primary 1", "Primary 2", "Primary 3", "Primary 4", "Primary 5", "Primary 6", "Secondary 1", "Secondary 2", "Secondary 3", "O-Level / IGCSE Yr 4", "O-Level / IGCSE Yr 5", "IB Diploma Yr 1", "IB Diploma Yr 2"], tiers: [3, 6, 9, 13] },
   "🌐 Global ESL Mode": { grades: ["A1 Beginner", "A2 Elementary", "B1 Intermediate", "B2 Upper-Intermediate", "C1 Advanced", "C2 Proficient"], tiers: [1, 2, 4, 6] },
@@ -87,6 +90,24 @@ const REGIONS = [
     ages: (g) => (g === "Junior Infants" ? [4, 5] : g === "Senior Infants" ? [5, 6] : /^(\d+)(st|nd|rd|th) Class$/.test(g) ? [num2(g) + 5, num2(g) + 6] : /^(1st|2nd|3rd|5th|6th) Year$/.test(g) ? [num2(g) + 11, num2(g) + 12] : g === "Transition Year" ? [15, 16] : null),
   },
   {
+    key: "🇮🇳 India", slug: "india", flag: "🇮🇳", name: "India", short: "India", subject: "English",
+    curriculum: "the NCERT and CBSE English curriculum",
+    note: "India has several boards (CBSE, ICSE and state boards). This guide follows NCERT and CBSE, so check what your school's board expects.",
+    ages: (g) => (/^Class (\d+)$/.test(g) ? [num(g) + 5, num(g) + 6] : null),
+  },
+  {
+    key: "🇿🇦 South Africa", slug: "south-africa", flag: "🇿🇦", name: "South Africa", short: "South Africa", subject: "English (Home Language)",
+    curriculum: "the CAPS English curriculum and the National Senior Certificate (NSC)",
+    note: "Many South African children study English as a First Additional Language, which has its own expectations. This guide follows English Home Language, so check with your school.",
+    ages: (g) => (g === "Grade R" ? [5, 6] : /^Grade (\d+)$/.test(g) ? [num(g) + 6, num(g) + 7] : null),
+  },
+  {
+    key: "🇭🇰 Hong Kong", slug: "hong-kong", flag: "🇭🇰", name: "Hong Kong", short: "Hong Kong", subject: "English Language",
+    curriculum: "the Education Bureau's English Language curriculum and HKDSE English Language",
+    note: "International and English-medium schools in Hong Kong often follow other curricula (British, IB or American), so check what your school uses.",
+    ages: (g) => (/^Primary (\d+)$/.test(g) ? [num(g) + 5, num(g) + 6] : /^Secondary (\d+)$/.test(g) ? [num(g) + 11, num(g) + 12] : null),
+  },
+  {
     key: "🇦🇪 UAE & GCC Hubs", slug: "uae-gcc", flag: "🇦🇪", name: "the UAE and the Gulf", short: "UAE & Gulf", subject: "English",
     curriculum: "Cambridge Primary, Lower Secondary and IGCSE English",
     note: "Schools in the Gulf follow many curricula (British, American, IB, national). This guide covers the Cambridge pathway, so check what your school uses.",
@@ -108,7 +129,7 @@ const REGIONS = [
 
 // Flag emoji show as two letters (GB, US...) on Windows, so countries use small flag
 // images, the same ones the homepage uses. The globe is a plain symbol and renders everywhere.
-const FLAG_CC = { uk: "gb", us: "us", australia: "au", canada: "ca", "new-zealand": "nz", ireland: "ie", "uae-gcc": "ae", singapore: "sg" };
+const FLAG_CC = { uk: "gb", us: "us", australia: "au", canada: "ca", "new-zealand": "nz", ireland: "ie", india: "in", "south-africa": "za", "hong-kong": "hk", "uae-gcc": "ae", singapore: "sg" };
 function flagHtml(r) {
   const cc = FLAG_CC[r.slug];
   if (!cc) return `<span class="flag-globe" aria-hidden="true">${r.flag}</span> `;
@@ -386,7 +407,7 @@ ${ctaBlock(`${r.slug}-hub`, "See it work on real writing")}
 
 function buildHub(regionGroups) {
   const title = "English guides for parents by country and year | LiteracyLab AI";
-  const description = "Plain-English guides to reading and writing, year by year, in the UK, US, Australia, Canada, NZ, Ireland, the Gulf, Singapore and for English learners.";
+  const description = "Plain-English guides to reading and writing, year by year, in the UK, US, Australia, Canada, NZ, Ireland, India, the Gulf and more, plus English learners.";
   const jsonld = { "@context": "https://schema.org", "@graph": [
     { "@type": "CollectionPage", name: title, description, url: urlFor.hub(), inLanguage: "en", dateModified: LASTMOD },
     breadcrumbLd([["Home", `${SITE}/`], ["Guides", urlFor.hub()]]),

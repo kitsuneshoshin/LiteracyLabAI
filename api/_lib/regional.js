@@ -5,7 +5,7 @@
 
 // ---------------------------------------------------------------- which convention
 // "us"  American spelling and usage
-// "uk"  British spelling and usage (also Australia, New Zealand, Ireland, Singapore, the Gulf: they follow British conventions)
+// "uk"  British spelling and usage (also Australia, New Zealand, Ireland, India, South Africa, Hong Kong, Singapore, the Gulf: they follow British conventions)
 // "ca"  Canadian: colour, centre, but -ize and program; either form of those is accepted
 // "any" no single convention (the global English-learner mode): either is accepted
 function conventionFor(country) {
@@ -13,7 +13,7 @@ function conventionFor(country) {
   if (/United States/.test(c)) return "us";
   if (/Canada/.test(c)) return "ca";
   if (/Global|ESL/i.test(c)) return "any";
-  if (/United Kingdom|Australia|New Zealand|Ireland|Singapore|UAE|GCC/.test(c)) return "uk";
+  if (/United Kingdom|Australia|New Zealand|Ireland|India|South Africa|Hong Kong|Singapore|UAE|GCC/.test(c)) return "uk";
   return "any";
 }
 
