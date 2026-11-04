@@ -124,6 +124,7 @@ section{ padding-block: 88px; }
   background: transparent; border-top: 0; border-bottom: 1px solid var(--ink);
   font-family: var(--serif-display); font-size: 28px; font-weight: 500; line-height: 1.2; letter-spacing: 0; text-align: center; padding: 26px 16px 18px;
 }
+.plan-table thead th{ vertical-align: bottom; }
 .plan-table thead th:first-child{ text-align: left; font-family: var(--mono-label); font-size: 12px; font-weight: 400; letter-spacing: 0.1em; text-transform: uppercase; vertical-align: bottom; }
 .plan-table thead th span{ font-family: "Lexend", sans-serif; font-size: 14px; font-weight: 500; color: var(--ink-soft); margin-top: 6px; }
 .plan-table th[scope="row"]{ font-weight: 500; font-size: 15.5px; line-height: 1.4; }
