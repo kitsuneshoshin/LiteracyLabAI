@@ -8,7 +8,8 @@ const path = require("node:path");
 // browser at 320, 375 and 414 pixels wide when this was built.)
 
 const ROOT = path.join(__dirname, "..");
-const read = (f) => fs.readFileSync(path.join(ROOT, f), "utf8");
+// Git on Windows checks files out with CRLF line endings; the patterns below match LF.
+const read = (f) => fs.readFileSync(path.join(ROOT, f), "utf8").replace(/\r\n/g, "\n");
 const INDEX = read("index.html");
 
 function htmlFiles(dir = ROOT, out = []) {
