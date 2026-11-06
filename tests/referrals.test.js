@@ -148,7 +148,8 @@ test("the pages remember the link, send it with the sign-up, and show the card o
   assert.equal(storedReferral(), "ABCD2345");
   store.ll_ref = "bad code!";
   assert.equal(storedReferral(), "", "a malformed stored value is ignored");
-  assert.match(app, /signUp\(ref \? \{ email, password, options: \{ data: \{ referral_code: ref \} \} \}/);
+  assert.match(app, /\.\.\.\(ref \? \{ referral_code: ref \} : \{\}\)/, "the friend's code goes into the sign-up data");
+  assert.match(app, /auth\.signUp\(Object\.keys\(data\)\.length \? \{ email, password, options: \{ data \} \}/);
   assert.match(index, /localStorage\.setItem\("ll_ref"/);
   assert.match(app, /if \(!isFree && !invited\) return null;/);
   assert.match(app, /<InviteFriendCard session=\{session\} backendLive=\{backendLive\} plan=\{plan\} \/>/);

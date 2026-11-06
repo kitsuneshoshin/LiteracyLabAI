@@ -129,6 +129,9 @@
   }
   .font-display{ font-family:"Lexend", ui-sans-serif, system-ui, sans-serif; }
   .font-read{ font-family:"Source Serif 4", Georgia, "Times New Roman", serif; }
+  /* Translated feedback: each paragraph takes the direction of its own text, so Arabic and Urdu read right to left
+     while the English quotes and vocabulary words inside the same page stay left to right. */
+  .ll-translated[lang] p, .ll-translated[lang] li { unicode-bidi: plaintext; text-align: start; }
   h1,h2,h3,h4{ text-wrap: balance; }
   ::selection{ background: var(--cyan); color:#fff; }
 
@@ -303,6 +306,58 @@ async function authedFetch(session, path, options = {}) {
     throw err;
   }
   return data;
+}
+
+/* ---------------------------------------------------------------- */
+/* Home language                                                       */
+/* ---------------------------------------------------------------- */
+// The language a family reads feedback in. The learner still practises English; only the explanations are translated, on
+// request, by api/history.js (action "translate"). Mirrors api/_lib/languages.js: tests/home-language.test.js keeps the
+// two lists in step. The choice lives on the account (Supabase user_metadata.language), set at sign-up or on the profile page.
+const HOME_LANGUAGES = [
+  { code: "en", native: "English", dir: "ltr" },
+  { code: "pl", native: "Polski", dir: "ltr" },
+  { code: "ro", native: "Română", dir: "ltr" },
+  { code: "es", native: "Español", dir: "ltr" },
+  { code: "pt", native: "Português", dir: "ltr" },
+  { code: "ar", native: "العربية", dir: "rtl" },
+  { code: "ur", native: "اردو", dir: "rtl" },
+  { code: "pa", native: "ਪੰਜਾਬੀ", dir: "ltr" },
+  { code: "bn", native: "বাংলা", dir: "ltr" },
+  { code: "hi", native: "हिन्दी", dir: "ltr" },
+  { code: "zh", native: "中文", dir: "ltr" },
+];
+function homeLanguageInfo(code){ return HOME_LANGUAGES.find((l) => l.code === code && l.code !== "en") || null; }
+// The account's translation language, or "" when the family reads English.
+function homeLanguage(session){
+  const code = session && session.user && session.user.user_metadata && session.user.user_metadata.language;
+  const l = homeLanguageInfo(code);
+  return l ? l.code : "";
+}
+// A new visitor's browser language, if we offer it, so the sign-up picker starts on the right choice.
+function guessHomeLanguage(){
+  try {
+    for (const tag of (navigator.languages || [navigator.language || ""])) {
+      const base = String(tag).toLowerCase().split("-")[0];
+      if (homeLanguageInfo(base)) return base;
+    }
+  } catch (e) { /* no navigator: English */ }
+  return "en";
+}
+// Puts each translated sentence back where it came from in a copy of the feedback ("highlights.2.note" and so on). A
+// sentence the server left out of the map stays in English.
+function applyTranslations(feedback, translations){
+  if (!feedback || !translations) return feedback;
+  const copy = JSON.parse(JSON.stringify(feedback));
+  for (const path of Object.keys(translations)) {
+    const text = translations[path];
+    if (typeof text !== "string" || !text) continue;
+    const parts = path.split(".");
+    let node = copy;
+    for (let i = 0; i < parts.length - 1 && node != null; i++) node = node[parts[i]];
+    if (node != null && typeof node === "object" && typeof node[parts[parts.length - 1]] === "string") node[parts[parts.length - 1]] = text;
+  }
+  return copy;
 }
 
 /* ---------------------------------------------------------------- */
@@ -2717,6 +2772,19 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
             </label>
           )}
 
+          {backendLive && session && (
+            <label className="flex flex-col gap-1.5 mb-4">
+              <span className="label-mono" style={{ color: "var(--ink-soft)" }}>Language at home</span>
+              <select value={homeLanguage(session) || "en"}
+                onChange={(e)=>{ supabaseClient.auth.updateUser({ data: { language: e.target.value === "en" ? null : e.target.value } }).catch(()=>{}); }}
+                className="focus-ring w-full rounded-xl border px-3.5 py-2.5 text-sm font-medium"
+                style={{ borderColor: "var(--border)", background: "var(--surface)", color: "var(--ink)" }}>
+                {HOME_LANGUAGES.map((l)=> <option key={l.code} value={l.code}>{l.native}</option>)}
+              </select>
+              <span className="text-[12px]" style={{ color: "var(--ink-faint)" }}>Feedback is explained in this language. The writing and reading stay in English.</span>
+            </label>
+          )}
+
           {backendLive && (
             <div className="flex flex-col gap-1.5 mb-6">
               <span className="label-mono" style={{ color: "var(--ink-soft)" }}>Choose an avatar</span>
@@ -3278,7 +3346,54 @@ function OverallScorePanel({ feedback }){
   );
 }
 
-function FeedbackPanel({ tier, gradeLabel, country, interest, confidence, motivation, seed, feedback, submissionId, session, backendLive, submittedText, onSeePlans, onPractise }){
+// Wraps a feedback panel for a family that reads another language: fetches the translation of the explanatory sentences
+// (cached per piece on the server), shows them in place of the English, and offers a switch back. The panel itself is
+// given a translated copy of the feedback and never knows. English-reading accounts get the panel untouched.
+function TranslatedFeedback({ session, submissionId, feedback, backendLive, render }){
+  const code = homeLanguage(session);
+  const info = homeLanguageInfo(code);
+  const [translations, setTranslations] = useState(null);
+  const [state, setState] = useState("idle"); // idle | loading | ready | failed
+  const [showEnglish, setShowEnglish] = useState(false);
+  useEffect(() => {
+    setTranslations(null); setShowEnglish(false);
+    if (!code || !backendLive || !submissionId || !feedback) { setState("idle"); return; }
+    let live = true;
+    setState("loading");
+    authedFetch(session, "/api/history", { method: "POST", body: JSON.stringify({ action: "translate", submissionId, language: code }) })
+      .then((x) => { if (!live) return; const t = x && x.translations; if (t && Object.keys(t).length) { setTranslations(t); setState("ready"); } else setState("failed"); })
+      .catch(() => { if (live) setState("failed"); });
+    return () => { live = false; };
+  }, [code, submissionId, backendLive]);
+  // One copy per translation (not per render), so the panel's own effects keyed on `feedback` don't re-run on every render.
+  const shown = React.useMemo(() => (state === "ready" && !showEnglish ? applyTranslations(feedback, translations) : feedback), [state, showEnglish, translations, feedback]);
+  if (!info) return render(feedback);
+  return (
+    <div className="flex flex-col gap-4 min-w-0">
+      <div className="card px-4 py-3 flex items-center justify-between gap-3 flex-wrap" role="status">
+        <div className="text-[13px]" style={{ color: "var(--ink-soft)" }}>
+          {state === "loading" && <>Translating into {info.native}…</>}
+          {state === "ready" && (showEnglish ? <>Showing the English original.</> : <>Explained in <strong style={{ color: "var(--ink)" }}>{info.native}</strong>. The writing itself stays in English.</>)}
+          {state === "failed" && <>We couldn't translate this just now, so it is shown in English.</>}
+          {state === "idle" && <>Showing in English.</>}
+        </div>
+        {state === "ready" && (
+          <button onClick={()=>setShowEnglish(!showEnglish)} className="focus-ring rounded-full px-3.5 py-1.5 text-[13px] font-bold" style={{ background: "var(--navy-tint)", color: "var(--ink)" }}>
+            {showEnglish ? "Show in " + info.native : "Show in English"}
+          </button>
+        )}
+      </div>
+      <div className="ll-translated min-w-0" lang={state === "ready" && !showEnglish ? code : undefined}>{render(shown)}</div>
+    </div>
+  );
+}
+
+function FeedbackPanel(props){
+  return <TranslatedFeedback session={props.session} submissionId={props.submissionId} feedback={props.feedback} backendLive={props.backendLive}
+    render={(fb) => <FeedbackPanelBody {...props} feedback={fb} />} />;
+}
+
+function FeedbackPanelBody({ tier, gradeLabel, country, interest, confidence, motivation, seed, feedback, submissionId, session, backendLive, submittedText, onSeePlans, onPractise }){
   // Real feedback from a plan without the spelling check / overall score
   // simply doesn't contain them (the server never generates them - see
   // api/_lib/plans.js), so their absence, on feedback that exists at all, is
@@ -3929,7 +4044,12 @@ function ScoreRing({ score, total, size = 92, label = "correct" }){
   );
 }
 
-function ReadingFeedbackPanel({ tier, country, interest, confidence, motivation, score, totalQ, feedback, submissionId, session, backendLive, questions, answers, bank, onNew, onPractise }){
+function ReadingFeedbackPanel(props){
+  return <TranslatedFeedback session={props.session} submissionId={props.submissionId} feedback={props.feedback} backendLive={props.backendLive}
+    render={(fb) => <ReadingFeedbackPanelBody {...props} feedback={fb} />} />;
+}
+
+function ReadingFeedbackPanelBody({ tier, country, interest, confidence, motivation, score, totalQ, feedback, submissionId, session, backendLive, questions, answers, bank, onNew, onPractise }){
   const interestLabel = (INTERESTS.find(i=>i.id===interest) || INTERESTS[0]).label;
   const curriculum = GRADE_DATA[country].curriculum;
   const pct = Math.round((score/totalQ)*100);
@@ -5660,6 +5780,7 @@ function AuthScreen(){
   const [mode, setMode] = useState("signup"); // signup | login | forgot
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [language, setLanguage] = useState(guessHomeLanguage);
   const [status, setStatus] = useState("idle"); // idle | loading | check-email | reset-sent | error
   const [errorMsg, setErrorMsg] = useState("");
 
@@ -5679,7 +5800,9 @@ function AuthScreen(){
       }
       if (mode === "signup") {
         const ref = storedReferral();
-        const { error } = await supabaseClient.auth.signUp(ref ? { email, password, options: { data: { referral_code: ref } } } : { email, password });
+        // The home language travels with the account (user_metadata.language); "en" is simply not stored.
+        const data = { ...(ref ? { referral_code: ref } : {}), ...(homeLanguageInfo(language) ? { language } : {}) };
+        const { error } = await supabaseClient.auth.signUp(Object.keys(data).length ? { email, password, options: { data } } : { email, password });
         if (error) throw error;
         window.llTrack && window.llTrack("sign_up", { method: "email" });
         setStatus("check-email");
@@ -5736,6 +5859,16 @@ function AuthScreen(){
                   <span className="label-mono" style={{ color: "var(--ink-soft)" }}>Password</span>
                   <input type="password" required minLength={8} value={password} onChange={(e)=>setPassword(e.target.value)}
                     className="focus-ring w-full rounded-xl border px-3.5 py-2.5 text-sm" style={{ borderColor: "var(--border)", background: "var(--surface)", color: "var(--ink)" }} placeholder="At least 8 characters" />
+                </label>
+                )}
+                {mode === "signup" && (
+                <label className="flex flex-col gap-1.5">
+                  <span className="label-mono" style={{ color: "var(--ink-soft)" }}>Language at home</span>
+                  <select value={language} onChange={(e)=>setLanguage(e.target.value)}
+                    className="focus-ring w-full rounded-xl border px-3.5 py-2.5 text-sm" style={{ borderColor: "var(--border)", background: "var(--surface)", color: "var(--ink)" }}>
+                    {HOME_LANGUAGES.map((l)=> <option key={l.code} value={l.code}>{l.native}</option>)}
+                  </select>
+                  <span className="text-[12px]" style={{ color: "var(--ink-faint)" }}>Your child practises English. We explain their feedback in this language so you can help.</span>
                 </label>
                 )}
                 {status === "error" && (

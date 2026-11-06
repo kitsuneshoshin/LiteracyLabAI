@@ -5,6 +5,9 @@ const { getMonthlyUsage } = require("./_lib/usage");
 const { dedupeByTerm, buildQuiz } = require("./_lib/vocabQuiz");
 const { readVocabProgress, writeVocabProgress } = require("./_lib/vocabProgress");
 const { checkRateLimit } = require("./_lib/rateLimit");
+const { translatableLanguage } = require("./_lib/languages");
+const { translateFeedback } = require("./_lib/translateFeedback");
+const { generateFeedbackJSON } = require("./_lib/openai");
 
 // Real progress data for the dashboard — replaces the hardcoded "12 days" /
 // "8,450 words" mock stats with numbers actually derived from submissions.
@@ -21,6 +24,36 @@ module.exports = async function handler(req, res) {
     // POST saves how well a learner knows their vocabulary words, so it follows them between devices.
     if (req.method === "POST") {
       const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body || {};
+
+      // Reads a finished piece of feedback in the family's home language. The English feedback is never changed; the
+      // translation is stored beside the piece (content.translations) so each language is paid for once per piece.
+      // Lives here, not in its own file, because the Hobby plan caps a deployment at 12 functions.
+      if (body.action === "translate") {
+        const language = translatableLanguage(body.language);
+        if (!language) return res.status(400).json({ error: "That language isn't available yet." });
+        if (!body.submissionId) return res.status(400).json({ error: "submissionId is required." });
+        const { data: row, error: rowErr } = await supabase
+          .from("submissions")
+          .select("id, content, feedback")
+          .eq("id", body.submissionId)
+          .eq("profile_id", user.id)
+          .maybeSingle();
+        if (rowErr) throw rowErr;
+        if (!row || !row.feedback || row.feedback._pending) return res.status(404).json({ error: "That feedback wasn't found." });
+        const saved = row.content && row.content.translations && row.content.translations[language.code];
+        if (saved) return res.status(200).json({ language: language.code, translations: saved });
+        await checkRateLimit(supabase, user.id, "translate", { limit: 20, windowSeconds: 300 });
+        const { translations } = await translateFeedback(row.feedback, language.code, generateFeedbackJSON);
+        // Only a complete-enough translation is kept for next time; a thin one is shown now but retried on the next ask.
+        if (Object.keys(translations).length > 0) {
+          const content = { ...(row.content || {}), translations: { ...((row.content && row.content.translations) || {}), [language.code]: translations } };
+          const { error: saveErr } = await supabase.from("submissions").update({ content }).eq("id", row.id).eq("profile_id", user.id);
+          if (saveErr) console.error("Could not save translation:", saveErr);
+        }
+        res.setHeader("Cache-Control", "no-store");
+        return res.status(200).json({ language: language.code, translations });
+      }
+
       if (!body.childId) return res.status(400).json({ error: "childId is required." });
       const { capabilities: planCaps } = await getMonthlyUsage(supabase, user.id);
       if (planCaps.vocabBank === false) return res.status(403).json({ error: "The vocabulary bank is part of Core and Premium.", vocabLocked: true });
