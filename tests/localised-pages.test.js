@@ -18,7 +18,7 @@ const english = read("index.html");
 const SAME_IN_ANY_LANGUAGE = new Set([
   "UK National Curriculum", "US Common Core &amp; AP", "New Zealand Curriculum &amp; NCEA", "Australian Curriculum", "Ontario Curriculum",
   "Fronted Adverbials", "Early Readers", "Elementary", "Middle School", "High School", "Free", "Core", "Premium", "LiteracyLab AI", "LiteracyLab", "AI",
-  "ominous", "© 2026 LiteracyLab AI", "Free<span><span class=\"js-price\" data-tier=\"free\">$0</span></span>", "Australia", "Start", "India", "Hong Kong",
+  "ominous", "© 2026 LiteracyLab AI", "Free<span><span class=\"js-price\" data-tier=\"free\">$0</span></span>", "Australia", "Start", "India", "Hong Kong", "Canada", "Singapore", "Feedback",
 ]);
 
 test("every sentence on the English homepage has a translation, and no translation is left over from a sentence that was removed", () => {

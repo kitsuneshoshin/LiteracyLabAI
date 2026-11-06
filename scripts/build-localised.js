@@ -16,6 +16,8 @@ const SITE = "https://www.literacylabai.com";
 const LANGS = [
   { code: "pl", locale: "pl_PL", dict: "pl.json", native: "Polski", englishOnly: "(po angielsku)" },
   { code: "es", locale: "es_ES", dict: "es.json", native: "Español", englishOnly: "(en inglés)" },
+  { code: "pt", locale: "pt_BR", dict: "pt.json", native: "Português", englishOnly: "(em inglês)" },
+  { code: "ro", locale: "ro_RO", dict: "ro.json", native: "Română", englishOnly: "(în engleză)" },
 ];
 
 const switchLink = (l) => `<a href="/${l.code}/" hreflang="${l.code}" lang="${l.code}">${l.native}</a>`;

@@ -53,7 +53,9 @@
   var BANNER_TEXT = {
     en: { label: "Cookie consent", text: "We use cookies to understand site traffic. You can accept or decline analytics cookies.", decline: "Decline", accept: "Accept" },
     pl: { label: "Zgoda na pliki cookie", text: "Używamy plików cookie, aby rozumieć ruch na stronie. Możesz zaakceptować lub odrzucić analityczne pliki cookie.", decline: "Odrzuć", accept: "Akceptuję" },
-    es: { label: "Consentimiento de cookies", text: "Usamos cookies para entender el tráfico del sitio. Puedes aceptar o rechazar las cookies de análisis.", decline: "Rechazar", accept: "Aceptar" }
+    es: { label: "Consentimiento de cookies", text: "Usamos cookies para entender el tráfico del sitio. Puedes aceptar o rechazar las cookies de análisis.", decline: "Rechazar", accept: "Aceptar" },
+    pt: { label: "Consentimento de cookies", text: "Usamos cookies para entender o tráfego do site. Você pode aceitar ou recusar os cookies de análise.", decline: "Recusar", accept: "Aceitar" },
+    ro: { label: "Acord pentru cookie-uri", text: "Folosim cookie-uri pentru a înțelege traficul de pe site. Poți accepta sau refuza cookie-urile de analiză.", decline: "Refuz", accept: "Accept" }
   };
 
   function showBanner() {
