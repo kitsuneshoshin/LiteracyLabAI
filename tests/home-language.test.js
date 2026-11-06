@@ -12,7 +12,7 @@ const APP = fs.readFileSync(path.join(__dirname, "..", "app.html"), "utf8");
 const start = APP.indexOf("const HOME_LANGUAGES = ");
 const end = APP.indexOf("/* Minimal line-icon set");
 assert.ok(start > 0 && end > start, "the home-language helpers are in app.html");
-const client = new Function("navigator", APP.slice(start, end) + "\nreturn { HOME_LANGUAGES, homeLanguage, homeLanguageInfo, guessHomeLanguage, applyTranslations };");
+const client = new Function("navigator", "window", APP.slice(start, end) + "\nreturn { HOME_LANGUAGES, homeLanguage, homeLanguageInfo, guessHomeLanguage, applyTranslations };");
 
 const feedback = {
   glow: 'You wrote "the dark forest was really scary" which builds tension.',
@@ -31,7 +31,7 @@ const feedback = {
 };
 
 test("the browser's language list and the server's list offer exactly the same languages", () => {
-  const c = client(undefined);
+  const c = client(undefined, undefined);
   assert.deepEqual(c.HOME_LANGUAGES.map((l) => l.code), LANGUAGES.map((l) => l.code));
   assert.deepEqual(c.HOME_LANGUAGES.map((l) => l.native), LANGUAGES.map((l) => l.native));
   assert.deepEqual(c.HOME_LANGUAGES.map((l) => l.dir), LANGUAGES.map((l) => l.dir));
@@ -95,7 +95,7 @@ test("an unavailable language is refused before any AI call", async () => {
 });
 
 test("the app puts translations back by path and leaves everything else exactly as it was", () => {
-  const c = client(undefined);
+  const c = client(undefined, undefined);
   const out = c.applyTranslations(feedback, { grow: "Spróbuj.", "highlights.1.note": "Zacznij od słowa czasu.", "vocab.0.definition": "daje wrażenie, że stanie się coś złego", "nonsense.0.x": "ignored", quote: "ignored" });
   assert.equal(out.grow, "Spróbuj.");
   assert.equal(out.highlights[1].note, "Zacznij od słowa czasu.");
@@ -109,7 +109,7 @@ test("the app puts translations back by path and leaves everything else exactly 
 });
 
 test("the account's language is read from the sign-up choice, and English or anything unknown means no translation", () => {
-  const c = client(undefined);
+  const c = client(undefined, undefined);
   const s = (language) => ({ user: { user_metadata: language === undefined ? {} : { language } } });
   assert.equal(c.homeLanguage(s("pl")), "pl");
   assert.equal(c.homeLanguage(s("en")), "");
@@ -119,10 +119,18 @@ test("the account's language is read from the sign-up choice, and English or any
 });
 
 test("the sign-up picker starts on the browser's language when we offer it", () => {
-  assert.equal(client({ languages: ["pl-PL", "en-GB"] }).guessHomeLanguage(), "pl");
-  assert.equal(client({ languages: ["fr-FR", "es-MX"] }).guessHomeLanguage(), "es", "the first language we offer wins");
-  assert.equal(client({ languages: ["en-GB"] }).guessHomeLanguage(), "en");
-  assert.equal(client({ languages: ["fr-FR"] }).guessHomeLanguage(), "en");
+  assert.equal(client({ languages: ["pl-PL", "en-GB"] }, undefined).guessHomeLanguage(), "pl");
+  assert.equal(client({ languages: ["fr-FR", "es-MX"] }, undefined).guessHomeLanguage(), "es", "the first language we offer wins");
+  assert.equal(client({ languages: ["en-GB"] }, undefined).guessHomeLanguage(), "en");
+  assert.equal(client({ languages: ["fr-FR"] }, undefined).guessHomeLanguage(), "en");
+});
+
+test("a link from a translated page (?lang=pl) starts the sign-up picker on that language, ahead of the browser's", () => {
+  const at = (search) => ({ location: { search } });
+  assert.equal(client({ languages: ["en-GB"] }, at("?lang=pl")).guessHomeLanguage(), "pl");
+  assert.equal(client({ languages: ["es"] }, at("?x=1&lang=pl")).guessHomeLanguage(), "pl");
+  assert.equal(client({ languages: ["es"] }, at("?lang=xx")).guessHomeLanguage(), "es", "an unknown code is ignored");
+  assert.equal(client({ languages: ["en-GB"] }, at("")).guessHomeLanguage(), "en");
 });
 
 test("the sign-up form asks for the language, and the profile page can change it", () => {

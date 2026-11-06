@@ -95,3 +95,22 @@ test("the privacy policy describes analytics: consent, what is collected, and th
   assert.match(p, /no submission content, names or email addresses/);
   assert.match(p, /<td[^>]*>Analytics data<\/td>/);
 });
+
+test("the cookie banner speaks the page's language", () => {
+  const banner = (lang) => {
+    let html = "";
+    const document = {
+      readyState: "complete", documentElement: { lang }, head: { appendChild() {} }, body: { appendChild() {} },
+      createElement: () => ({ style: {}, setAttribute() {}, addEventListener() {}, set innerHTML(v) { html = v; } }),
+      getElementById: () => ({ addEventListener() {} }), addEventListener() {},
+    };
+    const ctx = { window: { dataLayer: [], document }, document, localStorage: { getItem: () => null, setItem() {} }, location: { pathname: "/" } };
+    vm.runInNewContext(read("analytics.js"), ctx);
+    return html;
+  };
+  assert.match(banner("pl"), /Używamy plików cookie/);
+  assert.match(banner("pl"), />Odrzuć</);
+  assert.match(banner("pl"), />Akceptuję</);
+  assert.match(banner("en"), /We use cookies/);
+  assert.match(banner(""), /We use cookies/, "a page with no language stays English");
+});
