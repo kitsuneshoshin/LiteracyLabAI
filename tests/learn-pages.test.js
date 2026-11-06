@@ -112,13 +112,13 @@ test("every internal link on every page points at a page or file that exists", (
   }
 });
 
-test("the sitemap lists every guide page, once, plus the homepage, its Polish version, privacy and terms", () => {
+test("the sitemap lists every guide page, once, plus the homepage, its translations, privacy and terms", () => {
   const sm = fs.readFileSync(path.join(ROOT, "sitemap.xml"), "utf8");
   const locs = [...sm.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]);
   assert.equal(new Set(locs).size, locs.length, "no duplicates");
   for (const u of built.urls) assert.ok(locs.includes(u), `${u} missing from the sitemap`);
-  for (const u of ["https://www.literacylabai.com/", "https://www.literacylabai.com/pl/", "https://www.literacylabai.com/privacy.html", "https://www.literacylabai.com/terms.html"]) assert.ok(locs.includes(u));
-  assert.equal(locs.length, built.urls.length + 4);
+  for (const u of ["https://www.literacylabai.com/", "https://www.literacylabai.com/pl/", "https://www.literacylabai.com/es/", "https://www.literacylabai.com/privacy.html", "https://www.literacylabai.com/terms.html"]) assert.ok(locs.includes(u));
+  assert.equal(locs.length, built.urls.length + 5);
 });
 
 test("honest claims: no superlatives, guarantees, endorsements or invented statistics anywhere in the guides", () => {

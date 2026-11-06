@@ -503,7 +503,7 @@ function buildSitemap(learnUrls) {
   const entry = (loc, lastmod, freq, pri) => `  <url>\n    <loc>${loc}</loc>\n    <lastmod>${lastmod}</lastmod>\n    <changefreq>${freq}</changefreq>\n    <priority>${pri}</priority>\n  </url>`;
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` + [
     entry(`${SITE}/`, "2026-10-09", "weekly", "1.0"),
-    entry(`${SITE}/pl/`, "2026-11-07", "weekly", "0.9"), // the Polish homepage, built by scripts/build-localised.js
+    ...["pl", "es"].map((code) => entry(`${SITE}/${code}/`, "2026-11-07", "weekly", "0.9")), // the translated homepages, built by scripts/build-localised.js
     ...learnUrls.map((u) => entry(u, WS.isWorksheetUrl(u) ? WS.lastmodForUrl(u) : LASTMOD, "monthly", u === urlFor.hub() ? "0.8" : u === urlFor.prompts() ? "0.8" : u.split("/").length <= 6 ? "0.7" : "0.6")),
     entry(`${SITE}/privacy.html`, "2026-09-26", "monthly", "0.3"),
     entry(`${SITE}/terms.html`, "2026-09-26", "monthly", "0.3"),

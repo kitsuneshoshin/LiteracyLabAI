@@ -18,7 +18,7 @@ const english = read("index.html");
 const SAME_IN_ANY_LANGUAGE = new Set([
   "UK National Curriculum", "US Common Core &amp; AP", "New Zealand Curriculum &amp; NCEA", "Australian Curriculum", "Ontario Curriculum",
   "Fronted Adverbials", "Early Readers", "Elementary", "Middle School", "High School", "Free", "Core", "Premium", "LiteracyLab AI", "LiteracyLab", "AI",
-  "ominous", "© 2026 LiteracyLab AI", "Free<span><span class=\"js-price\" data-tier=\"free\">$0</span></span>", "Australia", "Start",
+  "ominous", "© 2026 LiteracyLab AI", "Free<span><span class=\"js-price\" data-tier=\"free\">$0</span></span>", "Australia", "Start", "India", "Hong Kong",
 ]);
 
 test("every sentence on the English homepage has a translation, and no translation is left over from a sentence that was removed", () => {
@@ -49,7 +49,8 @@ test("nothing is left in English on the translated page except names that do not
   for (const lang of LANGS) {
     const page = built.files[lang.code + "/index.html"];
     const en = new Set(findUnits(english).map((u) => u.key));
-    const left = [...new Set(findUnits(page).map((u) => u.key))].filter((k) => en.has(k) && !SAME_IN_ANY_LANGUAGE.has(k) && k !== lang.switchTo.label);
+    const names = new Set(["English", ...LANGS.map((l) => l.native)]);
+    const left = [...new Set(findUnits(page).map((u) => u.key))].filter((k) => en.has(k) && !SAME_IN_ANY_LANGUAGE.has(k) && !names.has(k));
     assert.deepEqual(left, [], lang.code + ": still in English");
   }
 });
@@ -66,8 +67,10 @@ test("the translated page declares its language, its own address and the alterna
       assert.ok(doc.includes('<link rel="alternate" hreflang="en" href="https://www.literacylabai.com/">'));
       assert.ok(doc.includes('<link rel="alternate" hreflang="x-default" href="https://www.literacylabai.com/">'));
     }
-    assert.ok(english.includes(`<a href="/${lang.code}/" hreflang="${lang.code}" lang="${lang.code}">`), "the English page links to the translation");
+    assert.ok(english.includes(`<a href="/${lang.code}/" hreflang="${lang.code}" lang="${lang.code}">${lang.native}</a>`), "the English page links to the translation");
     assert.ok(page.includes(`<a href="/" hreflang="en" lang="en">English</a>`), "and the translation links back");
+    assert.ok(!page.includes(`<a href="/${lang.code}/" hreflang`), "a page does not link to itself");
+    for (const other of LANGS.filter((l) => l !== lang)) assert.ok(page.includes(`<a href="/${other.code}/" hreflang="${other.code}" lang="${other.code}">${other.native}</a>`), `${lang.code} links to ${other.code}`);
   }
 });
 
@@ -109,9 +112,16 @@ test("the FAQ structured data is the visible FAQ, in the page's language", () =>
   }
 });
 
-test("the language pages are in the sitemap, and the pages the build does not translate stay English-only", () => {
+test("the language pages are in the sitemap, and the pages the build does not translate stay English-only and say so", () => {
   const sitemap = read("sitemap.xml");
-  for (const lang of LANGS) assert.ok(sitemap.includes(`<loc>https://www.literacylabai.com/${lang.code}/</loc>`));
-  const page = built.files["pl/index.html"];
-  assert.match(page, /Polityce prywatności \(po angielsku\)/, "the privacy policy is only in English, and the page says so");
+  for (const lang of LANGS) {
+    assert.ok(sitemap.includes(`<loc>https://www.literacylabai.com/${lang.code}/</loc>`));
+    const page = built.files[lang.code + "/index.html"];
+    assert.ok(page.includes(lang.englishOnly), `${lang.code}: links to the English-only privacy policy and guides say so`);
+  }
+});
+
+test("each language's page uses its own cookie banner text", () => {
+  const analytics = read("analytics.js");
+  for (const lang of LANGS) assert.ok(analytics.includes(`    ${lang.code}: { label:`), `${lang.code} has banner text in analytics.js`);
 });

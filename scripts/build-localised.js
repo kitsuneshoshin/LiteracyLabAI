@@ -12,11 +12,14 @@ const { applyUnits } = require("./i18n/html-units");
 const ROOT = path.join(__dirname, "..");
 const SITE = "https://www.literacylabai.com";
 
+// native: how the language names itself (the footer link). englishOnly: what the page says next to links to pages that are still English.
 const LANGS = [
-  { code: "pl", locale: "pl_PL", dict: "pl.json", switchTo: { href: "/", hreflang: "en", lang: "en", label: "English" } },
+  { code: "pl", locale: "pl_PL", dict: "pl.json", native: "Polski", englishOnly: "(po angielsku)" },
+  { code: "es", locale: "es_ES", dict: "es.json", native: "Español", englishOnly: "(en inglés)" },
 ];
 
-const SWITCH_LINK = '<a href="/pl/" hreflang="pl" lang="pl">Polski</a>';
+const switchLink = (l) => `<a href="/${l.code}/" hreflang="${l.code}" lang="${l.code}">${l.native}</a>`;
+const ENGLISH_LINK = '<a href="/" hreflang="en" lang="en">English</a>';
 
 // Visible FAQ -> the FAQPage structured data, so the markup search engines read always matches the page people read.
 function faqFromHtml(html) {
@@ -55,11 +58,13 @@ function translateJsonLd(html, lang, dict) {
 
 function buildLanguage(lang, source) {
   const dict = JSON.parse(fs.readFileSync(path.join(__dirname, "i18n", lang.dict), "utf8"));
-  // The language switch in the footer points the other way on the translated page.
-  const s = lang.switchTo;
-  let html = source.replace(SWITCH_LINK, `<a href="${s.href}" hreflang="${s.hreflang}" lang="${s.lang}">${s.label}</a>`);
+  // In the footer's language list, a translated page links to English where its own language was, and keeps the others.
+  let html = source.replace(switchLink(lang), ENGLISH_LINK);
 
-  const applied = applyUnits(html, Object.assign({ [s.label]: s.label }, dict.html));
+  // Names of languages are the same on every page.
+  const names = { English: "English" };
+  for (const l of LANGS) names[l.native] = l.native;
+  const applied = applyUnits(html, Object.assign(names, dict.html));
   html = applied.html;
 
   // Text inside the page's own scripts.
