@@ -405,3 +405,21 @@ create table if not exists public.share_cards (
 alter table public.share_cards enable row level security;
 create index if not exists share_cards_profile_idx on public.share_cards (profile_id);
 create index if not exists share_cards_submission_idx on public.share_cards (submission_id);
+
+-- ---------------------------------------------------------------------------
+-- Usage events (api/_lib/activity.js, written by POST /api/email?action=event, read by GET /api/email?action=activity
+-- for the owner's /admin page). One row per thing a signed-in person did: a whitelisted name and a few short,
+-- non-personal values (page, kind, tier, interest, status). Never any writing, prompt or feedback text; those live
+-- in submissions. RLS on with no policy, like every table here; only the server (service role) reads or writes.
+-- ---------------------------------------------------------------------------
+create table if not exists public.usage_events (
+  id uuid primary key default gen_random_uuid(),
+  profile_id uuid not null references public.profiles(id) on delete cascade,
+  child_id uuid references public.child_profiles(id) on delete set null,
+  name text not null,
+  props jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now()
+);
+alter table public.usage_events enable row level security;
+create index if not exists usage_events_created_idx on public.usage_events (created_at desc);
+create index if not exists usage_events_profile_idx on public.usage_events (profile_id, created_at desc);

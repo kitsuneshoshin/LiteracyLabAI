@@ -9,6 +9,10 @@
       "destination": "/feedback.html"
     },
     {
+      "source": "/admin",
+      "destination": "/admin.html"
+    },
+    {
       "source": "/c/:token",
       "destination": "/share.html"
     }

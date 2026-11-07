@@ -18,6 +18,8 @@ const { buildAnyEmail, ALL_EMAIL_KEYS, sampleContext } = require("./_lib/emailAn
 //   ga           GET   Google Analytics numbers for the dashboard (admin or cron secret)
 //   gsc          GET   Google Search Console numbers: the searches that bring people in (admin or cron secret)
 //   stats        GET   delivery, open and click numbers per email subject (admin or cron secret)
+//   event        POST  record one thing a signed-in person did in the app (usage_events)
+//   activity     GET   the owner's activity report: events, users and the latest pieces (admin or cron secret)
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const CATEGORIES = ["bug", "idea", "praise", "question", "other"];
@@ -418,9 +420,59 @@ async function handleRating(req, res) {
   return res.status(200).json({ commitment: data });
 }
 
+// ------------------------------------------------------------------ usage events
+// What a signed-in person does in the app (opened a page, made a prompt, started the quiz...), one small row each.
+// Names and values are whitelisted in _lib/activity.js; no writing or personal text is ever stored here.
+// It must never get in the app's way, so a bad or over-eager request is quietly dropped, not an error.
+async function handleEvent(req, res) {
+  if (req.method !== "POST") {
+    res.setHeader("Allow", "POST");
+    return res.status(405).json({ error: "Method not allowed." });
+  }
+  const user = await requireUser(req);
+  const { cleanEvent, MAX_EVENTS_PER_MINUTE } = require("./_lib/activity");
+  const body = parseBody(req);
+  const ev = cleanEvent(body);
+  if (!ev) return res.status(204).end();
+  const supabase = getSupabaseAdmin();
+  const minuteAgo = new Date(Date.now() - 60000).toISOString();
+  const { count } = await supabase.from("usage_events").select("id", { count: "exact", head: true }).eq("profile_id", user.id).gte("created_at", minuteAgo);
+  if ((count || 0) >= MAX_EVENTS_PER_MINUTE) return res.status(204).end();
+  const childId = UUID.test(String(body.childId || "")) ? String(body.childId) : null;
+  const { error } = await supabase.from("usage_events").insert({ profile_id: user.id, child_id: childId, name: ev.name, props: ev.props });
+  if (error) console.error("Saving a usage event failed:", error.message);
+  return res.status(204).end();
+}
+
+// ------------------------------------------------------------------ the owner's activity report
+// Who did what lately: usage events plus the latest pieces with the prompt given, what was written and the
+// feedback returned. Admin only (ADMIN_EMAILS, or the cron secret); shown at /admin.
+async function handleActivity(req, res) {
+  if (req.method !== "GET") {
+    res.setHeader("Allow", "GET");
+    return res.status(405).json({ error: "Method not allowed." });
+  }
+  if (!(await isCronOrAdmin(req))) return res.status(401).json({ error: "Unauthorized." });
+  const { buildActivity } = require("./_lib/activity");
+  const supabase = getSupabaseAdmin();
+  const days = Math.min(90, Math.max(1, Number(req.query && req.query.days) || 30));
+  const limit = Math.min(200, Math.max(1, Number(req.query && req.query.limit) || 60));
+  const since = new Date(Date.now() - days * 86400000).toISOString();
+  const [events, submissions, profiles] = await Promise.all([
+    supabase.from("usage_events").select("profile_id, name, props, created_at").gte("created_at", since).order("created_at", { ascending: false }).limit(5000),
+    supabase.from("submissions").select("id, profile_id, kind, tier, country, grade_label, interest, content, feedback, word_count, score, total_questions, model_used, created_at").order("created_at", { ascending: false }).limit(limit),
+    supabase.from("profiles").select("id, email, plan, created_at").limit(2000),
+  ]);
+  const failed = [events, submissions, profiles].find((r) => r.error);
+  if (failed) throw new Error(`Activity report query failed: ${failed.error.message}`);
+  return res.status(200).json(buildActivity({ events: events.data || [], submissions: submissions.data || [], profiles: profiles.data || [], days }));
+}
+
 module.exports = async function handler(req, res) {
   try {
     const action = String((req.query && req.query.action) || "");
+    if (action === "event") return await handleEvent(req, res);
+    if (action === "activity") return await handleActivity(req, res);
     if (action === "cron") return await handleCron(req, res);
     if (action === "qa") return await handleQa(req, res);
     if (action === "stats") return await handleStats(req, res);

@@ -277,6 +277,22 @@ function storedReferral(){
 }
 captureReferral();
 
+// Our own small usage log (api/_lib/activity.js): what people do in the app, never what they write. Fire and
+// forget - it can never slow down or break the app. Only whitelisted names and short values are kept server-side.
+async function logEvent(name, props, childId){
+  try {
+    if (!supabaseClient) return;
+    const { data } = await supabaseClient.auth.getSession();
+    const token = data && data.session && data.session.access_token;
+    if (!token) return;
+    fetch("/api/email?action=event", {
+      method: "POST", keepalive: true,
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ name, props: props || {}, childId: childId || undefined }),
+    }).catch(() => {});
+  } catch (e) { /* logging is optional */ }
+}
+
 async function authedFetch(session, path, options = {}) {
   const send = (token) => fetch(path, {
     ...options,
@@ -1624,7 +1640,7 @@ function VocabularyBank({ session, childId, backendLive, onSeePlans, displayName
     if (backendLive && childId && session) authedFetch(session, "/api/history", { method: "POST", body: JSON.stringify({ childId, updates: [{ term: key, box: entry.box, at: entry.at }] }) }).catch(() => {});
   }
 
-  function startCards(){ setDeck(vocabDeck(words, boxes, 8)); setView("cards"); }
+  function startCards(){ logEvent("vocab_cards", {}, childId); setDeck(vocabDeck(words, boxes, 8)); setView("cards"); }
 
   async function startQuiz(){
     setLoading(true);
@@ -1638,9 +1654,11 @@ function VocabularyBank({ session, childId, backendLive, onSeePlans, displayName
         setQuiz(null);
       } else {
         setQuiz(data);
+        logEvent("vocab_quiz", {}, childId);
       }
       setView("quiz");
     } catch (err) {
+      logEvent("vocab_quiz_failed", { status: err.statusCode || "network" }, childId);
       setQuizError(err.payload?.error || err.message || "Couldn't load the quiz right now.");
       setView("quiz");
     } finally {
@@ -3047,6 +3065,7 @@ function ThumbsFeedback({ context, session, submissionId, backendLive }){
 
   function send(v, text, mistake){
     setValue(v);
+    logEvent("feedback_rated", { rating: v });
     if (backendLive && submissionId) {
       authedFetch(session, "/api/email?action=rating", { method: "POST", body: JSON.stringify({ submissionId, helpfulRating: v, feedbackText: text || undefined, mistake: mistake ? true : undefined }) })
         .catch((err)=> logAppError("Failed to log feedback rating:", err));
@@ -4472,7 +4491,9 @@ function Workspace({ plan, country, gradeIdx, setGradeIdx, tier, setTierOverride
       pendingWritingRef.current[cacheKey] = fresh;
       setWritingPrompt(fresh);
       onSubmit(result.usage);
+      logEvent("prompt_generated", { kind: "writing", tier, interest: interestForPiece }, childId);
     } catch (err) {
+      logEvent("generate_failed", { kind: "writing", tier, status: err.statusCode || "network" }, childId);
       setSubmitError(err.payload?.error || err.message || "Couldn't generate a writing prompt. Please try again.");
     } finally {
       setWritingLoading(false);
@@ -4505,7 +4526,9 @@ function Workspace({ plan, country, gradeIdx, setGradeIdx, tier, setTierOverride
       pendingReadingRef.current[cacheKey] = fresh;
       setReadingPassage(fresh);
       onSubmit(result.usage);
+      logEvent("passage_generated", { kind: "reading", tier, interest: interestForPiece }, childId);
     } catch (err) {
+      logEvent("generate_failed", { kind: "reading", tier, status: err.statusCode || "network" }, childId);
       setSubmitError(err.payload?.error || err.message || "Couldn't generate a reading passage. Please try again.");
     } finally {
       setReadingLoading(false);
@@ -4631,6 +4654,7 @@ function Workspace({ plan, country, gradeIdx, setGradeIdx, tier, setTierOverride
       }
       setPhase("done");
     } catch (err) {
+      logEvent("submit_failed", { kind: exerciseType, tier, status: err.statusCode || "network" }, childId);
       // Same reasoning as the success path above - don't surface an error
       // banner for a request the student isn't looking at anymore. setPhase
       // is left unconditional as a harmless safety net: it's a no-op if the
@@ -5499,6 +5523,9 @@ function App({ session }){
   // scrolled to (the Dashboard is long; the new pages are short).
   useEffect(()=>{ window.scrollTo({ top: 0 }); }, [view]);
   useEffect(()=>{ if (view === "plan" && window.llTrack) window.llTrack("view_plans"); }, [view]);
+  // Our own usage log: one "app_open" per visit, then one "view" each time they move to a page.
+  useEffect(()=>{ if (backendLive) logEvent("app_open"); }, [backendLive]);
+  useEffect(()=>{ if (backendLive) logEvent("view", { view }); }, [view, backendLive]);
 
   // A standalone route straight to Stripe's own billing portal (payment
   // method, invoices, cancel) from the header's Account menu, without first
