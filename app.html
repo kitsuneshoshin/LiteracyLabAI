@@ -31,6 +31,8 @@
      which currency a visitor sees. Served from this site, so it can't be
      held up by a third-party CDN. -->
 <script src="pricing.js"></script>
+<!-- Translates the app's interface text into the family's language (see app-i18n.js). -->
+<script src="app-i18n.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <!-- Sentry is optional, so it loads async: the app must never wait on error
      reporting to start. The previous tag pointed at a jsdelivr path that
@@ -2797,7 +2799,7 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
             <label className="flex flex-col gap-1.5 mb-4">
               <span className="label-mono" style={{ color: "var(--ink-soft)" }}>Language at home</span>
               <select value={homeLanguage(session) || "en"}
-                onChange={(e)=>{ supabaseClient.auth.updateUser({ data: { language: e.target.value === "en" ? null : e.target.value } }).catch(()=>{}); }}
+                onChange={(e)=>{ const code = e.target.value; Promise.resolve(supabaseClient.auth.updateUser({ data: { language: code === "en" ? null : code } })).catch(()=>{}).then(()=>{ window.LLI18N && window.LLI18N.set(code); }); }}
                 className="focus-ring w-full rounded-xl border px-3.5 py-2.5 text-sm font-medium"
                 style={{ borderColor: "var(--border)", background: "var(--surface)", color: "var(--ink)" }}>
                 {HOME_LANGUAGES.map((l)=> <option key={l.code} value={l.code}>{l.native}</option>)}
@@ -5477,6 +5479,8 @@ const DEMO_CHILD = { id: "demo", display_name: "My Learner", country: "🇬🇧 
 
 function App({ session }){
   const backendLive = BACKEND_CONFIGURED && !!session;
+  // The app's own text follows the account's language when this browser has no choice of its own (see app-i18n.js).
+  useEffect(() => { if (session && window.LLI18N) window.LLI18N.accountLanguage(homeLanguage(session)); }, [session]);
 
   const [theme, setTheme] = useState("system");
   const [view, setView] = useState("workspace");
@@ -5894,7 +5898,7 @@ function AuthScreen(){
                 {mode === "signup" && (
                 <label className="flex flex-col gap-1.5">
                   <span className="label-mono" style={{ color: "var(--ink-soft)" }}>Language at home</span>
-                  <select value={language} onChange={(e)=>setLanguage(e.target.value)}
+                  <select value={language} onChange={(e)=>{ setLanguage(e.target.value); window.LLI18N && window.LLI18N.remember(e.target.value); }}
                     className="focus-ring w-full rounded-xl border px-3.5 py-2.5 text-sm" style={{ borderColor: "var(--border)", background: "var(--surface)", color: "var(--ink)" }}>
                     {HOME_LANGUAGES.map((l)=> <option key={l.code} value={l.code}>{l.native}</option>)}
                   </select>
