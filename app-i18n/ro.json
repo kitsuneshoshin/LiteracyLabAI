@@ -477,6 +477,10 @@
   "{n0}:{n1} remaining": "Rămân {n0}:{n1}",
   "Manage {0}'s profile": "Gestionează profilul — {0}",
   "{0}'s name, year group, interests and account settings": "Nume, clasă, interese și setările contului — {0}",
-  "{0}'s vocabulary bank": "Banca de vocabular — {0}"
+  "{0}'s vocabulary bank": "Banca de vocabular — {0}",
+  "One account per household — set up your learner after signing up.": "Un cont pe familie — configurezi elevul după înregistrare.",
+  "Log in to see your learner's dashboard.": "Conectează-te ca să vezi panoul elevului.",
+  "Enter your email and we'll send you a link to choose a new password.": "Introdu adresa de e-mail și îți trimitem un link pentru a alege o parolă nouă.",
+  "and": "și"
  }
 }

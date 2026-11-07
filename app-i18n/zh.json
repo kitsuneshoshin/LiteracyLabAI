@@ -473,6 +473,10 @@
   "{n0}:{n1} remaining": "剩余 {n0}:{n1}",
   "Manage {0}'s profile": "管理 {0} 的档案",
   "{0}'s name, year group, interests and account settings": "{0} 的姓名、年级、兴趣和账户设置",
-  "{0}'s vocabulary bank": "{0} 的词汇库"
+  "{0}'s vocabulary bank": "{0} 的词汇库",
+  "One account per household — set up your learner after signing up.": "每个家庭一个账户——注册后再设置学生。",
+  "Log in to see your learner's dashboard.": "登录以查看学生的仪表盘。",
+  "Enter your email and we'll send you a link to choose a new password.": "输入你的邮箱，我们会发给你一个设置新密码的链接。",
+  "and": "和"
  }
 }

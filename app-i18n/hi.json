@@ -475,6 +475,10 @@
   "{n0}:{n1} remaining": "{n0}:{n1} शेष",
   "Manage {0}'s profile": "प्रोफ़ाइल प्रबंधित करें — {0}",
   "{0}'s name, year group, interests and account settings": "नाम, कक्षा, रुचियाँ और खाते की सेटिंग — {0}",
-  "{0}'s vocabulary bank": "शब्दावली बैंक — {0}"
+  "{0}'s vocabulary bank": "शब्दावली बैंक — {0}",
+  "One account per household — set up your learner after signing up.": "एक परिवार के लिए एक खाता — साइन अप के बाद विद्यार्थी को सेट करें।",
+  "Log in to see your learner's dashboard.": "विद्यार्थी का डैशबोर्ड देखने के लिए लॉग इन करें।",
+  "Enter your email and we'll send you a link to choose a new password.": "अपना ईमेल दर्ज करें और हम नया पासवर्ड चुनने के लिए आपको एक लिंक भेजेंगे।",
+  "and": "और"
  }
 }

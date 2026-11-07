@@ -475,6 +475,10 @@
   "{n0}:{n1} remaining": "{n0}:{n1} ਬਾਕੀ",
   "Manage {0}'s profile": "ਪ੍ਰੋਫਾਈਲ ਪ੍ਰਬੰਧਿਤ ਕਰੋ — {0}",
   "{0}'s name, year group, interests and account settings": "ਨਾਮ, ਜਮਾਤ, ਰੁਚੀਆਂ ਅਤੇ ਖਾਤੇ ਦੀਆਂ ਸੈਟਿੰਗਾਂ — {0}",
-  "{0}'s vocabulary bank": "ਸ਼ਬਦਾਵਲੀ ਬੈਂਕ — {0}"
+  "{0}'s vocabulary bank": "ਸ਼ਬਦਾਵਲੀ ਬੈਂਕ — {0}",
+  "One account per household — set up your learner after signing up.": "ਹਰ ਪਰਿਵਾਰ ਲਈ ਇੱਕ ਖਾਤਾ — ਸਾਈਨ ਅੱਪ ਤੋਂ ਬਾਅਦ ਵਿਦਿਆਰਥੀ ਨੂੰ ਸੈੱਟ ਕਰੋ।",
+  "Log in to see your learner's dashboard.": "ਵਿਦਿਆਰਥੀ ਦਾ ਡੈਸ਼ਬੋਰਡ ਦੇਖਣ ਲਈ ਲੌਗ ਇਨ ਕਰੋ।",
+  "Enter your email and we'll send you a link to choose a new password.": "ਆਪਣੀ ਈਮੇਲ ਦਰਜ ਕਰੋ ਅਤੇ ਅਸੀਂ ਨਵਾਂ ਪਾਸਵਰਡ ਚੁਣਨ ਲਈ ਤੁਹਾਨੂੰ ਇੱਕ ਲਿੰਕ ਭੇਜਾਂਗੇ।",
+  "and": "ਅਤੇ"
  }
 }

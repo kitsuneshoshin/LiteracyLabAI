@@ -483,6 +483,10 @@
   "{n0}:{n1} remaining": "المتبقي {n0}:{n1}",
   "Manage {0}'s profile": "إدارة الملف الشخصي — {0}",
   "{0}'s name, year group, interests and account settings": "الاسم والصف والاهتمامات وإعدادات الحساب — {0}",
-  "{0}'s vocabulary bank": "بنك المفردات — {0}"
+  "{0}'s vocabulary bank": "بنك المفردات — {0}",
+  "One account per household — set up your learner after signing up.": "حساب واحد لكل أسرة — أعدّ الطالب بعد التسجيل.",
+  "Log in to see your learner's dashboard.": "سجّل الدخول لرؤية لوحة الطالب.",
+  "Enter your email and we'll send you a link to choose a new password.": "أدخل بريدك الإلكتروني وسنرسل لك رابطًا لاختيار كلمة مرور جديدة.",
+  "and": "و"
  }
 }

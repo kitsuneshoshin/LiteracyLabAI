@@ -475,6 +475,10 @@
   "{n0}:{n1} remaining": "{n0}:{n1} বাকি",
   "Manage {0}'s profile": "প্রোফাইল পরিচালনা করুন — {0}",
   "{0}'s name, year group, interests and account settings": "নাম, শ্রেণি, আগ্রহ ও অ্যাকাউন্টের সেটিংস — {0}",
-  "{0}'s vocabulary bank": "শব্দভান্ডার ব্যাংক — {0}"
+  "{0}'s vocabulary bank": "শব্দভান্ডার ব্যাংক — {0}",
+  "One account per household — set up your learner after signing up.": "প্রতি পরিবারে একটি অ্যাকাউন্ট — সাইন আপের পর শিক্ষার্থীকে সেট করুন।",
+  "Log in to see your learner's dashboard.": "শিক্ষার্থীর ড্যাশবোর্ড দেখতে লগ ইন করুন।",
+  "Enter your email and we'll send you a link to choose a new password.": "আপনার ইমেইল লিখুন, আমরা নতুন পাসওয়ার্ড বেছে নিতে একটি লিংক পাঠাব।",
+  "and": "এবং"
  }
 }

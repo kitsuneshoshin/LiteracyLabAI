@@ -479,6 +479,10 @@
   "{n0}:{n1} remaining": "Pozostało {n0}:{n1}",
   "Manage {0}'s profile": "Zarządzaj profilem — {0}",
   "{0}'s name, year group, interests and account settings": "Imię, rocznik, zainteresowania i ustawienia konta ucznia",
-  "{0}'s vocabulary bank": "Bank słownictwa — {0}"
+  "{0}'s vocabulary bank": "Bank słownictwa — {0}",
+  "One account per household — set up your learner after signing up.": "Jedno konto na rodzinę — ucznia ustawisz po rejestracji.",
+  "Log in to see your learner's dashboard.": "Zaloguj się, aby zobaczyć panel ucznia.",
+  "Enter your email and we'll send you a link to choose a new password.": "Podaj swój e-mail, a wyślemy Ci link do wyboru nowego hasła.",
+  "and": "i"
  }
 }

@@ -475,6 +475,10 @@
   "{n0}:{n1} remaining": "{n0}:{n1} باقی",
   "Manage {0}'s profile": "پروفائل کا انتظام کریں — {0}",
   "{0}'s name, year group, interests and account settings": "نام، جماعت، دلچسپیاں اور اکاؤنٹ کی سیٹنگز — {0}",
-  "{0}'s vocabulary bank": "الفاظ کا بینک — {0}"
+  "{0}'s vocabulary bank": "الفاظ کا بینک — {0}",
+  "One account per household — set up your learner after signing up.": "ہر گھرانے کے لیے ایک اکاؤنٹ — سائن اپ کے بعد طالب علم کو سیٹ کریں۔",
+  "Log in to see your learner's dashboard.": "طالب علم کا ڈیش بورڈ دیکھنے کے لیے لاگ اِن کریں۔",
+  "Enter your email and we'll send you a link to choose a new password.": "اپنا ای میل درج کریں اور ہم نیا پاس ورڈ چننے کے لیے آپ کو ایک لنک بھیجیں گے۔",
+  "and": "اور"
  }
 }

@@ -34,7 +34,7 @@
     { code: "zh", native: "中文", fonts: "Noto+Sans+SC:wght@400;500;700", family: '"Noto Sans SC", "PingFang SC", "Microsoft YaHei"' },
   ];
   // Bump when a dictionary changes, so browsers fetch the new one.
-  var DICT_VERSION = 8;
+  var DICT_VERSION = 9;
   var STORE_KEY = "ll_ui_lang";
   var ATTRS = ["title", "placeholder", "aria-label", "alt"];
 
