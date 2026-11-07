@@ -21,7 +21,7 @@
     { code: "pl", native: "Polski" },
   ];
   // Bump when a dictionary changes, so browsers fetch the new one.
-  var DICT_VERSION = 2;
+  var DICT_VERSION = 3;
   var STORE_KEY = "ll_ui_lang";
   var ATTRS = ["title", "placeholder", "aria-label", "alt"];
 
