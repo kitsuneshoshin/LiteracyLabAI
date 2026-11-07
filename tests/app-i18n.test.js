@@ -101,3 +101,23 @@ test("scripts the app's own fonts do not cover load a web font, with letter-spac
   const src = fs.readFileSync(path.join(ROOT, "app-i18n.js"), "utf8");
   assert.match(src, /letter-spacing: 0 !important; text-transform: none !important/);
 });
+
+test("right-to-left languages flip the page, and the app keeps to direction-neutral layout so the flip is clean", () => {
+  const rtl = I18N.LANGUAGES.filter((l) => l.rtl);
+  assert.deepEqual(rtl.map((l) => l.code).sort(), ["ar", "ur"]);
+  const src = fs.readFileSync(path.join(ROOT, "app-i18n.js"), "utf8");
+  assert.match(src, /setAttribute\("dir", "rtl"\)/);
+  assert.match(src, /app-rtl\.css/);
+  assert.ok(fs.existsSync(path.join(ROOT, "app-rtl.css")));
+  const css = fs.readFileSync(path.join(ROOT, "app-rtl.css"), "utf8");
+  assert.match(css, /\.ll-flip/);
+  assert.match(css, /unicode-bidi: plaintext/);
+  // The app's own markup must not name left or right outright (use ms-/me-/ps-/pe-/start-/end-/text-start/text-end/border-inline-start),
+  // or the flipped page would have things on the wrong side.
+  const babel = APP.slice(APP.indexOf('<script type="text/babel"'));
+  const physical = babel.match(/(?<![\w-])(text-left|text-right|ml-\d|mr-\d|pl-\d|pr-\d|-?left-\d|-?right-\d|border-l(?![\w])|border-r(?![\w])|rounded-l(?![gx\w])|rounded-r(?![\w]))[\w./-]*/g) || [];
+  // left-1/2 (centring) and the pair left-0 right-0 (stretching across) are the same either way round.
+  assert.deepEqual(physical.filter((t) => !["left-1/2", "left-0", "right-0"].includes(t)), [], "left/right-specific classes in the app");
+  assert.ok(!/\b(borderLeft|borderRight|marginLeft|marginRight|paddingLeft|paddingRight)\s*:/.test(babel), "left/right-specific inline styles");
+  assert.ok(babel.includes('const IconArrowRight = (p) => <Icon {...p} className={(p.className || "") + " ll-flip"}>'), "arrows are marked so they flip");
+});

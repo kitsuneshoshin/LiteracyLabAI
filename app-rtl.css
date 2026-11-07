@@ -1,0 +1,18 @@
+/* Right-to-left (Arabic, Urdu) additions for the app. app-i18n.js loads this and sets dir="rtl" on the page when one of those
+   languages is chosen. The page flips by itself (flex and grid follow the direction), and the app's own left/right rules were
+   changed to direction-neutral ones (ms-/me-/ps-/pe-, text-start/end, border-inline-start), so what is left to do here is small. */
+
+/* Arrows that point "forward" point the other way. The "back" arrow is already turned round in the markup, so it is put back. */
+html[dir="rtl"] .ll-flip { transform: scaleX(-1) !important; }
+html[dir="rtl"] .ll-unflip { transform: none !important; }
+
+/* Each paragraph, list item and box takes the direction of the text in it: the interface is right to left, but a reading passage
+   or something the learner writes is English and stays left to right. */
+html[dir="rtl"] p,
+html[dir="rtl"] li,
+html[dir="rtl"] textarea,
+html[dir="rtl"] input[type="text"],
+html[dir="rtl"] .font-read { unicode-bidi: plaintext; text-align: start; }
+
+/* Arabic and Urdu letters join, so letter-spacing would break the words apart, and capitals do not exist. */
+html[dir="rtl"] * { letter-spacing: 0 !important; text-transform: none !important; }

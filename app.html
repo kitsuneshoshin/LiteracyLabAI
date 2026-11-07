@@ -442,7 +442,7 @@ const IconLandmark = (p) => <Icon {...p}><path d="M4 21h16M5 21V10.5M19 21V10.5M
 const IconClapper = (p) => <Icon {...p}><path d="M3.5 10.5l15.6-3.7 1 4.2L4.5 14.7z" /><rect x="3.5" y="10.5" width="17" height="9.5" rx="1.6" /></Icon>;
 const IconGrad = (p) => <Icon {...p}><path d="M2.5 9.5L12 5l9.5 4.5L12 14z" /><path d="M6.5 11.6v4.7c0 1.3 2.5 2.7 5.5 2.7s5.5-1.4 5.5-2.7v-4.7" /></Icon>;
 const IconMic = (p) => <Icon {...p}><rect x="9" y="3" width="6" height="11" rx="3" /><path d="M6 11a6 6 0 0 0 12 0M12 17v4M9 21h6" /></Icon>;
-const IconArrowRight = (p) => <Icon {...p}><path d="M4.5 12h15M13.5 6l6 6-6 6" /></Icon>;
+const IconArrowRight = (p) => <Icon {...p} className={(p.className || "") + " ll-flip"}><path d="M4.5 12h15M13.5 6l6 6-6 6" /></Icon>;
 const IconMoon = (p) => <Icon {...p}><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z" /></Icon>;
 const IconPaw = (p) => <Icon {...p}><circle cx="7" cy="9" r="1.6" /><circle cx="12" cy="6.5" r="1.6" /><circle cx="17" cy="9" r="1.6" /><path d="M8 15c0-2 1.8-3.3 4-3.3s4 1.3 4 3.3-1.8 3.5-4 3.5-4-1.5-4-3.5z" /></Icon>;
 const IconBall = (p) => <Icon {...p}><circle cx="12" cy="12" r="8.5" /><path d="M12 3.5v5M12 15.5v5M4 8.5l7 3.5M20 8.5l-7 3.5M4 15.5l7-3.5M20 15.5l-7-3.5" /></Icon>;
@@ -1371,16 +1371,16 @@ function AccountMenu({ plan, backendLive, onGoToProfile, onGoToPlan, onManagePay
         <div role="menu" className={`absolute ${align === "left" ? "left-0" : "right-0"} mt-2 w-56 max-w-[calc(100vw-2rem)] rounded-xl border py-1.5 z-50`}
           style={{ borderColor: "var(--border)", background: "var(--surface)", boxShadow: "0 10px 30px rgba(0,0,0,.15)" }}>
           <button role="menuitem" onClick={() => pick(onGoToProfile)}
-            className="focus-ring w-full text-left px-3.5 py-2 text-[13px] font-medium" style={{ color: "var(--ink)" }}>
+            className="focus-ring w-full text-start px-3.5 py-2 text-[13px] font-medium" style={{ color: "var(--ink)" }}>
             Manage profile
           </button>
           <button role="menuitem" onClick={() => pick(onGoToPlan)}
-            className="focus-ring w-full text-left px-3.5 py-2 text-[13px] font-medium" style={{ color: "var(--ink)" }}>
+            className="focus-ring w-full text-start px-3.5 py-2 text-[13px] font-medium" style={{ color: "var(--ink)" }}>
             {paid ? "Manage plan" : "See plans"}
           </button>
           {paid && plan !== "admin" && (
             <button role="menuitem" onClick={() => pick(onManagePayment)} disabled={billingPortalLoading}
-              className="focus-ring w-full text-left px-3.5 py-2 text-[13px] font-medium disabled:opacity-60" style={{ color: "var(--ink)" }}>
+              className="focus-ring w-full text-start px-3.5 py-2 text-[13px] font-medium disabled:opacity-60" style={{ color: "var(--ink)" }}>
               {billingPortalLoading ? "Redirecting…" : "Manage payment details"}
             </button>
           )}
@@ -1388,7 +1388,7 @@ function AccountMenu({ plan, backendLive, onGoToProfile, onGoToPlan, onManagePay
             <>
               <div className="my-1 border-t" style={{ borderColor: "var(--border-soft)" }} />
               <button role="menuitem" onClick={() => pick(onSignOut)}
-                className="focus-ring w-full text-left px-3.5 py-2 text-[13px] font-medium" style={{ color: "var(--bad)" }}>
+                className="focus-ring w-full text-start px-3.5 py-2 text-[13px] font-medium" style={{ color: "var(--bad)" }}>
                 Sign out
               </button>
             </>
@@ -1765,7 +1765,7 @@ function VocabularyBank({ session, childId, backendLive, onSeePlans, displayName
             )}
           </div>
           {wordOfDay && !query.trim() && (
-            <div className="card p-5 sm:p-6" style={{ borderLeft: "4px solid var(--gold)" }} aria-label="Word of the day">
+            <div className="card p-5 sm:p-6" style={{ borderInlineStart: "4px solid var(--gold)" }} aria-label="Word of the day">
               <div className="flex items-center justify-between gap-2 flex-wrap">
                 <span className="label-mono" style={{ color: "var(--gold-ink)", fontWeight: 700 }}>Word of the day</span>
                 <MasteryPips box={vocabBoxOf(boxes, wordOfDay.term)} />
@@ -1840,14 +1840,14 @@ function VocabFlashcards({ deck, boxes, onRate, onBack, onAgain }){
   return (
     <div className="max-w-xl mx-auto w-full flex flex-col gap-4">
       <div className="flex items-center gap-3">
-        <button onClick={onBack} className="focus-ring text-[13px] font-semibold underline py-3 pr-3" style={{ color: "var(--ink-soft)" }}>Back</button>
+        <button onClick={onBack} className="focus-ring text-[13px] font-semibold underline py-3 pe-3" style={{ color: "var(--ink-soft)" }}>Back</button>
         <div className="flex-1 h-2 rounded-full overflow-hidden" style={{ background: "var(--border)" }} role="progressbar" aria-valuemin={0} aria-valuemax={deck.length} aria-valuenow={idx} aria-label="Cards done">
           <div className="h-full rounded-full" style={{ width: (idx / deck.length) * 100 + "%", background: "var(--cyan)", transition: "width 250ms" }} />
         </div>
         <span className="text-xs font-semibold tabular" style={{ color: "var(--ink-soft)" }}>{idx + 1} / {deck.length}</span>
       </div>
       <button type="button" onClick={()=>setFlipped((f) => !f)} aria-label={flipped ? "Show the word" : "Show the meaning"}
-        className="focus-ring card w-full text-left p-6 sm:p-8 min-h-[16rem] flex flex-col justify-center gap-3" style={{ borderColor: flipped ? "var(--cyan)" : "var(--border)", borderWidth: 1.5 }}>
+        className="focus-ring card w-full text-start p-6 sm:p-8 min-h-[16rem] flex flex-col justify-center gap-3" style={{ borderColor: flipped ? "var(--cyan)" : "var(--border)", borderWidth: 1.5 }}>
         <div className="flex items-center justify-between">
           <span className="label-mono" style={{ color: "var(--ink-soft)" }}>{flipped ? "Meaning" : "What does this word mean?"}</span>
           <MasteryPips box={vocabBoxOf(boxes, card.term)} />
@@ -1899,7 +1899,7 @@ function VocabQuiz({ quiz, error, onRate, onRetry, onBack, loading }){
         <ScoreRing score={right} total={qs.length} />
         <h3 className="font-display font-bold text-lg" style={{ color: "var(--ink)" }}>{right === qs.length ? "Perfect score" : right >= qs.length / 2 ? "Good going" : "Keep practising"}</h3>
         {missed.length > 0 && (
-          <div className="w-full text-left flex flex-col gap-2">
+          <div className="w-full text-start flex flex-col gap-2">
             <div className="label-mono" style={{ color: "var(--ink-soft)" }}>Words to revisit</div>
             {missed.map((m) => (
               <div key={m.term} className="rounded-xl p-3" style={{ background: "var(--surface-2)" }}>
@@ -1927,7 +1927,7 @@ function VocabQuiz({ quiz, error, onRate, onRetry, onBack, loading }){
   return (
     <div className="max-w-xl mx-auto w-full flex flex-col gap-4">
       <div className="flex items-center gap-3">
-        <button onClick={onBack} className="focus-ring text-[13px] font-semibold underline py-3 pr-3" style={{ color: "var(--ink-soft)" }}>Back</button>
+        <button onClick={onBack} className="focus-ring text-[13px] font-semibold underline py-3 pe-3" style={{ color: "var(--ink-soft)" }}>Back</button>
         <div className="flex-1 h-2 rounded-full overflow-hidden" style={{ background: "var(--border)" }} role="progressbar" aria-valuemin={0} aria-valuemax={qs.length} aria-valuenow={idx} aria-label="Quiz progress">
           <div className="h-full rounded-full" style={{ width: (idx / qs.length) * 100 + "%", background: "var(--cyan)", transition: "width 250ms" }} />
         </div>
@@ -1944,7 +1944,7 @@ function VocabQuiz({ quiz, error, onRate, onRetry, onBack, loading }){
             if (answered && isCorrect) st = { borderColor: "var(--good)", background: "var(--good-tint)", color: "var(--ink)" };
             else if (answered && isChosen) st = { borderColor: "var(--bad)", background: "var(--bad-tint)", color: "var(--ink)" };
             return (
-              <button key={oi} disabled={answered} onClick={()=>pick(oi)} className="focus-ring text-left rounded-xl border px-3.5 py-2.5 text-[14px] disabled:cursor-default" style={st}>{opt}</button>
+              <button key={oi} disabled={answered} onClick={()=>pick(oi)} className="focus-ring text-start rounded-xl border px-3.5 py-2.5 text-[14px] disabled:cursor-default" style={st}>{opt}</button>
             );
           })}
         </div>
@@ -2147,7 +2147,7 @@ function ActivityHistory({ recent, historyLimit, displayName, session, onOpen })
         })}
       </div>
       {rows.length > HISTORY_PAGE && (
-        <button onClick={()=>setExpanded(v=>!v)} className="focus-ring mt-3 pt-3 border-t w-full text-[12.5px] font-semibold text-left" style={{ borderColor: "var(--border-soft)", color: "var(--cyan-ink)" }}>
+        <button onClick={()=>setExpanded(v=>!v)} className="focus-ring mt-3 pt-3 border-t w-full text-[12.5px] font-semibold text-start" style={{ borderColor: "var(--border-soft)", color: "var(--cyan-ink)" }}>
           {expanded ? "Show less" : `Show all ${rows.length}`}
         </button>
       )}
@@ -2359,7 +2359,7 @@ function ChildSwitcher({ children_, activeChildId, onSwitchChild, onAddChild, sh
     <div className="flex items-center gap-1.5 rounded-full border p-1 w-fit mb-4 flex-wrap" style={{ borderColor: "var(--border)", background: "var(--surface-2)" }}>
       {children_.map(c=>(
         <button key={c.id} onClick={()=>onSwitchChild(c.id)}
-          className="focus-ring inline-flex items-center gap-1.5 rounded-full pl-1 pr-3.5 py-1 text-xs font-semibold transition-colors"
+          className="focus-ring inline-flex items-center gap-1.5 rounded-full ps-1 pe-3.5 py-1 text-xs font-semibold transition-colors"
           style={ c.id===activeChildId ? { background: "var(--ink)", color: "var(--on-ink)" } : { color: "var(--ink-soft)" } }>
           <Avatar avatarId={c.avatar_id ?? 0} size={22} />
           {c.display_name || "Learner"}
@@ -2483,7 +2483,7 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
     <>
     {needsOnboarding && !showPlan && (
       <div className="mx-auto max-w-[1400px] px-4 sm:px-6 pt-8">
-        <div className="px-5 py-4 flex items-center gap-3 flex-wrap" style={{ background: "var(--cyan-tint)", borderLeft: "4px solid var(--cyan)", borderRadius: 4 }}>
+        <div className="px-5 py-4 flex items-center gap-3 flex-wrap" style={{ background: "var(--cyan-tint)", borderInlineStart: "4px solid var(--cyan)", borderRadius: 4 }}>
           <div className="w-9 h-9 rounded-full grid place-items-center shrink-0" style={{ background: "var(--cyan)", color: "var(--on-solid)" }}>
             <IconSparkle size={17} strokeWidth={2.2} />
           </div>
@@ -2576,7 +2576,7 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
                 scrolls sideways hides the status. On a phone each target is a small
                 block (name, then progress and status); from sm up it is the familiar
                 three-column row with a heading line. */}
-            <div role="row" className="hidden sm:grid grid-cols-[1fr_10rem_7.5rem] gap-x-3 pb-2.5 text-left" style={{ color: "var(--ink-faint)" }}>
+            <div role="row" className="hidden sm:grid grid-cols-[1fr_10rem_7.5rem] gap-x-3 pb-2.5 text-start" style={{ color: "var(--ink-faint)" }}>
               <div role="columnheader" className="label-mono">Curriculum target</div>
               <div role="columnheader" className="label-mono">Progress</div>
               <div role="columnheader" className="label-mono">Status</div>
@@ -2592,7 +2592,7 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
                   <div className="h-2.5 rounded-full flex-1" style={{ background: "var(--surface-2)" }}>
                     <div className="h-2.5 rounded-full" style={{ width: (row.pct ?? 0) + "%", background: STATUS_STYLE[row.status].ink }} />
                   </div>
-                  <span className="text-xs font-semibold tabular w-10 text-right" style={{ color: "var(--ink-soft)" }}>{row.pct != null ? `${row.pct}%` : "—"}</span>
+                  <span className="text-xs font-semibold tabular w-10 text-end" style={{ color: "var(--ink-soft)" }}>{row.pct != null ? `${row.pct}%` : "—"}</span>
                 </div>
                 <div role="cell"><StatusTag status={row.status} /></div>
               </div>
@@ -2690,7 +2690,7 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
                         borderTop: i === 0 ? "none" : "1px solid var(--border-soft)",
                       }}>
                       <div className="flex items-center gap-3">
-                        <span className="font-display font-bold w-6 text-right" style={{ color: row.isYou ? "var(--cyan-ink)" : "var(--ink-faint)" }}>#{row.rank}</span>
+                        <span className="font-display font-bold w-6 text-end" style={{ color: row.isYou ? "var(--cyan-ink)" : "var(--ink-faint)" }}>#{row.rank}</span>
                         <span className="font-medium" style={{ color: "var(--ink)" }}>{row.isYou ? (displayName || "Your learner") : `Student ${row.rank}`}</span>
                       </div>
                       <span className="font-semibold tabular" style={{ color: row.isYou ? "var(--cyan-ink)" : "var(--ink-soft)" }}>{row.score}%</span>
@@ -2732,8 +2732,8 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
       <div className={`flex flex-col gap-6 ${showOverview ? "" : "w-full mx-auto " + (showPlan ? "max-w-4xl" : "max-w-5xl")}`}>
         {!showOverview && (
           <div>
-            <button onClick={()=>setView("dashboard")} className="focus-ring inline-flex items-center gap-1.5 text-[13px] font-semibold mb-2 py-2.5 pr-3" style={{ color: "var(--ink-soft)" }}>
-              <IconArrowRight size={14} style={{ transform: "rotate(180deg)" }} /> Back to dashboard
+            <button onClick={()=>setView("dashboard")} className="focus-ring inline-flex items-center gap-1.5 text-[13px] font-semibold mb-2 py-2.5 pe-3" style={{ color: "var(--ink-soft)" }}>
+              <IconArrowRight size={14} className="ll-unflip" style={{ transform: "rotate(180deg)" }} /> Back to dashboard
             </button>
             <div className="label-mono mb-1.5" style={{ color: "var(--ink-soft)" }}>Account</div>
             <h1 className="font-display text-5xl" style={{ color: "var(--ink)", lineHeight: 1.1 }}>
@@ -2749,7 +2749,7 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
           <div className="grid sm:grid-cols-3 gap-4">
             {[["profile", "Manage profile", `${displayName || "Your learner"}'s name, year group, interests and account settings`], ["plan", "Manage plan", "Your subscription and what each plan includes"]].map(([target, label, sub]) => (
               <button key={target} onClick={()=>setView(target)}
-                className="focus-ring card p-5 flex items-center justify-between gap-3 text-left transition-colors">
+                className="focus-ring card p-5 flex items-center justify-between gap-3 text-start transition-colors">
                 <div>
                   <div className="font-display text-2xl" style={{ color: "var(--ink)" }}>{label}</div>
                   <div className="text-[13px] mt-1" style={{ color: "var(--ink-soft)" }}>{sub}</div>
@@ -2758,8 +2758,8 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
               </button>
             ))}
             <button onClick={needsOnboarding ? onCompleteOnboarding : ()=>setView("workspace")}
-              className="focus-ring card p-5 flex items-center justify-between gap-3 text-left transition-colors"
-              style={ needsOnboarding ? { borderLeft: "4px solid var(--cyan)", background: "var(--cyan-tint)" } : {} }>
+              className="focus-ring card p-5 flex items-center justify-between gap-3 text-start transition-colors"
+              style={ needsOnboarding ? { borderInlineStart: "4px solid var(--cyan)", background: "var(--cyan-tint)" } : {} }>
               <div>
                 <div className="font-display text-2xl" style={{ color: "var(--ink)" }}>{needsOnboarding ? "Start Writing" : "Go to Student Workspace"}</div>
                 <div className="text-[13px] mt-1" style={{ color: "var(--ink-soft)" }}>{needsOnboarding ? "Setup saved — begin your first session" : `Start today’s ${TIER_META[tier].label.toLowerCase()} writing or reading session`}</div>
@@ -2820,7 +2820,7 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
               <span className="label-mono" style={{ color: "var(--ink-soft)" }}>Country curriculum</span>
               <div className="relative">
                 <select value={country} onChange={(e)=>setCountry(e.target.value)}
-                  className="focus-ring w-full appearance-none rounded-xl border px-3.5 py-2.5 pr-9 text-sm font-medium"
+                  className="focus-ring w-full appearance-none rounded-xl border px-3.5 py-2.5 pe-9 text-sm font-medium"
                   style={{ borderColor: "var(--border)", background: "var(--surface)", color: "var(--ink)" }}>
                   {/* A native <option> can't hold an <img>, so this is the
                       one spot the flag is dropped entirely rather than
@@ -2829,7 +2829,7 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
                       flag. value stays the real emoji-prefixed string. */}
                   {COUNTRIES.map(c=> <option key={c} value={c}>{stripFlag(c)}</option>)}
                 </select>
-                <IconChevron size={15} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2" style={{ color: "var(--ink-faint)" }} />
+                <IconChevron size={15} className="pointer-events-none absolute end-3 top-1/2 -translate-y-1/2" style={{ color: "var(--ink-faint)" }} />
               </div>
               <span className="text-[11px]" style={{ color: "var(--ink-faint)" }}>{GRADE_DATA[country].curriculum}</span>
             </label>
@@ -2837,11 +2837,11 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
               <span className="label-mono" style={{ color: "var(--ink-soft)" }}>Grade / year / level</span>
               <div className="relative">
                 <select value={gradeIdx} onChange={(e)=>setGradeIdx(Number(e.target.value))}
-                  className="focus-ring w-full appearance-none rounded-xl border px-3.5 py-2.5 pr-9 text-sm font-medium"
+                  className="focus-ring w-full appearance-none rounded-xl border px-3.5 py-2.5 pe-9 text-sm font-medium"
                   style={{ borderColor: "var(--border)", background: "var(--surface)", color: "var(--ink)" }}>
                   {grades.map((g,i)=> <option key={g} value={i}>{g}</option>)}
                 </select>
-                <IconChevron size={15} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2" style={{ color: "var(--ink-faint)" }} />
+                <IconChevron size={15} className="pointer-events-none absolute end-3 top-1/2 -translate-y-1/2" style={{ color: "var(--ink-faint)" }} />
               </div>
             </label>
           </div>
@@ -2877,7 +2877,7 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
 
           {backendLive && children_.length > 1 && (
             <button onClick={()=>{ if (window.confirm(`Remove ${displayName || "this learner"}? This deletes all of their submissions and progress history permanently.`)) onRemoveChild(activeChildId); }}
-              className="focus-ring mt-6 pt-4 pb-2 border-t text-[13px] font-semibold w-full text-left" style={{ borderColor: "var(--border-soft)", color: "var(--bad)" }}>
+              className="focus-ring mt-6 pt-4 pb-2 border-t text-[13px] font-semibold w-full text-start" style={{ borderColor: "var(--border-soft)", color: "var(--bad)" }}>
               Remove {displayName || "this learner"} from this account
             </button>
           )}
@@ -2901,7 +2901,7 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
         )}
         {showPlan && (
         <div id="account-plan-section" className="card p-6 relative overflow-hidden" style={{ background: "linear-gradient(160deg, #1F1C19, #3E2028)", border: "1px solid #1F1C19" }}>
-          <div className="absolute -right-6 -top-6 w-28 h-28 rounded-full" style={{ background: "radial-gradient(circle, var(--gold) 0%, transparent 70%)", opacity: .35 }} />
+          <div className="absolute -end-6 -top-6 w-28 h-28 rounded-full" style={{ background: "radial-gradient(circle, var(--gold) 0%, transparent 70%)", opacity: .35 }} />
           <div className="relative">
             <div className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold mb-3" style={{ background: "var(--gold)", color: "var(--on-solid)" }}>
               <IconCrown size={12} strokeWidth={2.4} /> LITERACYLAB PLANS
@@ -2966,7 +2966,7 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
 
         {!showPlan && !showOverview && (
         <button onClick={needsOnboarding ? onCompleteOnboarding : ()=>setView("workspace")}
-          className="focus-ring card p-5 flex items-center justify-between text-left transition-colors"
+          className="focus-ring card p-5 flex items-center justify-between text-start transition-colors"
           style={ needsOnboarding ? { borderColor: "var(--cyan)", borderWidth: 1.5, background: "var(--cyan-tint)" } : {} }>
           <div>
             <div className="font-display font-semibold text-sm" style={{ color: "var(--ink)" }}>{needsOnboarding ? "Start Writing" : "Go to Student Workspace"}</div>
@@ -3335,7 +3335,7 @@ function AnnotatedText({ text, highlights, revisedStory }){
 function FeedbackNote({ tone, kicker, tag, children }){
   const glow = tone === "glow";
   return (
-    <div className="card p-5 sm:p-6" style={{ borderLeft: "4px solid " + (glow ? "var(--good)" : "var(--cyan)") }}>
+    <div className="card p-5 sm:p-6" style={{ borderInlineStart: "4px solid " + (glow ? "var(--good)" : "var(--cyan)") }}>
       <div className="flex items-center justify-between gap-2 flex-wrap mb-2.5">
         <div className="label-mono" style={{ color: glow ? "var(--good)" : "var(--cyan-ink)", fontWeight: 700 }}>{kicker}</div>
         {tag && <span className="label-mono rounded-full px-2.5 py-1" style={{ fontSize: 10.5, border: "1px solid var(--border)", color: "var(--ink-soft)" }}>{tag}</span>}
@@ -3355,7 +3355,7 @@ function OverallScorePanel({ feedback }){
   const reasonHead = split ? split[1] : reason;
   const reasonRest = split && split[2] ? split[2].trim() : "";
   return (
-    <div className="card p-5 sm:p-6 flex items-center gap-5" style={{ borderLeft: "4px solid " + color }}>
+    <div className="card p-5 sm:p-6 flex items-center gap-5" style={{ borderInlineStart: "4px solid " + color }}>
       <ScoreRing score={score} total={10} label="score" />
       <div className="min-w-0">
         <div className="label-mono mb-1.5" style={{ color: "var(--ink-soft)" }}>Overall score</div>
@@ -3530,7 +3530,7 @@ function ExpandAllBar(){
   return (
     <div className="flex justify-end">
       <button type="button" onClick={()=>{ const next = !allOpen; setAllOpen(next); window.dispatchEvent(new CustomEvent("ll-set-all-sections", { detail: next })); }}
-        className="focus-ring text-[12.5px] font-semibold underline py-3 pl-3" style={{ color: "var(--ink-soft)" }}>
+        className="focus-ring text-[12.5px] font-semibold underline py-3 ps-3" style={{ color: "var(--ink-soft)" }}>
         {allOpen ? "Close all sections" : "Open all sections"}
       </button>
     </div>
@@ -3562,7 +3562,7 @@ function Collapsible({ id, icon, iconBg, iconColor, title, teaser, borderColor, 
   }
   return (
     <div className="card p-5 sm:p-6">
-      <button onClick={()=>setOpen(o=>!o)} className="focus-ring w-full flex items-center gap-2.5 text-left" aria-expanded={open}>
+      <button onClick={()=>setOpen(o=>!o)} className="focus-ring w-full flex items-center gap-2.5 text-start" aria-expanded={open}>
         <div className="w-8 h-8 rounded-full grid place-items-center shrink-0" style={{ border: "1px solid var(--border)", color: "var(--ink)" }}>
           {icon}
         </div>
@@ -3836,7 +3836,7 @@ function LabelledResponse({ text, labels, parts }){
   return (
     <div className="flex flex-col gap-2">
       {runs.map((r, i)=> r.part ? (
-        <div key={i} className="rounded-xl p-3" style={{ background: colorOf(r.part)[0], borderLeft: "4px solid " + colorOf(r.part)[1] }}>
+        <div key={i} className="rounded-xl p-3" style={{ background: colorOf(r.part)[0], borderInlineStart: "4px solid " + colorOf(r.part)[1] }}>
           <span className="inline-block rounded-full px-2 py-0.5 text-[11px] font-bold mb-1.5" style={{ background: "var(--surface)", color: colorOf(r.part)[1], border: "1px solid " + colorOf(r.part)[1] }}>{r.part}</span>
           <p className="whitespace-pre-wrap font-read text-[14px] leading-relaxed" style={{ color: "var(--ink)" }}>{r.text}</p>
           {r.note && <p className="text-[12.5px] mt-1.5" style={{ color: "var(--ink-soft)" }}><span className="font-semibold">How it works: </span>{r.note}</p>}
@@ -3971,7 +3971,7 @@ function QuestionReviewPanel({ feedback, questions, answers, passageBank, shownQ
                   <p className="text-[12.5px] mt-1.5" style={{ color: "var(--good)" }}><span className="font-semibold">You made these points: </span>{marked.hit.map((m) => String(m).replace(/[.;]+s*$/, "")).join("; ")}</p>
                 )}
                 {marked && Array.isArray(marked.missed) && marked.missed.length > 0 && (
-                  <div className="text-[12.5px] mt-1.5" style={{ color: "var(--ink-soft)" }}><div className="font-semibold">To earn more marks:</div><ul className="list-disc pl-4 mt-0.5 space-y-0.5">{marked.missed.map((m, mi) => <li key={mi}>{String(m).replace(/[.;]+s*$/, "")}</li>)}</ul></div>
+                  <div className="text-[12.5px] mt-1.5" style={{ color: "var(--ink-soft)" }}><div className="font-semibold">To earn more marks:</div><ul className="list-disc ps-4 mt-0.5 space-y-0.5">{marked.missed.map((m, mi) => <li key={mi}>{String(m).replace(/[.;]+s*$/, "")}</li>)}</ul></div>
                 )}
                 {marked && Array.isArray(marked.parts) && marked.parts.length > 0 && (
                   <div className="mt-1.5 flex flex-wrap items-center gap-1.5" aria-label={(qFwName(q) || "Answer") + " parts used"}>
@@ -3992,7 +3992,7 @@ function QuestionReviewPanel({ feedback, questions, answers, passageBank, shownQ
                       <p className="text-[13.5px] leading-relaxed mt-1 font-read" style={{ color: "var(--ink)" }}>
                         {q.modelParts.map((m, k) => (
                           <span key={k}>
-                            <span className="inline-block rounded px-1 mr-1 align-baseline text-[10.5px] font-bold uppercase tracking-wide" style={{ background: "var(--surface)", color: "var(--good)" }}>{m.part}</span>{m.text}{" "}
+                            <span className="inline-block rounded px-1 me-1 align-baseline text-[10.5px] font-bold uppercase tracking-wide" style={{ background: "var(--surface)", color: "var(--good)" }}>{m.part}</span>{m.text}{" "}
                           </span>
                         ))}
                       </p>
@@ -4032,7 +4032,7 @@ function QuestionReviewPanel({ feedback, questions, answers, passageBank, shownQ
                     return (
                       <p className="text-[12.5px] leading-snug mt-1.5 font-read" style={{ color: "var(--ink-faint)" }}>
                         From the passage: “{ev}”{findable && (
-                          <button type="button" onClick={() => onShowQuote(on ? "" : ev)} aria-pressed={on} className="focus-ring ml-2 inline-flex items-center rounded-full px-2 py-0.5 text-[11.5px] font-sans font-semibold not-italic"
+                          <button type="button" onClick={() => onShowQuote(on ? "" : ev)} aria-pressed={on} className="focus-ring ms-2 inline-flex items-center rounded-full px-2 py-0.5 text-[11.5px] font-sans font-semibold not-italic"
                             style={{ background: on ? "var(--gold)" : "var(--gold-tint)", color: on ? "var(--on-solid)" : "var(--gold-ink)" }}>{on ? "Hide in passage" : "Show in passage"}</button>
                         )}
                       </p>
@@ -4301,7 +4301,7 @@ function FocusPicker({ kind, tier, country, gradeLabel, premium, value, onChange
   // One card per choice: an icon, a name and a line saying what it is. "Surprise me" comes first.
   const card = (on, name, blurb, Ic, onClick, tag, key) => (
     <button key={key} type="button" aria-pressed={on} onClick={onClick}
-      className="focus-ring relative text-left rounded-xl border p-3 flex flex-col gap-1 h-full"
+      className="focus-ring relative text-start rounded-xl border p-3 flex flex-col gap-1 h-full"
       style={ on ? { background: "var(--cyan-tint)", borderColor: "var(--cyan)", borderWidth: 1.5, color: "var(--cyan-ink)" } : { borderColor: "var(--border)", color: "var(--ink)", background: "var(--surface)" } }>
       <span className="flex items-center justify-between gap-2">
         <Ic size={20} strokeWidth={1.8} style={{ color: on ? "var(--cyan-ink)" : "var(--ink-soft)" }} />
@@ -4326,7 +4326,7 @@ function FocusPicker({ kind, tier, country, gradeLabel, premium, value, onChange
               <button type="button" role="switch" aria-checked={!!v.examStyle} onClick={() => onChange({ ...v, examStyle: v.examStyle ? undefined : true })}
                 className="focus-ring inline-flex items-center gap-2 text-[13px] font-medium" style={{ color: "var(--ink-soft)" }}>
                 <span className="relative inline-block rounded-full shrink-0" style={{ width: 36, height: 20, background: v.examStyle ? "var(--cyan)" : "var(--border-strong, var(--border))", transition: "background .15s" }}>
-                  <span className="absolute rounded-full" style={{ top: 2, left: v.examStyle ? 18 : 2, width: 16, height: 16, background: "var(--surface)", transition: "left .15s" }} />
+                  <span className="absolute rounded-full" style={{ top: 2, insetInlineStart: v.examStyle ? 18 : 2, width: 16, height: 16, background: "var(--surface)", transition: "inset-inline-start .15s" }} />
                 </span>
                 Word it like a {exam} task
               </button>
@@ -4770,7 +4770,7 @@ function Workspace({ plan, country, gradeIdx, setGradeIdx, tier, setTierOverride
                   </>
                 ) : (
                   <>
-                    <div className="w-full text-left flex flex-col gap-4">
+                    <div className="w-full text-start flex flex-col gap-4">
                       <div>
                         <span className="label-mono" style={{ color: "var(--ink-soft)" }}>A prompt, made for you</span>
                         <div className="font-display text-2xl sm:text-3xl mt-1" style={{ color: "var(--ink)" }}>What would you like to write today?</div>
@@ -4809,7 +4809,7 @@ function Workspace({ plan, country, gradeIdx, setGradeIdx, tier, setTierOverride
                   </>
                 ) : (
                   <>
-                    <div className="w-full text-left flex flex-col gap-4">
+                    <div className="w-full text-start flex flex-col gap-4">
                       <div>
                         <span className="label-mono" style={{ color: "var(--ink-soft)" }}>A passage, made for you</span>
                         <div className="font-display text-2xl sm:text-3xl mt-1" style={{ color: "var(--ink)" }}>What would you like to read today?</div>
@@ -5044,9 +5044,9 @@ function VisualBlock({ visual }){
         <figcaption className="text-[12px] font-bold uppercase tracking-wide mb-2" style={{ color: "var(--ink-faint)" }}>{visual.title}</figcaption>
         <div className="overflow-x-auto">
           <table className="w-full text-[14px] border-collapse">
-            <thead><tr>{visual.headers.map((h, i) => <th key={i} scope="col" className="text-left font-display font-semibold px-2.5 py-1.5" style={{ background: "var(--surface-2)", color: "var(--ink)", borderBottom: "1px solid var(--border)" }}>{h}</th>)}</tr></thead>
+            <thead><tr>{visual.headers.map((h, i) => <th key={i} scope="col" className="text-start font-display font-semibold px-2.5 py-1.5" style={{ background: "var(--surface-2)", color: "var(--ink)", borderBottom: "1px solid var(--border)" }}>{h}</th>)}</tr></thead>
             <tbody>{visual.rows.map((r, ri) => <tr key={ri}>{r.map((c, ci) => ci === 0
-              ? <th key={ci} scope="row" className="text-left font-semibold px-2.5 py-1.5" style={{ color: "var(--ink)", borderTop: "1px solid var(--border-soft)" }}>{c}</th>
+              ? <th key={ci} scope="row" className="text-start font-semibold px-2.5 py-1.5" style={{ color: "var(--ink)", borderTop: "1px solid var(--border-soft)" }}>{c}</th>
               : <td key={ci} className="px-2.5 py-1.5 tabular" style={{ color: "var(--ink)", borderTop: "1px solid var(--border-soft)" }}>{c}</td>)}</tr>)}</tbody>
           </table>
         </div>
@@ -5063,7 +5063,7 @@ function VisualBlock({ visual }){
             <div key={i} className="grid items-center gap-2" style={{ gridTemplateColumns: "minmax(5rem, 9rem) 1fr 3rem" }}>
               <span className="text-[13px] truncate" style={{ color: "var(--ink)" }} title={it.label}>{it.label}</span>
               <span className="h-5 rounded" style={{ background: "var(--surface-2)" }}><span className="block h-full rounded" style={{ width: Math.max(2, ((Number(it.value) || 0) / max) * 100) + "%", background: "var(--cyan)" }} /></span>
-              <span className="text-[13px] font-semibold tabular text-right" style={{ color: "var(--ink)" }}>{it.value}</span>
+              <span className="text-[13px] font-semibold tabular text-end" style={{ color: "var(--ink)" }}>{it.value}</span>
             </div>
           ))}
         </div>
@@ -5141,7 +5141,7 @@ function ReadingQuestion({ q, qi, answer, setAnswer, revealed, disabled }){
               <div key={j} className="flex items-stretch gap-1.5">
                 <button type="button" disabled={lock} aria-label={pos !== -1 ? "Take \"" + item + "\" out of the order" : "Put \"" + item + "\" next in the order"}
                   onClick={() => setAnswer(pos !== -1 ? picked.filter((k) => k !== j) : [...picked, j])}
-                  className="focus-ring text-left rounded-xl border px-3.5 py-2.5 text-sm transition-colors flex items-center gap-2.5 flex-1 min-w-0"
+                  className="focus-ring text-start rounded-xl border px-3.5 py-2.5 text-sm transition-colors flex items-center gap-2.5 flex-1 min-w-0"
                   style={{ borderColor: right ? "var(--good)" : wrong ? "var(--bad)" : pos !== -1 ? "var(--cyan)" : "var(--border)", background: right ? "var(--good-tint)" : wrong ? "var(--bad-tint)" : pos !== -1 ? "var(--cyan-tint)" : "var(--surface)", color: "var(--ink)" }}>
                   <span className="inline-grid place-items-center rounded-full text-[12px] font-bold shrink-0" style={{ width: 24, height: 24, background: pos !== -1 ? "var(--cyan)" : "var(--surface-2)", color: pos !== -1 ? "var(--on-solid)" : "var(--ink-faint)" }}>{pos !== -1 ? pos + 1 : "•"}</span>
                   <span>{item}</span>
@@ -5239,7 +5239,7 @@ function ReadingQuestion({ q, qi, answer, setAnswer, revealed, disabled }){
           const isCorrect = oi === q.correct;
           return (
             <button key={oi} disabled={lock} onClick={() => setAnswer(oi)}
-              className={"focus-ring text-left rounded-xl border px-3.5 py-2.5 text-sm transition-colors" + (st === "tfng" ? " text-center font-semibold" : "") + (st === "evidence" ? " font-read italic" : "")}
+              className={"focus-ring text-start rounded-xl border px-3.5 py-2.5 text-sm transition-colors" + (st === "tfng" ? " text-center font-semibold" : "") + (st === "evidence" ? " font-read italic" : "")}
               style={choiceStyle(revealed, selected, isCorrect)}>
               {st === "evidence" ? "\u201C" + opt + "\u201D" : opt}
             </button>

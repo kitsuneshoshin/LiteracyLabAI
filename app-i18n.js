@@ -27,10 +27,14 @@
     { code: "hi", native: "हिन्दी", fonts: "Noto+Sans+Devanagari:wght@400;500;600;700", family: '"Noto Sans Devanagari"' },
     { code: "pa", native: "ਪੰਜਾਬੀ", fonts: "Noto+Sans+Gurmukhi:wght@400;500;600;700", family: '"Noto Sans Gurmukhi"' },
     { code: "bn", native: "বাংলা", fonts: "Noto+Sans+Bengali:wght@400;500;600;700", family: '"Noto Sans Bengali"' },
+    // rtl: reads right to left; the page is flipped (dir="rtl") and app-rtl.css loads. Urdu is set in Naskh here (not the Nastaliq of
+    // the homepage): Nastaliq's tall letters need line heights the app's compact controls do not have.
+    { code: "ar", native: "العربية", rtl: true, fonts: "Noto+Naskh+Arabic:wght@400;500;600;700", family: '"Noto Naskh Arabic"' },
+    { code: "ur", native: "اردو", rtl: true, fonts: "Noto+Naskh+Arabic:wght@400;500;600;700", family: '"Noto Naskh Arabic"' },
     { code: "zh", native: "中文", fonts: "Noto+Sans+SC:wght@400;500;700", family: '"Noto Sans SC", "PingFang SC", "Microsoft YaHei"' },
   ];
   // Bump when a dictionary changes, so browsers fetch the new one.
-  var DICT_VERSION = 7;
+  var DICT_VERSION = 8;
   var STORE_KEY = "ll_ui_lang";
   var ATTRS = ["title", "placeholder", "aria-label", "alt"];
 
@@ -208,7 +212,7 @@
     var sel = doc.createElement("select");
     sel.setAttribute("data-no-i18n", "");
     sel.setAttribute("aria-label", "Language");
-    sel.style.cssText = "position:fixed;right:12px;bottom:12px;z-index:60;font:600 12px/1 system-ui,sans-serif;padding:8px 10px;border-radius:999px;border:1px solid rgba(0,0,0,.25);background:var(--surface,#fff);color:var(--ink,#222);cursor:pointer;opacity:.92";
+    sel.style.cssText = "position:fixed;inset-inline-end:12px;bottom:12px;z-index:60;font:600 12px/1 system-ui,sans-serif;padding:8px 10px;border-radius:999px;border:1px solid rgba(0,0,0,.25);background:var(--surface,#fff);color:var(--ink,#222);cursor:pointer;opacity:.92";
     LANGUAGES.forEach(function (l) { var o = doc.createElement("option"); o.value = l.code; o.textContent = l.native; if (l.code === lang) o.selected = true; sel.appendChild(o); });
     sel.addEventListener("change", function () { api.set(sel.value); });
     doc.body.appendChild(sel);
@@ -246,6 +250,13 @@
       var style = doc.createElement("style");
       style.textContent = 'html[data-ui-lang="' + lang + '"] * { font-family: ' + info.family + ', system-ui, sans-serif !important; letter-spacing: 0 !important; text-transform: none !important; }';
       doc.head.appendChild(style);
+    }
+    if (info && info.rtl) {
+      doc.documentElement.setAttribute("dir", "rtl");
+      var rtl = doc.createElement("link");
+      rtl.rel = "stylesheet";
+      rtl.href = "app-rtl.css?v=" + DICT_VERSION;
+      doc.head.appendChild(rtl);
     }
     fetch("app-i18n/" + lang + ".json?v=" + DICT_VERSION).then(function (r) { return r.json(); }).then(function (d) {
       compiled = compile(d.strings || d);
