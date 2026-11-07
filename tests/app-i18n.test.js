@@ -93,3 +93,11 @@ test("the translation layer keeps the app's data and logic alone: it only touche
   // The only value it ever sets is the option list of its own language switcher.
   assert.deepEqual((src.match(/\w+\.value\s*=/g) || []), ["o.value ="], "no form value of the app is ever written");
 });
+
+test("scripts the app's own fonts do not cover load a web font, with letter-spacing and capitals switched off", () => {
+  const needs = I18N.LANGUAGES.filter((l) => ["hi", "zh"].includes(l.code));
+  assert.equal(needs.length, 2);
+  for (const l of needs) assert.ok(l.fonts && l.family, l.code + ": no font for its script");
+  const src = fs.readFileSync(path.join(ROOT, "app-i18n.js"), "utf8");
+  assert.match(src, /letter-spacing: 0 !important; text-transform: none !important/);
+});

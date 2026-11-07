@@ -22,9 +22,13 @@
     { code: "es", native: "Español" },
     { code: "pt", native: "Português" },
     { code: "ro", native: "Română" },
+    // Scripts the app's own fonts do not cover load a web font (and have letter-spacing and capitals switched off, as joined or
+    // unicase scripts do not use them) only when chosen.
+    { code: "hi", native: "हिन्दी", fonts: "Noto+Sans+Devanagari:wght@400;500;600;700", family: '"Noto Sans Devanagari"' },
+    { code: "zh", native: "中文", fonts: "Noto+Sans+SC:wght@400;500;700", family: '"Noto Sans SC", "PingFang SC", "Microsoft YaHei"' },
   ];
   // Bump when a dictionary changes, so browsers fetch the new one.
-  var DICT_VERSION = 5;
+  var DICT_VERSION = 6;
   var STORE_KEY = "ll_ui_lang";
   var ATTRS = ["title", "placeholder", "aria-label", "alt"];
 
@@ -231,6 +235,16 @@
     switcher();
     if (lang === "en") return;
     doc.documentElement.setAttribute("lang", lang);
+    var info = LANGUAGES.filter(function (l) { return l.code === lang; })[0];
+    if (info && info.fonts) {
+      var link = doc.createElement("link");
+      link.rel = "stylesheet";
+      link.href = "https://fonts.googleapis.com/css2?family=" + info.fonts + "&display=swap";
+      doc.head.appendChild(link);
+      var style = doc.createElement("style");
+      style.textContent = 'html[data-ui-lang="' + lang + '"] * { font-family: ' + info.family + ', system-ui, sans-serif !important; letter-spacing: 0 !important; text-transform: none !important; }';
+      doc.head.appendChild(style);
+    }
     fetch("app-i18n/" + lang + ".json?v=" + DICT_VERSION).then(function (r) { return r.json(); }).then(function (d) {
       compiled = compile(d.strings || d);
       try { rules = new Intl.PluralRules(lang); } catch (e) { rules = null; }
