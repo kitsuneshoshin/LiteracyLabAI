@@ -2,7 +2,7 @@ const test = require("node:test");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
-const { cleanEvent, buildActivity, EVENT_NAMES } = require("../api/_lib/activity");
+const { cleanEvent, buildActivity, isOwner, EVENT_NAMES } = require("../api/_lib/activity");
 const { loadHandler, call, did } = require("./harness");
 
 // The usage log and the owner's activity report: what is stored (names and short values, never writing),
@@ -73,9 +73,9 @@ test("the report counts pages, problems and people, and ignores events older tha
 // ---- the endpoints
 
 const res0 = () => ({ statusCode: 200, body: undefined, headers: {} });
-async function hit({ query, method = "POST", body = {}, bearer = "Bearer user-token", admins = "", count = 0, log = [] } = {}) {
-  const saved = process.env.ADMIN_EMAILS;
-  process.env.ADMIN_EMAILS = admins;
+async function hit({ query, method = "POST", body = {}, bearer = "Bearer user-token", owner = "", count = 0, log = [] } = {}) {
+  const saved = process.env.ACTIVITY_OWNER_EMAIL;
+  process.env.ACTIVITY_OWNER_EMAIL = owner;
   try {
     const db = (q) => {
       if (q.table === "usage_events" && did(q, "insert")) { log.push(q.ops.find(([n]) => n === "insert")[1]); return { data: null, error: null }; }
@@ -85,7 +85,7 @@ async function hit({ query, method = "POST", body = {}, bearer = "Bearer user-to
       return { data: null, error: null };
     };
     return await call(loadHandler("email.js", { db }), { method, query, body, headers: bearer ? { authorization: bearer } : {} });
-  } finally { if (saved == null) delete process.env.ADMIN_EMAILS; else process.env.ADMIN_EMAILS = saved; }
+  } finally { if (saved == null) delete process.env.ACTIVITY_OWNER_EMAIL; else process.env.ACTIVITY_OWNER_EMAIL = saved; }
 }
 
 test("event endpoint: a signed-in person's event is saved against their account with only the approved values", async () => {
@@ -109,14 +109,35 @@ test("event endpoint: unknown names, a flood from one account, and a bad child i
   assert.equal((await hit({ query: { action: "event" }, method: "GET" })).statusCode, 405);
 });
 
-test("activity endpoint: only an admin (or the cron secret) can read it", async () => {
-  assert.equal((await hit({ query: { action: "activity" }, method: "GET", admins: "boss@example.com" })).statusCode, 401, "a signed-in non-admin");
-  assert.equal((await hit({ query: { action: "activity" }, method: "GET", bearer: null, admins: "parent@example.com" })).statusCode, 401, "nobody signed in");
-  const ok = await hit({ query: { action: "activity" }, method: "GET", admins: "Parent@Example.com" });
+test("owner check: only the one confirmed owner address passes", () => {
+  const saved = process.env.ACTIVITY_OWNER_EMAIL;
+  process.env.ACTIVITY_OWNER_EMAIL = "Owner@Example.com";
+  try {
+    assert.equal(isOwner({ email: "owner@example.com", email_confirmed_at: "2026-01-01" }), true);
+    assert.equal(isOwner({ email: "owner@example.com" }), false, "an unconfirmed address is refused");
+    assert.equal(isOwner({ email: "other@example.com", email_confirmed_at: "2026-01-01" }), false);
+    assert.equal(isOwner(null), false);
+    delete process.env.ACTIVITY_OWNER_EMAIL;
+    assert.equal(isOwner({ email: "kitsune.shoshin@gmail.com", email_confirmed_at: "2026-01-01" }), true, "default owner");
+  } finally { if (saved == null) delete process.env.ACTIVITY_OWNER_EMAIL; else process.env.ACTIVITY_OWNER_EMAIL = saved; }
+});
+
+test("activity endpoint: only the owner can read it - not another signed-in user, not an ADMIN_EMAILS admin, not the cron secret", async () => {
+  assert.equal((await hit({ query: { action: "activity" }, method: "GET", owner: "boss@example.com" })).statusCode, 401, "a signed-in non-owner");
+  const savedAdmin = process.env.ADMIN_EMAILS, savedSecret = process.env.CRON_SECRET;
+  process.env.ADMIN_EMAILS = "parent@example.com"; process.env.CRON_SECRET = "s3cret";
+  try {
+    assert.equal((await hit({ query: { action: "activity" }, method: "GET", owner: "boss@example.com" })).statusCode, 401, "an ADMIN_EMAILS admin who is not the owner");
+    assert.equal((await hit({ query: { action: "activity" }, method: "GET", bearer: "Bearer s3cret", owner: "boss@example.com" })).statusCode, 401, "the cron secret");
+  } finally {
+    if (savedAdmin == null) delete process.env.ADMIN_EMAILS; else process.env.ADMIN_EMAILS = savedAdmin;
+    if (savedSecret == null) delete process.env.CRON_SECRET; else process.env.CRON_SECRET = savedSecret;
+  }
+  const ok = await hit({ query: { action: "activity" }, method: "GET", owner: "Parent@Example.com" });
   assert.equal(ok.statusCode, 200);
   assert.equal(ok.body.submissions.length, 4);
   assert.equal(ok.body.totals.accounts, 2);
-  assert.equal((await hit({ query: { action: "activity" }, method: "POST", admins: "parent@example.com" })).statusCode, 405);
+  assert.equal((await hit({ query: { action: "activity" }, method: "POST", owner: "parent@example.com" })).statusCode, 405);
 });
 
 // ---- wiring

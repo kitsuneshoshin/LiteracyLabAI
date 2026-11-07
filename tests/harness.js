@@ -52,7 +52,7 @@ function fakeRes() {
 function loadHandler(name, { plan = "free", used = 0, db, log, stripe, generate, supabaseExtras } = {}) {
   const caps = capabilitiesFor(plan);
   stub(lib("auth.js"), {
-    requireUser: async () => ({ id: "user-1", email: "parent@example.com" }),
+    requireUser: async () => ({ id: "user-1", email: "parent@example.com", email_confirmed_at: "2026-01-01T00:00:00Z" }),
     // Mirrors the real sendError: deliberate 4xx errors carry their code.
     sendError: async (res, err) => {
       const status = err.statusCode || 500;

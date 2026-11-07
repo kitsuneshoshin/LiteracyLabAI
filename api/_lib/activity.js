@@ -20,6 +20,15 @@ const PROP_KEYS = ["view", "kind", "tier", "interest", "status", "rating"];
 const MAX_PROP_LEN = 40;
 const MAX_EVENTS_PER_MINUTE = 60;
 
+// The one person who may open the activity report. ACTIVITY_OWNER_EMAIL in Vercel overrides the default; the address
+// must also be confirmed with Supabase Auth, so nobody can get in by registering it first.
+const DEFAULT_OWNER_EMAIL = "kitsune.shoshin@gmail.com";
+function isOwner(user) {
+  if (!user || !user.email || !user.email_confirmed_at) return false;
+  const owner = String(process.env.ACTIVITY_OWNER_EMAIL || DEFAULT_OWNER_EMAIL).trim().toLowerCase();
+  return String(user.email).trim().toLowerCase() === owner;
+}
+
 function cleanEvent(body) {
   const name = String((body && body.name) || "");
   if (!EVENT_NAMES.includes(name)) return null;
@@ -136,4 +145,4 @@ function buildActivity({ events = [], submissions = [], profiles = [], now = new
   };
 }
 
-module.exports = { EVENT_NAMES, PROP_KEYS, MAX_EVENTS_PER_MINUTE, cleanEvent, buildActivity, shapeSubmission };
+module.exports = { isOwner, EVENT_NAMES, PROP_KEYS, MAX_EVENTS_PER_MINUTE, cleanEvent, buildActivity, shapeSubmission };

@@ -452,8 +452,12 @@ async function handleActivity(req, res) {
     res.setHeader("Allow", "GET");
     return res.status(405).json({ error: "Method not allowed." });
   }
-  if (!(await isCronOrAdmin(req))) return res.status(401).json({ error: "Unauthorized." });
-  const { buildActivity } = require("./_lib/activity");
+  // Owner only: children's writing is visible here, so this is deliberately narrower than ADMIN_EMAILS (which may list
+  // other helpers) and does not accept the cron secret. One confirmed, signed-in address and nobody else.
+  const { buildActivity, isOwner } = require("./_lib/activity");
+  let user = null;
+  try { user = await requireUser(req); } catch (e) { user = null; }
+  if (!isOwner(user)) return res.status(401).json({ error: "Unauthorized." });
   const supabase = getSupabaseAdmin();
   const days = Math.min(90, Math.max(1, Number(req.query && req.query.days) || 30));
   const limit = Math.min(200, Math.max(1, Number(req.query && req.query.limit) || 60));

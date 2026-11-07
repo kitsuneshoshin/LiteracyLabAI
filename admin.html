@@ -116,7 +116,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
 // Same public Supabase project and anon key as app.html. The admin check happens on the server
-// (ADMIN_EMAILS); this page only shows what /api/email?action=activity agrees to return.
+// (the owner's confirmed address only); this page only shows what /api/email?action=activity agrees to return.
 var SUPABASE_URL = "https://ughwccheiqgdcnoffvit.supabase.co";
 var SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVnaHdjY2hlaXFnZGNub2Zmdml0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk2NDE1OTYsImV4cCI6MjEwNTIxNzU5Nn0.tLDzaC2fRs23vYW5mJfXQN0KaWgT2q0WRa9uClNRMOU";
 var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -238,7 +238,7 @@ async function load(){
   $("app").classList.toggle("hidden", !session);
   if (!session) return;
   var r = await fetch("/api/email?action=activity&days=" + $("days").value + "&limit=100", { headers: { Authorization: "Bearer " + session.access_token } });
-  if (r.status === 401) { $("app").classList.add("hidden"); showMsg("This account is not an admin. Add its email to ADMIN_EMAILS in Vercel, or sign in with a different account."); return; }
+  if (r.status === 401) { $("app").classList.add("hidden"); showMsg("This page is private to the site owner. Sign in with the owner account."); return; }
   if (!r.ok) { showMsg("Could not load activity (" + r.status + ")."); return; }
   DATA = await r.json();
   render();
