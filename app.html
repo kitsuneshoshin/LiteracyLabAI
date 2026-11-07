@@ -1652,7 +1652,7 @@ function VocabularyBank({ session, childId, backendLive, onSeePlans, displayName
       const exclude = (quiz?.questions || []).map(q => q.term).join("|");
       const data = await authedFetch(session, `/api/history?childId=${childId}&quiz=1&count=5${exclude ? `&exclude=${encodeURIComponent(exclude)}` : ""}`, { cache: "no-store" });
       if (!data.questions || data.questions.length === 0) {
-        setQuizError(`Collect at least ${data.minRequired || 4} different words first. You have ${wordsLearnedLabel(data.available)} so far.`);
+        setQuizError(`Collect at least ${data.minRequired || 4} different words first. You have ${data.available || 0} so far.`);
         setQuiz(null);
       } else {
         setQuiz(data);
@@ -1667,10 +1667,6 @@ function VocabularyBank({ session, childId, backendLive, onSeePlans, displayName
       setLoading(false);
     }
   }
-  function wordsLearnedLabel(n){
-    return n === 1 ? "1 word learned" : `${n || 0} words learned`;
-  }
-
   const who = displayName ? `${displayName}'s` : "Your";
 
   if (locked) {

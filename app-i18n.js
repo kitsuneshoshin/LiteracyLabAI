@@ -34,7 +34,7 @@
     { code: "zh", native: "中文", fonts: "Noto+Sans+SC:wght@400;500;700", family: '"Noto Sans SC", "PingFang SC", "Microsoft YaHei"' },
   ];
   // Bump when a dictionary changes, so browsers fetch the new one.
-  var DICT_VERSION = 9;
+  var DICT_VERSION = 11;
   var STORE_KEY = "ll_ui_lang";
   var ATTRS = ["title", "placeholder", "aria-label", "alt"];
 
@@ -262,6 +262,15 @@
       compiled = compile(d.strings || d);
       try { rules = new Intl.PluralRules(lang); } catch (e) { rules = null; }
       start();
+      // Pop-up boxes (alert, confirm) are not part of the page, so their text is translated here, one line at a time.
+      ["alert", "confirm"].forEach(function (name) {
+        var original = root[name];
+        if (typeof original !== "function") return;
+        root[name] = function (text) {
+          var lines = String(text).split("\n").map(function (line) { var t = translate(compiled, line, rules); return t === null ? line : t; });
+          return original.call(root, lines.join("\n"));
+        };
+      });
     }).catch(function () { /* no dictionary: the app simply stays in English */ });
   }
   if (doc.readyState === "loading") doc.addEventListener("DOMContentLoaded", boot); else boot();
