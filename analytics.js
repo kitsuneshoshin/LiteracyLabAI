@@ -57,7 +57,9 @@
     pt: { label: "Consentimento de cookies", text: "Usamos cookies para entender o tráfego do site. Você pode aceitar ou recusar os cookies de análise.", decline: "Recusar", accept: "Aceitar" },
     ro: { label: "Acord pentru cookie-uri", text: "Folosim cookie-uri pentru a înțelege traficul de pe site. Poți accepta sau refuza cookie-urile de analiză.", decline: "Refuz", accept: "Accept" },
     ar: { dir: "rtl", label: "الموافقة على ملفات تعريف الارتباط", text: "نستخدم ملفات تعريف الارتباط (الكوكيز) لفهم حركة الزيارات إلى الموقع. يمكنك قبول ملفات التحليلات أو رفضها.", decline: "رفض", accept: "قبول" },
-    ur: { dir: "rtl", label: "کوکیز کی رضامندی", text: "ہم سائٹ کے ٹریفک کو سمجھنے کے لیے کوکیز استعمال کرتے ہیں۔ آپ اینالیٹکس کوکیز قبول یا مسترد کر سکتے ہیں۔", decline: "مسترد کریں", accept: "قبول کریں" }
+    ur: { dir: "rtl", label: "کوکیز کی رضامندی", text: "ہم سائٹ کے ٹریفک کو سمجھنے کے لیے کوکیز استعمال کرتے ہیں۔ آپ اینالیٹکس کوکیز قبول یا مسترد کر سکتے ہیں۔", decline: "مسترد کریں", accept: "قبول کریں" },
+    hi: { label: "कुकी सहमति", text: "हम साइट ट्रैफ़िक को समझने के लिए कुकीज़ का उपयोग करते हैं। आप एनालिटिक्स कुकीज़ स्वीकार या अस्वीकार कर सकते हैं।", decline: "अस्वीकार करें", accept: "स्वीकार करें" },
+    zh: { label: "Cookie 同意", text: "我们使用 Cookie 来了解网站流量。你可以接受或拒绝分析类 Cookie。", decline: "拒绝", accept: "接受" }
   };
 
   function showBanner() {

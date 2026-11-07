@@ -1,0 +1,1447 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="google-site-verification" content="BTPfH1ZgcATkFK9mvxQe74ayAnhdl4c6EQ8OWZNl0ps" />
+<meta name="p:domain_verify" content="883351ee86a9a496647036e6701caf29"/>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<script>
+  // A password-reset or sign-up confirmation link can land on the homepage (the
+  // sign-in service falls back to the site address when a redirect is not on its
+  // allowed list). The links are passed straight on to the app, which knows what
+  // to do with them.
+  (function () {
+    var h = location.hash || "";
+    if (/(^|[#&])type=(recovery|signup)($|&)/.test(h) && h.indexOf("access_token=") !== -1) location.replace("/app.html" + h);
+  })();
+</script>
+<script>
+  // An old copy of this site is also served from GitHub Pages. Send anyone
+  // who lands there to the real site, keeping the page they asked for.
+  if (/\.github\.io$/.test(location.hostname)) {
+    location.replace("https://www.literacylabai.com" + location.pathname.replace(/^\/LiteracyLabAI/i, "") + location.search + location.hash);
+  }
+</script>
+<title>儿童写作与阅读 AI 反馈 | LiteracyLab AI</title>
+<meta name="description" content="为 5–18 岁孩子提供写作与阅读 AI 反馈，对应学校课程：英国、美国、澳大利亚、加拿大、新西兰、爱尔兰、印度、南非、中国香港、阿联酋、新加坡，以及英语作为第二语言（ESL）。适合 NAPLAN、SATs 和 GCSE 练习。提供免费方案。">
+<link rel="canonical" href="https://www.literacylabai.com/zh/">
+<link rel="alternate" hreflang="en" href="https://www.literacylabai.com/">
+<link rel="alternate" hreflang="pl" href="https://www.literacylabai.com/pl/">
+<link rel="alternate" hreflang="es" href="https://www.literacylabai.com/es/">
+<link rel="alternate" hreflang="pt" href="https://www.literacylabai.com/pt/">
+<link rel="alternate" hreflang="ro" href="https://www.literacylabai.com/ro/">
+<link rel="alternate" hreflang="ar" href="https://www.literacylabai.com/ar/">
+<link rel="alternate" hreflang="ur" href="https://www.literacylabai.com/ur/">
+<link rel="alternate" hreflang="hi" href="https://www.literacylabai.com/hi/">
+<link rel="alternate" hreflang="zh" href="https://www.literacylabai.com/zh/">
+<link rel="alternate" hreflang="x-default" href="https://www.literacylabai.com/">
+<meta name="robots" content="index, follow">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="LiteracyLab AI">
+<meta property="og:title" content="LiteracyLab AI — 对应课程的写作与阅读反馈，适合 5–18 岁">
+<meta property="og:description" content="基于孩子真实学校课程的写作与阅读 AI 反馈——英国、美国、澳大利亚、加拿大、新西兰、爱尔兰、印度、南非、中国香港、阿联酋、新加坡及 Global ESL。根据孩子的兴趣个性化定制。">
+<meta property="og:url" content="https://www.literacylabai.com/zh/">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://www.literacylabai.com/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="LiteracyLab AI — 对应课程的写作与阅读反馈，适合 5–18 岁">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="LiteracyLab AI — 对应课程的写作与阅读反馈">
+<meta name="twitter:description" content="基于孩子真实学校课程、并根据其兴趣个性化定制的 AI 反馈。免费方案，无需信用卡。">
+<meta name="twitter:image" content="https://www.literacylabai.com/og-image.png">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "LiteracyLab AI",
+  "url": "https://www.literacylabai.com/zh/",
+  "logo": "https://www.literacylabai.com/apple-touch-icon.png",
+  "sameAs": [
+    "https://www.pinterest.com/literacylabai/"
+  ],
+  "description": "LiteracyLab AI 为 5–18 岁的学生提供由 AI 生成的写作与阅读理解反馈，依据其所在国家真实的学校课程，并根据每位学生的兴趣个性化定制。"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "LiteracyLab AI",
+  "url": "https://www.literacylabai.com/zh/",
+  "inLanguage": "zh"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "LiteracyLab AI",
+  "applicationCategory": "EducationalApplication",
+  "operatingSystem": "Web",
+  "description": "面向 5–18 岁的 AI 读写教练：阅读孩子的写作或检查其阅读理解，对照其真实的学校课程（英国、美国、澳大利亚、加拿大、新西兰、爱尔兰、印度、南非、中国香港、阿联酋与海湾、新加坡，或与 CEFR 对应的 Global ESL），并返回一条 Glow、一条借助 PEEL 或 Story Mountain 等有名称的写作框架、以孩子自己的写作为基础来教授的 Grow，以及个性化的词汇提升，每条都配有用法示例。",
+  "offers": [
+    {
+      "@type": "Offer",
+      "name": "Free",
+      "price": "0",
+      "priceCurrency": "USD",
+      "description": "每月 3 次写作或阅读提交，附 Glow、Grow、高亮标注和词汇反馈。"
+    },
+    {
+      "@type": "Offer",
+      "name": "Core",
+      "price": "9.99",
+      "priceCurrency": "USD",
+      "description": "一名学生每月不限次数的提交、26 周进步趋势图、本年级内的匿名排名和完整活动历史。"
+    },
+    {
+      "@type": "Offer",
+      "name": "Premium",
+      "price": "15.99",
+      "priceCurrency": "USD",
+      "description": "包含 Core 的全部功能，最多 6 名学生，另有带第二个更有难度的下一步的扩展反馈、你的答案改写版及范例答案（两者都展示框架）、由 AI 评分的阅读理解书面短答、面向 NAPLAN、KS2 SATs、KS3、GCSE、EQAO、PSLE、IGCSE、NCEA、Leaving Cert、CBSE、NSC、HKDSE、美国各州考试和 CEFR 写作任务的考试风格练习、拼写与语法检查、整篇作品满分 10 分的评分，以及依据学生所在年级和地区的真实评估目标、将每次提交按 1–4 分级的考试技巧评分（11 岁以上）。"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "LiteracyLab AI 是什么？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "LiteracyLab AI 是面向 5–18 岁儿童和学生的在线读写教练。孩子写一篇文章或回答一篇阅读短文的问题，就会得到一个优点、一个清晰的下一步、一份修改过的作品版本和需要学习的词汇，并且都对应其学校课程（英国、美国、澳大利亚、加拿大、新西兰、爱尔兰、印度、南非、中国香港、海湾地区、新加坡，或面向英语学习者的 CEFR 等级）。账户由家长或监护人管理，并提供每月 3 次提交的免费方案。进一步了解 LiteracyLab AI（英文）。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "每月 3 次免费提交是怎么回事？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "每个账户在每个日历月都有 3 次免费提交——写作、阅读理解，或两者混合——每一次都包含完整的反馈：Glow、Grow、高亮标注和词汇。次数会在每月 1 日自动清零，所以你不用记，也不用手动续期。当你每周都在使用时，Core 会完全取消每月次数上限。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "我孩子写的内容安全且私密吗？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "是的。提交内容仅用于为你的孩子生成反馈——我们绝不出售或出租写作样本或个人数据，也不会用你孩子的提交内容来训练公共 AI 模型。家长可以随时查看、导出或永久删除孩子的写作历史。完整说明见我们的隐私政策（英文）。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "LiteracyLab AI 如何与我所在国家的课程对应？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "你选择所在地区——英国、美国、澳大利亚、加拿大、新西兰、爱尔兰、印度、南非、中国香港、阿联酋与海湾（Cambridge/IGCSE）、新加坡与东南亚（Cambridge/IB），或 Global ESL Mode（CEFR A1–C2）——再选孩子的年级、学年或等级，每个目标、每条 Grow 和每条词汇建议都会按该课程的实际要求来调整。这不是把一套通用评分标准硬套在每个国家上。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "我可以随时取消 LiteracyLab 订阅吗？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "可以——Core 和 Premium 都通过 Stripe 按月计费，没有绑定合约。在账户设置中点几下即可取消，之后不会再扣费；你会在已付费的周期结束前保留全部权限，随后转为免费方案，而不会丢失账户。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "我该选哪个 LiteracyLab AI 方案？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "先从 Free 开始，亲自判断反馈的质量——每月 3 次提交，附真实的 Glow、Grow、高亮标注和词汇。Core（每月 9.99 美元，并提供 A$、£、€、C$、S$、NZ$、HK$、R 和 ₹ 的本地价格）适合经常练习的一个孩子：不限次数的提交、26 周进步趋势、本年级内的匿名排名和完整活动历史。Premium（每月 15.99 美元）适合有不止一个孩子的家庭——一个账户最多 6 名学生，比两个 Core 方案更划算——或者正在备考的 11 岁以上学生，因为它在每条反馈中增加了考试技巧评分、第二个更有难度的下一步、拼写与语法检查和满分 10 分的整篇评分。你可以随时在账户设置中切换方案。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "什么是考试技巧评分？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "在 Premium 中，11 岁或以上的学生每次提交都会依据为其年级和地区公布的真实评估目标来评分——例如英国的 AQA GCSE English Language AO5 和 AO6，或美国相应的 Common Core 写作标准。每个目标会得到从 1（Emerging）到 4（Strong）的等级、一段来自孩子自己作品的引文作为该等级的证据，以及一项能让其提升一个等级的具体改动。它刻意从不给出原始考试分数、百分比或字母等级：一篇未经校准的作品支撑不了这种精确度，而一个看起来正式却并不正式的数字，比没有数字更糟。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "孩子用完 3 次提交后会怎样？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "工作区会清楚地显示已达上限，并暂停新的提交——不会丢失任何内容，进行中的草稿也会保留。之后你可以立刻升级到 Core 获得不限次数的提交，或者干脆等到下个月初免费额度重置。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "它会直接替我孩子写作文吗？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "不会——它从不替孩子写故事。LiteracyLab AI 只回应孩子已经完成的作品：指出一个具体的优点和一件需要改进的事。它最接近“改写”的是“你的故事，修改后”面板：取孩子真正写过的一个句子，并展示应用了建议修改后的同一句话——他们的词句、他们的声音，只改一处——让孩子看到建议在实际中的样子，而不是照抄现成的文字。下一稿仍然是他们自己的。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "我可以在同一个账户里添加多个孩子吗？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "可以，在 Premium 方案中：一个账户最多六名学生（Free 和 Core 方案支持一名学生），每人都有自己的国家课程、年级、兴趣和头像。他们的作品完全分开：提交内容、掌握度历史和进步都按每个孩子单独记录，所以哥哥姐姐的作文绝不会混进弟弟妹妹的仪表盘。你可以通过仪表盘顶部的学生栏在他们之间切换。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "你们会把我的孩子和其他孩子比较排名吗？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "只以刻意受限且匿名的方式进行。仪表盘会显示孩子的总体掌握度与同一国家、同一年级的其他学生相比如何——平均值、百分位数和一个排名阶梯。阶梯上的其他条目只显示名次和分数，并标注为“学生 4”之类；家庭之间不会传递任何姓名或可识别信息。而且如果与你孩子同一国家、同一年级的学生少于五人，对比就会被完全隐藏，而不是在小到足以识别某个人的群体面前展示。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "我可以导出或删除孩子的数据吗？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "可以——即时完成，而且无需向我们申请。在家长仪表盘中，你可以把账户保存的全部内容下载为一个文件，包括每位学生的档案及其完整的写作和阅读历史。你也可以永久删除整个账户，这会移除所有档案和全部历史，并取消任何有效订阅。删除立即生效，无法撤销——没有客服工单，也没有等待期。详情请见我们的隐私政策（英文）。"
+      }
+    }
+  ],
+  "inLanguage": "zh"
+}
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=Lexend:wght@400;500;600;700;800;900&family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --bg: #F1F1EF;
+    --bg-elevated: #FFFFFF;
+    --surface: #FFFFFF;
+    --surface-2: #E5E5E2;
+    --border: #D3D3CF;
+    --border-soft: #DEDEDB;
+    --ink: #212121;
+    --ink-soft: #5A5A56;
+    --ink-faint: #8F8F8A;
+    --accent: #7A3B45;
+    --accent-ink: #552830;
+    --accent-tint: #EBDEE0;
+    --gold: #8C7040;
+    --gold-ink: #5F4A26;
+    --gold-tint: #E9E2D2;
+    --good: #3F7A52;
+    --grid-line: rgba(33,33,33,0.05);
+    --shadow: 20 15% 20%;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg: #161513;
+      --bg-elevated: #1B1815;
+      --surface: #1E1B18;
+      --surface-2: #26221D;
+      --border: #37322B;
+      --border-soft: #2C2721;
+      --ink: #EDE9E2;
+      --ink-soft: #B3AB9C;
+      --ink-faint: #7C7568;
+      --accent: #C4776E;
+      --accent-ink: #E3A79F;
+      --accent-tint: #362320;
+      --gold: #C9A050;
+      --gold-ink: #C9A050;
+      --gold-tint: #3A2E17;
+      --good: #6FBE86;
+      --grid-line: rgba(255,255,255,0.05);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg: #161513;
+    --bg-elevated: #1B1815;
+    --surface: #1E1B18;
+    --surface-2: #26221D;
+    --border: #37322B;
+    --border-soft: #2C2721;
+    --ink: #EDE9E2;
+    --ink-soft: #B3AB9C;
+    --ink-faint: #7C7568;
+    --accent: #C4776E;
+    --accent-ink: #E3A79F;
+    --accent-tint: #362320;
+    --gold: #C9A050;
+    --gold-ink: #C9A050;
+    --gold-tint: #3A2E17;
+    --good: #6FBE86;
+    --grid-line: rgba(255,255,255,0.05);
+  }
+
+  *{ box-sizing: border-box; }
+  html{ scroll-behavior: smooth; }
+  body{
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Source Serif 4", Georgia, serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection{ background: var(--accent); color: var(--on-solid); }
+  a{ color: inherit; }
+  h1,h2,h3{ text-wrap: balance; margin: 0; font-family: "Fraunces", serif; font-weight: 500; }
+  p{ margin: 0; }
+  .sans{ font-family: "Lexend", ui-sans-serif, system-ui, sans-serif; }
+  .wrap{ max-width: 1140px; margin-inline: auto; padding-inline: 24px; }
+  @media (max-width: 640px){ .wrap{ padding-inline: 16px; } }
+
+  .eyebrow{
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: "Lexend", sans-serif; font-size: 12.5px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase;
+    color: var(--gold-ink);
+  }
+  .eyebrow::before{ content:""; width: 6px; height: 6px; border-radius: 50%; background: var(--gold); }
+
+  .btn{
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    font-family: "Lexend", sans-serif; font-weight: 600; font-size: 14.5px;
+    padding: 13px 22px; border-radius: 8px; text-decoration: none; cursor: pointer;
+    border: 1px solid transparent; transition: background .15s ease, border-color .15s ease;
+    white-space: nowrap;
+  }
+  .btn:active{ transform: translateY(1px); }
+  .btn-primary{ background: var(--accent); color: var(--on-solid); }
+  .btn-primary:hover{ background: var(--accent-ink); }
+  :root[data-theme="dark"] .btn-primary:hover, :root:not([data-theme="light"]) .btn-primary:hover{ background: color-mix(in srgb, var(--accent) 80%, white 20%); }
+  .btn-ghost{ background: transparent; color: var(--ink); border-color: var(--border); }
+  .btn-ghost:hover{ border-color: var(--ink-faint); }
+  .btn-gold{ background: var(--gold); color: var(--on-solid); }
+  .btn-gold:hover{ background: var(--gold-ink); }
+  .btn-lg{ padding: 16px 26px; font-size: 15.5px; }
+
+  /* ---------------- Nav ---------------- */
+  .nav{
+    position: sticky; top: 0; z-index: 40;
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border-soft);
+  }
+  .nav-inner{ position:relative; display:flex; align-items:center; justify-content:space-between; gap:16px; padding-block: 14px; }
+  .brand{ display:flex; align-items:center; gap:10px; font-family:"Fraunces",serif; font-weight:600; font-size:19px; letter-spacing:-0.01em; }
+  .brand-mark{ width:28px; height:28px; display:grid; place-items:center; position:relative; flex-shrink:0; }
+  .nav-links{ display:flex; align-items:center; gap:28px; font-family:"Lexend",sans-serif; font-size:14px; font-weight:500; color: var(--ink-soft); }
+  .nav-links a:hover{ color: var(--ink); }
+  .nav-cta{ display:flex; align-items:center; gap:10px; }
+  .theme-toggle{ width:34px; height:34px; border-radius:50%; border:1px solid var(--border); display:grid; place-items:center; background: var(--surface); color: var(--ink-soft); cursor:pointer; }
+  .nav-menu-toggle{ display:none; width:34px; height:34px; border-radius:50%; border:1px solid var(--border); align-items:center; justify-content:center; background: var(--surface); color: var(--ink-soft); cursor:pointer; }
+  /* Below 780px the links used to just disappear with nothing in their
+     place - Product/How it works/Pricing/FAQ became unreachable except by
+     scrolling, on the exact devices (phones) most parents actually browse
+     on. A hamburger toggle keeps every link reachable instead of removing
+     them from mobile entirely. */
+  @media (max-width: 780px){
+    .nav-links{ display:none; position:absolute; top:100%; left:0; right:0; flex-direction:column; align-items:flex-start; gap:2px; padding:10px 24px 16px; background: var(--bg); border-bottom:1px solid var(--border-soft); }
+    .nav-links.open{ display:flex; }
+    .nav-links a{ padding:10px 0; width:100%; }
+    .nav-menu-toggle{ display:grid; }
+  }
+  /* At phone widths the brand, theme toggle and CTA no longer fit on one
+     row: the "Launch workspace" button was pushed ~60px past the right edge
+     (found at 375px), taking the page's primary CTA off-screen and forcing
+     the whole page to scroll horizontally. Shrinking the button and letting
+     the row wrap keeps the CTA reachable without truncating its label. */
+  .theme-toggle-menu{ display:none; }
+  .nav-short{ display:none; }
+  @media (max-width: 460px){
+    /* One slim row on a phone (brand, menu, short button): a two-row sticky
+       header ate a fifth of the screen. The theme toggle moves into the menu. */
+    .nav-inner{ flex-wrap: wrap; row-gap: 10px; gap: 10px; padding-block: 10px; }
+    .brand{ font-size: 17px; }
+    .nav-cta{ gap: 8px; }
+    .nav-cta .theme-toggle{ display:none; }
+    .nav-cta .btn{ padding: 10px 14px; font-size: 13.5px; }
+    .nav-long{ display:none; }
+    .nav-short{ display:inline; }
+    .nav-links .theme-toggle-menu{ display:inline-grid; margin-top:6px; }
+  }
+
+  /* ---------------- Hero ---------------- */
+  .hero{ padding-top: 64px; padding-bottom: 40px; }
+  .hero-inner{ text-align:center; }
+  .hero h1{ font-size: clamp(32px, 5.4vw, 58px); line-height: 1.08; letter-spacing: -0.01em; margin-top: 18px; }
+  .hero h1 em{ font-style: italic; color: var(--accent); }
+  .hero-sub{ max-width: 620px; margin: 20px auto 0; font-size: 17.5px; line-height: 1.6; color: var(--ink-soft); }
+  .hero-ctas{ display:flex; align-items:center; justify-content:center; gap:12px; margin-top: 28px; flex-wrap:wrap; }
+  .hero-meta{ margin-top: 16px; font-family:"Lexend",sans-serif; font-size: 12.5px; color: var(--ink-faint); }
+
+  /* ---------------- Product preview panel ---------------- */
+  .preview-shell{
+    position: relative; z-index: 1; margin: 48px auto 0; max-width: 940px;
+    border-radius: 10px; border: 1px solid var(--border); background: var(--surface);
+    box-shadow: 0 1px 2px hsl(var(--shadow) / .04), 0 40px 80px -32px hsl(var(--shadow) / .3);
+    overflow: hidden; text-align: left;
+  }
+  .preview-chrome{ display:flex; align-items:center; gap:6px; padding: 12px 16px; border-bottom: 1px solid var(--border-soft); }
+  .preview-chrome span{ width:9px; height:9px; border-radius:50%; background: var(--border); }
+  .preview-body{ padding: 28px; display:grid; grid-template-columns: 1.1fr 1fr; gap: 22px; }
+  @media (max-width: 760px){ .preview-body{ grid-template-columns: 1fr; } }
+  .pv-card{ border: 1px solid var(--border-soft); border-radius: 6px; padding: 18px; background: var(--surface-2); }
+  .pv-label{ font-family:"Lexend",sans-serif; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color: var(--ink-faint); margin-bottom:9px; }
+  .pv-praise{ border-color: color-mix(in srgb, var(--good) 35%, var(--border-soft)); }
+  .pv-tip{ border-color: color-mix(in srgb, var(--accent) 35%, var(--border-soft)); }
+  .pv-tag{ font-family:"Lexend",sans-serif; display:inline-flex; align-items:center; gap:5px; font-size:10.5px; font-weight:700; padding:3px 9px; border-radius:999px; background: var(--accent-tint); color: var(--accent-ink); margin-bottom:9px; }
+  .pv-text{ font-family:"Source Serif 4", serif; font-size:14.5px; line-height:1.55; color: var(--ink); }
+  .pv-vocab{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .pv-vocab div{ background: var(--accent-tint); border-radius:6px; padding:10px 12px; }
+  .pv-vocab b{ font-family:"Lexend",sans-serif; display:block; font-size:12.5px; color: var(--accent-ink); margin-bottom:2px; }
+  .pv-vocab span{ font-family:"Lexend",sans-serif; font-size:11.5px; color: var(--ink-soft); line-height:1.4; }
+
+  /* ---------------- Sections ---------------- */
+  section{ padding-block: 84px; }
+  @media (max-width: 640px){ section{ padding-block: 52px; } }
+  .section-head{ max-width: 620px; margin-bottom: 46px; }
+  .section-head h2{ font-size: clamp(25px, 3.4vw, 36px); margin-top: 10px; }
+  .section-head p{ margin-top: 12px; font-size: 16px; color: var(--ink-soft); line-height: 1.65; }
+  .section-alt{ background: var(--bg-elevated); border-top: 1px solid var(--border-soft); border-bottom: 1px solid var(--border-soft); }
+
+  /* trust row */
+  .trust{ display:flex; flex-wrap:wrap; gap: 10px; justify-content:center; }
+  .trust-item{ font-family:"Lexend",sans-serif; display:flex; align-items:center; gap:9px; padding:9px 16px; border:1px solid var(--border); border-radius: 999px; font-size:13px; font-weight:600; color: var(--ink-soft); background: var(--surface); }
+
+  /* feature split */
+  .split{ display:grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items:center; }
+  .split.reverse .split-media{ order: 2; }
+  @media (max-width: 860px){ .split, .split.reverse .split-media{ grid-template-columns: 1fr; order:0; } .split{ display:flex; flex-direction:column; gap:32px; } }
+  .split-copy h3{ font-size: clamp(21px,2.6vw,26px); }
+  .split-copy p{ margin-top:14px; font-size:15.5px; line-height:1.65; color: var(--ink-soft); }
+  .split-list{ margin-top:18px; display:flex; flex-direction:column; gap:10px; font-family:"Lexend",sans-serif; }
+  /* Hanging indent rather than flex: as a flex container, every child of a
+     bullet became its own column, so a bullet containing an inline <em> broke
+     into three side-by-side blocks of text. A block box with an absolutely
+     positioned tick keeps all inline content in one flowing line of text, and
+     stays correct if any future bullet contains inline markup. */
+  .split-list div{ position:relative; padding-left:26px; font-size:14.5px; line-height:1.5; color: var(--ink); }
+  .split-list svg{ position:absolute; left:0; top:4px; color: var(--accent); }
+
+  .tier-tabs{ display:flex; gap:6px; padding:4px; border:1px solid var(--border); border-radius:999px; background: var(--surface-2); width:fit-content; margin-bottom:18px; flex-wrap:wrap; }
+  .tier-tabs button{ font-family:"Lexend",sans-serif; font-size:12.5px; font-weight:600; padding:8px 14px; border-radius:999px; border:none; background:transparent; color: var(--ink-soft); cursor:pointer; }
+  .tier-tabs button.active{ background: var(--ink); color: var(--bg); }
+  .tier-panel{ border:1px solid var(--border); border-radius:6px; background: var(--surface); padding:22px; min-height: 190px; }
+  .tier-panel .t-title{ font-family:"Fraunces",serif; font-weight:600; font-size:16px; margin-bottom:6px; }
+  .tier-panel .t-prompt{ font-family:"Source Serif 4",serif; font-size:14.5px; color: var(--ink-soft); line-height:1.55; margin-bottom:14px; }
+  .tier-meter{ font-family:"Lexend",sans-serif; display:flex; align-items:center; gap:8px; font-size:12px; color: var(--ink-faint); font-weight:600; }
+  .tier-meter .bar{ flex:1; height:5px; border-radius:99px; background: var(--surface-2); max-width:140px; }
+  .tier-meter .bar i{ display:block; height:100%; border-radius:99px; background: var(--accent); }
+
+  .mastery-row{ font-family:"Lexend",sans-serif; display:flex; align-items:center; justify-content:space-between; gap:12px; padding:11px 0; border-top:1px solid var(--border-soft); font-size:13.5px; }
+  .mastery-row:first-child{ border-top:none; }
+  .mastery-name{ font-weight:600; }
+  .mastery-bar{ flex:1; height:6px; border-radius:99px; background:var(--surface-2); margin: 0 12px; max-width: 160px; }
+  .mastery-bar i{ display:block; height:100%; border-radius:99px; }
+  .mastery-tag{ font-size:11px; font-weight:700; padding:3px 9px; border-radius:999px; white-space:nowrap; }
+
+  /* how it works */
+  .steps{ display:grid; grid-template-columns: repeat(3,1fr); gap: 24px; }
+  @media (max-width: 760px){ .steps{ grid-template-columns: 1fr; } }
+  .step{ padding: 26px 22px; border:1px solid var(--border); border-radius:6px; background: var(--surface); }
+  .step-num{ font-family:"Lexend",sans-serif; font-size:13px; font-weight:800; color: var(--gold-ink); letter-spacing:.05em; }
+  .step h4{ margin-top:10px; font-family:"Fraunces",serif; font-size:17px; font-weight:600; }
+  .step p{ margin-top:8px; font-family:"Lexend",sans-serif; font-size:13.5px; line-height:1.6; color: var(--ink-soft); }
+
+  /* pricing */
+  /* Equal-height cards with the buttons on one line: the eye compares plans
+     across a row, so the price, list and button of each should line up. */
+  /* The pricing cards and the comparison table below them share one grid: they fill the page container (the same width
+     as the header and every other section) and use the same gap, so each plan's column lines up under its card.
+     Both switch to a single column together, at 720px. */
+  :root{ --plan-gap: 20px; }
+  @media (max-width: 900px){ :root{ --plan-gap: 12px; } }
+  .pricing{ display:grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--plan-gap); width:100%; margin: 0 auto; align-items:stretch; }
+  @media (max-width: 720px){ .pricing{ grid-template-columns: 1fr; gap: 20px; } }
+  .price-card{ display:flex; flex-direction:column; border:1px solid var(--border); border-radius:8px; padding: 30px 26px; background: var(--surface); }
+  @media (min-width: 721px) and (max-width: 900px){ .price-card{ padding: 24px 18px; } .price-card.pro{ padding: 23px 17px !important; } }
+  .price-card.pro{ border:2px solid var(--gold); padding: 29px 25px; position:relative; background: linear-gradient(180deg, var(--gold-tint), var(--surface) 55%); box-shadow: 0 10px 30px -12px rgba(0,0,0,.25); }
+  .price-card.pro::before{ content:"MOST POPULAR"; position:absolute; top:-12px; left:50%; transform:translateX(-50%); white-space:nowrap; background: var(--gold); color: var(--on-solid); font-family:"Lexend",sans-serif; font-size:10.5px; font-weight:800; letter-spacing:.06em; padding:4px 12px; border-radius:999px; }
+  .price-card .price-list{ flex:1; }
+  .price-plan{ font-family:"Lexend",sans-serif; font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color: var(--ink-faint); }
+  .price-amount{ font-family:"Fraunces",serif; font-size:36px; font-weight:600; margin-top:10px; letter-spacing:-0.01em; }
+  .price-amount span{ font-family:"Lexend",sans-serif; font-size:14px; font-weight:500; color: var(--ink-faint); }
+  .price-list{ margin-top:20px; display:flex; flex-direction:column; gap:11px; font-family:"Lexend",sans-serif; }
+  .price-list div{ display:flex; gap:9px; align-items:flex-start; font-size:14px; color: var(--ink-soft); }
+  .price-list svg{ flex-shrink:0; margin-top:2px; color: var(--accent); }
+  .price-card.pro .price-list svg{ color: var(--gold); }
+  .price-card .btn{ width:100%; margin-top:24px; }
+  .price-note{ margin-top:10px; font-family:"Lexend",sans-serif; font-size:12px; color:var(--ink-faint); text-align:center; }
+
+  /* plan comparison table — three cards can only carry the headline
+     differences, so this is the full side-by-side for anyone deciding
+     between Core and Premium. On a phone it becomes
+     compact cards (see the media query below) instead of scrolling sideways. */
+  .plan-table-scroll{ width:100%; margin:48px auto 0; overflow-x:auto; -webkit-overflow-scrolling:touch; border:1px solid var(--border); border-radius:8px; background:var(--surface); }
+  .plan-table{ width:100%; min-width:640px; border-collapse:collapse; font-family:"Lexend",sans-serif; }
+  .plan-table th, .plan-table td{ padding:14px 16px; text-align:left; font-size:13.5px; border-top:1px solid var(--border-soft); vertical-align:top; }
+  .plan-table thead th{ border-top:0; background:var(--surface-2); font-size:12.5px; font-weight:700; letter-spacing:.03em; }
+  .plan-table thead th span{ display:block; font-weight:500; font-size:12px; color:var(--ink-faint); margin-top:3px; }
+  /* the price inside that span must stay on the same line as "/mo" */
+  .plan-table thead th .js-price{ display:inline; margin-top:0; }
+  .plan-table th[scope="row"]{ font-weight:600; color:var(--ink); width:34%; }
+  .plan-table td{ color:var(--ink-soft); width:22%; }
+  .plan-table .col-best{ background:var(--gold-tint); }
+  .plan-table thead .col-best{ background:var(--gold-tint); color:var(--gold-ink); }
+  .plan-table .yes{ color:var(--ink); font-weight:500; }
+  .plan-table .no{ color:var(--ink-faint); }
+  .plan-table tbody tr.group-head th{ background:var(--surface-2); font-size:11.5px; text-transform:uppercase; letter-spacing:.07em; color:var(--ink-faint); font-weight:700; }
+  /* Phones: a three-column table that has to be swiped sideways hides Core and
+     Premium off-screen, which is exactly the comparison a parent came for. Below
+     720px every feature becomes a compact card: the feature name on top and the
+     Free, Core and Premium answers side by side underneath, each labelled, so all
+     three plans are visible at once with no sideways scrolling. */
+  @media (max-width: 720px){
+    .plan-table-scroll{ overflow:visible; border:0; background:transparent; margin-top:36px; }
+    .plan-table, .plan-table tbody{ display:block; min-width:0; }
+    .plan-table thead{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
+    .plan-table tr{ display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); border:1px solid var(--border-soft); border-radius:10px; background:var(--surface); margin-bottom:10px; overflow:hidden; }
+    .plan-table tbody tr.group-head{ display:block; border:0; background:transparent; margin:24px 0 8px; border-radius:0; }
+    .plan-table tbody tr.group-head th{ display:block; background:transparent; border:0; padding:0 2px; font-size:12px; }
+    .plan-table th[scope="row"]{ grid-column:1 / -1; width:auto; padding:12px 14px 6px; border-top:0; font-size:14.5px; line-height:1.4; }
+    .plan-table td{ width:auto; padding:6px 12px 12px; border-top:0; border-left:1px solid var(--border-soft); font-size:14px; line-height:1.4; overflow-wrap:anywhere; }
+    .plan-table td:first-of-type{ border-left:0; }
+    .plan-table td::before{ content:attr(data-label); display:block; margin-bottom:4px; font-size:11.5px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--ink-faint); }
+    .plan-table td.col-best::before{ color:var(--gold-ink); }
+    /* Rows whose answers are whole sentences stack, one plan per line, so a long
+       Premium answer is not squeezed into a narrow third of the screen. */
+    .plan-table tr.wide{ grid-template-columns:1fr; }
+    .plan-table tr.wide td{ display:flex; gap:10px; align-items:baseline; border-left:0; border-top:1px solid var(--border-soft); padding:9px 14px; }
+    .plan-table tr.wide td::before{ flex:0 0 74px; margin-bottom:0; }
+  }
+
+  /* Touch targets: at least 44px tall for anything tappable (Apple and Google
+     guidance), without changing how the desktop site looks. */
+  @media (pointer:coarse), (max-width: 640px){
+    .theme-toggle, .nav-menu-toggle{ width:44px; height:44px; }
+    .btn, .nav-cta .btn{ min-height:44px; }
+    .tier-tabs button{ min-height:44px; padding:10px 16px; }
+    .nav-links a{ padding:13px 0; }
+    .foot-links{ flex-wrap:wrap; gap:0 10px; }
+    .foot-links a{ display:inline-block; padding:14px 6px; }
+    .faq-item summary{ min-height:48px; }
+  }
+
+  /* comparison */
+  .compare{ border:1px solid var(--border); border-radius:8px; overflow:hidden; background:var(--surface); }
+  .compare-row{ display:grid; grid-template-columns: 1.3fr 1fr 1fr; align-items:center; }
+  .compare-row + .compare-row{ border-top:1px solid var(--border-soft); }
+  .compare-row.head{ background:var(--surface-2); font-family:"Lexend",sans-serif; font-weight:700; font-size:13px; }
+  .compare-cell{ padding:16px 18px; font-family:"Lexend",sans-serif; font-size:14px; }
+  .compare-row.head .compare-cell:nth-child(2){ color:var(--ink-faint); }
+  .compare-row.head .compare-cell:nth-child(3){ color:var(--accent); }
+  .compare-cell.label{ color:var(--ink); font-weight:600; }
+  .compare-cell.no{ color:var(--ink-faint); }
+  .compare-cell.no svg{ color:var(--ink-faint); }
+  .compare-cell.yes{ color:var(--ink); font-weight:500; }
+  .compare-cell.yes svg{ color:var(--good); flex-shrink:0; }
+  .compare-cell{ display:flex; align-items:center; gap:8px; }
+  @media (max-width: 640px){
+    .compare-row{ grid-template-columns: 1fr; }
+    .compare-cell{ padding:8px 18px; }
+    .compare-row.head .compare-cell:first-child{ padding-top:14px; }
+    .compare-row:not(.head){ padding-bottom:6px; }
+  }
+
+  /* faq */
+  .faq-list{ max-width: 760px; margin: 0 auto; display:flex; flex-direction:column; gap:12px; }
+  .faq-item{ border:1px solid var(--border); border-radius:6px; background: var(--surface); overflow:hidden; }
+  .faq-item summary{ font-family:"Lexend",sans-serif; list-style:none; cursor:pointer; padding: 18px 22px; font-weight:600; font-size:15px; display:flex; align-items:center; justify-content:space-between; gap:16px; }
+  .faq-item summary::-webkit-details-marker{ display:none; }
+  .faq-item summary .faq-plus{ flex-shrink:0; width:20px; height:20px; position:relative; }
+  .faq-item summary .faq-plus::before, .faq-item summary .faq-plus::after{ content:""; position:absolute; background: var(--accent); border-radius:2px; transition: transform .2s ease; }
+  .faq-item summary .faq-plus::before{ top:9px; left:2px; width:16px; height:2px; }
+  .faq-item summary .faq-plus::after{ top:2px; left:9px; width:2px; height:16px; }
+  .faq-item[open] summary .faq-plus::after{ transform: rotate(90deg); opacity:0; }
+  .faq-item .faq-a{ font-family:"Lexend",sans-serif; padding: 0 22px 20px; font-size:14.5px; line-height:1.65; color: var(--ink-soft); }
+  .faq-a a{ color: var(--accent); font-weight:600; text-decoration: underline; text-underline-offset:2px; }
+
+  /* final cta */
+  .final-cta{ text-align:center; background: var(--bg-elevated); border-top:1px solid var(--border-soft); }
+  .final-cta h2{ font-size: clamp(27px, 4vw, 42px); }
+  .final-cta p{ margin-top:14px; font-size:16px; color: var(--ink-soft); max-width:520px; margin-inline:auto; }
+  .final-cta .hero-ctas{ margin-top: 26px; }
+
+  footer{ border-top:1px solid var(--border-soft); padding-block: 32px; }
+  .foot-inner{ font-family:"Lexend",sans-serif; display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; font-size:12.5px; color: var(--ink-faint); }
+  .foot-links{ display:flex; flex-wrap:wrap; gap:6px 20px; }
+
+  @media (prefers-reduced-motion: reduce){ html{ scroll-behavior:auto; } }
+</style>
+<script src="/analytics.js"></script>
+<script>
+/* A friend's link (?ref=CODE) is remembered so it can travel with their sign-up in the app. */
+(function(){ try { var m = /[?&]ref=([A-Za-z0-9]{6,12})(&|$)/.exec(location.search); if (m) localStorage.setItem("ll_ref", m[1].toUpperCase()); } catch (e) {} })();
+</script>
+<link rel="stylesheet" href="/theme.css?v=11">
+<link rel="stylesheet" href="/home.css?v=14">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/home-fonts.css?v=2">
+<style>.price-card.pro::before,.plan-table thead .col-best::before{content:"最受欢迎"}</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="wrap nav-inner">
+    <div class="brand">
+      <span class="brand-mark">
+        <svg width="28" height="28" viewBox="0 0 64 64" aria-hidden="true">
+          <g transform="rotate(-8 20 30)">
+            <rect x="6" y="14" width="28" height="30" rx="5" fill="var(--surface)" stroke="var(--accent)" stroke-width="2.5"/>
+            <path d="M13.5 20H18.5V33.5H26V38H13.5Z" fill="var(--accent)"/>
+            <path d="M28.6 36.2 30 35V41" fill="none" stroke="var(--accent)" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+          </g>
+          <g transform="rotate(7 44 36)">
+            <rect x="30" y="20" width="28" height="30" rx="5" fill="var(--accent)"/>
+            <path d="M37.5 26H42.5V39.5H50V44H37.5Z" fill="var(--bg)"/>
+            <path d="M52.6 42.2 54 41V47" fill="none" stroke="var(--bg)" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+          </g>
+        </svg>
+      </span>
+      LiteracyLab <span style="color:var(--accent)">AI</span>
+    </div>
+    <div class="nav-links" id="navLinks">
+      <a href="#product">产品</a>
+      <a href="#how">使用方式</a>
+      <a href="#pricing">价格</a>
+      <a href="/learn/">指南</a>
+      <a href="#faq">常见问题</a>
+      <button class="theme-toggle theme-toggle-menu" type="button" aria-label="切换主题"><svg class="theme-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z"/></svg></button>
+    </div>
+    <div class="nav-cta">
+      <button class="theme-toggle" id="themeToggle" aria-label="切换主题">
+        <svg id="themeIcon" class="theme-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z"/></svg>
+      </button>
+      <button class="nav-menu-toggle" id="navMenuToggle" aria-label="打开菜单" aria-expanded="false" aria-controls="navLinks">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+      <a class="btn btn-ghost" href="/app.html?lang=zh"><span class="nav-long">打开应用</span><span class="nav-short">开始</span></a>
+    </div>
+  </div>
+</header>
+
+<main>
+<section class="hero">
+  <div class="wrap hero-inner">
+    <div class="hero-grid">
+      <div class="hero-copy">
+        <span class="eyebrow">是读写教练，不是聊天机器人 · 5–18 岁</span>
+        <h1 id="heroTitle" data-parent="连<em>孩子自己的老师</em>也会认可的反馈。" data-learner="写点什么，看看里面<em>已经有哪些亮点</em>。">连<em>孩子自己的老师</em>也会认可的反馈。</h1>
+        <p class="hero-sub" id="heroSub" data-parent="LiteracyLab AI 会阅读孩子写的内容，或检查他们读懂了什么，对照他们真实的学校课程，把结果变成孩子真心愿意照着做的反馈，并借助他们本来就喜欢的事物来讲解。" data-learner="选一个题目，写几句话，教练会告诉你哪里做得好，以及接下来可以试的一件事。然后你就可以收集新单词。">LiteracyLab AI 会阅读孩子写的内容，或检查他们读懂了什么，对照他们真实的学校课程，把结果变成孩子真心愿意照着做的反馈，并借助他们本来就喜欢的事物来讲解。</p>
+
+        <div class="aud-label" id="audLabel">这是为谁准备的？</div>
+        <div class="aud" role="group" aria-labelledby="audLabel">
+          <button type="button" data-aud="parent" aria-pressed="true">我是家长</button>
+          <button type="button" data-aud="learner" aria-pressed="false">我是学生</button>
+        </div>
+
+        <div class="hero-ctas">
+          <a class="btn btn-primary btn-lg" href="/app.html?lang=zh">免费开始 — 每月 3 次提交</a>
+          <a class="btn btn-ghost btn-lg" href="#how">看看它如何运作</a>
+        </div>
+        <div class="hero-meta">无需信用卡 · 免费方案，不限时间</div>
+      </div>
+
+      <div class="hero-plate">
+        <div class="plate-tabs" role="group" aria-label="看看一条反馈是如何生成的">
+          <button type="button" data-step="1" aria-pressed="true">1 阅读</button>
+          <button type="button" data-step="2" aria-pressed="false">2 Glow</button>
+          <button type="button" data-step="3" aria-pressed="false">3 Grow</button>
+        </div>
+        <figure class="plate">
+          <svg viewBox="0 0 560 284" role="img" aria-label="一个孩子的虚构句子，分步展示：一个优点被高亮，下一步建议被划线">
+            <line class="rule" x1="10" y1="76" x2="550" y2="76"/><line class="rule" x1="10" y1="130" x2="550" y2="130"/><line class="rule" x1="10" y1="184" x2="550" y2="184"/>
+            <rect id="markGlow" class="mark mark-fill" x="4" y="22" width="300" height="44" rx="22" hidden/>
+            <text class="child" x="16" y="56"><tspan id="phGlow">老橡树在风中</tspan><tspan> 吱吱作响</tspan></text>
+            <text class="child" x="16" y="110"><tspan>然后 </tspan><tspan id="phGrow">我很害怕</tspan><tspan> 因为天黑了。</tspan></text>
+            <text class="child" x="16" y="164">我跑回了家。</text>
+            <path id="markGrow" class="mark mark-dash" d="M0 0" hidden/>
+            <rect id="tagBg" class="tag-bg" x="16" y="206" width="90" height="24" rx="12"/>
+            <text id="noteLabel" class="note-label" x="28" y="223">阅读</text>
+            <text id="noteL1" class="note" x="16" y="252">教练先读一遍，然后问：</text>
+            <text id="noteL2" class="note" x="16" y="274">这里已经有哪些地方做得好？</text>
+          </svg>
+        </figure>
+        <div class="plate-foot">
+          <span class="plate-cap">图 1 &nbsp;一句话，分步看</span>
+          <button type="button" class="plate-next" id="plateNext">显示 Glow</button>
+        </div>
+
+        <div class="aud-card" id="cardParent">
+          <span class="k">周一你会看到什么</span>
+          <p class="row"><strong>练习天数</strong> <span>7 天中的 4 天</span></p>
+          <div class="meter"><i style="width:57%"></i></div>
+          <p class="row"><strong>阅读平均分</strong> <span>75%</span></p>
+          <div class="meter"><i style="width:75%"></i></div>
+          <p class="small">下一项要练的技能：在开头短语后加逗号。</p>
+        </div>
+        <div class="aud-card" id="cardLearner" hidden>
+          <span class="k">每日一词</span>
+          <p class="word">ominous</p>
+          <p class="small">暗示有不好的事情可能发生。</p>
+          <p class="ex">An ominous silence filled the hall. （一片不祥的寂静笼罩了大厅。）</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="product">
+  <div class="wrap">
+    <div class="section-head" style="margin-inline:auto; margin-bottom:24px; text-align:center;">
+      <span class="eyebrow" style="justify-content:center;">支持的课程</span>
+      <h2 style="font-size:20px;">对应孩子学校实际教授的课程。</h2>
+    </div>
+    <div class="trust">
+      <div class="trust-item"><img src="https://flagcdn.com/20x15/gb.png" srcset="https://flagcdn.com/40x30/gb.png 2x" width="20" height="15" alt="" loading="lazy"> UK National Curriculum</div>
+      <div class="trust-item"><img src="https://flagcdn.com/20x15/us.png" srcset="https://flagcdn.com/40x30/us.png 2x" width="20" height="15" alt="" loading="lazy"> US Common Core &amp; AP</div>
+      <div class="trust-item"><img src="https://flagcdn.com/20x15/au.png" srcset="https://flagcdn.com/40x30/au.png 2x" width="20" height="15" alt="" loading="lazy"> Australian Curriculum</div>
+      <div class="trust-item"><img src="https://flagcdn.com/20x15/ca.png" srcset="https://flagcdn.com/40x30/ca.png 2x" width="20" height="15" alt="" loading="lazy"> Ontario Curriculum</div>
+      <div class="trust-item"><img src="https://flagcdn.com/20x15/nz.png" srcset="https://flagcdn.com/40x30/nz.png 2x" width="20" height="15" alt="" loading="lazy"> New Zealand Curriculum &amp; NCEA</div>
+      <div class="trust-item"><img src="https://flagcdn.com/20x15/ie.png" srcset="https://flagcdn.com/40x30/ie.png 2x" width="20" height="15" alt="" loading="lazy"> 爱尔兰：Junior Cycle 与 Leaving Cert</div>
+      <div class="trust-item"><img src="https://flagcdn.com/20x15/in.png" srcset="https://flagcdn.com/40x30/in.png 2x" width="20" height="15" alt="" loading="lazy"> 印度：NCERT 与 CBSE</div>
+      <div class="trust-item"><img src="https://flagcdn.com/20x15/za.png" srcset="https://flagcdn.com/40x30/za.png 2x" width="20" height="15" alt="" loading="lazy"> 南非：CAPS 与 NSC</div>
+      <div class="trust-item"><img src="https://flagcdn.com/20x15/hk.png" srcset="https://flagcdn.com/40x30/hk.png 2x" width="20" height="15" alt="" loading="lazy"> 中国香港：EDB 与 HKDSE</div>
+      <div class="trust-item"><img src="https://flagcdn.com/20x15/ae.png" srcset="https://flagcdn.com/40x30/ae.png 2x" width="20" height="15" alt="" loading="lazy"> 阿联酋与海湾：Cambridge / IGCSE</div>
+      <div class="trust-item"><img src="https://flagcdn.com/20x15/sg.png" srcset="https://flagcdn.com/40x30/sg.png 2x" width="20" height="15" alt="" loading="lazy"> 新加坡：Cambridge 与 IB</div>
+      <div class="trust-item">🌐 英语学习者（CEFR 等级）</div>
+    </div>
+
+    <div class="where" id="where">
+      <h3 class="where-title" id="whereTitle" style="font-size:clamp(26px,3.4vw,38px); font-weight:400; line-height:1.2; margin-bottom:20px;">选择孩子就读的地区。</h3>
+      <div class="where-tabs" role="group" aria-labelledby="whereTitle">
+        <button type="button" data-place="au" aria-pressed="true">澳大利亚</button>
+        <button type="button" data-place="uk" aria-pressed="false">英国</button>
+        <button type="button" data-place="us" aria-pressed="false">美国</button>
+        <button type="button" data-place="ca" aria-pressed="false">加拿大</button>
+        <button type="button" data-place="nz" aria-pressed="false">新西兰</button>
+        <button type="button" data-place="ie" aria-pressed="false">爱尔兰</button>
+        <button type="button" data-place="in" aria-pressed="false">印度</button>
+        <button type="button" data-place="za" aria-pressed="false">南非</button>
+        <button type="button" data-place="hk" aria-pressed="false">中国香港</button>
+        <button type="button" data-place="sg" aria-pressed="false">新加坡</button>
+        <button type="button" data-place="ae" aria-pressed="false">阿联酋与海湾</button>
+        <button type="button" data-place="esl" aria-pressed="false">英语学习者</button>
+      </div>
+      <dl class="where-facts" aria-live="polite">
+        <div><dt>课程</dt><dd id="whereCurr"></dd></div>
+        <div><dt>考试风格练习（Premium）</dt><dd id="whereExam"></dd></div>
+        <div><dt>拼写按此标准检查</dt><dd id="whereSpell"></dd></div>
+      </dl>
+    </div>
+  </div>
+</section>
+
+<section id="how">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">使用方式</span>
+      <h2>从一张白纸到可执行的反馈，只需三步。</h2>
+    </div>
+    <div class="steps">
+      <div class="step"><div class="step-num">01</div><h4>设置学生档案</h4><p>选择所在国家的课程、年级，以及能让反馈更打动孩子的兴趣——太空、游戏、历史等等。</p></div>
+      <div class="step"><div class="step-num">02</div><h4>写作，或阅读并作答</h4><p>孩子要么在适合其年龄的写作空间里写作，实时统计字数，并有依据其年级真实课程要求设定的目标；要么阅读一篇原创短文，回答理解题。</p></div>
+      <div class="step"><div class="step-num">03</div><h4>获得 Key Takeaways（要点总结）</h4><p>几秒钟内：一条 Glow（已经做得好的地方）、一条 Grow（下一步），以及与孩子兴趣相关的词汇学习。</p></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">不只是聊天机器人</span>
+      <h2>你也可以把作文贴进 ChatGPT。但你会因此失去这些。</h2>
+      <p>通用 AI 可以点评一段文字，却不了解孩子的年级、学校的课程，也不知道上个月写过什么——而且它并不是针对五岁孩子的数据来设计的。</p>
+    </div>
+    <div class="compare">
+      <div class="compare-row head">
+        <div class="compare-cell">功能</div>
+        <div class="compare-cell">通用 AI 聊天机器人</div>
+        <div class="compare-cell">LiteracyLab AI</div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-cell label">针对课程的反馈</div>
+        <div class="compare-cell no"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg> 泛泛的写作建议，对所有年龄都一样</div>
+        <div class="compare-cell yes"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> 依据其年级和所在国家的真实标准</div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-cell label">长期进步</div>
+        <div class="compare-cell no"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg> 对话之间没有记忆</div>
+        <div class="compare-cell yes"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> 用仪表盘追踪每一次提交中的技能掌握情况</div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-cell label">既适合 5 岁的孩子，也适合 18 岁的青少年</div>
+        <div class="compare-cell no"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg> 对所有人都是同一个界面、同一种语气</div>
+        <div class="compare-cell yes"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> 四个按年龄划分的工作区，从朗读到备考</div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-cell label">孩子写下的内容</div>
+        <div class="compare-cell no"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg> 通用的消费者条款，并非为未成年人设计</div>
+        <div class="compare-cell yes"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> 设计时考虑了 COPPA——绝不出售，也绝不用于训练公共模型</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">反馈如何被检查</span>
+      <h2>靠验证，而不是靠感觉。</h2>
+      <p>AI 模型生成了回答，并不等于这个回答是正确的。每一条反馈在孩子看到之前都要经过自动检查——它不是某个模型未经审核的单次输出，更不会被盲目信任。</p>
+    </div>
+    <div class="split">
+      <div class="split-copy">
+        <div class="split-list">
+          <div><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> 每一处课程引用都会与该年级的真实标准清单核对——编造的或不匹配的引用会被自动拒绝，不会展示。</div>
+          <div><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> 当反馈改写孩子故事的一部分时，改写内容会先检查是否重复、语气是否合适，然后才会插入——它必须真正落实建议，而不只是描述建议。</div>
+          <div><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> 如果某条回答没有通过这些检查，会自动重新生成——最多尝试三次——之后孩子才会看到结果。</div>
+        </div>
+      </div>
+      <div class="split-media">
+        <div class="trust" style="justify-content:flex-start;">
+          <div class="trust-item">仅限由家长管理的账户</div>
+          <div class="trust-item">即时、自助地导出和删除数据</div>
+          <div class="trust-item">绝不出售。绝不用于训练公共 AI 模型。</div>
+          <div class="trust-item">设计时考虑了 COPPA</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section-alt">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">适合每个年龄</span>
+      <h2>一个学生，四个工作区。</h2>
+      <p>同一个引擎会调整版式、词汇和语气，从五岁孩子的第一批句子，到高中生的考试作文——没有人会“用不上”这个产品。</p>
+    </div>
+    <div class="split">
+      <div class="split-copy">
+        <div class="tier-tabs" id="tierTabs">
+          <button class="active" data-tier="early">Early Readers</button>
+          <button data-tier="elementary">Elementary</button>
+          <button data-tier="middle">Middle School</button>
+          <button data-tier="high">High School</button>
+        </div>
+        <p style="font-family:'Lexend',sans-serif; font-size:14px;color:var(--ink-faint);">选择一个学段来预览它的工作区。</p>
+      </div>
+      <div class="split-media">
+        <div class="tier-panel" id="tierPanel">
+          <!-- filled by script -->
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="split reverse">
+      <div class="split-media">
+        <div class="tier-panel">
+          <div class="pv-card pv-tip" style="margin-bottom:12px;">
+            <span class="pv-tag">借助游戏来讲解</span>
+            <div class="pv-text font-read">"把你的论点推得更远——就像打 Boss 战一样：先抬高紧张感，再在恰当的时刻打出最强的一击。"</div>
+          </div>
+          <div class="pv-card" style="background:linear-gradient(135deg, var(--ink), #3E2028); border:none;">
+            <div style="color:var(--accent-ink); font-family:'Lexend',sans-serif; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; margin-bottom:6px;">框架聚焦：PEEL</div>
+            <div style="color:#EDE1DC; font-family:'Lexend',sans-serif; font-size:13.5px; line-height:1.55;">Point（观点）：在这里抬高紧张感。Evidence（证据）：Boss 战的最后阶段。Explain（解释）：这正是你的论点最有力的时刻。Link（衔接）：每一段都用同样的方式收尾。</div>
+          </div>
+        </div>
+      </div>
+      <div class="split-copy">
+        <span class="eyebrow">产品</span>
+        <h3 style="margin-top:10px;">会教的反馈，而不只是打分。</h3>
+        <p>每次提交都会按同样的顺序返回同样的内容：一条与课程目标挂钩的 Glow；一条刚好略高于孩子现有水平的 Grow（即其最近发展区），借助孩子在设置时选的兴趣来讲解，并配合一个有名称的写作框架来教学——PEEL、Story Mountain 等，依文章而定——以孩子自己作品中的一个真实句子为基础，并改写该句来展示这种技巧如何用在他们自己的文字上；两个词汇提升，各配一个用法示例；在 Premium 中，还有单独的拼写和语法检查，以及整篇作品满分 10 分的评分，与那条单独的 Grow 分开评判，即使指导聚焦在某一点上，评分依然保持公正。</p>
+        <div class="split-list">
+          <div><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> Glow 对应真实的课程目标，而不是泛泛的夸奖</div>
+          <div><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> 每条 Grow 都借助一个兴趣来讲解 <em>由孩子自己选择</em> ——同一堂写作课，对太空迷和对足球少年的触动并不一样</div>
+          <div><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> "你的故事，修改后"：把他们自己的句子改写后展示，并应用了修改建议，让建议成为他们看得见的东西，而不只是读到的文字</div>
+          <div><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> 直接从孩子自己的写作中教授的有名称的框架，而不是泛泛的示例</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section-alt">
+  <div class="wrap">
+    <div class="split">
+      <div class="split-copy">
+        <span class="eyebrow">给家长</span>
+        <h3 style="margin-top:10px;">家长真正看得懂的仪表盘。</h3>
+        <p>查看孩子对学校本学期教学目标的掌握情况——前置状语、情态动词、修辞手法——无需教师资格也能看懂。</p>
+        <div class="split-list">
+          <div><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> 总体掌握度、已写字数和连续活跃天数，一目了然</div>
+          <div><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> 针对课程的具体目标，而不是含糊的字母等级</div>
+          <div><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> 逐周的进步趋势，让你看到变化，而不是某一刻的快照</div>
+          <div><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> 与同一国家、同一年级的其他学生做匿名对比</div>
+          <div><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> 一个账户最多六名学生，每人的数据完全独立记录</div>
+        </div>
+      </div>
+      <div class="split-media">
+        <div class="tier-panel">
+          <div class="mastery-row">
+            <span class="mastery-name">Fronted Adverbials</span>
+            <div class="mastery-bar"><i style="width:64%; background:var(--gold)"></i></div>
+            <span class="mastery-tag" style="background:var(--gold-tint); color:var(--gold-ink);">进行中</span>
+          </div>
+          <div class="mastery-row">
+            <span class="mastery-name">段落结构</span>
+            <div class="mastery-bar"><i style="width:88%; background:var(--good)"></i></div>
+            <span class="mastery-tag" style="background:color-mix(in srgb, var(--good) 18%, transparent); color:var(--good);">已掌握</span>
+          </div>
+          <div class="mastery-row">
+            <span class="mastery-name">描写性形容词</span>
+            <div class="mastery-bar"><i style="width:41%; background:var(--accent)"></i></div>
+            <span class="mastery-tag" style="background:var(--accent-tint); color:var(--accent-ink);">需要关注</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section-alt" id="pricing">
+  <div class="wrap">
+    <div class="section-head" style="margin-inline:auto; text-align:center;">
+      <span class="eyebrow" style="justify-content:center;">价格</span>
+      <h2>免费开始。等孩子着迷了再升级。</h2>
+    </div>
+    <div class="pricing">
+      <div class="price-card">
+        <div class="price-plan">Free</div>
+        <div class="price-amount"><span class="js-price" data-tier="free" style="font:inherit;color:inherit;">$0</span><span> /月</span></div>
+        <div class="price-list">
+          <div><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> 每月 3 次写作或阅读提交</div>
+          <div><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> 每次都有 Glow、Grow、高亮标注和词汇</div>
+          <div><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> 选择要练习的写作或阅读类型</div>
+          <div><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> 家长与学生仪表盘</div>
+        </div>
+        <a class="btn btn-ghost" href="/app.html?lang=zh">免费开始</a>
+        <div class="price-note">无需绑卡。</div>
+      </div>
+      <div class="price-card pro">
+        <div class="price-plan">Core</div>
+        <div class="price-amount"><span class="js-price" data-tier="core" style="font:inherit;color:inherit;">$9.99</span><span> /月</span></div>
+        <div class="price-list">
+          <div><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> 不限次数的写作与阅读提交</div>
+          <div><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> 26 周进步趋势，而不只是今天的分数</div>
+          <div><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> 在本年级内的匿名排名</div>
+          <div><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> 词汇库，配有闪卡、测验，进度跨设备保存</div>
+        </div>
+        <a class="btn btn-gold" href="/app.html?lang=zh">选择 Core</a>
+        <div class="price-note">一名学生。随时取消。</div>
+      </div>
+      <div class="price-card">
+        <div class="price-plan">Premium</div>
+        <div class="price-amount"><span class="js-price" data-tier="premium" style="font:inherit;color:inherit;">$15.99</span><span> /月</span></div>
+        <div class="price-list">
+          <div><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> 包含 Core 的全部功能，最多 6 名学生</div>
+          <div><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> 依据真实评估目标的考试技巧评分</div>
+          <div><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> 扩展反馈：第二个更有难度的下一步</div>
+          <div><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> 你的答案改写版和一份范例答案，两者都展示写作框架</div>
+          <div><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> 考试风格练习：NAPLAN、KS2 SATs、KS3、GCSE、EQAO、PSLE、IGCSE、NCEA、Leaving Cert、CBSE、NSC、HKDSE、美国各州考试和 CEFR 写作任务</div>
+          <div><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> 每次提交都有拼写与语法检查和满分 10 分的评分</div>
+        </div>
+        <a class="btn btn-ghost" href="/app.html?lang=zh">选择 Premium</a>
+        <div class="price-note">两个孩子？比两个 Core 更划算。</div>
+      </div>
+    </div>
+
+    <div class="plan-compare" id="planCompare">
+    <h3 style="text-align:center; margin-top:64px;">对比所有功能</h3>
+    <p class="plan-note" id="planNote" style="margin-top:8px;">点按某个部分即可展开</p>
+    <div class="plan-table-scroll">
+      <table class="plan-table" role="table" aria-label="Free、Core 与 Premium 对比">
+        <thead role="rowgroup">
+          <tr role="row">
+            <th role="columnheader" scope="col">你能得到什么</th>
+            <th role="columnheader" scope="col">Free<span><span class="js-price" data-tier="free">$0</span></span></th>
+            <th role="columnheader" scope="col" class="col-best">Core<span><span class="js-price" data-tier="core">$9.99</span> /月</span></th>
+            <th role="columnheader" scope="col">Premium<span><span class="js-price" data-tier="premium">$15.99</span> /月</span></th>
+          </tr>
+        </thead>
+        <tbody role="rowgroup">
+          <tr class="group-head" role="row"><th role="rowheader" scope="row" colspan="4">练习</th></tr>
+          <tr role="row">
+            <th role="rowheader" scope="row">每月提交次数</th>
+            <td role="cell" data-label="Free" class="no">3</td>
+            <td role="cell" data-label="Core" class="yes col-best">不限</td>
+            <td role="cell" data-label="Premium" class="yes">不限</td>
+          </tr>
+          <tr role="row">
+            <th role="rowheader" scope="row">一个账户的学生数</th>
+            <td role="cell" data-label="Free" class="no">1</td>
+            <td role="cell" data-label="Core" class="no col-best">1</td>
+            <td role="cell" data-label="Premium" class="yes">最多 6 名</td>
+          </tr>
+          <tr role="row">
+            <th role="rowheader" scope="row">写作题目与阅读短文</th>
+            <td role="cell" data-label="Free" class="yes">每次都是全新生成</td>
+            <td role="cell" data-label="Core" class="yes col-best">每次都是全新生成</td>
+            <td role="cell" data-label="Premium" class="yes">每次都是全新生成</td>
+          </tr>
+          <tr role="row">
+            <th role="rowheader" scope="row">依据其年级课程设定的字数目标</th>
+            <td role="cell" data-label="Free" class="yes">有</td>
+            <td role="cell" data-label="Core" class="yes col-best">有</td>
+            <td role="cell" data-label="Premium" class="yes">有</td>
+          </tr>
+
+          <tr role="row">
+            <th role="rowheader" scope="row">七种形式的阅读题，涉及故事、诗歌、文章、演讲、数据表等</th>
+            <td role="cell" data-label="Free" class="yes">有</td>
+            <td role="cell" data-label="Core" class="yes col-best">有</td>
+            <td role="cell" data-label="Premium" class="yes">有</td>
+          </tr>
+
+          <tr role="row">
+            <th role="rowheader" scope="row">选择练什么：写作类型、文本类型、阅读技能</th>
+            <td role="cell" data-label="Free" class="yes">有</td>
+            <td role="cell" data-label="Core" class="yes col-best">有</td>
+            <td role="cell" data-label="Premium" class="yes">有</td>
+          </tr>
+
+          <tr class="group-head" role="row"><th role="rowheader" scope="row" colspan="4">反馈</th></tr>
+          <tr role="row">
+            <th role="rowheader" scope="row">Key Takeaways：Glow、Grow、词汇</th>
+            <td role="cell" data-label="Free" class="yes">有</td>
+            <td role="cell" data-label="Core" class="yes col-best">有</td>
+            <td role="cell" data-label="Premium" class="yes">有</td>
+          </tr>
+          <tr role="row">
+            <th role="rowheader" scope="row">在孩子自己的文字中高亮标注，并附改写</th>
+            <td role="cell" data-label="Free" class="yes">有</td>
+            <td role="cell" data-label="Core" class="yes col-best">有</td>
+            <td role="cell" data-label="Premium" class="yes">有</td>
+          </tr>
+          <tr role="row">
+            <th role="rowheader" scope="row">从孩子自己的写作中教授的有名称的框架</th>
+            <td role="cell" data-label="Free" class="yes">有</td>
+            <td role="cell" data-label="Core" class="yes col-best">有</td>
+            <td role="cell" data-label="Premium" class="yes">有</td>
+          </tr>
+          <tr role="row">
+            <th role="rowheader" scope="row">拼写与语法检查</th>
+            <td role="cell" data-label="Free" class="no">—</td>
+            <td role="cell" data-label="Core" class="no col-best">—</td>
+            <td role="cell" data-label="Premium" class="yes">有</td>
+          </tr>
+          <tr role="row">
+            <th role="rowheader" scope="row">满分 10 分的总评分，并说明理由</th>
+            <td role="cell" data-label="Free" class="no">—</td>
+            <td role="cell" data-label="Core" class="no col-best">—</td>
+            <td role="cell" data-label="Premium" class="yes">有</td>
+          </tr>
+          <tr role="row">
+            <th role="rowheader" scope="row">围绕孩子兴趣展开的反馈</th>
+            <td role="cell" data-label="Free" class="yes">有</td>
+            <td role="cell" data-label="Core" class="yes col-best">有</td>
+            <td role="cell" data-label="Premium" class="yes">有</td>
+          </tr>
+          <tr role="row">
+            <th role="rowheader" scope="row">扩展反馈：第二个更有难度的下一步</th>
+            <td role="cell" data-label="Free" class="no">—</td>
+            <td role="cell" data-label="Core" class="no col-best">—</td>
+            <td role="cell" data-label="Premium" class="yes">有</td>
+          </tr>
+          <tr role="row">
+            <th role="rowheader" scope="row">你的答案修改版和范例答案，两者都展示框架</th>
+            <td role="cell" data-label="Free" class="no">—</td>
+            <td role="cell" data-label="Core" class="no col-best">—</td>
+            <td role="cell" data-label="Premium" class="yes">有</td>
+          </tr>
+          <tr role="row" class="wide">
+            <th role="rowheader" scope="row">阅读理解中的书面作答，按 2 分或 3 分制评分</th>
+            <td role="cell" data-label="Free" class="no">—</td>
+            <td role="cell" data-label="Core" class="no col-best">—</td>
+            <td role="cell" data-label="Premium" class="yes">有，并说明哪里得分，另附一份优秀范例答案</td>
+          </tr>
+          <tr role="row">
+            <th role="rowheader" scope="row">考试风格练习：NAPLAN、KS2 SATs、KS3、GCSE、EQAO、PSLE、IGCSE、NCEA、Leaving Cert、CBSE、NSC、HKDSE、美国各州考试和 CEFR 写作任务</th>
+            <td role="cell" data-label="Free" class="no">—</td>
+            <td role="cell" data-label="Core" class="no col-best">—</td>
+            <td role="cell" data-label="Premium" class="yes">有</td>
+          </tr>
+          <tr role="row" class="wide">
+            <th role="rowheader" scope="row">考试技巧评分 <span style="font-weight:400; color:var(--ink-faint);">（11 岁以上）</span></th>
+            <td role="cell" data-label="Free" class="no">—</td>
+            <td role="cell" data-label="Core" class="no col-best">—</td>
+            <td role="cell" data-label="Premium" class="yes">每个评估目标按 1–4 分级，附证据以及如何提升一级</td>
+          </tr>
+
+          <tr class="group-head" role="row"><th role="rowheader" scope="row" colspan="4">进步</th></tr>
+          <tr role="row">
+            <th role="rowheader" scope="row">连续天数、已写字数、平均分</th>
+            <td role="cell" data-label="Free" class="yes">有</td>
+            <td role="cell" data-label="Core" class="yes col-best">有</td>
+            <td role="cell" data-label="Premium" class="yes">有</td>
+          </tr>
+          <tr role="row">
+            <th role="rowheader" scope="row">技能掌握情况明细</th>
+            <td role="cell" data-label="Free" class="yes">有</td>
+            <td role="cell" data-label="Core" class="yes col-best">有</td>
+            <td role="cell" data-label="Premium" class="yes">有</td>
+          </tr>
+          <tr role="row">
+            <th role="rowheader" scope="row">26 周进步趋势图</th>
+            <td role="cell" data-label="Free" class="no">—</td>
+            <td role="cell" data-label="Core" class="yes col-best">有</td>
+            <td role="cell" data-label="Premium" class="yes">有</td>
+          </tr>
+          <tr role="row">
+            <th role="rowheader" scope="row">本年级内的匿名排名</th>
+            <td role="cell" data-label="Free" class="no">—</td>
+            <td role="cell" data-label="Core" class="yes col-best">有</td>
+            <td role="cell" data-label="Premium" class="yes">有</td>
+          </tr>
+          <tr role="row">
+            <th role="rowheader" scope="row">重新打开过往作品与反馈</th>
+            <td role="cell" data-label="Free" class="no">最近 10 次</td>
+            <td role="cell" data-label="Core" class="yes col-best">完整历史</td>
+            <td role="cell" data-label="Premium" class="yes">完整历史</td>
+          </tr>
+          <tr role="row">
+            <th role="rowheader" scope="row">词汇库、闪卡和自测测验，进度跨设备保存</th>
+            <td role="cell" data-label="Free" class="no">—</td>
+            <td role="cell" data-label="Core" class="yes col-best">有</td>
+            <td role="cell" data-label="Premium" class="yes">有</td>
+          </tr>
+
+          <tr class="group-head" role="row"><th role="rowheader" scope="row" colspan="4">账户</th></tr>
+          <tr role="row">
+            <th role="rowheader" scope="row">导出或删除你的数据</th>
+            <td role="cell" data-label="Free" class="yes">有</td>
+            <td role="cell" data-label="Core" class="yes col-best">有</td>
+            <td role="cell" data-label="Premium" class="yes">有</td>
+          </tr>
+          <tr role="row">
+            <th role="rowheader" scope="row">随时取消，无合约</th>
+            <td role="cell" data-label="Free" class="no">无需取消</td>
+            <td role="cell" data-label="Core" class="yes col-best">有</td>
+            <td role="cell" data-label="Premium" class="yes">有</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    </div>
+    <div class="plan-toggle-wrap"><button type="button" class="plan-toggle" id="planToggle" aria-expanded="false" aria-controls="planCompare">展开所有部分</button></div>
+  </div>
+</section>
+
+<section id="faq">
+  <div class="wrap">
+    <div class="section-head" style="margin-inline:auto; text-align:center;">
+      <span class="eyebrow" style="justify-content:center;">常见问题</span>
+      <h2>家长和学生真正会问的问题。</h2>
+    </div>
+    <div class="faq-list">
+      <details class="faq-item" open>
+        <summary>LiteracyLab AI 是什么？<span class="faq-plus"></span></summary>
+        <div class="faq-a">LiteracyLab AI 是面向 5–18 岁儿童和学生的在线读写教练。孩子写一篇文章或回答一篇阅读短文的问题，就会得到一个优点、一个清晰的下一步、一份修改过的作品版本和需要学习的词汇，并且都对应其学校课程（英国、美国、澳大利亚、加拿大、新西兰、爱尔兰、印度、南非、中国香港、海湾地区、新加坡，或面向英语学习者的 CEFR 等级）。账户由家长或监护人管理，并提供每月 3 次提交的免费方案。<a href="/learn/about-literacylab-ai/">进一步了解 LiteracyLab AI（英文）</a>。</div>
+      </details>
+      <details class="faq-item">
+        <summary>每月 3 次免费提交是怎么回事？<span class="faq-plus"></span></summary>
+        <div class="faq-a">每个账户在每个日历月都有 3 次免费提交——写作、阅读理解，或两者混合——每一次都包含完整的反馈：Glow、Grow、高亮标注和词汇。次数会在每月 1 日自动清零，所以你不用记，也不用手动续期。当你每周都在使用时，<a href="#pricing">Core</a> 会完全取消每月次数上限。</div>
+      </details>
+      <details class="faq-item">
+        <summary>我孩子写的内容安全且私密吗？<span class="faq-plus"></span></summary>
+        <div class="faq-a">是的。提交内容仅用于为你的孩子生成反馈——我们绝不出售或出租写作样本或个人数据，也不会用你孩子的提交内容来训练公共 AI 模型。家长可以随时查看、导出或永久删除孩子的写作历史。完整说明见我们的<a href="/privacy.html">隐私政策（英文）</a>。</div>
+      </details>
+      <details class="faq-item">
+        <summary>LiteracyLab AI 如何与我所在国家的课程对应？<span class="faq-plus"></span></summary>
+        <div class="faq-a">你选择所在地区——英国、美国、澳大利亚、加拿大、新西兰、爱尔兰、印度、南非、中国香港、阿联酋与海湾（Cambridge/IGCSE）、新加坡与东南亚（Cambridge/IB），或 Global ESL Mode（CEFR A1–C2）——再选孩子的年级、学年或等级，每个目标、每条 Grow 和每条词汇建议都会按该课程的实际要求来调整。这不是把一套通用评分标准硬套在每个国家上。</div>
+      </details>
+      <details class="faq-item">
+        <summary>我可以随时取消 LiteracyLab 订阅吗？<span class="faq-plus"></span></summary>
+        <div class="faq-a">可以——Core 和 Premium 都通过 Stripe 按月计费，没有绑定合约。在账户设置中点几下即可取消，之后不会再扣费；你会在已付费的周期结束前保留全部权限，随后转为免费方案，而不会丢失账户。</div>
+      </details>
+      <details class="faq-item">
+        <summary>我该选哪个 LiteracyLab AI 方案？<span class="faq-plus"></span></summary>
+        <div class="faq-a">先从 Free 开始，亲自判断反馈的质量——每月 3 次提交，附真实的 Glow、Grow、高亮标注和词汇。<strong>Core</strong>（每月 9.99 美元，并提供 A$、£、€、C$、S$、NZ$、HK$、R 和 ₹ 的本地价格）适合经常练习的一个孩子：不限次数的提交、26 周进步趋势、本年级内的匿名排名和完整活动历史。<strong>Premium</strong>（每月 15.99 美元）适合有不止一个孩子的家庭——一个账户最多 6 名学生，比两个 Core 方案更划算——或者正在备考的 11 岁以上学生，因为它在每条反馈中增加了考试技巧评分、第二个更有难度的下一步、拼写与语法检查和满分 10 分的整篇评分。你可以随时在账户设置中切换方案。</div>
+      </details>
+      <details class="faq-item">
+        <summary>什么是考试技巧评分？<span class="faq-plus"></span></summary>
+        <div class="faq-a">在 <a href="#pricing">Premium</a> 中，11 岁或以上的学生每次提交都会依据为其年级和地区公布的真实评估目标来评分——例如英国的 AQA GCSE English Language AO5 和 AO6，或美国相应的 Common Core 写作标准。每个目标会得到从 1（Emerging）到 4（Strong）的等级、一段来自孩子自己作品的引文作为该等级的证据，以及一项能让其提升一个等级的具体改动。它刻意从不给出原始考试分数、百分比或字母等级：一篇未经校准的作品支撑不了这种精确度，而一个看起来正式却并不正式的数字，比没有数字更糟。</div>
+      </details>
+      <details class="faq-item">
+        <summary>孩子用完 3 次提交后会怎样？<span class="faq-plus"></span></summary>
+        <div class="faq-a">工作区会清楚地显示已达上限，并暂停新的提交——不会丢失任何内容，进行中的草稿也会保留。之后你可以立刻升级到 Core 获得不限次数的提交，或者干脆等到下个月初免费额度重置。</div>
+      </details>
+      <details class="faq-item">
+        <summary>它会直接替我孩子写作文吗？<span class="faq-plus"></span></summary>
+        <div class="faq-a">不会——它从不替孩子写故事。LiteracyLab AI 只回应孩子已经完成的作品：指出一个具体的优点和一件需要改进的事。它最接近“改写”的是“你的故事，修改后”面板：取孩子真正写过的一个句子，并展示应用了建议修改后的同一句话——他们的词句、他们的声音，只改一处——让孩子看到建议在实际中的样子，而不是照抄现成的文字。下一稿仍然是他们自己的。</div>
+      </details>
+      <details class="faq-item">
+        <summary>我可以在同一个账户里添加多个孩子吗？<span class="faq-plus"></span></summary>
+        <div class="faq-a">可以，在 <a href="#pricing">Premium</a> 方案中：一个账户最多六名学生（Free 和 Core 方案支持一名学生），每人都有自己的国家课程、年级、兴趣和头像。他们的作品完全分开：提交内容、掌握度历史和进步都按每个孩子单独记录，所以哥哥姐姐的作文绝不会混进弟弟妹妹的仪表盘。你可以通过仪表盘顶部的学生栏在他们之间切换。</div>
+      </details>
+      <details class="faq-item">
+        <summary>你们会把我的孩子和其他孩子比较排名吗？<span class="faq-plus"></span></summary>
+        <div class="faq-a">只以刻意受限且匿名的方式进行。仪表盘会显示孩子的总体掌握度与同一国家、同一年级的其他学生相比如何——平均值、百分位数和一个排名阶梯。阶梯上的其他条目只显示名次和分数，并标注为“学生 4”之类；家庭之间不会传递任何姓名或可识别信息。而且如果与你孩子同一国家、同一年级的学生少于五人，对比就会被完全隐藏，而不是在小到足以识别某个人的群体面前展示。</div>
+      </details>
+      <details class="faq-item">
+        <summary>我可以导出或删除孩子的数据吗？<span class="faq-plus"></span></summary>
+        <div class="faq-a">可以——即时完成，而且无需向我们申请。在家长仪表盘中，你可以把账户保存的全部内容下载为一个文件，包括每位学生的档案及其完整的写作和阅读历史。你也可以永久删除整个账户，这会移除所有档案和全部历史，并取消任何有效订阅。删除立即生效，无法撤销——没有客服工单，也没有等待期。详情请见我们的<a href="/privacy.html">隐私政策（英文）</a>。</div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<section class="final-cta">
+  <div class="wrap">
+    <h2>给他们的下一个故事一个成长的地方。</h2>
+    <p>不到一分钟即可建立学生档案——无需信用卡，没有任何承诺。</p>
+    <div class="hero-ctas">
+      <a class="btn btn-primary btn-lg" href="/app.html?lang=zh">打开应用</a>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap foot-inner">
+    <span>© 2026 LiteracyLab AI</span>
+    <div class="foot-links">
+      <a href="/app.html?lang=zh">应用</a>
+      <a href="#pricing">价格</a>
+      <a href="#faq">常见问题</a>
+      <a href="/learn/">指南</a>
+      <a href="/learn/about-literacylab-ai/">关于</a>
+      <a href="/privacy.html">隐私（英文）</a>
+      <a href="/terms.html">条款（英文）</a>
+      <a href="/pl/" hreflang="pl" lang="pl">Polski</a>
+      <a href="/es/" hreflang="es" lang="es">Español</a>
+      <a href="/pt/" hreflang="pt" lang="pt">Português</a>
+      <a href="/ro/" hreflang="ro" lang="ro">Română</a>
+      <a href="/ar/" hreflang="ar" lang="ar">العربية</a>
+      <a href="/ur/" hreflang="ur" lang="ur">اردو</a>
+      <a href="/hi/" hreflang="hi" lang="hi">हिन्दी</a>
+      <a href="/" hreflang="en" lang="en">English</a>
+    </div>
+  </div>
+</footer>
+
+<script src="/pricing.js"></script>
+<script>
+  // Theme toggle: cycles system -> dark -> light -> system
+  (function(){
+    var root = document.documentElement;
+    var btns = document.querySelectorAll('.theme-toggle');
+    var icons = document.querySelectorAll('.theme-icon');
+    var SUN = '<path d="M12 2.5v2.3M12 19.2v2.3M4.4 4.4l1.6 1.6M18 18l1.6 1.6M2.5 12h2.3M19.2 12h2.3M4.4 19.6L6 18M18 6l1.6-1.6"/><circle cx="12" cy="12" r="4.2"/>';
+    var MOON = '<path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z"/>';
+    function apply(mode){
+      if(mode === 'system'){ root.removeAttribute('data-theme'); }
+      else{ root.setAttribute('data-theme', mode); }
+      var isDark = mode === 'dark' || (mode === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      icons.forEach(function(i){ i.innerHTML = isDark ? SUN : MOON; });
+    }
+    var current = 'system';
+    apply(current);
+    btns.forEach(function(b){ b.addEventListener('click', function(){
+      current = current === 'system' ? 'dark' : current === 'dark' ? 'light' : 'system';
+      apply(current);
+    }); });
+  })();
+
+  // Mobile nav toggle - the links panel is hidden by default below 780px
+  // (see .nav-links CSS) and shown/hidden by adding/removing "open".
+  (function(){
+    var toggle = document.getElementById('navMenuToggle');
+    var links = document.getElementById('navLinks');
+    if (!toggle || !links) return;
+    function close(){
+      links.classList.remove('open');
+      toggle.setAttribute('aria-expanded', 'false');
+    }
+    toggle.addEventListener('click', function(){
+      var open = links.classList.toggle('open');
+      toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+    links.querySelectorAll('a').forEach(function(a){ a.addEventListener('click', close); });
+  })();
+
+  // Hero: who it is for, and the sentence shown step by step
+  (function(){
+    var title = document.getElementById('heroTitle'), sub = document.getElementById('heroSub');
+    var audBtns = document.querySelectorAll('.aud button');
+    var cardP = document.getElementById('cardParent'), cardL = document.getElementById('cardLearner');
+    function aud(which){
+      title.innerHTML = title.getAttribute('data-' + which);
+      sub.innerHTML = sub.getAttribute('data-' + which);
+      audBtns.forEach(function(b){ b.setAttribute('aria-pressed', b.getAttribute('data-aud') === which ? 'true' : 'false'); });
+      cardP.hidden = which !== 'parent'; cardL.hidden = which !== 'learner';
+    }
+    audBtns.forEach(function(b){ b.addEventListener('click', function(){ aud(b.getAttribute('data-aud')); }); });
+
+    var tabs = document.querySelectorAll('.plate-tabs button');
+    var next = document.getElementById('plateNext');
+    var glow = document.getElementById('markGlow'), grow = document.getElementById('markGrow');
+    var lab = document.getElementById('noteLabel'), l1 = document.getElementById('noteL1'), l2 = document.getElementById('noteL2');
+    var NOTES = {
+      1: ['阅读', '教练先读一遍，然后问：', '这里已经有哪些地方做得好？', '显示 Glow'],
+      2: ['GLOW', '你写出了树的声音，', '我仿佛真的听见了。', '显示 Grow'],
+      3: ['GROW', '把害怕写出来：天黑的时候，你的手', '在做什么？试着写一行。', '重新开始']
+    };
+    var step = 1;
+    var show = function(n){
+      step = n;
+      var d = NOTES[n];
+      lab.textContent = d[0]; l1.textContent = d[1]; l2.textContent = d[2]; next.textContent = d[3];
+      glow.toggleAttribute('hidden', n < 2); grow.toggleAttribute('hidden', n < 3); // SVG shapes have no .hidden property, so the attribute is toggled
+      tabs.forEach(function(t){ t.setAttribute('aria-pressed', Number(t.getAttribute('data-step')) === n ? 'true' : 'false'); });
+    }
+    tabs.forEach(function(t){ t.addEventListener('click', function(){ show(Number(t.getAttribute('data-step'))); }); });
+    next.addEventListener('click', function(){ show(step >= 3 ? 1 : step + 1); });
+    // Draw the marks from the real size of the words, so they always fit the sentence however the font loads.
+    var tagBg = document.getElementById('tagBg');
+    function place(){
+      try {
+        var g = document.getElementById('phGlow').getBBox();
+        // a highlighter-pen band behind the words, no outline, so nothing crosses a letter
+        glow.setAttribute('x', g.x - 3); glow.setAttribute('y', g.y + g.height * 0.36);
+        glow.setAttribute('width', g.width + 6); glow.setAttribute('height', g.height * 0.52);
+        glow.setAttribute('rx', 3);
+        var r = document.getElementById('phGrow').getBBox();
+        var y = r.y + r.height + 3;
+        grow.setAttribute("d", "M" + r.x + " " + y + " h " + r.width);
+        tagBg.setAttribute('width', lab.getBBox().width + 24);
+      } catch (e) { /* a browser without SVG text measuring simply shows no marks */ }
+    }
+    var showOrig = show;
+    show = function(n){ showOrig(n); place(); };
+    place();
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(place);
+    window.addEventListener('resize', place);
+    show(1);
+  })();
+
+  // The plan comparison is a set of sections (Practice, Feedback, Progress...) that open and close from their headings.
+  // Every row stays in the page's HTML, so search engines and AI tools read all of it; this only changes what is shown.
+  // Ticks replace the word "Yes". Without scripts the whole table simply stays open as written.
+  (function(){
+    var box = document.getElementById('planCompare'), btn = document.getElementById('planToggle'), note = document.getElementById('planNote');
+    var table = box && box.querySelector('.plan-table');
+    if (!box || !btn || !table) return;
+    var TICK = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 12.5l5 5 10-11"/></svg><span class="sr">有</span>';
+    var groups = [], cur = null, n = 0;
+    table.querySelectorAll('tbody tr').forEach(function(tr){
+      if (tr.classList.contains('group-head')) {
+        var th = tr.querySelector('th'), label = th.textContent.trim(), id = 'plan-sec-' + (++n);
+        th.innerHTML = '<button type="button" class="plan-sec-btn" aria-expanded="true" aria-controls="' + id + '"><span>' + label + '</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>';
+        cur = { head: tr, btn: th.querySelector('button'), rows: [] };
+        cur.btn.addEventListener('click', (function(g){ return function(){ setGroup(g, g.btn.getAttribute('aria-expanded') !== 'true'); sync(); }; })(cur));
+        groups.push(cur);
+        return;
+      }
+      tr.querySelectorAll('td').forEach(function(td){
+        var t = td.textContent.trim();
+        if (t === '有') td.innerHTML = TICK;
+        else if (t === '—' || t === '-') td.innerHTML = '<span class="dash" aria-hidden="true">—</span><span class="sr">不包含</span>';
+      });
+      if (cur) cur.rows.push(tr);
+    });
+    function setGroup(g, open){
+      g.btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      g.head.classList.toggle('is-closed', !open);
+      g.rows.forEach(function(r){ r.classList.toggle('is-folded', !open); });
+    }
+    function sync(){
+      var all = groups.every(function(g){ return g.btn.getAttribute('aria-expanded') === 'true'; });
+      btn.textContent = all ? '收起所有部分' : '展开所有部分';
+      btn.setAttribute('aria-expanded', all ? 'true' : 'false');
+    }
+    btn.addEventListener('click', function(){
+      var open = btn.getAttribute('aria-expanded') !== 'true';
+      groups.forEach(function(g){ setGroup(g, open); }); sync();
+    });
+    if (!groups.length) { btn.parentNode.hidden = true; note.hidden = true; return; }
+    note.textContent = '点按某个部分即可展开';
+    groups.forEach(function(g, i){ setGroup(g, i === 0); });
+    sync();
+  })();
+
+  // Where it applies
+  (function(){
+    var D = {
+      au:  ['Australian Curriculum', 'NAPLAN，3 至 9 年级', '英式风格（澳大利亚）'],
+      uk:  ['UK National Curriculum', 'KS2 SATs、KS3 和 GCSE English', '英式'],
+      us:  ['US Common Core 与 AP', '各州考试（Common Core），3 至 12 年级', '美式'],
+      nz:  ['New Zealand Curriculum 与 NCEA', 'NCEA English，11 至 13 年级', '英式'],
+      in:  ['NCERT 与 CBSE English', 'CBSE 10 年级和 12 年级 English，9 至 12 年级', '英式'],
+      za:  ['CAPS English', 'NSC English（matric），10 至 12 年级', '英式'],
+      hk:  ['Education Bureau English Language Curriculum 与 HKDSE', 'HKDSE English Language，Secondary 4 至 6', '英式'],
+      ie:  ['Primary、Junior Cycle 与 Leaving Certificate', 'Junior Cycle English 与 Leaving Certificate English', '英式'],
+      ca:  ['Ontario Curriculum', 'EQAO，3 至 9 年级，以及 10 年级的 OSSLT', '加拿大式：-ize 与 -ise 均可接受'],
+      sg:  ['Cambridge 与 IB', 'PSLE English（Primary 4 至 6）与 O-Level English', '英式'],
+      ae:  ['Cambridge 与 IGCSE', 'Cambridge Checkpoint、IGCSE 以及 AS 与 A Level English', '英式'],
+      esl: ['英语学习者（CEFR 等级）', 'CEFR 写作任务，A1 至 C2', '英式或美式']
+    };
+    var btns = document.querySelectorAll('.where-tabs button');
+    var c = document.getElementById('whereCurr'), e = document.getElementById('whereExam'), p = document.getElementById('whereSpell');
+    function pick(k){
+      c.textContent = D[k][0]; e.textContent = D[k][1]; p.textContent = D[k][2];
+      btns.forEach(function(b){ b.setAttribute('aria-pressed', b.getAttribute('data-place') === k ? 'true' : 'false'); });
+    }
+    btns.forEach(function(b){ b.addEventListener('click', function(){ pick(b.getAttribute('data-place')); }); });
+    pick('au');
+  })();
+
+  // Age-tier preview switcher
+  (function(){
+    var data = {
+      early: { title: "今日故事灵感", prompt: "讲一个短故事：一只勇敢的恐龙造了一枚火箭，要去月球。", words: 42, target: 60 },
+      elementary: { title: "本周任务", prompt: "写一个冒险故事：你的角色在自己最喜欢的游戏里发现了一个隐藏的世界。", words: 118, target: 150 },
+      middle: { title: "分析性回答", prompt: "在你最近读过的一个故事里，作者是如何利用场景设定来营造紧张感的？", words: 214, target: 350 },
+      high: { title: "限时作文", prompt: "“在文学作品中，野心总是被描绘成一种破坏性的力量。”你在多大程度上同意这一说法？", words: 480, target: 800 },
+    };
+    var tabs = document.querySelectorAll('#tierTabs button');
+    var panel = document.getElementById('tierPanel');
+    function render(tier){
+      var d = data[tier];
+      var pct = Math.min(100, Math.round((d.words/d.target)*100));
+      panel.innerHTML =
+        '<div class="t-title">'+d.title+'</div>' +
+        '<div class="t-prompt">'+d.prompt+'</div>' +
+        '<div class="tier-meter"><div class="bar"><i style="width:'+pct+'%"></i></div>'+d.words+' / '+d.target+' 字</div>';
+    }
+    tabs.forEach(function(btn){
+      btn.addEventListener('click', function(){
+        tabs.forEach(function(b){ b.classList.remove('active'); });
+        btn.classList.add('active');
+        render(btn.dataset.tier);
+      });
+    });
+    render('early');
+  })();
+
+  // Local-currency prices. The rules live in pricing.js, shared with the
+  // app, so the two can never quote different prices. If that file fails
+  // to load, the "$9.99" already in the page stays, which is still the
+  // right number.
+  (function(){
+    if (!window.LL_PRICING) return;
+    var currency = window.LL_PRICING.detectCurrency();
+    document.querySelectorAll('.js-price').forEach(function(el){
+      // Free has no amount in pricing.js; reuse Core's label so "A$0" sits beside "A$9.99".
+      var tier = el.dataset.tier;
+      el.textContent = tier === 'free'
+        ? window.LL_PRICING.priceLabel('core', currency).replace(/[\d.]+$/, '0')
+        : window.LL_PRICING.priceLabel(tier, currency);
+    });
+  })();
+</script>
+</body>
+</html>

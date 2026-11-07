@@ -18,6 +18,8 @@ const LANGS = [
   { code: "es", locale: "es_ES", dict: "es.json", native: "Español", englishOnly: "(en inglés)" },
   { code: "pt", locale: "pt_BR", dict: "pt.json", native: "Português", englishOnly: "(em inglês)" },
   { code: "ro", locale: "ro_RO", dict: "ro.json", native: "Română", englishOnly: "(în engleză)" },
+  { code: "hi", locale: "hi_IN", dict: "hi.json", native: "हिन्दी", englishOnly: "(अंग्रेज़ी में)", fonts: "Noto+Sans+Devanagari:wght@400;500;600;700" },
+  { code: "zh", locale: "zh_CN", dict: "zh.json", native: "中文", englishOnly: "（英文）", fonts: "Noto+Sans+SC:wght@400;500;700" },
   // dir "rtl" reads right to left: the page flips, home-rtl.css mirrors what the layout cannot, and fonts is the extra web font to load.
   { code: "ar", locale: "ar_AR", dict: "ar.json", native: "العربية", englishOnly: "(بالإنجليزية)", dir: "rtl", fonts: "Noto+Naskh+Arabic:wght@400;500;600;700" },
   { code: "ur", locale: "ur_PK", dict: "ur.json", native: "اردو", englishOnly: "(انگریزی میں)", dir: "rtl", fonts: "Noto+Nastaliq+Urdu:wght@400;500;600;700&family=Noto+Naskh+Arabic:wght@400;600" },
@@ -92,6 +94,10 @@ function buildLanguage(lang, source) {
   // The "most popular" badge on the plans is text inside the page's CSS, so it is set here. A right-to-left language also
   // gets its fonts, its mirroring stylesheet and a flipped sentence demo.
   const extra = [`<style>.price-card.pro::before,.plan-table thead .col-best::before{content:${JSON.stringify(dict.popular)}}</style>`];
+  // A left-to-right language in another script (Hindi, Chinese) gets its web font and home-fonts.css.
+  if (lang.fonts && lang.dir !== "rtl") {
+    extra.unshift(`<link href="https://fonts.googleapis.com/css2?family=${lang.fonts}&display=swap" rel="stylesheet">`, '<link rel="stylesheet" href="home-fonts.css?v=2">');
+  }
   if (lang.dir === "rtl") {
     html = html.replace(`<html lang="${lang.code}">`, `<html lang="${lang.code}" dir="rtl">`);
     extra.unshift(`<link href="https://fonts.googleapis.com/css2?family=${lang.fonts}&display=swap" rel="stylesheet">`, '<link rel="stylesheet" href="home-rtl.css?v=3">');

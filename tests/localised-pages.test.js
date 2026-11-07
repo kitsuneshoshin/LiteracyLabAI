@@ -152,3 +152,14 @@ test("right-to-left languages flip the page, load their fonts and mirroring styl
   const css = read("home-rtl.css");
   assert.match(css, /html\[lang="ar"\] \*, html\[lang="ur"\] \* \{ letter-spacing: 0 !important/, "joined letters are never letter-spaced");
 });
+
+test("a left-to-right language in another script (Hindi, Chinese) loads its web font and font stylesheet", () => {
+  const scripts = LANGS.filter((l) => l.fonts && l.dir !== "rtl");
+  assert.ok(scripts.length >= 2);
+  for (const lang of scripts) {
+    const page = built.files[lang.code + "/index.html"];
+    assert.ok(page.includes("fonts.googleapis.com/css2?family=" + lang.fonts));
+    assert.ok(page.includes('<link rel="stylesheet" href="/home-fonts.css?v=2">'));
+    assert.ok(read("home-fonts.css").includes(`html[lang="${lang.code}"]`), lang.code + " has type rules");
+  }
+});

@@ -120,6 +120,8 @@ test("the cookie banner speaks the page's language", () => {
   assert.match(banner("ro"), />Refuz</);
   assert.match(banner("ar"), /ملفات تعريف الارتباط/);
   assert.match(banner("ur"), /کوکیز/);
+  assert.match(banner("hi"), /कुकीज़/);
+  assert.match(banner("zh-CN"), /我们使用 Cookie/);
   assert.match(banner("en"), /We use cookies/);
   assert.match(banner("fr"), /We use cookies/, "a language without its own text falls back to English");
   assert.match(banner(""), /We use cookies/, "a page with no language stays English");
