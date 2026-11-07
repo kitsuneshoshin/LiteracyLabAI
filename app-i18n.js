@@ -20,9 +20,11 @@
     { code: "en", native: "English" },
     { code: "pl", native: "Polski" },
     { code: "es", native: "Español" },
+    { code: "pt", native: "Português" },
+    { code: "ro", native: "Română" },
   ];
   // Bump when a dictionary changes, so browsers fetch the new one.
-  var DICT_VERSION = 4;
+  var DICT_VERSION = 5;
   var STORE_KEY = "ll_ui_lang";
   var ATTRS = ["title", "placeholder", "aria-label", "alt"];
 
