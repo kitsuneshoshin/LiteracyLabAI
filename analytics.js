@@ -55,7 +55,9 @@
     pl: { label: "Zgoda na pliki cookie", text: "Używamy plików cookie, aby rozumieć ruch na stronie. Możesz zaakceptować lub odrzucić analityczne pliki cookie.", decline: "Odrzuć", accept: "Akceptuję" },
     es: { label: "Consentimiento de cookies", text: "Usamos cookies para entender el tráfico del sitio. Puedes aceptar o rechazar las cookies de análisis.", decline: "Rechazar", accept: "Aceptar" },
     pt: { label: "Consentimento de cookies", text: "Usamos cookies para entender o tráfego do site. Você pode aceitar ou recusar os cookies de análise.", decline: "Recusar", accept: "Aceitar" },
-    ro: { label: "Acord pentru cookie-uri", text: "Folosim cookie-uri pentru a înțelege traficul de pe site. Poți accepta sau refuza cookie-urile de analiză.", decline: "Refuz", accept: "Accept" }
+    ro: { label: "Acord pentru cookie-uri", text: "Folosim cookie-uri pentru a înțelege traficul de pe site. Poți accepta sau refuza cookie-urile de analiză.", decline: "Refuz", accept: "Accept" },
+    ar: { dir: "rtl", label: "الموافقة على ملفات تعريف الارتباط", text: "نستخدم ملفات تعريف الارتباط (الكوكيز) لفهم حركة الزيارات إلى الموقع. يمكنك قبول ملفات التحليلات أو رفضها.", decline: "رفض", accept: "قبول" },
+    ur: { dir: "rtl", label: "کوکیز کی رضامندی", text: "ہم سائٹ کے ٹریفک کو سمجھنے کے لیے کوکیز استعمال کرتے ہیں۔ آپ اینالیٹکس کوکیز قبول یا مسترد کر سکتے ہیں۔", decline: "مسترد کریں", accept: "قبول کریں" }
   };
 
   function showBanner() {
@@ -65,6 +67,7 @@
     var code = String((document.documentElement && document.documentElement.lang) || "").slice(0, 2).toLowerCase();
     var T = BANNER_TEXT[code] || BANNER_TEXT.en;
     bar.setAttribute("aria-label", T.label);
+    if (T.dir) bar.setAttribute("dir", T.dir);
     bar.style.cssText = "position:fixed;left:0;right:0;bottom:0;z-index:9999;background:#1a1a1a;color:#fff;"
       + "padding:14px 16px;display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:center;"
       + "font:14px/1.4 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;";

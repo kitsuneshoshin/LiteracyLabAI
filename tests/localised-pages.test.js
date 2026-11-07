@@ -58,7 +58,7 @@ test("nothing is left in English on the translated page except names that do not
 test("the translated page declares its language, its own address and the alternates, and so does the English page", () => {
   for (const lang of LANGS) {
     const page = built.files[lang.code + "/index.html"];
-    assert.match(page, new RegExp(`<html lang="${lang.code}">`));
+    assert.ok(page.includes(`<html lang="${lang.code}"`));
     assert.ok(page.includes(`<link rel="canonical" href="https://www.literacylabai.com/${lang.code}/">`));
     assert.ok(page.includes(`<meta property="og:url" content="https://www.literacylabai.com/${lang.code}/">`));
     assert.ok(page.includes(`<meta property="og:locale" content="${lang.locale}">`));
@@ -123,5 +123,32 @@ test("the language pages are in the sitemap, and the pages the build does not tr
 
 test("each language's page uses its own cookie banner text", () => {
   const analytics = read("analytics.js");
-  for (const lang of LANGS) assert.ok(analytics.includes(`    ${lang.code}: { label:`), `${lang.code} has banner text in analytics.js`);
+  for (const lang of LANGS) assert.ok(analytics.includes(`    ${lang.code}: {`), `${lang.code} has banner text in analytics.js`);
+});
+
+test("the plans' 'most popular' badge, which lives in the page's CSS, is in each page's own language", () => {
+  for (const lang of LANGS) {
+    const page = built.files[lang.code + "/index.html"];
+    const dict = JSON.parse(read("scripts/i18n/" + lang.dict));
+    assert.ok(dict.popular && dict.popular !== "MOST POPULAR", lang.code + ": no translated badge");
+    assert.ok(page.includes(`.price-card.pro::before,.plan-table thead .col-best::before{content:${JSON.stringify(dict.popular)}}`));
+  }
+});
+
+test("right-to-left languages flip the page, load their fonts and mirroring stylesheet, and mirror the sentence demo", () => {
+  const rtl = LANGS.filter((l) => l.dir === "rtl");
+  assert.ok(rtl.length >= 2);
+  for (const lang of LANGS) {
+    const page = built.files[lang.code + "/index.html"];
+    if (lang.dir !== "rtl") { assert.ok(!page.includes('dir="rtl"') && !page.includes("home-rtl.css"), lang.code + " is left to right"); continue; }
+    assert.ok(page.includes(`<html lang="${lang.code}" dir="rtl">`));
+    assert.ok(page.includes('<link rel="stylesheet" href="/home-rtl.css?v=3">'));
+    assert.ok(page.includes("fonts.googleapis.com/css2?family=" + lang.fonts));
+    const plate = page.slice(page.indexOf('<figure class="plate">'), page.indexOf("</figure>"));
+    assert.ok(!/ x="16"/.test(plate.replace(/<line[^>]*>/g, "")), lang.code + ": the demo still starts at the left edge");
+    assert.ok((plate.match(/ x="(544|532)"[^>]* direction="rtl"/g) || []).length >= 6, lang.code + ": demo text starts at the right edge and runs right to left");
+    assert.ok(page.includes("tagBg.setAttribute('x', 544 -"), lang.code + ": the label tag grows from the right");
+  }
+  const css = read("home-rtl.css");
+  assert.match(css, /html\[lang="ar"\] \*, html\[lang="ur"\] \* \{ letter-spacing: 0 !important/, "joined letters are never letter-spaced");
 });

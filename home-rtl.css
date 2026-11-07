@@ -1,0 +1,41 @@
+/* Right-to-left pages (Arabic, Urdu). Loaded after home.css on those pages only (scripts/build-localised.js adds it).
+   The page's flex and grid layouts flip by themselves under dir="rtl"; this file mirrors the few rules in index.html and
+   home.css that name left or right outright, and sets the type for the two scripts. */
+
+[dir="rtl"] body,
+[dir="rtl"] .hero-inner,
+[dir="rtl"] .preview-shell,
+[dir="rtl"] .plan-table th,
+[dir="rtl"] .plan-table td,
+[dir="rtl"] .plan-table thead th:first-child { text-align: right; }
+
+/* Tick-mark lists: the icon sits at the start of the line. */
+[dir="rtl"] .split-list div { padding-left: 0; padding-right: 26px; }
+[dir="rtl"] .split-list svg { left: auto; right: 0; }
+
+/* Dividers between side-by-side columns. */
+[dir="rtl"] .where-facts > div + div,
+[dir="rtl"] .step + .step { padding-left: 0; padding-right: 28px; border-left: 0; border-right: 1px solid var(--border); }
+@media (max-width: 780px){ [dir="rtl"] .where-facts > div + div { padding-right: 0; border-right: 0; border-top: 1px solid var(--border); } }
+@media (max-width: 760px){ [dir="rtl"] .step + .step { padding-right: 0; border-right: 0; border-top: 1px solid var(--border); } }
+
+/* The plans table when it stacks on a phone. */
+@media (max-width: 720px){
+  [dir="rtl"] .plan-table td { border-left: 0; border-right: 1px solid var(--border-soft); }
+  [dir="rtl"] .plan-table td:first-of-type { border-right: 0; }
+  [dir="rtl"] .plan-table tr.wide td { border-right: 0; }
+}
+
+/* Arabic and Urdu letters join, so letter-spacing would break the words apart, and capitals do not exist. */
+html[lang="ar"] *, html[lang="ur"] * { letter-spacing: 0 !important; text-transform: none !important; }
+
+/* Type. Arabic in Naskh; Urdu in Nastaliq, the style Urdu readers expect, which needs more line height. The Latin fonts stay
+   in the stack, so the English names inside a sentence (Glow, Grow, PEEL) keep their usual look, and the brand name is left alone. */
+html[lang="ar"] *:not(.brand):not(.brand *) { font-family: "Noto Naskh Arabic", "Source Serif 4", "Lexend", serif; }
+html[lang="ur"] *:not(.brand):not(.brand *) { font-family: "Noto Nastaliq Urdu", "Noto Naskh Arabic", "Source Serif 4", "Lexend", serif; }
+html[lang="ur"] body { line-height: 2.1; }
+html[lang="ur"] h1, html[lang="ur"] h2, html[lang="ur"] h3 { line-height: 1.9; }
+/* Nastaliq letters are tall, so the headings are set smaller than the Latin ones to take the same room. */
+html[lang="ur"] h1 { font-size: clamp(28px, 4.2vw, 46px) !important; }
+html[lang="ur"] h2 { font-size: clamp(22px, 3vw, 34px) !important; }
+html[lang="ur"] .btn, html[lang="ur"] button { line-height: 1.8; }

@@ -18,6 +18,9 @@ const LANGS = [
   { code: "es", locale: "es_ES", dict: "es.json", native: "Español", englishOnly: "(en inglés)" },
   { code: "pt", locale: "pt_BR", dict: "pt.json", native: "Português", englishOnly: "(em inglês)" },
   { code: "ro", locale: "ro_RO", dict: "ro.json", native: "Română", englishOnly: "(în engleză)" },
+  // dir "rtl" reads right to left: the page flips, home-rtl.css mirrors what the layout cannot, and fonts is the extra web font to load.
+  { code: "ar", locale: "ar_AR", dict: "ar.json", native: "العربية", englishOnly: "(بالإنجليزية)", dir: "rtl", fonts: "Noto+Naskh+Arabic:wght@400;500;600;700" },
+  { code: "ur", locale: "ur_PK", dict: "ur.json", native: "اردو", englishOnly: "(انگریزی میں)", dir: "rtl", fonts: "Noto+Nastaliq+Urdu:wght@400;500;600;700&family=Noto+Naskh+Arabic:wght@400;600" },
 ];
 
 const switchLink = (l) => `<a href="/${l.code}/" hreflang="${l.code}" lang="${l.code}">${l.native}</a>`;
@@ -85,6 +88,25 @@ function buildLanguage(lang, source) {
   html = html.replace('<html lang="en">', `<html lang="${lang.code}">`)
     .replace('<link rel="canonical" href="https://www.literacylabai.com/">', `<link rel="canonical" href="${url}">`)
     .replace('<meta property="og:url" content="https://www.literacylabai.com/">', `<meta property="og:url" content="${url}">\n<meta property="og:locale" content="${lang.locale}">`);
+
+  // The "most popular" badge on the plans is text inside the page's CSS, so it is set here. A right-to-left language also
+  // gets its fonts, its mirroring stylesheet and a flipped sentence demo.
+  const extra = [`<style>.price-card.pro::before,.plan-table thead .col-best::before{content:${JSON.stringify(dict.popular)}}</style>`];
+  if (lang.dir === "rtl") {
+    html = html.replace(`<html lang="${lang.code}">`, `<html lang="${lang.code}" dir="rtl">`);
+    extra.unshift(`<link href="https://fonts.googleapis.com/css2?family=${lang.fonts}&display=swap" rel="stylesheet">`, '<link rel="stylesheet" href="home-rtl.css?v=3">');
+    html = html.replace(/<figure class="plate">[\s\S]*?<\/figure>/, (fig) => fig
+      .replace('<text class="child" x="16"', '<text class="child" x="544" direction="rtl"')
+      .replace('<text class="child" x="16"', '<text class="child" x="544" direction="rtl"')
+      .replace('<text class="child" x="16"', '<text class="child" x="544" direction="rtl"')
+      .replace('<rect id="tagBg" class="tag-bg" x="16"', '<rect id="tagBg" class="tag-bg" x="454"')
+      .replace('<text id="noteLabel" class="note-label" x="28"', '<text id="noteLabel" class="note-label" x="532" direction="rtl"')
+      .replace('<text id="noteL1" class="note" x="16"', '<text id="noteL1" class="note" x="544" direction="rtl"')
+      .replace('<text id="noteL2" class="note" x="16"', '<text id="noteL2" class="note" x="544" direction="rtl"'));
+    // In right-to-left SVG text the start of a line is its right end, so each line is simply given the right edge as x. The label tag grows with its text from there.
+    html = html.replace("tagBg.setAttribute('width', lab.getBBox().width + 24);", "tagBg.setAttribute('width', lab.getBBox().width + 24); tagBg.setAttribute('x', 544 - (lab.getBBox().width + 24));");
+  }
+  html = html.replace("</head>", extra.join("\n") + "\n</head>");
 
   // The page now lives one folder down, so every relative link becomes absolute. The workspace link carries the language, so
   // the sign-up form starts on it.
