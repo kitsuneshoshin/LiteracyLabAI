@@ -81,7 +81,7 @@ function shapeSubmission(s, emailByProfile) {
     // "stopped" = a prompt/passage was made and billed but nothing was ever submitted for it.
     status: s.kind === "writing" ? (typeof c.text === "string" ? "marked" : "stopped") : (fb ? "marked" : "stopped"),
     prompt: gp ? { genre: gp.genre || null, title: gp.title || null, text: gp.prompt || null } : null,
-    passage: gpass ? { title: gpass.title || null, skill: gpass.skill || null, text: gpass.passage || null } : null,
+    passage: gpass ? { title: gpass.title || null, skill: gpass.skill || null, text: gpass.passage || null, textType: gpass.textType || null, questions: Array.isArray(gpass.questions) ? gpass.questions : [] } : null,
     written: typeof c.text === "string" ? c.text : null,
     answers: Array.isArray(c.answers) ? c.answers : null,
     feedback: fb,

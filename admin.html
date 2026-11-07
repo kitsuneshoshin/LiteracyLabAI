@@ -11,17 +11,23 @@
 <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#F1F1EF; --surface:#FFFFFF; --border:#D3D3CF; --ink:#212121; --ink-soft:#5A5A56;
-    --wine:#7A3B45; --wine-ink:#552830; --wine-tint:#EBDEE0; --good:#2E6B4E; --good-tint:#E3F0E9; --bad:#A63A3A; --warn-tint:#F6ECD6;
+    --bg:#F1F1EF; --surface:#FFFFFF; --surface2:#F8F7F5; --border:#D3D3CF; --ink:#212121; --ink-soft:#5A5A56;
+    --wine:#7A3B45; --wine-ink:#552830; --wine-tint:#EBDEE0;
+    --good:#2E6B4E; --good-tint:#E3F0E9; --good-line:#9FCBB3;
+    --grow:#8A5A00; --grow-tint:#FBF0D5; --grow-line:#E5C679;
+    --bad:#A63A3A; --bad-tint:#F7E3E1; --blue-tint:#E4ECF6; --blue:#2F5C93;
   }
   @media (prefers-color-scheme: dark){
-    :root{ --bg:#161513; --surface:#1E1B18; --border:#37322B; --ink:#EDE9E2; --ink-soft:#B3AB9C;
-      --wine:#C4776E; --wine-ink:#E3A79F; --wine-tint:#362320; --good:#7FD6A4; --good-tint:#17301F; --bad:#E58B84; --warn-tint:#33291a; }
+    :root{ --bg:#161513; --surface:#1E1B18; --surface2:#26221E; --border:#37322B; --ink:#EDE9E2; --ink-soft:#B3AB9C;
+      --wine:#C4776E; --wine-ink:#E3A79F; --wine-tint:#362320;
+      --good:#7FD6A4; --good-tint:#17301F; --good-line:#2F6B4A;
+      --grow:#E8B659; --grow-tint:#33291a; --grow-line:#6E5420;
+      --bad:#E58B84; --bad-tint:#3A201F; --blue-tint:#1D2A3B; --blue:#8DB4E8; }
   }
   *{ box-sizing:border-box; }
   body{ margin:0; background:var(--bg); color:var(--ink); font-family:"Lexend","Segoe UI",Helvetica,Arial,sans-serif; line-height:1.55; }
   .top{ border-top:4px solid var(--wine); }
-  .wrap{ max-width:1080px; margin:0 auto; padding:20px 16px 64px; }
+  .wrap{ max-width:1180px; margin:0 auto; padding:20px 16px 64px; }
   h1{ font-size:24px; margin:8px 0 4px; }
   h2{ font-size:17px; margin:0 0 10px; }
   .sub{ color:var(--ink-soft); font-size:14px; margin:0 0 18px; }
@@ -34,32 +40,88 @@
   .bar{ display:flex; align-items:center; gap:8px; font-size:13px; margin:4px 0; }
   .bar .lbl{ width:42%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .bar .track{ flex:1; background:var(--wine-tint); border-radius:6px; height:14px; overflow:hidden; }
-  .bar .fill{ background:var(--wine); height:100%; }
+  .bar .fill{ background:var(--wine); height:100%; display:block; }
   .bar .n{ width:34px; text-align:right; color:var(--ink-soft); }
   table{ width:100%; border-collapse:collapse; font-size:13px; }
   th,td{ text-align:left; padding:7px 8px; border-bottom:1px solid var(--border); vertical-align:top; }
   th{ font-weight:600; color:var(--ink-soft); }
   .scroll{ overflow-x:auto; }
-  .tag{ display:inline-block; font-size:11.5px; padding:1px 8px; border-radius:99px; background:var(--wine-tint); color:var(--wine-ink); margin-right:4px; white-space:nowrap; }
+  .tag{ display:inline-block; font-size:11.5px; padding:1px 8px; border-radius:99px; background:var(--wine-tint); color:var(--wine-ink); white-space:nowrap; }
   .tag.good{ background:var(--good-tint); color:var(--good); }
-  .tag.warn{ background:var(--warn-tint); }
+  .tag.warn{ background:var(--grow-tint); color:var(--grow); }
+  .tag.blue{ background:var(--blue-tint); color:var(--blue); }
+  .tag.bad{ background:var(--bad-tint); color:var(--bad); }
   input,select,button{ font:inherit; font-size:14px; }
   input,select{ padding:8px 10px; border:1px solid var(--border); border-radius:10px; background:var(--surface); color:var(--ink); }
   button{ padding:9px 16px; border-radius:10px; border:1px solid var(--wine); background:var(--wine); color:#fff; font-weight:600; cursor:pointer; }
   button.ghost{ background:transparent; color:var(--wine-ink); }
   :focus-visible{ outline:2px solid var(--wine); outline-offset:2px; }
-  .filters{ display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-  details.sub-item{ border:1px solid var(--border); border-radius:12px; margin-bottom:8px; background:var(--surface); }
-  details.sub-item > summary{ cursor:pointer; padding:10px 12px; font-size:13.5px; list-style:none; display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
-  details.sub-item > summary::-webkit-details-marker{ display:none; }
-  .detail{ padding:4px 14px 14px; border-top:1px solid var(--border); }
-  .detail h3{ font-size:12.5px; text-transform:uppercase; letter-spacing:.04em; color:var(--ink-soft); margin:14px 0 4px; }
-  .detail p, .detail pre{ margin:0; white-space:pre-wrap; word-wrap:break-word; font:inherit; font-size:14px; }
-  .msg{ padding:14px; border-radius:12px; background:var(--warn-tint); margin-bottom:16px; }
+  .filters{ display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; align-items:center; }
+  .msg{ padding:14px; border-radius:12px; background:var(--grow-tint); margin-bottom:16px; }
   .hidden{ display:none; }
   .muted{ color:var(--ink-soft); }
   .login{ max-width:380px; margin:48px auto; }
   .login input{ width:100%; margin:6px 0 12px; }
+
+  /* ---- pieces: list on the left, what the learner saw on the right ---- */
+  .split{ display:grid; grid-template-columns:330px 1fr; gap:16px; align-items:start; }
+  .list{ position:sticky; top:12px; max-height:calc(100vh - 24px); overflow:auto; display:flex; flex-direction:column; gap:6px; padding-right:2px; }
+  .row{ text-align:left; width:100%; background:var(--surface); color:var(--ink); border:1px solid var(--border); border-radius:12px; padding:10px 12px; font-weight:400; display:block; }
+  .row:hover{ border-color:var(--wine); }
+  .row[aria-current="true"]{ border-color:var(--wine); box-shadow:0 0 0 2px var(--wine-tint); background:var(--surface2); }
+  .row .l1{ display:flex; gap:6px; align-items:center; flex-wrap:wrap; margin-bottom:3px; }
+  .row .l2{ font-size:13px; font-weight:600; }
+  .row .l3{ font-size:12px; color:var(--ink-soft); }
+  .pane{ min-width:0; }
+  .empty{ padding:40px 16px; text-align:center; }
+
+  .head{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; justify-content:space-between; margin-bottom:14px; }
+  .head .who{ font-size:15px; font-weight:600; }
+  .head .meta{ font-size:12.5px; color:var(--ink-soft); }
+  .score{ min-width:64px; text-align:center; border-radius:12px; background:var(--wine); color:#fff; padding:6px 12px; font-weight:700; font-size:20px; line-height:1.1; }
+  .score small{ display:block; font-size:10.5px; font-weight:500; opacity:.85; }
+
+  .block{ background:var(--surface); border:1px solid var(--border); border-radius:14px; margin-bottom:12px; overflow:hidden; }
+  .block > h3{ margin:0; padding:9px 14px; font-size:11.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-soft); background:var(--surface2); border-bottom:1px solid var(--border); display:flex; justify-content:space-between; gap:8px; }
+  .block > .in{ padding:12px 14px; }
+  .block.given > h3{ background:var(--blue-tint); color:var(--blue); }
+  .block.glow > h3{ background:var(--good-tint); color:var(--good); }
+  .block.grow > h3{ background:var(--grow-tint); color:var(--grow); }
+  .block details > summary{ cursor:pointer; padding:9px 14px; font-size:11.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-soft); background:var(--surface2); list-style:none; display:flex; justify-content:space-between; }
+  .block details > summary::-webkit-details-marker{ display:none; }
+  .block details[open] > summary{ border-bottom:1px solid var(--border); }
+  .two{ display:grid; gap:12px; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); }
+  .two > .block{ margin-bottom:0; }
+  .prose{ margin:0; white-space:pre-wrap; word-wrap:break-word; font-size:15px; line-height:1.65; }
+  .prose + .prose{ margin-top:10px; }
+  .big{ font-size:15.5px; }
+  .note{ font-size:13px; color:var(--ink-soft); margin:6px 0 0; }
+  mark{ background:none; color:inherit; border-radius:4px; padding:1px 2px; }
+  mark.glow{ background:var(--good-tint); box-shadow:inset 0 -2px var(--good-line); }
+  mark.grow{ background:var(--grow-tint); box-shadow:inset 0 -2px var(--grow-line); }
+  mark.sg{ background:var(--bad-tint); box-shadow:inset 0 -2px var(--bad); }
+  .legend{ display:flex; gap:12px; font-size:12px; color:var(--ink-soft); margin:0 0 8px; flex-wrap:wrap; }
+  .vocab{ display:grid; gap:10px; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); }
+  .vcard{ border:1px solid var(--border); border-radius:12px; padding:10px 12px; background:var(--surface2); font-size:13.5px; }
+  .vcard b{ font-size:15px; display:block; margin-bottom:2px; }
+  .vcard .k{ color:var(--ink-soft); font-size:11.5px; text-transform:uppercase; letter-spacing:.05em; margin-top:6px; display:block; }
+  .item{ padding:8px 0; border-top:1px solid var(--border); font-size:14px; }
+  .item:first-child{ border-top:0; padding-top:0; }
+  .q{ border:1px solid var(--border); border-radius:12px; padding:10px 12px; margin-bottom:10px; background:var(--surface2); }
+  .q.ok{ border-left:4px solid var(--good); } .q.no{ border-left:4px solid var(--bad); } .q.na{ border-left:4px solid var(--border); }
+  .q .qt{ font-weight:600; font-size:14.5px; margin-bottom:6px; }
+  .q .ans{ font-size:13.5px; margin:2px 0; }
+  .q .ans b{ color:var(--ink-soft); font-weight:500; margin-right:6px; }
+  .parts{ display:flex; flex-wrap:wrap; gap:6px; margin:6px 0; }
+  .seg{ padding:8px 0; border-top:1px solid var(--border); font-size:14.5px; }
+  .seg:first-child{ border-top:0; }
+  .seg .p{ margin-right:6px; }
+  .seg .nt{ display:block; font-size:12.5px; color:var(--ink-soft); margin-top:2px; }
+  pre.raw{ margin:0; padding:12px 14px; font-size:12px; white-space:pre-wrap; word-wrap:break-word; }
+  @media (max-width:860px){
+    .split{ grid-template-columns:1fr; }
+    .list{ position:static; max-height:260px; }
+  }
 </style>
 </head>
 <body class="top">
@@ -69,7 +131,7 @@
 
   <div id="login" class="card login hidden">
     <h2>Sign in</h2>
-    <p class="sub">Use your admin account.</p>
+    <p class="sub">Use the owner account.</p>
     <form id="loginForm">
       <label for="email">Email</label>
       <input id="email" type="email" autocomplete="username" required>
@@ -101,33 +163,40 @@
       <h2>People</h2>
       <div class="scroll"><table id="users"></table></div>
     </div>
-    <div class="card">
-      <h2>Latest pieces — prompt given, what was written, feedback returned</h2>
-      <div class="filters">
-        <select id="fKind"><option value="">All kinds</option><option value="writing">Writing</option><option value="reading">Reading</option></select>
-        <select id="fStatus"><option value="">Any status</option><option value="marked">Marked</option><option value="stopped">Stopped before submitting</option></select>
-        <select id="fUser"><option value="">Everyone</option></select>
-      </div>
-      <div id="subs"></div>
+
+    <h2 style="margin-top:8px">What learners got back</h2>
+    <div class="filters">
+      <select id="fKind"><option value="">All kinds</option><option value="writing">Writing</option><option value="reading">Reading</option></select>
+      <select id="fStatus"><option value="">Any status</option><option value="marked">Marked</option><option value="stopped">Stopped before submitting</option></select>
+      <select id="fUser"><option value="">Everyone</option></select>
+      <span class="muted" id="count"></span>
+    </div>
+    <div class="split">
+      <div class="list" id="list" role="list"></div>
+      <div class="pane" id="pane"></div>
     </div>
   </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
-// Same public Supabase project and anon key as app.html. The admin check happens on the server
+// Same public Supabase project and anon key as app.html. The owner check happens on the server
 // (the owner's confirmed address only); this page only shows what /api/email?action=activity agrees to return.
 var SUPABASE_URL = "https://ughwccheiqgdcnoffvit.supabase.co";
 var SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVnaHdjY2hlaXFnZGNub2Zmdml0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk2NDE1OTYsImV4cCI6MjEwNTIxNzU5Nn0.tLDzaC2fRs23vYW5mJfXQN0KaWgT2q0WRa9uClNRMOU";
 var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-var DATA = null;
+var DATA = null, SELECTED = null;
 
 function $(id){ return document.getElementById(id); }
 // Everything a child wrote goes in through textContent, so it can never run as markup.
 function el(tag, cls, text){ var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+function add(parent){ for (var i = 1; i < arguments.length; i++) { var c = arguments[i]; if (c != null && c !== false) parent.appendChild(typeof c === "string" ? document.createTextNode(c) : c); } return parent; }
 function when(iso){ if (!iso) return "—"; var d = new Date(iso); return d.toLocaleString([], { day:"numeric", month:"short", hour:"2-digit", minute:"2-digit" }); }
 function showMsg(t){ var m = $("msg"); m.textContent = t; m.classList.toggle("hidden", !t); }
+function arr(v){ return Array.isArray(v) ? v : []; }
+function str(v){ return v == null ? "" : typeof v === "string" ? v : JSON.stringify(v); }
 
+/* ---------------------------------------------------------------- overview */
 function bars(target, pairs, labelKey, countKey){
   target.textContent = "";
   if (!pairs.length) { target.appendChild(el("p", "muted", "Nothing yet.")); return; }
@@ -136,67 +205,210 @@ function bars(target, pairs, labelKey, countKey){
     var row = el("div", "bar");
     row.appendChild(el("span", "lbl", String(p[labelKey])));
     var track = el("span", "track"), fill = el("span", "fill");
-    fill.style.display = "block"; fill.style.width = Math.max(3, Math.round(p[countKey] / max * 100)) + "%";
+    fill.style.width = Math.max(3, Math.round(p[countKey] / max * 100)) + "%";
     track.appendChild(fill); row.appendChild(track);
     row.appendChild(el("span", "n", String(p[countKey])));
     target.appendChild(row);
   });
 }
 
-function section(title, node){
-  var wrap = document.createDocumentFragment();
-  if (node == null) return wrap;
-  wrap.appendChild(el("h3", null, title)); wrap.appendChild(node); return wrap;
+/* ---------------------------------------------------------------- building blocks for the learner's view */
+function block(title, cls, body, right){
+  var b = el("div", "block" + (cls ? " " + cls : ""));
+  var h = el("h3"); add(h, el("span", null, title)); if (right) add(h, el("span", null, right));
+  add(b, h); var inner = el("div", "in"); add(inner, body); add(b, inner); return b;
 }
-function para(text){ return el("p", null, text); }
-
-function feedbackNode(fb){
-  var f = document.createDocumentFragment();
-  if (!fb) return f;
-  if (fb.glow) f.appendChild(section("Glow", para(fb.glow)));
-  if (fb.grow) f.appendChild(section("Grow", para(fb.grow)));
-  if (Array.isArray(fb.vocab) && fb.vocab.length) {
-    f.appendChild(section("Vocab given", para(fb.vocab.map(function(v){ return v.term + " — " + (v.definition || ""); }).join("\n"))));
-  }
-  var rest = Object.keys(fb).filter(function(k){ return ["glow","grow","vocab"].indexOf(k) < 0; });
-  if (rest.length) {
-    var details = el("details"); details.appendChild(el("summary", "muted", "Everything else the model returned"));
-    details.appendChild(el("pre", null, JSON.stringify(rest.reduce(function(o,k){ o[k] = fb[k]; return o; }, {}), null, 2)));
-    f.appendChild(section("Other feedback", details));
-  }
-  return f;
+function fold(title, body, open){
+  var b = el("div", "block"); var d = el("details"); if (open) d.open = true;
+  var s = el("summary"); add(s, el("span", null, title), el("span", null, "▾"));
+  add(d, s); var inner = el("div", "in"); add(inner, body); add(d, inner); add(b, d); return b;
 }
+function prose(text, cls){ var out = document.createDocumentFragment(); str(text).split(/\n{2,}/).forEach(function(p){ if (p.trim()) add(out, el("p", "prose" + (cls ? " " + cls : ""), p)); }); return out; }
+function tag(text, cls){ return el("span", "tag" + (cls ? " " + cls : ""), text); }
 
-function subNode(s){
-  var d = el("details", "sub-item");
-  var sum = el("summary");
-  sum.appendChild(el("span", "tag " + (s.status === "marked" ? "good" : "warn"), s.status === "marked" ? "marked" : "stopped"));
-  sum.appendChild(el("span", "tag", s.kind));
-  sum.appendChild(el("span", null, when(s.at)));
-  sum.appendChild(el("span", "muted", [s.user, s.gradeLabel, s.country, s.interest].filter(Boolean).join(" · ")));
-  if (s.kind === "reading" && s.score != null) sum.appendChild(el("span", "tag", s.score + "/" + s.total));
-  if (s.kind === "writing" && s.wordCount) sum.appendChild(el("span", "tag", s.wordCount + " words"));
-  d.appendChild(sum);
-  var body = el("div", "detail");
-  if (s.prompt) body.appendChild(section("Prompt given (" + (s.prompt.genre || "?") + ") — " + (s.prompt.title || ""), para(s.prompt.text || "")));
-  if (s.passage) body.appendChild(section("Passage given — " + (s.passage.title || "") + (s.passage.skill ? " · skill: " + s.passage.skill : ""), para(s.passage.text || "")));
-  if (s.written != null) body.appendChild(section("What they wrote", para(s.written)));
-  if (s.answers) body.appendChild(section("Their answers", para(JSON.stringify(s.answers))));
-  if (s.status === "stopped") body.appendChild(para("Nothing was submitted for this one."));
-  body.appendChild(feedbackNode(s.feedback));
-  body.appendChild(el("p", "muted", [s.tier, s.model].filter(Boolean).join(" · ")));
-  d.appendChild(body);
-  return d;
-}
-
-function renderSubs(){
-  var kind = $("fKind").value, status = $("fStatus").value, user = $("fUser").value;
-  var list = DATA.submissions.filter(function(s){
-    return (!kind || s.kind === kind) && (!status || s.status === status) && (!user || s.userId === user);
+// Their writing with the model's highlights marked in place, the way the learner sees it.
+// Highlights whose quote can't be found word for word are skipped here but still listed below.
+function highlighted(text, highlights, spelling){
+  var marks = [];
+  arr(highlights).forEach(function(h){ if (h && h.quote) { var i = text.indexOf(h.quote); if (i >= 0) marks.push({ s: i, e: i + h.quote.length, cls: h.type === "grow" ? "grow" : "glow", note: h.note }); } });
+  arr(spelling).forEach(function(h){ if (h && h.quote) { var i = text.indexOf(h.quote); if (i >= 0) marks.push({ s: i, e: i + h.quote.length, cls: "sg", note: (h.type || "spelling") + " → " + (h.correction || "") }); } });
+  marks.sort(function(a, b){ return a.s - b.s; });
+  var out = el("p", "prose big"), pos = 0;
+  marks.forEach(function(m){
+    if (m.s < pos) return; // overlaps one already drawn
+    if (m.s > pos) add(out, text.slice(pos, m.s));
+    var mk = el("mark", m.cls, text.slice(m.s, m.e)); if (m.note) mk.title = m.note; add(out, mk); pos = m.e;
   });
-  var box = $("subs"); box.textContent = "";
-  if (!list.length) box.appendChild(el("p", "muted", "No pieces match."));
-  list.forEach(function(s){ box.appendChild(subNode(s)); });
+  if (pos < text.length) add(out, text.slice(pos));
+  return out;
+}
+
+function vocabCards(list){
+  var g = el("div", "vocab");
+  arr(list).forEach(function(v){
+    var c = el("div", "vcard"); add(c, el("b", null, str(v.term)), el("span", null, str(v.definition)));
+    if (v.trick) add(c, el("span", "k", "Memory trick"), el("span", null, str(v.trick)));
+    if (v.example) add(c, el("span", "k", "Example"), el("span", null, str(v.example)));
+    if (v.nonExample) add(c, el("span", "k", "Not"), el("span", null, str(v.nonExample)));
+    g.appendChild(c);
+  });
+  return g;
+}
+
+function segments(list){
+  var w = el("div");
+  arr(list).forEach(function(s){ var r = el("div", "seg"); add(r, tag(str(s.part), "blue"), " ", str(s.text)); if (s.note) add(r, el("span", "nt", str(s.note))); w.appendChild(r); });
+  return w;
+}
+
+/* ---------------------------------------------------------------- reading: each question, what they picked, what was right */
+function optText(q, v){
+  if (typeof v === "number" && Array.isArray(q.options)) return q.options[v] != null ? q.options[v] : String(v);
+  return str(v);
+}
+function showAns(q, v){
+  if (v == null) return "No answer";
+  if (q.type === "order" && Array.isArray(v)) return v.map(function(i){ return arr(q.items)[i] != null ? arr(q.items)[i] : i; }).join("  →  ");
+  if (q.type === "match" && Array.isArray(v)) return v.map(function(o, i){ return str(arr(q.items)[i]) + " = " + optText(q, o); }).join(";  ");
+  if (Array.isArray(v)) return v.map(function(x){ return optText(q, x); }).join(", ");
+  return optText(q, v);
+}
+function questionBlock(qs, answers, review, shortFb){
+  var w = el("div"), revBy = {};
+  arr(review).forEach(function(r){ revBy[r.n] = r; });
+  arr(qs).forEach(function(q, i){
+    var a = arr(answers)[i], isShort = q.type === "short";
+    var ok = !isShort && q.correct != null && a != null && JSON.stringify(a) === JSON.stringify(q.correct);
+    var box = el("div", "q " + (isShort ? "na" : a == null ? "na" : ok ? "ok" : "no"));
+    add(box, el("div", "qt", (i + 1) + ". " + str(q.q)));
+    if (q.type === "cloze" && q.text) add(box, el("p", "note", str(q.text)));
+    var row = el("div", "ans"); add(row, el("b", null, "They answered"), showAns(q, a)); add(box, row);
+    if (isShort) { var m = el("div", "ans"); add(m, el("b", null, "Model answer"), str(q.modelAnswer)); add(box, m); }
+    else if (!ok) { var c = el("div", "ans"); add(c, el("b", null, "Correct"), showAns(q, q.correct)); add(box, c); }
+    add(box, tag(q.type || "question"));
+    var r = revBy[i + 1];
+    if (r) { add(box, el("p", "note", str(r.explanation))); if (r.evidence) add(box, el("p", "note", "Evidence: “" + str(r.evidence) + "”")); }
+    w.appendChild(box);
+  });
+  return w;
+}
+
+/* ---------------------------------------------------------------- one piece, laid out like the learner's results page */
+function detail(s){
+  var pane = el("div"), fb = s.feedback || {};
+  var head = el("div", "head"), left = el("div");
+  add(left, el("div", "who", s.user + (s.gradeLabel ? " · " + s.gradeLabel : "")), el("div", "meta", [when(s.at), s.country, s.interest ? "likes " + s.interest : null, s.model].filter(Boolean).join(" · ")));
+  add(head, left);
+  var right = el("div"); right.style.display = "flex"; right.style.gap = "8px"; right.style.alignItems = "center";
+  add(right, tag(s.kind, "blue"), tag(s.status, s.status === "marked" ? "good" : "warn"));
+  if (s.kind === "writing" && fb.overallScore != null) { var sc = el("div", "score", String(fb.overallScore)); add(sc, el("small", null, "overall")); add(right, sc); }
+  if (s.kind === "reading" && s.score != null) { var sr = el("div", "score", s.score + "/" + s.total); add(sr, el("small", null, "correct")); add(right, sr); }
+  add(head, right); add(pane, head);
+
+  // 1. what they were given
+  if (s.prompt) add(pane, block("Prompt given", "given", add(el("div"), prose(s.prompt.text, "big")), [s.prompt.genre, s.prompt.title].filter(Boolean).join(" · ")));
+  if (s.passage) add(pane, block("Passage given", "given", prose(s.passage.text), [s.passage.skill, s.passage.title].filter(Boolean).join(" · ")));
+
+  if (s.status === "stopped") {
+    add(pane, block("Result", null, el("p", "prose muted", "Nothing was submitted for this one, so there is no feedback. A credit was still used when it was made.")));
+    return pane;
+  }
+
+  // 2. what they did
+  if (s.written != null) {
+    var wrap = el("div"), lg = el("div", "legend");
+    add(lg, el("span", null, "Highlighted for the learner:"), tag("glow", "good"), tag("grow", "warn"), tag("spelling / grammar", "bad"), el("span", null, "(hover a highlight for the note)"));
+    add(wrap, lg, highlighted(s.written, fb.highlights, fb.spellingGrammar));
+    add(pane, block("What they wrote", null, wrap, s.wordCount ? s.wordCount + " words" : ""));
+  }
+  if (s.passage && arr(s.passage.questions).length) {
+    add(pane, block("Their answers", null, questionBlock(s.passage.questions, s.answers, fb.questionReview), s.score != null ? s.score + " of " + s.total + " right" : ""));
+  }
+
+  // 3. what came back
+  var gg = el("div", "two");
+  if (fb.glow) add(gg, block("Glow", "glow", add(el("div"), prose(fb.glow), fb.glowTarget ? el("p", "note", "Skill: " + fb.glowTarget) : null)));
+  if (fb.grow) add(gg, block("Grow", "grow", add(el("div"), prose(fb.grow), fb.growTarget ? el("p", "note", "Skill: " + fb.growTarget) : null, fb.growNext ? el("p", "note", "Try next: " + fb.growNext) : null)));
+  if (gg.childNodes.length) { add(pane, gg); gg.style.marginBottom = "12px"; }
+
+  if (fb.scoreReason || fb.examSummary) add(pane, block("Why this score", null, add(el("div"), fb.scoreReason ? prose(fb.scoreReason) : null, fb.examSummary ? prose(fb.examSummary) : null), fb.overallScore != null ? fb.overallScore + " / 10" : ""));
+
+  if (fb.shortAnswer) {
+    var sa = fb.shortAnswer, sw = el("div");
+    add(sw, prose(sa.comment), el("p", "note", "Awarded " + sa.awarded + " of " + sa.outOf));
+    var parts = el("div", "parts"); arr(sa.parts).forEach(function(p){ add(parts, tag((p.used ? "✓ " : "✗ ") + p.name, p.used ? "good" : "bad")); }); add(sw, parts);
+    if (arr(sa.missed).length) add(sw, el("p", "note", "Points missed: " + sa.missed.join(" · ")));
+    add(pane, block("Short answer", null, sw));
+  }
+  if (fb.readingStrategy) add(pane, block("Reading strategy", null, add(el("div"), el("p", "prose", str(fb.readingStrategy.name)), el("p", "note", str(fb.readingStrategy.how)), el("p", "note", str(fb.readingStrategy.tip)))));
+
+  if (arr(fb.spellingGrammar).length) {
+    var sg = el("div"); arr(fb.spellingGrammar).forEach(function(x){ var r = el("div", "item"); add(r, tag(str(x.type) || "fix", "bad"), "  “" + str(x.quote) + "”  →  “" + str(x.correction) + "”"); sg.appendChild(r); });
+    add(pane, block("Spelling & grammar", null, sg, (fb.spellingGrammarTotal != null ? fb.spellingGrammarTotal : arr(fb.spellingGrammar).length) + " found"));
+  } else if (s.kind === "writing") add(pane, block("Spelling & grammar", null, el("p", "prose muted", "None found.")));
+
+  if (fb.frameworkTip) {
+    var f = fb.frameworkTip, fw = el("div");
+    add(fw, el("p", "prose", f.description));
+    if (f.quote) add(fw, el("p", "note", "Their line: “" + f.quote + "”"));
+    if (f.revision) add(fw, el("p", "prose", "Suggested: " + f.revision));
+    add(pane, block("Writing framework — " + str(f.name), null, fw));
+  }
+  if (fb.deviceCheck) {
+    var dc = fb.deviceCheck, dw = el("div");
+    arr(dc.used).forEach(function(u){ var r = el("div", "item"); add(r, tag(str(u.device), "good"), "  “" + str(u.quote) + "”"); dw.appendChild(r); });
+    if (dc.tryNext) { var tn = el("div", "item"); add(tn, tag("try next: " + str(dc.tryNext.device), "warn"), "  " + str(dc.tryNext.idea)); dw.appendChild(tn); }
+    add(pane, block("Persuasive devices", null, dw));
+  }
+  if (arr(fb.examTechnique).length) {
+    var ew = el("div");
+    arr(fb.examTechnique).forEach(function(x){ var r = el("div", "item"); add(r, tag("band " + str(x.band) + " · " + str(x.descriptor), "blue"), "  " + str(x.criterion)); if (x.evidence) add(r, el("p", "note", "Evidence: " + str(x.evidence))); if (x.toNextBand) add(r, el("p", "note", "To reach the next band: " + str(x.toNextBand))); ew.appendChild(r); });
+    if (arr(fb.examNotBanded).length) add(ew, el("p", "note", "Not banded: " + fb.examNotBanded.join(" · ") + (fb.examNotBandedWhy ? " — " + str(fb.examNotBandedWhy) : "")));
+    add(pane, block("Exam technique", null, ew));
+  }
+  if (arr(fb.vocab).length) add(pane, block("Vocabulary cards", null, vocabCards(fb.vocab), fb.vocab.length + " words"));
+
+  // 4. longer extras, folded away
+  if (fb.revisedStory) add(pane, fold("Corrected version of their piece", add(el("div"), prose(fb.revisedStory), arr(fb.revisedFramework).length ? segments(fb.revisedFramework) : null)));
+  if (fb.modelResponse) add(pane, fold("Model response shown to them", add(el("div"), prose(fb.modelResponse), arr(fb.modelFramework).length ? segments(fb.modelFramework) : null)));
+  if (arr(fb.highlights).length) {
+    var hw = el("div");
+    arr(fb.highlights).forEach(function(h){ var r = el("div", "item"); add(r, tag(h.type === "grow" ? "grow" : "glow", h.type === "grow" ? "warn" : "good"), "  “" + str(h.quote) + "”"); add(r, el("p", "note", str(h.note))); if (h.revision) add(r, el("p", "note", "Rewrite: " + str(h.revision))); hw.appendChild(r); });
+    add(pane, fold("All highlight notes (" + fb.highlights.length + ")", hw));
+  }
+  var raw = el("pre", "raw", JSON.stringify(fb, null, 2));
+  add(pane, fold("Raw feedback data", raw));
+  return pane;
+}
+
+/* ---------------------------------------------------------------- the list and the page */
+function filtered(){
+  var kind = $("fKind").value, status = $("fStatus").value, user = $("fUser").value;
+  return DATA.submissions.filter(function(s){ return (!kind || s.kind === kind) && (!status || s.status === status) && (!user || s.userId === user); });
+}
+function snippet(s){
+  if (s.written) return s.written.replace(/\s+/g, " ").slice(0, 90);
+  if (s.prompt) return s.prompt.title || s.prompt.text || "";
+  if (s.passage) return s.passage.title || "";
+  return "";
+}
+function renderList(){
+  var list = filtered(), box = $("list"); box.textContent = "";
+  $("count").textContent = list.length + " piece" + (list.length === 1 ? "" : "s");
+  if (!list.some(function(s){ return s.id === SELECTED; })) SELECTED = list.length ? list[0].id : null;
+  list.forEach(function(s){
+    var b = el("button", "row"); b.type = "button"; b.setAttribute("role", "listitem");
+    if (s.id === SELECTED) b.setAttribute("aria-current", "true");
+    var l1 = el("div", "l1"); add(l1, tag(s.kind, "blue"), tag(s.status, s.status === "marked" ? "good" : "warn"));
+    if (s.kind === "writing" && s.feedback && s.feedback.overallScore != null) add(l1, tag(s.feedback.overallScore + "/10"));
+    if (s.kind === "reading" && s.score != null) add(l1, tag(s.score + "/" + s.total));
+    add(b, l1, el("div", "l2", s.user + (s.gradeLabel ? " · " + s.gradeLabel : "")), el("div", "l3", when(s.at) + (snippet(s) ? " · " + snippet(s) : "")));
+    b.addEventListener("click", function(){ SELECTED = s.id; renderList(); });
+    box.appendChild(b);
+  });
+  var pane = $("pane"); pane.textContent = "";
+  var cur = list.filter(function(s){ return s.id === SELECTED; })[0];
+  if (cur) { add(pane, detail(cur)); } else add(pane, el("p", "muted empty", "No pieces match."));
 }
 
 function render(){
@@ -226,7 +438,7 @@ function render(){
     var o = el("option", null, u.email || u.userId.slice(0, 8)); o.value = u.userId; fu.appendChild(o);
   });
   fu.value = keep;
-  renderSubs();
+  renderList();
   $("sub").textContent = "Updated " + when(DATA.generatedAt) + ". Events cover the last " + DATA.windowDays + " days; usage events only began being recorded on the day this page went live.";
 }
 
@@ -253,7 +465,7 @@ $("loginForm").addEventListener("submit", async function(e){
 $("refresh").addEventListener("click", load);
 $("days").addEventListener("change", load);
 $("signout").addEventListener("click", async function(){ await sb.auth.signOut(); DATA = null; load(); });
-["fKind", "fStatus", "fUser"].forEach(function(id){ $(id).addEventListener("change", function(){ if (DATA) renderSubs(); }); });
+["fKind", "fStatus", "fUser"].forEach(function(id){ $(id).addEventListener("change", function(){ if (DATA) renderList(); }); });
 load();
 </script>
 </body>
