@@ -33,6 +33,26 @@ function mentionsAStandard(text, standardsList) {
   });
 }
 
+// The glow must name the curriculum standard it was given, and the standards carry a reference in brackets:
+// "Opinion Writing With Linking Words (CCSS.ELA-LITERACY.W.3.1)". The name reads fine in a sentence for a child or
+// parent; the bracketed code does not. Once the glow has passed the check, the reference is taken out of the sentence and
+// kept beside it as glowStandard, so nothing is lost and the dashboard's target table still cites every standard.
+function plainStandardInGlow(parsed, standardsList) {
+  if (!parsed || typeof parsed.glow !== "string" || !Array.isArray(standardsList)) return parsed;
+  for (const std of standardsList) {
+    const m = /^(.*?)\s*\(([^()]+)\)\s*$/.exec(String(std));
+    if (!m) continue;
+    const name = m[1].trim(), ref = m[2].trim();
+    const full = `${name} (${ref})`;
+    if (parsed.glow.includes(full)) parsed.glow = parsed.glow.split(full).join(name);
+    else if (parsed.glow.includes(`(${ref})`)) parsed.glow = parsed.glow.split(`(${ref})`).join("").replace(/\s{2,}/g, " ").replace(/\s+([.,;:])/g, "$1");
+    else continue;
+    parsed.glowStandard = full;
+    break;
+  }
+  return parsed;
+}
+
 function checkString(value, min, max) {
   return typeof value === "string" && value.trim().length >= min && value.trim().length <= max;
 }
@@ -873,4 +893,4 @@ function validateWritingPrompt(parsed, { tier }) {
   return { ok: issues.length === 0, issues };
 }
 
-module.exports = { coerceOverallScore, dropNonVerbatimHighlights, validateExamTechnique, repairShortAnswer, dropRestatingHighlights, repairResponses, dropGlowsQuotingMisspellings, repairZeroScoreGlow, repairReadingExamEvidence, validateFeedback, validatePassage, validateWritingPrompt, resolveTarget, dropInvalidSpellingGrammar, sanitizeQuestionReview, stripUngrantedSections, MAX_AVG_WORDS_PER_SENTENCE };
+module.exports = { plainStandardInGlow, coerceOverallScore, dropNonVerbatimHighlights, validateExamTechnique, repairShortAnswer, dropRestatingHighlights, repairResponses, dropGlowsQuotingMisspellings, repairZeroScoreGlow, repairReadingExamEvidence, validateFeedback, validatePassage, validateWritingPrompt, resolveTarget, dropInvalidSpellingGrammar, sanitizeQuestionReview, stripUngrantedSections, MAX_AVG_WORDS_PER_SENTENCE };

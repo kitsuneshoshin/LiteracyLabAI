@@ -29,9 +29,21 @@ const EARLY_MOTIVATION_NOTE = {
   competition: "Their stated goal is to do their very best. Close the Grow with one friendly tip that would make this their best piece yet. Do not use exam, test or competition words.",
 };
 const EARLY_VOICE = "LANGUAGE FOR THIS AGE: write the Glow, the Grow and every explanation for a child of 5 to 7. Use everyday words and short sentences. Say 'your teacher' or 'a reader', never 'grader', 'examiner', 'marker' or 'assessor'. Curriculum standard names are still quoted exactly as given.";
+// Ages 8 to 10 get the same plain goal notes: "graders" and "examiners" mean nothing to a child writing a story, and a parent
+// reading over their shoulder hears it as pressure. Middle and high school keep the exam wording.
+const ELEMENTARY_VOICE = "LANGUAGE FOR THIS AGE: write for a child of 8 to 10, in plain, friendly words a parent would also be happy to read. Say 'your teacher' or 'a reader', never 'grader', 'examiner', 'marker' or 'assessor', and do not say a piece will be 'graded', 'scored' or 'marked'. Curriculum standard names are still quoted exactly as given.";
 function motivationNote(motivation, tier) {
-  const table = tier === "early" ? EARLY_MOTIVATION_NOTE : MOTIVATION_NOTE;
-  return (table[motivation] || "") + (tier === "early" ? "\n" + EARLY_VOICE : "");
+  const plain = tier === "early" || tier === "elementary";
+  const table = plain ? EARLY_MOTIVATION_NOTE : MOTIVATION_NOTE;
+  return (table[motivation] || "") + (tier === "early" ? "\n" + EARLY_VOICE : tier === "elementary" ? "\n" + ELEMENTARY_VOICE : "");
+}
+
+// How far the student's interest may shape the feedback. It had been asked for in every field, which produced forced
+// comparisons ("check it like code line by line" for an essay on 1984, "finish like a good sports play" for a five-year-old).
+// Now it is a garnish, used only when it genuinely makes the idea clearer, and never for the youngest learners.
+function analogyRule(tier, interest) {
+  if (tier === "early") return "INTEREST: do not compare anything to the student's interest anywhere in the feedback. Keep the Grow one plain, friendly tip and every vocabulary example about everyday life or school.";
+  return `INTEREST (${interest}): use it for at most ONE short comparison in the whole feedback, and only when it is accurate and makes the idea clearer to someone who does not share the interest. Leave it out when it is forced or only works as a pun. Never explain a word, a skill or a mistake in programming or game terms unless the student's own piece is about that.`;
 }
 
 function standardsClause(country, tier, gradeLabel) {
@@ -277,7 +289,7 @@ function successCriteria(tier, { includeFramework, includeScore, includeSpelling
 2. The glow's curriculum reference is either the exact standard you were given, or (if none was given) a general curriculum phrase — never an invented code.
 3. The grow names exactly ONE step, uses the student's stated interest as a real, concrete analogy only where an accurate, natural one exists (never forced, and none for a very short piece), and ends with the motivation-appropriate line.
 4. Count the words per sentence across your glow and grow COMBINED, and average it — it must be UNDER ${cap} words per sentence for this age tier. Short, plain sentences. This is checked mechanically, so if a sentence is running long, split it into two rather than adding a comma clause.
-5. Both vocab definitions are one plain sentence each, framed through the student's interest where natural, and each has an "example" sentence that actually uses the term correctly (not just repeats the definition).
+5. Both vocab definitions are one plain sentence each with no comparison to the student's interest, and each has an "example" sentence that actually uses the term correctly (not just repeats the definition).
 6. glowTarget and growTarget are copied EXACTLY, character-for-character, from the provided list of skill area names — not paraphrased, shortened, or invented.
 7. Every highlight's "quote" is an exact, verbatim substring you can point to in the submitted text above — not a cleaned-up or paraphrased version of it.
 8. Every "grow" highlight has a "revision" that is an actual rewrite of its quote (different wording, applying the fix) — never the same text repeated, and never just advice about the quote instead of a rewrite of it.${(tier === "middle" || tier === "high") ? '\n9. Every "revision" reads as a natural continuation of this student\'s own formal, third-person essay — pure academic argument, with NO interest-based analogy dropped into the revision text itself in any phrasing ("like how I...", "similar to how...", "just like...", etc). That framing belongs only in the "grow" field.' : ""}${fw ? `\n10. frameworkTip.name is EXACTLY "${fw.name}", copied verbatim; frameworkTip.quote is an exact, verbatim substring of the submitted text above (not a paraphrase); and frameworkTip.revision is a genuine rewrite of that exact quote (different wording, actually applying "${fw.name}") — never the same text repeated, never an unrelated invented example.` : ""}${includeScore ? '\n11. overallScore is an integer 1-10 (never a string, never out of range) judging the WHOLE piece, not just the one glow/grow — if it disagrees with how positive the glow/grow read, that\'s fine and expected, since the score is the more critical, whole-piece judgement. scoreReason names a real pattern across the piece, not just a restatement of the single "grow" detail.' : ""}${includeSpelling ? '\n12. spellingGrammar contains only real errors (each "quote" a verbatim substring, each "correction" that same fragment with just the error fixed) — an empty array if the piece is genuinely clean, never a fabricated error to avoid returning an empty list, and never a stylistic choice mislabelled as a mistake. spellingGrammarTotal is the TRUE count of real errors, never silently capped to match the list length when there are genuinely more than 8.' : ""}`;
@@ -308,8 +320,8 @@ function buildWritingPrompt({ tier, country, gradeLabel, interest, confidenceWri
     `  "glow": "1-2 sentences of specific, genuine praise tied to something the student actually did in this text and to the curriculum standard noted above."`,
     `  "grow": "1-2 sentences naming ONE specific, actionable next step scaled to this student's zone of proximal development — not a laundry list. Where an accurate, natural one exists, weave in an analogy drawn from their stated interest (${interest}) to make the concept concrete; if it would be forced or inaccurate, leave the analogy out. End with the motivation-appropriate closing line."`,
     `  "vocab": [
-    { "term": "a single word or short phrase", "definition": "a one-sentence, age-appropriate definition, framed using their interest where natural", "example": "a fresh sentence using the term correctly, built around their stated interest (${interest})", "trick": "one short sentence applying the word trick to this word"${TECH.frayerShape(tier)} },
-    { "term": "a second word or short phrase", "definition": "a one-sentence, age-appropriate definition, framed using their interest where natural", "example": "a fresh sentence using the term correctly, built around their stated interest (${interest})", "trick": "one short sentence applying the word trick to this word"${TECH.frayerShape(tier)} }
+    { "term": "a single word or short phrase", "definition": "a one-sentence, age-appropriate definition in plain everyday words, with no comparison to their interest", "example": "a fresh sentence using the term correctly, set in everyday life or school (their interest, ${interest}, only where it fits naturally)", "trick": "one short sentence applying the word trick to this word"${TECH.frayerShape(tier)} },
+    { "term": "a second word or short phrase", "definition": "a one-sentence, age-appropriate definition in plain everyday words, with no comparison to their interest", "example": "a fresh sentence using the term correctly, set in everyday life or school (their interest, ${interest}, only where it fits naturally)", "trick": "one short sentence applying the word trick to this word"${TECH.frayerShape(tier)} }
   ]`,
     `  "glowTarget": "the exact skill area name from the given list that the glow demonstrates"`,
     `  "growTarget": "the exact skill area name from the given list that the grow is building towards"`,
@@ -335,6 +347,7 @@ ${text}
 Their stated interest for personalising feedback is: ${interest}.
 ${CONFIDENCE_NOTE[confidenceWriting] || ""}
 ${motivationNote(motivation, tier)}
+${analogyRule(tier, interest)}
 ${standardsClause(country, tier, gradeLabel)}
 ${targetsClause(targetNames)}
 ${highlightsClause(tier)}
@@ -457,6 +470,7 @@ ${answerLines}
 Their stated interest for personalising feedback is: ${interest}.
 ${CONFIDENCE_NOTE[confidenceReading] || ""}
 ${motivationNote(motivation, tier)}
+${analogyRule(tier, interest)}
 ${standardsClause(country, tier, gradeLabel)}
 ${targetsClause(targetNames)}
 ${deepFeedbackClause(caps.deepFeedback)}${strictStandardClause(caps, "reading")}
@@ -469,10 +483,10 @@ ${successCriteria(tier)}
 Respond with ONLY a JSON object (no markdown fences, no commentary) with exactly this shape:
 {
   "glow": "1-2 sentences of specific praise. If they got questions right, name which comprehension skill they clearly demonstrated (e.g. inference, retrieval) and tie it to the curriculum standard noted above.${zeroScoreClause(score)}",
-  "grow": "1-2 sentences on ONE specific, actionable next step. If they missed a question, point them back to the exact idea in the passage they should re-examine, without just giving away the answer outright. Weave in an analogy from their stated interest (${interest}). End with the motivation-appropriate closing line.",
+  "grow": "1-2 sentences on ONE specific, actionable next step. If they missed a question, point them back to the exact idea in the passage they should re-examine, without just giving away the answer outright. Use a short comparison from their stated interest (${interest}) only if it is accurate and natural, otherwise leave it out. End with the motivation-appropriate closing line.",
   "vocab": [
-    { "term": "a word or phrase from the passage worth upgrading", "definition": "a one-sentence, age-appropriate definition, framed using their interest where natural", "example": "a fresh sentence using the term correctly, built around their stated interest (${interest})", "trick": "one short sentence applying the word trick to this word"${TECH.frayerShape(tier)} },
-    { "term": "a second word or phrase from the passage", "definition": "a one-sentence, age-appropriate definition, framed using their interest where natural", "example": "a fresh sentence using the term correctly, built around their stated interest (${interest})", "trick": "one short sentence applying the word trick to this word"${TECH.frayerShape(tier)} }
+    { "term": "a word or phrase from the passage worth upgrading", "definition": "a one-sentence, age-appropriate definition in plain everyday words, with no comparison to their interest", "example": "a fresh sentence using the term correctly, set in everyday life or school (their interest, ${interest}, only where it fits naturally)", "trick": "one short sentence applying the word trick to this word"${TECH.frayerShape(tier)} },
+    { "term": "a second word or phrase from the passage", "definition": "a one-sentence, age-appropriate definition in plain everyday words, with no comparison to their interest", "example": "a fresh sentence using the term correctly, set in everyday life or school (their interest, ${interest}, only where it fits naturally)", "trick": "one short sentence applying the word trick to this word"${TECH.frayerShape(tier)} }
   ],
   "glowTarget": "the exact skill area name from the given list that the glow demonstrates",
   "growTarget": "the exact skill area name from the given list that the grow is building towards"${caps.deepFeedback ? ',\n  "growNext": "ONE further, harder step: the next level of the same skill as the main grow (or the very next skill), as a concrete action for their next piece that quotes a short verbatim fragment of their own work in quotation marks - no analogy, no games or projects, not a restatement."' : ""}${wantsExam ? `,\n${examJsonShape(targets)}` : ""},

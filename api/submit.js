@@ -11,7 +11,7 @@ const TECH = require("./_lib/techniques");
 const QT = require("./_lib/questionTypes");
 const { frameworkFor } = require("./_lib/writingFrameworks");
 const { makeSplitGenerator, splitEnabled } = require("./_lib/splitGenerate");
-const { coerceOverallScore, dropNonVerbatimHighlights, dropRestatingHighlights, repairResponses, dropGlowsQuotingMisspellings, validateFeedback, resolveTarget, dropInvalidSpellingGrammar, sanitizeQuestionReview, repairZeroScoreGlow, repairReadingExamEvidence, repairShortAnswer, stripUngrantedSections } = require("./_lib/validate");
+const { coerceOverallScore, dropNonVerbatimHighlights, dropRestatingHighlights, repairResponses, dropGlowsQuotingMisspellings, plainStandardInGlow, validateFeedback, resolveTarget, dropInvalidSpellingGrammar, sanitizeQuestionReview, repairZeroScoreGlow, repairReadingExamEvidence, repairShortAnswer, stripUngrantedSections } = require("./_lib/validate");
 const { checkRateLimit } = require("./_lib/rateLimit");
 const { writingLimitsForGrade } = require("./_lib/writingLimits");
 const { assessLength, calibrateWriting, applyCorrections, repairExamEvidence } = require("./_lib/calibrate");
@@ -91,6 +91,7 @@ async function generateAndValidate(prompt, tier, country, gradeLabel, submittedT
       // api/progress.js's exact-key Map lookup actually finds them.
       attempt.parsed.glowTarget = resolveTarget(attempt.parsed.glowTarget, targetNames) || attempt.parsed.glowTarget;
       attempt.parsed.growTarget = resolveTarget(attempt.parsed.growTarget, targetNames) || attempt.parsed.growTarget;
+      plainStandardInGlow(attempt.parsed, standardsList);
       return attempt;
     }
     console.warn(`Feedback validation failed on attempt ${i}:`, check.issues);
@@ -117,6 +118,7 @@ async function generateAndValidate(prompt, tier, country, gradeLabel, submittedT
       }
       attempt.parsed.glowTarget = resolveTarget(attempt.parsed.glowTarget, targetNames) || attempt.parsed.glowTarget;
       attempt.parsed.growTarget = resolveTarget(attempt.parsed.growTarget, targetNames) || attempt.parsed.growTarget;
+      plainStandardInGlow(attempt.parsed, standardsList);
       return attempt;
     }
     lastIssues = check.issues;
