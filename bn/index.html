@@ -1,0 +1,1451 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="google-site-verification" content="BTPfH1ZgcATkFK9mvxQe74ayAnhdl4c6EQ8OWZNl0ps" />
+<meta name="p:domain_verify" content="883351ee86a9a496647036e6701caf29"/>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<script>
+  // A password-reset or sign-up confirmation link can land on the homepage (the
+  // sign-in service falls back to the site address when a redirect is not on its
+  // allowed list). The links are passed straight on to the app, which knows what
+  // to do with them.
+  (function () {
+    var h = location.hash || "";
+    if (/(^|[#&])type=(recovery|signup)($|&)/.test(h) && h.indexOf("access_token=") !== -1) location.replace("/app.html" + h);
+  })();
+</script>
+<script>
+  // An old copy of this site is also served from GitHub Pages. Send anyone
+  // who lands there to the real site, keeping the page they asked for.
+  if (/\.github\.io$/.test(location.hostname)) {
+    location.replace("https://www.literacylabai.com" + location.pathname.replace(/^\/LiteracyLabAI/i, "") + location.search + location.hash);
+  }
+</script>
+<title>শিশুদের লেখা ও পড়ার ওপর AI ফিডব্যাক | LiteracyLab AI</title>
+<meta name="description" content="৫ থেকে ১৮ বছর বয়সী শিশুদের লেখা ও পড়ার ওপর AI ফিডব্যাক, যা তাদের স্কুলের পাঠ্যক্রমের সঙ্গে মেলে: যুক্তরাজ্য, যুক্তরাষ্ট্র, অস্ট্রেলিয়া, কানাডা, নিউজিল্যান্ড, আয়ারল্যান্ড, ভারত, দক্ষিণ আফ্রিকা, হংকং, সংযুক্ত আরব আমিরাত, সিঙ্গাপুর এবং দ্বিতীয় ভাষা হিসেবে ইংরেজি (ESL)। NAPLAN, SATs ও GCSE-র অনুশীলন। বিনামূল্যের প্ল্যান।">
+<link rel="canonical" href="https://www.literacylabai.com/bn/">
+<link rel="alternate" hreflang="en" href="https://www.literacylabai.com/">
+<link rel="alternate" hreflang="pl" href="https://www.literacylabai.com/pl/">
+<link rel="alternate" hreflang="es" href="https://www.literacylabai.com/es/">
+<link rel="alternate" hreflang="pt" href="https://www.literacylabai.com/pt/">
+<link rel="alternate" hreflang="ro" href="https://www.literacylabai.com/ro/">
+<link rel="alternate" hreflang="ar" href="https://www.literacylabai.com/ar/">
+<link rel="alternate" hreflang="ur" href="https://www.literacylabai.com/ur/">
+<link rel="alternate" hreflang="hi" href="https://www.literacylabai.com/hi/">
+<link rel="alternate" hreflang="zh" href="https://www.literacylabai.com/zh/">
+<link rel="alternate" hreflang="pa" href="https://www.literacylabai.com/pa/">
+<link rel="alternate" hreflang="bn" href="https://www.literacylabai.com/bn/">
+<link rel="alternate" hreflang="x-default" href="https://www.literacylabai.com/">
+<meta name="robots" content="index, follow">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="LiteracyLab AI">
+<meta property="og:title" content="LiteracyLab AI — পাঠ্যক্রম অনুযায়ী লেখা ও পড়ার ফিডব্যাক, ৫ থেকে ১৮ বছরের জন্য">
+<meta property="og:description" content="আপনার সন্তানের প্রকৃত স্কুল পাঠ্যক্রমের ওপর ভিত্তি করে লেখা ও পড়ার AI ফিডব্যাক — যুক্তরাজ্য, যুক্তরাষ্ট্র, অস্ট্রেলিয়া, কানাডা, নিউজিল্যান্ড, আয়ারল্যান্ড, ভারত, দক্ষিণ আফ্রিকা, হংকং, সংযুক্ত আরব আমিরাত, সিঙ্গাপুর ও Global ESL। সন্তানের আগ্রহ অনুযায়ী সাজানো।">
+<meta property="og:url" content="https://www.literacylabai.com/bn/">
+<meta property="og:locale" content="bn_BD">
+<meta property="og:image" content="https://www.literacylabai.com/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="LiteracyLab AI — পাঠ্যক্রম অনুযায়ী লেখা ও পড়ার ফিডব্যাক, ৫ থেকে ১৮ বছরের জন্য">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="LiteracyLab AI — পাঠ্যক্রম অনুযায়ী লেখা ও পড়ার ফিডব্যাক">
+<meta name="twitter:description" content="আপনার সন্তানের প্রকৃত স্কুল পাঠ্যক্রমের ওপর ভিত্তি করে এবং তার আগ্রহ অনুযায়ী সাজানো AI ফিডব্যাক। বিনামূল্যের প্ল্যান, ক্রেডিট কার্ড লাগে না।">
+<meta name="twitter:image" content="https://www.literacylabai.com/og-image.png">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "LiteracyLab AI",
+  "url": "https://www.literacylabai.com/bn/",
+  "logo": "https://www.literacylabai.com/apple-touch-icon.png",
+  "sameAs": [
+    "https://www.pinterest.com/literacylabai/"
+  ],
+  "description": "LiteracyLab AI ৫ থেকে ১৮ বছর বয়সী শিক্ষার্থীদের লেখা ও পড়ার বোধের ওপর AI-তৈরি ফিডব্যাক দেয়, যা তাদের নিজের দেশের প্রকৃত স্কুল পাঠ্যক্রমের ওপর ভিত্তি করে এবং প্রতিটি শিক্ষার্থীর আগ্রহ অনুযায়ী সাজানো।"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "LiteracyLab AI",
+  "url": "https://www.literacylabai.com/bn/",
+  "inLanguage": "bn"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "LiteracyLab AI",
+  "applicationCategory": "EducationalApplication",
+  "operatingSystem": "Web",
+  "description": "৫ থেকে ১৮ বছরের জন্য AI পড়া ও লেখার কোচ, যা শিশুর লেখা পড়ে বা তার পড়ার বোধ যাচাই করে, তার প্রকৃত স্কুল পাঠ্যক্রমের (যুক্তরাজ্য, যুক্তরাষ্ট্র, অস্ট্রেলিয়া, কানাডা, নিউজিল্যান্ড, আয়ারল্যান্ড, ভারত, দক্ষিণ আফ্রিকা, হংকং, সংযুক্ত আরব আমিরাত ও উপসাগর, সিঙ্গাপুর, বা CEFR-এর সঙ্গে মেলানো Global ESL) সঙ্গে মেলায়, এবং একটি Glow, PEEL বা Story Mountain-এর মতো নামযুক্ত লেখার কাঠামোর মাধ্যমে শিশুর নিজের লেখার ওপর শেখানো একটি Grow, এবং ব্যবহারের উদাহরণ সহ ব্যক্তিগত শব্দভান্ডার উন্নতি ফিরিয়ে দেয়।",
+  "offers": [
+    {
+      "@type": "Offer",
+      "name": "Free",
+      "price": "0",
+      "priceCurrency": "USD",
+      "description": "প্রতি মাসে ৩টি লেখা বা পড়ার কাজ, Glow, Grow, হাইলাইট ও শব্দভান্ডারের ফিডব্যাক সহ।"
+    },
+    {
+      "@type": "Offer",
+      "name": "Core",
+      "price": "9.99",
+      "priceCurrency": "USD",
+      "description": "একজন শিক্ষার্থীর জন্য সীমাহীন মাসিক কাজ, ২৬ সপ্তাহের অগ্রগতির প্রবণতার চার্ট, নিজের শ্রেণিতে বেনামি র‍্যাঙ্কিং এবং কার্যকলাপের সম্পূর্ণ ইতিহাস।"
+    },
+    {
+      "@type": "Offer",
+      "name": "Premium",
+      "price": "15.99",
+      "priceCurrency": "USD",
+      "description": "৬ জন শিক্ষার্থী পর্যন্ত Core-এর সবকিছু, সঙ্গে দ্বিতীয় কঠিন পরের ধাপ সহ বর্ধিত ফিডব্যাক, আপনার নতুন করে লেখা উত্তর একটি আদর্শ উত্তরের পাশাপাশি এবং দুটিতেই কাঠামোর ঝলক, পড়ার বোধে একটি ছোট লিখিত উত্তর যা AI যাচাই করে, NAPLAN, KS2 SATs, KS3, GCSE, EQAO, PSLE, IGCSE, NCEA, Leaving Cert, CBSE, NSC, HKDSE, মার্কিন রাজ্য পরীক্ষা ও CEFR লেখার কাজের জন্য পরীক্ষার ধাঁচের অনুশীলন, বানান ও ব্যাকরণ যাচাই, পুরো কাজের ১০-এর মধ্যে স্কোর, এবং পরীক্ষা-কৌশলের স্কোরিং যা শিক্ষার্থীর বছর ও অঞ্চলের প্রকৃত মূল্যায়ন লক্ষ্য অনুযায়ী প্রতিটি কাজকে ১ থেকে ৪ স্তরে ফেলে (বয়স ১১+)।"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "LiteracyLab AI কী?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "LiteracyLab AI হলো ৫ থেকে ১৮ বছর বয়সী শিশু ও শিক্ষার্থীদের জন্য পড়া ও লেখার অনলাইন কোচ। শিশু কোনো লেখা লেখে বা পড়ার অংশের উত্তর দেয়, আর ফিরে পায় একটি শক্তিশালী দিক, একটি স্পষ্ট পরের ধাপ, তার লেখার সংশোধিত রূপ এবং শেখার শব্দ, যা তার স্কুলের পাঠ্যক্রমের (যুক্তরাজ্য, যুক্তরাষ্ট্র, অস্ট্রেলিয়া, কানাডা, নিউজিল্যান্ড, আয়ারল্যান্ড, ভারত, দক্ষিণ আফ্রিকা, হংকং, উপসাগর, সিঙ্গাপুর, বা ইংরেজি শিক্ষার্থীদের জন্য CEFR স্তর) সঙ্গে মেলে। অ্যাকাউন্ট চালান অভিভাবক বা তত্ত্বাবধায়ক, আর প্রতি মাসে ৩টি কাজের একটি বিনামূল্যের প্ল্যান আছে। LiteracyLab AI সম্পর্কে আরও (ইংরেজিতে)।"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "প্রতি মাসের ৩টি বিনামূল্যের কাজ কীভাবে চলে?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "প্রতিটি অ্যাকাউন্ট প্রতি ক্যালেন্ডার মাসে ৩টি বিনামূল্যের কাজ পায় — লেখা, পড়ার বোধ, বা দুটির মিশ্রণ — আর প্রতিটিতেই সম্পূর্ণ ফিডব্যাক থাকে: Glow, Grow, হাইলাইট ও শব্দভান্ডার। আপনার গণনা প্রতি মাসের ১ তারিখে নিজে থেকেই শূন্য হয়ে যায়, তাই মনে রাখার বা হাতে নবায়নের কিছু নেই। যখন আপনি এটি প্রতি সপ্তাহে ব্যবহার করবেন, তখন Core মাসিক সীমা পুরোপুরি তুলে দেয়।"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "আমার সন্তানের লেখা কি নিরাপদ ও ব্যক্তিগত?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "হ্যাঁ। কাজগুলো শুধু আপনার সন্তানের জন্য ফিডব্যাক তৈরি করতেই প্রক্রিয়া করা হয় — আমরা কখনো লেখার নমুনা বা ব্যক্তিগত তথ্য বিক্রি বা ভাড়া দিই না, আর আপনার সন্তানের কাজ পাবলিক AI মডেল প্রশিক্ষণে ব্যবহার করি না। অভিভাবকরা যেকোনো সময় সন্তানের লেখার ইতিহাস দেখতে, রপ্তানি করতে বা চিরতরে মুছে ফেলতে পারেন। সম্পূর্ণ বিবরণ আমাদের গোপনীয়তা নীতিতে (ইংরেজিতে) আছে।"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "LiteracyLab AI আমার দেশের পাঠ্যক্রমের সঙ্গে কীভাবে মেলে?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "আপনি আপনার অঞ্চল বেছে নেন — যুক্তরাজ্য, যুক্তরাষ্ট্র, অস্ট্রেলিয়া, কানাডা, নিউজিল্যান্ড, আয়ারল্যান্ড, ভারত, দক্ষিণ আফ্রিকা, হংকং, সংযুক্ত আরব আমিরাত ও উপসাগর (Cambridge/IGCSE), সিঙ্গাপুর ও দক্ষিণ-পূর্ব এশিয়া (Cambridge/IB), বা Global ESL Mode (CEFR A1–C2) — আর আপনার সন্তানের শ্রেণি, বছর বা স্তর, এবং প্রতিটি লক্ষ্য, প্রতিটি Grow ও শব্দভান্ডারের প্রতিটি পরামর্শ সেই পাঠ্যক্রমের প্রকৃত প্রত্যাশা অনুযায়ী সাজানো হয়। এটি এমন একটি সাধারণ মাপকাঠি নয় যা সব দেশের ওপর টেনে দেওয়া হয়েছে।"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "আমি কি যেকোনো সময় আমার LiteracyLab সাবস্ক্রিপশন বাতিল করতে পারি?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "হ্যাঁ — Core ও Premium দুটির বিলই প্রতি মাসে Stripe-এর মাধ্যমে হয়, কোনো বাধ্যতামূলক চুক্তি ছাড়া। আপনার অ্যাকাউন্ট সেটিংস থেকে কয়েক ক্লিকে বাতিল করুন, আর আপনার কাছ থেকে আর অর্থ নেওয়া হবে না; আপনি পরিশোধিত মেয়াদ শেষ পর্যন্ত পুরো অ্যাক্সেস রাখেন, তারপর অ্যাকাউন্ট হারানোর বদলে বিনামূল্যের প্ল্যানে ফিরে যান।"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "আমি LiteracyLab AI-এর কোন প্ল্যান বেছে নেব?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Free দিয়ে শুরু করুন এবং ফিডব্যাকের মান নিজে যাচাই করুন — প্রতি মাসে ৩টি কাজ, আসল Glow, Grow, হাইলাইট ও শব্দভান্ডার সহ। Core (মাসে ৯.৯৯ মার্কিন ডলার, স্থানীয় মূল্য A$, £, €, C$, S$, NZ$, HK$, R ও ₹-তে) নিয়মিত অনুশীলন করা একটি শিশুর জন্য ঠিক: সীমাহীন কাজ, ২৬ সপ্তাহের অগ্রগতির প্রবণতা, নিজের শ্রেণিতে বেনামি র‍্যাঙ্কিং ও কার্যকলাপের সম্পূর্ণ ইতিহাস। Premium (মাসে ১৫.৯৯ মার্কিন ডলার) এমন পরিবারের জন্য যেখানে একাধিক সন্তান — এক অ্যাকাউন্টে ৬ জন শিক্ষার্থী পর্যন্ত, দুটি Core প্ল্যানের চেয়ে সস্তা — অথবা ১১ বছর বা তার বেশি বয়সী যে শিক্ষার্থী পরীক্ষার প্রস্তুতি নিচ্ছে তার জন্য, কারণ এটি প্রতিটি ফিডব্যাকে পরীক্ষা-কৌশলের স্কোরিং, দ্বিতীয় কঠিন পরের ধাপ, বানান ও ব্যাকরণ যাচাই এবং পুরো কাজের ১০-এর মধ্যে স্কোর যোগ করে। আপনি অ্যাকাউন্ট সেটিংস থেকে যেকোনো সময় প্ল্যান বদলাতে পারেন।"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "পরীক্ষা-কৌশলের স্কোরিং কী?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Premium-এ ১১ বছর বা তার বেশি বয়সী শিক্ষার্থীর প্রতিটি কাজ তার বছর ও অঞ্চলের জন্য প্রকাশিত প্রকৃত মূল্যায়ন লক্ষ্য অনুযায়ী স্কোর করা হয় — যেমন যুক্তরাজ্যে AQA GCSE English Language AO5 ও AO6, বা যুক্তরাষ্ট্রে প্রাসঙ্গিক Common Core লেখার মানদণ্ড। প্রতিটি লক্ষ্য ১ (Emerging) থেকে ৪ (Strong) পর্যন্ত একটি স্তর পায়, সেই স্তরের প্রমাণ হিসেবে তার নিজের কাজ থেকে একটি উদ্ধৃতি, এবং এক ধাপ ওপরে তোলার মতো একটি নির্দিষ্ট পরিবর্তন। এটি ইচ্ছাকৃতভাবে কখনো কাঁচা পরীক্ষার নম্বর, শতাংশ বা অক্ষরের গ্রেড দেয় না: একটি অযাচাই কাজ এত নিখুঁততা বহন করতে পারে না, আর সরকারি দেখায় অথচ নয় এমন একটি সংখ্যা কোনো সংখ্যা না থাকার চেয়েও খারাপ।"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "আমার সন্তান ৩টি কাজের সীমায় পৌঁছালে কী হয়?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "ওয়ার্কস্পেস স্পষ্ট দেখায় কখন সীমা পূর্ণ হলো এবং নতুন কাজ থামিয়ে দেয় — কিছুই হারায় না, আর চলমান খসড়া সংরক্ষিত থাকে। সেখান থেকে আপনি তখনই সীমাহীন কাজের জন্য Core-এ যেতে পারেন, অথবা শুধু পরের মাসের শুরুতে বিনামূল্যের কোটা নতুন হওয়ার অপেক্ষা করতে পারেন।"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "এটি কি আমার সন্তানের রচনা শুধু নিজেই লিখে দেবে?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "না — এটি কখনো তাদের গল্প লেখে না। LiteracyLab AI শুধু সেই কাজেরই জবাব দেয় যা আপনার সন্তান আগেই করেছে: এটি একটি নির্দিষ্ট শক্তিশালী দিক আর উন্নতির একটি বিষয় জানায়। নতুন করে লেখার সবচেয়ে কাছাকাছি হলো \"আপনার গল্প, সংশোধনের পর\" প্যানেল, যা আপনার সন্তানের লেখা একটি বাক্য নিয়ে সেই একই বাক্য প্রস্তাবিত সংশোধন সহ দেখায় — তার শব্দ, তার কণ্ঠ, একটি পরিবর্তন — যাতে সে দেখতে পায় পরামর্শটি বাস্তবে কেমন দেখায়, তৈরি লেখা নকল না করে। পরের খসড়াটি তবু তারই।"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "আমি কি একই অ্যাকাউন্টে একাধিক সন্তান যোগ করতে পারি?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "হ্যাঁ, Premium প্ল্যানে: এক অ্যাকাউন্টে ছয়জন পর্যন্ত শিক্ষার্থী (Free ও Core প্ল্যান একজন শিক্ষার্থীকে কভার করে), প্রত্যেকের নিজের দেশের পাঠ্যক্রম, শ্রেণি, আগ্রহ ও অবতার। তাদের কাজ সম্পূর্ণ আলাদা থাকে: কাজ, দখলের ইতিহাস ও অগ্রগতি প্রতিটি সন্তানের সঙ্গে আলাদাভাবে যুক্ত, তাই বড় ভাইবোনের রচনা কখনো ছোটজনের ড্যাশবোর্ডে মিশে যায় না। আপনি ড্যাশবোর্ডের ওপরের শিক্ষার্থী বার থেকে তাদের মধ্যে বদলান।"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "আপনারা কি আমার সন্তানকে অন্য শিশুদের সঙ্গে র‍্যাঙ্ক করেন?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "শুধু ইচ্ছাকৃতভাবে সীমিত ও বেনামি উপায়ে। ড্যাশবোর্ড দেখায় আপনার সন্তানের সামগ্রিক দখল ঠিক একই দেশ ও শ্রেণির অন্য শিক্ষার্থীদের সঙ্গে কেমন — একটি গড়, একটি শতকরা অবস্থান ও একটি ক্রমানুসারে সাজানো সিঁড়ি। সেই সিঁড়ির অন্য প্রতিটি এন্ট্রি শুধু একটি অবস্থান ও স্কোর দেখায়, \"শিক্ষার্থী ৪\"-এর মতো লেবেল সহ; পরিবারগুলোর মধ্যে কোনো নাম বা শনাক্তকারী তথ্য যায় না। আর আপনার সন্তানের ঠিক একই দেশ ও শ্রেণিতে পাঁচজনের কম শিক্ষার্থী থাকলে তুলনা পুরোপুরি লুকিয়ে রাখা হয়, এত ছোট দলের সামনে দেখানোর বদলে যেখানে কাউকে চেনা সম্ভব।"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "আমি কি আমার সন্তানের তথ্য রপ্তানি বা মুছে ফেলতে পারি?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "হ্যাঁ — তাৎক্ষণিকভাবে, এবং আমাদের কাছে না চেয়েই। অভিভাবক ড্যাশবোর্ড থেকে আপনি অ্যাকাউন্টে থাকা সবকিছু একটি ফাইলে ডাউনলোড করতে পারেন, প্রতিটি শিক্ষার্থীর প্রোফাইল ও তার লেখা ও পড়ার সম্পূর্ণ ইতিহাস সহ। আপনি পুরো অ্যাকাউন্ট চিরতরে মুছেও ফেলতে পারেন, যাতে সব প্রোফাইল ও সব ইতিহাস সরে যায় এবং যেকোনো সক্রিয় সাবস্ক্রিপশন বাতিল হয়। মুছে ফেলা সঙ্গে সঙ্গে কার্যকর হয় এবং ফেরানো যায় না — কোনো সাপোর্ট টিকিট নেই, অপেক্ষার সময়ও নেই। সম্পূর্ণ বিবরণের জন্য আমাদের গোপনীয়তা নীতি (ইংরেজিতে) দেখুন।"
+      }
+    }
+  ],
+  "inLanguage": "bn"
+}
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=Lexend:wght@400;500;600;700;800;900&family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --bg: #F1F1EF;
+    --bg-elevated: #FFFFFF;
+    --surface: #FFFFFF;
+    --surface-2: #E5E5E2;
+    --border: #D3D3CF;
+    --border-soft: #DEDEDB;
+    --ink: #212121;
+    --ink-soft: #5A5A56;
+    --ink-faint: #8F8F8A;
+    --accent: #7A3B45;
+    --accent-ink: #552830;
+    --accent-tint: #EBDEE0;
+    --gold: #8C7040;
+    --gold-ink: #5F4A26;
+    --gold-tint: #E9E2D2;
+    --good: #3F7A52;
+    --grid-line: rgba(33,33,33,0.05);
+    --shadow: 20 15% 20%;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg: #161513;
+      --bg-elevated: #1B1815;
+      --surface: #1E1B18;
+      --surface-2: #26221D;
+      --border: #37322B;
+      --border-soft: #2C2721;
+      --ink: #EDE9E2;
+      --ink-soft: #B3AB9C;
+      --ink-faint: #7C7568;
+      --accent: #C4776E;
+      --accent-ink: #E3A79F;
+      --accent-tint: #362320;
+      --gold: #C9A050;
+      --gold-ink: #C9A050;
+      --gold-tint: #3A2E17;
+      --good: #6FBE86;
+      --grid-line: rgba(255,255,255,0.05);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg: #161513;
+    --bg-elevated: #1B1815;
+    --surface: #1E1B18;
+    --surface-2: #26221D;
+    --border: #37322B;
+    --border-soft: #2C2721;
+    --ink: #EDE9E2;
+    --ink-soft: #B3AB9C;
+    --ink-faint: #7C7568;
+    --accent: #C4776E;
+    --accent-ink: #E3A79F;
+    --accent-tint: #362320;
+    --gold: #C9A050;
+    --gold-ink: #C9A050;
+    --gold-tint: #3A2E17;
+    --good: #6FBE86;
+    --grid-line: rgba(255,255,255,0.05);
+  }
+
+  *{ box-sizing: border-box; }
+  html{ scroll-behavior: smooth; }
+  body{
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Source Serif 4", Georgia, serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection{ background: var(--accent); color: var(--on-solid); }
+  a{ color: inherit; }
+  h1,h2,h3{ text-wrap: balance; margin: 0; font-family: "Fraunces", serif; font-weight: 500; }
+  p{ margin: 0; }
+  .sans{ font-family: "Lexend", ui-sans-serif, system-ui, sans-serif; }
+  .wrap{ max-width: 1140px; margin-inline: auto; padding-inline: 24px; }
+  @media (max-width: 640px){ .wrap{ padding-inline: 16px; } }
+
+  .eyebrow{
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: "Lexend", sans-serif; font-size: 12.5px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase;
+    color: var(--gold-ink);
+  }
+  .eyebrow::before{ content:""; width: 6px; height: 6px; border-radius: 50%; background: var(--gold); }
+
+  .btn{
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    font-family: "Lexend", sans-serif; font-weight: 600; font-size: 14.5px;
+    padding: 13px 22px; border-radius: 8px; text-decoration: none; cursor: pointer;
+    border: 1px solid transparent; transition: background .15s ease, border-color .15s ease;
+    white-space: nowrap;
+  }
+  .btn:active{ transform: translateY(1px); }
+  .btn-primary{ background: var(--accent); color: var(--on-solid); }
+  .btn-primary:hover{ background: var(--accent-ink); }
+  :root[data-theme="dark"] .btn-primary:hover, :root:not([data-theme="light"]) .btn-primary:hover{ background: color-mix(in srgb, var(--accent) 80%, white 20%); }
+  .btn-ghost{ background: transparent; color: var(--ink); border-color: var(--border); }
+  .btn-ghost:hover{ border-color: var(--ink-faint); }
+  .btn-gold{ background: var(--gold); color: var(--on-solid); }
+  .btn-gold:hover{ background: var(--gold-ink); }
+  .btn-lg{ padding: 16px 26px; font-size: 15.5px; }
+
+  /* ---------------- Nav ---------------- */
+  .nav{
+    position: sticky; top: 0; z-index: 40;
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border-soft);
+  }
+  .nav-inner{ position:relative; display:flex; align-items:center; justify-content:space-between; gap:16px; padding-block: 14px; }
+  .brand{ display:flex; align-items:center; gap:10px; font-family:"Fraunces",serif; font-weight:600; font-size:19px; letter-spacing:-0.01em; }
+  .brand-mark{ width:28px; height:28px; display:grid; place-items:center; position:relative; flex-shrink:0; }
+  .nav-links{ display:flex; align-items:center; gap:28px; font-family:"Lexend",sans-serif; font-size:14px; font-weight:500; color: var(--ink-soft); }
+  .nav-links a:hover{ color: var(--ink); }
+  .nav-cta{ display:flex; align-items:center; gap:10px; }
+  .theme-toggle{ width:34px; height:34px; border-radius:50%; border:1px solid var(--border); display:grid; place-items:center; background: var(--surface); color: var(--ink-soft); cursor:pointer; }
+  .nav-menu-toggle{ display:none; width:34px; height:34px; border-radius:50%; border:1px solid var(--border); align-items:center; justify-content:center; background: var(--surface); color: var(--ink-soft); cursor:pointer; }
+  /* Below 780px the links used to just disappear with nothing in their
+     place - Product/How it works/Pricing/FAQ became unreachable except by
+     scrolling, on the exact devices (phones) most parents actually browse
+     on. A hamburger toggle keeps every link reachable instead of removing
+     them from mobile entirely. */
+  @media (max-width: 780px){
+    .nav-links{ display:none; position:absolute; top:100%; left:0; right:0; flex-direction:column; align-items:flex-start; gap:2px; padding:10px 24px 16px; background: var(--bg); border-bottom:1px solid var(--border-soft); }
+    .nav-links.open{ display:flex; }
+    .nav-links a{ padding:10px 0; width:100%; }
+    .nav-menu-toggle{ display:grid; }
+  }
+  /* At phone widths the brand, theme toggle and CTA no longer fit on one
+     row: the "Launch workspace" button was pushed ~60px past the right edge
+     (found at 375px), taking the page's primary CTA off-screen and forcing
+     the whole page to scroll horizontally. Shrinking the button and letting
+     the row wrap keeps the CTA reachable without truncating its label. */
+  .theme-toggle-menu{ display:none; }
+  .nav-short{ display:none; }
+  @media (max-width: 460px){
+    /* One slim row on a phone (brand, menu, short button): a two-row sticky
+       header ate a fifth of the screen. The theme toggle moves into the menu. */
+    .nav-inner{ flex-wrap: wrap; row-gap: 10px; gap: 10px; padding-block: 10px; }
+    .brand{ font-size: 17px; }
+    .nav-cta{ gap: 8px; }
+    .nav-cta .theme-toggle{ display:none; }
+    .nav-cta .btn{ padding: 10px 14px; font-size: 13.5px; }
+    .nav-long{ display:none; }
+    .nav-short{ display:inline; }
+    .nav-links .theme-toggle-menu{ display:inline-grid; margin-top:6px; }
+  }
+
+  /* ---------------- Hero ---------------- */
+  .hero{ padding-top: 64px; padding-bottom: 40px; }
+  .hero-inner{ text-align:center; }
+  .hero h1{ font-size: clamp(32px, 5.4vw, 58px); line-height: 1.08; letter-spacing: -0.01em; margin-top: 18px; }
+  .hero h1 em{ font-style: italic; color: var(--accent); }
+  .hero-sub{ max-width: 620px; margin: 20px auto 0; font-size: 17.5px; line-height: 1.6; color: var(--ink-soft); }
+  .hero-ctas{ display:flex; align-items:center; justify-content:center; gap:12px; margin-top: 28px; flex-wrap:wrap; }
+  .hero-meta{ margin-top: 16px; font-family:"Lexend",sans-serif; font-size: 12.5px; color: var(--ink-faint); }
+
+  /* ---------------- Product preview panel ---------------- */
+  .preview-shell{
+    position: relative; z-index: 1; margin: 48px auto 0; max-width: 940px;
+    border-radius: 10px; border: 1px solid var(--border); background: var(--surface);
+    box-shadow: 0 1px 2px hsl(var(--shadow) / .04), 0 40px 80px -32px hsl(var(--shadow) / .3);
+    overflow: hidden; text-align: left;
+  }
+  .preview-chrome{ display:flex; align-items:center; gap:6px; padding: 12px 16px; border-bottom: 1px solid var(--border-soft); }
+  .preview-chrome span{ width:9px; height:9px; border-radius:50%; background: var(--border); }
+  .preview-body{ padding: 28px; display:grid; grid-template-columns: 1.1fr 1fr; gap: 22px; }
+  @media (max-width: 760px){ .preview-body{ grid-template-columns: 1fr; } }
+  .pv-card{ border: 1px solid var(--border-soft); border-radius: 6px; padding: 18px; background: var(--surface-2); }
+  .pv-label{ font-family:"Lexend",sans-serif; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color: var(--ink-faint); margin-bottom:9px; }
+  .pv-praise{ border-color: color-mix(in srgb, var(--good) 35%, var(--border-soft)); }
+  .pv-tip{ border-color: color-mix(in srgb, var(--accent) 35%, var(--border-soft)); }
+  .pv-tag{ font-family:"Lexend",sans-serif; display:inline-flex; align-items:center; gap:5px; font-size:10.5px; font-weight:700; padding:3px 9px; border-radius:999px; background: var(--accent-tint); color: var(--accent-ink); margin-bottom:9px; }
+  .pv-text{ font-family:"Source Serif 4", serif; font-size:14.5px; line-height:1.55; color: var(--ink); }
+  .pv-vocab{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .pv-vocab div{ background: var(--accent-tint); border-radius:6px; padding:10px 12px; }
+  .pv-vocab b{ font-family:"Lexend",sans-serif; display:block; font-size:12.5px; color: var(--accent-ink); margin-bottom:2px; }
+  .pv-vocab span{ font-family:"Lexend",sans-serif; font-size:11.5px; color: var(--ink-soft); line-height:1.4; }
+
+  /* ---------------- Sections ---------------- */
+  section{ padding-block: 84px; }
+  @media (max-width: 640px){ section{ padding-block: 52px; } }
+  .section-head{ max-width: 620px; margin-bottom: 46px; }
+  .section-head h2{ font-size: clamp(25px, 3.4vw, 36px); margin-top: 10px; }
+  .section-head p{ margin-top: 12px; font-size: 16px; color: var(--ink-soft); line-height: 1.65; }
+  .section-alt{ background: var(--bg-elevated); border-top: 1px solid var(--border-soft); border-bottom: 1px solid var(--border-soft); }
+
+  /* trust row */
+  .trust{ display:flex; flex-wrap:wrap; gap: 10px; justify-content:center; }
+  .trust-item{ font-family:"Lexend",sans-serif; display:flex; align-items:center; gap:9px; padding:9px 16px; border:1px solid var(--border); border-radius: 999px; font-size:13px; font-weight:600; color: var(--ink-soft); background: var(--surface); }
+
+  /* feature split */
+  .split{ display:grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items:center; }
+  .split.reverse .split-media{ order: 2; }
+  @media (max-width: 860px){ .split, .split.reverse .split-media{ grid-template-columns: 1fr; order:0; } .split{ display:flex; flex-direction:column; gap:32px; } }
+  .split-copy h3{ font-size: clamp(21px,2.6vw,26px); }
+  .split-copy p{ margin-top:14px; font-size:15.5px; line-height:1.65; color: var(--ink-soft); }
+  .split-list{ margin-top:18px; display:flex; flex-direction:column; gap:10px; font-family:"Lexend",sans-serif; }
+  /* Hanging indent rather than flex: as a flex container, every child of a
+     bullet became its own column, so a bullet containing an inline <em> broke
+     into three side-by-side blocks of text. A block box with an absolutely
+     positioned tick keeps all inline content in one flowing line of text, and
+     stays correct if any future bullet contains inline markup. */
+  .split-list div{ position:relative; padding-left:26px; font-size:14.5px; line-height:1.5; color: var(--ink); }
+  .split-list svg{ position:absolute; left:0; top:4px; color: var(--accent); }
+
+  .tier-tabs{ display:flex; gap:6px; padding:4px; border:1px solid var(--border); border-radius:999px; background: var(--surface-2); width:fit-content; margin-bottom:18px; flex-wrap:wrap; }
+  .tier-tabs button{ font-family:"Lexend",sans-serif; font-size:12.5px; font-weight:600; padding:8px 14px; border-radius:999px; border:none; background:transparent; color: var(--ink-soft); cursor:pointer; }
+  .tier-tabs button.active{ background: var(--ink); color: var(--bg); }
+  .tier-panel{ border:1px solid var(--border); border-radius:6px; background: var(--surface); padding:22px; min-height: 190px; }
+  .tier-panel .t-title{ font-family:"Fraunces",serif; font-weight:600; font-size:16px; margin-bottom:6px; }
+  .tier-panel .t-prompt{ font-family:"Source Serif 4",serif; font-size:14.5px; color: var(--ink-soft); line-height:1.55; margin-bottom:14px; }
+  .tier-meter{ font-family:"Lexend",sans-serif; display:flex; align-items:center; gap:8px; font-size:12px; color: var(--ink-faint); font-weight:600; }
+  .tier-meter .bar{ flex:1; height:5px; border-radius:99px; background: var(--surface-2); max-width:140px; }
+  .tier-meter .bar i{ display:block; height:100%; border-radius:99px; background: var(--accent); }
+
+  .mastery-row{ font-family:"Lexend",sans-serif; display:flex; align-items:center; justify-content:space-between; gap:12px; padding:11px 0; border-top:1px solid var(--border-soft); font-size:13.5px; }
+  .mastery-row:first-child{ border-top:none; }
+  .mastery-name{ font-weight:600; }
+  .mastery-bar{ flex:1; height:6px; border-radius:99px; background:var(--surface-2); margin: 0 12px; max-width: 160px; }
+  .mastery-bar i{ display:block; height:100%; border-radius:99px; }
+  .mastery-tag{ font-size:11px; font-weight:700; padding:3px 9px; border-radius:999px; white-space:nowrap; }
+
+  /* how it works */
+  .steps{ display:grid; grid-template-columns: repeat(3,1fr); gap: 24px; }
+  @media (max-width: 760px){ .steps{ grid-template-columns: 1fr; } }
+  .step{ padding: 26px 22px; border:1px solid var(--border); border-radius:6px; background: var(--surface); }
+  .step-num{ font-family:"Lexend",sans-serif; font-size:13px; font-weight:800; color: var(--gold-ink); letter-spacing:.05em; }
+  .step h4{ margin-top:10px; font-family:"Fraunces",serif; font-size:17px; font-weight:600; }
+  .step p{ margin-top:8px; font-family:"Lexend",sans-serif; font-size:13.5px; line-height:1.6; color: var(--ink-soft); }
+
+  /* pricing */
+  /* Equal-height cards with the buttons on one line: the eye compares plans
+     across a row, so the price, list and button of each should line up. */
+  /* The pricing cards and the comparison table below them share one grid: they fill the page container (the same width
+     as the header and every other section) and use the same gap, so each plan's column lines up under its card.
+     Both switch to a single column together, at 720px. */
+  :root{ --plan-gap: 20px; }
+  @media (max-width: 900px){ :root{ --plan-gap: 12px; } }
+  .pricing{ display:grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--plan-gap); width:100%; margin: 0 auto; align-items:stretch; }
+  @media (max-width: 720px){ .pricing{ grid-template-columns: 1fr; gap: 20px; } }
+  .price-card{ display:flex; flex-direction:column; border:1px solid var(--border); border-radius:8px; padding: 30px 26px; background: var(--surface); }
+  @media (min-width: 721px) and (max-width: 900px){ .price-card{ padding: 24px 18px; } .price-card.pro{ padding: 23px 17px !important; } }
+  .price-card.pro{ border:2px solid var(--gold); padding: 29px 25px; position:relative; background: linear-gradient(180deg, var(--gold-tint), var(--surface) 55%); box-shadow: 0 10px 30px -12px rgba(0,0,0,.25); }
+  .price-card.pro::before{ content:"MOST POPULAR"; position:absolute; top:-12px; left:50%; transform:translateX(-50%); white-space:nowrap; background: var(--gold); color: var(--on-solid); font-family:"Lexend",sans-serif; font-size:10.5px; font-weight:800; letter-spacing:.06em; padding:4px 12px; border-radius:999px; }
+  .price-card .price-list{ flex:1; }
+  .price-plan{ font-family:"Lexend",sans-serif; font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color: var(--ink-faint); }
+  .price-amount{ font-family:"Fraunces",serif; font-size:36px; font-weight:600; margin-top:10px; letter-spacing:-0.01em; }
+  .price-amount span{ font-family:"Lexend",sans-serif; font-size:14px; font-weight:500; color: var(--ink-faint); }
+  .price-list{ margin-top:20px; display:flex; flex-direction:column; gap:11px; font-family:"Lexend",sans-serif; }
+  .price-list div{ display:flex; gap:9px; align-items:flex-start; font-size:14px; color: var(--ink-soft); }
+  .price-list svg{ flex-shrink:0; margin-top:2px; color: var(--accent); }
+  .price-card.pro .price-list svg{ color: var(--gold); }
+  .price-card .btn{ width:100%; margin-top:24px; }
+  .price-note{ margin-top:10px; font-family:"Lexend",sans-serif; font-size:12px; color:var(--ink-faint); text-align:center; }
+
+  /* plan comparison table — three cards can only carry the headline
+     differences, so this is the full side-by-side for anyone deciding
+     between Core and Premium. On a phone it becomes
+     compact cards (see the media query below) instead of scrolling sideways. */
+  .plan-table-scroll{ width:100%; margin:48px auto 0; overflow-x:auto; -webkit-overflow-scrolling:touch; border:1px solid var(--border); border-radius:8px; background:var(--surface); }
+  .plan-table{ width:100%; min-width:640px; border-collapse:collapse; font-family:"Lexend",sans-serif; }
+  .plan-table th, .plan-table td{ padding:14px 16px; text-align:left; font-size:13.5px; border-top:1px solid var(--border-soft); vertical-align:top; }
+  .plan-table thead th{ border-top:0; background:var(--surface-2); font-size:12.5px; font-weight:700; letter-spacing:.03em; }
+  .plan-table thead th span{ display:block; font-weight:500; font-size:12px; color:var(--ink-faint); margin-top:3px; }
+  /* the price inside that span must stay on the same line as "/mo" */
+  .plan-table thead th .js-price{ display:inline; margin-top:0; }
+  .plan-table th[scope="row"]{ font-weight:600; color:var(--ink); width:34%; }
+  .plan-table td{ color:var(--ink-soft); width:22%; }
+  .plan-table .col-best{ background:var(--gold-tint); }
+  .plan-table thead .col-best{ background:var(--gold-tint); color:var(--gold-ink); }
+  .plan-table .yes{ color:var(--ink); font-weight:500; }
+  .plan-table .no{ color:var(--ink-faint); }
+  .plan-table tbody tr.group-head th{ background:var(--surface-2); font-size:11.5px; text-transform:uppercase; letter-spacing:.07em; color:var(--ink-faint); font-weight:700; }
+  /* Phones: a three-column table that has to be swiped sideways hides Core and
+     Premium off-screen, which is exactly the comparison a parent came for. Below
+     720px every feature becomes a compact card: the feature name on top and the
+     Free, Core and Premium answers side by side underneath, each labelled, so all
+     three plans are visible at once with no sideways scrolling. */
+  @media (max-width: 720px){
+    .plan-table-scroll{ overflow:visible; border:0; background:transparent; margin-top:36px; }
+    .plan-table, .plan-table tbody{ display:block; min-width:0; }
+    .plan-table thead{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
+    .plan-table tr{ display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); border:1px solid var(--border-soft); border-radius:10px; background:var(--surface); margin-bottom:10px; overflow:hidden; }
+    .plan-table tbody tr.group-head{ display:block; border:0; background:transparent; margin:24px 0 8px; border-radius:0; }
+    .plan-table tbody tr.group-head th{ display:block; background:transparent; border:0; padding:0 2px; font-size:12px; }
+    .plan-table th[scope="row"]{ grid-column:1 / -1; width:auto; padding:12px 14px 6px; border-top:0; font-size:14.5px; line-height:1.4; }
+    .plan-table td{ width:auto; padding:6px 12px 12px; border-top:0; border-left:1px solid var(--border-soft); font-size:14px; line-height:1.4; overflow-wrap:anywhere; }
+    .plan-table td:first-of-type{ border-left:0; }
+    .plan-table td::before{ content:attr(data-label); display:block; margin-bottom:4px; font-size:11.5px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--ink-faint); }
+    .plan-table td.col-best::before{ color:var(--gold-ink); }
+    /* Rows whose answers are whole sentences stack, one plan per line, so a long
+       Premium answer is not squeezed into a narrow third of the screen. */
+    .plan-table tr.wide{ grid-template-columns:1fr; }
+    .plan-table tr.wide td{ display:flex; gap:10px; align-items:baseline; border-left:0; border-top:1px solid var(--border-soft); padding:9px 14px; }
+    .plan-table tr.wide td::before{ flex:0 0 74px; margin-bottom:0; }
+  }
+
+  /* Touch targets: at least 44px tall for anything tappable (Apple and Google
+     guidance), without changing how the desktop site looks. */
+  @media (pointer:coarse), (max-width: 640px){
+    .theme-toggle, .nav-menu-toggle{ width:44px; height:44px; }
+    .btn, .nav-cta .btn{ min-height:44px; }
+    .tier-tabs button{ min-height:44px; padding:10px 16px; }
+    .nav-links a{ padding:13px 0; }
+    .foot-links{ flex-wrap:wrap; gap:0 10px; }
+    .foot-links a{ display:inline-block; padding:14px 6px; }
+    .faq-item summary{ min-height:48px; }
+  }
+
+  /* comparison */
+  .compare{ border:1px solid var(--border); border-radius:8px; overflow:hidden; background:var(--surface); }
+  .compare-row{ display:grid; grid-template-columns: 1.3fr 1fr 1fr; align-items:center; }
+  .compare-row + .compare-row{ border-top:1px solid var(--border-soft); }
+  .compare-row.head{ background:var(--surface-2); font-family:"Lexend",sans-serif; font-weight:700; font-size:13px; }
+  .compare-cell{ padding:16px 18px; font-family:"Lexend",sans-serif; font-size:14px; }
+  .compare-row.head .compare-cell:nth-child(2){ color:var(--ink-faint); }
+  .compare-row.head .compare-cell:nth-child(3){ color:var(--accent); }
+  .compare-cell.label{ color:var(--ink); font-weight:600; }
+  .compare-cell.no{ color:var(--ink-faint); }
+  .compare-cell.no svg{ color:var(--ink-faint); }
+  .compare-cell.yes{ color:var(--ink); font-weight:500; }
+  .compare-cell.yes svg{ color:var(--good); flex-shrink:0; }
+  .compare-cell{ display:flex; align-items:center; gap:8px; }
+  @media (max-width: 640px){
+    .compare-row{ grid-template-columns: 1fr; }
+    .compare-cell{ padding:8px 18px; }
+    .compare-row.head .compare-cell:first-child{ padding-top:14px; }
+    .compare-row:not(.head){ padding-bottom:6px; }
+  }
+
+  /* faq */
+  .faq-list{ max-width: 760px; margin: 0 auto; display:flex; flex-direction:column; gap:12px; }
+  .faq-item{ border:1px solid var(--border); border-radius:6px; background: var(--surface); overflow:hidden; }
+  .faq-item summary{ font-family:"Lexend",sans-serif; list-style:none; cursor:pointer; padding: 18px 22px; font-weight:600; font-size:15px; display:flex; align-items:center; justify-content:space-between; gap:16px; }
+  .faq-item summary::-webkit-details-marker{ display:none; }
+  .faq-item summary .faq-plus{ flex-shrink:0; width:20px; height:20px; position:relative; }
+  .faq-item summary .faq-plus::before, .faq-item summary .faq-plus::after{ content:""; position:absolute; background: var(--accent); border-radius:2px; transition: transform .2s ease; }
+  .faq-item summary .faq-plus::before{ top:9px; left:2px; width:16px; height:2px; }
+  .faq-item summary .faq-plus::after{ top:2px; left:9px; width:2px; height:16px; }
+  .faq-item[open] summary .faq-plus::after{ transform: rotate(90deg); opacity:0; }
+  .faq-item .faq-a{ font-family:"Lexend",sans-serif; padding: 0 22px 20px; font-size:14.5px; line-height:1.65; color: var(--ink-soft); }
+  .faq-a a{ color: var(--accent); font-weight:600; text-decoration: underline; text-underline-offset:2px; }
+
+  /* final cta */
+  .final-cta{ text-align:center; background: var(--bg-elevated); border-top:1px solid var(--border-soft); }
+  .final-cta h2{ font-size: clamp(27px, 4vw, 42px); }
+  .final-cta p{ margin-top:14px; font-size:16px; color: var(--ink-soft); max-width:520px; margin-inline:auto; }
+  .final-cta .hero-ctas{ margin-top: 26px; }
+
+  footer{ border-top:1px solid var(--border-soft); padding-block: 32px; }
+  .foot-inner{ font-family:"Lexend",sans-serif; display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; font-size:12.5px; color: var(--ink-faint); }
+  .foot-links{ display:flex; flex-wrap:wrap; gap:6px 20px; }
+
+  @media (prefers-reduced-motion: reduce){ html{ scroll-behavior:auto; } }
+</style>
+<script src="/analytics.js"></script>
+<script>
+/* A friend's link (?ref=CODE) is remembered so it can travel with their sign-up in the app. */
+(function(){ try { var m = /[?&]ref=([A-Za-z0-9]{6,12})(&|$)/.exec(location.search); if (m) localStorage.setItem("ll_ref", m[1].toUpperCase()); } catch (e) {} })();
+</script>
+<link rel="stylesheet" href="/theme.css?v=11">
+<link rel="stylesheet" href="/home.css?v=14">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/home-fonts.css?v=3">
+<style>.price-card.pro::before,.plan-table thead .col-best::before{content:"সবচেয়ে জনপ্রিয়"}</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="wrap nav-inner">
+    <div class="brand">
+      <span class="brand-mark">
+        <svg width="28" height="28" viewBox="0 0 64 64" aria-hidden="true">
+          <g transform="rotate(-8 20 30)">
+            <rect x="6" y="14" width="28" height="30" rx="5" fill="var(--surface)" stroke="var(--accent)" stroke-width="2.5"/>
+            <path d="M13.5 20H18.5V33.5H26V38H13.5Z" fill="var(--accent)"/>
+            <path d="M28.6 36.2 30 35V41" fill="none" stroke="var(--accent)" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+          </g>
+          <g transform="rotate(7 44 36)">
+            <rect x="30" y="20" width="28" height="30" rx="5" fill="var(--accent)"/>
+            <path d="M37.5 26H42.5V39.5H50V44H37.5Z" fill="var(--bg)"/>
+            <path d="M52.6 42.2 54 41V47" fill="none" stroke="var(--bg)" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+          </g>
+        </svg>
+      </span>
+      LiteracyLab <span style="color:var(--accent)">AI</span>
+    </div>
+    <div class="nav-links" id="navLinks">
+      <a href="#product">পণ্য</a>
+      <a href="#how">এটি কীভাবে কাজ করে</a>
+      <a href="#pricing">মূল্য</a>
+      <a href="/learn/">গাইড</a>
+      <a href="#faq">প্রশ্ন</a>
+      <button class="theme-toggle theme-toggle-menu" type="button" aria-label="থিম বদলান"><svg class="theme-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z"/></svg></button>
+    </div>
+    <div class="nav-cta">
+      <button class="theme-toggle" id="themeToggle" aria-label="থিম বদলান">
+        <svg id="themeIcon" class="theme-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z"/></svg>
+      </button>
+      <button class="nav-menu-toggle" id="navMenuToggle" aria-label="মেনু খুলুন" aria-expanded="false" aria-controls="navLinks">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+      <a class="btn btn-ghost" href="/app.html?lang=bn"><span class="nav-long">অ্যাপ খুলুন</span><span class="nav-short">শুরু করুন</span></a>
+    </div>
+  </div>
+</header>
+
+<main>
+<section class="hero">
+  <div class="wrap hero-inner">
+    <div class="hero-grid">
+      <div class="hero-copy">
+        <span class="eyebrow">পড়া ও লেখার কোচ, চ্যাটবট নয় · বয়স ৫ থেকে ১৮ বছর</span>
+        <h1 id="heroTitle" data-parent="এমন ফিডব্যাক যা <em>আপনার সন্তানের নিজের শিক্ষকও</em> চিনতে পারবেন।" data-learner="কিছু লিখুন। দেখুন এতে <em>আগে থেকেই কী ভালো আছে</em>।">এমন ফিডব্যাক যা <em>আপনার সন্তানের নিজের শিক্ষকও</em> চিনতে পারবেন।</h1>
+        <p class="hero-sub" id="heroSub" data-parent="LiteracyLab AI আপনার সন্তান যা লেখে তা পড়ে — অথবা সে কী বুঝেছে তা যাচাই করে — তার প্রকৃত স্কুল পাঠ্যক্রমের সঙ্গে মেলায়, এবং এমন ফিডব্যাকে রূপ দেয় যা সন্তান সত্যিই কাজে লাগাতে চাইবে, আর সেটাও তার আগে থেকে ভালোবাসা জিনিসগুলোর মাধ্যমে বুঝিয়ে।" data-learner="একটি বিষয় বেছে নিন, কয়েকটি বাক্য লিখুন, আর আপনার কোচ দেখাবে কোনটা ঠিক আছে এবং এরপর কোন একটি জিনিস চেষ্টা করতে হবে। তারপর আপনি নতুন শব্দ জমান।">LiteracyLab AI আপনার সন্তান যা লেখে তা পড়ে — অথবা সে কী বুঝেছে তা যাচাই করে — তার প্রকৃত স্কুল পাঠ্যক্রমের সঙ্গে মেলায়, এবং এমন ফিডব্যাকে রূপ দেয় যা সন্তান সত্যিই কাজে লাগাতে চাইবে, আর সেটাও তার আগে থেকে ভালোবাসা জিনিসগুলোর মাধ্যমে বুঝিয়ে।</p>
+
+        <div class="aud-label" id="audLabel">এটি কার জন্য?</div>
+        <div class="aud" role="group" aria-labelledby="audLabel">
+          <button type="button" data-aud="parent" aria-pressed="true">আমি অভিভাবক</button>
+          <button type="button" data-aud="learner" aria-pressed="false">আমি শিক্ষার্থী</button>
+        </div>
+
+        <div class="hero-ctas">
+          <a class="btn btn-primary btn-lg" href="/app.html?lang=bn">বিনামূল্যে শুরু করুন — প্রতি মাসে ৩টি কাজ</a>
+          <a class="btn btn-ghost btn-lg" href="#how">দেখুন এটি কীভাবে কাজ করে</a>
+        </div>
+        <div class="hero-meta">ক্রেডিট কার্ড লাগবে না · বিনামূল্যের প্ল্যান, সময়ের কোনো সীমা নেই</div>
+      </div>
+
+      <div class="hero-plate">
+        <div class="plate-tabs" role="group" aria-label="দেখুন ফিডব্যাক কীভাবে তৈরি হয়">
+          <button type="button" data-step="1" aria-pressed="true">১ পড়া</button>
+          <button type="button" data-step="2" aria-pressed="false">২ Glow</button>
+          <button type="button" data-step="3" aria-pressed="false">৩ Grow</button>
+        </div>
+        <figure class="plate">
+          <svg viewBox="0 0 560 284" role="img" aria-label="একটি শিশুর কাল্পনিক বাক্য, ধাপে ধাপে দেখানো: একটি শক্তিশালী দিক হাইলাইট করা এবং পরের ধাপটি দাগ টানা">
+            <line class="rule" x1="10" y1="76" x2="550" y2="76"/><line class="rule" x1="10" y1="130" x2="550" y2="130"/><line class="rule" x1="10" y1="184" x2="550" y2="184"/>
+            <rect id="markGlow" class="mark mark-fill" x="4" y="22" width="300" height="44" rx="22" hidden/>
+            <text class="child" x="16" y="56"><tspan id="phGlow">পুরোনো ওক গাছ মচমচ করল</tspan><tspan> হাওয়ায়</tspan></text>
+            <text class="child" x="16" y="110"><tspan>আর </tspan><tspan id="phGrow">আমার ভয় লাগল</tspan><tspan> কারণ আঁধার ছিল।</tspan></text>
+            <text class="child" x="16" y="164">আমি দৌড়ে বাড়ি গেলাম।</text>
+            <path id="markGrow" class="mark mark-dash" d="M0 0" hidden/>
+            <rect id="tagBg" class="tag-bg" x="16" y="206" width="90" height="24" rx="12"/>
+            <text id="noteLabel" class="note-label" x="28" y="223">পড়া</text>
+            <text id="noteL1" class="note" x="16" y="252">আপনার কোচ আগে পড়ে এবং জিজ্ঞেস করে:</text>
+            <text id="noteL2" class="note" x="16" y="274">এখানে আগে থেকেই কী ভালো চলছে?</text>
+          </svg>
+        </figure>
+        <div class="plate-foot">
+          <span class="plate-cap">চিত্র ১ &nbsp;একটি বাক্য, ধাপে ধাপে</span>
+          <button type="button" class="plate-next" id="plateNext">Glow দেখান</button>
+        </div>
+
+        <div class="aud-card" id="cardParent">
+          <span class="k">সোমবার আপনি কী দেখেন</span>
+          <p class="row"><strong>অনুশীলনের দিন</strong> <span>৭-এর মধ্যে ৪</span></p>
+          <div class="meter"><i style="width:57%"></i></div>
+          <p class="row"><strong>পড়ার গড়</strong> <span>75%</span></p>
+          <div class="meter"><i style="width:75%"></i></div>
+          <p class="small">পরের দক্ষতা যেটি অনুশীলন করতে হবে: ভূমিকা-বাক্যাংশের পর কমা বসানো।</p>
+        </div>
+        <div class="aud-card" id="cardLearner" hidden>
+          <span class="k">আজকের শব্দ</span>
+          <p class="word">ominous</p>
+          <p class="small">যা ইঙ্গিত দেয় খারাপ কিছু ঘটতে পারে।</p>
+          <p class="ex">An ominous silence filled the hall. (হলঘরে এক অশুভ নীরবতা নেমে এল।)</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="product">
+  <div class="wrap">
+    <div class="section-head" style="margin-inline:auto; margin-bottom:24px; text-align:center;">
+      <span class="eyebrow" style="justify-content:center;">সমর্থিত পাঠ্যক্রম</span>
+      <h2 style="font-size:20px;">আপনার সন্তানের স্কুল যে প্রকৃত পাঠ্যক্রম পড়ায় তার সঙ্গে মেলানো।</h2>
+    </div>
+    <div class="trust">
+      <div class="trust-item"><img src="https://flagcdn.com/20x15/gb.png" srcset="https://flagcdn.com/40x30/gb.png 2x" width="20" height="15" alt="" loading="lazy"> UK National Curriculum</div>
+      <div class="trust-item"><img src="https://flagcdn.com/20x15/us.png" srcset="https://flagcdn.com/40x30/us.png 2x" width="20" height="15" alt="" loading="lazy"> US Common Core &amp; AP</div>
+      <div class="trust-item"><img src="https://flagcdn.com/20x15/au.png" srcset="https://flagcdn.com/40x30/au.png 2x" width="20" height="15" alt="" loading="lazy"> Australian Curriculum</div>
+      <div class="trust-item"><img src="https://flagcdn.com/20x15/ca.png" srcset="https://flagcdn.com/40x30/ca.png 2x" width="20" height="15" alt="" loading="lazy"> Ontario Curriculum</div>
+      <div class="trust-item"><img src="https://flagcdn.com/20x15/nz.png" srcset="https://flagcdn.com/40x30/nz.png 2x" width="20" height="15" alt="" loading="lazy"> New Zealand Curriculum &amp; NCEA</div>
+      <div class="trust-item"><img src="https://flagcdn.com/20x15/ie.png" srcset="https://flagcdn.com/40x30/ie.png 2x" width="20" height="15" alt="" loading="lazy"> আয়ারল্যান্ড: Junior Cycle ও Leaving Cert</div>
+      <div class="trust-item"><img src="https://flagcdn.com/20x15/in.png" srcset="https://flagcdn.com/40x30/in.png 2x" width="20" height="15" alt="" loading="lazy"> ভারত: NCERT ও CBSE</div>
+      <div class="trust-item"><img src="https://flagcdn.com/20x15/za.png" srcset="https://flagcdn.com/40x30/za.png 2x" width="20" height="15" alt="" loading="lazy"> দক্ষিণ আফ্রিকা: CAPS ও NSC</div>
+      <div class="trust-item"><img src="https://flagcdn.com/20x15/hk.png" srcset="https://flagcdn.com/40x30/hk.png 2x" width="20" height="15" alt="" loading="lazy"> হংকং: EDB ও HKDSE</div>
+      <div class="trust-item"><img src="https://flagcdn.com/20x15/ae.png" srcset="https://flagcdn.com/40x30/ae.png 2x" width="20" height="15" alt="" loading="lazy"> সংযুক্ত আরব আমিরাত ও উপসাগর: Cambridge / IGCSE</div>
+      <div class="trust-item"><img src="https://flagcdn.com/20x15/sg.png" srcset="https://flagcdn.com/40x30/sg.png 2x" width="20" height="15" alt="" loading="lazy"> সিঙ্গাপুর: Cambridge ও IB</div>
+      <div class="trust-item">🌐 ইংরেজি শিক্ষার্থী (CEFR স্তর)</div>
+    </div>
+
+    <div class="where" id="where">
+      <h3 class="where-title" id="whereTitle" style="font-size:clamp(26px,3.4vw,38px); font-weight:400; line-height:1.2; margin-bottom:20px;">বেছে নিন আপনার সন্তান কোথায় পড়ে।</h3>
+      <div class="where-tabs" role="group" aria-labelledby="whereTitle">
+        <button type="button" data-place="au" aria-pressed="true">অস্ট্রেলিয়া</button>
+        <button type="button" data-place="uk" aria-pressed="false">যুক্তরাজ্য</button>
+        <button type="button" data-place="us" aria-pressed="false">যুক্তরাষ্ট্র</button>
+        <button type="button" data-place="ca" aria-pressed="false">কানাডা</button>
+        <button type="button" data-place="nz" aria-pressed="false">নিউজিল্যান্ড</button>
+        <button type="button" data-place="ie" aria-pressed="false">আয়ারল্যান্ড</button>
+        <button type="button" data-place="in" aria-pressed="false">ভারত</button>
+        <button type="button" data-place="za" aria-pressed="false">দক্ষিণ আফ্রিকা</button>
+        <button type="button" data-place="hk" aria-pressed="false">হংকং</button>
+        <button type="button" data-place="sg" aria-pressed="false">সিঙ্গাপুর</button>
+        <button type="button" data-place="ae" aria-pressed="false">সংযুক্ত আরব আমিরাত ও উপসাগর</button>
+        <button type="button" data-place="esl" aria-pressed="false">ইংরেজি শিক্ষার্থী</button>
+      </div>
+      <dl class="where-facts" aria-live="polite">
+        <div><dt>পাঠ্যক্রম</dt><dd id="whereCurr"></dd></div>
+        <div><dt>পরীক্ষার ধাঁচের অনুশীলন (Premium)</dt><dd id="whereExam"></dd></div>
+        <div><dt>বানান যাচাই করা হয় যে রীতিতে</dt><dd id="whereSpell"></dd></div>
+      </dl>
+    </div>
+  </div>
+</section>
+
+<section id="how">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">এটি কীভাবে কাজ করে</span>
+      <h2>ফাঁকা পাতা থেকে কাজে লাগার মতো ফিডব্যাক পর্যন্ত, তিন ধাপে।</h2>
+    </div>
+    <div class="steps">
+      <div class="step"><div class="step-num">01</div><h4>শিক্ষার্থীর প্রোফাইল তৈরি করুন</h4><p>দেশের পাঠ্যক্রম, শ্রেণি বা বছর এবং যে আগ্রহগুলো ফিডব্যাককে মনে ধরায় সেগুলো বেছে নিন — মহাকাশ, গেম, ইতিহাস আর আরও অনেক কিছু।</p></div>
+      <div class="step"><div class="step-num">02</div><h4>লিখুন, অথবা পড়ুন ও উত্তর দিন</h4><p>হয় সে তার বয়সের জন্য তৈরি জায়গায় লেখে, যেখানে সরাসরি শব্দ গণনা এবং তার শ্রেণির প্রকৃত পাঠ্যক্রমের প্রত্যাশা থেকে নেওয়া একটি লক্ষ্য থাকে, নয়তো একটি মৌলিক অংশ পড়ে বোঝার প্রশ্নের উত্তর দেয়।</p></div>
+      <div class="step"><div class="step-num">03</div><h4>Key Takeaways (মূল কথা) পান</h4><p>কয়েক সেকেন্ডে: একটি Glow (যা আগে থেকেই ভালো), একটি Grow (পরের ধাপ), আর আপনার সন্তানের আগ্রহের সঙ্গে জড়ানো শেখার শব্দ।</p></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">শুধু একটি চ্যাটবট নয়</span>
+      <h2>আপনি এটি ChatGPT-তে পেস্ট করতে পারেন। দেখুন আপনি কী হারাবেন।</h2>
+      <p>একটি সাধারণ AI কোনো অনুচ্ছেদ নিয়ে মন্তব্য করতে পারে। সে আপনার সন্তানের শ্রেণি, তার স্কুলের পাঠ্যক্রম, বা গত মাসে সে কী লিখেছিল — কিছুই জানে না — আর পাঁচ বছরের শিশুর তথ্যের কথা মাথায় রেখে তাকে তৈরি করা হয়নি।</p>
+    </div>
+    <div class="compare">
+      <div class="compare-row head">
+        <div class="compare-cell">সুবিধা</div>
+        <div class="compare-cell">একটি সাধারণ AI চ্যাটবট</div>
+        <div class="compare-cell">LiteracyLab AI</div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-cell label">পাঠ্যক্রম অনুযায়ী ফিডব্যাক</div>
+        <div class="compare-cell no"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg> লেখার সাধারণ পরামর্শ, সব বয়সের জন্য একই</div>
+        <div class="compare-cell yes"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> তাদের শ্রেণি ও দেশের প্রকৃত মানদণ্ডের উল্লেখ সহ</div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-cell label">সময়ের সঙ্গে অগ্রগতি</div>
+        <div class="compare-cell no"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg> কথোপকথনের মাঝে কোনো স্মৃতি নেই</div>
+        <div class="compare-cell yes"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> একটি ড্যাশবোর্ড যা প্রতিটি কাজে দক্ষতার ওপর দখল ট্র্যাক করে</div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-cell label">৫ বছরের শিশু আর ১৮ বছরের কিশোর, দুজনের জন্যই তৈরি</div>
+        <div class="compare-cell no"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg> সবার জন্য একই ইন্টারফেস, একই সুর</div>
+        <div class="compare-cell yes"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> বয়স অনুযায়ী চারটি ওয়ার্কস্পেস, জোরে পড়া থেকে পরীক্ষার প্রস্তুতি পর্যন্ত</div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-cell label">একটি শিশুর লেখা</div>
+        <div class="compare-cell no"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg> সাধারণ ভোক্তা শর্তাবলি, অপ্রাপ্তবয়স্কদের জন্য তৈরি নয়</div>
+        <div class="compare-cell yes"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> COPPA-র কথা মাথায় রেখে তৈরি — কখনো বিক্রি হয় না, কখনো পাবলিক মডেল প্রশিক্ষণে ব্যবহৃত হয় না</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">ফিডব্যাক কীভাবে যাচাই হয়</span>
+      <h2>যাচাই, নিছক ধারণা নয়।</h2>
+      <p>একটি AI মডেলের উত্তর দিয়ে দেওয়া মানেই সেই উত্তর সঠিক নয়। প্রতিটি ফিডব্যাক আপনার সন্তানের কাছে পৌঁছানোর আগে স্বয়ংক্রিয় যাচাইয়ের মধ্য দিয়ে যায় — এটি কোনো একটি মডেলের অযাচাই ফল নয় যাকে অন্ধভাবে বিশ্বাস করা হয়।</p>
+    </div>
+    <div class="split">
+      <div class="split-copy">
+        <div class="split-list">
+          <div><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> পাঠ্যক্রমের প্রতিটি উল্লেখ সেই শ্রেণির প্রকৃত মানদণ্ডের তালিকার সঙ্গে মেলানো হয় — বানানো বা অমিল উল্লেখ নিজে থেকেই বাতিল হয় এবং দেখানো হয় না।</div>
+          <div><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> যখন ফিডব্যাক আপনার সন্তানের গল্পের কোনো অংশ নতুন করে লেখে, তখন সেটি বসানোর আগে পুনরাবৃত্তি ও সুরের জন্য যাচাই করা হয় — তাকে সত্যিই পরামর্শটি প্রয়োগ করে দেখাতে হয়, শুধু বর্ণনা করলে হয় না।</div>
+          <div><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> কোনো উত্তর এই যাচাই পার না হলে সেটি নিজে থেকেই আবার তৈরি হয় — সর্বোচ্চ তিনবার — আপনার সন্তান কোনো ফল দেখার আগে।</div>
+        </div>
+      </div>
+      <div class="split-media">
+        <div class="trust" style="justify-content:flex-start;">
+          <div class="trust-item">শুধু অভিভাবক-পরিচালিত অ্যাকাউন্ট</div>
+          <div class="trust-item">তাৎক্ষণিক, নিজে করা যায় এমন তথ্য রপ্তানি ও মুছে ফেলা</div>
+          <div class="trust-item">কখনো বিক্রি হয় না। কখনো পাবলিক AI মডেল প্রশিক্ষণে ব্যবহৃত হয় না।</div>
+          <div class="trust-item">COPPA-র কথা মাথায় রেখে তৈরি</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section-alt">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">সব বয়সের জন্য</span>
+      <h2>একজন শিক্ষার্থী, চারটি ওয়ার্কস্পেস।</h2>
+      <p>একই ইঞ্জিন পাঁচ বছরের শিশুর প্রথম বাক্য থেকে শুরু করে উচ্চ বিদ্যালয়ের শিক্ষার্থীর পরীক্ষার রচনা পর্যন্ত বিন্যাস, শব্দভান্ডার ও সুর মানিয়ে নেয় — কেউই এই পণ্যকে ছাড়িয়ে যায় না।</p>
+    </div>
+    <div class="split">
+      <div class="split-copy">
+        <div class="tier-tabs" id="tierTabs">
+          <button class="active" data-tier="early">Early Readers</button>
+          <button data-tier="elementary">Elementary</button>
+          <button data-tier="middle">Middle School</button>
+          <button data-tier="high">High School</button>
+        </div>
+        <p style="font-family:'Lexend',sans-serif; font-size:14px;color:var(--ink-faint);">একটি স্তর বেছে নিন তার ওয়ার্কস্পেস দেখতে।</p>
+      </div>
+      <div class="split-media">
+        <div class="tier-panel" id="tierPanel">
+          <!-- filled by script -->
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="split reverse">
+      <div class="split-media">
+        <div class="tier-panel">
+          <div class="pv-card pv-tip" style="margin-bottom:12px;">
+            <span class="pv-tag">গেমের মাধ্যমে বোঝানো</span>
+            <div class="pv-text font-read">"আপনার যুক্তিকে আরও এগিয়ে নিয়ে যান — বস ফাইটের মতো: উত্তেজনা বাড়ান, তারপর ঠিক মুহূর্তে আপনার সবচেয়ে জোরালো আঘাতটি হানুন।"</div>
+          </div>
+          <div class="pv-card" style="background:linear-gradient(135deg, var(--ink), #3E2028); border:none;">
+            <div style="color:var(--accent-ink); font-family:'Lexend',sans-serif; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; margin-bottom:6px;">কাঠামোর দিকে নজর: PEEL</div>
+            <div style="color:#EDE1DC; font-family:'Lexend',sans-serif; font-size:13.5px; line-height:1.55;">Point (মূল বক্তব্য): এখানে উত্তেজনা বাড়ান। Evidence (প্রমাণ): বস ফাইটের শেষ ধাপ। Explain (ব্যাখ্যা): এই মুহূর্তেই আপনার যুক্তি সবচেয়ে বেশি প্রভাব ফেলে। Link (সংযোগ): প্রতিটি অনুচ্ছেদ একই ভাবে শেষ করুন।</div>
+          </div>
+        </div>
+      </div>
+      <div class="split-copy">
+        <span class="eyebrow">পণ্য</span>
+        <h3 style="margin-top:10px;">এমন ফিডব্যাক যা শেখায়, শুধু নম্বর দেয় না।</h3>
+        <p>প্রতিটি কাজ একই ক্রমে একই জিনিস ফিরিয়ে দেয়: পাঠ্যক্রমের লক্ষ্যের সঙ্গে যুক্ত একটি Glow; একটি Grow যা সন্তানের বর্তমান সামর্থ্যের ঠিক সামান্য ওপরে থাকে (তার নিকটবর্তী বিকাশ অঞ্চল), সেটি সে সেটআপের সময় যে আগ্রহ বেছেছিল তার মাধ্যমে বোঝানো হয় এবং একটি নামযুক্ত লেখার কাঠামোর সঙ্গে শেখানো হয় — PEEL, Story Mountain ও আরও, লেখা অনুযায়ী — যা তার নিজের কাজের একটি আসল বাক্যের ওপর ভিত্তি করে এবং নতুন করে লেখা হয় যাতে তার নিজের লেখায় কৌশলটির প্রয়োগ দেখা যায়; শব্দভান্ডারের দুটি উন্নতি, প্রতিটির সঙ্গে ব্যবহারের উদাহরণ; এবং Premium-এ, বানান ও ব্যাকরণের আলাদা যাচাই আর পুরো কাজের ১০-এর মধ্যে স্কোর, যা ওই একটি Grow থেকে আলাদা করে বিচার করা হয় যাতে নির্দেশনা একটিমাত্র বিষয়ে সীমাবদ্ধ থাকলেও সেটি সৎ থাকে।</p>
+        <div class="split-list">
+          <div><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> পাঠ্যক্রমের প্রকৃত লক্ষ্যের সঙ্গে যুক্ত Glow, সাধারণ প্রশংসা নয়</div>
+          <div><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> প্রতিটি Grow একটি আগ্রহের মাধ্যমে বোঝানো <em>যা আপনার সন্তান বেছে নেয়</em> — একই লেখার পাঠ মহাকাশ-পাগলের কাছে এক রকমভাবে পৌঁছায়, আর ফুটবলারের কাছে আরেক রকমে</div>
+          <div><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> "আপনার গল্প, সংশোধনের পর": তার নিজের বাক্য, সংশোধন প্রয়োগ করে নতুন করে লেখা, যাতে পরামর্শটি এমন কিছু হয় যা সে দেখতে পারে, শুধু পড়তে নয়</div>
+          <div><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> একটি নামযুক্ত কাঠামো যা সরাসরি তার নিজের লেখা থেকে শেখানো হয়, কোনো সাধারণ উদাহরণ থেকে নয়</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section-alt">
+  <div class="wrap">
+    <div class="split">
+      <div class="split-copy">
+        <span class="eyebrow">অভিভাবকদের জন্য</span>
+        <h3 style="margin-top:10px;">এমন ড্যাশবোর্ড যা অভিভাবকরা সত্যিই বুঝতে পারেন।</h3>
+        <p>এই সেমিস্টারে স্কুল যে নির্দিষ্ট লক্ষ্যগুলো পড়াচ্ছে সেগুলোর ওপর দখল দেখুন — fronted adverbials, মডাল ক্রিয়া, অলংকারিক কৌশল — আর এটি পড়তে শিক্ষকতার ডিগ্রি লাগে না।</p>
+        <div class="split-list">
+          <div><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> সামগ্রিক দখল, লেখা শব্দ আর সক্রিয় ধারাবাহিকতা এক নজরে</div>
+          <div><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> পাঠ্যক্রম-নির্দিষ্ট লক্ষ্য, অস্পষ্ট অক্ষরের গ্রেড নয়</div>
+          <div><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> সপ্তাহ ধরে সপ্তাহ অগ্রগতির প্রবণতা, যাতে আপনি একটি মুহূর্তের ছবি নয়, গতি দেখতে পান</div>
+          <div><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> একই দেশ ও শ্রেণির অন্য শিক্ষার্থীদের সঙ্গে বেনামি তুলনা</div>
+          <div><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> এক অ্যাকাউন্টে ছয়জন পর্যন্ত শিক্ষার্থী, প্রত্যেকে সম্পূর্ণ আলাদাভাবে ট্র্যাক করা</div>
+        </div>
+      </div>
+      <div class="split-media">
+        <div class="tier-panel">
+          <div class="mastery-row">
+            <span class="mastery-name">Fronted Adverbials</span>
+            <div class="mastery-bar"><i style="width:64%; background:var(--gold)"></i></div>
+            <span class="mastery-tag" style="background:var(--gold-tint); color:var(--gold-ink);">চলমান</span>
+          </div>
+          <div class="mastery-row">
+            <span class="mastery-name">অনুচ্ছেদের গঠন</span>
+            <div class="mastery-bar"><i style="width:88%; background:var(--good)"></i></div>
+            <span class="mastery-tag" style="background:color-mix(in srgb, var(--good) 18%, transparent); color:var(--good);">দখল অর্জিত</span>
+          </div>
+          <div class="mastery-row">
+            <span class="mastery-name">বর্ণনামূলক বিশেষণ</span>
+            <div class="mastery-bar"><i style="width:41%; background:var(--accent)"></i></div>
+            <span class="mastery-tag" style="background:var(--accent-tint); color:var(--accent-ink);">মনোযোগ দরকার</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section-alt" id="pricing">
+  <div class="wrap">
+    <div class="section-head" style="margin-inline:auto; text-align:center;">
+      <span class="eyebrow" style="justify-content:center;">মূল্য</span>
+      <h2>বিনামূল্যে শুরু করুন। আগ্রহ জমলে আপগ্রেড করুন।</h2>
+    </div>
+    <div class="pricing">
+      <div class="price-card">
+        <div class="price-plan">Free</div>
+        <div class="price-amount"><span class="js-price" data-tier="free" style="font:inherit;color:inherit;">$0</span><span> /মাস</span></div>
+        <div class="price-list">
+          <div><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> প্রতি মাসে ৩টি লেখা বা পড়ার কাজ</div>
+          <div><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> প্রতিটি কাজে Glow, Grow, হাইলাইট ও শব্দভান্ডার</div>
+          <div><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> অনুশীলনের জন্য লেখা বা পড়ার ধরন বেছে নিন</div>
+          <div><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> অভিভাবক ও শিক্ষার্থীর ড্যাশবোর্ড</div>
+        </div>
+        <a class="btn btn-ghost" href="/app.html?lang=bn">বিনামূল্যে শুরু করুন</a>
+        <div class="price-note">কার্ড লাগবে না।</div>
+      </div>
+      <div class="price-card pro">
+        <div class="price-plan">Core</div>
+        <div class="price-amount"><span class="js-price" data-tier="core" style="font:inherit;color:inherit;">$9.99</span><span> /মাস</span></div>
+        <div class="price-list">
+          <div><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> সীমাহীন লেখা ও পড়ার কাজ</div>
+          <div><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> ২৬ সপ্তাহের অগ্রগতির প্রবণতা, শুধু আজকের স্কোর নয়</div>
+          <div><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> নিজের শ্রেণিতে বেনামি র‍্যাঙ্কিং</div>
+          <div><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> ফ্ল্যাশকার্ড, কুইজ ও সব ডিভাইসে সংরক্ষিত অগ্রগতি সহ শব্দভান্ডার ব্যাংক</div>
+        </div>
+        <a class="btn btn-gold" href="/app.html?lang=bn">Core বেছে নিন</a>
+        <div class="price-note">একজন শিক্ষার্থী। যখন খুশি বাতিল করুন।</div>
+      </div>
+      <div class="price-card">
+        <div class="price-plan">Premium</div>
+        <div class="price-amount"><span class="js-price" data-tier="premium" style="font:inherit;color:inherit;">$15.99</span><span> /মাস</span></div>
+        <div class="price-list">
+          <div><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> Core-এর সবকিছু, ৬ জন শিক্ষার্থী পর্যন্ত</div>
+          <div><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> প্রকৃত মূল্যায়ন লক্ষ্য অনুযায়ী পরীক্ষা-কৌশলের স্কোরিং</div>
+          <div><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> বর্ধিত ফিডব্যাক: দ্বিতীয়, আরও কঠিন পরের ধাপ</div>
+          <div><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> আপনার উত্তর নতুন করে লেখা এবং একটি আদর্শ উত্তর, দুটিতেই লেখার কাঠামো দেখানো</div>
+          <div><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> পরীক্ষার ধাঁচের অনুশীলন: NAPLAN, KS2 SATs, KS3, GCSE, EQAO, PSLE, IGCSE, NCEA, Leaving Cert, CBSE, NSC, HKDSE, মার্কিন রাজ্য পরীক্ষা ও CEFR লেখার কাজ</div>
+          <div><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> প্রতিটি কাজে বানান ও ব্যাকরণ যাচাই এবং ১০-এর মধ্যে স্কোর</div>
+        </div>
+        <a class="btn btn-ghost" href="/app.html?lang=bn">Premium বেছে নিন</a>
+        <div class="price-note">দুটি সন্তান? দুটি Core-এর চেয়ে সস্তা।</div>
+      </div>
+    </div>
+
+    <div class="plan-compare" id="planCompare">
+    <h3 style="text-align:center; margin-top:64px;">সব সুবিধার তুলনা করুন</h3>
+    <p class="plan-note" id="planNote" style="margin-top:8px;">খুলতে কোনো অংশে ট্যাপ করুন</p>
+    <div class="plan-table-scroll">
+      <table class="plan-table" role="table" aria-label="Free, Core ও Premium-এর তুলনা">
+        <thead role="rowgroup">
+          <tr role="row">
+            <th role="columnheader" scope="col">আপনি কী পান</th>
+            <th role="columnheader" scope="col">Free<span><span class="js-price" data-tier="free">$0</span></span></th>
+            <th role="columnheader" scope="col" class="col-best">Core<span><span class="js-price" data-tier="core">$9.99</span> /মাস</span></th>
+            <th role="columnheader" scope="col">Premium<span><span class="js-price" data-tier="premium">$15.99</span> /মাস</span></th>
+          </tr>
+        </thead>
+        <tbody role="rowgroup">
+          <tr class="group-head" role="row"><th role="rowheader" scope="row" colspan="4">অনুশীলন</th></tr>
+          <tr role="row">
+            <th role="rowheader" scope="row">প্রতি মাসে কাজ</th>
+            <td role="cell" data-label="Free" class="no">3</td>
+            <td role="cell" data-label="Core" class="yes col-best">সীমাহীন</td>
+            <td role="cell" data-label="Premium" class="yes">সীমাহীন</td>
+          </tr>
+          <tr role="row">
+            <th role="rowheader" scope="row">এক অ্যাকাউন্টে শিক্ষার্থী</th>
+            <td role="cell" data-label="Free" class="no">1</td>
+            <td role="cell" data-label="Core" class="no col-best">1</td>
+            <td role="cell" data-label="Premium" class="yes">৬ জন পর্যন্ত</td>
+          </tr>
+          <tr role="row">
+            <th role="rowheader" scope="row">লেখার বিষয় ও পড়ার অংশ</th>
+            <td role="cell" data-label="Free" class="yes">প্রতিবার নতুন করে তৈরি</td>
+            <td role="cell" data-label="Core" class="yes col-best">প্রতিবার নতুন করে তৈরি</td>
+            <td role="cell" data-label="Premium" class="yes">প্রতিবার নতুন করে তৈরি</td>
+          </tr>
+          <tr role="row">
+            <th role="rowheader" scope="row">তাদের শ্রেণির পাঠ্যক্রম থেকে শব্দের লক্ষ্য</th>
+            <td role="cell" data-label="Free" class="yes">হ্যাঁ</td>
+            <td role="cell" data-label="Core" class="yes col-best">হ্যাঁ</td>
+            <td role="cell" data-label="Premium" class="yes">হ্যাঁ</td>
+          </tr>
+
+          <tr role="row">
+            <th role="rowheader" scope="row">সাত ধাঁচের পড়ার প্রশ্ন, গল্প, কবিতা, প্রবন্ধ, বক্তৃতা, তথ্য সারণি ও আরও অনেক কিছুর ওপর</th>
+            <td role="cell" data-label="Free" class="yes">হ্যাঁ</td>
+            <td role="cell" data-label="Core" class="yes col-best">হ্যাঁ</td>
+            <td role="cell" data-label="Premium" class="yes">হ্যাঁ</td>
+          </tr>
+
+          <tr role="row">
+            <th role="rowheader" scope="row">কী অনুশীলন করবে তা বেছে নিন: লেখার ধরন, পাঠের ধরন, পড়ার দক্ষতা</th>
+            <td role="cell" data-label="Free" class="yes">হ্যাঁ</td>
+            <td role="cell" data-label="Core" class="yes col-best">হ্যাঁ</td>
+            <td role="cell" data-label="Premium" class="yes">হ্যাঁ</td>
+          </tr>
+
+          <tr class="group-head" role="row"><th role="rowheader" scope="row" colspan="4">ফিডব্যাক</th></tr>
+          <tr role="row">
+            <th role="rowheader" scope="row">Key Takeaways: Glow, Grow, শব্দভান্ডার</th>
+            <td role="cell" data-label="Free" class="yes">হ্যাঁ</td>
+            <td role="cell" data-label="Core" class="yes col-best">হ্যাঁ</td>
+            <td role="cell" data-label="Premium" class="yes">হ্যাঁ</td>
+          </tr>
+          <tr role="row">
+            <th role="rowheader" scope="row">তাদের নিজের লেখায় হাইলাইট, নতুন করে লেখা বাক্য সহ</th>
+            <td role="cell" data-label="Free" class="yes">হ্যাঁ</td>
+            <td role="cell" data-label="Core" class="yes col-best">হ্যাঁ</td>
+            <td role="cell" data-label="Premium" class="yes">হ্যাঁ</td>
+          </tr>
+          <tr role="row">
+            <th role="rowheader" scope="row">তাদের নিজের লেখা থেকে শেখানো নামযুক্ত কাঠামো</th>
+            <td role="cell" data-label="Free" class="yes">হ্যাঁ</td>
+            <td role="cell" data-label="Core" class="yes col-best">হ্যাঁ</td>
+            <td role="cell" data-label="Premium" class="yes">হ্যাঁ</td>
+          </tr>
+          <tr role="row">
+            <th role="rowheader" scope="row">বানান ও ব্যাকরণ যাচাই</th>
+            <td role="cell" data-label="Free" class="no">—</td>
+            <td role="cell" data-label="Core" class="no col-best">—</td>
+            <td role="cell" data-label="Premium" class="yes">হ্যাঁ</td>
+          </tr>
+          <tr role="row">
+            <th role="rowheader" scope="row">১০-এর মধ্যে সামগ্রিক স্কোর, কারণ সহ</th>
+            <td role="cell" data-label="Free" class="no">—</td>
+            <td role="cell" data-label="Core" class="no col-best">—</td>
+            <td role="cell" data-label="Premium" class="yes">হ্যাঁ</td>
+          </tr>
+          <tr role="row">
+            <th role="rowheader" scope="row">তাদের আগ্রহ ঘিরে ফিডব্যাক</th>
+            <td role="cell" data-label="Free" class="yes">হ্যাঁ</td>
+            <td role="cell" data-label="Core" class="yes col-best">হ্যাঁ</td>
+            <td role="cell" data-label="Premium" class="yes">হ্যাঁ</td>
+          </tr>
+          <tr role="row">
+            <th role="rowheader" scope="row">বর্ধিত ফিডব্যাক: দ্বিতীয়, আরও কঠিন পরের ধাপ</th>
+            <td role="cell" data-label="Free" class="no">—</td>
+            <td role="cell" data-label="Core" class="no col-best">—</td>
+            <td role="cell" data-label="Premium" class="yes">হ্যাঁ</td>
+          </tr>
+          <tr role="row">
+            <th role="rowheader" scope="row">আপনার উত্তর সংশোধিত এবং একটি আদর্শ উত্তর, দুটিতেই কাঠামো দেখানো</th>
+            <td role="cell" data-label="Free" class="no">—</td>
+            <td role="cell" data-label="Core" class="no col-best">—</td>
+            <td role="cell" data-label="Premium" class="yes">হ্যাঁ</td>
+          </tr>
+          <tr role="row" class="wide">
+            <th role="rowheader" scope="row">পড়ার বোধে লিখিত উত্তর, ২ বা ৩-এর মধ্যে নম্বর</th>
+            <td role="cell" data-label="Free" class="no">—</td>
+            <td role="cell" data-label="Core" class="no col-best">—</td>
+            <td role="cell" data-label="Premium" class="yes">হ্যাঁ, কীসে নম্বর এল তার বিবরণ ও একটি শক্তিশালী আদর্শ উত্তর সহ</td>
+          </tr>
+          <tr role="row">
+            <th role="rowheader" scope="row">পরীক্ষার ধাঁচের অনুশীলন: NAPLAN, KS2 SATs, KS3, GCSE, EQAO, PSLE, IGCSE, NCEA, Leaving Cert, CBSE, NSC, HKDSE, মার্কিন রাজ্য পরীক্ষা ও CEFR লেখার কাজ</th>
+            <td role="cell" data-label="Free" class="no">—</td>
+            <td role="cell" data-label="Core" class="no col-best">—</td>
+            <td role="cell" data-label="Premium" class="yes">হ্যাঁ</td>
+          </tr>
+          <tr role="row" class="wide">
+            <th role="rowheader" scope="row">পরীক্ষা-কৌশলের স্কোরিং <span style="font-weight:400; color:var(--ink-faint);">(বয়স ১১+)</span></th>
+            <td role="cell" data-label="Free" class="no">—</td>
+            <td role="cell" data-label="Core" class="no col-best">—</td>
+            <td role="cell" data-label="Premium" class="yes">প্রতিটি মূল্যায়ন লক্ষ্যের জন্য ১ থেকে ৪ স্তর, প্রমাণ ও ওপরে ওঠার উপায় সহ</td>
+          </tr>
+
+          <tr class="group-head" role="row"><th role="rowheader" scope="row" colspan="4">অগ্রগতি</th></tr>
+          <tr role="row">
+            <th role="rowheader" scope="row">ধারাবাহিকতা, লেখা শব্দ, গড় স্কোর</th>
+            <td role="cell" data-label="Free" class="yes">হ্যাঁ</td>
+            <td role="cell" data-label="Core" class="yes col-best">হ্যাঁ</td>
+            <td role="cell" data-label="Premium" class="yes">হ্যাঁ</td>
+          </tr>
+          <tr role="row">
+            <th role="rowheader" scope="row">দক্ষতায় দখলের বিস্তারিত</th>
+            <td role="cell" data-label="Free" class="yes">হ্যাঁ</td>
+            <td role="cell" data-label="Core" class="yes col-best">হ্যাঁ</td>
+            <td role="cell" data-label="Premium" class="yes">হ্যাঁ</td>
+          </tr>
+          <tr role="row">
+            <th role="rowheader" scope="row">২৬ সপ্তাহের অগ্রগতির চার্ট</th>
+            <td role="cell" data-label="Free" class="no">—</td>
+            <td role="cell" data-label="Core" class="yes col-best">হ্যাঁ</td>
+            <td role="cell" data-label="Premium" class="yes">হ্যাঁ</td>
+          </tr>
+          <tr role="row">
+            <th role="rowheader" scope="row">শ্রেণিতে বেনামি র‍্যাঙ্কিং</th>
+            <td role="cell" data-label="Free" class="no">—</td>
+            <td role="cell" data-label="Core" class="yes col-best">হ্যাঁ</td>
+            <td role="cell" data-label="Premium" class="yes">হ্যাঁ</td>
+          </tr>
+          <tr role="row">
+            <th role="rowheader" scope="row">আগের কাজ ও ফিডব্যাক আবার খুলুন</th>
+            <td role="cell" data-label="Free" class="no">শেষ ১০টি</td>
+            <td role="cell" data-label="Core" class="yes col-best">সম্পূর্ণ ইতিহাস</td>
+            <td role="cell" data-label="Premium" class="yes">সম্পূর্ণ ইতিহাস</td>
+          </tr>
+          <tr role="row">
+            <th role="rowheader" scope="row">শব্দভান্ডার ব্যাংক, ফ্ল্যাশকার্ড ও নিজে যাচাইয়ের কুইজ, সব ডিভাইসে সংরক্ষিত অগ্রগতি সহ</th>
+            <td role="cell" data-label="Free" class="no">—</td>
+            <td role="cell" data-label="Core" class="yes col-best">হ্যাঁ</td>
+            <td role="cell" data-label="Premium" class="yes">হ্যাঁ</td>
+          </tr>
+
+          <tr class="group-head" role="row"><th role="rowheader" scope="row" colspan="4">অ্যাকাউন্ট</th></tr>
+          <tr role="row">
+            <th role="rowheader" scope="row">আপনার তথ্য রপ্তানি করুন বা মুছে ফেলুন</th>
+            <td role="cell" data-label="Free" class="yes">হ্যাঁ</td>
+            <td role="cell" data-label="Core" class="yes col-best">হ্যাঁ</td>
+            <td role="cell" data-label="Premium" class="yes">হ্যাঁ</td>
+          </tr>
+          <tr role="row">
+            <th role="rowheader" scope="row">যখন খুশি বাতিল করুন, কোনো চুক্তি নেই</th>
+            <td role="cell" data-label="Free" class="no">বাতিল করার কিছু নেই</td>
+            <td role="cell" data-label="Core" class="yes col-best">হ্যাঁ</td>
+            <td role="cell" data-label="Premium" class="yes">হ্যাঁ</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    </div>
+    <div class="plan-toggle-wrap"><button type="button" class="plan-toggle" id="planToggle" aria-expanded="false" aria-controls="planCompare">সব অংশ খুলুন</button></div>
+  </div>
+</section>
+
+<section id="faq">
+  <div class="wrap">
+    <div class="section-head" style="margin-inline:auto; text-align:center;">
+      <span class="eyebrow" style="justify-content:center;">প্রশ্ন</span>
+      <h2>যে প্রশ্নগুলো অভিভাবক ও শিক্ষার্থীরা সত্যিই করেন।</h2>
+    </div>
+    <div class="faq-list">
+      <details class="faq-item" open>
+        <summary>LiteracyLab AI কী?<span class="faq-plus"></span></summary>
+        <div class="faq-a">LiteracyLab AI হলো ৫ থেকে ১৮ বছর বয়সী শিশু ও শিক্ষার্থীদের জন্য পড়া ও লেখার অনলাইন কোচ। শিশু কোনো লেখা লেখে বা পড়ার অংশের উত্তর দেয়, আর ফিরে পায় একটি শক্তিশালী দিক, একটি স্পষ্ট পরের ধাপ, তার লেখার সংশোধিত রূপ এবং শেখার শব্দ, যা তার স্কুলের পাঠ্যক্রমের (যুক্তরাজ্য, যুক্তরাষ্ট্র, অস্ট্রেলিয়া, কানাডা, নিউজিল্যান্ড, আয়ারল্যান্ড, ভারত, দক্ষিণ আফ্রিকা, হংকং, উপসাগর, সিঙ্গাপুর, বা ইংরেজি শিক্ষার্থীদের জন্য CEFR স্তর) সঙ্গে মেলে। অ্যাকাউন্ট চালান অভিভাবক বা তত্ত্বাবধায়ক, আর প্রতি মাসে ৩টি কাজের একটি বিনামূল্যের প্ল্যান আছে। <a href="/learn/about-literacylab-ai/">LiteracyLab AI সম্পর্কে আরও (ইংরেজিতে)</a>।</div>
+      </details>
+      <details class="faq-item">
+        <summary>প্রতি মাসের ৩টি বিনামূল্যের কাজ কীভাবে চলে?<span class="faq-plus"></span></summary>
+        <div class="faq-a">প্রতিটি অ্যাকাউন্ট প্রতি ক্যালেন্ডার মাসে ৩টি বিনামূল্যের কাজ পায় — লেখা, পড়ার বোধ, বা দুটির মিশ্রণ — আর প্রতিটিতেই সম্পূর্ণ ফিডব্যাক থাকে: Glow, Grow, হাইলাইট ও শব্দভান্ডার। আপনার গণনা প্রতি মাসের ১ তারিখে নিজে থেকেই শূন্য হয়ে যায়, তাই মনে রাখার বা হাতে নবায়নের কিছু নেই। যখন আপনি এটি প্রতি সপ্তাহে ব্যবহার করবেন, তখন <a href="#pricing">Core</a> মাসিক সীমা পুরোপুরি তুলে দেয়।</div>
+      </details>
+      <details class="faq-item">
+        <summary>আমার সন্তানের লেখা কি নিরাপদ ও ব্যক্তিগত?<span class="faq-plus"></span></summary>
+        <div class="faq-a">হ্যাঁ। কাজগুলো শুধু আপনার সন্তানের জন্য ফিডব্যাক তৈরি করতেই প্রক্রিয়া করা হয় — আমরা কখনো লেখার নমুনা বা ব্যক্তিগত তথ্য বিক্রি বা ভাড়া দিই না, আর আপনার সন্তানের কাজ পাবলিক AI মডেল প্রশিক্ষণে ব্যবহার করি না। অভিভাবকরা যেকোনো সময় সন্তানের লেখার ইতিহাস দেখতে, রপ্তানি করতে বা চিরতরে মুছে ফেলতে পারেন। সম্পূর্ণ বিবরণ আমাদের <a href="/privacy.html">গোপনীয়তা নীতিতে (ইংরেজিতে)</a> আছে।</div>
+      </details>
+      <details class="faq-item">
+        <summary>LiteracyLab AI আমার দেশের পাঠ্যক্রমের সঙ্গে কীভাবে মেলে?<span class="faq-plus"></span></summary>
+        <div class="faq-a">আপনি আপনার অঞ্চল বেছে নেন — যুক্তরাজ্য, যুক্তরাষ্ট্র, অস্ট্রেলিয়া, কানাডা, নিউজিল্যান্ড, আয়ারল্যান্ড, ভারত, দক্ষিণ আফ্রিকা, হংকং, সংযুক্ত আরব আমিরাত ও উপসাগর (Cambridge/IGCSE), সিঙ্গাপুর ও দক্ষিণ-পূর্ব এশিয়া (Cambridge/IB), বা Global ESL Mode (CEFR A1–C2) — আর আপনার সন্তানের শ্রেণি, বছর বা স্তর, এবং প্রতিটি লক্ষ্য, প্রতিটি Grow ও শব্দভান্ডারের প্রতিটি পরামর্শ সেই পাঠ্যক্রমের প্রকৃত প্রত্যাশা অনুযায়ী সাজানো হয়। এটি এমন একটি সাধারণ মাপকাঠি নয় যা সব দেশের ওপর টেনে দেওয়া হয়েছে।</div>
+      </details>
+      <details class="faq-item">
+        <summary>আমি কি যেকোনো সময় আমার LiteracyLab সাবস্ক্রিপশন বাতিল করতে পারি?<span class="faq-plus"></span></summary>
+        <div class="faq-a">হ্যাঁ — Core ও Premium দুটির বিলই প্রতি মাসে Stripe-এর মাধ্যমে হয়, কোনো বাধ্যতামূলক চুক্তি ছাড়া। আপনার অ্যাকাউন্ট সেটিংস থেকে কয়েক ক্লিকে বাতিল করুন, আর আপনার কাছ থেকে আর অর্থ নেওয়া হবে না; আপনি পরিশোধিত মেয়াদ শেষ পর্যন্ত পুরো অ্যাক্সেস রাখেন, তারপর অ্যাকাউন্ট হারানোর বদলে বিনামূল্যের প্ল্যানে ফিরে যান।</div>
+      </details>
+      <details class="faq-item">
+        <summary>আমি LiteracyLab AI-এর কোন প্ল্যান বেছে নেব?<span class="faq-plus"></span></summary>
+        <div class="faq-a">Free দিয়ে শুরু করুন এবং ফিডব্যাকের মান নিজে যাচাই করুন — প্রতি মাসে ৩টি কাজ, আসল Glow, Grow, হাইলাইট ও শব্দভান্ডার সহ। <strong>Core</strong> (মাসে ৯.৯৯ মার্কিন ডলার, স্থানীয় মূল্য A$, £, €, C$, S$, NZ$, HK$, R ও ₹-তে) নিয়মিত অনুশীলন করা একটি শিশুর জন্য ঠিক: সীমাহীন কাজ, ২৬ সপ্তাহের অগ্রগতির প্রবণতা, নিজের শ্রেণিতে বেনামি র‍্যাঙ্কিং ও কার্যকলাপের সম্পূর্ণ ইতিহাস। <strong>Premium</strong> (মাসে ১৫.৯৯ মার্কিন ডলার) এমন পরিবারের জন্য যেখানে একাধিক সন্তান — এক অ্যাকাউন্টে ৬ জন শিক্ষার্থী পর্যন্ত, দুটি Core প্ল্যানের চেয়ে সস্তা — অথবা ১১ বছর বা তার বেশি বয়সী যে শিক্ষার্থী পরীক্ষার প্রস্তুতি নিচ্ছে তার জন্য, কারণ এটি প্রতিটি ফিডব্যাকে পরীক্ষা-কৌশলের স্কোরিং, দ্বিতীয় কঠিন পরের ধাপ, বানান ও ব্যাকরণ যাচাই এবং পুরো কাজের ১০-এর মধ্যে স্কোর যোগ করে। আপনি অ্যাকাউন্ট সেটিংস থেকে যেকোনো সময় প্ল্যান বদলাতে পারেন।</div>
+      </details>
+      <details class="faq-item">
+        <summary>পরীক্ষা-কৌশলের স্কোরিং কী?<span class="faq-plus"></span></summary>
+        <div class="faq-a"><a href="#pricing">Premium</a>-এ ১১ বছর বা তার বেশি বয়সী শিক্ষার্থীর প্রতিটি কাজ তার বছর ও অঞ্চলের জন্য প্রকাশিত প্রকৃত মূল্যায়ন লক্ষ্য অনুযায়ী স্কোর করা হয় — যেমন যুক্তরাজ্যে AQA GCSE English Language AO5 ও AO6, বা যুক্তরাষ্ট্রে প্রাসঙ্গিক Common Core লেখার মানদণ্ড। প্রতিটি লক্ষ্য ১ (Emerging) থেকে ৪ (Strong) পর্যন্ত একটি স্তর পায়, সেই স্তরের প্রমাণ হিসেবে তার নিজের কাজ থেকে একটি উদ্ধৃতি, এবং এক ধাপ ওপরে তোলার মতো একটি নির্দিষ্ট পরিবর্তন। এটি ইচ্ছাকৃতভাবে কখনো কাঁচা পরীক্ষার নম্বর, শতাংশ বা অক্ষরের গ্রেড দেয় না: একটি অযাচাই কাজ এত নিখুঁততা বহন করতে পারে না, আর সরকারি দেখায় অথচ নয় এমন একটি সংখ্যা কোনো সংখ্যা না থাকার চেয়েও খারাপ।</div>
+      </details>
+      <details class="faq-item">
+        <summary>আমার সন্তান ৩টি কাজের সীমায় পৌঁছালে কী হয়?<span class="faq-plus"></span></summary>
+        <div class="faq-a">ওয়ার্কস্পেস স্পষ্ট দেখায় কখন সীমা পূর্ণ হলো এবং নতুন কাজ থামিয়ে দেয় — কিছুই হারায় না, আর চলমান খসড়া সংরক্ষিত থাকে। সেখান থেকে আপনি তখনই সীমাহীন কাজের জন্য Core-এ যেতে পারেন, অথবা শুধু পরের মাসের শুরুতে বিনামূল্যের কোটা নতুন হওয়ার অপেক্ষা করতে পারেন।</div>
+      </details>
+      <details class="faq-item">
+        <summary>এটি কি আমার সন্তানের রচনা শুধু নিজেই লিখে দেবে?<span class="faq-plus"></span></summary>
+        <div class="faq-a">না — এটি কখনো তাদের গল্প লেখে না। LiteracyLab AI শুধু সেই কাজেরই জবাব দেয় যা আপনার সন্তান আগেই করেছে: এটি একটি নির্দিষ্ট শক্তিশালী দিক আর উন্নতির একটি বিষয় জানায়। নতুন করে লেখার সবচেয়ে কাছাকাছি হলো "আপনার গল্প, সংশোধনের পর" প্যানেল, যা আপনার সন্তানের লেখা একটি বাক্য নিয়ে সেই একই বাক্য প্রস্তাবিত সংশোধন সহ দেখায় — তার শব্দ, তার কণ্ঠ, একটি পরিবর্তন — যাতে সে দেখতে পায় পরামর্শটি বাস্তবে কেমন দেখায়, তৈরি লেখা নকল না করে। পরের খসড়াটি তবু তারই।</div>
+      </details>
+      <details class="faq-item">
+        <summary>আমি কি একই অ্যাকাউন্টে একাধিক সন্তান যোগ করতে পারি?<span class="faq-plus"></span></summary>
+        <div class="faq-a">হ্যাঁ, <a href="#pricing">Premium</a> প্ল্যানে: এক অ্যাকাউন্টে ছয়জন পর্যন্ত শিক্ষার্থী (Free ও Core প্ল্যান একজন শিক্ষার্থীকে কভার করে), প্রত্যেকের নিজের দেশের পাঠ্যক্রম, শ্রেণি, আগ্রহ ও অবতার। তাদের কাজ সম্পূর্ণ আলাদা থাকে: কাজ, দখলের ইতিহাস ও অগ্রগতি প্রতিটি সন্তানের সঙ্গে আলাদাভাবে যুক্ত, তাই বড় ভাইবোনের রচনা কখনো ছোটজনের ড্যাশবোর্ডে মিশে যায় না। আপনি ড্যাশবোর্ডের ওপরের শিক্ষার্থী বার থেকে তাদের মধ্যে বদলান।</div>
+      </details>
+      <details class="faq-item">
+        <summary>আপনারা কি আমার সন্তানকে অন্য শিশুদের সঙ্গে র‍্যাঙ্ক করেন?<span class="faq-plus"></span></summary>
+        <div class="faq-a">শুধু ইচ্ছাকৃতভাবে সীমিত ও বেনামি উপায়ে। ড্যাশবোর্ড দেখায় আপনার সন্তানের সামগ্রিক দখল ঠিক একই দেশ ও শ্রেণির অন্য শিক্ষার্থীদের সঙ্গে কেমন — একটি গড়, একটি শতকরা অবস্থান ও একটি ক্রমানুসারে সাজানো সিঁড়ি। সেই সিঁড়ির অন্য প্রতিটি এন্ট্রি শুধু একটি অবস্থান ও স্কোর দেখায়, "শিক্ষার্থী ৪"-এর মতো লেবেল সহ; পরিবারগুলোর মধ্যে কোনো নাম বা শনাক্তকারী তথ্য যায় না। আর আপনার সন্তানের ঠিক একই দেশ ও শ্রেণিতে পাঁচজনের কম শিক্ষার্থী থাকলে তুলনা পুরোপুরি লুকিয়ে রাখা হয়, এত ছোট দলের সামনে দেখানোর বদলে যেখানে কাউকে চেনা সম্ভব।</div>
+      </details>
+      <details class="faq-item">
+        <summary>আমি কি আমার সন্তানের তথ্য রপ্তানি বা মুছে ফেলতে পারি?<span class="faq-plus"></span></summary>
+        <div class="faq-a">হ্যাঁ — তাৎক্ষণিকভাবে, এবং আমাদের কাছে না চেয়েই। অভিভাবক ড্যাশবোর্ড থেকে আপনি অ্যাকাউন্টে থাকা সবকিছু একটি ফাইলে ডাউনলোড করতে পারেন, প্রতিটি শিক্ষার্থীর প্রোফাইল ও তার লেখা ও পড়ার সম্পূর্ণ ইতিহাস সহ। আপনি পুরো অ্যাকাউন্ট চিরতরে মুছেও ফেলতে পারেন, যাতে সব প্রোফাইল ও সব ইতিহাস সরে যায় এবং যেকোনো সক্রিয় সাবস্ক্রিপশন বাতিল হয়। মুছে ফেলা সঙ্গে সঙ্গে কার্যকর হয় এবং ফেরানো যায় না — কোনো সাপোর্ট টিকিট নেই, অপেক্ষার সময়ও নেই। সম্পূর্ণ বিবরণের জন্য আমাদের <a href="/privacy.html">গোপনীয়তা নীতি (ইংরেজিতে)</a> দেখুন।</div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<section class="final-cta">
+  <div class="wrap">
+    <h2>তাদের পরের গল্পটিকে বেড়ে ওঠার জায়গা দিন।</h2>
+    <p>এক মিনিটেরও কম সময়ে শিক্ষার্থীর প্রোফাইল তৈরি করুন — ক্রেডিট কার্ড নয়, কোনো বাধ্যবাধকতা নয়।</p>
+    <div class="hero-ctas">
+      <a class="btn btn-primary btn-lg" href="/app.html?lang=bn">অ্যাপ খুলুন</a>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap foot-inner">
+    <span>© 2026 LiteracyLab AI</span>
+    <div class="foot-links">
+      <a href="/app.html?lang=bn">অ্যাপ</a>
+      <a href="#pricing">মূল্য</a>
+      <a href="#faq">প্রশ্ন</a>
+      <a href="/learn/">গাইড</a>
+      <a href="/learn/about-literacylab-ai/">পরিচিতি</a>
+      <a href="/privacy.html">গোপনীয়তা (ইংরেজিতে)</a>
+      <a href="/terms.html">শর্তাবলি (ইংরেজিতে)</a>
+      <a href="/pl/" hreflang="pl" lang="pl">Polski</a>
+      <a href="/es/" hreflang="es" lang="es">Español</a>
+      <a href="/pt/" hreflang="pt" lang="pt">Português</a>
+      <a href="/ro/" hreflang="ro" lang="ro">Română</a>
+      <a href="/ar/" hreflang="ar" lang="ar">العربية</a>
+      <a href="/ur/" hreflang="ur" lang="ur">اردو</a>
+      <a href="/hi/" hreflang="hi" lang="hi">हिन्दी</a>
+      <a href="/zh/" hreflang="zh" lang="zh">中文</a>
+      <a href="/pa/" hreflang="pa" lang="pa">ਪੰਜਾਬੀ</a>
+      <a href="/" hreflang="en" lang="en">English</a>
+    </div>
+  </div>
+</footer>
+
+<script src="/pricing.js"></script>
+<script>
+  // Theme toggle: cycles system -> dark -> light -> system
+  (function(){
+    var root = document.documentElement;
+    var btns = document.querySelectorAll('.theme-toggle');
+    var icons = document.querySelectorAll('.theme-icon');
+    var SUN = '<path d="M12 2.5v2.3M12 19.2v2.3M4.4 4.4l1.6 1.6M18 18l1.6 1.6M2.5 12h2.3M19.2 12h2.3M4.4 19.6L6 18M18 6l1.6-1.6"/><circle cx="12" cy="12" r="4.2"/>';
+    var MOON = '<path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z"/>';
+    function apply(mode){
+      if(mode === 'system'){ root.removeAttribute('data-theme'); }
+      else{ root.setAttribute('data-theme', mode); }
+      var isDark = mode === 'dark' || (mode === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      icons.forEach(function(i){ i.innerHTML = isDark ? SUN : MOON; });
+    }
+    var current = 'system';
+    apply(current);
+    btns.forEach(function(b){ b.addEventListener('click', function(){
+      current = current === 'system' ? 'dark' : current === 'dark' ? 'light' : 'system';
+      apply(current);
+    }); });
+  })();
+
+  // Mobile nav toggle - the links panel is hidden by default below 780px
+  // (see .nav-links CSS) and shown/hidden by adding/removing "open".
+  (function(){
+    var toggle = document.getElementById('navMenuToggle');
+    var links = document.getElementById('navLinks');
+    if (!toggle || !links) return;
+    function close(){
+      links.classList.remove('open');
+      toggle.setAttribute('aria-expanded', 'false');
+    }
+    toggle.addEventListener('click', function(){
+      var open = links.classList.toggle('open');
+      toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+    links.querySelectorAll('a').forEach(function(a){ a.addEventListener('click', close); });
+  })();
+
+  // Hero: who it is for, and the sentence shown step by step
+  (function(){
+    var title = document.getElementById('heroTitle'), sub = document.getElementById('heroSub');
+    var audBtns = document.querySelectorAll('.aud button');
+    var cardP = document.getElementById('cardParent'), cardL = document.getElementById('cardLearner');
+    function aud(which){
+      title.innerHTML = title.getAttribute('data-' + which);
+      sub.innerHTML = sub.getAttribute('data-' + which);
+      audBtns.forEach(function(b){ b.setAttribute('aria-pressed', b.getAttribute('data-aud') === which ? 'true' : 'false'); });
+      cardP.hidden = which !== 'parent'; cardL.hidden = which !== 'learner';
+    }
+    audBtns.forEach(function(b){ b.addEventListener('click', function(){ aud(b.getAttribute('data-aud')); }); });
+
+    var tabs = document.querySelectorAll('.plate-tabs button');
+    var next = document.getElementById('plateNext');
+    var glow = document.getElementById('markGlow'), grow = document.getElementById('markGrow');
+    var lab = document.getElementById('noteLabel'), l1 = document.getElementById('noteL1'), l2 = document.getElementById('noteL2');
+    var NOTES = {
+      1: ['পড়া', 'আপনার কোচ আগে পড়ে এবং জিজ্ঞেস করে:', 'এখানে আগে থেকেই কী ভালো চলছে?', 'Glow দেখান'],
+      2: ['GLOW', 'আপনি গাছের শব্দটা ধরেছেন,', 'আর আমি তা শুনতে পেলাম।', 'Grow দেখান'],
+      3: ['GROW', 'ভয়টা দেখান: অন্ধকার হলে আপনার হাত', 'কী করছিল? একটি লাইন চেষ্টা করুন।', 'আবার শুরু করুন']
+    };
+    var step = 1;
+    var show = function(n){
+      step = n;
+      var d = NOTES[n];
+      lab.textContent = d[0]; l1.textContent = d[1]; l2.textContent = d[2]; next.textContent = d[3];
+      glow.toggleAttribute('hidden', n < 2); grow.toggleAttribute('hidden', n < 3); // SVG shapes have no .hidden property, so the attribute is toggled
+      tabs.forEach(function(t){ t.setAttribute('aria-pressed', Number(t.getAttribute('data-step')) === n ? 'true' : 'false'); });
+    }
+    tabs.forEach(function(t){ t.addEventListener('click', function(){ show(Number(t.getAttribute('data-step'))); }); });
+    next.addEventListener('click', function(){ show(step >= 3 ? 1 : step + 1); });
+    // Draw the marks from the real size of the words, so they always fit the sentence however the font loads.
+    var tagBg = document.getElementById('tagBg');
+    function place(){
+      try {
+        var g = document.getElementById('phGlow').getBBox();
+        // a highlighter-pen band behind the words, no outline, so nothing crosses a letter
+        glow.setAttribute('x', g.x - 3); glow.setAttribute('y', g.y + g.height * 0.36);
+        glow.setAttribute('width', g.width + 6); glow.setAttribute('height', g.height * 0.52);
+        glow.setAttribute('rx', 3);
+        var r = document.getElementById('phGrow').getBBox();
+        var y = r.y + r.height + 3;
+        grow.setAttribute("d", "M" + r.x + " " + y + " h " + r.width);
+        tagBg.setAttribute('width', lab.getBBox().width + 24);
+      } catch (e) { /* a browser without SVG text measuring simply shows no marks */ }
+    }
+    var showOrig = show;
+    show = function(n){ showOrig(n); place(); };
+    place();
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(place);
+    window.addEventListener('resize', place);
+    show(1);
+  })();
+
+  // The plan comparison is a set of sections (Practice, Feedback, Progress...) that open and close from their headings.
+  // Every row stays in the page's HTML, so search engines and AI tools read all of it; this only changes what is shown.
+  // Ticks replace the word "Yes". Without scripts the whole table simply stays open as written.
+  (function(){
+    var box = document.getElementById('planCompare'), btn = document.getElementById('planToggle'), note = document.getElementById('planNote');
+    var table = box && box.querySelector('.plan-table');
+    if (!box || !btn || !table) return;
+    var TICK = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 12.5l5 5 10-11"/></svg><span class="sr">হ্যাঁ</span>';
+    var groups = [], cur = null, n = 0;
+    table.querySelectorAll('tbody tr').forEach(function(tr){
+      if (tr.classList.contains('group-head')) {
+        var th = tr.querySelector('th'), label = th.textContent.trim(), id = 'plan-sec-' + (++n);
+        th.innerHTML = '<button type="button" class="plan-sec-btn" aria-expanded="true" aria-controls="' + id + '"><span>' + label + '</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>';
+        cur = { head: tr, btn: th.querySelector('button'), rows: [] };
+        cur.btn.addEventListener('click', (function(g){ return function(){ setGroup(g, g.btn.getAttribute('aria-expanded') !== 'true'); sync(); }; })(cur));
+        groups.push(cur);
+        return;
+      }
+      tr.querySelectorAll('td').forEach(function(td){
+        var t = td.textContent.trim();
+        if (t === 'হ্যাঁ') td.innerHTML = TICK;
+        else if (t === '—' || t === '-') td.innerHTML = '<span class="dash" aria-hidden="true">—</span><span class="sr">অন্তর্ভুক্ত নয়</span>';
+      });
+      if (cur) cur.rows.push(tr);
+    });
+    function setGroup(g, open){
+      g.btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      g.head.classList.toggle('is-closed', !open);
+      g.rows.forEach(function(r){ r.classList.toggle('is-folded', !open); });
+    }
+    function sync(){
+      var all = groups.every(function(g){ return g.btn.getAttribute('aria-expanded') === 'true'; });
+      btn.textContent = all ? 'সব অংশ বন্ধ করুন' : 'সব অংশ খুলুন';
+      btn.setAttribute('aria-expanded', all ? 'true' : 'false');
+    }
+    btn.addEventListener('click', function(){
+      var open = btn.getAttribute('aria-expanded') !== 'true';
+      groups.forEach(function(g){ setGroup(g, open); }); sync();
+    });
+    if (!groups.length) { btn.parentNode.hidden = true; note.hidden = true; return; }
+    note.textContent = 'খুলতে কোনো অংশে ট্যাপ করুন';
+    groups.forEach(function(g, i){ setGroup(g, i === 0); });
+    sync();
+  })();
+
+  // Where it applies
+  (function(){
+    var D = {
+      au:  ['Australian Curriculum', 'NAPLAN, শ্রেণি ৩ থেকে ৯', 'ব্রিটিশ ধাঁচ (অস্ট্রেলীয়)'],
+      uk:  ['UK National Curriculum', 'KS2 SATs, KS3 ও GCSE English', 'ব্রিটিশ'],
+      us:  ['US Common Core ও AP', 'রাজ্য পরীক্ষা (Common Core), গ্রেড ৩ থেকে ১২', 'মার্কিন'],
+      nz:  ['New Zealand Curriculum ও NCEA', 'NCEA English, বছর ১১ থেকে ১৩', 'ব্রিটিশ'],
+      in:  ['NCERT ও CBSE English', 'CBSE দশম ও দ্বাদশ শ্রেণির English, শ্রেণি ৯ থেকে ১২', 'ব্রিটিশ'],
+      za:  ['CAPS English', 'NSC English (matric), গ্রেড ১০ থেকে ১২', 'ব্রিটিশ'],
+      hk:  ['Education Bureau English Language Curriculum ও HKDSE', 'HKDSE English Language, Secondary 4 থেকে 6', 'ব্রিটিশ'],
+      ie:  ['Primary, Junior Cycle ও Leaving Certificate', 'Junior Cycle English ও Leaving Certificate English', 'ব্রিটিশ'],
+      ca:  ['Ontario Curriculum', 'EQAO, গ্রেড ৩ থেকে ৯, এবং গ্রেড ১০-এ OSSLT', 'কানাডীয়: -ize বা -ise দুটিই গ্রহণযোগ্য'],
+      sg:  ['Cambridge ও IB', 'PSLE English (Primary 4 থেকে 6) ও O-Level English', 'ব্রিটিশ'],
+      ae:  ['Cambridge ও IGCSE', 'Cambridge Checkpoint, IGCSE এবং AS ও A Level English', 'ব্রিটিশ'],
+      esl: ['ইংরেজি শিক্ষার্থী (CEFR স্তর)', 'CEFR লেখার কাজ, A1 থেকে C2', 'ব্রিটিশ বা মার্কিন']
+    };
+    var btns = document.querySelectorAll('.where-tabs button');
+    var c = document.getElementById('whereCurr'), e = document.getElementById('whereExam'), p = document.getElementById('whereSpell');
+    function pick(k){
+      c.textContent = D[k][0]; e.textContent = D[k][1]; p.textContent = D[k][2];
+      btns.forEach(function(b){ b.setAttribute('aria-pressed', b.getAttribute('data-place') === k ? 'true' : 'false'); });
+    }
+    btns.forEach(function(b){ b.addEventListener('click', function(){ pick(b.getAttribute('data-place')); }); });
+    pick('au');
+  })();
+
+  // Age-tier preview switcher
+  (function(){
+    var data = {
+      early: { title: "আজকের গল্পের স্ফুলিঙ্গ", prompt: "একটি সাহসী ডাইনোসর নিয়ে ছোট একটি গল্প বলুন, যে চাঁদে যাওয়ার জন্য রকেট বানায়।", words: 42, target: 60 },
+      elementary: { title: "এই সপ্তাহের মিশন", prompt: "একটি অভিযানের গল্প লিখুন যেখানে আপনার চরিত্র তার প্রিয় গেমের ভেতরে একটি লুকানো জগৎ আবিষ্কার করে।", words: 118, target: 150 },
+      middle: { title: "বিশ্লেষণমূলক উত্তর", prompt: "সম্প্রতি পড়া কোনো গল্পে লেখক উত্তেজনা তৈরি করতে পরিবেশ কীভাবে ব্যবহার করেন?", words: 214, target: 350 },
+      high: { title: "সময়বদ্ধ রচনা", prompt: "“সাহিত্যে উচ্চাকাঙ্ক্ষাকে সবসময় একটি ধ্বংসাত্মক শক্তি হিসেবে দেখানো হয়।” আপনি কতটা একমত?", words: 480, target: 800 },
+    };
+    var tabs = document.querySelectorAll('#tierTabs button');
+    var panel = document.getElementById('tierPanel');
+    function render(tier){
+      var d = data[tier];
+      var pct = Math.min(100, Math.round((d.words/d.target)*100));
+      panel.innerHTML =
+        '<div class="t-title">'+d.title+'</div>' +
+        '<div class="t-prompt">'+d.prompt+'</div>' +
+        '<div class="tier-meter"><div class="bar"><i style="width:'+pct+'%"></i></div>'+d.words+' / '+d.target+' শব্দ</div>';
+    }
+    tabs.forEach(function(btn){
+      btn.addEventListener('click', function(){
+        tabs.forEach(function(b){ b.classList.remove('active'); });
+        btn.classList.add('active');
+        render(btn.dataset.tier);
+      });
+    });
+    render('early');
+  })();
+
+  // Local-currency prices. The rules live in pricing.js, shared with the
+  // app, so the two can never quote different prices. If that file fails
+  // to load, the "$9.99" already in the page stays, which is still the
+  // right number.
+  (function(){
+    if (!window.LL_PRICING) return;
+    var currency = window.LL_PRICING.detectCurrency();
+    document.querySelectorAll('.js-price').forEach(function(el){
+      // Free has no amount in pricing.js; reuse Core's label so "A$0" sits beside "A$9.99".
+      var tier = el.dataset.tier;
+      el.textContent = tier === 'free'
+        ? window.LL_PRICING.priceLabel('core', currency).replace(/[\d.]+$/, '0')
+        : window.LL_PRICING.priceLabel(tier, currency);
+    });
+  })();
+</script>
+</body>
+</html>

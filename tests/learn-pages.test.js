@@ -117,8 +117,8 @@ test("the sitemap lists every guide page, once, plus the homepage, its translati
   const locs = [...sm.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]);
   assert.equal(new Set(locs).size, locs.length, "no duplicates");
   for (const u of built.urls) assert.ok(locs.includes(u), `${u} missing from the sitemap`);
-  for (const u of ["https://www.literacylabai.com/", "https://www.literacylabai.com/pl/", "https://www.literacylabai.com/es/", "https://www.literacylabai.com/pt/", "https://www.literacylabai.com/ro/", "https://www.literacylabai.com/ar/", "https://www.literacylabai.com/ur/", "https://www.literacylabai.com/hi/", "https://www.literacylabai.com/zh/", "https://www.literacylabai.com/privacy.html", "https://www.literacylabai.com/terms.html"]) assert.ok(locs.includes(u));
-  assert.equal(locs.length, built.urls.length + 11);
+  for (const u of ["https://www.literacylabai.com/", "https://www.literacylabai.com/pl/", "https://www.literacylabai.com/es/", "https://www.literacylabai.com/pt/", "https://www.literacylabai.com/ro/", "https://www.literacylabai.com/ar/", "https://www.literacylabai.com/ur/", "https://www.literacylabai.com/hi/", "https://www.literacylabai.com/zh/", "https://www.literacylabai.com/pa/", "https://www.literacylabai.com/bn/", "https://www.literacylabai.com/privacy.html", "https://www.literacylabai.com/terms.html"]) assert.ok(locs.includes(u));
+  assert.equal(locs.length, built.urls.length + 13);
 });
 
 test("honest claims: no superlatives, guarantees, endorsements or invented statistics anywhere in the guides", () => {

@@ -159,7 +159,7 @@ test("a left-to-right language in another script (Hindi, Chinese) loads its web 
   for (const lang of scripts) {
     const page = built.files[lang.code + "/index.html"];
     assert.ok(page.includes("fonts.googleapis.com/css2?family=" + lang.fonts));
-    assert.ok(page.includes('<link rel="stylesheet" href="/home-fonts.css?v=2">'));
+    assert.ok(page.includes('<link rel="stylesheet" href="/home-fonts.css?v=3">'));
     assert.ok(read("home-fonts.css").includes(`html[lang="${lang.code}"]`), lang.code + " has type rules");
   }
 });

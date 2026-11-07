@@ -1,17 +1,19 @@
-/* Type for the left-to-right languages that are not written in the Latin alphabet (Hindi, Chinese). Loaded after home.css on those
+/* Type for the left-to-right languages that are not written in the Latin alphabet (Hindi, Punjabi, Bengali, Chinese). Loaded after home.css on those
    pages only (scripts/build-localised.js adds it, with the web font). The Latin fonts stay in the stack, so English names inside a
    sentence (Glow, Grow, PEEL) keep their usual look, and the brand name is left alone. */
 
-html[lang="hi"] *, html[lang="zh"] * { letter-spacing: 0 !important; text-transform: none !important; }
+html[lang="hi"] *, html[lang="zh"] *, html[lang="pa"] *, html[lang="bn"] * { letter-spacing: 0 !important; text-transform: none !important; }
 
 html[lang="hi"] *:not(.brand):not(.brand *) { font-family: "Noto Sans Devanagari", "Lexend", "Source Serif 4", sans-serif; }
 html[lang="zh"] *:not(.brand):not(.brand *) { font-family: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", "Lexend", sans-serif; }
+html[lang="pa"] *:not(.brand):not(.brand *) { font-family: "Noto Sans Gurmukhi", "Lexend", "Source Serif 4", sans-serif; }
+html[lang="bn"] *:not(.brand):not(.brand *) { font-family: "Noto Sans Bengali", "Lexend", "Source Serif 4", sans-serif; }
 
 /* Devanagari carries marks above and below the line, so it needs more room; Chinese reads best a little looser than Latin. */
-html[lang="hi"] body { line-height: 1.75; }
-html[lang="hi"] h1, html[lang="hi"] h2, html[lang="hi"] h3 { line-height: 1.35; font-weight: 600; }
+html[lang="hi"] body, html[lang="pa"] body, html[lang="bn"] body { line-height: 1.75; }
+html[lang="hi"] h1, html[lang="hi"] h2, html[lang="hi"] h3, html[lang="pa"] h1, html[lang="pa"] h2, html[lang="pa"] h3, html[lang="bn"] h1, html[lang="bn"] h2, html[lang="bn"] h3 { line-height: 1.4; font-weight: 600; }
 html[lang="zh"] body { line-height: 1.8; }
 html[lang="zh"] h1, html[lang="zh"] h2, html[lang="zh"] h3 { line-height: 1.4; font-weight: 700; }
 
 /* Neither script has an italic, so the browser would only fake a slant on the highlighted phrases; the accent colour carries them. */
-html[lang="hi"] em, html[lang="zh"] em { font-style: normal; }
+html[lang="hi"] em, html[lang="zh"] em, html[lang="pa"] em, html[lang="bn"] em { font-style: normal; }
