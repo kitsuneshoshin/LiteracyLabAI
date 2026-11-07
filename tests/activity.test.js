@@ -166,3 +166,64 @@ test("wiring: the app logs the key moments with the shared helper, and sends it 
     for (const k of [...m[1].matchAll(/([a-zA-Z_]+):/g)].map((x) => x[1])) assert.ok(allowed.has(k), `logEvent sends an unapproved field "${k}"`);
   }
 });
+
+// ---- the learner's Dashboard, as the parent sees it
+
+const { buildLearnerDashboard } = require("../api/_lib/learnerDashboard");
+const { targetsForGrade } = require("../api/_lib/masteryTargets");
+
+const UK = "🇬🇧 United Kingdom";
+const defs = targetsForGrade(UK, "Year 5", "elementary").targets;
+const today = new Date().toISOString();
+const dsubs = [
+  { id: "a", kind: "writing", tier: "elementary", country: UK, grade_label: "Year 5", word_count: 120, score: null, total_questions: null, created_at: today, feedback: { glowTarget: defs[0].name, growTarget: defs[1].name, vocab: [{ term: "Clue", definition: "A hint" }] } },
+  { id: "b", kind: "writing", tier: "elementary", country: UK, grade_label: "Year 5", word_count: 80, created_at: today, feedback: { glowTarget: defs[0].name, growTarget: defs[1].name, vocab: [{ term: "clue", definition: "dupe" }, { term: "plot", definition: "story line" }] } },
+  { id: "c", kind: "reading", tier: "elementary", country: UK, grade_label: "Year 5", score: 3, total_questions: 5, created_at: today, feedback: { glowTarget: defs[0].name } },
+  { id: "d", kind: "writing", tier: "elementary", country: UK, grade_label: "Year 5", word_count: null, created_at: today, feedback: null },
+];
+
+test("dashboard: snapshot, mastery, vocabulary and locks are worked out like the parent's own page", () => {
+  const d = buildLearnerDashboard({ child: { id: "kid", display_name: "Mia", interests: ["coding"] }, submissions: dsubs, cohortRows: [], capabilities: { progressTrend: false, peerComparison: false, vocabBank: false, recentHistoryLimit: 10 }, vocabProgress: { plot: { box: 2, at: 1 } } });
+  assert.equal(d.snapshot.wordsWritten, 200);
+  assert.equal(d.snapshot.writingPieces, 2);
+  assert.equal(d.snapshot.avgReadingScore, 60);
+  assert.equal(d.snapshot.activeStreak, 1);
+  assert.equal(d.snapshot.stopped, 1, "the writing prompt that was never answered");
+  const first = d.mastery.targets.find((t) => t.name === defs[0].name);
+  assert.equal(first.pct, 100, "three glows, no grows");
+  assert.equal(d.mastery.targets.find((t) => t.name === defs[1].name).pct, 0);
+  assert.equal(d.vocab.total, 2, "a repeated word is listed once");
+  assert.equal(d.vocab.words.find((w) => w.term === "plot").box, 2);
+  assert.deepEqual(d.locked, { timeline: true, peers: true, vocab: true, overallScore: false, historyLimit: 10 });
+  assert.equal(d.peers.available, false, "no cohort data");
+  assert.equal(d.child.name, "Mia");
+});
+
+test("dashboard: a learner with no pieces gets empty, honest sections rather than an error", () => {
+  const d = buildLearnerDashboard({ child: { id: "kid", display_name: "Zed" }, submissions: [] });
+  assert.equal(d.mastery, null);
+  assert.equal(d.peers, null);
+  assert.equal(d.snapshot.totalSubmissions, 0);
+  assert.equal(d.vocab.total, 0);
+});
+
+test("learner endpoint: owner only, needs a real id, and returns the dashboard with the account's plan", async () => {
+  const child = { id: "11111111-2222-3333-4444-555555555555", profile_id: "user-1", display_name: "Mia", country: UK, interests: [] };
+  const db = (q) => {
+    if (q.table === "child_profiles") return { data: child, error: null };
+    if (q.table === "submissions") return { data: dsubs.map((s) => ({ ...s })), error: null };
+    return { data: null, error: null };
+  };
+  const run = async (query, owner) => {
+    const saved = process.env.ACTIVITY_OWNER_EMAIL; process.env.ACTIVITY_OWNER_EMAIL = owner;
+    try { return await call(loadHandler("email.js", { db }), { method: "GET", query, headers: { authorization: "Bearer t" } }); }
+    finally { if (saved == null) delete process.env.ACTIVITY_OWNER_EMAIL; else process.env.ACTIVITY_OWNER_EMAIL = saved; }
+  };
+  assert.equal((await run({ action: "learner", childId: child.id }, "boss@example.com")).statusCode, 401, "not the owner");
+  assert.equal((await run({ action: "learner", childId: "nope" }, "parent@example.com")).statusCode, 400);
+  const ok = await run({ action: "learner", childId: child.id }, "parent@example.com");
+  assert.equal(ok.statusCode, 200);
+  assert.equal(ok.body.child.name, "Mia");
+  assert.equal(ok.body.snapshot.wordsWritten, 200);
+  assert.equal(ok.body.account.plan, "free");
+});

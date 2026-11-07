@@ -118,7 +118,22 @@
   .seg .p{ margin-right:6px; }
   .seg .nt{ display:block; font-size:12.5px; color:var(--ink-soft); margin-top:2px; }
   pre.raw{ margin:0; padding:12px 14px; font-size:12px; white-space:pre-wrap; word-wrap:break-word; }
+  .tiles{ display:grid; gap:12px; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); margin-bottom:12px; }
+  .tile{ background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:14px 16px; }
+  .tile .v{ font-size:28px; font-weight:700; line-height:1.15; }
+  .tile .t{ font-size:12px; letter-spacing:.05em; text-transform:uppercase; color:var(--ink-soft); }
+  .tile .s{ font-size:12.5px; color:var(--ink-soft); }
+  .mrow{ display:grid; grid-template-columns:1fr 150px 120px; gap:10px; align-items:center; padding:10px 0; border-top:1px solid var(--border); }
+  .mrow:first-child{ border-top:0; }
+  .mrow .nm{ font-size:14px; font-weight:500; }
+  .mrow .sd{ font-size:11.5px; color:var(--ink-soft); }
+  .pbar{ display:flex; align-items:center; gap:8px; font-size:12px; color:var(--ink-soft); }
+  .pbar .track{ flex:1; height:10px; border-radius:6px; background:var(--surface2); overflow:hidden; border:1px solid var(--border); }
+  .pbar .fill{ display:block; height:100%; }
+  .locked{ padding:12px 14px; border-radius:12px; background:var(--grow-tint); color:var(--grow); font-size:13.5px; }
+  tr.click{ cursor:pointer; } tr.click:hover td{ background:var(--surface2); }
   @media (max-width:860px){
+    .mrow{ grid-template-columns:1fr; gap:4px; }
     .split{ grid-template-columns:1fr; }
     .list{ position:static; max-height:260px; }
   }
@@ -164,6 +179,13 @@
       <div class="scroll"><table id="users"></table></div>
     </div>
 
+    <h2 style="margin-top:8px">Learner dashboard <span class="muted" style="font-weight:400;font-size:13px">— what their parent sees</span></h2>
+    <div class="filters">
+      <select id="lSel" aria-label="Learner"></select>
+      <span class="muted" id="lNote"></span>
+    </div>
+    <div id="dash"></div>
+
     <h2 style="margin-top:8px">What learners got back</h2>
     <div class="filters">
       <select id="fKind"><option value="">All kinds</option><option value="writing">Writing</option><option value="reading">Reading</option></select>
@@ -197,10 +219,10 @@ function arr(v){ return Array.isArray(v) ? v : []; }
 function str(v){ return v == null ? "" : typeof v === "string" ? v : JSON.stringify(v); }
 
 /* ---------------------------------------------------------------- overview */
-function bars(target, pairs, labelKey, countKey){
+function bars(target, pairs, labelKey, countKey, fixedMax){
   target.textContent = "";
   if (!pairs.length) { target.appendChild(el("p", "muted", "Nothing yet.")); return; }
-  var max = Math.max.apply(null, pairs.map(function(p){ return p[countKey]; })) || 1;
+  var max = fixedMax || Math.max.apply(null, pairs.map(function(p){ return p[countKey]; })) || 1;
   pairs.forEach(function(p){
     var row = el("div", "bar");
     row.appendChild(el("span", "lbl", String(p[labelKey])));
@@ -381,6 +403,118 @@ function detail(s){
   return pane;
 }
 
+/* ---------------------------------------------------------------- the learner's Dashboard, as their parent sees it */
+var STATUS_CLS = { "Mastered": "good", "In Progress": "warn", "Needs Attention": "bad", "Not Yet Assessed": "" };
+var STATUS_COL = { "Mastered": "var(--good)", "In Progress": "var(--grow)", "Needs Attention": "var(--bad)", "Not Yet Assessed": "var(--border)" };
+function panel(title, sub, body, right){
+  var c = el("div", "card"); var h = el("div"); h.style.display = "flex"; h.style.justifyContent = "space-between"; h.style.gap = "8px"; h.style.flexWrap = "wrap";
+  add(h, el("h2", null, title)); if (right) add(h, right); add(c, h);
+  if (sub) add(c, el("p", "sub", sub));
+  add(c, body); return c;
+}
+function tile(label, value, sub){ var t = el("div", "tile"); add(t, el("div", "t", label), el("div", "v", String(value)), el("div", "s", sub || "")); return t; }
+function lockedNote(text){ return el("div", "locked", text); }
+
+function renderDash(d){
+  var box = $("dash"); box.textContent = "";
+  var name = d.child && d.child.name ? d.child.name : "This learner";
+  var acct = d.account || {};
+  var head = el("div", "filters");
+  add(head, tag(acct.plan || "?", acct.plan && acct.plan !== "free" ? "good" : ""), el("span", "muted", acct.monthlyCap != null && acct.monthlyCap < 900 ? acct.usedThisMonth + " of " + acct.monthlyCap + " pieces used this month" : (acct.usedThisMonth || 0) + " pieces this month (no cap)"));
+  if (d.child && d.child.interests && d.child.interests.length) add(head, el("span", "muted", "Interests: " + d.child.interests.join(", ")));
+  add(box, head);
+
+  // Snapshot
+  var s = d.snapshot, tiles = el("div", "tiles");
+  add(tiles,
+    tile("Reading accuracy", s.avgReadingScore != null ? s.avgReadingScore + "%" : "—", "From " + s.readingSubmissions + " submission" + (s.readingSubmissions === 1 ? "" : "s")),
+    tile("Words written", s.wordsWritten.toLocaleString(), "Across " + s.writingPieces + " piece" + (s.writingPieces === 1 ? "" : "s")),
+    tile("Active streak", s.activeStreak + " day" + (s.activeStreak === 1 ? "" : "s"), "Consecutive days with a piece"),
+    tile("Not finished", s.stopped, "of " + s.totalSubmissions + " started"));
+  add(box, tiles);
+
+  // Target mastery
+  var m = d.mastery, mbody = el("div");
+  if (!m) add(mbody, el("p", "muted", "No pieces yet, so no mastery to show."));
+  else {
+    var allEmpty = m.targets.every(function(t){ return t.assessedCount === 0; });
+    if (allEmpty) add(mbody, el("p", "muted", "Submit a story or a reading exercise to start tracking mastery against these targets."));
+    m.targets.forEach(function(t){
+      var row = el("div", "mrow"), left = el("div");
+      add(left, el("div", "nm", t.name)); if (t.standard) add(left, el("div", "sd", t.standard));
+      if (t.assessedCount > 0) add(left, el("div", "sd", t.strengths + " strength" + (t.strengths === 1 ? "" : "s") + " and " + t.nextSteps + " next step" + (t.nextSteps === 1 ? "" : "s") + " in the last " + Math.min(t.assessedCount, m.window)));
+      var pb = el("div", "pbar"), track = el("span", "track"), fill = el("span", "fill");
+      fill.style.width = (t.pct || 0) + "%"; fill.style.background = STATUS_COL[t.status] || "var(--border)";
+      add(track, fill); add(pb, track, el("span", null, t.pct != null ? t.pct + "%" : "—"));
+      add(row, left, pb, tag(t.status, STATUS_CLS[t.status] || ""));
+      mbody.appendChild(row);
+    });
+  }
+  add(box, panel(name + "'s target mastery" + (m && m.gradeLabel ? " — " + m.gradeLabel : ""), m ? (m.isMapped ? m.curriculumLabel + ". Reflects the last " + m.window + " times each skill came up." : "Not individually mapped to a national standard yet, so target names are illustrative.") : "", mbody));
+
+  // Progress over time
+  var tl = el("div");
+  if (d.locked.timeline) add(tl, lockedNote("Locked for this plan: the parent sees an upgrade prompt here instead of the trend (Core and Premium only). Shown below for you anyway."));
+  var weeks = d.timeline || [];
+  if (!weeks.length) add(tl, el("p", "muted", "No weeks to show yet."));
+  else {
+    var tb = el("div");
+    bars(tb, weeks.map(function(w){ return { label: "week of " + w.weekStart.slice(5) + " · " + w.submissions + " piece" + (w.submissions === 1 ? "" : "s"), count: w.masteryPct == null ? 0 : w.masteryPct }; }), "label", "count", 100);
+    add(tl, tb);
+  }
+  add(box, panel("Progress over time", "Average target mastery at the end of each week.", tl));
+
+  // Compared with others
+  var pc = el("div"), p = d.peers;
+  if (d.locked.peers) add(pc, lockedNote("Locked for this plan: the parent sees an upgrade prompt here (Core and Premium only). Shown below for you anyway."));
+  if (!p) add(pc, el("p", "muted", "Needs a piece with a year group first."));
+  else if (!p.available) add(pc, el("p", "muted", p.reason === "no_data_yet" ? "Submit a story or reading exercise first to see a comparison." : "Not enough other students in this year yet for a fair, anonymous comparison (" + (p.cohortSize || 0) + " others so far; 5 needed)."));
+  else {
+    var pt = el("div", "tiles");
+    add(pt, tile(name, p.yourScore + "%", "Overall mastery"), tile("Peer average", p.cohortAverage + "%", p.cohortSize + " students in this cohort"), tile("Percentile", p.percentile + "th", "Ahead of " + p.percentile + "% of peers"));
+    add(pc, pt);
+    (p.ladder || []).forEach(function(r){ var line = el("div", "item"); add(line, (r.isYou ? "★ " : "") + "#" + r.rank + "  " + (r.isYou ? name : "Student " + r.rank) + "  —  " + r.score + "%"); pc.appendChild(line); });
+  }
+  add(box, panel("How " + name + " compares", m ? m.country + " · " + (m.gradeLabel || "") : "", pc));
+
+  // Vocabulary bank
+  var vb = el("div");
+  if (d.locked.vocab) add(vb, lockedNote("Locked for this plan: the parent sees an upgrade prompt instead of the vocabulary bank (Core and Premium only). Words still appear inside each piece's feedback."));
+  if (!d.vocab.total) add(vb, el("p", "muted", "No words collected yet."));
+  else {
+    var vg = el("div", "vocab");
+    d.vocab.words.forEach(function(w){
+      var c = el("div", "vcard"); add(c, el("b", null, w.term), el("span", null, w.definition));
+      if (w.example) add(c, el("span", "k", "Example"), el("span", null, w.example));
+      if (w.box != null) add(c, el("span", "k", "Practice level"), el("span", null, w.box + " of 3"));
+      vg.appendChild(c);
+    });
+    add(vb, vg);
+  }
+  add(box, panel("Vocabulary bank", d.vocab.total + " word" + (d.vocab.total === 1 ? "" : "s") + " collected from feedback, newest first.", vb));
+  if (d.locked.historyLimit != null && d.locked.historyLimit < 500) add(box, el("p", "muted", "On this plan the parent's Activity history shows only the last " + d.locked.historyLimit + " pieces."));
+}
+
+async function loadLearner(){
+  var id = $("lSel").value, box = $("dash");
+  box.textContent = "";
+  if (!id) { box.appendChild(el("p", "muted", "No learners yet.")); return; }
+  box.appendChild(el("p", "muted", "Loading…"));
+  var res = await sb.auth.getSession(), session = res.data && res.data.session;
+  if (!session) return;
+  var r = await fetch("/api/email?action=learner&childId=" + encodeURIComponent(id), { headers: { Authorization: "Bearer " + session.access_token } });
+  if (!r.ok) { box.textContent = ""; box.appendChild(el("p", "muted", "Could not load this learner (" + r.status + ").")); return; }
+  renderDash(await r.json());
+}
+function fillLearners(){
+  var sel = $("lSel"), keep = sel.value; sel.textContent = "";
+  var count = {}; DATA.users.forEach(function(u){ count[u.userId] = u.writing + u.reading; });
+  var ls = DATA.learners.slice().sort(function(a, b){ return (count[b.userId] || 0) - (count[a.userId] || 0); });
+  ls.forEach(function(l){ var o = el("option", null, (l.name || "Learner") + " · " + (l.email || l.userId.slice(0, 8)) + " (" + (count[l.userId] || 0) + " pieces)"); o.value = l.childId; sel.appendChild(o); });
+  if (keep && ls.some(function(l){ return l.childId === keep; })) sel.value = keep;
+  $("lNote").textContent = ls.length + " learner" + (ls.length === 1 ? "" : "s");
+}
+
 /* ---------------------------------------------------------------- the list and the page */
 function filtered(){
   var kind = $("fKind").value, status = $("fStatus").value, user = $("fUser").value;
@@ -427,7 +561,8 @@ function render(){
   var head = el("tr"); ["Person", "Plan", "Joined", "Writing", "Reading", "Stopped", "Events", "Last seen"].forEach(function(h){ head.appendChild(el("th", null, h)); });
   tb.appendChild(head);
   DATA.users.forEach(function(u){
-    var r = el("tr");
+    var r = el("tr", "click"); r.title = "Open this person's learner dashboard";
+    r.addEventListener("click", function(){ var l = DATA.learners.filter(function(x){ return x.userId === u.userId; })[0]; if (l) { $("lSel").value = l.childId; loadLearner(); $("dash").scrollIntoView(); } });
     [u.email || u.userId.slice(0, 8), u.plan, when(u.joined), u.writing, u.reading, u.stopped, u.events, when(u.lastSeen)].forEach(function(v){ r.appendChild(el("td", null, String(v))); });
     tb.appendChild(r);
   });
@@ -438,6 +573,9 @@ function render(){
     var o = el("option", null, u.email || u.userId.slice(0, 8)); o.value = u.userId; fu.appendChild(o);
   });
   fu.value = keep;
+  var prevLearner = $("lSel").value;
+  fillLearners();
+  if ($("lSel").value !== prevLearner || !$("dash").childNodes.length) loadLearner();
   renderList();
   $("sub").textContent = "Updated " + when(DATA.generatedAt) + ". Events cover the last " + DATA.windowDays + " days; usage events only began being recorded on the day this page went live.";
 }
@@ -465,6 +603,7 @@ $("loginForm").addEventListener("submit", async function(e){
 $("refresh").addEventListener("click", load);
 $("days").addEventListener("change", load);
 $("signout").addEventListener("click", async function(){ await sb.auth.signOut(); DATA = null; load(); });
+$("lSel").addEventListener("change", loadLearner);
 ["fKind", "fStatus", "fUser"].forEach(function(id){ $(id).addEventListener("change", function(){ if (DATA) renderList(); }); });
 load();
 </script>

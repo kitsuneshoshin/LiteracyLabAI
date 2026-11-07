@@ -74,6 +74,7 @@ function shapeSubmission(s, emailByProfile) {
     interest: s.interest || null,
     user: email ? email.replace(/^(.{2}).*(@.*)$/, "$1…$2") : String(s.profile_id || "").slice(0, 8),
     userId: s.profile_id,
+    childId: s.child_id || null,
     wordCount: s.word_count == null ? null : s.word_count,
     score: s.score == null ? null : s.score,
     total: s.total_questions == null ? null : s.total_questions,
@@ -88,7 +89,7 @@ function shapeSubmission(s, emailByProfile) {
   };
 }
 
-function buildActivity({ events = [], submissions = [], profiles = [], now = new Date(), days = 30 }) {
+function buildActivity({ events = [], submissions = [], profiles = [], children = [], now = new Date(), days = 30 }) {
   const emailByProfile = {};
   for (const p of profiles) emailByProfile[p.id] = p.email || "";
   const since = new Date(now.getTime() - days * 86400000).toISOString();
@@ -140,6 +141,8 @@ function buildActivity({ events = [], submissions = [], profiles = [], now = new
     failures: sortedPairs(countBy(failures, (e) => `${e.name} (${(e.props && e.props.status) || "?"})`)),
     interests: sortedPairs(countBy(subs, (s) => s.interest)),
     genres: sortedPairs(countBy(subs.filter((s) => s.prompt), (s) => s.prompt.genre)),
+    // Every learner profile, so the page can open a learner's Dashboard (see _lib/learnerDashboard.js).
+    learners: children.map((c) => ({ childId: c.id, userId: c.profile_id, name: c.display_name || "", country: c.country || "", email: emailByProfile[c.profile_id] || "" })),
     users: Object.values(perUser).sort((a, b) => String(b.lastSeen || "").localeCompare(String(a.lastSeen || ""))),
     submissions: subs,
   };

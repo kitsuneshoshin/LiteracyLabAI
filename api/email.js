@@ -19,7 +19,8 @@ const { buildAnyEmail, ALL_EMAIL_KEYS, sampleContext } = require("./_lib/emailAn
 //   gsc          GET   Google Search Console numbers: the searches that bring people in (admin or cron secret)
 //   stats        GET   delivery, open and click numbers per email subject (admin or cron secret)
 //   event        POST  record one thing a signed-in person did in the app (usage_events)
-//   activity     GET   the owner's activity report: events, users and the latest pieces (admin or cron secret)
+//   activity     GET   the owner's activity report: events, users and the latest pieces (owner only)
+//   learner      GET   one learner's parent Dashboard as the parent sees it (owner only)
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const CATEGORIES = ["bug", "idea", "praise", "question", "other"];
@@ -446,30 +447,75 @@ async function handleEvent(req, res) {
 
 // ------------------------------------------------------------------ the owner's activity report
 // Who did what lately: usage events plus the latest pieces with the prompt given, what was written and the
-// feedback returned. Admin only (ADMIN_EMAILS, or the cron secret); shown at /admin.
-async function handleActivity(req, res) {
-  if (req.method !== "GET") {
-    res.setHeader("Allow", "GET");
-    return res.status(405).json({ error: "Method not allowed." });
+// feedback returned; shown at /admin.
+// Owner only: children's writing is visible here, so this is deliberately narrower than ADMIN_EMAILS (which may list
+// other helpers) and does not accept the cron secret. One confirmed, signed-in address and nobody else.
+async function requireOwner(req, res, method) {
+  if (req.method !== method) {
+    res.setHeader("Allow", method);
+    res.status(405).json({ error: "Method not allowed." });
+    return false;
   }
-  // Owner only: children's writing is visible here, so this is deliberately narrower than ADMIN_EMAILS (which may list
-  // other helpers) and does not accept the cron secret. One confirmed, signed-in address and nobody else.
-  const { buildActivity, isOwner } = require("./_lib/activity");
   let user = null;
   try { user = await requireUser(req); } catch (e) { user = null; }
-  if (!isOwner(user)) return res.status(401).json({ error: "Unauthorized." });
+  if (!require("./_lib/activity").isOwner(user)) {
+    res.status(401).json({ error: "Unauthorized." });
+    return false;
+  }
+  return true;
+}
+
+async function handleActivity(req, res) {
+  if (!(await requireOwner(req, res, "GET"))) return;
+  const { buildActivity } = require("./_lib/activity");
   const supabase = getSupabaseAdmin();
   const days = Math.min(90, Math.max(1, Number(req.query && req.query.days) || 30));
   const limit = Math.min(200, Math.max(1, Number(req.query && req.query.limit) || 60));
   const since = new Date(Date.now() - days * 86400000).toISOString();
-  const [events, submissions, profiles] = await Promise.all([
+  const [events, submissions, profiles, children] = await Promise.all([
     supabase.from("usage_events").select("profile_id, name, props, created_at").gte("created_at", since).order("created_at", { ascending: false }).limit(5000),
-    supabase.from("submissions").select("id, profile_id, kind, tier, country, grade_label, interest, content, feedback, word_count, score, total_questions, model_used, created_at").order("created_at", { ascending: false }).limit(limit),
+    supabase.from("submissions").select("id, profile_id, child_id, kind, tier, country, grade_label, interest, content, feedback, word_count, score, total_questions, model_used, created_at").order("created_at", { ascending: false }).limit(limit),
     supabase.from("profiles").select("id, email, plan, created_at").limit(2000),
+    supabase.from("child_profiles").select("id, profile_id, display_name, country").limit(2000),
   ]);
-  const failed = [events, submissions, profiles].find((r) => r.error);
+  const failed = [events, submissions, profiles, children].find((r) => r.error);
   if (failed) throw new Error(`Activity report query failed: ${failed.error.message}`);
-  return res.status(200).json(buildActivity({ events: events.data || [], submissions: submissions.data || [], profiles: profiles.data || [], days }));
+  return res.status(200).json(buildActivity({ events: events.data || [], submissions: submissions.data || [], profiles: profiles.data || [], children: children.data || [], days }));
+}
+
+// One learner's Dashboard as their parent sees it: snapshot, target mastery, progress over time, peer comparison and
+// the vocabulary bank, plus which of those their plan locks. Owner only, like the report above.
+async function handleLearner(req, res) {
+  if (!(await requireOwner(req, res, "GET"))) return;
+  const childId = String((req.query && req.query.childId) || "");
+  if (!UUID.test(childId)) return res.status(400).json({ error: "childId is required." });
+  const supabase = getSupabaseAdmin();
+  const { data: child, error: childErr } = await supabase.from("child_profiles").select("*").eq("id", childId).maybeSingle();
+  if (childErr) throw childErr;
+  if (!child) return res.status(404).json({ error: "Learner not found." });
+  const { data: subs, error: subErr } = await supabase
+    .from("submissions")
+    .select("id, kind, tier, country, grade_label, score, total_questions, word_count, feedback, created_at")
+    .eq("child_id", childId)
+    .order("created_at", { ascending: false })
+    .limit(500);
+  if (subErr) throw subErr;
+  const submissions = subs || [];
+  let cohortRows = [];
+  const latest = submissions[0];
+  if (latest && latest.grade_label) {
+    const { data, error } = await supabase.from("submissions").select("child_id, feedback").eq("country", latest.country).eq("tier", latest.tier).eq("grade_label", latest.grade_label).limit(5000);
+    if (error) throw error;
+    cohortRows = data || [];
+  }
+  const { getMonthlyUsage } = require("./_lib/usage");
+  const { readVocabProgress } = require("./_lib/vocabProgress");
+  const usage = await getMonthlyUsage(supabase, child.profile_id);
+  const vocabProgress = await readVocabProgress(supabase, child.profile_id, childId);
+  const { buildLearnerDashboard } = require("./_lib/learnerDashboard");
+  const dash = buildLearnerDashboard({ child, submissions, cohortRows, capabilities: usage.capabilities || {}, vocabProgress });
+  dash.account = { plan: usage.plan, usedThisMonth: usage.used, monthlyCap: usage.cap };
+  return res.status(200).json(dash);
 }
 
 module.exports = async function handler(req, res) {
@@ -477,6 +523,7 @@ module.exports = async function handler(req, res) {
     const action = String((req.query && req.query.action) || "");
     if (action === "event") return await handleEvent(req, res);
     if (action === "activity") return await handleActivity(req, res);
+    if (action === "learner") return await handleLearner(req, res);
     if (action === "cron") return await handleCron(req, res);
     if (action === "qa") return await handleQa(req, res);
     if (action === "stats") return await handleStats(req, res);
