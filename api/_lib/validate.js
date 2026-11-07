@@ -540,7 +540,19 @@ function occursAsWholeWords(normalizedText, quote) {
   return re.test(normalizedText);
 }
 
+// The reply template shows the total as quoted text, so a model sometimes sends "3" or leaves it out. A numeric string is
+// turned into the whole number; a missing or unusable total becomes the number of errors actually listed, which is the
+// smallest honest total (it can never read as fewer than what is listed). A real number that is simply wrong is left alone.
+function coerceSpellingTotal(parsed) {
+  if (!parsed || !Array.isArray(parsed.spellingGrammar)) return parsed;
+  const v = parsed.spellingGrammarTotal;
+  if (typeof v === "string" && /^\s*\d+\s*$/.test(v)) parsed.spellingGrammarTotal = Number(v);
+  else if (v === undefined || v === null || v === "" || (typeof v === "string" && !/^\s*-?\d/.test(v)) || (typeof v === "number" && Number.isNaN(v))) parsed.spellingGrammarTotal = parsed.spellingGrammar.length;
+  return parsed;
+}
+
 function dropInvalidSpellingGrammar(parsed, submittedText, country) {
+  coerceSpellingTotal(parsed);
   if (!parsed || !Array.isArray(parsed.spellingGrammar) || !submittedText) return parsed;
   const normalizedText = normalizeForMatch(submittedText);
   const kept = parsed.spellingGrammar.filter((item) =>
@@ -893,4 +905,4 @@ function validateWritingPrompt(parsed, { tier }) {
   return { ok: issues.length === 0, issues };
 }
 
-module.exports = { plainStandardInGlow, coerceOverallScore, dropNonVerbatimHighlights, validateExamTechnique, repairShortAnswer, dropRestatingHighlights, repairResponses, dropGlowsQuotingMisspellings, repairZeroScoreGlow, repairReadingExamEvidence, validateFeedback, validatePassage, validateWritingPrompt, resolveTarget, dropInvalidSpellingGrammar, sanitizeQuestionReview, stripUngrantedSections, MAX_AVG_WORDS_PER_SENTENCE };
+module.exports = { coerceSpellingTotal, plainStandardInGlow, coerceOverallScore, dropNonVerbatimHighlights, validateExamTechnique, repairShortAnswer, dropRestatingHighlights, repairResponses, dropGlowsQuotingMisspellings, repairZeroScoreGlow, repairReadingExamEvidence, validateFeedback, validatePassage, validateWritingPrompt, resolveTarget, dropInvalidSpellingGrammar, sanitizeQuestionReview, stripUngrantedSections, MAX_AVG_WORDS_PER_SENTENCE };

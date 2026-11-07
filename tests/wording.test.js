@@ -97,7 +97,45 @@ test("every mapped region's standards survive the clean-up: the name stays in th
   }
 });
 
+test("wiring: submit.js and the quality check both run the vocabulary trim", () => {
+  for (const f of ["api/submit.js", "api/_lib/qaRun.js"]) assert.match(fs.readFileSync(path.join(__dirname, "..", f), "utf8"), /TECH\.trimExtraVocab\(/);
+});
+
 test("wiring: both successful paths in submit.js clean the glow, and nothing in the app needed to change", () => {
   const submit = fs.readFileSync(path.join(__dirname, "..", "api", "submit.js"), "utf8");
   assert.equal((submit.match(/plainStandardInGlow\(attempt\.parsed, standardsList\)/g) || []).length, 2);
+});
+
+// ---- small repairs found by the live quality check on 7 Nov: a text total and a third vocab word cost a retry each
+
+const { coerceSpellingTotal, dropInvalidSpellingGrammar, validateFeedback } = require("../api/_lib/validate");
+const TECH = require("../api/_lib/techniques");
+
+test("spelling total: a numeric string becomes a number, a missing or non-numeric total becomes the listed count, a real number is left alone", () => {
+  const items = [{ quote: "a", correction: "b", type: "spelling" }, { quote: "c", correction: "d", type: "spelling" }];
+  assert.equal(coerceSpellingTotal({ spellingGrammar: items, spellingGrammarTotal: "3" }).spellingGrammarTotal, 3);
+  assert.equal(coerceSpellingTotal({ spellingGrammar: items, spellingGrammarTotal: " 7 " }).spellingGrammarTotal, 7);
+  assert.equal(coerceSpellingTotal({ spellingGrammar: items }).spellingGrammarTotal, 2);
+  assert.equal(coerceSpellingTotal({ spellingGrammar: items, spellingGrammarTotal: null }).spellingGrammarTotal, 2);
+  assert.equal(coerceSpellingTotal({ spellingGrammar: items, spellingGrammarTotal: "many" }).spellingGrammarTotal, 2);
+  assert.equal(coerceSpellingTotal({ spellingGrammar: items, spellingGrammarTotal: 5 }).spellingGrammarTotal, 5);
+  assert.equal(coerceSpellingTotal({ spellingGrammar: [], spellingGrammarTotal: undefined }).spellingGrammarTotal, 0);
+  assert.deepEqual(coerceSpellingTotal({ glow: "x" }), { glow: "x" }, "no spelling list: untouched");
+});
+
+test("spelling total: the repair runs inside dropInvalidSpellingGrammar, so the real-check failure no longer needs a retry", () => {
+  const parsed = { spellingGrammar: [{ quote: "teh", correction: "the", type: "spelling" }], spellingGrammarTotal: "1" };
+  dropInvalidSpellingGrammar(parsed, "I saw teh dog.", "🇬🇧 United Kingdom");
+  assert.equal(parsed.spellingGrammarTotal, 1);
+  assert.ok(Number.isInteger(parsed.spellingGrammarTotal));
+});
+
+test("vocabulary: a third word is trimmed away; one word too few is still refused", () => {
+  const w = (t) => ({ term: t, definition: "d", example: `a ${t}`, trick: "a short trick here" });
+  const three = TECH.trimExtraVocab({ vocab: [w("a"), w("b"), w("c")] });
+  assert.deepEqual(three.vocab.map((v) => v.term), ["a", "b"]);
+  const one = TECH.trimExtraVocab({ vocab: [w("a")] });
+  assert.equal(one.vocab.length, 1);
+  const issues = validateFeedback({ glow: "You did well on this one.", grow: "Try this next.", vocab: one.vocab }, { tier: "elementary", standardsList: [], targetNames: [], submittedText: "x" }).issues;
+  assert.ok(issues.some((i) => /exactly 2 items/.test(i)));
 });

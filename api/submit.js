@@ -73,6 +73,7 @@ async function generateAndValidate(prompt, tier, country, gradeLabel, submittedT
     if (capabilities?.spellingGrammar !== false) dropInvalidSpellingGrammar(attempt.parsed, submittedText, country);
     if (capabilities?.spellingGrammar !== false) dropGlowsQuotingMisspellings(attempt.parsed);
     TECH.repairVocabTricks(attempt.parsed);
+    TECH.trimExtraVocab(attempt.parsed);
     coerceOverallScore(attempt.parsed);
     TECH.repairFrayer(attempt.parsed);
     if (submittedText) { if (TECH.devicesApply(genre, tier)) TECH.repairDevices(attempt.parsed, submittedText); else delete attempt.parsed.deviceCheck; }

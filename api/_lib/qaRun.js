@@ -112,6 +112,7 @@ async function runOne(s, kind, generate, deadline = Infinity, validate = validat
         dropNonVerbatimHighlights(parsed, s.text);
         dropRestatingHighlights(parsed, s.text);
         TECH.repairVocabTricks(parsed);
+        TECH.trimExtraVocab(parsed);
         coerceOverallScore(parsed);
         TECH.repairFrayer(parsed);
         if (TECH.devicesApply(built.genre, s.tier)) TECH.repairDevices(parsed, s.text); else delete parsed.deviceCheck;

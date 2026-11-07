@@ -171,6 +171,13 @@ function attachReadingStrategy(parsed, tier) {
   return parsed;
 }
 
+// Exactly two words are asked for. A third is harmless, so it is trimmed rather than costing a whole retry
+// (one word too few still fails: nothing can be invented for it).
+function trimExtraVocab(parsed) {
+  if (parsed && Array.isArray(parsed.vocab) && parsed.vocab.length > 2) parsed.vocab = parsed.vocab.slice(0, 2);
+  return parsed;
+}
+
 // A vocabulary trick is a bonus: a missing or odd one is dropped, never a reason to fail feedback.
 function repairVocabTricks(parsed) {
   if (!parsed || !Array.isArray(parsed.vocab)) return parsed;
@@ -183,7 +190,7 @@ function repairVocabTricks(parsed) {
 }
 
 module.exports = {
-  READING_STRATEGIES, VOCAB_TRICKS, strategiesFor, vocabTrickFor, resolveStrategy,
+  trimExtraVocab, READING_STRATEGIES, VOCAB_TRICKS, strategiesFor, vocabTrickFor, resolveStrategy,
   readingStrategyClause, readingStrategyShape, vocabTrickClause,
   validateReadingStrategy, attachReadingStrategy, repairVocabTricks,
   PERSUASIVE_DEVICES, devicesApply, deviceClause, deviceShape, repairDevices,
