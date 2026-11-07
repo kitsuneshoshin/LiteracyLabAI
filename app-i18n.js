@@ -25,10 +25,12 @@
     // Scripts the app's own fonts do not cover load a web font (and have letter-spacing and capitals switched off, as joined or
     // unicase scripts do not use them) only when chosen.
     { code: "hi", native: "हिन्दी", fonts: "Noto+Sans+Devanagari:wght@400;500;600;700", family: '"Noto Sans Devanagari"' },
+    { code: "pa", native: "ਪੰਜਾਬੀ", fonts: "Noto+Sans+Gurmukhi:wght@400;500;600;700", family: '"Noto Sans Gurmukhi"' },
+    { code: "bn", native: "বাংলা", fonts: "Noto+Sans+Bengali:wght@400;500;600;700", family: '"Noto Sans Bengali"' },
     { code: "zh", native: "中文", fonts: "Noto+Sans+SC:wght@400;500;700", family: '"Noto Sans SC", "PingFang SC", "Microsoft YaHei"' },
   ];
   // Bump when a dictionary changes, so browsers fetch the new one.
-  var DICT_VERSION = 6;
+  var DICT_VERSION = 7;
   var STORE_KEY = "ll_ui_lang";
   var ATTRS = ["title", "placeholder", "aria-label", "alt"];
 

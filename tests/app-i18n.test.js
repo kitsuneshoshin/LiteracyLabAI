@@ -95,8 +95,8 @@ test("the translation layer keeps the app's data and logic alone: it only touche
 });
 
 test("scripts the app's own fonts do not cover load a web font, with letter-spacing and capitals switched off", () => {
-  const needs = I18N.LANGUAGES.filter((l) => ["hi", "zh"].includes(l.code));
-  assert.equal(needs.length, 2);
+  const needs = I18N.LANGUAGES.filter((l) => ["hi", "zh", "pa", "bn"].includes(l.code));
+  assert.equal(needs.length, 4);
   for (const l of needs) assert.ok(l.fonts && l.family, l.code + ": no font for its script");
   const src = fs.readFileSync(path.join(ROOT, "app-i18n.js"), "utf8");
   assert.match(src, /letter-spacing: 0 !important; text-transform: none !important/);
