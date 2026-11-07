@@ -100,14 +100,14 @@ async function handleQa(req, res) {
   }
   const secret = process.env.CRON_SECRET;
   const bearer = (req.headers && req.headers.authorization) || "";
-  // Vercel Cron sends the secret. A signed-in ADMIN (ADMIN_EMAILS) may also run it by hand,
-  // so the owner can compare models without ever handling the secret.
+  // Vercel Cron sends the secret. A signed-in ADMIN (ADMIN_EMAILS) may also run it by hand, and so may the owner
+  // from the /admin page, so the owner can run it without ever handling the secret.
   let allowed = Boolean(secret) && bearer === `Bearer ${secret}`;
   if (!allowed && bearer.startsWith("Bearer ")) {
     try {
       const user = await require("./_lib/auth").requireUser(req);
       const admins = (process.env.ADMIN_EMAILS || "").split(",").map((e) => e.trim().toLowerCase()).filter(Boolean);
-      allowed = admins.includes(String(user.email || "").toLowerCase());
+      allowed = admins.includes(String(user.email || "").toLowerCase()) || require("./_lib/activity").isOwner(user);
     } catch (e) { allowed = false; }
   }
   if (!allowed && !secret) return res.status(500).json({ error: "CRON_SECRET is not set." });

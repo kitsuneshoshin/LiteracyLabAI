@@ -179,6 +179,13 @@
       <div class="scroll"><table id="users"></table></div>
     </div>
 
+    <div class="card">
+      <h2>Marking quality check</h2>
+      <p class="sub">Sends eight made-up sample pieces through the real feedback process and the real quality checks, once each. Takes about a minute, uses a few cents of AI, and is saved to the quality history (the same one the Sunday run uses).</p>
+      <div class="filters"><button id="qaRun" type="button">Run the check now</button><span class="muted" id="qaStatus"></span></div>
+      <div id="qaOut"></div>
+    </div>
+
     <h2 style="margin-top:8px">Learner dashboard <span class="muted" style="font-weight:400;font-size:13px">— what their parent sees</span></h2>
     <div class="filters">
       <select id="lSel" aria-label="Learner"></select>
@@ -603,6 +610,34 @@ $("loginForm").addEventListener("submit", async function(e){
 $("refresh").addEventListener("click", load);
 $("days").addEventListener("change", load);
 $("signout").addEventListener("click", async function(){ await sb.auth.signOut(); DATA = null; load(); });
+
+/* ---------------------------------------------------------------- the marking quality check, run by hand */
+async function runQuality(){
+  var btn = $("qaRun"), out = $("qaOut"), st = $("qaStatus");
+  btn.disabled = true; st.textContent = "Running… this takes up to a minute."; out.textContent = "";
+  try {
+    var res = await sb.auth.getSession(), session = res.data && res.data.session;
+    if (!session) { st.textContent = "Please sign in again."; return; }
+    var r = await fetch("/api/email?action=qa", { headers: { Authorization: "Bearer " + session.access_token } });
+    if (!r.ok) { st.textContent = r.status === 401 ? "Not allowed." : "The check failed to run (" + r.status + ")."; return; }
+    var q = await r.json();
+    st.textContent = (q.saved ? "Done, and saved to the quality history." : "Done (not saved).");
+    var tiles = el("div", "tiles");
+    add(tiles, tile("Right first time", q.passedFirstTry + " of " + q.total, q.passRate + "%"), tile("Would reach a customer", q.delivered + " of " + q.total, q.deliveredRate + "%"), tile("Average attempts", q.avgAttempts, "1 is perfect; 3 is the limit"), tile("Timed out", q.timedOut, ""));
+    add(out, tiles);
+    var tb = el("table"), head = el("tr");
+    ["Sample", "Result", "Attempts", "What the checks said"].forEach(function(h){ head.appendChild(el("th", null, h)); });
+    tb.appendChild(head);
+    arr(q.results).forEach(function(x){
+      var row = el("tr");
+      add(row, el("td", null, x.name), (function(){ var td = el("td"); add(td, tag(x.firstTry ? "right first time" : x.outcome === "failed" ? "failed" : "needed a retry", x.firstTry ? "good" : x.outcome === "failed" ? "bad" : "warn")); return td; })(), el("td", null, String(x.attempts)), el("td", null, arr(x.issues).join(" · ").slice(0, 400)));
+      tb.appendChild(row);
+    });
+    var wrap = el("div", "scroll"); add(wrap, tb); add(out, wrap);
+  } catch (e) { st.textContent = "The check could not be run."; }
+  finally { btn.disabled = false; }
+}
+$("qaRun").addEventListener("click", runQuality);
 $("lSel").addEventListener("change", loadLearner);
 ["fKind", "fStatus", "fUser"].forEach(function(id){ $(id).addEventListener("change", function(){ if (DATA) renderList(); }); });
 load();

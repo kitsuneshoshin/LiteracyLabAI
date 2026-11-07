@@ -227,3 +227,26 @@ test("learner endpoint: owner only, needs a real id, and returns the dashboard w
   assert.equal(ok.body.snapshot.wordsWritten, 200);
   assert.equal(ok.body.account.plan, "free");
 });
+
+// ---- the quality check, run by hand from /admin
+
+test("quality check: the owner may run it from the admin page; another signed-in user may not", async () => {
+  const run = async (owner) => {
+    const saved = { o: process.env.ACTIVITY_OWNER_EMAIL, a: process.env.ADMIN_EMAILS, c: process.env.CRON_SECRET };
+    process.env.ACTIVITY_OWNER_EMAIL = owner; delete process.env.ADMIN_EMAILS; process.env.CRON_SECRET = "s3cret";
+    try { return await call(loadHandler("email.js", { db: () => ({ data: null, error: null }) }), { method: "GET", query: { action: "qa", save: "0" }, headers: { authorization: "Bearer user-token" } }); }
+    finally { for (const [k, v] of [["ACTIVITY_OWNER_EMAIL", saved.o], ["ADMIN_EMAILS", saved.a], ["CRON_SECRET", saved.c]]) { if (v == null) delete process.env[k]; else process.env[k] = v; } }
+  };
+  assert.equal((await run("boss@example.com")).statusCode, 401);
+  const ok = await run("parent@example.com");
+  assert.equal(ok.statusCode, 200);
+  assert.equal(ok.body.total, 8);
+  assert.ok(Array.isArray(ok.body.results));
+});
+
+test("wiring: the admin page has a run button that calls the quality check with the signed-in session", () => {
+  const page = fs.readFileSync(path.join(ROOT, "admin.html"), "utf8");
+  assert.match(page, /id="qaRun"/);
+  assert.match(page, /action=qa/);
+  assert.ok(!/innerHTML/.test(page));
+});
