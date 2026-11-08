@@ -60,12 +60,29 @@
   .msg{ padding:14px; border-radius:12px; background:var(--grow-tint); margin-bottom:16px; }
   .hidden{ display:none; }
   .muted{ color:var(--ink-soft); }
+  .bar{ display:flex; flex-wrap:wrap; gap:12px 20px; align-items:flex-end; justify-content:space-between; margin-bottom:8px; }
+  .bar h1{ margin-top:4px; }
+  .bar .sub{ margin-bottom:0; }
+  .tools{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+  .tools button{ padding:7px 14px; }
+
+  /* ---- section tabs: one sticky row, scrolls sideways on a phone ---- */
+  .tabs{ position:sticky; top:0; z-index:5; display:flex; gap:4px; overflow-x:auto; background:var(--bg); border-bottom:1px solid var(--border); margin:0 -16px 18px; padding:8px 16px 0; scrollbar-width:thin; }
+  .tabs button{ flex:0 0 auto; background:transparent; color:var(--ink-soft); border:0; border-bottom:3px solid transparent; border-radius:8px 8px 0 0; padding:10px 16px; font-weight:500; white-space:nowrap; }
+  .tabs button:hover{ color:var(--ink); background:var(--surface2); }
+  .tabs button[aria-selected="true"]{ color:var(--wine-ink); border-bottom-color:var(--wine); font-weight:600; }
+  .badge{ display:inline-block; min-width:20px; padding:0 6px; margin-left:4px; border-radius:99px; background:var(--wine); color:#fff; font-size:11.5px; font-weight:600; text-align:center; line-height:19px; }
+  .lead{ color:var(--ink-soft); font-size:14px; margin:0 0 16px; max-width:70ch; }
+  h2.sec{ font-size:13px; text-transform:uppercase; letter-spacing:.07em; color:var(--ink-soft); margin:26px 0 10px; }
+  h3.ch{ font-size:15px; margin:0 0 10px; }
+  .block .in p.k{ margin:12px 0 2px; font-size:11.5px; letter-spacing:.05em; text-transform:uppercase; color:var(--ink-soft); }
+  .block .in p.k:first-child{ margin-top:0; }
   .login{ max-width:380px; margin:48px auto; }
   .login input{ width:100%; margin:6px 0 12px; }
 
   /* ---- pieces: list on the left, what the learner saw on the right ---- */
   .split{ display:grid; grid-template-columns:330px 1fr; gap:16px; align-items:start; }
-  .list{ position:sticky; top:12px; max-height:calc(100vh - 24px); overflow:auto; display:flex; flex-direction:column; gap:6px; padding-right:2px; }
+  .list{ position:sticky; top:64px; max-height:calc(100vh - 80px); overflow:auto; display:flex; flex-direction:column; gap:6px; padding-right:2px; }
   .row{ text-align:left; width:100%; background:var(--surface); color:var(--ink); border:1px solid var(--border); border-radius:12px; padding:10px 12px; font-weight:400; display:block; }
   .row:hover{ border-color:var(--wine); }
   .row[aria-current="true"]{ border-color:var(--wine); box-shadow:0 0 0 2px var(--wine-tint); background:var(--surface2); }
@@ -141,8 +158,18 @@
 </head>
 <body class="top">
 <div class="wrap">
-  <h1>Activity</h1>
-  <p class="sub" id="sub">What people are doing on LiteracyLab, and what they get back.</p>
+  <header class="bar">
+    <div>
+      <h1>LiteracyLab admin</h1>
+      <p class="sub" id="sub">What people are doing on LiteracyLab, and what they get back.</p>
+    </div>
+    <div class="tools hidden" id="tools">
+      <label class="muted" for="days">Window</label>
+      <select id="days"><option value="7">7 days</option><option value="30" selected>30 days</option><option value="90">90 days</option></select>
+      <button class="ghost" id="refresh" type="button">Refresh</button>
+      <button class="ghost" id="signout" type="button">Sign out</button>
+    </div>
+  </header>
 
   <div id="login" class="card login hidden">
     <h2>Sign in</h2>
@@ -158,30 +185,36 @@
 
   <div id="msg" class="msg hidden"></div>
   <div id="app" class="hidden">
-    <div class="filters">
-      <label class="muted" for="days">Window</label>
-      <select id="days"><option value="7">7 days</option><option value="30" selected>30 days</option><option value="90">90 days</option></select>
-      <button class="ghost" id="refresh" type="button">Refresh</button>
-      <button class="ghost" id="signout" type="button">Sign out</button>
-    </div>
-    <div class="grid" id="totals"></div>
-    <div style="height:16px"></div>
-    <div class="cols">
-      <div class="card"><h2>Active per day</h2><div id="perDay"></div></div>
-      <div class="card"><h2>Pages visited</h2><div id="views"></div></div>
-      <div class="card"><h2>Actions</h2><div id="actions"></div></div>
-      <div class="card"><h2>Problems</h2><div id="failures"></div></div>
-      <div class="card"><h2>Interests chosen</h2><div id="interests"></div></div>
-      <div class="card"><h2>Writing genres given</h2><div id="genres"></div></div>
-    </div>
-    <div class="card">
-      <h2>People</h2>
-      <div class="scroll"><table id="users"></table></div>
-    </div>
+    <nav class="tabs" role="tablist" aria-label="Admin sections">
+      <button type="button" role="tab" id="tab-overview" data-tab="overview" aria-controls="panel-overview" aria-selected="true">Overview</button>
+      <button type="button" role="tab" id="tab-feedback" data-tab="feedback" aria-controls="panel-feedback" aria-selected="false" tabindex="-1">Feedback <span class="badge hidden" id="fbBadge"></span></button>
+      <button type="button" role="tab" id="tab-people" data-tab="people" aria-controls="panel-people" aria-selected="false" tabindex="-1">People</button>
+      <button type="button" role="tab" id="tab-work" data-tab="work" aria-controls="panel-work" aria-selected="false" tabindex="-1">Learner work</button>
+      <button type="button" role="tab" id="tab-quality" data-tab="quality" aria-controls="panel-quality" aria-selected="false" tabindex="-1">Marking quality</button>
+    </nav>
 
-    <div class="card" id="fbCard">
-      <h2>Customer feedback</h2>
-      <p class="sub">Everything customers have told us: thumbs-downs, mistake reports, comments from the dashboard, email links and cancellations. Newest first.</p>
+    <!-- Overview: how the site is doing at a glance -->
+    <section role="tabpanel" id="panel-overview" aria-labelledby="tab-overview">
+      <p class="lead">How the site is doing: accounts, usage, and anything that went wrong.</p>
+      <div class="grid" id="totals"></div>
+      <h2 class="sec">Usage</h2>
+      <div class="cols">
+        <div class="card"><h3 class="ch">Active per day</h3><div id="perDay"></div></div>
+        <div class="card"><h3 class="ch">Pages visited</h3><div id="views"></div></div>
+        <div class="card"><h3 class="ch">Actions taken</h3><div id="actions"></div></div>
+      </div>
+      <h2 class="sec">What learners choose</h2>
+      <div class="cols">
+        <div class="card"><h3 class="ch">Interests chosen</h3><div id="interests"></div></div>
+        <div class="card"><h3 class="ch">Writing genres given</h3><div id="genres"></div></div>
+      </div>
+      <h2 class="sec">Problems</h2>
+      <div class="card"><div id="failures"></div></div>
+    </section>
+
+    <!-- Feedback: what customers have told us -->
+    <section role="tabpanel" id="panel-feedback" aria-labelledby="tab-feedback" class="hidden">
+      <p class="lead">Everything customers have told us: thumbs-downs, mistake reports, dashboard comments, email links and cancellations. Newest first.</p>
       <div class="filters">
         <select id="fbStatus" aria-label="Status"><option value="open">Needs attention (new + triaged)</option><option value="">Every status</option><option value="new">New</option><option value="triaged">Triaged</option><option value="planned">Planned</option><option value="done">Done</option><option value="wont_do">Won't do</option></select>
         <select id="fbCat" aria-label="Type"><option value="">Every type</option><option value="bug">Bug / mistake</option><option value="idea">Idea</option><option value="praise">Praise</option><option value="question">Question</option><option value="other">Other</option></select>
@@ -191,33 +224,47 @@
         <div class="list" id="fbList" role="list"></div>
         <div class="pane" id="fbPane"></div>
       </div>
-    </div>
+    </section>
 
-    <div class="card">
-      <h2>Marking quality check</h2>
-      <p class="sub">Sends eight made-up sample pieces through the real feedback process and the real quality checks, once each. Takes about a minute, uses a few cents of AI, and is saved to the quality history (the same one the Sunday run uses).</p>
-      <div class="filters"><button id="qaRun" type="button">Run the check now</button><span class="muted" id="qaStatus"></span></div>
-      <div id="qaOut"></div>
-    </div>
+    <!-- People: who has an account, and one learner's dashboard as their parent sees it -->
+    <section role="tabpanel" id="panel-people" aria-labelledby="tab-people" class="hidden">
+      <p class="lead">Everyone with an account. Click a row to open that learner's dashboard below.</p>
+      <div class="card">
+        <div class="scroll"><table id="users"></table></div>
+      </div>
+      <h2 class="sec">Learner dashboard <span class="muted" style="font-weight:400;font-size:13px">what their parent sees</span></h2>
+      <div class="filters">
+        <select id="lSel" aria-label="Learner"></select>
+        <span class="muted" id="lNote"></span>
+      </div>
+      <div id="dash"></div>
+    </section>
 
-    <h2 style="margin-top:8px">Learner dashboard <span class="muted" style="font-weight:400;font-size:13px">— what their parent sees</span></h2>
-    <div class="filters">
-      <select id="lSel" aria-label="Learner"></select>
-      <span class="muted" id="lNote"></span>
-    </div>
-    <div id="dash"></div>
+    <!-- Learner work: each piece, with the prompt, what was written and the feedback returned -->
+    <section role="tabpanel" id="panel-work" aria-labelledby="tab-work" class="hidden">
+      <p class="lead">Every piece a learner started: the prompt or passage they were given, what they did, and what they got back.</p>
+      <div class="filters">
+        <select id="fKind" aria-label="Kind"><option value="">All kinds</option><option value="writing">Writing</option><option value="reading">Reading</option></select>
+        <select id="fStatus" aria-label="Result"><option value="">Any status</option><option value="marked">Marked</option><option value="stopped">Stopped before submitting</option></select>
+        <select id="fUser" aria-label="Person"><option value="">Everyone</option></select>
+        <span class="muted" id="count"></span>
+      </div>
+      <div class="split">
+        <div class="list" id="list" role="list"></div>
+        <div class="pane" id="pane"></div>
+      </div>
+    </section>
 
-    <h2 style="margin-top:8px">What learners got back</h2>
-    <div class="filters">
-      <select id="fKind"><option value="">All kinds</option><option value="writing">Writing</option><option value="reading">Reading</option></select>
-      <select id="fStatus"><option value="">Any status</option><option value="marked">Marked</option><option value="stopped">Stopped before submitting</option></select>
-      <select id="fUser"><option value="">Everyone</option></select>
-      <span class="muted" id="count"></span>
-    </div>
-    <div class="split">
-      <div class="list" id="list" role="list"></div>
-      <div class="pane" id="pane"></div>
-    </div>
+    <!-- Marking quality: the check that runs on made-up samples -->
+    <section role="tabpanel" id="panel-quality" aria-labelledby="tab-quality" class="hidden">
+      <p class="lead">Checks that the AI marking is still good, using made-up sample pieces rather than real children's work.</p>
+      <div class="card">
+        <h3 class="ch">Run the check</h3>
+        <p class="sub">Sends eight made-up sample pieces through the real feedback process and the real quality checks, once each. Takes about a minute, uses a few cents of AI, and is saved to the quality history (the same one the Sunday run uses).</p>
+        <div class="filters"><button id="qaRun" type="button">Run the check now</button><span class="muted" id="qaStatus"></span></div>
+        <div id="qaOut"></div>
+      </div>
+    </section>
   </div>
 </div>
 
@@ -607,9 +654,10 @@ async function load(){
   var session = res.data && res.data.session;
   $("login").classList.toggle("hidden", !!session);
   $("app").classList.toggle("hidden", !session);
+  $("tools").classList.toggle("hidden", !session);
   if (!session) return;
   var r = await fetch("/api/email?action=activity&days=" + $("days").value + "&limit=100", { headers: { Authorization: "Bearer " + session.access_token } });
-  if (r.status === 401) { $("app").classList.add("hidden"); showMsg("This page is private to the site owner. Sign in with the owner account."); return; }
+  if (r.status === 401) { $("app").classList.add("hidden"); $("tools").classList.add("hidden"); showMsg("This page is private to the site owner. Sign in with the owner account."); return; }
   if (!r.ok) { showMsg("Could not load activity (" + r.status + ")."); return; }
   DATA = await r.json();
   render();
@@ -622,6 +670,28 @@ $("loginForm").addEventListener("submit", async function(e){
   if (out.error) { showMsg(out.error.message); return; }
   load();
 });
+/* ---------------------------------------------------------------- section tabs (the address keeps the open one: /admin#feedback) */
+var TABS = ["overview", "feedback", "people", "work", "quality"];
+function showTab(name){
+  if (TABS.indexOf(name) < 0) name = "overview";
+  TABS.forEach(function(t){
+    $("panel-" + t).classList.toggle("hidden", t !== name);
+    var b = $("tab-" + t); b.setAttribute("aria-selected", t === name ? "true" : "false"); b.tabIndex = t === name ? 0 : -1;
+  });
+  try { history.replaceState(null, "", "#" + name); } catch (e) { /* the tab still switches without it */ }
+}
+TABS.forEach(function(t, i){
+  var b = $("tab-" + t);
+  b.addEventListener("click", function(){ showTab(t); });
+  b.addEventListener("keydown", function(e){
+    var to = e.key === "ArrowRight" ? i + 1 : e.key === "ArrowLeft" ? i - 1 : e.key === "Home" ? 0 : e.key === "End" ? TABS.length - 1 : null;
+    if (to == null) return;
+    e.preventDefault(); to = (to + TABS.length) % TABS.length; showTab(TABS[to]); $("tab-" + TABS[to]).focus();
+  });
+});
+showTab(location.hash.replace("#", ""));
+window.addEventListener("hashchange", function(){ showTab(location.hash.replace("#", "")); });
+
 $("refresh").addEventListener("click", load);
 $("days").addEventListener("change", load);
 $("signout").addEventListener("click", async function(){ await sb.auth.signOut(); DATA = null; load(); });
@@ -723,6 +793,9 @@ async function loadFeedback(){
   var r = await fetch("/api/email?action=feedbackInbox", { headers: { Authorization: "Bearer " + session.access_token } });
   if (!r.ok) { box.textContent = ""; box.appendChild(el("p", "muted", "Could not load feedback (" + r.status + ").")); return; }
   FB = await r.json();
+  var open = FB.counts["new"] || 0, badge = $("fbBadge");
+  badge.textContent = String(open); badge.classList.toggle("hidden", !open);
+  badge.title = open + " new, not yet looked at";
   renderFeedbackList();
 }
 ["fbStatus", "fbCat"].forEach(function(id){ $(id).addEventListener("change", function(){ if (FB) renderFeedbackList(); }); });
