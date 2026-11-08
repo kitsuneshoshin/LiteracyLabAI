@@ -179,6 +179,20 @@
       <div class="scroll"><table id="users"></table></div>
     </div>
 
+    <div class="card" id="fbCard">
+      <h2>Customer feedback</h2>
+      <p class="sub">Everything customers have told us: thumbs-downs, mistake reports, comments from the dashboard, email links and cancellations. Newest first.</p>
+      <div class="filters">
+        <select id="fbStatus" aria-label="Status"><option value="open">Needs attention (new + triaged)</option><option value="">Every status</option><option value="new">New</option><option value="triaged">Triaged</option><option value="planned">Planned</option><option value="done">Done</option><option value="wont_do">Won't do</option></select>
+        <select id="fbCat" aria-label="Type"><option value="">Every type</option><option value="bug">Bug / mistake</option><option value="idea">Idea</option><option value="praise">Praise</option><option value="question">Question</option><option value="other">Other</option></select>
+        <span class="muted" id="fbCount"></span>
+      </div>
+      <div class="split">
+        <div class="list" id="fbList" role="list"></div>
+        <div class="pane" id="fbPane"></div>
+      </div>
+    </div>
+
     <div class="card">
       <h2>Marking quality check</h2>
       <p class="sub">Sends eight made-up sample pieces through the real feedback process and the real quality checks, once each. Takes about a minute, uses a few cents of AI, and is saved to the quality history (the same one the Sunday run uses).</p>
@@ -599,6 +613,7 @@ async function load(){
   if (!r.ok) { showMsg("Could not load activity (" + r.status + ")."); return; }
   DATA = await r.json();
   render();
+  loadFeedback();
 }
 
 $("loginForm").addEventListener("submit", async function(e){
@@ -610,6 +625,107 @@ $("loginForm").addEventListener("submit", async function(e){
 $("refresh").addEventListener("click", load);
 $("days").addEventListener("change", load);
 $("signout").addEventListener("click", async function(){ await sb.auth.signOut(); DATA = null; load(); });
+
+/* ---------------------------------------------------------------- customer feedback inbox */
+var FB = null, FB_SELECTED = null;
+var FB_STATUS = { "new": "New", triaged: "Triaged", planned: "Planned", done: "Done", wont_do: "Won't do" };
+var FB_CAT = { bug: "Bug / mistake", idea: "Idea", praise: "Praise", question: "Question", other: "Other" };
+function fbFiltered(){
+  var st = $("fbStatus").value, cat = $("fbCat").value;
+  return FB.items.filter(function(i){
+    var okSt = !st || (st === "open" ? (i.status === "new" || i.status === "triaged") : i.status === st);
+    return okSt && (!cat || i.category === cat);
+  });
+}
+function fbWho(i){
+  if (!i.person) return "Anonymous";
+  var learners = i.person.learners.length ? " · " + i.person.learners.join(", ") : "";
+  return (i.person.email || "Unknown account") + learners;
+}
+function renderFeedbackList(){
+  var list = fbFiltered(), box = $("fbList"); box.textContent = "";
+  $("fbCount").textContent = list.length + " of " + FB.items.length + " item" + (FB.items.length === 1 ? "" : "s");
+  if (!list.some(function(i){ return i.id === FB_SELECTED; })) FB_SELECTED = list.length ? list[0].id : null;
+  list.forEach(function(i){
+    var b = el("button", "row"); b.type = "button"; b.setAttribute("role", "listitem");
+    if (i.id === FB_SELECTED) b.setAttribute("aria-current", "true");
+    var l1 = el("div", "l1");
+    add(l1, tag(FB_CAT[i.category] || i.category, i.category === "bug" ? "bad" : i.category === "praise" ? "good" : "blue"), tag(FB_STATUS[i.status] || i.status, i.status === "new" ? "warn" : i.status === "done" ? "good" : ""));
+    if (i.rating) add(l1, tag(i.rating === "up" ? "👍" : "👎"));
+    if (i.priority) add(l1, tag(i.priority + " priority", i.priority === "high" ? "bad" : ""));
+    add(b, l1, el("div", "l2", fbWho(i)), el("div", "l3", when(i.at) + (i.message ? " · " + i.message.replace(/\s+/g, " ").slice(0, 80) : "")));
+    b.addEventListener("click", function(){ FB_SELECTED = i.id; renderFeedbackList(); });
+    box.appendChild(b);
+  });
+  var pane = $("fbPane"); pane.textContent = "";
+  var cur = list.filter(function(i){ return i.id === FB_SELECTED; })[0];
+  if (cur) add(pane, feedbackDetail(cur)); else add(pane, el("p", "muted empty", "No feedback matches."));
+}
+function sourceText(i){
+  if (i.source === "app") return i.emailKey === "app-reading" || i.emailKey === "app-writing" ? "the app, after a " + i.emailKey.slice(4) + " piece" : "the dashboard feedback card";
+  return i.emailKey ? "an email link (" + i.emailKey + ")" : "the feedback page";
+}
+function feedbackDetail(i){
+  var pane = el("div");
+  var head = el("div", "head"), left = el("div");
+  add(left, el("div", "who", fbWho(i)), el("div", "meta", [when(i.at), "from " + sourceText(i), i.person && i.person.plan ? i.person.plan + " plan" : null].filter(Boolean).join(" · ")));
+  var right = el("div"); right.style.display = "flex"; right.style.gap = "8px"; right.style.alignItems = "center";
+  add(right, tag(FB_CAT[i.category] || i.category, i.category === "bug" ? "bad" : "blue"));
+  if (i.rating) add(right, tag(i.rating === "up" ? "thumbs up" : "thumbs down"));
+  add(head, left, right); add(pane, head);
+
+  add(pane, block("What they said", null, i.message ? prose(i.message, "big") : el("p", "prose muted", "No message, just a rating.")));
+  add(pane, block("Can we contact them?", null, el("p", "prose", i.contactOk ? "Yes, they ticked that we may reply" + (i.person && i.person.email ? ": " + i.person.email : ".") : "No. They did not give permission, so do not email them about this.")));
+
+  if (i.piece) {
+    var p = i.piece, body = el("div");
+    add(body, el("p", "meta", [p.child, p.gradeLabel, p.country, p.interest ? "likes " + p.interest : null, when(p.at)].filter(Boolean).join(" · ")));
+    if (p.prompt) add(body, el("p", "k", "Prompt they were given"), prose([p.prompt.title, p.prompt.text].filter(Boolean).join("\n\n")));
+    if (p.written) add(body, el("p", "k", "What they wrote"), prose(p.written));
+    if (p.score != null) add(body, el("p", "k", "Score"), el("p", "prose", p.kind === "reading" ? p.score + " of " + p.total + " correct" : p.score + "/10" + (p.scoreReason ? " — " + p.scoreReason : "")));
+    if (p.glow) add(body, el("p", "k", "Glow"), prose(p.glow));
+    if (p.grow) add(body, el("p", "k", "Grow"), prose(p.grow));
+    add(pane, block("The piece they were talking about", "given", body, p.kind));
+  } else if (i.pieceMissing) {
+    add(pane, block("The piece they were talking about", null, el("p", "prose muted", "That piece no longer exists (the account or learner may have been deleted).")));
+  }
+
+  // The owner's triage: status, priority and a private note. Saved on the server, shown to nobody else.
+  var form = el("div");
+  var row = el("div", "filters");
+  var st = el("select"); st.setAttribute("aria-label", "Status");
+  Object.keys(FB_STATUS).forEach(function(k){ var o = el("option", null, FB_STATUS[k]); o.value = k; st.appendChild(o); }); st.value = i.status;
+  var pr = el("select"); pr.setAttribute("aria-label", "Priority");
+  [["", "No priority"], ["high", "High"], ["medium", "Medium"], ["low", "Low"]].forEach(function(x){ var o = el("option", null, x[1]); o.value = x[0]; pr.appendChild(o); }); pr.value = i.priority || "";
+  var notes = el("textarea"); notes.rows = 3; notes.style.width = "100%"; notes.maxLength = 4000; notes.placeholder = "Private notes: what you decided, what you replied, what to do next"; notes.value = i.notes;
+  var save = el("button", null, "Save"); save.type = "button";
+  var msg = el("span", "muted");
+  save.addEventListener("click", async function(){
+    save.disabled = true; msg.textContent = "Saving…";
+    try {
+      var res = await sb.auth.getSession(), session = res.data && res.data.session;
+      var r = await fetch("/api/email?action=feedbackUpdate", { method: "POST", headers: { "Content-Type": "application/json", Authorization: "Bearer " + session.access_token }, body: JSON.stringify({ id: i.id, status: st.value, priority: pr.value, notes: notes.value }) });
+      if (!r.ok) { msg.textContent = "Could not save (" + r.status + ")."; return; }
+      var out = await r.json(); i.status = out.status; i.priority = out.priority; i.notes = out.notes;
+      msg.textContent = "Saved.";
+      renderFeedbackList();
+    } catch (e) { msg.textContent = "Could not save."; }
+    finally { save.disabled = false; }
+  });
+  add(row, st, pr, save, msg); add(form, row, notes);
+  add(pane, block("Your triage", null, form));
+  return pane;
+}
+async function loadFeedback(){
+  var box = $("fbList");
+  var res = await sb.auth.getSession(), session = res.data && res.data.session;
+  if (!session) return;
+  var r = await fetch("/api/email?action=feedbackInbox", { headers: { Authorization: "Bearer " + session.access_token } });
+  if (!r.ok) { box.textContent = ""; box.appendChild(el("p", "muted", "Could not load feedback (" + r.status + ").")); return; }
+  FB = await r.json();
+  renderFeedbackList();
+}
+["fbStatus", "fbCat"].forEach(function(id){ $(id).addEventListener("change", function(){ if (FB) renderFeedbackList(); }); });
 
 /* ---------------------------------------------------------------- the marking quality check, run by hand */
 async function runQuality(){

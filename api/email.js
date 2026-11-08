@@ -21,6 +21,8 @@ const { buildAnyEmail, ALL_EMAIL_KEYS, sampleContext } = require("./_lib/emailAn
 //   event        POST  record one thing a signed-in person did in the app (usage_events)
 //   activity     GET   the owner's activity report: events, users and the latest pieces (owner only)
 //   learner      GET   one learner's parent Dashboard as the parent sees it (owner only)
+//   feedbackInbox  GET   all customer feedback with who sent it and the piece it was about (owner only)
+//   feedbackUpdate POST  set a feedback item's status, priority or notes (owner only)
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const CATEGORIES = ["bug", "idea", "praise", "question", "other"];
@@ -518,9 +520,49 @@ async function handleLearner(req, res) {
   return res.status(200).json(dash);
 }
 
+// Every piece of customer feedback with who sent it and, for a mistake report, the piece it was about. Owner only:
+// it shows children's writing, like the report above.
+async function handleFeedbackInbox(req, res) {
+  if (!(await requireOwner(req, res, "GET"))) return;
+  const { buildInbox, submissionIdOf } = require("./_lib/feedbackInbox");
+  const supabase = getSupabaseAdmin();
+  const { data: rows, error } = await supabase
+    .from("feedback")
+    .select("id, created_at, profile_id, source, email_key, rating, category, message, contact_ok, status, priority, owner_notes")
+    .order("created_at", { ascending: false })
+    .limit(300);
+  if (error) throw new Error(`Feedback query failed: ${error.message}`);
+  const profileIds = [...new Set((rows || []).map((r) => r.profile_id).filter(Boolean))];
+  const subIds = [...new Set((rows || []).map((r) => submissionIdOf(r.message)).filter(Boolean))];
+  const [profiles, children, submissions] = await Promise.all([
+    profileIds.length ? supabase.from("profiles").select("id, email, plan").in("id", profileIds) : { data: [] },
+    profileIds.length ? supabase.from("child_profiles").select("id, profile_id, display_name").in("profile_id", profileIds) : { data: [] },
+    subIds.length ? supabase.from("submissions").select("id, child_id, kind, country, grade_label, interest, content, feedback, score, total_questions, created_at").in("id", subIds) : { data: [] },
+  ]);
+  const failed = [profiles, children, submissions].find((r) => r.error);
+  if (failed) throw new Error(`Feedback lookup failed: ${failed.error.message}`);
+  return res.status(200).json(buildInbox({ rows: rows || [], profiles: profiles.data || [], children: children.data || [], submissions: submissions.data || [] }));
+}
+
+async function handleFeedbackUpdate(req, res) {
+  if (!(await requireOwner(req, res, "POST"))) return;
+  const { validateUpdate } = require("./_lib/feedbackInbox");
+  const body = parseBody(req);
+  if (!UUID.test(String(body.id || ""))) return res.status(400).json({ error: "id is required." });
+  const { patch, error: bad } = validateUpdate(body);
+  if (bad) return res.status(400).json({ error: bad });
+  const supabase = getSupabaseAdmin();
+  const { data, error } = await supabase.from("feedback").update(patch).eq("id", body.id).select("id, status, priority, owner_notes");
+  if (error) throw error;
+  if (!data || !data.length) return res.status(404).json({ error: "Feedback not found." });
+  return res.status(200).json({ ok: true, status: data[0].status, priority: data[0].priority, notes: data[0].owner_notes || "" });
+}
+
 module.exports = async function handler(req, res) {
   try {
     const action = String((req.query && req.query.action) || "");
+    if (action === "feedbackInbox") return await handleFeedbackInbox(req, res);
+    if (action === "feedbackUpdate") return await handleFeedbackUpdate(req, res);
     if (action === "event") return await handleEvent(req, res);
     if (action === "activity") return await handleActivity(req, res);
     if (action === "learner") return await handleLearner(req, res);
