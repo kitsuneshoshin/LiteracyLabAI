@@ -38,7 +38,12 @@ function redact(text) {
   if (typeof text !== "string") return text;
   return text.replace(QUOTED_BLOCK, '("[redacted]")').replace(QUOTED, '"[redacted]"');
 }
-function redactEvent(event) {
+function redactEvent(event, hint) {
+  // Safety net behind captureIfUnexpected: an expected 4xx (e.g. an expired
+  // sign-in, "Invalid or expired session.") must never be reported, even if
+  // it reaches Sentry by another route such as an unhandled rejection.
+  const orig = hint && hint.originalException;
+  if (orig && orig.statusCode && orig.statusCode < 500) return null;
   if (event.message) event.message = redact(event.message);
   for (const ex of (event.exception && event.exception.values) || []) ex.value = redact(ex.value);
   return event;
