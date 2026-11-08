@@ -26,7 +26,7 @@ const poemPassage = [
   "She moved the sign closer to the road", "and wrote the price in bigger letters.", "Soon a queue had formed,", "and by noon every cake was gone.",
 ].join("\n");
 function proseOf(words) {
-  const filler = Array.from({ length: Math.max(0, words - 46) }, (_, i) => ["gently", "slowly", "again", "outside", "morning", "market"][i % 6]).join(" ");
+  const filler = Array.from({ length: Math.max(0, words - 46) }, (_, i) => ["so", "we", "go", "on", "and", "see", "it", "all"][i % 8] + ((i + 1) % 8 === 0 ? "." : "")).join(" ");
   return PASSAGE_CORE + (filler ? " " + filler + "." : "");
 }
 
@@ -234,7 +234,7 @@ function fakeModel(prompt, { passage } = {}) {
   const style = (label) => Object.keys(QT.STYLE_LABEL).find((k) => QT.STYLE_LABEL[k] === label);
   const tier = /Early Years/.test(prompt) ? "early" : /Elementary/.test(prompt) ? "elementary" : /Middle School/.test(prompt) ? "middle" : "high";
   const isPoem = /wholly original (simple )?poem\b/.test(prompt);
-  return adaptToPrompt({ title: "The Cake Stall", skill: "Inference", passage: passage || (isPoem ? poemPassage : proseOf({ early: 110, elementary: 210, middle: 290, high: 370 }[tier])), questions: labels.map((l) => RAW[style(l)](tier)) }, prompt);
+  return adaptToPrompt({ title: "The Cake Stall", skill: "Inference", passage: passage || (isPoem ? poemPassage : proseOf({ early: 70, elementary: 160, middle: 260, high: 340 }[tier])), questions: labels.map((l) => RAW[style(l)](tier)) }, prompt);
 }
 
 async function runGenerator(tier, generate) {
@@ -331,7 +331,7 @@ function standardToken(tier) {
 }
 
 async function submitMixed(tier, template, answerFor) {
-  const passage = proseOf({ early: 110, elementary: 210, middle: 290, high: 370 }[tier]);
+  const passage = proseOf({ early: 70, elementary: 160, middle: 260, high: 340 }[tier]);
   const questions = QT.normalizeQuestions(rawFor(template, tier), template, seeded(11));
   const answers = questions.map(answerFor);
   const row = { id: "sub1", child_id: "c1", tier, country: COUNTRY, grade_label: GRADE[tier], interest: "football", content: { generatedPassage: { title: "The Cake Stall", skill: "Inference", passage, questions } }, feedback: null };

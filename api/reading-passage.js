@@ -25,14 +25,14 @@ const VALID_TIERS = ["early", "elementary", "middle", "high"];
 // styled plan keeps failing) a plain multiple-choice version of the same kind of text, so a student
 // is never turned away just because a fancier question style was hard to write.
 async function generateAndValidate(prompt, tier, opts = {}) {
-  const { template, textType, fallbackPrompt } = opts;
+  const { template, textType, fallbackPrompt, country, gradeLabel } = opts;
   const fallbackTemplate = opts.fallbackTemplate || QT.MC_FOUR;
   const rng = opts.rng || Math.random;
   const attemptWith = async (p, tpl) => {
     const attempt = await generateFeedbackJSON(p);
     if (attempt.parsed && textType && textType.visual && attempt.parsed.visual) attempt.parsed.visual = normalizeVisual(attempt.parsed.visual);
     if (attempt.parsed && Array.isArray(attempt.parsed.questions)) attempt.parsed.questions = QT.normalizeQuestions(attempt.parsed.questions, tpl, rng, tier);
-    return { attempt, check: validatePassage(attempt.parsed, { tier, template: tpl, textType }) };
+    return { attempt, check: validatePassage(attempt.parsed, { tier, template: tpl, textType, country, gradeLabel }) };
   };
 
   let r = await attemptWith(prompt, template);
@@ -133,7 +133,7 @@ module.exports = async function handler(req, res) {
       // If the styled plan keeps failing, fall back to plain multiple choice, keeping the written answer for Premium.
       const fallbackTemplate = withShort ? [...QT.MC_FOUR, "short"] : QT.MC_FOUR;
       const fallbackPrompt = buildReadingPassagePrompt({ tier, country, gradeLabel, textType, template: fallbackTemplate, skill: focus.skill || undefined, strict });
-      ({ parsed } = await generateAndValidate(llmPrompt, tier, { template, textType, fallbackPrompt, fallbackTemplate }));
+      ({ parsed } = await generateAndValidate(llmPrompt, tier, { template, textType, fallbackPrompt, fallbackTemplate, country, gradeLabel }));
       // A poem keeps its line breaks; prose is regrouped into paragraphs if the model sent one block.
       parsed.passage = (textType.lines || textType.two) ? String(parsed.passage).replace(/\r\n/g, "\n").trim() : paragraphise(parsed.passage);
       parsed.textType = textType.name;

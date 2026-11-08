@@ -9,6 +9,17 @@ const { growDevelops, assessLength } = require("./calibrate");
 const RESP = require("./responses");
 const TECH = require("./techniques");
 const { frameworkFor, VALID_GENRES } = require("./writingFrameworks");
+const { levelFor, readability, GRADE_AGE } = require("./gradeLevel");
+
+// Room above a year's aim before a finished passage is sent back: the model is told the aim, and a little over it
+// is still right for the year, while a retry costs time.
+const READING_SENTENCE_SLACK = 2.5;
+const READING_FK_SLACK = 1;
+const CEFR_LABEL = /^(A1|A2|B1|B2|C1|C2)\b/i;
+function gradeKnown(country, gradeLabel) {
+  if (/Global ESL/.test(String(country || ""))) return CEFR_LABEL.test(String(gradeLabel || "").trim());
+  return !!(GRADE_AGE[country] && GRADE_AGE[country][gradeLabel]);
+}
 
 const MAX_AVG_WORDS_PER_SENTENCE = { early: 14, elementary: 18, middle: 24, high: 32 };
 const SENTENCE_LENGTH_TOLERANCE = 2;
@@ -862,7 +873,7 @@ function wordCount(text) {
 // index that would silently break grading.
 // The passage and its questions. With a template, the questions must follow its styles exactly
 // (see api/_lib/questionTypes.js); without one, the original five multiple-choice questions.
-function validatePassage(parsed, { tier, template, textType }) {
+function validatePassage(parsed, { tier, template, textType, country, gradeLabel }) {
   const issues = [];
 
   if (!checkString(parsed?.title, 2, 100)) issues.push("title is missing or an unreasonable length");
@@ -870,10 +881,24 @@ function validatePassage(parsed, { tier, template, textType }) {
   if (!checkString(parsed?.passage, 20, 3000)) {
     issues.push("passage is missing or an unreasonable length");
   } else {
-    const [min0, max] = PASSAGE_WORD_BOUNDS[tier] || [20, 400];
+    // Bounds come from the learner's own year (gradeLevel.js) when it is known, with room either side of the aim;
+    // otherwise from the tier.
+    const level = country || gradeLabel ? levelFor(country, gradeLabel, tier) : null;
+    const yearBounds = level && level.reading && (level.age != null || level.cefr) && gradeKnown(country, gradeLabel)
+      ? [Math.floor(level.reading.words[0] * 0.75), Math.ceil(level.reading.words[1] * 1.25)] : null;
+    const [min0, max0] = yearBounds || PASSAGE_WORD_BOUNDS[tier] || [20, 400];
+    const max = textType && textType.visual ? Math.max(max0, 160) : max0; // the writing that comes with a table or chart is a fixed length
     const min = textType && (textType.lines || textType.visual) ? 25 : min0; // a poem, or a short text that comes with data, is shorter than prose
     const words = wordCount(parsed.passage);
-    if (words < min || words > max) issues.push(`passage is ${words} words, expected roughly ${min}-${max} for this age tier`);
+    if (words < min || words > max) issues.push(`passage is ${words} words, expected roughly ${min}-${max} for ${yearBounds ? gradeLabel : "this age tier"}`);
+    // Readability: the average sentence and the Flesch-Kincaid grade must not run above the year's ceiling.
+    // Poems and the text that sits beside a table or chart are not ordinary prose, so they are left out.
+    if (yearBounds && !(textType && (textType.lines || textType.visual)) && words >= 20) {
+      const r = readability(parsed.passage.replace(/^\s*Text [AB]:[^\n]*$/gm, ""));
+      const band = level.reading;
+      if (r.avg > band.avg + READING_SENTENCE_SLACK) issues.push(`sentences are too long for ${gradeLabel}: they average ${r.avg.toFixed(1)} words and should average about ${band.avg} or fewer (use shorter sentences and simpler words)`);
+      else if (r.fk > band.fk + READING_FK_SLACK) issues.push(`the text reads too hard for ${gradeLabel} (reading grade ${r.fk.toFixed(1)}, it should be about ${band.fk} or lower): use shorter sentences and more familiar words`);
+    }
   }
 
   if (textType && textType.visual) require("./visualText").validateVisual(parsed?.visual, textType.visual, issues);
@@ -891,10 +916,17 @@ function validatePassage(parsed, { tier, template, textType }) {
 // Structural check for an AI-generated writing prompt — deliberately loose
 // on content (there's no "correct answer" to a creative prompt), just
 // catches the model returning something malformed or absurdly short/long.
-function validateWritingPrompt(parsed, { tier }) {
+function validateWritingPrompt(parsed, { tier, country, gradeLabel }) {
   const issues = [];
   if (!checkString(parsed?.title, 2, 100)) issues.push("title is missing or an unreasonable length");
   if (!checkString(parsed?.prompt, 10, 400)) issues.push("prompt is missing, too short, or too long");
+  else if (country || gradeLabel) {
+    // A prompt a young learner cannot read in one go is the first thing that makes the task too hard.
+    const level = levelFor(country, gradeLabel, tier);
+    const n = wordCount(parsed.prompt);
+    const limit = Math.ceil(level.writing.maxWords * 1.25);
+    if (gradeKnown(country, gradeLabel) && n > limit) issues.push(`the prompt is ${n} words, too long for ${gradeLabel}: keep it to about ${level.writing.maxWords} words or fewer, in simpler words`);
+  }
   // Drives which named writing framework this piece is later taught with
   // (see writingFrameworks.js) - must be one of the real, known genres, not
   // an invented or paraphrased one, or frameworkForGenre() would silently

@@ -16,7 +16,7 @@ const GRADE = { elementary: "Year 5", middle: "Year 8", high: "Year 11" };
 const TABLE = { type: "table", title: "Pets at Oakfield School", headers: ["Pet", "Pupils"], rows: [["Dog", "12"], ["Cat", "9"], ["Fish", "5"]] };
 const CHART = { type: "chart", title: "Votes for the class trip", unit: "votes", items: [{ label: "Zoo", value: 14 }, { label: "Museum", value: 9 }, { label: "Beach", value: 17 }] };
 const CORE = "Mia set up her stall by the gate at nine. By ten, only two people had stopped, and both only looked. She moved the sign closer to the road and wrote the price in bigger letters. Soon a queue had formed, and by noon every cake was gone.";
-const filler = (n) => Array.from({ length: n }, (_, i) => ["gently", "slowly", "again", "outside", "morning", "market"][i % 6]).join(" ") + ".";
+const filler = (n) => { const w = ["so", "we", "go", "on", "and", "see", "it", "all"]; return Array.from({ length: n }, (_, i) => w[i % 8] + ((i + 1) % 8 === 0 ? "." : "")).join(" ") + "."; };
 
 // ------------------------------------------------------------ the data itself
 

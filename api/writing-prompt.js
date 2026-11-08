@@ -16,14 +16,14 @@ const VALID_TIERS = ["early", "elementary", "middle", "high"];
 // it inserts the submissions row (and consumes this account's monthly
 // credit) immediately - one credit per writing attempt, whether or not the
 // student ends up submitting a finished piece.
-async function generateAndValidate(prompt, tier) {
+async function generateAndValidate(prompt, tier, country, gradeLabel) {
   let attempt = await generateFeedbackJSON(prompt);
-  let check = validateWritingPrompt(attempt.parsed, { tier });
+  let check = validateWritingPrompt(attempt.parsed, { tier, country, gradeLabel });
   if (check.ok) return attempt;
 
   console.warn("Writing prompt validation failed on attempt 1:", check.issues);
   attempt = await generateFeedbackJSON(prompt + correctiveAddendum(check.issues));
-  check = validateWritingPrompt(attempt.parsed, { tier });
+  check = validateWritingPrompt(attempt.parsed, { tier, country, gradeLabel });
   if (check.ok) return attempt;
 
   console.warn("Writing prompt validation failed on attempt 2:", check.issues);
@@ -104,7 +104,7 @@ module.exports = async function handler(req, res) {
       // What the learner chose to practise (checked against fixed lists; the exam style is Premium only).
       const focus = writingFocusFor({ tier, country, gradeLabel, capabilities: usage.capabilities }, body.focus);
       const llmPrompt = buildWritingPromptGenerator({ tier, country, gradeLabel, genre: focus.genre || undefined, exam: focus.exam || undefined });
-      ({ parsed } = await generateAndValidate(llmPrompt, tier));
+      ({ parsed } = await generateAndValidate(llmPrompt, tier, country, gradeLabel));
       // The kind of piece decides which technique is taught, so a chosen kind is kept whatever the model tagged.
       if (focus.genre) parsed.genre = focus.genre;
       if (focus.exam) parsed.examStyle = focus.exam.name;

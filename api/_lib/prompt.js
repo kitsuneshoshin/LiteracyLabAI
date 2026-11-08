@@ -1,6 +1,7 @@
 const { curriculumLabel, standardsFor } = require("./curriculum");
 const REGIONAL = require("./regional");
 const { MAX_AVG_WORDS_PER_SENTENCE } = require("./validate");
+const { levelFor, ageWords } = require("./gradeLevel");
 const { assessLength, lengthClause } = require("./calibrate");
 const { examTargetsFor } = require("./masteryTargets");
 const RESP = require("./responses");
@@ -495,17 +496,7 @@ ${caps.deepFeedback ? shortAnswerShape(questions) : ""}${TECH.readingStrategySha
 }`;
 }
 
-// Bumped up from each tier's original length (early was 3-5 sentences,
-// elementary 6-10, middle 8-12, high 10-15) once the question count went
-// from 3 to 5 - a passage sized for 3 questions doesn't comfortably support
-// 5 genuinely distinct ones without repeating the same detail.
-const PASSAGE_LENGTH = {
-  early: "7-9 sentences (roughly 90-130 words), mostly simple but with a few longer sentences and at least one less common word a child can work out from context",
-  elementary: "11-15 sentences (roughly 180-240 words), with varied sentence lengths and some richer vocabulary that can be worked out from context",
-  middle: "13-18 sentences (roughly 250-330 words), with complex and compound sentence structures, figurative language and some implied meaning",
-  high: "15-20 sentences (roughly 320-420 words), written in a sophisticated, adult-register style with dense vocabulary and nuanced or layered ideas",
-};
-
+// Length, sentence length and vocabulary now come from gradeLevel.js, year by year, instead of one setting per tier.
 const PASSAGE_PARAGRAPHS = {
   early: "2 short paragraphs",
   elementary: "2-3 short paragraphs",
@@ -534,6 +525,8 @@ const PASSAGE_SKILL = {
 // skill: { key, text } the learner chose to work on (see focus.js), or undefined for the age's usual mix.
 function buildReadingPassagePrompt({ tier, country, gradeLabel, textType, template, skill, strict }) {
   const QT = require("./questionTypes");
+  const level = levelFor(country, gradeLabel, tier);
+  const band = level.reading;
   const plan = template || QT.MC_FOUR;
   const type = textType && textType.name ? textType : { name: "passage", lines: false };
   const isPoem = !!type.lines;
@@ -549,7 +542,9 @@ function buildReadingPassagePrompt({ tier, country, gradeLabel, textType, templa
     ? "about 40-90 words in total (a poem is shorter than prose)"
     : type.visual
       ? "about 60-140 words of writing (the data comes on top of this)"
-      : PASSAGE_LENGTH[tier];
+      : `${band.sentences} sentences (roughly ${band.words[0]}-${band.words[1]} words)`;
+  const levelRule = isPoem ? "" : `
+- Reading level: ${level.cefr ? `English learners at CEFR level ${level.cefr}` : `${ageWords(level.age)} in ${gradeLabel}`}. Vocabulary: ${band.vocab}. Sentences: ${band.structure}; the average sentence must be about ${band.avg} words or fewer, and no sentence longer than ${band.avg * 2} words. This is measured after you write it, so keep to it. Aim at the top of what a typical pupil at this level reads comfortably: a small stretch, never above it.`;
   const visualRule = type.visual === "table"
     ? `
 - Data: also return "visual", a table of invented but believable data that the text refers to: { "type": "table", "title": a short title, "headers": 2 to 5 short column labels, "rows": 3 to 7 rows, each with exactly one short cell per column (numbers as plain text, no units inside the cells unless short) }. The text and the table must agree. At least two questions must need numbers from the table (reading a value, comparing, a total, or a trend), and every such answer must be certain from the table alone.`
@@ -565,12 +560,12 @@ function buildReadingPassagePrompt({ tier, country, gradeLabel, textType, templa
 Write a short, wholly original ${type.name} - never copied or closely paraphrased from any existing published book, article, poem, or other copyrighted work - appropriate for this age, plus ${count} comprehension questions about it, in the styles listed below.${type.note ? " " + type.note : ""}
 
 Requirements:
-- Text length: ${lengthNote}.
+- Text length: ${lengthNote}.${levelRule}
 - Layout: write it ${layout}.
 - The questions should primarily test this comprehension skill: ${skill && skill.text ? skill.text : PASSAGE_SKILL[tier]}, but cover distinct details, moments, or angles of the text so the ${count} questions feel genuinely different.${skill && skill.text ? ` The learner chose to work on this skill, so at least three of the ${count} questions must test it directly.` : ""}
 - Each question has exactly ONE unambiguously correct answer that is clearly supported by the text. Wrong answers must be clearly wrong to a careful reader, not intentionally tricky or debatable.
 - Do not reuse character names, settings, or plots from well-known published works.
-- Pitch it as a real stretch for this age: at least two of the ${count} questions must need inference or interpretation rather than finding a stated fact.${strict ? ` Hold it to the full standard for this age: at least half of the ${count} questions must need inference, interpretation or comparing details, and every wrong option must be tempting to a reader who skimmed (taken from the text or a likely misreading), never obviously silly.` : ""}${visualRule}
+- ${level.age != null && level.age <= 7 ? `Keep the questions simple and in words this age can read: at least one of the ${count} questions needs a simple inference (how someone feels, or why something happened) rather than finding a stated fact.` : `Pitch it as a small stretch for this level: at least two of the ${count} questions must need inference or interpretation rather than finding a stated fact.`} The questions and answer options must be written at the same reading level as the text.${strict ? ` Hold it to the full standard for this age: at least half of the ${count} questions must need inference, interpretation or comparing details, and every wrong option must be tempting to a reader who skimmed (taken from the text or a likely misreading), never obviously silly.` : ""}${visualRule}
 
 The ${count} questions, in this exact order and in these exact styles:
 ${QT.questionPlanText(plan, tier)}
@@ -601,6 +596,8 @@ const WRITING_EXERCISE_TYPE = {
 // genre: the kind of piece the learner chose (see focus.js), or undefined for a surprise. exam: an exam style (Premium) or undefined.
 function buildWritingPromptGenerator({ tier, country, gradeLabel, genre, exam }) {
   const { WRITING_TASK } = require("./focus");
+  const level = levelFor(country, gradeLabel, tier);
+  const wband = level.writing;
   const chosen = genre && WRITING_TASK[genre] && WRITING_TASK[genre][tier] ? genre : null;
   const task = chosen ? WRITING_TASK[chosen][tier] : WRITING_EXERCISE_TYPE[tier];
   const examLine = exam && exam.style ? ` Write the prompt ${exam.style}, so it works as practice for the ${exam.name}.` : "";
@@ -614,8 +611,9 @@ Write ${task}.${examLine}
 Requirements:
 - The prompt must be wholly original — not copied or closely paraphrased from any existing published writing prompt, exam question, or exercise.
 - Do not reuse character names, settings, or specific plots from well-known published works.
-- Pitch it as a real stretch for this age: it should ask the student to make choices, take a perspective or develop an idea, not just describe or retell something simple.
-- Keep the prompt itself short (one or two sentences) — the student does the writing, not you.
+- Pitch it for ${level.cefr ? `English learners at CEFR level ${level.cefr}` : `${ageWords(level.age)} in ${gradeLabel}`}: it should ask for ${wband.ask}. A small stretch is good, but a prompt the student cannot read or picture straight away is too hard.
+- Write the prompt itself in words this reader can read easily, with no specialist vocabulary.
+- Keep the prompt itself short: no more than ${wband.maxWords} words — the student does the writing, not you.
 ${classify}
 
 Respond with ONLY a JSON object (no markdown fences, no commentary) with exactly this shape:

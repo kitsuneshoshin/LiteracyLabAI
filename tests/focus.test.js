@@ -218,7 +218,7 @@ test("through the endpoint: the exam style is only given to Premium, and only wh
 
 const TABLE = { type: "table", title: "Pets at Oakfield School", headers: ["Pet", "Pupils"], rows: [["Dog", "12"], ["Cat", "9"], ["Fish", "5"]] };
 const CORE = "Mia set up her stall by the gate at nine. By ten, only two people had stopped, and both only looked. She moved the sign closer to the road and wrote the price in bigger letters. Soon a queue had formed, and by noon every cake was gone.";
-const filler = (n) => Array.from({ length: n }, (_, i) => ["gently", "slowly", "again", "outside", "morning", "market"][i % 6]).join(" ") + ".";
+const filler = (n) => { const w = ["so", "we", "go", "on", "and", "see", "it", "all"]; return Array.from({ length: n }, (_, i) => w[i % 8] + ((i + 1) % 8 === 0 ? "." : "")).join(" ") + "."; };
 const RAWQ = {
   mc: () => ({ q: "What happened at ten o'clock?", options: ["Only two people stopped", "A queue formed", "The cakes were gone", "Mia went home"], correct: 0 }),
   tfng: () => ({ q: "The queue formed before the sign was moved.", correct: 1 }),
@@ -241,7 +241,7 @@ const answerFor = (prompt, tier) => {
   const chart = /"visual", a bar chart/.test(prompt);
   const two = /"Text A: <a short title>"/.test(prompt);
   let passage = poem ? "Mia set up her stall\nby the gate at nine.\nBy ten, only two people had stopped,\nand both only looked.\n\nShe moved the sign closer to the road\nand wrote the price in bigger letters.\nSoon a queue had formed,\nand by noon every cake was gone." : CORE + " " + filler({ elementary: 160, middle: 240, high: 300 }[tier]);
-  if (two) passage = "Text A: The seller\n" + CORE + "\n\nText B: The customer\n" + filler(130);
+  if (two) passage = "Text A: The seller\n" + CORE + "\n\nText B: The customer\n" + filler(170);
   return { title: "At the stall", skill: "Reading", passage, ...(table ? { visual: TABLE } : chart ? { visual: { type: "chart", title: "Pets", unit: "pupils", items: [{ label: "Dog", value: 12 }, { label: "Cat", value: 9 }, { label: "Fish", value: 5 }] } } : {}), questions: styleOf(prompt).map((s) => RAWQ[s](tier)) };
 };
 
