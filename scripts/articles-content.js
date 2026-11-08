@@ -234,8 +234,8 @@ const ARTICLES = [
   },
   {
     slug: "story-mountain-explained",
-    title: "Story Mountain explained: planning a story step by step",
-    description: "What the Story Mountain is, its five parts (opening, build-up, climax, resolution, ending) and how to use it to help a child plan a story.",
+    title: "Story Mountain explained: plan a story step by step",
+    description: "What a Story Mountain is, its five parts (opening, build-up, climax, resolution, ending), a worked example and a template to copy, for children aged 7 to 12.",
     lead: "The Story Mountain is a simple way to plan a story so it has a shape. Picture a mountain: the story climbs to an exciting peak and then comes back down. Children aged about 7 to 12 use it in many schools.",
     sections: [
       { h: "The five parts", ul: [
@@ -255,11 +255,26 @@ const ARTICLES = [
         "No problem: the story is just a list of things that happened. Ask what goes wrong.",
         "A climax that is not very exciting. Ask what the worst thing that could happen is.",
         "An abrupt ending. Ask how the character feels at the end and what has changed."] },
+      { h: "A blank Story Mountain template to copy", p: ["Draw a mountain with five labelled points and give your child one box to fill at each point. You do not need a printed template: a folded sheet of paper works well."], ul: [
+        "Point 1, bottom left (Opening): Who is in the story? Where are they? When is it?",
+        "Point 2, up the slope (Build-up): What happens that starts the problem? What does the character want?",
+        "Point 3, the peak (Climax): What is the most exciting, scary or surprising moment?",
+        "Point 4, down the slope (Resolution): How is the problem solved, and who solves it?",
+        "Point 5, bottom right (Ending): How does the character feel now, and what has changed?"] },
+      { h: "Turning the plan into a story", ul: [
+        "Give each point its own paragraph, or two for the build-up and climax.",
+        "Spend the most words at the peak. Slow down and add what the character sees, hears and feels.",
+        "Start each paragraph differently, so the story does not read as a list.",
+        "Read the story aloud when it is finished. Children often hear a missing word or a run-on sentence that they cannot see."] },
+      { h: "Story Mountain or other plans?", p: ["Some schools use a story spine, a five-finger plan or a simple beginning, middle and end instead. They all do the same job: give the story a shape before the writing starts. If your child's school uses a different plan, follow that one, and use the mountain as a back-up for stories that feel flat."] },
       { h: "Make it their own", p: ["Once they can use the mountain, encourage them to change it: start in the middle of the action or end on a surprise. Structure is a starting point, not a cage."] },
     ],
     faq: [
       ["What age is the Story Mountain for?", "It is most often used with children of about 7 to 12, but the idea works for any age."],
       ["Does every story need all five parts?", "For planning, yes. Later they can vary or combine parts."],
+      ["What are the parts of a Story Mountain?", "Opening, build-up, climax, resolution and ending. The climax is the peak of the mountain."],
+      ["How long should a Story Mountain plan take?", "Two to five minutes. One short line at each point is enough."],
+      ["Where can I find a free Story Mountain template?", "You can draw one: a mountain shape with five labelled points and one box for each. The template above shows what to write at each point."],
     ],
     related: rel("prompts", "feedback", "guides"),
   },

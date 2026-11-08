@@ -532,6 +532,13 @@
     .faq-item summary{ min-height:48px; }
   }
 
+  /* Tier switcher on phones: a tidy 2x2 grid instead of a pill that wraps. */
+  @media (max-width: 640px){
+    .tier-tabs{ display:grid; grid-template-columns:1fr 1fr; width:100%; border-radius:16px; gap:4px; }
+    .tier-tabs button{ padding:10px 8px; text-align:center; }
+    .tier-panel{ min-height:0; padding:18px; }
+  }
+
   /* comparison */
   .compare{ border:1px solid var(--border); border-radius:8px; overflow:hidden; background:var(--surface); }
   .compare-row{ display:grid; grid-template-columns: 1.3fr 1fr 1fr; align-items:center; }

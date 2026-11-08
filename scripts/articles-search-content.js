@@ -105,6 +105,46 @@ const SEARCH = [
     ],
     related: rel("us", "comprehension", "vocab", "worksheets", "prompts"),
   },
+  {
+    slug: "how-to-use-reading-worksheets-at-home",
+    title: "How to use reading worksheets at home: a parent's guide",
+    description: "How to use free reading comprehension worksheets at home: how often, how long, how to check answers, and what to do when your child finds them hard.",
+    lead: "A reading worksheet is a short text followed by questions. Used well, it is a calm ten-minute habit that builds reading and understanding. Used badly, it becomes another chore. This guide shows a simple routine that works for most children, whichever country you are in.",
+    sections: [
+      { h: "How to use a reading worksheet in five steps", ul: [
+        "Choose a sheet that is a little easy at first, so your child starts with a win.",
+        "Read the text together, or let your child read it aloud if they enjoy that.",
+        "Let your child answer the questions without help, using a pencil.",
+        "Check the answers together and ask \"How did you find that?\" for each one.",
+        "Stop after one sheet. Short and regular beats long and rare."] },
+      { h: "How often and how long", p: ["Two or three short sessions a week is plenty for most children. Ten to fifteen minutes is about right. If your child is tired or cross, stop and try again another day."] },
+      { h: "Checking answers without a fight", ul: [
+        "Start with what they got right and say why it was a good answer.",
+        "For a wrong answer, ask them to point to the line in the text that gave them the idea.",
+        "Remind them that the answer is nearly always in the text, even for questions that ask what a character feels.",
+        "Do not mark every small slip. Pick one thing to practise next time."] },
+      { h: "Question types to expect", ul: [
+        "Retrieval: find a fact stated in the text.",
+        "Vocabulary: work out what a word means from the sentence around it.",
+        "Inference: read between the lines to work out something the writer does not say directly.",
+        "Writer's choices: explain why the writer used a word or a short sentence.",
+        "Summary: say what the text is about in a sentence or two."] },
+      { h: "If your child finds worksheets hard", ul: [
+        "Go back to an easier sheet or to a year below. Confidence matters more than the label on the sheet.",
+        "Read the text aloud to them first, then let them answer.",
+        "Underline the key word in each question before looking for the answer.",
+        "Talk about a favourite book the same way: who, where, what happened and why."] },
+      { h: "Picking the right sheet", p: ["LiteracyLab AI has free printable reading worksheets written for UK, US and Australian classrooms, with a different mix of fiction and non-fiction at each year or grade. Pick the country and year that match your child's school, since spelling and the way questions are asked can differ."] },
+      { h: "A note on feedback tools", p: ["Worksheets practise reading. When your child begins to write longer answers or stories, LiteracyLab AI can give calm, specific feedback on what they wrote. It is a practice aid, not a replacement for a teacher who knows your child."] },
+    ],
+    faq: [
+      ["How often should my child do reading worksheets?", "Two or three short sessions a week is enough for most children. Ten to fifteen minutes is about right."],
+      ["Are free reading worksheets any good?", "They can be, if the text is well written and the questions ask for different skills, such as finding facts, working out word meanings and inferring. Look for answers you can check against the text."],
+      ["What if my child gets most answers wrong?", "Move to an easier sheet, read the text aloud together first and ask them to show you the line that supports each answer."],
+      ["Should I time the worksheet?", "Not at first. Timing can add stress. Add it later only if your child will sit a timed test."],
+    ],
+    related: rel("worksheets", "comprehension", "vocab", "guides", "prompts"),
+  },
 ];
 
 module.exports = { SEARCH, LINKS };
