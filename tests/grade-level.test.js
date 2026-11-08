@@ -122,3 +122,16 @@ test("levelFor: an unknown grade uses the middle of the tier, and the age is alw
   assert.equal(levelFor("Nowhere", "Whatever", "high").age, 16);
   assert.equal(levelFor(UK, "Year 7", "middle").age, 11);
 });
+
+test("a piece that is short for its year is told kindly: a next step, never a verdict, and the score cap still applies", () => {
+  const { calibrateScore, assessLength, lengthClause } = require("../api/_lib/calibrate");
+  const a = assessLength({ text: "word ".repeat(30), tier: "elementary", country: UK, gradeLabel: "Year 4" });
+  const parsed = { overallScore: 9, scoreReason: "Clear ideas." };
+  calibrateScore(parsed, a);
+  assert.ok(parsed.overallScore <= a.scoreCap, "still capped");
+  assert.match(parsed.scoreReason, /30 words against about 120 expected/);
+  assert.match(parsed.scoreReason, /lift this score/);
+  assert.doesNotMatch(parsed.scoreReason, /too short to score highly/);
+  assert.match(lengthClause(a), /never as a failure/);
+  assert.match(buildReadingPassagePrompt({ tier: "elementary", country: UK, gradeLabel: "Year 4" }), /Year 4/);
+});

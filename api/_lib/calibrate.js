@@ -55,7 +55,7 @@ function lengthClause(a) {
   if (a.level === "ok") return "";
   const pct = Math.max(1, Math.round(a.ratio * 100));
   const lead = `\n\nLENGTH CHECK (computed, not an estimate): the student wrote ${a.words} word${a.words === 1 ? "" : "s"}${a.repetitive ? ` (about ${a.effective} once repeated words are ignored)` : ""}; about ${a.target} are expected at this level, so this piece is roughly ${pct}% of the expected length.`;
-  const rules = ` Say so plainly and kindly in "scoreReason" (or in the grow if there is no score), do not award a high score or a high band for a piece this short, never describe it as developed, thorough or comprehensive, and make the main "grow" about developing the piece (adding the next reason, example or detail) rather than polishing wording. Do not praise a skill the few words do not demonstrate. Do not force an interest analogy into the grow. The revised response may develop their own points only as the REVISED RESPONSE instructions allow, and must keep their position.`;
+  const rules = ` Say so plainly and kindly in "scoreReason", as the next step to take and never as a failure (for example "a little more detail will lift this"), and name one thing they did well first (or in the grow if there is no score), do not award a high score or a high band for a piece this short, never describe it as developed, thorough or comprehensive, and make the main "grow" about developing the piece (adding the next reason, example or detail) rather than polishing wording. Do not praise a skill the few words do not demonstrate. Do not force an interest analogy into the grow. The revised response may develop their own points only as the REVISED RESPONSE instructions allow, and must keep their position.`;
   return lead + rules;
 }
 
@@ -99,8 +99,8 @@ function calibrateScore(parsed, a) {
   // Always state the real length when it is a factor, even if the model had
   // already scored low, so the number is explained honestly.
   if (a.level !== "ok" && typeof parsed.scoreReason === "string") {
-    const lead = `Your piece is ${a.words} word${a.words === 1 ? "" : "s"} against about ${a.target} expected, so it is too short to score highly. `;
-    if (!/\b(too short|very short|short piece|words? (against|of|expected))\b/i.test(parsed.scoreReason)) {
+    const lead = `Your piece is ${a.words} word${a.words === 1 ? "" : "s"} against about ${a.target} expected, so ${a.level === "short" ? "a little more writing will lift this score" : "this is a good start, and keeping going will lift this score"}. `;
+    if (!/\b(too short|very short|short piece|good start|lift this score|words? (against|of|expected))\b/i.test(parsed.scoreReason)) {
       parsed.scoreReason = (lead + parsed.scoreReason).slice(0, 300);
     }
   }

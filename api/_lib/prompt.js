@@ -175,7 +175,7 @@ function strictStandardClause(caps, kind) {
   if (kind === "reading") {
     return `\n\nSTRICT STANDARD: Hold this learner to the full expectation for their year group and do not round up. Praise only what the answers truly show: name the questions answered correctly, and for every wrong answer say exactly why the chosen option fails against the passage. Never call a result strong, excellent or secure when questions were missed. Stay encouraging in tone but do not soften the facts.`;
   }
-  return `\n\nSTRICT STANDARD: Hold this piece to the full expectation for this year group and country and do not round up. The Glow names only what is genuinely strong FOR THIS GRADE, with a short quote as proof, never general praise. If the piece falls short of the expected length, structure, sentence variety or accuracy, the Grow says so plainly and concretely, in encouraging words but without softening the fact. Never call a piece excellent, perfect or flawless unless it truly is.`;
+  return `\n\nSTRICT STANDARD: Hold this piece to the full expectation for this year group and country and do not round up. The Glow names only what is genuinely strong FOR THIS GRADE, with a short quote as proof, never general praise. If the piece falls short of the expected length, structure, sentence variety or accuracy, the Grow says so plainly and concretely, as a next step the learner can take ("next time, try adding...") rather than as a verdict, in warm, encouraging words but without softening the fact. Never use words like weak, poor, failed or disappointing, and keep the tone of a kind teacher. Never call a piece excellent, perfect or flawless unless it truly is.`;
 }
 
 function deepFeedbackClause(deep) {
