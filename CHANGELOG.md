@@ -5,6 +5,7 @@ Internal engineering changelog, not linked from the site. One entry per shipped 
 ## 2026-11-10
 
 - `78e78fc` Homepage: fluid layout for every screen, device and browser
+- `5e1afd9` Homepage FAQ: two-column desktop layout, clearer states, better readability
 
 ## 2026-11-08
 
