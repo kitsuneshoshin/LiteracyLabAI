@@ -187,3 +187,114 @@ section{ padding-block: 88px; }
   .plan-table thead th{ border-bottom: 0; }
   .plan-table tbody tr.group-head th{ display: block; padding: 18px 16px; }
 }
+
+/* ---------- every screen, device and browser ----------
+   One responsive layer for the home page (and its translated copies, which share this file). The content column is
+   fluid: it fills phones edge to edge with a safe gutter, grows with the window on laptops and desktops, and keeps
+   widening on big and ultra-wide monitors instead of leaving a narrow strip in the middle. Text and tap targets scale
+   with the screen, notched phones keep clear of the cut-outs, and nothing is allowed to scroll sideways. */
+html{ -webkit-text-size-adjust: 100%; text-size-adjust: 100%; scroll-padding-top: 76px; }
+body{ overflow-x: clip; }
+@supports not (overflow: clip){ body{ overflow-x: hidden; } }
+img, svg, video, canvas{ max-width: 100%; }
+h1, h2, h3{ overflow-wrap: break-word; }
+p, li, dd, summary{ overflow-wrap: break-word; }
+.btn{ -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+
+/* the content column: fluid gutter, wider ceiling as the screen grows */
+.wrap{
+  max-width: min(100%, 1140px);
+  padding-inline: max(clamp(16px, 4vw, 48px), env(safe-area-inset-left)) max(clamp(16px, 4vw, 48px), env(safe-area-inset-right));
+}
+@media (min-width: 1280px){ .wrap{ max-width: min(100%, 1240px); } }
+@media (min-width: 1536px){ .wrap{ max-width: min(100%, 1440px); } }
+@media (min-width: 1920px){ .wrap{ max-width: min(100%, 1680px); } }
+@media (min-width: 2400px){ .wrap{ max-width: min(100%, 2000px); } }
+
+/* type grows with the screen on big displays, and the hero uses the width it is given */
+@media (min-width: 1536px){
+  .hero{ padding-top: 72px; padding-bottom: 72px; }
+  .hero-grid{ gap: 72px; }
+  .hero-sub, .section-head p{ font-size: 19px; }
+  .section-head{ max-width: 900px; }
+  section{ padding-block: 104px; }
+  .step p{ font-size: 16.5px; }
+  .where-facts dd{ font-size: 36px; }
+}
+@media (min-width: 1920px){
+  .hero h1{ font-size: clamp(76px, 4.2vw, 96px); }
+  .section-head h2{ font-size: clamp(58px, 3.2vw, 72px); }
+  .hero-sub, .section-head p{ font-size: 20px; max-width: 680px; }
+  .section-head{ max-width: 1000px; }
+  .faq-list{ max-width: 960px; }
+}
+
+/* laptops and large tablets: keep the two-column hero from getting cramped */
+@media (min-width: 921px) and (max-width: 1100px){
+  .hero-grid{ gap: 36px; }
+  .hero h1{ font-size: clamp(38px, 5.2vw, 52px); }
+  .plate{ padding: 16px; }
+}
+
+/* tablets and small windows: the hero stacks, and the plate gets a comfortable width instead of stretching */
+@media (max-width: 920px){
+  .hero{ padding-top: 40px; padding-bottom: 40px; }
+  .hero-sub{ max-width: 680px; }
+  .plate-wrap, .hero-grid > div + div{ max-width: 720px; width: 100%; }
+}
+
+/* phones: full-width tap targets, no cramped rows */
+@media (max-width: 640px){
+  .hero h1{ font-size: clamp(34px, 10.4vw, 46px); }
+  .section-head h2{ font-size: clamp(30px, 8.6vw, 40px); }
+  .final-cta h2{ font-size: clamp(32px, 9vw, 44px); }
+  .hero-ctas{ flex-direction: column; align-items: stretch; }
+  .hero-ctas .btn{ width: 100%; justify-content: center; text-align: center; white-space: normal; }
+  .aud button{ flex: 1 1 calc(50% - 10px); padding: 0 12px; }
+  .plate{ padding: 14px; }
+  .plate-foot{ flex-wrap: wrap; }
+  .step h4{ font-size: 28px; }
+  .step, .step + .step{ padding-right: 0; }
+  .where-facts > div{ padding-right: 0; }
+  .plan-toggle{ width: 100%; }
+}
+@media (max-width: 380px){
+  .wrap{ padding-inline: max(14px, env(safe-area-inset-left)) max(14px, env(safe-area-inset-right)); }
+  .aud button, .where-tabs button{ font-size: 14px; }
+  .eyebrow{ font-size: 11px; }
+}
+
+/* short landscape phones: don't let the sticky bar eat the screen */
+@media (max-height: 480px) and (orientation: landscape){
+  .nav{ position: static; }
+  .hero, section{ padding-block: 32px; }
+}
+
+/* pointer devices get hover polish; touch devices don't get stuck hover states */
+@media (hover: none){
+  .btn-ghost:hover, .plan-toggle:hover{ background: transparent; color: var(--ink); }
+  .btn-ghost:active, .plan-toggle:active{ background: var(--ink); color: var(--bg); }
+}
+
+/* older browsers without color-mix(): fall back to plain tints so nothing turns transparent or unreadable */
+@supports not (background: color-mix(in srgb, red 10%, blue)){
+  .plan-table .col-best, .plan-table thead .col-best{ background: var(--accent-tint); }
+  .plate .mark-fill{ fill: var(--accent-tint); }
+  .final-cta p{ color: var(--on-ink); opacity: .85; }
+}
+
+/* high-contrast and print */
+@media (forced-colors: active){ .aud button[aria-pressed="true"], .plate-tabs button[aria-pressed="true"], .where-tabs button[aria-pressed="true"]{ outline: 2px solid Highlight; } }
+@media print{ .nav, .final-cta{ display: none; } body{ background: #fff; } }
+
+/* Safari needs the prefixed blur on the sticky bar */
+.nav{ -webkit-backdrop-filter: blur(10px); }
+
+/* nav on tablets (781-1000px): links stay on one line and tighten up, the button label stays whole */
+.nav-links a, .nav-cta .btn{ white-space: nowrap; }
+@media (min-width: 781px) and (max-width: 1000px){
+  .nav-links{ gap: 16px; font-size: 11px; letter-spacing: 0.06em; }
+  .nav-inner{ gap: 10px; }
+  .nav-cta .btn{ padding-inline: 14px; font-size: 13.5px; }
+}
+@media (max-width: 780px){ .nav-links{ padding-inline: max(16px, env(safe-area-inset-left)) max(16px, env(safe-area-inset-right)); } }
