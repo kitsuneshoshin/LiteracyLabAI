@@ -4,6 +4,8 @@ Internal engineering changelog, not linked from the site. One entry per shipped 
 
 ## 2026-11-18
 
+- `024d3da` All guide, article and worksheet-hub pages now share the homepage header (logo, links, theme toggle, Launch workspace, phone menu) and footer, and use the full page width with card grids that adapt from phone to desktop
+
 - `ac378e4` Guides hub and country pages now use the full screen width: 4-column country grid on desktop, 2 columns on phones, intro links in columns, fluid text sizes and notch-safe edges
 
 - `0943ee2` Homepage pricing comparison: on wide screens it is now a normal table (feature on the left, Free / Core / Premium in columns on one row) instead of stacked rows with big gaps
