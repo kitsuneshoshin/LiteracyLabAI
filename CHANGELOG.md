@@ -2,6 +2,10 @@
 
 Internal engineering changelog, not linked from the site. One entry per shipped commit, newest first, grouped by day. Generated from git history — run `git log --format="%ad|%h|%s" --date=short` in the repo to regenerate or extend.
 
+## 2026-11-18
+
+- `36042fa` Save the cancellation reason Stripe sends in its second update, and show who cancelled and why on the admin People table
+
 ## 2026-11-10
 
 - `78e78fc` Homepage: fluid layout for every screen, device and browser
