@@ -6,6 +6,7 @@ const { checkRateLimit } = require("./_lib/rateLimit");
 const { generateFeedbackJSON } = require("./_lib/openai");
 const { buildWritingPromptGenerator, correctiveAddendum } = require("./_lib/prompt");
 const { writingFocusFor } = require("./_lib/focus");
+const { writingTopic } = require("./_lib/topics");
 const { validateWritingPrompt } = require("./_lib/validate");
 
 const VALID_TIERS = ["early", "elementary", "middle", "high"];
@@ -103,7 +104,7 @@ module.exports = async function handler(req, res) {
     try {
       // What the learner chose to practise (checked against fixed lists; the exam style is Premium only).
       const focus = writingFocusFor({ tier, country, gradeLabel, capabilities: usage.capabilities }, body.focus);
-      const llmPrompt = buildWritingPromptGenerator({ tier, country, gradeLabel, genre: focus.genre || undefined, exam: focus.exam || undefined });
+      const llmPrompt = buildWritingPromptGenerator({ tier, country, gradeLabel, genre: focus.genre || undefined, exam: focus.exam || undefined, topic: writingTopic(tier, focus.genre || undefined) });
       ({ parsed } = await generateAndValidate(llmPrompt, tier, country, gradeLabel));
       // The kind of piece decides which technique is taught, so a chosen kind is kept whatever the model tagged.
       if (focus.genre) parsed.genre = focus.genre;

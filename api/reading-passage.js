@@ -9,7 +9,8 @@ const { validatePassage } = require("./_lib/validate");
 const { paragraphise } = require("./_lib/passageFormat");
 const QT = require("./_lib/questionTypes");
 const { normalizeVisual } = require("./_lib/visualText");
-const { readingFocusFor } = require("./_lib/focus");
+const { readingFocusFor, examTextTypes } = require("./_lib/focus");
+const { readingTopic } = require("./_lib/topics");
 
 const VALID_TIERS = ["early", "elementary", "middle", "high"];
 
@@ -125,14 +126,17 @@ module.exports = async function handler(req, res) {
       const withShort = !!(usage.capabilities && usage.capabilities.deepFeedback) && !!QT.SHORT_MARKS[tier];
       // What the learner chose to practise: a kind of text and/or a skill (checked against fixed lists).
       const focus = readingFocusFor({ tier, country, gradeLabel, capabilities: usage.capabilities }, body.focus);
-      const textType = focus.textType || QT.pickTextType(tier);
+      // An exam-style passage is a kind of text that exam really sets (never a poem for a prose paper).
+      const examTypes = focus.exam ? examTextTypes(tier, focus.exam.name) : null;
+      const textType = focus.textType || (examTypes ? examTypes[Math.floor(Math.random() * examTypes.length)] : QT.pickTextType(tier));
+      const topic = readingTopic(tier);
       const baseTemplate = QT.pickTemplate(tier, Math.random, textType);
       const template = withShort ? [...baseTemplate, "short"] : baseTemplate;
       const strict = !!(usage.capabilities && usage.capabilities.strictStandard);
-      const llmPrompt = buildReadingPassagePrompt({ tier, country, gradeLabel, textType, template, skill: focus.skill || undefined, strict, exam: focus.exam || undefined });
+      const llmPrompt = buildReadingPassagePrompt({ tier, country, gradeLabel, textType, template, skill: focus.skill || undefined, strict, exam: focus.exam || undefined, topic });
       // If the styled plan keeps failing, fall back to plain multiple choice, keeping the written answer for Premium.
       const fallbackTemplate = withShort ? [...QT.MC_FOUR, "short"] : QT.MC_FOUR;
-      const fallbackPrompt = buildReadingPassagePrompt({ tier, country, gradeLabel, textType, template: fallbackTemplate, skill: focus.skill || undefined, strict, exam: focus.exam || undefined });
+      const fallbackPrompt = buildReadingPassagePrompt({ tier, country, gradeLabel, textType, template: fallbackTemplate, skill: focus.skill || undefined, strict, exam: focus.exam || undefined, topic });
       ({ parsed } = await generateAndValidate(llmPrompt, tier, { template, textType, fallbackPrompt, fallbackTemplate, country, gradeLabel }));
       // A poem keeps its line breaks; prose is regrouped into paragraphs if the model sent one block.
       parsed.passage = (textType.lines || textType.two) ? String(parsed.passage).replace(/\r\n/g, "\n").trim() : paragraphise(parsed.passage);

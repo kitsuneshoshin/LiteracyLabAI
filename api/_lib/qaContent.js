@@ -5,7 +5,8 @@
 // the model does unaided.
 
 const { GRADE_AGE, levelFor, readability } = require("./gradeLevel");
-const { examStyleFor, readingExamStyleFor } = require("./focus");
+const { examStyleFor, readingExamStyleFor, examTextTypes } = require("./focus");
+const { readingTopic, writingTopic } = require("./topics");
 const QT = require("./questionTypes");
 const { buildReadingPassagePrompt, buildWritingPromptGenerator } = require("./prompt");
 const { validatePassage, validateWritingPrompt } = require("./validate");
@@ -35,17 +36,19 @@ async function runSample({ kind, country, gradeLabel, tier, exam, generate, rng 
   const level = levelFor(country, gradeLabel, tier);
   const t0 = Date.now();
   if (kind === "reading") {
-    const textType = QT.pickTextType(tier, rng);
-    const template = QT.pickTemplate(tier, rng, textType);
     const examStyle = exam ? readingExamStyleFor(country, gradeLabel) : null;
-    const prompt = buildReadingPassagePrompt({ tier, country, gradeLabel, textType, template, exam: examStyle || undefined });
+    const types = examStyle ? examTextTypes(tier, examStyle.name) : null;
+    const textType = types ? types[Math.floor(rng() * types.length)] : QT.pickTextType(tier, rng);
+    const template = QT.pickTemplate(tier, rng, textType);
+    const topic = readingTopic(tier, rng);
+    const prompt = buildReadingPassagePrompt({ tier, country, gradeLabel, textType, template, exam: examStyle || undefined, topic });
     const { parsed } = await generate(prompt, { maxTokens: 3800 });
     if (parsed && Array.isArray(parsed.questions)) parsed.questions = QT.normalizeQuestions(parsed.questions, template, rng, tier);
     const check = validatePassage(parsed, { tier, template, textType, country, gradeLabel });
     const text = parsed && parsed.passage ? String(parsed.passage) : "";
     const r = readability(text);
     return {
-      kind, country, gradeLabel, tier, exam: examStyle ? examStyle.name : null, textType: textType.name, title: parsed && parsed.title,
+      kind, country, gradeLabel, tier, exam: examStyle ? examStyle.name : null, textType: textType.name, topic, title: parsed && parsed.title,
       passage: text, visual: parsed && parsed.visual || null,
       questions: ((parsed && parsed.questions) || []).map((q) => ({ type: q.type, q: q.q || q.prompt || q.text, options: q.options, correct: q.correct, answer: q.answer })),
       measured: { words: r.words, avgSentence: Number(r.avg.toFixed(1)), fk: Number(r.fk.toFixed(1)) },
@@ -54,12 +57,13 @@ async function runSample({ kind, country, gradeLabel, tier, exam, generate, rng 
     };
   }
   const examStyle = exam ? examStyleFor(country, gradeLabel) : null;
-  const prompt = buildWritingPromptGenerator({ tier, country, gradeLabel, exam: examStyle || undefined });
+  const topic = writingTopic(tier, undefined, rng);
+  const prompt = buildWritingPromptGenerator({ tier, country, gradeLabel, exam: examStyle || undefined, topic });
   const { parsed } = await generate(prompt, { maxTokens: 1200 });
   const check = validateWritingPrompt(parsed, { tier, country, gradeLabel });
   const text = parsed && parsed.prompt ? String(parsed.prompt) : "";
   return {
-    kind, country, gradeLabel, tier, exam: examStyle ? examStyle.name : null, title: parsed && parsed.title, prompt: text, genre: parsed && parsed.genre,
+    kind, country, gradeLabel, tier, exam: examStyle ? examStyle.name : null, topic, title: parsed && parsed.title, prompt: text, genre: parsed && parsed.genre,
     words: text.split(/\s+/).filter(Boolean).length, maxWords: level.writing ? level.writing.maxWords : null,
     valid: check.ok, issues: check.issues || [], ms: Date.now() - t0,
   };

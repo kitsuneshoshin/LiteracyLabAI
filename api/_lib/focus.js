@@ -192,6 +192,33 @@ const READING_EXAM = {
   "state test (Common Core)": "the way a US state reading test does: a literary or informational text, and questions that ask for the evidence in the text, the theme or central idea, word meaning including figurative language, and the author's point of view",
 };
 
+// Which kinds of text each exam's reading paper really uses (names from questionTypes.js TEXT_TYPES, any age). Without this a
+// CBSE or PSLE style passage could come out as a poem or a set of instructions, which those papers never set. An exam not
+// listed here keeps every kind except poems and instructions, unless it is one of the few that do set poetry.
+const READING_EXAM_TYPES = {
+  "PSLE English": ["short story", "information text", "diary entry or letter", "bar chart"],
+  "Singapore secondary English": ["short story", "story extract", "news or magazine article", "article", "persuasive piece", "persuasive or opinion piece", "bar chart", "data table", "two texts"],
+  "O-Level English Paper 1": ["story extract", "article", "news or magazine article", "persuasive or opinion piece", "bar chart", "data table", "two texts"],
+  "CBSE Class 10 English": ["information text", "news or magazine article", "persuasive piece", "article", "persuasive or opinion piece", "data table", "bar chart"],
+  "CBSE Class 12 English": ["information text", "news or magazine article", "persuasive piece", "article", "persuasive or opinion piece", "story extract", "short story", "data table", "bar chart"],
+  "IGCSE English First Language": ["article", "news or magazine article", "persuasive or opinion piece", "persuasive piece", "speech", "two texts"],
+  "Cambridge AS and A Level English": ["article", "news or magazine article", "persuasive or opinion piece", "persuasive piece", "speech", "diary entry or letter", "two texts"],
+  "OSSLT": ["short story", "story extract", "information text", "news or magazine article", "article", "diary entry or letter"],
+  "EQAO": ["short story", "story extract", "information text", "news or magazine article", "article"],
+  "NSC English": ["article", "news or magazine article", "persuasive or opinion piece", "persuasive piece", "bar chart", "data table", "story extract"],
+  "HKDSE English Language": ["article", "news or magazine article", "persuasive or opinion piece", "persuasive piece", "diary entry or letter", "data table", "bar chart"],
+};
+const EXAMS_WITH_POETRY = new Set(["KS2 SATs", "KS2 English", "state test (Common Core)", "NAPLAN", "CEFR writing task", "Junior Cycle English", "NCEA English"]);
+
+// The kinds of text this exam's reading paper uses at this age (the whole list for the age when none is defined).
+function examTextTypes(tier, examName) {
+  const all = TEXT_TYPES[tier] || [];
+  const allowed = READING_EXAM_TYPES[examName];
+  let list = allowed ? all.filter((t) => allowed.includes(t.name)) : EXAMS_WITH_POETRY.has(examName) ? all : all.filter((t) => !/poem|instructions/i.test(t.name));
+  const prose = all.filter((t) => !/poem|instructions/i.test(t.name));
+  return list.length ? list : prose.length ? prose : all;
+}
+
 // The learner's exam, for reading: { name, read } or null. Same applicability as the writing exam style.
 function readingExamStyleFor(country, gradeLabel) {
   const e = examStyleFor(country, gradeLabel);
@@ -214,6 +241,6 @@ function readingFocusFor({ tier, country, gradeLabel, capabilities }, raw) {
 }
 
 module.exports = {
-  WRITING_GENRES, WRITING_TASK, GENRE_ORDER, examStyleFor, readingExamStyleFor, READING_EXAM, gradeNumber, writingFocusFor,
+  WRITING_GENRES, WRITING_TASK, GENRE_ORDER, examStyleFor, readingExamStyleFor, READING_EXAM, READING_EXAM_TYPES, examTextTypes, gradeNumber, writingFocusFor,
   READING_SKILLS, READING_SKILLS_BY_TIER, SKILL_ORDER, readingFocusFor,
 };

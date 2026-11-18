@@ -15,6 +15,10 @@ const { levelFor, readability, GRADE_AGE } = require("./gradeLevel");
 // is still right for the year, while a retry costs time.
 const READING_SENTENCE_SLACK = 2.5;
 const READING_FK_SLACK = 1;
+// Older learners were being handed texts five or more grades below the year (a live check of 22 passages found 16 at least
+// three grades easy). The floor is wide on purpose: readability scores underrate short, punchy writing, and speeches are exempt.
+const READING_FK_FLOOR = 5;
+const READING_FLOOR_FROM_AGE = 11;
 const CEFR_LABEL = /^(A1|A2|B1|B2|C1|C2)\b/i;
 function gradeKnown(country, gradeLabel) {
   if (/Global ESL/.test(String(country || ""))) return CEFR_LABEL.test(String(gradeLabel || "").trim());
@@ -898,6 +902,7 @@ function validatePassage(parsed, { tier, template, textType, country, gradeLabel
       const band = level.reading;
       if (r.avg > band.avg + READING_SENTENCE_SLACK) issues.push(`sentences are too long for ${gradeLabel}: they average ${r.avg.toFixed(1)} words and should average about ${band.avg} or fewer (use shorter sentences and simpler words)`);
       else if (r.fk > band.fk + READING_FK_SLACK) issues.push(`the text reads too hard for ${gradeLabel} (reading grade ${r.fk.toFixed(1)}, it should be about ${band.fk} or lower): use shorter sentences and more familiar words`);
+      else if (level.age != null && level.age >= READING_FLOOR_FROM_AGE && !(textType && /speech/i.test(textType.name)) && r.fk < band.fk - READING_FK_FLOOR) issues.push(`the text reads too easy for ${gradeLabel} (reading grade ${r.fk.toFixed(1)}, it should be about ${band.fk}): use richer, more precise vocabulary and longer, more varied sentences with subordinate clauses, averaging about ${band.avg} words`);
     }
   }
 

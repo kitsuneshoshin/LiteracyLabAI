@@ -223,7 +223,7 @@ test("through the endpoint: the exam style is only given to Premium, and only wh
 
 const TABLE = { type: "table", title: "Pets at Oakfield School", headers: ["Pet", "Pupils"], rows: [["Dog", "12"], ["Cat", "9"], ["Fish", "5"]] };
 const CORE = "Mia set up her stall by the gate at nine. By ten, only two people had stopped, and both only looked. She moved the sign closer to the road and wrote the price in bigger letters. Soon a queue had formed, and by noon every cake was gone.";
-const filler = (n) => { const w = ["so", "we", "go", "on", "and", "see", "it", "all"]; return Array.from({ length: n }, (_, i) => w[i % 8] + ((i + 1) % 8 === 0 ? "." : "")).join(" ") + "."; };
+const filler = (n) => { const w = ["so", "we", "considerable", "and", "atmosphere", "it", "idea", "all"]; return Array.from({ length: n }, (_, i) => w[i % 8] + ((i + 1) % 8 === 0 ? "." : "")).join(" ") + "."; };
 const RAWQ = {
   mc: () => ({ q: "What happened at ten o'clock?", options: ["Only two people stopped", "A queue formed", "The cakes were gone", "Mia went home"], correct: 0 }),
   tfng: () => ({ q: "The queue formed before the sign was moved.", correct: 1 }),

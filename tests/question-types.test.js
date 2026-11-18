@@ -26,7 +26,9 @@ const poemPassage = [
   "She moved the sign closer to the road", "and wrote the price in bigger letters.", "Soon a queue had formed,", "and by noon every cake was gone.",
 ].join("\n");
 function proseOf(words) {
-  const filler = Array.from({ length: Math.max(0, words - 46) }, (_, i) => ["so", "we", "go", "on", "and", "see", "it", "all"][i % 8] + ((i + 1) % 8 === 0 ? "." : "")).join(" ");
+  // Older passages are checked for being too easy as well as too hard, so the filler for long texts uses longer words.
+  const W = words >= 160 ? ["so", "we", "considerable", "and", "atmosphere", "it", "idea", "all"] : ["so", "we", "go", "on", "and", "see", "it", "all"];
+  const filler = Array.from({ length: Math.max(0, words - 46) }, (_, i) => W[i % 8] + ((i + 1) % 8 === 0 ? "." : "")).join(" ");
   return PASSAGE_CORE + (filler ? " " + filler + "." : "");
 }
 

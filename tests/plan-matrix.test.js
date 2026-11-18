@@ -530,7 +530,7 @@ for (const plan of PLANS) {
 
     test(`reading passage: ${plan} / ${tier} - generates 5 questions (plus one written answer where the plan has Premium feedback) and never sends the answer key`, async () => {
       const [lo, hi] = passageWordRange(tier);
-      const passage = Array.from({ length: Math.round((lo + hi) / 2) }, (_, i) => `word${i}` + ((i + 1) % 8 === 0 ? "." : "")).join(" ") + ".";
+      const passage = Array.from({ length: Math.round((lo + hi) / 2) }, (_, i) => (({ middle: [2, 5, 7], high: [1, 3, 5, 7] }[tier] || null) ? (({ middle: [2, 5, 7], high: [1, 3, 5, 7] }[tier]).includes(i % 8) ? "banana" : `w${i}`) : `word${i}`) + ((i + 1) % 8 === 0 ? "." : "")).join(" ") + ".";
       const parsed = { title: "The Volcano", skill: "Inference", passage, questions: QUESTIONS.map((q, i) => ({ ...q, options: [`a${i}`, `b${i}`, `c${i}`, `d${i}`] })) };
       const h = loadHandler("reading-passage.js", {
         plan, used: 0,

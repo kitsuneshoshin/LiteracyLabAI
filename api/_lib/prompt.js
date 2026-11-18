@@ -529,7 +529,7 @@ const PASSAGE_SKILL = {
 // engaging - and it meant two students with different interests never saw
 // the same original passage even when everything else about them matched.
 // skill: { key, text } the learner chose to work on (see focus.js), or undefined for the age's usual mix.
-function buildReadingPassagePrompt({ tier, country, gradeLabel, textType, template, skill, strict, exam }) {
+function buildReadingPassagePrompt({ tier, country, gradeLabel, textType, template, skill, strict, exam, topic }) {
   const QT = require("./questionTypes");
   const level = levelFor(country, gradeLabel, tier);
   const band = level.reading;
@@ -558,6 +558,9 @@ function buildReadingPassagePrompt({ tier, country, gradeLabel, textType, templa
 - Curriculum fit: this learner follows ${curriculumLabel(country)}. Write a text of the kind that curriculum uses: ${regionNote}.` : "";
   const examRule = exam && exam.read ? `
 - Exam style: this is practice for the ${exam.name}. Set the text and the questions ${exam.read}. Keep to the question styles listed below and to this learner's reading level.` : "";
+  // One subject picked at random, so the model does not keep writing about the same few things.
+  const topicRule = topic ? `
+- Subject: write about ${topic}. Do not fall back on school gardens, seeds, composting, rainy days, or a hidden object unless that is the subject above.` : "";
   const visualRule = type.visual === "table"
     ? `
 - Data: also return "visual", a table of invented but believable data that the text refers to: { "type": "table", "title": a short title, "headers": 2 to 5 short column labels, "rows": 3 to 7 rows, each with exactly one short cell per column (numbers as plain text, no units inside the cells unless short) }. The text and the table must agree. At least two questions must need numbers from the table (reading a value, comparing, a total, or a trend), and every such answer must be certain from the table alone.`
@@ -573,7 +576,7 @@ function buildReadingPassagePrompt({ tier, country, gradeLabel, textType, templa
 Write a short, wholly original ${type.name} - never copied or closely paraphrased from any existing published book, article, poem, or other copyrighted work - appropriate for this age, plus ${count} comprehension questions about it, in the styles listed below.${type.note ? " " + type.note : ""}
 
 Requirements:
-- Text length: ${lengthNote}.${levelRule}${regionRule}${examRule}
+- Text length: ${lengthNote}.${levelRule}${regionRule}${examRule}${topicRule}
 - Layout: write it ${layout}.
 - The questions should primarily test this comprehension skill: ${skill && skill.text ? skill.text : (regionSkill || PASSAGE_SKILL[tier])}, but cover distinct details, moments, or angles of the text so the ${count} questions feel genuinely different.${skill && skill.text ? ` The learner chose to work on this skill, so at least three of the ${count} questions must test it directly.` : ""}
 - Each question has exactly ONE unambiguously correct answer that is clearly supported by the text. Wrong answers must be clearly wrong to a careful reader, not intentionally tricky or debatable.
@@ -607,7 +610,7 @@ const WRITING_EXERCISE_TYPE = {
 // Same reasoning as buildReadingPassagePrompt above: interest stays out of
 // the exercise itself, and only shapes the feedback afterward.
 // genre: the kind of piece the learner chose (see focus.js), or undefined for a surprise. exam: an exam style (Premium) or undefined.
-function buildWritingPromptGenerator({ tier, country, gradeLabel, genre, exam }) {
+function buildWritingPromptGenerator({ tier, country, gradeLabel, genre, exam, topic }) {
   const { WRITING_TASK } = require("./focus");
   const level = levelFor(country, gradeLabel, tier);
   const wband = level.writing;
@@ -617,6 +620,8 @@ function buildWritingPromptGenerator({ tier, country, gradeLabel, genre, exam })
   const classify = chosen
     ? `- This prompt must ask for a "${chosen}" piece, so classify it as exactly "${chosen}" (from these exact options: ${VALID_GENRES.join(", ")}). This is used later to decide which writing technique to teach the student.`
     : `- Also classify what this specific prompt is actually asking the student to write, from these exact options: ${VALID_GENRES.join(", ")}. This will typically be "${DEFAULT_GENRE_BY_TIER[tier]}" for a piece written at this tier, but tag whichever one genuinely matches what you wrote — this is used later to decide which writing technique to teach the student, so it must reflect the real exercise, not just default to the usual one.`;
+  const topicLine = topic ? `
+- Idea to build it around: ${topic}. Do not use a hidden door, a key, a box, a secret passage, or mobile phones in school unless the idea above says so.` : "";
   const wNote = level.cefr ? null : CP.writingNote(country, level.age);
   const regionLine = wNote ? `
 - Curriculum fit: this learner follows ${curriculumLabel(country)}. Where it suits the kind of piece asked for, use the forms and conventions that curriculum uses: ${wNote}.` : "";
@@ -629,7 +634,7 @@ Requirements:
 - Do not reuse character names, settings, or specific plots from well-known published works.
 - Pitch it for ${level.cefr ? `English learners at CEFR level ${level.cefr}` : `${ageWords(level.age)} in ${gradeLabel}`}: it should ask for ${wband.ask}. A small stretch is good, but a prompt the student cannot read or picture straight away is too hard.
 - Write the prompt itself in words this reader can read easily, with no specialist vocabulary.
-- Keep the prompt itself short: no more than ${wband.maxWords} words — the student does the writing, not you.${regionLine}
+- Keep the prompt itself short: no more than ${wband.maxWords} words — the student does the writing, not you.${regionLine}${topicLine}
 ${classify}
 
 Respond with ONLY a JSON object (no markdown fences, no commentary) with exactly this shape:
