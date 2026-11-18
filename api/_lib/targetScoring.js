@@ -1,4 +1,5 @@
 const { recentMastery } = require("./mastery");
+const { LEVEL_VALUE } = require("./skillLevels");
 const { conventionsTarget, conventionsScore } = require("./conventions");
 
 // Real per-skill mastery, computed from this student's own submission
@@ -11,14 +12,20 @@ const { conventionsTarget, conventionsScore } = require("./conventions");
 // learner improves. A target with zero mentions yet is "Not Yet Assessed" rather than a fabricated percentage.
 // submissions arrive newest first.
 //
-// Premium pieces also carry a band (1-4) for EVERY objective (fb.examTechnique). That is a much finer signal than the one
+// Premium pieces carry a band (1-4) for EVERY objective (fb.examTechnique). That is a much finer signal than the one
 // strength and one next step, so where a piece has a band for a target it is used instead of the strength / next step:
 // Emerging, Developing, Secure and Strong read as 10%, 40%, 70% and 95%. A band given with "Too little writing to judge"
 // says nothing about the learner, so it is skipped and the strength / next step (if any) is used.
-const BAND_VALUE = { 1: 0.1, 2: 0.4, 3: 0.7, 4: 0.95 };
+const BAND_VALUE = LEVEL_VALUE;
 
 function bandsByTarget(fb, outcomes) {
   const bands = new Map();
+  // Every plan but Premium's exam bands: a 1-4 level per skill (see _lib/skillLevels.js).
+  if (fb.skillLevels && typeof fb.skillLevels === "object" && !Array.isArray(fb.skillLevels)) {
+    for (const [name, level] of Object.entries(fb.skillLevels)) {
+      if (outcomes.has(name) && LEVEL_VALUE[level] !== undefined) bands.set(name, LEVEL_VALUE[level]);
+    }
+  }
   if (!Array.isArray(fb.examTechnique)) return bands;
   for (const e of fb.examTechnique) {
     if (!e || !outcomes.has(e.criterion)) continue;

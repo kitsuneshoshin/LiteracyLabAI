@@ -9,6 +9,7 @@ const { targetsForGrade, examTargetsFor } = require("./_lib/masteryTargets");
 const RESP = require("./_lib/responses");
 const TECH = require("./_lib/techniques");
 const QT = require("./_lib/questionTypes");
+const { cleanSkillLevels } = require("./_lib/skillLevels");
 const { frameworkFor } = require("./_lib/writingFrameworks");
 const { makeSplitGenerator, splitEnabled } = require("./_lib/splitGenerate");
 const { coerceOverallScore, dropNonVerbatimHighlights, dropRestatingHighlights, repairResponses, dropGlowsQuotingMisspellings, plainStandardInGlow, validateFeedback, resolveTarget, dropInvalidSpellingGrammar, sanitizeQuestionReview, repairZeroScoreGlow, repairReadingExamEvidence, repairShortAnswer, stripUngrantedSections } = require("./_lib/validate");
@@ -75,6 +76,7 @@ async function generateAndValidate(prompt, tier, country, gradeLabel, submittedT
     TECH.repairVocabTricks(attempt.parsed);
     TECH.trimExtraVocab(attempt.parsed);
     coerceOverallScore(attempt.parsed);
+    cleanSkillLevels(attempt.parsed, examTargetNames, { ask: !(capabilities?.examTechnique && examTechniqueSupported(tier)) });
     TECH.repairFrayer(attempt.parsed);
     if (submittedText) { if (TECH.devicesApply(genre, tier)) TECH.repairDevices(attempt.parsed, submittedText); else delete attempt.parsed.deviceCheck; }
     if (submittedText) { dropNonVerbatimHighlights(attempt.parsed, submittedText); dropRestatingHighlights(attempt.parsed, submittedText); }

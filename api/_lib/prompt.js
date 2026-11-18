@@ -7,6 +7,7 @@ const { assessLength, lengthClause } = require("./calibrate");
 const { examTargetsFor } = require("./masteryTargets");
 const RESP = require("./responses");
 const TECH = require("./techniques");
+const SL = require("./skillLevels");
 const { frameworkForGenre, frameworkFor, resolveGenre, DEFAULT_GENRE_BY_TIER, VALID_GENRES } = require("./writingFrameworks");
 
 const TIER_LABEL = { early: "Early Years (ages 5-7)", elementary: "Elementary (ages 8-10)", middle: "Middle School (ages 11-13)", high: "High School (ages 14-18)" };
@@ -317,6 +318,8 @@ function buildWritingPrompt({ tier, country, gradeLabel, interest, confidenceWri
   // a caller with no plan info still gets the full feedback shape.
   const wantsScore = !coreOnly && caps.overallScore !== false;
   const wantsSpelling = !coreOnly && caps.spellingGrammar !== false;
+  // Where there are no exam bands (every plan but Premium's middle and high school years), a 1-4 level for each skill.
+  const wantsLevels = !(caps.examTechnique && examTechniqueSupported(tier)) && Array.isArray(targets) && targets.length > 0;
   // The reply's fields, one entry each, so the shape stays valid JSON whichever are asked for.
   const shapeEntries = [
     `  "glow": "1-2 sentences of specific, genuine praise tied to something the student actually did in this text and to the curriculum standard noted above."`,
@@ -331,6 +334,7 @@ function buildWritingPrompt({ tier, country, gradeLabel, interest, confidenceWri
   ];
   if (caps.deepFeedback) shapeEntries.push('  "growNext": "ONE further, harder step: the next level of the same skill as the main grow (or the very next skill), as a concrete action for their next piece that quotes a short verbatim fragment of their own work in quotation marks - no analogy, no games or projects, not a restatement."');
   if (wantsExam) shapeEntries.push(examJsonShape(targets, "writing"));
+  if (wantsLevels) shapeEntries.push(SL.skillLevelsShape(targets));
   shapeEntries.push('  "frameworkTip": { "name": "the exact framework name you were given, verbatim", "quote": "a real, verbatim fragment from the student\'s own submitted text", "revision": "that exact fragment rewritten to demonstrate the framework applied to THEIR writing" }');
   if (TECH.devicesApply(genre, tier)) shapeEntries.push(TECH.deviceShape(genre, tier));
   if (wantsScore) shapeEntries.push('  "overallScore": "an integer 1-10 scoring the WHOLE piece against the four criteria above",\n  "scoreReason": "one sentence citing the specific strength/weakness pattern across the whole piece that drove that score"');
@@ -354,7 +358,7 @@ ${standardsClause(country, tier, gradeLabel)}
 ${targetsClause(targetNames)}
 ${highlightsClause(tier)}
 ${deepFeedbackClause(caps.deepFeedback)}${strictStandardClause(caps, "writing")}
-${wantsExam ? examTechniqueClause({ tier, targets, kind: "writing" }) : ""}
+${wantsExam ? examTechniqueClause({ tier, targets, kind: "writing" }) : ""}${wantsLevels ? SL.skillLevelsClause(targets, "writing") : ""}
 ${frameworkClause({ tier, genre })}${TECH.deviceClause(genre, tier)}
 ${wantsScore ? overallScoreClause() : ""}${lengthClause(assessment)}
 ${coreOnly ? "" : revisedStoryClause(tier, wantsSpelling, assessment, origWords) + (wantsModel ? RESP.responsesClause({ fw, tier, gradeLabel, country, assessment }) : "")}
@@ -448,6 +452,7 @@ function buildReadingPrompt({ tier, country, gradeLabel, interest, confidenceRea
   const caps = capabilities || {};
   targets = examTargetsFor(targets, "reading");
   const wantsExam = caps.examTechnique && examTechniqueSupported(tier) && Array.isArray(targets) && targets.length > 0;
+  const wantsLevels = !(caps.examTechnique && examTechniqueSupported(tier)) && Array.isArray(targets) && targets.length > 0;
   const QT = require("./questionTypes");
   const answerLines = questions.map((q, i) => {
     const chosen = answers[i];
@@ -476,7 +481,7 @@ ${analogyRule(tier, interest)}
 ${standardsClause(country, tier, gradeLabel)}
 ${targetsClause(targetNames)}
 ${deepFeedbackClause(caps.deepFeedback)}${strictStandardClause(caps, "reading")}
-${wantsExam ? examTechniqueClause({ tier, targets, kind: "reading" }) : ""}${questionReviewClause(questions.length, interest)}${caps.deepFeedback ? shortAnswerClause(questions, answers) : ""}${TECH.readingStrategyClause(tier)}${TECH.vocabTrickClause(tier)}${TECH.frayerClause(tier)}
+${wantsExam ? examTechniqueClause({ tier, targets, kind: "reading" }) : ""}${wantsLevels ? SL.skillLevelsClause(targets, "reading") : ""}${questionReviewClause(questions.length, interest)}${caps.deepFeedback ? shortAnswerClause(questions, answers) : ""}${TECH.readingStrategyClause(tier)}${TECH.vocabTrickClause(tier)}${TECH.frayerClause(tier)}
 
 ${workedExample({ score: false, spelling: false })}
 
@@ -491,7 +496,7 @@ Respond with ONLY a JSON object (no markdown fences, no commentary) with exactly
     { "term": "a second word or phrase from the passage", "definition": "a one-sentence, age-appropriate definition in plain everyday words, with no comparison to their interest", "example": "a fresh sentence using the term correctly, set in everyday life or school (their interest, ${interest}, only where it fits naturally)", "trick": "one short sentence applying the word trick to this word"${TECH.frayerShape(tier)} }
   ],
   "glowTarget": "the exact skill area name from the given list that the glow demonstrates",
-  "growTarget": "the exact skill area name from the given list that the grow is building towards"${caps.deepFeedback ? ',\n  "growNext": "ONE further, harder step: the next level of the same skill as the main grow (or the very next skill), as a concrete action for their next piece that quotes a short verbatim fragment of their own work in quotation marks - no analogy, no games or projects, not a restatement."' : ""}${wantsExam ? `,\n${examJsonShape(targets)}` : ""},
+  "growTarget": "the exact skill area name from the given list that the grow is building towards"${caps.deepFeedback ? ',\n  "growNext": "ONE further, harder step: the next level of the same skill as the main grow (or the very next skill), as a concrete action for their next piece that quotes a short verbatim fragment of their own work in quotation marks - no analogy, no games or projects, not a restatement."' : ""}${wantsExam ? `,\n${examJsonShape(targets)}` : ""}${wantsLevels ? `,\n${SL.skillLevelsShape(targets)}` : ""},
 ${questionReviewShape(questions.length)},
 ${caps.deepFeedback ? shortAnswerShape(questions) : ""}${TECH.readingStrategyShape()}
 }`;
