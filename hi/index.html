@@ -412,6 +412,7 @@
   /* trust row */
   .trust{ display:flex; flex-wrap:wrap; gap: 10px; justify-content:center; }
   .trust-item{ font-family:"Lexend",sans-serif; display:flex; align-items:center; gap:9px; padding:9px 16px; border:1px solid var(--border); border-radius: 999px; font-size:13px; font-weight:600; color: var(--ink-soft); background: var(--surface); }
+  @media (max-width: 640px){ .trust{ gap:6px; } .trust-item{ padding:6px 11px; font-size:12px; gap:7px; } }
 
   /* feature split */
   .split{ display:grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items:center; }
@@ -540,6 +541,8 @@
   }
 
   /* comparison */
+  .verify-head{ margin-top:64px; }
+  .verify-head h3{ font-size:clamp(26px,3.4vw,38px); font-weight:400; line-height:1.2; }
   .compare{ border:1px solid var(--border); border-radius:8px; overflow:hidden; background:var(--surface); }
   .compare-row{ display:grid; grid-template-columns: 1.3fr 1fr 1fr; align-items:center; }
   .compare-row + .compare-row{ border-top:1px solid var(--border-soft); }
@@ -797,14 +800,10 @@
         <div class="compare-cell yes"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> COPPA को ध्यान में रखकर बनाया गया — कभी बेचा नहीं जाता, कभी सार्वजनिक मॉडल सिखाने में इस्तेमाल नहीं होता</div>
       </div>
     </div>
-  </div>
-</section>
 
-<section>
-  <div class="wrap">
-    <div class="section-head">
+    <div class="section-head verify-head">
       <span class="eyebrow">फ़ीडबैक की जाँच कैसे होती है</span>
-      <h2>पुष्टि, सिर्फ़ अंदाज़ा नहीं।</h2>
+      <h3>पुष्टि, सिर्फ़ अंदाज़ा नहीं।</h3>
       <p>किसी AI मॉडल का जवाब दे देना इस बात के बराबर नहीं कि वह जवाब सही है। हर फ़ीडबैक आपके बच्चे तक पहुँचने से पहले स्वचालित जाँचों से गुज़रती है — यह किसी एक मॉडल का बिना जाँचा नतीजा नहीं जिस पर आँख मूँदकर भरोसा किया जाए।</p>
     </div>
     <div class="split">

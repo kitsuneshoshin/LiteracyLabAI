@@ -354,6 +354,7 @@
   /* trust row */
   .trust{ display:flex; flex-wrap:wrap; gap: 10px; justify-content:center; }
   .trust-item{ font-family:"Lexend",sans-serif; display:flex; align-items:center; gap:9px; padding:9px 16px; border:1px solid var(--border); border-radius: 999px; font-size:13px; font-weight:600; color: var(--ink-soft); background: var(--surface); }
+  @media (max-width: 640px){ .trust{ gap:6px; } .trust-item{ padding:6px 11px; font-size:12px; gap:7px; } }
 
   /* feature split */
   .split{ display:grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items:center; }
@@ -482,6 +483,8 @@
   }
 
   /* comparison */
+  .verify-head{ margin-top:64px; }
+  .verify-head h3{ font-size:clamp(26px,3.4vw,38px); font-weight:400; line-height:1.2; }
   .compare{ border:1px solid var(--border); border-radius:8px; overflow:hidden; background:var(--surface); }
   .compare-row{ display:grid; grid-template-columns: 1.3fr 1fr 1fr; align-items:center; }
   .compare-row + .compare-row{ border-top:1px solid var(--border-soft); }
@@ -736,14 +739,10 @@
         <div class="compare-cell yes"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> COPPA-minded by design — never sold, never used to train public models</div>
       </div>
     </div>
-  </div>
-</section>
 
-<section>
-  <div class="wrap">
-    <div class="section-head">
+    <div class="section-head verify-head">
       <span class="eyebrow">How feedback is checked</span>
-      <h2>Verification, not vibes.</h2>
+      <h3>Verification, not vibes.</h3>
       <p>An AI model generating a response is not the same as that response being correct. Every piece of feedback goes through automated checks before your child ever sees it — not a single unreviewed model output, trusted blindly.</p>
     </div>
     <div class="split">

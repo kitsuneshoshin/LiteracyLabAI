@@ -412,6 +412,7 @@
   /* trust row */
   .trust{ display:flex; flex-wrap:wrap; gap: 10px; justify-content:center; }
   .trust-item{ font-family:"Lexend",sans-serif; display:flex; align-items:center; gap:9px; padding:9px 16px; border:1px solid var(--border); border-radius: 999px; font-size:13px; font-weight:600; color: var(--ink-soft); background: var(--surface); }
+  @media (max-width: 640px){ .trust{ gap:6px; } .trust-item{ padding:6px 11px; font-size:12px; gap:7px; } }
 
   /* feature split */
   .split{ display:grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items:center; }
@@ -540,6 +541,8 @@
   }
 
   /* comparison */
+  .verify-head{ margin-top:64px; }
+  .verify-head h3{ font-size:clamp(26px,3.4vw,38px); font-weight:400; line-height:1.2; }
   .compare{ border:1px solid var(--border); border-radius:8px; overflow:hidden; background:var(--surface); }
   .compare-row{ display:grid; grid-template-columns: 1.3fr 1fr 1fr; align-items:center; }
   .compare-row + .compare-row{ border-top:1px solid var(--border-soft); }
@@ -797,14 +800,10 @@
         <div class="compare-cell yes"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> 设计时考虑了 COPPA——绝不出售，也绝不用于训练公共模型</div>
       </div>
     </div>
-  </div>
-</section>
 
-<section>
-  <div class="wrap">
-    <div class="section-head">
+    <div class="section-head verify-head">
       <span class="eyebrow">反馈如何被检查</span>
-      <h2>靠验证，而不是靠感觉。</h2>
+      <h3>靠验证，而不是靠感觉。</h3>
       <p>AI 模型生成了回答，并不等于这个回答是正确的。每一条反馈在孩子看到之前都要经过自动检查——它不是某个模型未经审核的单次输出，更不会被盲目信任。</p>
     </div>
     <div class="split">

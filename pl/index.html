@@ -412,6 +412,7 @@
   /* trust row */
   .trust{ display:flex; flex-wrap:wrap; gap: 10px; justify-content:center; }
   .trust-item{ font-family:"Lexend",sans-serif; display:flex; align-items:center; gap:9px; padding:9px 16px; border:1px solid var(--border); border-radius: 999px; font-size:13px; font-weight:600; color: var(--ink-soft); background: var(--surface); }
+  @media (max-width: 640px){ .trust{ gap:6px; } .trust-item{ padding:6px 11px; font-size:12px; gap:7px; } }
 
   /* feature split */
   .split{ display:grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items:center; }
@@ -540,6 +541,8 @@
   }
 
   /* comparison */
+  .verify-head{ margin-top:64px; }
+  .verify-head h3{ font-size:clamp(26px,3.4vw,38px); font-weight:400; line-height:1.2; }
   .compare{ border:1px solid var(--border); border-radius:8px; overflow:hidden; background:var(--surface); }
   .compare-row{ display:grid; grid-template-columns: 1.3fr 1fr 1fr; align-items:center; }
   .compare-row + .compare-row{ border-top:1px solid var(--border-soft); }
@@ -795,14 +798,10 @@
         <div class="compare-cell yes"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.5 12.5l5 5 10-11"/></svg> Z myślą o COPPA — nigdy nie sprzedawane i nigdy nie używane do trenowania publicznych modeli</div>
       </div>
     </div>
-  </div>
-</section>
 
-<section>
-  <div class="wrap">
-    <div class="section-head">
+    <div class="section-head verify-head">
       <span class="eyebrow">Jak sprawdzamy informacje zwrotne</span>
-      <h2>Weryfikacja, a nie wrażenia.</h2>
+      <h3>Weryfikacja, a nie wrażenia.</h3>
       <p>Odpowiedź wygenerowana przez model AI to nie to samo, co odpowiedź poprawna. Każda informacja zwrotna przechodzi automatyczne kontrole, zanim zobaczy ją Twoje dziecko — to nie jest pojedyncza, niesprawdzona odpowiedź modelu, której ślepo się ufa.</p>
     </div>
     <div class="split">
