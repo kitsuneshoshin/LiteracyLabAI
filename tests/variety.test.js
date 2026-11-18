@@ -70,11 +70,21 @@ const check = (passage, tier, gradeLabel, textType) => validatePassage({ title: 
 test("an older learner is not given a passage written for much younger readers", () => {
   const issues = check(simple(340), "high", "Year 11").issues;
   assert.ok(issues.some((i) => /reads too easy for Year 11/.test(i)), issues.join(" | "));
-  assert.ok(issues.find((i) => /too easy/.test(i)).includes("about 12.5"), "says what the year should be");
+  assert.ok(issues.find((i) => /too easy/.test(i)).includes("about 11"), "says what the year should be");
 });
 
 test("the too-easy check leaves younger years, speeches and poems alone", () => {
   assert.ok(!check(simple(160), "elementary", "Year 5").issues.some((i) => /too easy/.test(i)), "under 11 is exempt");
   assert.ok(!check(simple(340), "high", "Year 11", { name: "speech", lines: false }).issues.some((i) => /too easy/.test(i)), "speeches use short sentences");
   assert.ok(!check(simple(80), "high", "Year 11", { name: "poem", lines: true }).issues.some((i) => /too easy/.test(i)), "poems are not prose");
+});
+
+test("for ages 14 and over the stretch comes from vocabulary, ideas and inference, and half the questions need inference", () => {
+  const base = { tier: "high", country: UK, textType: QT.TEXT_TYPES.high[0], template: QT.TEMPLATES.high[0] };
+  const old = buildReadingPassagePrompt({ ...base, gradeLabel: "Year 10" });
+  assert.match(old, /precise vocabulary, layered ideas/);
+  assert.match(old, /at least half of the \d+ questions must need inference/);
+  const young = buildReadingPassagePrompt({ ...base, tier: "middle", gradeLabel: "Year 8", textType: QT.TEXT_TYPES.middle[0], template: QT.TEMPLATES.middle[0] });
+  assert.doesNotMatch(young, /precise vocabulary, layered ideas/);
+  assert.match(young, /at least two of the \d+ questions must need inference/);
 });

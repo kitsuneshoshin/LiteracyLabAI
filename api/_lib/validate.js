@@ -15,9 +15,10 @@ const { levelFor, readability, GRADE_AGE } = require("./gradeLevel");
 // is still right for the year, while a retry costs time.
 const READING_SENTENCE_SLACK = 2.5;
 const READING_FK_SLACK = 1;
-// Older learners were being handed texts five or more grades below the year (a live check of 22 passages found 16 at least
-// three grades easy). The floor is wide on purpose: readability scores underrate short, punchy writing, and speeches are exempt.
-const READING_FK_FLOOR = 5;
+// Older learners were being handed texts far below the year (a live check of 22 passages found 16 at least three grades
+// under the old targets). The floor is six grades under the target, so it still lets through real exam passages (about 6.6 to
+// 6.9 for ages 14 to 18). It is wide on purpose: readability scores underrate short, punchy writing, and speeches are exempt.
+const READING_FK_FLOOR = 6;
 const READING_FLOOR_FROM_AGE = 11;
 const CEFR_LABEL = /^(A1|A2|B1|B2|C1|C2)\b/i;
 function gradeKnown(country, gradeLabel) {

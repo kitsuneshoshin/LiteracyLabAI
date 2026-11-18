@@ -6,6 +6,9 @@
 // own reading band (length, sentence length, vocabulary, a readability ceiling that is checked mechanically after
 // the model writes) and its own writing-prompt band. The English-learner mode is banded by CEFR level instead.
 //
+// For ages 13 to 18 the ceilings were lowered on 18 Nov 2026 after measuring real exam passages (a Leaving Certificate Higher Level
+// text, age 17-18, read at grade 6.9; a Junior Cycle text, age 14-15, at 6.6): the old 12.5 to 15.5 asked for adult newspaper writing.
+// They still sit about four grades above those real texts, because the point is to stretch.
 // The bands aim at a small step ABOVE what a typical learner of that age reads comfortably - the point of the
 // app is to stretch - but never the "adult register" a 14-year-old was being given before.
 
@@ -40,12 +43,12 @@ const READING_BY_AGE = {
   10: { words: [160, 215], sentences: "11-14", avg: 13, fk: 7.5,  vocab: "everyday words with some richer vocabulary and a little figurative language that can be worked out from context", structure: "varied sentence lengths, with some complex sentences, in clear paragraphs" },
   11: { words: [190, 250], sentences: "12-16", avg: 14, fk: 8.5,  vocab: "a good range of vocabulary, with some figurative language and a few harder words that context explains", structure: "complex and compound sentences in short paragraphs, with one idea that is hinted at rather than stated" },
   12: { words: [220, 290], sentences: "13-17", avg: 15, fk: 9.5,  vocab: "a good range of vocabulary and figurative language, with a few subject words explained by the text", structure: "complex and compound sentences, with some implied meaning" },
-  13: { words: [250, 320], sentences: "14-18", avg: 16, fk: 10.5, vocab: "rich vocabulary and figurative language; any technical word is explained by the text", structure: "varied sentence structures, with a clear viewpoint and some implied meaning" },
-  14: { words: [280, 350], sentences: "14-19", avg: 17, fk: 11.5, vocab: "rich, precise vocabulary, with figurative language and a few abstract words", structure: "varied sentence structures, with an argument or a mood that builds across paragraphs" },
-  15: { words: [300, 380], sentences: "15-20", avg: 18, fk: 12.5, vocab: "rich, precise vocabulary with some abstract and formal words", structure: "varied and sometimes long sentences, with a layered idea or a viewpoint that needs interpreting" },
-  16: { words: [330, 420], sentences: "15-21", avg: 19, fk: 13.5, vocab: "sophisticated vocabulary, still clear on a careful first read", structure: "varied and sometimes long sentences, with nuanced or layered ideas" },
-  17: { words: [350, 450], sentences: "16-22", avg: 20, fk: 14.5, vocab: "sophisticated vocabulary and a confident, formal or literary register", structure: "long and varied sentences, with nuanced ideas and a clear stance or tone" },
-  18: { words: [370, 480], sentences: "16-22", avg: 20, fk: 15.5, vocab: "sophisticated, adult vocabulary and register", structure: "long and varied sentences, with nuanced, layered ideas and a clear stance or tone" },
+  13: { words: [250, 320], sentences: "14-18", avg: 16, fk: 10.0, vocab: "rich vocabulary and figurative language; any technical word is explained by the text", structure: "varied sentence structures, with a clear viewpoint and some implied meaning" },
+  14: { words: [280, 350], sentences: "14-19", avg: 16, fk: 10.5, vocab: "rich, precise vocabulary, with figurative language and a few abstract words", structure: "varied sentence structures, with an argument or a mood that builds across paragraphs" },
+  15: { words: [300, 380], sentences: "15-20", avg: 17, fk: 11.0, vocab: "rich, precise vocabulary with some abstract and formal words", structure: "varied and sometimes long sentences, with a layered idea or a viewpoint that needs interpreting" },
+  16: { words: [330, 420], sentences: "15-21", avg: 17, fk: 11.5, vocab: "sophisticated vocabulary, still clear on a careful first read", structure: "varied and sometimes long sentences, with nuanced or layered ideas" },
+  17: { words: [350, 450], sentences: "16-22", avg: 18, fk: 12.0, vocab: "sophisticated vocabulary and a confident, formal or literary register", structure: "long and varied sentences, with nuanced ideas and a clear stance or tone" },
+  18: { words: [370, 480], sentences: "16-22", avg: 18, fk: 12.5, vocab: "sophisticated, adult vocabulary and register", structure: "long and varied sentences, with nuanced, layered ideas and a clear stance or tone" },
 };
 
 // English learners, by CEFR level.

@@ -89,8 +89,8 @@ test("validatePassage: a plain passage passes for Year 2 and a dense one is sent
 });
 
 test("validatePassage: the same dense text is fine for Year 13 and the length bound follows the year", () => {
-  const sixth = "Although the organisers had postponed the departure, the climbers resumed their careful preparations, and the valley below slowly filled with cloud. ";
-  const long = sixth.repeat(14);
+  const sixth = "Although the organisers had delayed the departure, the climbers resumed their preparations as cloud filled the valley below. ";
+  const long = sixth.repeat(16);
   const r = validatePassage({ title: "Expedition", skill: "Infer", passage: long, questions: QUESTIONS }, { tier: "high", country: UK, gradeLabel: "Year 13" });
   assert.ok(!r.issues.some((i) => /too long for|reads too hard/.test(i)), r.issues.join("; "));
   const tooLongForReception = validatePassage({ title: "x", skill: "y", passage: easy.repeat(6), questions: QUESTIONS }, { tier: "early", country: UK, gradeLabel: "Reception" });
