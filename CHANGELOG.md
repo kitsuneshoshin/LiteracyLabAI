@@ -20,6 +20,7 @@ Internal engineering changelog, not linked from the site. One entry per shipped 
 
 - `39bbf8c` Progress bars and the weekly trend now move smoothly (recency-weighted, graded) instead of jumping in 50% steps
 
+- `29e823a` Reading-level targets for ages 13 to 18 lowered to sit just above real exam passages (they were adult newspaper level); older passages now lean on vocabulary, ideas and inference, and at least half the questions need inference
 - `4758d75` Stop the model repeating the same few topics (random subject per piece), reject older passages written far too easily, and keep exam-style reading to kinds of text that exam really sets; admin content spot-check added
 - `5fa3818` Hong Kong and South Africa notes checked against the official curriculum guides and the November 2025 senior certificate papers
 - `ea65e08` Irish Junior Cycle and Leaving Cert notes now match the real exam papers; CBSE Class 10 confirmed against the official syllabus
