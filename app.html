@@ -1749,7 +1749,7 @@ function VocabularyBank({ session, childId, backendLive, onSeePlans, displayName
                 <IconSparkle size={14} /> Practise flashcards
               </button>
               <button onClick={startQuiz} disabled={loading} className="focus-ring inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-bold disabled:opacity-50" style={{ background: "var(--surface-2)", color: "var(--ink)" }}>
-                {loading ? "Loading…" : "Take a quiz"}
+                {!loading && <IconTarget size={14} />} {loading ? "Loading…" : "Take a quiz"}
               </button>
             </div>
           )}
