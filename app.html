@@ -177,8 +177,16 @@
   }
   .analyzing-pulse{ animation: pulse-ring 1.6s cubic-bezier(.4,0,.6,1) infinite; }
 
+  /* Word Dash (vocabulary game): a quick pop for coins, a hatch for a new Word Pal, a tiny shake for a miss */
+  @keyframes dash-pop{ 0%{ transform: scale(.6); opacity:0; } 45%{ transform: scale(1.25); opacity:1; } 100%{ transform: scale(1); opacity:1; } }
+  .dash-pop{ animation: dash-pop .45s cubic-bezier(.16,1,.3,1) both; }
+  @keyframes dash-hatch{ 0%{ transform: scale(.2) rotate(-12deg); opacity:0; } 55%{ transform: scale(1.3) rotate(8deg); opacity:1; } 75%{ transform: scale(.92) rotate(-4deg); } 100%{ transform: scale(1) rotate(0); opacity:1; } }
+  .dash-hatch{ animation: dash-hatch .9s cubic-bezier(.16,1,.3,1) both; }
+  @keyframes dash-shake{ 0%,100%{ transform: translateX(0); } 25%{ transform: translateX(-5px); } 75%{ transform: translateX(5px); } }
+  .dash-shake{ animation: dash-shake .3s ease-in-out; }
+
   @media (prefers-reduced-motion: reduce){
-    .animate-float-in, .animate-spin-slow, .analyzing-pulse{ animation: none !important; }
+    .animate-float-in, .animate-spin-slow, .analyzing-pulse, .dash-pop, .dash-hatch, .dash-shake{ animation: none !important; }
   }
 
   input[type="range"]{ accent-color: var(--cyan); }
@@ -1605,12 +1613,15 @@ function VocabularyBank({ session, childId, backendLive, onSeePlans, displayName
   const [quiz, setQuiz] = useState(null);
   const [quizError, setQuizError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [dash, setDash] = useState(() => dashState()); // Word Dash game progress (this device)
+  const [roundKey, setRoundKey] = useState(0);
 
   // Fetched here (rather than passed in) because the bank is its own tab in the workspace and opens straight
   // after a submission - it always wants the latest words, not whatever the dashboard loaded earlier.
   useEffect(()=>{
     setView("words"); setQuiz(null); setQuizError(""); setLoadError(""); setLocked(false); setQuery("");
     setBoxes(childId ? loadVocabBoxes(childId) : {});
+    setDash(childId ? dashLoad(childId) : dashState());
     if (!backendLive || !childId) { setWords([]); return; }
     let cancelled = false;
     setWords(null);
@@ -1645,6 +1656,16 @@ function VocabularyBank({ session, childId, backendLive, onSeePlans, displayName
     // Saved to the account too, quietly: if it cannot be (offline, plan change), this device keeps it and the
     // next time the page opens the newer copy is sent up.
     if (backendLive && childId && session) authedFetch(session, "/api/history", { method: "POST", body: JSON.stringify({ childId, updates: [{ term: key, box: entry.box, at: entry.at }] }) }).catch(() => {});
+  }
+
+  function startDash(){ logEvent("vocab_dash_start", {}, childId); setRoundKey((k) => k + 1); setView("game"); }
+  // Called when a round ends: adds it to the saved game and hands back what changed (hatched pals, streak) for the summary.
+  function finishDash(res){
+    const out = dashApplyRound(dash, res, dashDay(Date.now()), Math.random);
+    setDash(out.state);
+    if (childId) dashSave(childId, out.state);
+    logEvent("vocab_dash_round", { status: res.stars }, childId);
+    return out;
   }
 
   function startCards(){ logEvent("vocab_cards", {}, childId); setDeck(vocabDeck(words, boxes, 8)); setView("cards"); }
@@ -1706,6 +1727,9 @@ function VocabularyBank({ session, childId, backendLive, onSeePlans, displayName
           </div>
           {total > 0 && view === "words" && (
             <div className="flex flex-wrap gap-2 shrink-0">
+              {total >= 4 && <button onClick={startDash} className="focus-ring inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-bold" style={{ background: "var(--gold)", color: "var(--on-solid)" }}>
+                <IconFlame size={14} /> Play Word Dash
+              </button>}
               <button onClick={startCards} className="focus-ring inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-bold" style={{ background: "var(--cyan)", color: "var(--on-solid)" }}>
                 <IconSparkle size={14} /> Practise flashcards
               </button>
@@ -1728,7 +1752,11 @@ function VocabularyBank({ session, childId, backendLive, onSeePlans, displayName
         )}
       </div>
 
-      {view === "cards" ? (
+      {view === "game" ? (
+        <DashRound key={roundKey} words={list} boxes={boxes} onRate={rate} onFinish={finishDash} onAgain={startDash} onPals={()=>setView("pals")} onBack={()=>setView("words")} />
+      ) : view === "pals" ? (
+        <DashPals dash={dash} onBack={()=>setView("words")} />
+      ) : view === "cards" ? (
         <VocabFlashcards deck={deck} boxes={boxes} onRate={rate} onBack={()=>setView("words")} onAgain={startCards} />
       ) : view === "quiz" ? (
         <VocabQuiz quiz={quiz} error={quizError} onRate={rate} onRetry={startQuiz} onBack={()=>setView("words")} loading={loading} />
@@ -1748,6 +1776,7 @@ function VocabularyBank({ session, childId, backendLive, onSeePlans, displayName
         </div>
       ) : (
         <>
+          <DashHome dash={dash} today={dashDay(Date.now())} canPlay={total >= 4} onPlay={startDash} onPals={()=>setView("pals")} />
           <div className="flex flex-wrap items-center gap-2">
             <input type="search" value={query} onChange={(e)=>setQuery(e.target.value)} placeholder="Search your words"
               aria-label="Search your words" className="focus-ring flex-1 min-w-[12rem] rounded-full border px-4 py-2 text-sm"
@@ -1958,6 +1987,429 @@ function VocabQuiz({ quiz, error, onRate, onRetry, onBack, loading }){
       <button onClick={()=>{ setChosen(null); setIdx((i) => i + 1); }} disabled={!answered}
         className="focus-ring rounded-xl py-3 text-sm font-bold disabled:opacity-40" style={{ background: "var(--ink)", color: "var(--on-ink)" }}>
         {idx + 1 === qs.length ? "See my results" : "Next question"}
+      </button>
+    </div>
+  );
+}
+
+// ---- Word Dash rules (start). A quick game built from the learner's own words. Each question makes them RETRIEVE a word
+// in a different way (meaning, the word for a meaning, fill the gap, spell it), because recall spread across varied
+// formats is what makes words stick. The hook: a combo that builds, coins that fill an egg, a Word Pal that hatches
+// (a surprise, but always earned by answering), and a daily streak with a safety net (a streak freeze) so one missed day
+// does not feel like a punishment. No timer and no lives, so it stays calm. Right and wrong answers still move each word
+// up or down the same ladder as the flashcards. Game progress (coins, pals, streak) is kept on this device.
+const DASH_ROUND = 10;
+const DASH_EGG = 150; // coins per egg
+const DASH_PALS = [
+  { id: "fox", emoji: "🦊", name: "Fennel", rare: 0 }, { id: "penguin", emoji: "🐧", name: "Pip", rare: 0 },
+  { id: "turtle", emoji: "🐢", name: "Shelly", rare: 0 }, { id: "frog", emoji: "🐸", name: "Ribbit", rare: 0 },
+  { id: "bee", emoji: "🐝", name: "Buzz", rare: 0 }, { id: "hedgehog", emoji: "🦔", name: "Spike", rare: 0 },
+  { id: "panda", emoji: "🐼", name: "Bamboo", rare: 0 }, { id: "octopus", emoji: "🐙", name: "Inky", rare: 0 },
+  { id: "owl", emoji: "🦉", name: "Sage", rare: 1 }, { id: "butterfly", emoji: "🦋", name: "Flutter", rare: 1 },
+  { id: "dolphin", emoji: "🐬", name: "Splash", rare: 1 }, { id: "lion", emoji: "🦁", name: "Leo", rare: 1 },
+  { id: "trex", emoji: "🦖", name: "Rexy", rare: 1 }, { id: "dragon", emoji: "🐲", name: "Ember", rare: 2 },
+  { id: "unicorn", emoji: "🦄", name: "Stardust", rare: 2 }, { id: "peacock", emoji: "🦚", name: "Plume", rare: 2 },
+];
+const DASH_RARITY = ["Common", "Rare", "Epic"];
+const DASH_BLANK = { coins: 0, egg: 0, pals: [], streak: 0, lastDay: -1, freezes: 0, rounds: 0, right: 0, bestCombo: 0, perfect: 0 };
+const dashDay = (ms) => Math.floor((ms - new Date(ms).getTimezoneOffset() * 60000) / 86400000);
+const dashCount = (v) => (Number.isFinite(v) && v > 0 ? Math.floor(v) : 0);
+// Whatever is saved is cleaned up on the way in, so a corrupted or hand-edited store can never break the game.
+function dashState(v){
+  const s = v && typeof v === "object" && !Array.isArray(v) ? v : {};
+  const known = DASH_PALS.map((p) => p.id);
+  const pals = Array.isArray(s.pals) ? s.pals.filter((id, i, a) => known.includes(id) && a.indexOf(id) === i) : [];
+  return {
+    coins: dashCount(s.coins), egg: Math.min(DASH_EGG - 1, dashCount(s.egg)), pals,
+    streak: dashCount(s.streak), lastDay: Number.isFinite(s.lastDay) ? Math.floor(s.lastDay) : -1,
+    freezes: Math.min(2, dashCount(s.freezes)), rounds: dashCount(s.rounds), right: dashCount(s.right),
+    bestCombo: dashCount(s.bestCombo), perfect: dashCount(s.perfect),
+  };
+}
+function dashLoad(childId){
+  try { return dashState(JSON.parse(localStorage.getItem("ll_vocab_game_" + childId) || "{}")); } catch (e) { return dashState(); }
+}
+function dashSave(childId, state){
+  try { localStorage.setItem("ll_vocab_game_" + childId, JSON.stringify(state)); } catch (e) { /* private window: the game still works, it just is not remembered here */ }
+}
+// What the streak flame should show today: the streak is alive if they played yesterday or today, or if a streak freeze
+// will cover the one missed day.
+function dashStreakShown(state, today){
+  const s = dashState(state);
+  if (s.lastDay < 0 || s.streak < 1) return { days: 0, atRisk: false, saved: false };
+  const gap = today - s.lastDay;
+  if (gap <= 0) return { days: s.streak, atRisk: false, saved: false };
+  if (gap === 1) return { days: s.streak, atRisk: true, saved: false };
+  if (gap === 2 && s.freezes > 0) return { days: s.streak, atRisk: true, saved: true };
+  return { days: 0, atRisk: false, saved: false };
+}
+const dashMult = (combo) => Math.min(5, Math.floor((Math.max(1, combo) - 1) / 2) + 1);
+const dashCoins = (combo) => 10 * dashMult(combo);
+const dashStars = (right, outOf) => (outOf > 0 ? (right / outOf >= 0.9 ? 3 : right / outOf >= 0.7 ? 2 : right / outOf >= 0.4 ? 1 : 0) : 0);
+function dashRoundResult({ right, outOf, coins, bestCombo }){
+  const perfect = outOf > 0 && right === outOf;
+  const bonus = perfect ? 25 : 0;
+  return { right, outOf, coins: dashCount(coins) + bonus, bonus, bestCombo, stars: dashStars(right, outOf), perfect };
+}
+// Adds a finished round to the saved game: streak (with the freeze safety net), coins into the egg, and any pals that hatch.
+function dashApplyRound(state, res, today, rng){
+  const s = dashState(state);
+  let streak = s.streak, freezes = s.freezes, usedFreeze = false, extended = false, earnedFreeze = false;
+  if (s.lastDay < today) {
+    const gap = s.lastDay < 0 ? 99 : today - s.lastDay;
+    if (gap === 1) streak += 1;
+    else if (gap === 2 && freezes > 0) { streak += 1; freezes -= 1; usedFreeze = true; }
+    else streak = 1;
+    extended = true;
+    if (streak % 5 === 0 && freezes < 2) { freezes += 1; earnedFreeze = true; }
+  }
+  let egg = s.egg + dashCount(res.coins);
+  const pals = s.pals.slice(), hatched = [];
+  while (egg >= DASH_EGG) {
+    const left = DASH_PALS.filter((p) => !pals.includes(p.id));
+    if (!left.length) { egg = 0; break; }
+    const weights = left.map((p) => (p.rare === 0 ? 6 : p.rare === 1 ? 3 : 1));
+    let r = rng() * weights.reduce((a, b) => a + b, 0), pick = left[left.length - 1];
+    for (let i = 0; i < left.length; i++) { r -= weights[i]; if (r < 0) { pick = left[i]; break; } }
+    pals.push(pick.id); hatched.push(pick); egg -= DASH_EGG;
+  }
+  if (pals.length >= DASH_PALS.length) egg = 0;
+  const next = {
+    coins: s.coins + dashCount(res.coins), egg, pals, streak, lastDay: Math.max(s.lastDay, today), freezes,
+    rounds: s.rounds + 1, right: s.right + dashCount(res.right), bestCombo: Math.max(s.bestCombo, dashCount(res.bestCombo)),
+    perfect: s.perfect + (res.perfect ? 1 : 0),
+  };
+  return { state: next, hatched, usedFreeze, extended, earnedFreeze };
+}
+function dashShuffle(arr, rng){
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rng() * (i + 1)); const t = a[i]; a[i] = a[j]; a[j] = t; }
+  return a;
+}
+// The example sentence with the word hidden, or "" when the sentence does not contain the word exactly.
+function dashBlank(example, term){
+  const ex = String(example || ""), t = String(term || "").trim();
+  if (!ex || !t) return "";
+  const re = new RegExp("(^|[^\\p{L}])(" + t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + ")(?=$|[^\\p{L}])", "iu");
+  return re.test(ex) ? ex.replace(re, (m, a) => a + "_____") : "";
+}
+// One question about a word, or null when there are not enough other words to make wrong answers.
+function dashQuestion(word, kind, pool, rng){
+  const key = vocabTermKey(word.term), def = String(word.definition || "").trim();
+  const others = dashShuffle(pool.filter((w) => vocabTermKey(w.term) !== key), rng);
+  if (kind === "spell") {
+    const answer = String(word.term).trim().toLowerCase();
+    let letters = answer.split("");
+    for (let i = 0; i < 6; i++) { letters = dashShuffle(answer.split(""), rng); if (letters.join("") !== answer) break; }
+    return { kind, term: word.term, label: "Spell the word", prompt: def, letters, answer };
+  }
+  const byDef = kind === "meaning";
+  const seen = new Set([byDef ? def.toLowerCase() : key]);
+  const wrong = [];
+  for (const o of others) {
+    const text = byDef ? String(o.definition || "").trim() : String(o.term).trim();
+    const k = text.toLowerCase();
+    if (text && !seen.has(k)) { seen.add(k); wrong.push(text); }
+    if (wrong.length === 3) break;
+  }
+  if (wrong.length < 2) return null;
+  const right = byDef ? def : String(word.term).trim();
+  const options = dashShuffle([right, ...wrong], rng);
+  const prompt = kind === "gap" ? dashBlank(word.example, word.term) : kind === "word" ? def : word.term;
+  const label = kind === "meaning" ? "Which meaning fits?" : kind === "gap" ? "Which word fills the gap?" : "Which word fits this meaning?";
+  return { kind, term: word.term, label, prompt, options, correctIndex: options.indexOf(right) };
+}
+// A round: the words that need the most work come first, each asked in a different way from the last, and a word that
+// is asked twice (a small bank) is asked a new way the second time.
+function dashPlan(words, boxes, rng, size = DASH_ROUND){
+  const pool = (words || []).filter((w) => w && vocabTermKey(w.term) && String(w.definition || "").trim());
+  if (pool.length < 4) return [];
+  const order = dashShuffle(pool, rng).map((w) => ({ w, b: vocabBoxOf(boxes, w.term) })).sort((a, b) => a.b - b.b).map((x) => x.w);
+  const total = Math.min(size, Math.max(6, pool.length));
+  const used = {}, out = [];
+  let prev = "";
+  for (let i = 0; i < total; i++) {
+    const w = order[i % order.length], key = vocabTermKey(w.term), box = vocabBoxOf(boxes, w.term);
+    const kinds = box === 0 ? ["meaning", "word"] : ["word", "gap", "spell", "meaning"];
+    let ok = kinds.filter((k) => !(used[key] || []).includes(k) && (k !== "gap" || dashBlank(w.example, w.term)) && (k !== "spell" || /^[a-z]{3,9}$/i.test(String(w.term).trim())));
+    if (!ok.length) ok = ["meaning", "word"];
+    const fresh = ok.filter((k) => k !== prev), from = fresh.length ? fresh : ok;
+    const q = dashQuestion(w, from[Math.floor(rng() * from.length)], pool, rng) || dashQuestion(w, "meaning", pool, rng);
+    if (!q) continue;
+    (used[key] = used[key] || []).push(q.kind);
+    prev = q.kind;
+    out.push(q);
+  }
+  return out;
+}
+// A missed word comes back once at the end as a plain meaning question (a second chance, worth a few coins).
+function dashRetry(q, words, rng){
+  const pool = (words || []).filter((w) => w && vocabTermKey(w.term) && String(w.definition || "").trim());
+  const w = pool.find((x) => vocabTermKey(x.term) === vocabTermKey(q.term));
+  const r = w ? dashQuestion(w, "meaning", pool, rng) : null;
+  return r ? { ...r, retry: true, label: "Second chance" } : null;
+}
+// ---- Word Dash rules (end)
+
+// The card on the word list: streak, egg and the way in.
+function DashHome({ dash, today, canPlay, onPlay, onPals }){
+  const sh = dashStreakShown(dash, today);
+  const played = dash.lastDay === today;
+  const full = dash.pals.length >= DASH_PALS.length;
+  const pct = full ? 100 : Math.min(100, Math.round((dash.egg / DASH_EGG) * 100));
+  const line = !canPlay ? "Collect at least 4 words to unlock the game."
+    : played ? "Today's round is done. Play more to hatch more Word Pals."
+    : sh.days > 0 ? (sh.saved ? "A streak freeze will cover yesterday. Play today to keep your streak." : "Play today to keep your streak going.")
+    : "Play a quick round to start your streak.";
+  return (
+    <div className="card p-5 sm:p-6" style={{ borderInlineStart: "4px solid var(--gold)" }} aria-label="Word Dash">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-4 justify-between">
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2 flex-wrap">
+            <h3 className="font-display text-2xl" style={{ color: "var(--ink)" }}>Word Dash</h3>
+            <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[12px] font-bold" style={{ background: sh.days > 0 ? "var(--gold-tint)" : "var(--surface-2)", color: sh.days > 0 ? "var(--gold-ink)" : "var(--ink-faint)" }} title="Days in a row with a round played">
+              <IconFlame size={13} /> {sh.days > 0 ? sh.days + "-day streak" : "No streak yet"}
+            </span>
+            {dash.freezes > 0 && <span className="text-[12px] font-semibold" style={{ color: "var(--cyan-ink)" }} title="Covers one missed day">❄ {dash.freezes} streak freeze{dash.freezes === 1 ? "" : "s"}</span>}
+          </div>
+          <p className="text-[13px] mt-1" style={{ color: "var(--ink-soft)" }}>{line}</p>
+          <div className="mt-3 max-w-md">
+            <div className="flex items-center justify-between text-[12px] mb-1" style={{ color: "var(--ink-soft)" }}>
+              <span>{full ? "Every Word Pal collected!" : "🥚 Next Word Pal"}</span>
+              {!full && <span className="tabular">{dash.egg} / {DASH_EGG} coins</span>}
+            </div>
+            <div className="h-2.5 rounded-full overflow-hidden" style={{ background: "var(--border)" }} role="progressbar" aria-valuemin={0} aria-valuemax={DASH_EGG} aria-valuenow={full ? DASH_EGG : dash.egg} aria-label="Coins towards the next Word Pal">
+              <div className="h-full rounded-full" style={{ width: pct + "%", background: "var(--gold)", transition: "width 300ms" }} />
+            </div>
+          </div>
+        </div>
+        <div className="flex flex-wrap gap-2 shrink-0">
+          <button onClick={onPlay} disabled={!canPlay} className="focus-ring inline-flex items-center gap-1.5 rounded-full px-5 py-2.5 text-sm font-bold disabled:opacity-40" style={{ background: "var(--gold)", color: "var(--on-solid)" }}>
+            <IconSparkle size={14} /> {played ? "Play again" : "Play Word Dash"}
+          </button>
+          <button onClick={onPals} className="focus-ring inline-flex items-center gap-1.5 rounded-full px-4 py-2.5 text-sm font-bold" style={{ background: "var(--surface-2)", color: "var(--ink)" }}>
+            My Word Pals ({dash.pals.length}/{DASH_PALS.length})
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function DashPals({ dash, onBack }){
+  return (
+    <div className="max-w-3xl mx-auto w-full flex flex-col gap-4">
+      <div className="flex items-center gap-3">
+        <button onClick={onBack} className="focus-ring text-[13px] font-semibold underline py-3 pe-3" style={{ color: "var(--ink-soft)" }}>Back</button>
+        <h3 className="font-display text-2xl" style={{ color: "var(--ink)" }}>My Word Pals</h3>
+        <span className="text-xs font-semibold tabular ms-auto" style={{ color: "var(--ink-soft)" }}>{dash.pals.length} / {DASH_PALS.length}</span>
+      </div>
+      <p className="text-[13px]" style={{ color: "var(--ink-soft)" }}>Answer words to earn coins. Every {DASH_EGG} coins hatches a new Word Pal. Rare and epic pals are harder to find.</p>
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        {DASH_PALS.map((p) => {
+          const own = dash.pals.includes(p.id);
+          return (
+            <div key={p.id} className="card p-4 flex flex-col items-center text-center gap-1" style={{ opacity: own ? 1 : 0.55 }} aria-label={own ? p.name + ", " + DASH_RARITY[p.rare] : "Not found yet"}>
+              <div className="text-5xl" style={{ filter: own ? "none" : "grayscale(1) brightness(0.35)", lineHeight: 1.1 }} aria-hidden="true">{p.emoji}</div>
+              <div className="font-display text-lg" style={{ color: "var(--ink)" }}>{own ? p.name : "???"}</div>
+              <div className="text-[11px] font-bold uppercase tracking-wide" style={{ color: p.rare === 2 ? "var(--bad)" : p.rare === 1 ? "var(--cyan-ink)" : "var(--ink-faint)" }}>{DASH_RARITY[p.rare]}</div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function DashRound({ words, boxes, onRate, onFinish, onAgain, onPals, onBack }){
+  const [qs, setQs] = useState(() => dashPlan(words, boxes, Math.random));
+  const total = useRef(qs.length).current;
+  const [idx, setIdx] = useState(0);
+  const [tiles, setTiles] = useState([]);
+  const [picked, setPicked] = useState(null);
+  const [verdict, setVerdict] = useState(null); // null = not answered yet
+  const [combo, setCombo] = useState(0);
+  const [best, setBest] = useState(0);
+  const [coins, setCoins] = useState(0);
+  const [right, setRight] = useState(0);
+  const [gain, setGain] = useState(0);
+  const [missed, setMissed] = useState([]);
+  const [done, setDone] = useState(null);
+  const nextRef = useRef(null);
+  const q = qs[idx];
+
+  useEffect(()=>{ if (verdict !== null && nextRef.current) nextRef.current.focus(); }, [verdict]);
+  // Keys 1-4 pick an answer, for learners on a keyboard.
+  useEffect(()=>{
+    if (!q || verdict !== null || done || q.kind === "spell") return;
+    const onKey = (e) => { const n = Number(e.key); if (n >= 1 && n <= q.options.length && !e.metaKey && !e.ctrlKey && !e.altKey) pick(n - 1); };
+    window.addEventListener("keydown", onKey);
+    return ()=>window.removeEventListener("keydown", onKey);
+  });
+
+  function settle(ok){
+    setVerdict(ok);
+    if (q.retry) { setGain(ok ? 5 : 0); if (ok) setCoins((c) => c + 5); return; }
+    if (onRate) onRate(q.term, ok);
+    if (ok) {
+      const c = combo + 1, g = dashCoins(c);
+      setCombo(c); setBest((b) => Math.max(b, c)); setCoins((x) => x + g); setGain(g); setRight((r) => r + 1);
+    } else {
+      setCombo(0); setGain(0);
+      const w = (words || []).find((x) => vocabTermKey(x.term) === vocabTermKey(q.term));
+      setMissed((m) => [...m, { term: q.term, definition: w ? w.definition : "" }]);
+      const again = dashRetry(q, words, Math.random);
+      if (again) setQs((list) => [...list, again]);
+    }
+  }
+  function pick(oi){ if (verdict !== null || !q) return; setPicked(oi); settle(oi === q.correctIndex); }
+  function tapTile(i){
+    if (verdict !== null || tiles.includes(i)) return;
+    const nt = [...tiles, i];
+    setTiles(nt);
+    if (nt.length === q.letters.length) settle(nt.map((k) => q.letters[k]).join("").toLowerCase() === q.answer);
+  }
+  function next(){
+    if (idx + 1 >= qs.length) {
+      if (done) return;
+      const res = dashRoundResult({ right, outOf: total, coins, bestCombo: best });
+      setDone({ res, out: onFinish(res) });
+      return;
+    }
+    setIdx(idx + 1); setPicked(null); setTiles([]); setVerdict(null); setGain(0);
+  }
+
+  if (total === 0) {
+    return (
+      <div className="card p-6 max-w-xl mx-auto w-full">
+        <p className="text-sm py-2 text-center" style={{ color: "var(--ink-faint)" }}>Collect at least 4 words with meanings to play Word Dash.</p>
+        <button onClick={onBack} className="focus-ring mt-3 w-full rounded-full py-2.5 text-sm font-bold" style={{ background: "var(--surface-2)", color: "var(--ink)" }}>Back</button>
+      </div>
+    );
+  }
+
+  if (done) {
+    const { res, out } = done;
+    const st = out.state;
+    const full = st.pals.length >= DASH_PALS.length;
+    return (
+      <div className="card p-6 sm:p-8 flex flex-col items-center gap-4 text-center max-w-xl mx-auto w-full animate-float-in">
+        <div className="flex items-center gap-1" role="img" aria-label={res.stars + " out of 3 stars"}>
+          {[1, 2, 3].map((n) => <IconStar key={n} size={34} strokeWidth={1.8} style={{ color: n <= res.stars ? "var(--gold)" : "var(--border)", fill: n <= res.stars ? "var(--gold)" : "none" }} />)}
+        </div>
+        <h3 className="font-display font-bold text-2xl" style={{ color: "var(--ink)" }}>{res.perfect ? "Perfect round!" : res.stars >= 2 ? "Great round!" : res.stars === 1 ? "Good going!" : "Keep dashing!"}</h3>
+        <p className="text-[14px]" style={{ color: "var(--ink-soft)" }}>
+          <strong className="tabular" style={{ color: "var(--ink)" }}>{res.right}</strong> of {res.outOf} right · best combo <strong className="tabular" style={{ color: "var(--ink)" }}>{res.bestCombo}</strong> · <strong className="tabular" style={{ color: "var(--gold-ink)" }}>+{res.coins} coins</strong>{res.bonus > 0 ? " (includes a +" + res.bonus + " perfect bonus)" : ""}
+        </p>
+        {out.hatched.map((p) => (
+          <div key={p.id} className="rounded-2xl p-4 w-full" style={{ background: "var(--gold-tint)" }} role="status">
+            <div className="text-7xl dash-hatch" aria-hidden="true">{p.emoji}</div>
+            <div className="font-display text-xl mt-1" style={{ color: "var(--ink)" }}>A new Word Pal hatched: {p.name}!</div>
+            <div className="text-[11px] font-bold uppercase tracking-wide" style={{ color: "var(--gold-ink)" }}>{DASH_RARITY[p.rare]}</div>
+          </div>
+        ))}
+        {!full && (
+          <div className="w-full max-w-sm">
+            <div className="flex items-center justify-between text-[12px] mb-1" style={{ color: "var(--ink-soft)" }}><span>🥚 Next Word Pal</span><span className="tabular">{st.egg} / {DASH_EGG} coins</span></div>
+            <div className="h-2.5 rounded-full overflow-hidden" style={{ background: "var(--border)" }}><div className="h-full rounded-full" style={{ width: Math.min(100, (st.egg / DASH_EGG) * 100) + "%", background: "var(--gold)", transition: "width 600ms" }} /></div>
+          </div>
+        )}
+        <div className="flex flex-col gap-1 text-[13.5px]" style={{ color: "var(--ink-soft)" }}>
+          <span className="inline-flex items-center justify-center gap-1.5 font-semibold" style={{ color: "var(--gold-ink)" }}><IconFlame size={15} /> {st.streak}-day streak{out.extended && st.streak > 1 ? " — one more day!" : ""}</span>
+          {out.usedFreeze && <span>❄ A streak freeze covered a missed day, so your streak is safe.</span>}
+          {out.earnedFreeze && <span>❄ You earned a streak freeze. It covers one missed day.</span>}
+        </div>
+        {missed.length > 0 && (
+          <div className="w-full text-start flex flex-col gap-2">
+            <div className="label-mono" style={{ color: "var(--ink-soft)" }}>Words to revisit</div>
+            {missed.map((m) => (
+              <div key={m.term} className="rounded-xl p-3" style={{ background: "var(--surface-2)" }}>
+                <span className="font-display text-xl" style={{ color: "var(--ink)" }}>{m.term}</span>
+                <p className="text-[13px] mt-0.5" style={{ color: "var(--ink)" }}>{m.definition}</p>
+              </div>
+            ))}
+          </div>
+        )}
+        <div className="flex gap-2 flex-wrap justify-center">
+          <button onClick={onAgain} className="focus-ring rounded-full px-5 py-2.5 text-sm font-bold" style={{ background: "var(--gold)", color: "var(--on-solid)" }}>One more round</button>
+          <button onClick={onPals} className="focus-ring rounded-full px-5 py-2.5 text-sm font-bold" style={{ background: "var(--surface-2)", color: "var(--ink)" }}>My Word Pals</button>
+          <button onClick={onBack} className="focus-ring rounded-full px-5 py-2.5 text-sm font-bold" style={{ background: "var(--surface-2)", color: "var(--ink)" }}>Done</button>
+        </div>
+      </div>
+    );
+  }
+
+  const mult = dashMult(Math.max(1, combo));
+  const PRAISE = ["Nice!", "Spot on!", "Brilliant!", "You got it!", "Yes!", "Smart!"];
+  return (
+    <div className="max-w-xl mx-auto w-full flex flex-col gap-4">
+      <div className="flex items-center gap-3">
+        <button onClick={onBack} className="focus-ring text-[13px] font-semibold underline py-3 pe-3" style={{ color: "var(--ink-soft)" }}>Quit</button>
+        <div className="flex-1 h-2 rounded-full overflow-hidden" style={{ background: "var(--border)" }} role="progressbar" aria-valuemin={0} aria-valuemax={qs.length} aria-valuenow={idx} aria-label="Round progress">
+          <div className="h-full rounded-full" style={{ width: (idx / qs.length) * 100 + "%", background: "var(--gold)", transition: "width 250ms" }} />
+        </div>
+        <span className="text-xs font-semibold tabular" style={{ color: "var(--ink-soft)" }}>{idx + 1} / {qs.length}</span>
+      </div>
+      <div className="flex items-center justify-between gap-2">
+        <span className="inline-flex items-center gap-1 rounded-full px-3 py-1 text-[13px] font-bold" style={{ background: combo >= 2 ? "var(--gold-tint)" : "var(--surface-2)", color: combo >= 2 ? "var(--gold-ink)" : "var(--ink-faint)" }} aria-live="polite">
+          <IconFlame size={14} /> {combo >= 2 ? combo + " in a row · x" + mult : "Build a combo"}
+        </span>
+        <span className="text-[13px] font-bold tabular" style={{ color: "var(--gold-ink)" }}>🪙 {coins}</span>
+      </div>
+      <div className={"card p-5 sm:p-6" + (verdict === false ? " dash-shake" : "")}>
+        <div className="label-mono mb-1.5" style={{ color: q.retry ? "var(--cyan-ink)" : "var(--ink-soft)" }}>{q.label}</div>
+        <div className={(q.kind === "meaning" ? "font-display text-4xl" : "font-read text-[17px] leading-snug") + " mb-5"} style={{ color: "var(--ink)", lineHeight: q.kind === "meaning" ? 1.1 : undefined }}>{q.prompt}</div>
+        {q.kind === "spell" ? (
+          <div>
+            <div className="flex flex-wrap gap-1.5 mb-4" role="group" aria-label="Your spelling">
+              {q.letters.map((_, i) => (
+                <span key={i} className="w-9 h-11 rounded-lg border-2 flex items-center justify-center font-display text-2xl" style={{ borderColor: verdict === null ? "var(--border)" : verdict ? "var(--good)" : "var(--bad)", background: verdict === null ? "var(--surface)" : verdict ? "var(--good-tint)" : "var(--bad-tint)", color: "var(--ink)" }}>{tiles[i] != null ? q.letters[tiles[i]] : ""}</span>
+              ))}
+            </div>
+            <div className="flex flex-wrap gap-2" role="group" aria-label="Letters to use">
+              {q.letters.map((l, i) => (
+                <button key={i} type="button" disabled={verdict !== null || tiles.includes(i)} onClick={()=>tapTile(i)} className="focus-ring w-11 h-11 rounded-xl border font-display text-2xl disabled:opacity-25" style={{ borderColor: "var(--border)", background: "var(--surface)", color: "var(--ink)" }}>{l}</button>
+              ))}
+            </div>
+            <div className="mt-3 flex gap-3">
+              <button type="button" disabled={verdict !== null || tiles.length === 0} onClick={()=>setTiles((t) => t.slice(0, -1))} className="focus-ring text-[13px] font-semibold underline disabled:opacity-40" style={{ color: "var(--ink-soft)" }}>Undo</button>
+              <button type="button" disabled={verdict !== null || tiles.length === 0} onClick={()=>setTiles([])} className="focus-ring text-[13px] font-semibold underline disabled:opacity-40" style={{ color: "var(--ink-soft)" }}>Clear</button>
+            </div>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-2">
+            {q.options.map((opt, oi) => {
+              const isCorrect = oi === q.correctIndex, isChosen = oi === picked;
+              let st = { borderColor: "var(--border)", background: "var(--surface)", color: "var(--ink)" };
+              if (verdict !== null && isCorrect) st = { borderColor: "var(--good)", background: "var(--good-tint)", color: "var(--ink)" };
+              else if (verdict !== null && isChosen) st = { borderColor: "var(--bad)", background: "var(--bad-tint)", color: "var(--ink)" };
+              return (
+                <button key={oi} disabled={verdict !== null} onClick={()=>pick(oi)} className="focus-ring text-start rounded-xl border px-3.5 py-2.5 text-[14px] disabled:cursor-default flex items-start gap-2.5" style={st}>
+                  <span className="text-[11px] font-bold rounded-md px-1.5 py-0.5 mt-0.5 shrink-0" style={{ background: "var(--surface-2)", color: "var(--ink-faint)" }} aria-hidden="true">{oi + 1}</span>
+                  <span>{opt}</span>
+                </button>
+              );
+            })}
+          </div>
+        )}
+        {verdict !== null && (
+          <div className="mt-4" role="status">
+            {verdict ? (
+              <p className="text-[14px] font-bold flex items-center gap-2" style={{ color: "var(--good)" }}>
+                {PRAISE[idx % PRAISE.length]} {gain > 0 && <span className="dash-pop inline-block rounded-full px-2.5 py-0.5 text-[13px]" style={{ background: "var(--gold-tint)", color: "var(--gold-ink)" }}>+{gain} 🪙</span>}
+              </p>
+            ) : (
+              <div className="rounded-xl p-3" style={{ background: "var(--bad-tint)" }}>
+                <p className="text-[13px] font-semibold" style={{ color: "var(--bad)" }}>{q.retry ? "Not quite. You will see this word again soon." : "Not quite. That word will come back for a second chance."}</p>
+                <p className="mt-1"><span className="font-display text-xl" style={{ color: "var(--ink)" }}>{q.term}</span></p>
+                {(() => { const w = (words || []).find((x) => vocabTermKey(x.term) === vocabTermKey(q.term)); return w ? (<><p className="text-[13.5px] mt-0.5" style={{ color: "var(--ink)" }}>{w.definition}</p>{w.example && <p className="text-[13px] italic mt-0.5" style={{ color: "var(--ink-soft)" }}>“{w.example}”</p>}</>) : null; })()}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+      <button ref={nextRef} onClick={next} disabled={verdict === null} className="focus-ring rounded-xl py-3 text-sm font-bold disabled:opacity-40" style={{ background: "var(--ink)", color: "var(--on-ink)" }}>
+        {idx + 1 >= qs.length ? "Finish the round" : "Next word"}
       </button>
     </div>
   );
@@ -3493,7 +3945,7 @@ function FeedbackPanelBody({ tier, gradeLabel, country, interest, confidence, mo
         <div className="card p-4 sm:p-5 flex items-center justify-between gap-3 flex-wrap">
           <div className="min-w-0">
             <div className="font-display font-semibold text-sm" style={{ color: "var(--ink)" }}>Make these words stick</div>
-            <div className="text-[13px]" style={{ color: "var(--ink-soft)" }}>Flashcards and a quick quiz, starting with the words you need most.</div>
+            <div className="text-[13px]" style={{ color: "var(--ink-soft)" }}>Flashcards, a quick quiz and Word Dash, a game that hatches pets as you learn.</div>
           </div>
           <button onClick={onPractise} className="focus-ring inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-bold shrink-0" style={{ background: "var(--cyan)", color: "var(--on-solid)" }}>Practise words <IconArrowRight size={14} /></button>
         </div>
@@ -4183,7 +4635,7 @@ function ReadingFeedbackPanelBody({ tier, country, interest, confidence, motivat
         <div className="card p-4 sm:p-5 flex items-center justify-between gap-3 flex-wrap">
           <div className="min-w-0">
             <div className="font-display font-semibold text-sm" style={{ color: "var(--ink)" }}>Make these words stick</div>
-            <div className="text-[13px]" style={{ color: "var(--ink-soft)" }}>Flashcards and a quick quiz, starting with the words you need most.</div>
+            <div className="text-[13px]" style={{ color: "var(--ink-soft)" }}>Flashcards, a quick quiz and Word Dash, a game that hatches pets as you learn.</div>
           </div>
           <button onClick={onPractise} className="focus-ring inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-bold shrink-0" style={{ background: "var(--cyan)", color: "var(--on-solid)" }}>Practise words <IconArrowRight size={14} /></button>
         </div>
