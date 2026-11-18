@@ -51,6 +51,7 @@
   .tag.warn{ background:var(--grow-tint); color:var(--grow); }
   .tag.blue{ background:var(--blue-tint); color:var(--blue); }
   .tag.bad{ background:var(--bad-tint); color:var(--bad); }
+  .tag.plain{ background:var(--surface2); color:var(--ink-soft); border:1px solid var(--border); }
   input,select,button{ font:inherit; font-size:14px; }
   input,select{ padding:8px 10px; border:1px solid var(--border); border-radius:10px; background:var(--surface); color:var(--ink); }
   button{ padding:9px 16px; border-radius:10px; border:1px solid var(--wine); background:var(--wine); color:#fff; font-weight:600; cursor:pointer; }
@@ -231,6 +232,12 @@
     <!-- People: who has an account, and one learner's dashboard as their parent sees it -->
     <section role="tabpanel" id="panel-people" aria-labelledby="tab-people" class="hidden">
       <p class="lead">Everyone with an account. Click a row to open that learner's dashboard below.</p>
+      <div class="filters">
+        <input id="uSearch" type="search" placeholder="Search email" aria-label="Search people">
+        <select id="uPlan" aria-label="Plan"><option value="">All plans</option><option value="free">Free</option><option value="core">Core</option><option value="premium">Premium</option></select>
+        <select id="uState" aria-label="Activity"><option value="">Any activity</option><option value="used">Has used it</option><option value="never">Never used it</option><option value="cancelled">Cancelled</option></select>
+        <span class="muted" id="uCount"></span>
+      </div>
       <div class="card">
         <div class="scroll"><table id="users"></table></div>
       </div>
@@ -615,6 +622,36 @@ function renderList(){
   if (cur) { add(pane, detail(cur)); } else add(pane, el("p", "muted empty", "No pieces match."));
 }
 
+var PLAN_TAG = { free: "plain", core: "blue", premium: "warn" };
+function renderUsers(){
+  var q = ($("uSearch").value || "").trim().toLowerCase(), plan = $("uPlan").value, state = $("uState").value;
+  var list = DATA.users.filter(function(u){
+    var used = (u.writing + u.reading + u.events) > 0;
+    if (q && String(u.email || u.userId).toLowerCase().indexOf(q) < 0) return false;
+    if (plan && u.plan !== plan) return false;
+    if (state === "used" && !used) return false;
+    if (state === "never" && used) return false;
+    if (state === "cancelled" && !u.cancelled) return false;
+    return true;
+  });
+  $("uCount").textContent = list.length + " of " + DATA.users.length + " people";
+  var tb = $("users"); tb.textContent = "";
+  var head = el("tr"); ["Person", "Plan", "Joined", "Writing", "Reading", "Stopped", "Events", "Last seen", "Cancelled"].forEach(function(h){ head.appendChild(el("th", null, h)); });
+  tb.appendChild(head);
+  list.forEach(function(u){
+    var r = el("tr", "click"); r.title = "Open this person's learner dashboard";
+    r.addEventListener("click", function(){ var l = DATA.learners.filter(function(x){ return x.userId === u.userId; })[0]; if (l) { $("lSel").value = l.childId; loadLearner(); $("dash").scrollIntoView(); } });
+    var td = el("td"); td.appendChild(tag(u.plan, PLAN_TAG[u.plan] || "plain"));
+    [u.email || u.userId.slice(0, 8), null, when(u.joined), u.writing, u.reading, u.stopped, u.events, when(u.lastSeen), u.cancelled ? when(u.cancelled.when) + " - " + u.cancelled.reason : "-"].forEach(function(v){
+      if (v === null) { r.appendChild(td); return; }
+      r.appendChild(el("td", null, String(v)));
+    });
+    tb.appendChild(r);
+  });
+  if (!list.length) { var er = el("tr"); var ec = el("td", "muted", "No one matches these filters."); ec.colSpan = 9; er.appendChild(ec); tb.appendChild(er); }
+}
+["uSearch", "uPlan", "uState"].forEach(function(id){ $(id).addEventListener("input", function(){ if (DATA) renderUsers(); }); });
+
 function render(){
   var t = DATA.totals;
   var tiles = [["Accounts", t.accounts], ["Paid", t.paid], ["Pieces (latest)", t.submissions], ["Marked", t.marked], ["Stopped", t.stopped], ["Events", t.events], ["Problems", t.failures]];
@@ -627,15 +664,7 @@ function render(){
   bars($("interests"), DATA.interests, "label", "count");
   bars($("genres"), DATA.genres, "label", "count");
 
-  var tb = $("users"); tb.textContent = "";
-  var head = el("tr"); ["Person", "Plan", "Joined", "Writing", "Reading", "Stopped", "Events", "Last seen", "Cancelled"].forEach(function(h){ head.appendChild(el("th", null, h)); });
-  tb.appendChild(head);
-  DATA.users.forEach(function(u){
-    var r = el("tr", "click"); r.title = "Open this person's learner dashboard";
-    r.addEventListener("click", function(){ var l = DATA.learners.filter(function(x){ return x.userId === u.userId; })[0]; if (l) { $("lSel").value = l.childId; loadLearner(); $("dash").scrollIntoView(); } });
-    [u.email || u.userId.slice(0, 8), u.plan, when(u.joined), u.writing, u.reading, u.stopped, u.events, when(u.lastSeen), u.cancelled ? when(u.cancelled.when) + " - " + u.cancelled.reason : "-"].forEach(function(v){ r.appendChild(el("td", null, String(v))); });
-    tb.appendChild(r);
-  });
+  renderUsers();
 
   var fu = $("fUser"), keep = fu.value; fu.textContent = "";
   var all = el("option", null, "Everyone"); all.value = ""; fu.appendChild(all);
