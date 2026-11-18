@@ -4,6 +4,8 @@ Internal engineering changelog, not linked from the site. One entry per shipped 
 
 ## 2026-11-18
 
+- `9564b27` Vocabulary bank: new game, Word Dash. Rounds of 10 questions from the learner's own words (meaning, word for a meaning, fill the gap, spell it), combo multiplier, coins that fill an egg and hatch one of 16 Word Pals, daily streak with streak freezes, second chance for missed words. Answers still move words up/down the flashcard ladder. Progress kept on the device. New analytics events vocab_dash_start, vocab_dash_round
+
 - `b2335b0` Admin page now matches the rest of the site (header, footer, colours, full-width). Dashboard language check: the workspace footer links and four messages (marking fallback, nickname fields, flag-a-problem prompt) are now translated in all 10 languages
 
 - `a043947` Consistency pass: privacy, terms, feedback, share and unsubscribe pages share the homepage header/footer (new site-chrome.css); one style for all back/previous/next links; small uppercase labels now use Lexend instead of the typewriter font everywhere; the progress chart fills its card; Account and Manage plan pages use the full width
