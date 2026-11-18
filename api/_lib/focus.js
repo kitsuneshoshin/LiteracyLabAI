@@ -98,8 +98,8 @@ function examStyleFor(country, gradeLabel) {
     return null;
   }
   if (/Ireland/.test(c)) {
-    if (/^[123](st|nd|rd) Year$/i.test(label)) return { name: "Junior Cycle English", style: "the way a Junior Cycle English written task is worded: a stimulus text or topic and a clear instruction to respond, such as a speech, an article, a letter or a short story, or a short written response to the stimulus" };
-    if (/^[56]th Year$/i.test(label)) return { name: "Leaving Certificate English", style: "the way a Leaving Certificate English Paper 1 composition is worded: a title or a prompt, with a choice of forms such as a personal essay, a speech, a short story, a magazine article or a news report, for a timed response" };
+    if (/^[123](st|nd|rd) Year$/i.test(label)) return { name: "Junior Cycle English", style: "the way a Junior Cycle English written task is worded: a stimulus text and a clear instruction to write for a stated audience and purpose, such as a letter, a speech, an article or an imaginative piece written in response to the text" };
+    if (/^[56]th Year$/i.test(label)) return { name: "Leaving Certificate English", style: "the way a Leaving Certificate English Paper 1 is worded: either a composition chosen from several titles (a short story, a personal essay, an opinion piece for a magazine, a discursive essay or a speech) or a functional writing task in response to a text (an article, a letter to a newspaper editor or a proposal), for a timed response" };
     return null;
   }
   if (/ESL|Global/.test(c)) {
@@ -177,8 +177,8 @@ const READING_EXAM = {
   "CBSE Class 10 English": "the way a CBSE Class 10 unseen-passage section does: a discursive passage, or a factual passage with a chart, table or statistics, with multiple-choice and short-answer questions on comprehension, inference, interpretation, evaluation and vocabulary in context",
   "CBSE Class 12 English": "the way a CBSE Class 12 reading section does: a factual, descriptive or literary passage, or a factual passage with a chart or statistics, with multiple-choice and short-answer questions on inference, the writer's attitude, vocabulary and reference",
   "HKDSE English Language": "the way an HKDSE English Language Paper 1 reading part does: written texts of different lengths and difficulty, with a mix of multiple-choice, short-answer, true/false/not given, matching and pronoun-reference questions on main ideas and details, the contextual meaning of words, tone and mood, and the writer's views, attitudes and arguments",
-  "Junior Cycle English": "the way a Junior Cycle English reading text does: a narrative, informational or persuasive text, with questions on understanding, inference and the effect of the writer's choices",
-  "Leaving Certificate English": "the way a Leaving Certificate English Paper 1 comprehension does: an article, speech or personal essay with a clear voice, with questions on the writer's purpose, style, tone and language",
+  "Junior Cycle English": "the way a Junior Cycle English reading paper does: a narrative, informational or persuasive text, a poster or other visual text, or a short passage such as a talk, with questions on comprehension strategies, audience and register, and the appreciation of language, including what a word means in its passage",
+  "Leaving Certificate English": "the way a Leaving Certificate English Paper 1 comprehension does: linked texts of different kinds on one theme (for example an article, a literary extract and a commentary on the arts), each followed by a question asking for three developed points with reference to the text and a question on style, tone or the effect of language",
   "CEFR writing task": "the way a Cambridge English reading task at this CEFR level does: a short everyday text such as a notice, an email, an article or a story, with questions that check understanding at that level",
   "NAPLAN": "the way a NAPLAN reading test does: an imaginative, informative or persuasive text, and questions that range from finding a stated detail to inferring and interpreting",
   "NCEA English": "the way an NCEA English reading task does: unfamiliar texts (for example a poem, a short prose extract and a feature or media text), with questions on how language, structure and ideas create meaning and effects",
