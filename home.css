@@ -214,7 +214,8 @@ p, li, dd, summary{ overflow-wrap: break-word; }
 /* type grows with the screen on big displays, and the hero uses the width it is given */
 @media (min-width: 1536px){
   .hero{ padding-top: 72px; padding-bottom: 72px; }
-  .hero-grid{ gap: 72px; }
+  .hero-grid{ gap: 72px; grid-template-columns: minmax(0, 1.12fr) minmax(0, 0.88fr); }
+  .hero h1{ line-height: 1.1; }
   .hero-sub, .section-head p{ font-size: 19px; }
   .section-head{ max-width: 900px; }
   section{ padding-block: 104px; }
@@ -222,7 +223,8 @@ p, li, dd, summary{ overflow-wrap: break-word; }
   .where-facts dd{ font-size: 36px; }
 }
 @media (min-width: 1920px){
-  .hero h1{ font-size: clamp(76px, 4.2vw, 96px); }
+  .hero h1{ font-size: clamp(72px, 3.9vw, 88px); }
+  .hero-grid > div + div{ max-width: 680px; width: 100%; justify-self: end; }
   .section-head h2{ font-size: clamp(58px, 3.2vw, 72px); }
   .hero-sub, .section-head p{ font-size: 20px; max-width: 680px; }
   .section-head{ max-width: 1000px; }
