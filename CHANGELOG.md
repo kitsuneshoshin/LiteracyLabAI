@@ -4,6 +4,7 @@ Internal engineering changelog, not linked from the site. One entry per shipped 
 
 ## 2026-11-18
 
+- `fdefdb9` Reading and writing now follow each country's own curriculum (static table with sources and review dates), and Premium can set reading passages like their exam
 - `36042fa` Save the cancellation reason Stripe sends in its second update, and show who cancelled and why on the admin People table
 
 ## 2026-11-10
