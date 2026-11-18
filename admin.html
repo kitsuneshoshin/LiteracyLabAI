@@ -218,7 +218,7 @@
     <section role="tabpanel" id="panel-feedback" aria-labelledby="tab-feedback" class="hidden">
       <p class="lead">Everything customers have told us: thumbs-downs, mistake reports, dashboard comments, email links and cancellations. Newest first.</p>
       <div class="filters">
-        <select id="fbStatus" aria-label="Status"><option value="open">Needs attention (new + triaged)</option><option value="">Every status</option><option value="new">New</option><option value="triaged">Triaged</option><option value="planned">Planned</option><option value="done">Done</option><option value="wont_do">Won't do</option></select>
+        <select id="fbStatus" aria-label="Status"><option value="active">Active (not archived)</option><option value="archived">Archived (history)</option><option value="open">Needs attention (new + triaged)</option><option value="">Every status, including archived</option><option value="new">New</option><option value="triaged">Triaged</option><option value="planned">Planned</option><option value="done">Done</option><option value="wont_do">Won't do</option></select>
         <select id="fbCat" aria-label="Type"><option value="">Every type</option><option value="bug">Bug / mistake</option><option value="idea">Idea</option><option value="praise">Praise</option><option value="question">Question</option><option value="other">Other</option></select>
         <span class="muted" id="fbCount"></span>
       </div>
@@ -700,12 +700,12 @@ $("signout").addEventListener("click", async function(){ await sb.auth.signOut()
 
 /* ---------------------------------------------------------------- customer feedback inbox */
 var FB = null, FB_SELECTED = null;
-var FB_STATUS = { "new": "New", triaged: "Triaged", planned: "Planned", done: "Done", wont_do: "Won't do" };
+var FB_STATUS = { "new": "New", triaged: "Triaged", planned: "Planned", done: "Done", wont_do: "Won't do", archived: "Archived" };
 var FB_CAT = { bug: "Bug / mistake", idea: "Idea", praise: "Praise", question: "Question", other: "Other" };
 function fbFiltered(){
   var st = $("fbStatus").value, cat = $("fbCat").value;
   return FB.items.filter(function(i){
-    var okSt = !st || (st === "open" ? (i.status === "new" || i.status === "triaged") : i.status === st);
+    var okSt = !st || (st === "active" ? i.status !== "archived" : st === "open" ? (i.status === "new" || i.status === "triaged") : i.status === st);
     return okSt && (!cat || i.category === cat);
   });
 }
@@ -772,19 +772,24 @@ function feedbackDetail(i){
   var notes = el("textarea"); notes.rows = 3; notes.style.width = "100%"; notes.maxLength = 4000; notes.placeholder = "Private notes: what you decided, what you replied, what to do next"; notes.value = i.notes;
   var save = el("button", null, "Save"); save.type = "button";
   var msg = el("span", "muted");
-  save.addEventListener("click", async function(){
-    save.disabled = true; msg.textContent = "Saving…";
+  var arch = el("button", null, i.status === "archived" ? "Restore to active" : "Archive"); arch.type = "button";
+  async function doSave(status, btn){
+    btn.disabled = true; msg.textContent = "Saving…";
     try {
       var res = await sb.auth.getSession(), session = res.data && res.data.session;
-      var r = await fetch("/api/email?action=feedbackUpdate", { method: "POST", headers: { "Content-Type": "application/json", Authorization: "Bearer " + session.access_token }, body: JSON.stringify({ id: i.id, status: st.value, priority: pr.value, notes: notes.value }) });
+      var r = await fetch("/api/email?action=feedbackUpdate", { method: "POST", headers: { "Content-Type": "application/json", Authorization: "Bearer " + session.access_token }, body: JSON.stringify({ id: i.id, status: status, priority: pr.value, notes: notes.value }) });
       if (!r.ok) { msg.textContent = "Could not save (" + r.status + ")."; return; }
       var out = await r.json(); i.status = out.status; i.priority = out.priority; i.notes = out.notes;
       msg.textContent = "Saved.";
+      var c = {}; FB.items.forEach(function(x){ c[x.status] = (c[x.status] || 0) + 1; }); FB.counts = c;
+      var open = c["new"] || 0, badge = $("fbBadge"); badge.textContent = String(open); badge.classList.toggle("hidden", !open);
       renderFeedbackList();
     } catch (e) { msg.textContent = "Could not save."; }
-    finally { save.disabled = false; }
-  });
-  add(row, st, pr, save, msg); add(form, row, notes);
+    finally { btn.disabled = false; }
+  }
+  save.addEventListener("click", function(){ doSave(st.value, save); });
+  arch.addEventListener("click", function(){ doSave(i.status === "archived" ? "triaged" : "archived", arch); });
+  add(row, st, pr, save, arch, msg); add(form, row, notes);
   add(pane, block("Your triage", null, form));
   return pane;
 }

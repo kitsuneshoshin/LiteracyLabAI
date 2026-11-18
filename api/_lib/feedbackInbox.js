@@ -1,7 +1,7 @@
 // The owner's customer-feedback inbox: turns raw feedback rows plus the people and pieces they point at into
 // what the /admin page shows, and checks the owner's edits (status, priority, notes) before they are saved.
 
-const STATUSES = ["new", "triaged", "planned", "done", "wont_do"];
+const STATUSES = ["new", "triaged", "planned", "done", "wont_do", "archived"];
 const PRIORITIES = ["low", "medium", "high"];
 const SUBMISSION_TAG = /\[submission ([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\]/i;
 

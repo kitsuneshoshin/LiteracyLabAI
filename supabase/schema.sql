@@ -258,7 +258,7 @@ create table if not exists public.feedback (
   message text check (char_length(message) <= 2000),
   contact_ok boolean not null default false,
   ip_hash text,
-  status text not null default 'new' check (status in ('new', 'triaged', 'planned', 'done', 'wont_do')),
+  status text not null default 'new' check (status in ('new', 'triaged', 'planned', 'done', 'wont_do', 'archived')),
   priority text check (priority in ('low', 'medium', 'high')),
   owner_notes text
 );
