@@ -15,6 +15,7 @@ const { buildAnyEmail, ALL_EMAIL_KEYS, sampleContext } = require("./_lib/emailAn
 //   feedback     POST  save what a customer tells us: the product backlog
 //   rating       POST  a thumbs up/down on a piece of feedback (was api/commit.js)
 //   qa           GET   the weekly marking-quality check (called by Vercel Cron)
+//   qaContent    GET   admin only: one generated passage or prompt for a chosen country and year, to judge by eye
 //   ga           GET   Google Analytics numbers for the dashboard (admin or cron secret)
 //   gsc          GET   Google Search Console numbers: the searches that bring people in (admin or cron secret)
 //   stats        GET   delivery, open and click numbers per email subject (admin or cron secret)
@@ -131,6 +132,33 @@ async function handleQa(req, res) {
   }
   console.log("qa-run", JSON.stringify({ passed: summary.passed, delivered: summary.delivered, total: summary.total, avgMs: summary.avgMs, saved }));
   return res.status(200).json({ saved, passedFirstTry: summary.passed, delivered: summary.delivered, total: summary.total, passRate: summary.passRate, deliveredRate: summary.deliveredRate, timedOut: summary.timedOut, avgAttempts: summary.avgAttempts, avgMs: summary.avgMs, results: summary.results.map((r) => ({ name: r.name, firstTry: r.firstTry, outcome: r.outcome, attempts: r.attempts, ms: r.ms, issues: r.issues })) });
+}
+
+// ------------------------------------------------------------------ content spot-check
+// Generates one reading passage or writing prompt for a chosen country and year through the real prompt, model and
+// validator, so a person can judge whether it suits that country and year. Admin only; nothing is stored.
+//   ?action=qaContent&plan=1                                   the fixed list of samples
+//   ?action=qaContent&i=<n>[&exam=0]                           run sample n of that list
+async function handleQaContent(req, res) {
+  let allowed = false;
+  const bearer = (req.headers && req.headers.authorization) || "";
+  if (bearer.startsWith("Bearer ")) {
+    try {
+      const user = await require("./_lib/auth").requireUser(req);
+      const admins = (process.env.ADMIN_EMAILS || "").split(",").map((e) => e.trim().toLowerCase()).filter(Boolean);
+      allowed = admins.includes(String(user.email || "").toLowerCase()) || require("./_lib/activity").isOwner(user);
+    } catch (e) { allowed = false; }
+  }
+  if (!allowed) return res.status(401).json({ error: "Unauthorized." });
+  const QC = require("./_lib/qaContent");
+  const plan = QC.samplePlan();
+  if (req.query && req.query.plan === "1") return res.status(200).json({ count: plan.length, plan });
+  const i = Number(req.query && req.query.i);
+  if (!Number.isInteger(i) || i < 0 || i >= plan.length) return res.status(400).json({ error: "i is out of range." });
+  const { generateFeedbackJSON } = require("./_lib/openai");
+  const s = plan[i];
+  const result = await QC.runSample({ ...s, generate: (prompt, o = {}) => generateFeedbackJSON(prompt, { maxTokens: o.maxTokens || 3800 }) });
+  return res.status(200).json({ i, ...result });
 }
 
 // ------------------------------------------------------------------ Google Analytics numbers
@@ -570,6 +598,7 @@ module.exports = async function handler(req, res) {
     if (action === "learner") return await handleLearner(req, res);
     if (action === "cron") return await handleCron(req, res);
     if (action === "qa") return await handleQa(req, res);
+    if (action === "qaContent") return await handleQaContent(req, res);
     if (action === "stats") return await handleStats(req, res);
     if (action === "ga") return await handleGa(req, res);
     if (action === "gsc") return await handleGsc(req, res);
