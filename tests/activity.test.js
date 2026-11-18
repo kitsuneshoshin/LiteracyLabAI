@@ -77,7 +77,7 @@ test("the people list shows when and why an account cancelled", () => {
     { profile_id: "gone", created_at: "2026-11-07T22:00:00Z", message: "CANCELLED (core plan). Reason: Other." },
   ];
   const r = buildActivity({ events, submissions, profiles, cancellations, now: NOW });
-  assert.deepEqual(r.users.find((u) => u.userId === "p1").cancelled, { when: "2026-11-07T22:00:00Z", reason: "It's missing features I need." }, "the newest cancellation wins");
+  assert.deepEqual(r.users.find((u) => u.userId === "p1").cancelled, { when: "2026-11-07T22:00:00Z", plan: "premium", reason: "It's missing features I need." }, "the newest cancellation wins");
   assert.equal(r.users.find((u) => u.userId === "p2").cancelled, null);
 });
 

@@ -6,7 +6,7 @@ Internal engineering changelog, not linked from the site. One entry per shipped 
 
 - `895fe37` Admin People tab: plan is now a colour-coded tag (free grey, core blue, premium gold) and the list can be filtered by email search, plan, and activity (has used it / never used it / cancelled)
 
-- `PLANARROW` Admin People table: Plan column shows the plan they cancelled from, an arrow, then cancelled (still on it until period end) or the plan they are on now
+- `3b178c4` Admin People table: Plan column shows the plan they cancelled from, an arrow, then cancelled (still on it until period end) or the plan they are on now
 
 - `a2a4971` Admin feedback: Archive/Restore button and Active/Archived filter (new "archived" status, history kept); public site header removed from admin
 
