@@ -79,6 +79,27 @@
   }
   footer{ max-width:760px; margin:0 auto; padding:0 24px 48px; font-size:13px; color:var(--ink-faint); font-family:"Lexend",sans-serif; }
   footer a{ color:var(--ink-soft); }
+  /* Fluid side padding that respects phone notches, on every guide page. */
+  .nav-inner, .doc, footer{ padding-left:max(clamp(16px,4vw,40px),env(safe-area-inset-left)); padding-right:max(clamp(16px,4vw,40px),env(safe-area-inset-right)); }
+  /* Hub and country pages: use the full width of the screen. */
+  body.wide .nav-inner, body.wide .doc, body.wide footer{ max-width:1280px; }
+  body.wide .doc > h1, body.wide .doc > .lead{ max-width:62rem; }
+  body.wide .doc h1{ font-size:clamp(30px,4.2vw,52px); }
+  body.wide .grid{ grid-template-columns:repeat(auto-fill,minmax(min(100%,230px),1fr)); gap:clamp(10px,1.4vw,18px); margin:26px 0 30px; }
+  body.wide .grid a{ padding:clamp(14px,1.6vw,22px); font-size:clamp(14px,1.2vw,16px); height:100%; }
+  body.wide .grid a small{ font-size:clamp(12.5px,1vw,14px); }
+  body.wide .links{ display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr)); gap:0 clamp(24px,4vw,56px); margin:0 0 8px; }
+  body.wide .links p{ margin:0 0 16px; }
+  body.wide .cta{ display:grid; grid-template-columns:1fr; gap:4px 32px; align-items:center; }
+  @media (min-width:900px){
+    body.wide .cta{ grid-template-columns:1fr auto; }
+    body.wide .cta h2{ grid-column:1; }
+    body.wide .cta p{ grid-column:1; max-width:60rem; }
+    body.wide .cta p:last-child{ grid-column:2; grid-row:1 / span 2; margin:0; }
+  }
+  body.wide .cta h2{ border-top:0; padding-top:0; margin-top:0; }
+  @media (max-width:640px){ body.wide .grid{ grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; } body.wide .grid a{ padding:12px; } }
+  @media (max-width:640px){ .doc{ padding-top:24px; padding-bottom:48px; } .btn{ display:block; text-align:center; } }
 </style>
 <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Article","headline":"GCSE English Language assessment objectives: AO1 to AO6 (AQA)","description":"GCSE English Language assessment objectives AO1 to AO6 explained: what AO5 and AO6 mean, how many marks each carries on AQA Papers 1 and 2, and how to help.","url":"https://www.literacylabai.com/learn/articles/gcse-english-language-explained/","inLanguage":"en","datePublished":"2026-10-08","dateModified":"2026-10-08","author":{"@type":"Organization","name":"LiteracyLab AI"},"publisher":{"@type":"Organization","name":"LiteracyLab AI"}},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What are the GCSE English Language assessment objectives?","acceptedAnswer":{"@type":"Answer","text":"There are six. AO1 to AO4 are for reading (finding information, analysing language and structure, comparing texts and evaluating) and AO5 and AO6 are for writing (content and organisation, then technical accuracy)."}},{"@type":"Question","name":"What do AO5 and AO6 mean in English Language?","acceptedAnswer":{"@type":"Answer","text":"AO5 is content and organisation: writing that suits its purpose and reader and is well planned. AO6 is technical accuracy: a range of vocabulary and sentence structures, with accurate spelling and punctuation. In AQA, AO5 is worth 24 marks and AO6 is worth 16 marks in each writing question."}},{"@type":"Question","name":"What does AO6 mean in GCSE English Language?","acceptedAnswer":{"@type":"Answer","text":"AO6 is technical accuracy in writing: using a range of vocabulary and sentence structures, with accurate spelling and punctuation. In AQA it carries 16 of the 40 marks in Question 5 on each paper."}},{"@type":"Question","name":"Which assessment objectives are tested on each paper?","acceptedAnswer":{"@type":"Answer","text":"Both papers test AO1 and AO2 in reading and AO5 and AO6 in writing. Paper 1 adds AO4 (evaluating) and Paper 2 adds AO3 (comparing two texts)."}},{"@type":"Question","name":"Are the objectives the same for every exam board?","acceptedAnswer":{"@type":"Answer","text":"They are very similar across boards, but the paper structures and mark totals differ. Check your board's specification."}},{"@type":"Question","name":"How are grades reported?","acceptedAnswer":{"@type":"Answer","text":"On a 9 to 1 scale, with 9 the highest."}},{"@type":"Question","name":"How many marks are there for accuracy in the writing questions?","acceptedAnswer":{"@type":"Answer","text":"In AQA, 16 of the 40 marks in each writing question are for technical accuracy (AO6)."}},{"@type":"Question","name":"Where can I see past papers?","acceptedAnswer":{"@type":"Answer","text":"Past papers and mark schemes are published on the exam board's website."}}]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://www.literacylabai.com/"},{"@type":"ListItem","position":2,"name":"Guides","item":"https://www.literacylabai.com/learn/"},{"@type":"ListItem","position":3,"name":"Articles for parents","item":"https://www.literacylabai.com/learn/articles/"},{"@type":"ListItem","position":4,"name":"GCSE English Language assessment objectives: AO1 to AO6 (AQA)","item":"https://www.literacylabai.com/learn/articles/gcse-english-language-explained/"}]}]}</script>
 <script src="/analytics.js"></script>

@@ -79,6 +79,27 @@
   }
   footer{ max-width:760px; margin:0 auto; padding:0 24px 48px; font-size:13px; color:var(--ink-faint); font-family:"Lexend",sans-serif; }
   footer a{ color:var(--ink-soft); }
+  /* Fluid side padding that respects phone notches, on every guide page. */
+  .nav-inner, .doc, footer{ padding-left:max(clamp(16px,4vw,40px),env(safe-area-inset-left)); padding-right:max(clamp(16px,4vw,40px),env(safe-area-inset-right)); }
+  /* Hub and country pages: use the full width of the screen. */
+  body.wide .nav-inner, body.wide .doc, body.wide footer{ max-width:1280px; }
+  body.wide .doc > h1, body.wide .doc > .lead{ max-width:62rem; }
+  body.wide .doc h1{ font-size:clamp(30px,4.2vw,52px); }
+  body.wide .grid{ grid-template-columns:repeat(auto-fill,minmax(min(100%,230px),1fr)); gap:clamp(10px,1.4vw,18px); margin:26px 0 30px; }
+  body.wide .grid a{ padding:clamp(14px,1.6vw,22px); font-size:clamp(14px,1.2vw,16px); height:100%; }
+  body.wide .grid a small{ font-size:clamp(12.5px,1vw,14px); }
+  body.wide .links{ display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr)); gap:0 clamp(24px,4vw,56px); margin:0 0 8px; }
+  body.wide .links p{ margin:0 0 16px; }
+  body.wide .cta{ display:grid; grid-template-columns:1fr; gap:4px 32px; align-items:center; }
+  @media (min-width:900px){
+    body.wide .cta{ grid-template-columns:1fr auto; }
+    body.wide .cta h2{ grid-column:1; }
+    body.wide .cta p{ grid-column:1; max-width:60rem; }
+    body.wide .cta p:last-child{ grid-column:2; grid-row:1 / span 2; margin:0; }
+  }
+  body.wide .cta h2{ border-top:0; padding-top:0; margin-top:0; }
+  @media (max-width:640px){ body.wide .grid{ grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; } body.wide .grid a{ padding:12px; } }
+  @media (max-width:640px){ .doc{ padding-top:24px; padding-bottom:48px; } .btn{ display:block; text-align:center; } }
 </style>
 <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Article","headline":"Grade 8 English Language Arts (US): what's taught and how to help","description":"What Grade 8 children in the US learn in English Language Arts (ages 13–14): a plain-English guide with practice prompts for parents.","url":"https://www.literacylabai.com/learn/us/grade-8/","inLanguage":"en","dateModified":"2026-10-09","author":{"@type":"Organization","name":"LiteracyLab AI"},"publisher":{"@type":"Organization","name":"LiteracyLab AI","url":"https://www.literacylabai.com"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://www.literacylabai.com/"},{"@type":"ListItem","position":2,"name":"Guides","item":"https://www.literacylabai.com/learn/"},{"@type":"ListItem","position":3,"name":"US","item":"https://www.literacylabai.com/learn/us/"},{"@type":"ListItem","position":4,"name":"Grade 8","item":"https://www.literacylabai.com/learn/us/grade-8/"}]}]}</script>
 <script src="/analytics.js"></script>

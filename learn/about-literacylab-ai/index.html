@@ -79,6 +79,27 @@
   }
   footer{ max-width:760px; margin:0 auto; padding:0 24px 48px; font-size:13px; color:var(--ink-faint); font-family:"Lexend",sans-serif; }
   footer a{ color:var(--ink-soft); }
+  /* Fluid side padding that respects phone notches, on every guide page. */
+  .nav-inner, .doc, footer{ padding-left:max(clamp(16px,4vw,40px),env(safe-area-inset-left)); padding-right:max(clamp(16px,4vw,40px),env(safe-area-inset-right)); }
+  /* Hub and country pages: use the full width of the screen. */
+  body.wide .nav-inner, body.wide .doc, body.wide footer{ max-width:1280px; }
+  body.wide .doc > h1, body.wide .doc > .lead{ max-width:62rem; }
+  body.wide .doc h1{ font-size:clamp(30px,4.2vw,52px); }
+  body.wide .grid{ grid-template-columns:repeat(auto-fill,minmax(min(100%,230px),1fr)); gap:clamp(10px,1.4vw,18px); margin:26px 0 30px; }
+  body.wide .grid a{ padding:clamp(14px,1.6vw,22px); font-size:clamp(14px,1.2vw,16px); height:100%; }
+  body.wide .grid a small{ font-size:clamp(12.5px,1vw,14px); }
+  body.wide .links{ display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr)); gap:0 clamp(24px,4vw,56px); margin:0 0 8px; }
+  body.wide .links p{ margin:0 0 16px; }
+  body.wide .cta{ display:grid; grid-template-columns:1fr; gap:4px 32px; align-items:center; }
+  @media (min-width:900px){
+    body.wide .cta{ grid-template-columns:1fr auto; }
+    body.wide .cta h2{ grid-column:1; }
+    body.wide .cta p{ grid-column:1; max-width:60rem; }
+    body.wide .cta p:last-child{ grid-column:2; grid-row:1 / span 2; margin:0; }
+  }
+  body.wide .cta h2{ border-top:0; padding-top:0; margin-top:0; }
+  @media (max-width:640px){ body.wide .grid{ grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; } body.wide .grid a{ padding:12px; } }
+  @media (max-width:640px){ .doc{ padding-top:24px; padding-bottom:48px; } .btn{ display:block; text-align:center; } }
 </style>
 <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebPage","name":"About LiteracyLab AI: what it is, how it works, and its limits","description":"What LiteracyLab AI is, how its feedback is made, what it does with children's writing, what it cannot do, and how to contact us.","url":"https://www.literacylabai.com/learn/about-literacylab-ai/","inLanguage":"en","dateModified":"2026-11-04","publisher":{"@type":"Organization","name":"LiteracyLab AI"}},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Who is LiteracyLab AI for?","acceptedAnswer":{"@type":"Answer","text":"Parents and guardians of children and students aged 5 to 18, and English learners at any age. Accounts are created and managed by a parent or guardian."}},{"@type":"Question","name":"Is LiteracyLab AI free?","acceptedAnswer":{"@type":"Answer","text":"There is a Free plan with 3 pieces a month and full feedback, no card needed. Core adds unlimited pieces for one learner and progress tracking. Premium adds up to 6 learners and extra feedback sections."}},{"@type":"Question","name":"Is it affiliated with a school or exam board?","acceptedAnswer":{"@type":"Answer","text":"No. It is an independent product and is not affiliated with any exam board, government or school."}}]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://www.literacylabai.com/"},{"@type":"ListItem","position":2,"name":"Guides","item":"https://www.literacylabai.com/learn/"},{"@type":"ListItem","position":3,"name":"About LiteracyLab AI","item":"https://www.literacylabai.com/learn/about-literacylab-ai/"}]}]}</script>
 <script src="/analytics.js"></script>

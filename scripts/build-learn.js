@@ -253,9 +253,30 @@ const CSS = `
   }
   footer{ max-width:760px; margin:0 auto; padding:0 24px 48px; font-size:13px; color:var(--ink-faint); font-family:"Lexend",sans-serif; }
   footer a{ color:var(--ink-soft); }
+  /* Fluid side padding that respects phone notches, on every guide page. */
+  .nav-inner, .doc, footer{ padding-left:max(clamp(16px,4vw,40px),env(safe-area-inset-left)); padding-right:max(clamp(16px,4vw,40px),env(safe-area-inset-right)); }
+  /* Hub and country pages: use the full width of the screen. */
+  body.wide .nav-inner, body.wide .doc, body.wide footer{ max-width:1280px; }
+  body.wide .doc > h1, body.wide .doc > .lead{ max-width:62rem; }
+  body.wide .doc h1{ font-size:clamp(30px,4.2vw,52px); }
+  body.wide .grid{ grid-template-columns:repeat(auto-fill,minmax(min(100%,230px),1fr)); gap:clamp(10px,1.4vw,18px); margin:26px 0 30px; }
+  body.wide .grid a{ padding:clamp(14px,1.6vw,22px); font-size:clamp(14px,1.2vw,16px); height:100%; }
+  body.wide .grid a small{ font-size:clamp(12.5px,1vw,14px); }
+  body.wide .links{ display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr)); gap:0 clamp(24px,4vw,56px); margin:0 0 8px; }
+  body.wide .links p{ margin:0 0 16px; }
+  body.wide .cta{ display:grid; grid-template-columns:1fr; gap:4px 32px; align-items:center; }
+  @media (min-width:900px){
+    body.wide .cta{ grid-template-columns:1fr auto; }
+    body.wide .cta h2{ grid-column:1; }
+    body.wide .cta p{ grid-column:1; max-width:60rem; }
+    body.wide .cta p:last-child{ grid-column:2; grid-row:1 / span 2; margin:0; }
+  }
+  body.wide .cta h2{ border-top:0; padding-top:0; margin-top:0; }
+  @media (max-width:640px){ body.wide .grid{ grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; } body.wide .grid a{ padding:12px; } }
+  @media (max-width:640px){ .doc{ padding-top:24px; padding-bottom:48px; } .btn{ display:block; text-align:center; } }
 `;
 
-function layout({ title, description, canonical, jsonld, body, script, css }) {
+function layout({ title, description, canonical, jsonld, body, script, css, wide }) {
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -281,7 +302,7 @@ function layout({ title, description, canonical, jsonld, body, script, css }) {
 <script src="/analytics.js"></script>
 <link rel="stylesheet" href="/theme.css?v=11">
 </head>
-<body>
+<body${wide ? ' class="wide"' : ""}>
 <div class="nav"><div class="nav-inner">
   <a class="brand" href="/">LiteracyLab <span>AI</span></a>
   <a class="try" href="/app.html">Try it free</a>
@@ -402,7 +423,7 @@ ${items}
 </ul>
 ${ctaBlock(`${r.slug}-hub`, "See it work on real writing")}
 <p class="small">${esc(r.note)}</p>`;
-  return layout({ title, description, canonical: urlFor.region(r), jsonld, body });
+  return layout({ title, description, canonical: urlFor.region(r), jsonld, body, wide: true });
 }
 
 function buildHub(regionGroups) {
@@ -419,13 +440,15 @@ function buildHub(regionGroups) {
 <ul class="grid">
 ${items}
 </ul>
+<div class="links">
 <p>Looking for advice? Browse our <a href="/learn/articles/">articles for parents</a> on reading, writing and exams.</p>
 <p>New here? Read <a href="/learn/how-it-works/">how LiteracyLab AI works</a>, what <a href="/learn/writing-feedback-for-kids/">good writing feedback</a> looks like, or find <a href="/learn/reading-comprehension-practice/">reading comprehension practice</a>.</p>
 <p>Preparing for a test? See <a href="/learn/naplan-writing-practice/">NAPLAN writing practice</a>, <a href="/learn/ks2-sats-reading-practice/">KS2 SATs reading practice</a>, <a href="/learn/11-plus-english-practice/">11+ English practice</a>, <a href="/learn/igcse-english-first-language-writing-feedback/">IGCSE English writing feedback</a> or <a href="/learn/common-core-writing-feedback-for-parents/">Common Core writing feedback</a>. Worried about AI and children? Read <a href="/learn/ai-writing-coach-for-kids/">what parents should know</a>.</p>
 <p>Looking for something to write about? Try the <a href="/learn/prompts/">free writing prompt generator</a>: choose an age group, a topic and a kind of writing.</p>${WS.published().length ? `<p>Want reading practice? Download our <a href="/learn/worksheets/">free printable reading comprehension worksheets</a> for ${WS.levelsText()}, with answer keys.</p>` : ""}
-${ctaBlock("hub", "Get feedback on your child's writing")}
+</div>
+${ctaBlock("hub","Get feedback on your child's writing")}
 <p class="small">General information based on published curriculum documents. Always check your school's own guidance.</p>`;
-  return layout({ title, description, canonical: urlFor.hub(), jsonld, body });
+  return layout({ title, description, canonical: urlFor.hub(), jsonld, body, wide: true });
 }
 
 function buildPromptsPage() {
