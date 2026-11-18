@@ -4,6 +4,8 @@ Internal engineering changelog, not linked from the site. One entry per shipped 
 
 ## 2026-11-18
 
+- `a043947` Consistency pass: privacy, terms, feedback, share and unsubscribe pages share the homepage header/footer (new site-chrome.css); one style for all back/previous/next links; small uppercase labels now use Lexend instead of the typewriter font everywhere; the progress chart fills its card; Account and Manage plan pages use the full width
+
 - `71454f6` Workspace (app): same logo as the homepage (Fraunces wordmark, no tagline), same footer, tabs in the same Lexend style as the top links, and the page uses the same widescreen container that grows on big screens
 
 - `e4e32d3` Guide breadcrumbs (Home › Guides › ...) now use the same Lexend style as the top navigation links instead of uppercase typewriter text
