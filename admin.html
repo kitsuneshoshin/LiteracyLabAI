@@ -641,7 +641,13 @@ function renderUsers(){
   list.forEach(function(u){
     var r = el("tr", "click"); r.title = "Open this person's learner dashboard";
     r.addEventListener("click", function(){ var l = DATA.learners.filter(function(x){ return x.userId === u.userId; })[0]; if (l) { $("lSel").value = l.childId; loadLearner(); $("dash").scrollIntoView(); } });
-    var td = el("td"); td.appendChild(tag(u.plan, PLAN_TAG[u.plan] || "plain"));
+    var td = el("td");
+    if (u.cancelled && u.cancelled.plan && u.cancelled.plan !== "free") {
+      // What they were paying for, an arrow, then where they are now (still on it until the period ends = "cancelled")
+      td.appendChild(tag(u.cancelled.plan, PLAN_TAG[u.cancelled.plan] || "plain"));
+      td.appendChild(el("span", "muted", " → "));
+      td.appendChild(u.plan === u.cancelled.plan ? tag("cancelled", "bad") : tag(u.plan, PLAN_TAG[u.plan] || "plain"));
+    } else td.appendChild(tag(u.plan, PLAN_TAG[u.plan] || "plain"));
     [u.email || u.userId.slice(0, 8), null, when(u.joined), u.writing, u.reading, u.stopped, u.events, when(u.lastSeen), u.cancelled ? when(u.cancelled.when) + " - " + u.cancelled.reason : "-"].forEach(function(v){
       if (v === null) { r.appendChild(td); return; }
       r.appendChild(el("td", null, String(v)));

@@ -116,7 +116,8 @@ function buildActivity({ events = [], submissions = [], profiles = [], children 
   for (const c of cancellations) {
     const u = perUser[c.profile_id]; if (!u) continue;
     if (u.cancelled && String(u.cancelled.when) >= String(c.created_at)) continue;
-    u.cancelled = { when: c.created_at, reason: String(c.message || "").replace(/^CANCELLED \([^)]*\)\.\s*/, "").replace(/^Reason:\s*/, "").trim() };
+    const planMatch = /^CANCELLED \(([a-z]+) plan\)/i.exec(String(c.message || ""));
+    u.cancelled = { when: c.created_at, plan: planMatch ? planMatch[1].toLowerCase() : null, reason: String(c.message || "").replace(/^CANCELLED \([^)]*\)\.\s*/, "").replace(/^Reason:\s*/, "").trim() };
   }
   for (const s of submissions) {
     const u = perUser[s.profile_id]; if (!u) continue;
