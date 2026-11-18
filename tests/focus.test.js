@@ -30,23 +30,28 @@ test("every kind of writing on offer is one the feedback knows how to teach, and
 
 test("the exam a learner is likely preparing for follows their country and year, and some have none", () => {
   assert.equal(F.examStyleFor(AU, "Year 5").name, "NAPLAN");
+  for (const y of ["Year 4", "Year 6", "Year 8"]) assert.equal(F.examStyleFor(AU, y), null, "NAPLAN is sat in Years 3, 5, 7 and 9 only: " + y);
   assert.equal(F.examStyleFor(AU, "Year 9").name, "NAPLAN");
   assert.equal(F.examStyleFor(AU, "Year 11"), null, "NAPLAN stops at Year 9");
   assert.equal(F.examStyleFor(AU, "Foundation"), null);
   assert.equal(F.examStyleFor(UK, "Year 11").name, "GCSE English Language");
   assert.equal(F.examStyleFor(UK, "Year 8").name, "KS3 English");
-  assert.equal(F.examStyleFor(UK, "Year 4").name, "KS2 SATs");
+  assert.equal(F.examStyleFor(UK, "Year 4").name, "KS2 English");
+  assert.equal(F.readingExamStyleFor(UK, "Year 4").name, "KS2 English");
+  assert.equal(F.readingExamStyleFor(UK, "Year 6").name, "KS2 SATs", "the national reading test is sat in Year 6");
   assert.equal(F.examStyleFor(UK, "Reception"), null);
   assert.equal(F.examStyleFor(US, "Grade 7").name, "state test (Common Core)");
   assert.equal(F.examStyleFor(US, "Kindergarten"), null);
-  assert.equal(F.examStyleFor(CA, "Grade 7").name, "EQAO");
+  assert.equal(F.examStyleFor(CA, "Grade 6").name, "EQAO");
+  assert.equal(F.examStyleFor(CA, "Grade 3").name, "EQAO");
+  for (const g of ["Grade 4", "Grade 5", "Grade 7", "Grade 9"]) assert.equal(F.examStyleFor(CA, g), null, "EQAO reading and writing is Grades 3 and 6 only: " + g);
   assert.equal(F.examStyleFor(CA, "Grade 10").name, "OSSLT");
   assert.equal(F.examStyleFor(CA, "Grade 12"), null, "no clear exam after Grade 10");
   assert.equal(F.examStyleFor(CA, "Kindergarten"), null);
   const SG = "🇸🇬 Singapore & SE Asia", AE = "🇦🇪 UAE & GCC Hubs", ESL = "🌐 Global ESL Mode";
   assert.equal(F.examStyleFor(SG, "Primary 6").name, "PSLE English");
   assert.equal(F.examStyleFor(SG, "Primary 2"), null);
-  assert.equal(F.examStyleFor(SG, "Secondary 2").name, "O-Level English Paper 1");
+  assert.equal(F.examStyleFor(SG, "Secondary 2").name, "Singapore secondary English");
   assert.equal(F.examStyleFor(SG, "O-Level / IGCSE Yr 5").name, "O-Level English Paper 1");
   assert.equal(F.examStyleFor(SG, "IB Diploma Yr 1"), null);
   assert.equal(F.examStyleFor(AE, "Cambridge Primary 5").name, "Cambridge Primary Checkpoint");
@@ -102,9 +107,9 @@ test("the exam style is Premium only, only where there is an exam, and only when
   assert.equal(wf("elementary", "admin", ask).exam.name, "NAPLAN");
   assert.equal(wf("elementary", "free", ask).exam, null);
   assert.equal(wf("elementary", "core", ask).exam, null, "Core does not have it");
-  assert.equal(wf("elementary", "premium", ask, CA, "Grade 5").exam.name, "EQAO");
+  assert.equal(wf("elementary", "premium", ask, CA, "Grade 6").exam.name, "EQAO");
   assert.equal(wf("elementary", "premium", ask, CA, "Grade 12").exam, null, "no exam for this year");
-  assert.equal(wf("elementary", "core", ask, CA, "Grade 5").exam, null, "Core does not have it");
+  assert.equal(wf("elementary", "core", ask, CA, "Grade 6").exam, null, "Core does not have it");
   for (const bad of ["true", 1, "yes", {}, [], null, false]) assert.equal(wf("elementary", "premium", { examStyle: bad }).exam, null, JSON.stringify(bad));
   assert.equal(wf("elementary", "premium", ask).genre, "persuasive", "the kind of writing is still kept");
 });
@@ -208,7 +213,7 @@ test("through the endpoint: the exam style is only given to Premium, and only wh
     assert.equal(r.res.statusCode, 200, plan);
     assert.doesNotMatch(r.seen[0], /NAPLAN/, plan); assert.equal(r.res.body.examStyle, null, plan);
   }
-  const ca = await writingPrompt("premium", "elementary", CA, "Grade 5", ask);
+  const ca = await writingPrompt("premium", "elementary", CA, "Grade 6", ask);
   assert.match(ca.seen[0], /practice for the EQAO/); assert.equal(ca.res.body.examStyle, "EQAO");
   const none = await writingPrompt("premium", "elementary", CA, "Grade 12", ask);
   assert.doesNotMatch(none.seen[0], /practice for the/); assert.equal(none.res.body.examStyle, null);

@@ -85,17 +85,18 @@ test("every exam the writing side knows has a reading style, and the two share o
         seen.add(w.name);
         const r = F.readingExamStyleFor(country, g);
         assert.ok(r, `${w.name} has a reading style`);
-        assert.equal(r.name, w.name);
+        assert.ok(r.name === w.name || (w.name === "KS2 English" && r.name === "KS2 SATs"), r.name);
       }
     }
   }
   assert.ok(seen.size >= 18, `found ${seen.size} exams`);
-  for (const name of Object.keys(F.READING_EXAM)) assert.ok(seen.has(name), `${name} in READING_EXAM is a real exam name`);
+  for (const name of Object.keys(F.READING_EXAM)) assert.ok(seen.has(name) || name === "KS2 SATs", `${name} in READING_EXAM is a real exam name`);
 });
 
 test("exam-style reading is Premium only, only where there is an exam, and only when asked for as exactly true", () => {
   const rf = (plan, raw, country = UK, gradeLabel = "Year 5") => F.readingFocusFor({ tier: "elementary", country, gradeLabel, capabilities: capabilitiesFor(plan) }, raw);
-  assert.equal(rf("premium", { examStyle: true }).exam.name, "KS2 SATs");
+  assert.equal(rf("premium", { examStyle: true }).exam.name, "KS2 English");
+  assert.equal(rf("premium", { examStyle: true }, UK, "Year 6").exam.name, "KS2 SATs");
   assert.equal(rf("free", { examStyle: true }).exam, null);
   assert.equal(rf("core", { examStyle: true }).exam, null);
   assert.equal(rf("premium", { examStyle: true }, UK, "Reception").exam, null, "no exam for this year");
@@ -124,4 +125,26 @@ test("the page offers the reading exam switch to Premium, sends it, and the endp
   const src = fs.readFileSync(path.join(__dirname, "..", "api", "reading-passage.js"), "utf8");
   assert.match(src, /readingFocusFor\(\{ tier, country, gradeLabel, capabilities: usage\.capabilities \}/);
   assert.match(src, /examStyle: parsed\.examStyle \|\| null/);
+});
+
+test("each grade lands in a band written for its own stage (the band edges follow the ages in gradeLevel.js)", () => {
+  const AE = "🇦🇪 UAE & GCC Hubs";
+  const note = (c, g) => CP.readingNote(c, GRADE_AGE[c][g]);
+  assert.match(note(AE, "Cambridge Primary 6"), /Cambridge Primary/);
+  assert.match(note(AE, "Lower Secondary 7"), /Lower Secondary/, "age 11 starts Lower Secondary");
+  assert.match(note(AE, "Lower Secondary 9"), /Lower Secondary/);
+  assert.match(note(AE, "IGCSE Year 10"), /upper-secondary/, "age 14 is IGCSE");
+  assert.match(note(AE, "AS Level (Yr 12)"), /AS and A Level/, "age 16 is AS Level");
+  assert.match(note(SG, "Secondary 2"), /lower secondary/);
+  assert.match(note(SG, "Secondary 3"), /upper secondary/, "Secondary 3 is upper secondary in MOE terms");
+  assert.match(note(SG, "O-Level / IGCSE Yr 4"), /upper secondary/);
+  assert.doesNotMatch(note(SG, "Secondary 3"), /lower secondary/);
+});
+
+test("Singapore Secondary 1-3 is not called an O-Level task, and only Primary 6 asks for the 150-word PSLE composition", () => {
+  assert.equal(F.examStyleFor(SG, "Secondary 1").name, "Singapore secondary English");
+  assert.equal(F.examStyleFor(SG, "O-Level / IGCSE Yr 4").name, "O-Level English Paper 1");
+  assert.match(F.examStyleFor(SG, "Primary 6").style, /at least 150 words/);
+  assert.doesNotMatch(F.examStyleFor(SG, "Primary 5").style, /150 words/);
+  assert.equal(F.readingExamStyleFor(SG, "Secondary 1").name, "Singapore secondary English");
 });

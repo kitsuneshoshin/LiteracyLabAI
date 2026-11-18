@@ -64,39 +64,41 @@ const CEFR_STYLE = {
   B1: "a writing task of about 100 words, such as an email or a short story, with a clear situation and a few points to cover",
   B2: "a writing task of about 140 to 190 words, such as an article, an essay, a review or an informal letter, with a clear situation, audience and purpose",
   C1: "a writing task of about 220 to 260 words, such as an essay or a report, where the writer has to give an opinion, weigh up ideas and choose a suitable formal or semi-formal register",
-  C2: "a demanding writing task of about 240 to 280 words, such as an essay, a review or a report, asking for a precise, well-organised and nuanced answer in a register suited to the reader",
+  C2: "a demanding writing task of about 240 to 320 words, such as an essay, an article, a review or a report, asking for a precise, well-organised and nuanced answer in a register suited to the reader",
 };
 function examStyleFor(country, gradeLabel) {
   const c = String(country || "");
   const label = String(gradeLabel || "");
   if (/Singapore/.test(c)) {
     const p = labelNumber(label, /^Primary\s*(\d{1,2})$/i);
-    if (p != null && p >= 4 && p <= 6) return { name: "PSLE English", style: "the way a PSLE English continuous-writing task is worded: a theme or a set of pictures to build a story around, with a short instruction, for a timed composition of at least 150 words" };
-    if (labelNumber(label, /^Secondary\s*([1-3])$/i) != null || /^O-Level\s*\/\s*IGCSE\s*Yr\s*[45]$/i.test(label)) {
-      return { name: "O-Level English Paper 1", style: "the way a Singapore secondary English writing paper is worded: a short instruction with a theme, a title or a viewpoint, asking for a narrative, a descriptive or a discursive piece" };
+    if (p === 6) return { name: "PSLE English", style: "the way a PSLE English continuous-writing task is worded: a topic, usually with pictures, to build a story around, with a short instruction, for a timed composition of at least 150 words" };
+    if (p === 4 || p === 5) return { name: "PSLE English", style: "the way a PSLE English continuous-writing task is worded: a topic, usually with pictures, to build a story around, with a short instruction, for a timed composition of a length suited to this year" };
+    if (labelNumber(label, /^Secondary\s*([1-3])$/i) != null) return { name: "Singapore secondary English", style: "the way a Singapore secondary English writing task is worded: a short instruction with a theme, a title or a viewpoint, asking for a narrative, a descriptive or an argumentative piece" };
+    if (/^O-Level\s*\/\s*IGCSE\s*Yr\s*[45]$/i.test(label)) {
+      return { name: "O-Level English Paper 1", style: "the way a Singapore O-Level English writing paper is worded: either a situational writing task (a formal letter or email that must cover given points) or a continuous-writing task from a title or a viewpoint (a narrative, a descriptive or a discursive piece)" };
     }
     return null;
   }
   if (/UAE|GCC/.test(c)) {
     const p = labelNumber(label, /^Cambridge Primary\s*(\d)$/i);
-    if (p != null && p >= 4 && p <= 6) return { name: "Cambridge Primary Checkpoint", style: "the way a Cambridge Primary English writing task is worded: a clear purpose and audience, in simple language a child of this age can follow" };
+    if (p != null && p >= 4 && p <= 6) return { name: "Cambridge Primary Checkpoint", style: "the way a Cambridge Primary Checkpoint English writing task is worded: a clear purpose and audience, a non-fiction form (for example a letter, report or article) or a fiction piece (a story), in simple language a child of this age can follow" };
     if (labelNumber(label, /^Lower Secondary\s*([7-9])$/i) != null) return { name: "Cambridge Lower Secondary Checkpoint", style: "the way a Cambridge Lower Secondary English writing task is worded: a clear purpose, audience and form, such as an article, a letter or a story" };
-    if (/^IGCSE Year\s*1[01]$/i.test(label)) return { name: "IGCSE English First Language", style: "the way an IGCSE English First Language writing question is worded: a topic or a viewpoint, and a clear form (a descriptive or narrative piece, an article, a letter or a speech)" };
-    if (/^A(S)? Level\b/i.test(label)) return { name: "Cambridge AS and A Level English", style: "the way a Cambridge AS and A Level English writing task is worded: a topic or a statement, and a clear form (a discursive, a narrative or a descriptive piece) for a timed response" };
+    if (/^IGCSE Year\s*1[01]$/i.test(label)) return { name: "IGCSE English First Language", style: "the way an IGCSE English First Language writing question is worded: either a directed writing task (a discursive, argumentative or persuasive speech, letter, article or report, about 250 to 350 words, responding to a text) or a composition from a title (descriptive or narrative, about 350 to 450 words)" };
+    if (/^A(S)? Level\b/i.test(label)) return { name: "Cambridge AS and A Level English", style: "the way a Cambridge AS Level English Language writing task is worded: a brief giving a form, purpose and audience (for example an article, a review, a blog, a speech or a travel piece), either a short text of up to 400 words or an extended piece of 600 to 900 words that is imaginative or descriptive, discursive or argumentative, or a review" };
     return null;
   }
   if (/India/.test(c)) {
     const k = labelNumber(label, /^Class\s*(\d{1,2})$/i);
-    if (k != null && k >= 9 && k <= 10) return { name: "CBSE Class 10 English", style: "the way a CBSE Class 10 English writing task is worded: a short situation, and an instruction to write a clear form such as a formal letter, an article, a story or a notice within a word limit" };
-    if (k != null && k >= 11 && k <= 12) return { name: "CBSE Class 12 English", style: "the way a CBSE Class 12 English writing task is worded: a short situation, and an instruction to write a clear form such as a formal letter, a report, an article or a speech within a word limit" };
+    if (k != null && k >= 9 && k <= 10) return { name: "CBSE Class 10 English", style: "the way a CBSE Class 10 English writing task is worded: a short situation, and an instruction to write either a formal letter (for example a complaint, request or enquiry) or an analytical paragraph on a given chart, graph or set of cues, in about 100 to 120 words" };
+    if (k != null && k >= 11 && k <= 12) return { name: "CBSE Class 12 English", style: "the way a CBSE Class 12 English writing task is worded: a short situation or input, and an instruction to write a notice, an invitation or reply (up to 50 words), or a letter, an article or a report (120 to 150 words)" };
     return null;
   }
   if (/Hong Kong/.test(c)) {
-    if (labelNumber(label, /^Secondary\s*([4-6])$/i) != null) return { name: "HKDSE English Language", style: "the way an HKDSE English Language Paper 2 writing task is worded: a short situation or stimulus, and an instruction to write a stated text type (such as a letter, an article, a speech or a story) for a stated audience" };
+    if (labelNumber(label, /^Secondary\s*([4-6])$/i) != null) return { name: "HKDSE English Language", style: "the way an HKDSE English Language Paper 2 writing task is worded: either a short guided task (about 200 words) that gives the situation, the purpose for writing and some information to use, such as a letter, email, report or proposal for a stated reader, or a longer, more open task (about 400 words) such as a story, an article, a speech or a letter for a stated audience" };
     return null;
   }
   if (/Ireland/.test(c)) {
-    if (/^[123](st|nd|rd) Year$/i.test(label)) return { name: "Junior Cycle English", style: "the way a Junior Cycle English written task is worded: a topic or a situation and a clear form, such as a speech, an article, a letter or a short story" };
+    if (/^[123](st|nd|rd) Year$/i.test(label)) return { name: "Junior Cycle English", style: "the way a Junior Cycle English written task is worded: a stimulus text or topic and a clear instruction to respond, such as a speech, an article, a letter or a short story, or a short written response to the stimulus" };
     if (/^[56]th Year$/i.test(label)) return { name: "Leaving Certificate English", style: "the way a Leaving Certificate English Paper 1 composition is worded: a title or a prompt, with a choice of forms such as a personal essay, a speech, a short story, a magazine article or a news report, for a timed response" };
     return null;
   }
@@ -108,26 +110,26 @@ function examStyleFor(country, gradeLabel) {
   }
   const n = gradeNumber(gradeLabel);
   if (n == null) return null;
-  if (/Australia/.test(c) && n >= 3 && n <= 9) {
-    return { name: "NAPLAN", style: "a short stimulus (a topic, a statement or a question) followed by a plain instruction, written the way a NAPLAN writing task is, for a timed response" };
+  if (/Australia/.test(c) && [3, 5, 7, 9].includes(n)) {
+    return { name: "NAPLAN", style: "a short stimulus (a topic, a statement or a question) followed by a plain instruction, written the way a NAPLAN writing task is, for a narrative or persuasive response in a timed setting" };
   }
   if (/New Zealand/.test(c) && n >= 11 && n <= 13) {
-    return { name: "NCEA English", style: "the way an NCEA English writing task is worded: a topic or a statement, and an instruction to write a clear, developed response (a creative piece or a formal essay) in a timed assessment" };
+    return { name: "NCEA English", style: "the way an NCEA English writing task is worded: a purpose and a topic, with an instruction to develop ideas in a piece of fiction or non-fiction writing (such as a personal account, narrative, poem, script, report or essay) for a stated audience, written over time in class" };
   }
   if (/South Africa/.test(c) && n >= 10 && n <= 12) {
-    return { name: "NSC English", style: "the way a South African NSC English writing paper is worded: a choice of essay topics (narrative, descriptive, reflective, argumentative or discursive) and a transactional text such as a formal letter, a speech, a review or a newspaper article" };
+    return { name: "NSC English", style: "the way a South African NSC English writing paper is worded: one essay chosen from several topics (narrative, descriptive, reflective, discursive or argumentative, 400 to 450 words) and two transactional texts of different kinds (for example a letter, a CV and covering letter, a report, a review, a newspaper or magazine article, a speech, a dialogue or a written interview, 180 to 200 words each)" };
   }
   if (/Canada/.test(c)) {
-    if (n >= 3 && n <= 9) return { name: "EQAO", style: "the way an Ontario EQAO writing task is worded: a short situation or topic and a clear instruction about what to write, in plain language for a timed response" };
-    if (n === 10) return { name: "OSSLT", style: "the way the Ontario Secondary School Literacy Test words its writing tasks: a short situation, and an instruction to write a news report or a series of paragraphs giving an opinion, supported with reasons and examples" };
+    if (n === 3 || n === 6) return { name: "EQAO", style: "the way an Ontario EQAO writing task is worded: a short situation or topic and a clear instruction about what to write, in plain language for a timed response" };
+    if (n === 10) return { name: "OSSLT", style: "the way the Ontario Secondary School Literacy Test words its writing tasks: a short topic or situation, and an instruction to write a series of paragraphs giving and supporting an opinion with reasons and examples" };
   }
   if (/United Kingdom/.test(c)) {
-    if (n >= 10 && n <= 11) return { name: "GCSE English Language", style: "the way a GCSE English Language writing question is worded: a situation or a viewpoint, and a clear form (a description, a story, an article, a letter or a speech)" };
+    if (n >= 10 && n <= 11) return { name: "GCSE English Language", style: "the way a GCSE English Language writing question is worded: a situation or a viewpoint, and a clear form (a description or a story, or an article, letter, speech, leaflet, review or report)" };
     if (n >= 7 && n <= 9) return { name: "KS3 English", style: "the way a Key Stage 3 English writing task is worded: a clear purpose and audience, and a form such as an article, a letter or a speech" };
-    if (n >= 3 && n <= 6) return { name: "KS2 SATs", style: "the way a Key Stage 2 writing task is worded: a clear purpose and audience, in simple language a child of this age can follow" };
+    if (n >= 3 && n <= 6) return { name: "KS2 English", style: "the way a Key Stage 2 writing task is set in school (writing is teacher-assessed, with no national writing test): a clear purpose and audience, in simple language a child of this age can follow" };
   }
   if (/United States/.test(c) && n >= 3 && n <= 12) {
-    return { name: "state test (Common Core)", style: "the way a Common Core state writing task is worded: a topic or a claim, and an instruction to write with reasons, evidence or a clear sequence of events" };
+    return { name: "state test (Common Core)", style: "the way a US state writing test task is worded: a topic or a claim, and an instruction to write with reasons, evidence or a clear sequence of events" };
   }
   return null;
 }
@@ -165,33 +167,38 @@ const READING_SKILLS_BY_TIER = {
 // one switch in the app serves both reading and writing, and the name shown is the same. "read" says how that exam words
 // its reading texts and questions; it never names a real published passage.
 const READING_EXAM = {
-  "PSLE English": "the way a PSLE English comprehension paper does: a narrative or information passage with Singapore settings, questions that need a fact, an inference, what a word or phrase refers to, or a meaning in context, and answers that should be put in the pupil's own words",
-  "O-Level English Paper 1": "the way a Singapore secondary English reading task does: an article or narrative with a clear viewpoint, and questions on inference, the writer's purpose and tone, and vocabulary in context",
+  "PSLE English": "the way the PSLE English Paper 2 comprehension section does: a narrative or information passage with Singapore settings, and open-ended questions needing a fact, an inference, what a word or phrase refers to, or a meaning in context, with answers put in the pupil's own words (Paper 2 also has multiple-choice questions on a short visual text such as an advert or notice)",
+  "O-Level English Paper 1": "the way a Singapore O-Level English comprehension does: an article or narrative with a clear viewpoint, and questions on inference, the writer's purpose and tone, and vocabulary in context",
+  "Singapore secondary English": "the way a Singapore secondary English reading task does: an article or narrative with a clear viewpoint, and questions on inference, the writer's purpose and tone, and vocabulary in context",
   "Cambridge Primary Checkpoint": "the way a Cambridge Primary English Checkpoint reading paper does: a story or non-fiction text, and questions that need a fact, an inference, a word meaning or a comment on the writer's choices",
   "Cambridge Lower Secondary Checkpoint": "the way a Cambridge Lower Secondary English Checkpoint reading paper does: a fiction or non-fiction text, and questions on explicit and implicit meaning, the writer's viewpoint and the effect of language",
-  "IGCSE English First Language": "the way an IGCSE English First Language reading paper does: a non-fiction article or report to read closely, with questions on selecting points, implicit meaning and the effect of the writer's word choices",
-  "Cambridge AS and A Level English": "the way a Cambridge AS and A Level English reading task does: a feature, speech or opinion text, with questions on how the writer shapes meaning for an audience",
-  "CBSE Class 10 English": "the way a CBSE Class 10 unseen passage does: a factual, discursive or literary passage with questions on inference, vocabulary (a word's meaning or its opposite) and what a word or phrase refers to",
-  "CBSE Class 12 English": "the way a CBSE Class 12 unseen passage does: a factual or discursive passage on a social or scientific theme, with questions on inference, the writer's attitude, vocabulary and reference",
-  "HKDSE English Language": "the way an HKDSE English Language Paper 1 reading text does: a magazine feature, opinion piece or letter written for a stated purpose, with questions on main ideas, details, inference, the writer's attitude, vocabulary in context and fact versus opinion",
+  "IGCSE English First Language": "the way an IGCSE English First Language Paper 1 does: related non-fiction texts, with comprehension questions on explicit and implicit meaning, a short summary in the pupil's own words (no more than 120 words), and questions on the effect of the writer's language",
+  "Cambridge AS and A Level English": "the way a Cambridge AS Level English Language Paper 1 does: an unseen text (such as a news story, article, blog, brochure, editorial or diary), with questions asking the pupil to comment on its form, structure and language and relate them to purpose and audience",
+  "CBSE Class 10 English": "the way a CBSE Class 10 unseen-passage section does: a discursive passage, or a factual passage with a chart, table or statistics, with multiple-choice and short-answer questions on comprehension, inference, interpretation, evaluation and vocabulary in context",
+  "CBSE Class 12 English": "the way a CBSE Class 12 reading section does: a factual, descriptive or literary passage, or a factual passage with a chart or statistics, with multiple-choice and short-answer questions on inference, the writer's attitude, vocabulary and reference",
+  "HKDSE English Language": "the way an HKDSE English Language Paper 1 reading part does: written texts of different lengths and difficulty, with a mix of multiple-choice, short-answer, true/false/not given, matching and pronoun-reference questions on main ideas and details, the contextual meaning of words, tone and mood, and the writer's views, attitudes and arguments",
   "Junior Cycle English": "the way a Junior Cycle English reading text does: a narrative, informational or persuasive text, with questions on understanding, inference and the effect of the writer's choices",
   "Leaving Certificate English": "the way a Leaving Certificate English Paper 1 comprehension does: an article, speech or personal essay with a clear voice, with questions on the writer's purpose, style, tone and language",
   "CEFR writing task": "the way a Cambridge English reading task at this CEFR level does: a short everyday text such as a notice, an email, an article or a story, with questions that check understanding at that level",
   "NAPLAN": "the way a NAPLAN reading test does: an imaginative, informative or persuasive text, and questions that range from finding a stated detail to inferring and interpreting",
-  "NCEA English": "the way an NCEA English reading task does: an article, a feature or a literary extract, with questions on how language and structure create meaning for the audience",
-  "NSC English": "the way a South African NSC English comprehension does: a passage that may come with an advert or a cartoon-style text, with literal, inferential and evaluative questions and a question on the writer's viewpoint or tone",
+  "NCEA English": "the way an NCEA English reading task does: unfamiliar texts (for example a poem, a short prose extract and a feature or media text), with questions on how language, structure and ideas create meaning and effects",
+  "NSC English": "the way a South African NSC English Paper 1 comprehension does: a prose passage of about 700 to 800 words with a related visual text (for example a cartoon, an advert or a graphic) with questions on it, then literal, inferential and evaluative comprehension questions",
   "EQAO": "the way an Ontario EQAO reading test does: a story, poem or information text, with questions on explicit and implicit meaning and on forming a view backed by evidence from the text",
-  "OSSLT": "the way the Ontario Secondary School Literacy Test does: a news report, a short narrative or an opinion piece, with questions on direct, indirect and implicit meaning",
+  "OSSLT": "the way the Ontario Secondary School Literacy Test does: a real-life narrative, an information paragraph, a news report or a dialogue, with questions on direct, indirect and implicit meaning",
   "GCSE English Language": "the way a GCSE English Language reading paper does: a literary fiction extract or a non-fiction piece with a viewpoint, and questions on implicit meaning, the effect of language and structure, and the writer's perspective",
   "KS3 English": "the way a Key Stage 3 English reading task does: a fiction or non-fiction text, with questions on inference with evidence, the effect of language and the writer's purpose",
+  "KS2 English": "the way Key Stage 2 reading is set in school: a fiction, non-fiction or poetry text, and questions on word meaning, retrieval, summarising, inference with evidence, prediction, structure and the effect of language",
   "KS2 SATs": "the way a Key Stage 2 reading test does: a fiction, non-fiction or poetry text, and questions on word meaning, retrieval, summarising, inference with evidence, prediction, structure and the effect of language",
-  "state test (Common Core)": "the way a Common Core state reading test does: a literary or informational text, and questions that ask for the evidence in the text, the theme or central idea, word meaning including figurative language, and the author's point of view",
+  "state test (Common Core)": "the way a US state reading test does: a literary or informational text, and questions that ask for the evidence in the text, the theme or central idea, word meaning including figurative language, and the author's point of view",
 };
 
 // The learner's exam, for reading: { name, read } or null. Same applicability as the writing exam style.
 function readingExamStyleFor(country, gradeLabel) {
   const e = examStyleFor(country, gradeLabel);
-  return e && READING_EXAM[e.name] ? { name: e.name, read: READING_EXAM[e.name] } : null;
+  if (!e) return null;
+  // Year 6 in England sits a national reading test (the SATs); Years 3-5 and writing at every year are teacher-assessed.
+  if (e.name === "KS2 English" && gradeNumber(gradeLabel) === 6) return { name: "KS2 SATs", read: READING_EXAM["KS2 SATs"] };
+  return READING_EXAM[e.name] ? { name: e.name, read: READING_EXAM[e.name] } : null;
 }
 
 // raw: { textType: a name from this age's list, skill: a key, examStyle: true } -> { textType: the full entry or null, skill: { key, text } or null, exam }
