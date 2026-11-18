@@ -342,7 +342,7 @@ function layout({ title, description, canonical, jsonld, body, script, css, wide
 <style>${CSS}${css || ""}</style>
 <script type="application/ld+json">${JSON.stringify(jsonld)}</script>
 <script src="/analytics.js"></script>
-<link rel="stylesheet" href="/theme.css?v=11">
+<link rel="stylesheet" href="/theme.css?v=12">
 </head>
 <body>
 <header class="nav"><div class="nav-inner">
