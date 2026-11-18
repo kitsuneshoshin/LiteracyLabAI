@@ -201,8 +201,8 @@ test("dashboard: snapshot, mastery, vocabulary and locks are worked out like the
   assert.equal(d.snapshot.activeStreak, 1);
   assert.equal(d.snapshot.stopped, 1, "the writing prompt that was never answered");
   const first = d.mastery.targets.find((t) => t.name === defs[0].name);
-  assert.equal(first.pct, 100, "three glows, no grows");
-  assert.equal(d.mastery.targets.find((t) => t.name === defs[1].name).pct, 0);
+  assert.equal(first.pct, 87, "three glows, no grows");
+  assert.equal(d.mastery.targets.find((t) => t.name === defs[1].name).pct, 17);
   assert.equal(d.vocab.total, 2, "a repeated word is listed once");
   assert.equal(d.vocab.words.find((w) => w.term === "plot").box, 2);
   assert.deepEqual(d.locked, { timeline: true, peers: true, vocab: true, overallScore: false, historyLimit: 10 });

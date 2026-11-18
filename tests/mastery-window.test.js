@@ -16,15 +16,21 @@ const T = targetsForGrade(AU, "Year 11", "high").targets.map((t) => t.name);
 test("mastery looks at the last 8 mentions of a skill, not everything since the account began", () => {
   assert.equal(MASTERY_WINDOW, 8);
   assert.deepEqual(recentMastery([]), { strengths: 0, nextSteps: 0, pct: null });
-  assert.deepEqual(recentMastery(["n", "n", "n"]), { strengths: 0, nextSteps: 3, pct: 0 });
-  assert.deepEqual(recentMastery(["g"]), { strengths: 1, nextSteps: 0, pct: 100 });
+  assert.deepEqual(recentMastery(["n", "n", "n"]), { strengths: 0, nextSteps: 3, pct: 13 });
+  assert.deepEqual(recentMastery(["g"]), { strengths: 1, nextSteps: 0, pct: 75 });
   // four early next steps, then eight strengths: the early ones have aged out
   const improved = ["n", "n", "n", "n", ...Array(8).fill("g")];
-  assert.deepEqual(recentMastery(improved), { strengths: 8, nextSteps: 0, pct: 100 });
+  assert.deepEqual(recentMastery(improved), { strengths: 8, nextSteps: 0, pct: 93 });
   // the reverse: eight strengths then a run of next steps drags it down
   const slipped = [...Array(8).fill("g"), "n", "n", "n", "n"];
-  assert.deepEqual(recentMastery(slipped), { strengths: 4, nextSteps: 4, pct: 50 });
+  assert.deepEqual(recentMastery(slipped), { strengths: 4, nextSteps: 4, pct: 41 });
   assert.equal(recentMastery(undefined).pct, null);
+  // the bar is graded, not stuck on round steps: the same two mentions read differently by which is more recent
+  assert.equal(recentMastery(["g", "n"]).pct, 48);
+  assert.equal(recentMastery(["n", "g"]).pct, 52);
+  // a finer reading (0-1) counts as such
+  assert.equal(recentMastery([0.5]).pct, 50);
+  assert.ok(recentMastery([0.9]).pct > recentMastery([0.6]).pct);
 });
 
 function subs(list) {
@@ -45,7 +51,7 @@ test("a skill the learner has improved at moves up, instead of being stuck behin
   const list = [...Array(4).fill([B, A]), ...Array(8).fill([A, B])];
   const body = await progress(list);
   const a = byName(body)[A];
-  assert.equal(a.pct, 100);
+  assert.equal(a.pct, 93);
   assert.equal(a.status, "Mastered");
   assert.equal(a.strengths, 8); assert.equal(a.nextSteps, 0);
   assert.equal(a.assessedCount, 12, "the total number of mentions is still reported");
@@ -56,20 +62,20 @@ test("a skill that is always the next step shows 0% with the evidence beside it,
   const [A, B, C] = T;
   const body = await progress([[B, A], [B, A], [B, A], [B, B]]);
   const t = byName(body);
-  assert.equal(t[A].pct, 0); assert.equal(t[A].status, "Needs Attention"); assert.equal(t[A].strengths, 0); assert.equal(t[A].nextSteps, 3);
-  assert.equal(t[B].strengths, 4); assert.equal(t[B].nextSteps, 1); assert.equal(t[B].pct, 80); assert.equal(t[B].status, "Mastered");
+  assert.equal(t[A].pct, 13); assert.equal(t[A].status, "Needs Attention"); assert.equal(t[A].strengths, 0); assert.equal(t[A].nextSteps, 3);
+  assert.equal(t[B].strengths, 4); assert.equal(t[B].nextSteps, 1); assert.equal(t[B].pct, 71); assert.equal(t[B].status, "In Progress");
   assert.equal(t[C].pct, null); assert.equal(t[C].status, "Not Yet Assessed"); assert.equal(t[C].assessedCount, 0); assert.equal(t[C].strengths, 0);
 });
 
 test("the first skill moves as soon as it is praised", async () => {
   const [A, B] = T;
   const before = byName(await progress([[B, A], [B, A], [B, A]]))[A];
-  assert.equal(before.pct, 0);
+  assert.equal(before.pct, 13);
   const after = byName(await progress([[B, A], [B, A], [B, A], [A, B]]))[A];
-  assert.equal(after.pct, 25);
+  assert.equal(after.pct, 34);
   assert.equal(after.status, "Needs Attention");
   const later = byName(await progress([[B, A], [B, A], [B, A], [A, B], [A, B], [A, B]]))[A];
-  assert.equal(later.pct, 50); assert.equal(later.status, "In Progress");
+  assert.equal(later.pct, 56); assert.equal(later.status, "In Progress");
 });
 
 test("the weekly trend uses the same recent window, so it can climb as the learner improves", () => {
@@ -81,7 +87,7 @@ test("the weekly trend uses the same recent window, so it can climb as the learn
   const last = t[t.length - 1].masteryPct;
   const mid = t[5].masteryPct;
   assert.ok(last > mid, `the line keeps climbing (${mid} then ${last})`);
-  assert.equal(last, 100, "A has been a strength for its last 8 mentions, B always was");
+  assert.ok(last >= 90, `A has been a strength for its last 8 mentions, B always was (${last})`);
 });
 
 const APP = fs.readFileSync(path.join(__dirname, "..", "app.html"), "utf8");

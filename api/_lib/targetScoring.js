@@ -1,5 +1,5 @@
 const { recentMastery } = require("./mastery");
-const { conventionsTarget, conventionsOutcome } = require("./conventions");
+const { conventionsTarget, conventionsScore } = require("./conventions");
 
 // Real per-skill mastery, computed from this student's own submission
 // history rather than the static placeholder numbers the dashboard used to
@@ -19,8 +19,8 @@ function scoreTargets(targets, submissions) {
     if (outcomes.has(fb.growTarget)) outcomes.get(fb.growTarget).push("n");
     // Premium's spelling and grammar check also speaks for the conventions target, unless the AI already chose it this time.
     if (conv && fb.glowTarget !== conv && fb.growTarget !== conv) {
-      const o = conventionsOutcome(sub);
-      if (o) outcomes.get(conv).push(o);
+      const o = conventionsScore(sub);
+      if (o !== null) outcomes.get(conv).push(o);
     }
   }
 

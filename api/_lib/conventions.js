@@ -24,4 +24,15 @@ function conventionsOutcome(submission) {
   return null;
 }
 
-module.exports = { conventionsTarget, conventionsOutcome, STRONG_PER_100, WEAK_PER_100, MIN_WORDS };
+// A finer reading of the same check: 1 at or under STRONG_PER_100, 0 at or over WEAK_PER_100, in proportion between.
+// null when there is nothing to judge.
+function conventionsScore(submission) {
+  const fb = (submission && submission.feedback) || {};
+  const total = fb.spellingGrammarTotal;
+  const words = Number(submission && submission.word_count);
+  if (!Number.isFinite(total) || total < 0 || !Number.isFinite(words) || words < MIN_WORDS) return null;
+  const per100 = (total / words) * 100;
+  return Math.min(1, Math.max(0, (WEAK_PER_100 - per100) / (WEAK_PER_100 - STRONG_PER_100)));
+}
+
+module.exports = { conventionsTarget, conventionsOutcome, conventionsScore, STRONG_PER_100, WEAK_PER_100, MIN_WORDS };

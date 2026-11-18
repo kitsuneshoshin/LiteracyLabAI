@@ -22,7 +22,7 @@ test("computeTimeline: buckets submissions by week and computes masteryPct from 
   assert.equal(week1.weekStart, "2026-09-21");
   assert.equal(week1.submissions, 2);
   assert.equal(week1.wordsWritten, 150);
-  assert.equal(week1.masteryPct, 50); // 1 glow / (1 glow + 1 grow)
+  assert.equal(week1.masteryPct, 48); // a glow then a grow on the same skill: just under half, as the newer one counts a little more
   assert.equal(week2.weekStart, "2026-09-28");
   assert.equal(week2.masteryPct, null, "a week with no glow/grow-tagged feedback must show a gap, not a fabricated 0%");
 });
@@ -102,7 +102,7 @@ test("computeTimeline: a learner whose weaker skill improves sees the line rise"
     sub("2026-09-21T10:00:00Z", "B", "B"),
   ];
   const v = computeTimeline(subs).map((w) => w.masteryPct);
-  assert.deepEqual(v, [50, 67, 70]); // week 2: A 100%, B 1 of 3 = 33% -> 67. Week 3: B 2 of 5 = 40% -> 70
+  assert.deepEqual(v, [50, 57, 59]); // B keeps being the glow, so the line climbs
 });
 
 test("computeTimeline: the last week is the average of per-skill mastery, the same ratio as Target mastery", () => {

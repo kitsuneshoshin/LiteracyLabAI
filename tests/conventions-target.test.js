@@ -37,13 +37,13 @@ async function progress(rows) {
 test("a Premium piece with few errors fills the conventions bar even though the AI praised something else", async () => {
   const other = IG.find((t) => t.name !== CONV).name;
   const t = await progress([{ feedback: { glowTarget: other, growTarget: other, spellingGrammarTotal: 1 }, word_count: 200 }]);
-  assert.equal(t[CONV].status, "Mastered"); assert.equal(t[CONV].strengths, 1); assert.equal(t[CONV].pct, 100);
+  assert.equal(t[CONV].status, "In Progress", "one clean piece is a good start, not mastery"); assert.equal(t[CONV].strengths, 1); assert.equal(t[CONV].pct, 75);
 });
 
 test("many errors make it a next step, and a piece the AI already tagged to this target is not counted twice", async () => {
   const other = IG.find((t) => t.name !== CONV).name;
   const messy = await progress([{ feedback: { glowTarget: other, growTarget: other, spellingGrammarTotal: 20 }, word_count: 200 }]);
-  assert.equal(messy[CONV].nextSteps, 1); assert.equal(messy[CONV].pct, 0);
+  assert.equal(messy[CONV].nextSteps, 1); assert.equal(messy[CONV].pct, 25);
   const tagged = await progress([{ feedback: { glowTarget: CONV, growTarget: other, spellingGrammarTotal: 0 }, word_count: 200 }]);
   assert.equal(tagged[CONV].strengths, 1, "counted once, from the AI's own choice");
   assert.equal(tagged[CONV].assessedCount, 1);
