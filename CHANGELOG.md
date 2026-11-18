@@ -14,6 +14,7 @@ Internal engineering changelog, not linked from the site. One entry per shipped 
 
 - `39bbf8c` Progress bars and the weekly trend now move smoothly (recency-weighted, graded) instead of jumping in 50% steps
 
+- `4758d75` Stop the model repeating the same few topics (random subject per piece), reject older passages written far too easily, and keep exam-style reading to kinds of text that exam really sets; admin content spot-check added
 - `5fa3818` Hong Kong and South Africa notes checked against the official curriculum guides and the November 2025 senior certificate papers
 - `ea65e08` Irish Junior Cycle and Leaving Cert notes now match the real exam papers; CBSE Class 10 confirmed against the official syllabus
 - `435e7a5` Singapore, Ontario, New Zealand and Ireland notes checked against the official exam-board and curriculum documents (PSLE and O-Level formats, EQAO test structure)
