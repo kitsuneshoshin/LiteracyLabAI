@@ -4,6 +4,8 @@ Internal engineering changelog, not linked from the site. One entry per shipped 
 
 ## 2026-11-18
 
+- `39bbf8c` Progress bars and the weekly trend now move smoothly (recency-weighted, graded) instead of jumping in 50% steps
+
 - `ea65e08` Irish Junior Cycle and Leaving Cert notes now match the real exam papers; CBSE Class 10 confirmed against the official syllabus
 - `435e7a5` Singapore, Ontario, New Zealand and Ireland notes checked against the official exam-board and curriculum documents (PSLE and O-Level formats, EQAO test structure)
 - `8a8efa9` Checked every country's curriculum notes and exam styles against official sources and fixed the errors found (exam years, task formats, age bands)
