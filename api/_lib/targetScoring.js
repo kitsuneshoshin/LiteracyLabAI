@@ -10,15 +10,36 @@ const { conventionsTarget, conventionsScore } = require("./conventions");
 // The share is over the target's RECENT mentions (the last MASTERY_WINDOW, see _lib/mastery.js), so it moves as the
 // learner improves. A target with zero mentions yet is "Not Yet Assessed" rather than a fabricated percentage.
 // submissions arrive newest first.
+//
+// Premium pieces also carry a band (1-4) for EVERY objective (fb.examTechnique). That is a much finer signal than the one
+// strength and one next step, so where a piece has a band for a target it is used instead of the strength / next step:
+// Emerging, Developing, Secure and Strong read as 10%, 40%, 70% and 95%. A band given with "Too little writing to judge"
+// says nothing about the learner, so it is skipped and the strength / next step (if any) is used.
+const BAND_VALUE = { 1: 0.1, 2: 0.4, 3: 0.7, 4: 0.95 };
+
+function bandsByTarget(fb, outcomes) {
+  const bands = new Map();
+  if (!Array.isArray(fb.examTechnique)) return bands;
+  for (const e of fb.examTechnique) {
+    if (!e || !outcomes.has(e.criterion)) continue;
+    const v = BAND_VALUE[Math.round(Number(e.band))];
+    if (v === undefined || /too little writing/i.test(String(e.evidence || ""))) continue;
+    bands.set(e.criterion, v);
+  }
+  return bands;
+}
+
 function scoreTargets(targets, submissions) {
   const outcomes = new Map(targets.map((t) => [t.name, []])); // oldest first, once reversed below
   const conv = conventionsTarget(targets);
   for (const sub of [...submissions].reverse()) {
     const fb = sub.feedback || {};
-    if (outcomes.has(fb.glowTarget)) outcomes.get(fb.glowTarget).push("g");
-    if (outcomes.has(fb.growTarget)) outcomes.get(fb.growTarget).push("n");
+    const bands = bandsByTarget(fb, outcomes);
+    for (const [name, v] of bands) outcomes.get(name).push(v);
+    if (outcomes.has(fb.glowTarget) && !bands.has(fb.glowTarget)) outcomes.get(fb.glowTarget).push("g");
+    if (outcomes.has(fb.growTarget) && !bands.has(fb.growTarget)) outcomes.get(fb.growTarget).push("n");
     // Premium's spelling and grammar check also speaks for the conventions target, unless the AI already chose it this time.
-    if (conv && fb.glowTarget !== conv && fb.growTarget !== conv) {
+    if (conv && fb.glowTarget !== conv && fb.growTarget !== conv && !bands.has(conv)) {
       const o = conventionsScore(sub);
       if (o !== null) outcomes.get(conv).push(o);
     }

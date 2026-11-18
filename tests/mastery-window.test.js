@@ -120,3 +120,22 @@ test("the trend chart is drawn at the width of its card so it lines up with the 
   assert.match(APP, /const W = Math\.max\(300, Math\.min\(1400, boxW \|\| 640\)\)/);
   assert.doesNotMatch(APP, /className="w-full" style=\{\{ height: 200 \}\}/, "no fixed-height box that centres a narrow chart");
 });
+
+test("a Premium piece's band for each skill gives a graded reading instead of strength / next step", async () => {
+  const [A, B, C] = T;
+  const band = (criterion, b, evidence = "a quote") => ({ criterion, band: b, evidence });
+  const rows = [
+    { feedback: { glowTarget: A, growTarget: B, examTechnique: [band(A, 3), band(B, 2), band(C, 4, "Too little writing to judge this yet.")] } },
+  ];
+  const t = byName(await progress2(rows));
+  assert.equal(t[A].pct, 60, "Secure: (0.7 + 0.5) / 2");
+  assert.equal(t[B].pct, 45, "Developing: (0.4 + 0.5) / 2");
+  assert.equal(t[C].status, "Not Yet Assessed", "a band with too little writing to judge is not evidence");
+  assert.equal(t[A].assessedCount, 1, "the band replaces the glow for that skill, it is not counted twice");
+});
+async function progress2(list) {
+  const h = loadHandler("progress.js", { plan: "premium", db: (q) => (q.table === "submissions" ? { data: list.map((r) => ({ created_at: "2026-09-01T00:00:00Z", ...r })), error: null } : { data: null, error: null }) });
+  const res = await call(h, { method: "GET", query: { tier: "high", country: AU, gradeLabel: "Year 11", childId: "c1" } });
+  assert.equal(res.statusCode, 200, JSON.stringify(res.body));
+  return res.body;
+}
