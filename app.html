@@ -135,6 +135,9 @@
   @media (min-width:1920px){ :root{ --wrap:1680px; } }
   @media (min-width:2400px){ :root{ --wrap:2000px; } }
   /* Navigation tabs use the same type as the site's top links. */
+  /* One style for every back link on the site. */
+  .back-link{ display:inline-flex; align-items:center; gap:6px; font-family:"Lexend", ui-sans-serif, system-ui, sans-serif; font-size:14px; font-weight:500; color:var(--ink-soft); text-decoration:none; background:none; border:0; padding:0; cursor:pointer; }
+  .back-link:hover{ color:var(--ink); text-decoration:underline; }
   .tab-ui{ font-family:"Lexend", ui-sans-serif, system-ui, sans-serif; font-size:14px; font-weight:500; letter-spacing:0; text-transform:none; }
   .font-display{ font-family:"Lexend", ui-sans-serif, system-ui, sans-serif; }
   .font-read{ font-family:"Source Serif 4", Georgia, "Times New Roman", serif; }
@@ -181,7 +184,7 @@
   input[type="range"]{ accent-color: var(--cyan); }
 </style>
 <script src="analytics.js"></script>
-<link rel="stylesheet" href="/theme.css?v=12">
+<link rel="stylesheet" href="/theme.css?v=13">
 </head>
 <body>
 
@@ -2290,7 +2293,7 @@ function ProgressTimeline({ weeks }){
       </div>
     );
   }
-  const W = Math.max(300, Math.min(1400, boxW || 640)), H = W >= 700 ? 300 : 240, padL = 40, padR = 16, padT = 16, padB = 28;
+  const W = Math.max(300, Math.min(2200, boxW || 640)), H = W >= 700 ? 300 : 240, padL = 40, padR = 16, padT = 16, padB = 28;
   const innerW = W - padL - padR, innerH = H - padT - padB;
   const n = plottable.length;
   const x = (i) => padL + (n === 1 ? innerW / 2 : (i / (n - 1)) * innerW);
@@ -2727,10 +2730,10 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
       {/* ACCOUNT pages - Manage profile (learner setup) and Manage plan
           (billing) are their own pages now rather than cards at the
           bottom of the overview; the overview just links to them. */}
-      <div className={`flex flex-col gap-6 ${showOverview ? "" : "w-full mx-auto " + (showPlan ? "max-w-4xl" : "max-w-5xl")}`}>
+      <div className={`flex flex-col gap-6 ${showOverview ? "" : "w-full"}`}>
         {!showOverview && (
           <div>
-            <button onClick={()=>setView("dashboard")} className="focus-ring inline-flex items-center gap-1.5 text-[13px] font-semibold mb-2 py-2.5 pe-3" style={{ color: "var(--ink-soft)" }}>
+            <button onClick={()=>setView("dashboard")} className="focus-ring back-link mb-2 py-2.5 pe-3">
               <IconArrowRight size={14} className="ll-unflip" style={{ transform: "rotate(180deg)" }} /> Back to dashboard
             </button>
             <div className="label-mono mb-1.5" style={{ color: "var(--ink-soft)" }}>Account</div>
@@ -5885,7 +5888,7 @@ function AuthScreen(){
               </div>
               <h2 className="font-display text-3xl mb-2" style={{ color: "var(--ink)" }}>Check your email</h2>
               <p className="text-[15px] leading-relaxed" style={{ color: "var(--ink-soft)" }}>If there's a LiteracyLab AI account for <strong>{email}</strong>, we've sent a link to choose a new password. It can take a minute to arrive.</p>
-              <button onClick={()=>{ setStatus("idle"); setMode("login"); }} className="focus-ring mt-4 text-sm font-semibold" style={{ color: "var(--cyan-ink)" }}>Back to log in</button>
+              <button onClick={()=>{ setStatus("idle"); setMode("login"); }} className="focus-ring back-link mt-4"><IconArrowRight size={14} className="ll-unflip" style={{ transform: "rotate(180deg)" }} /> Back to log in</button>
             </div>
           ) : status === "check-email" ? (
             <div className="text-center py-4">
@@ -5894,7 +5897,7 @@ function AuthScreen(){
               </div>
               <h2 className="font-display text-3xl mb-2" style={{ color: "var(--ink)" }}>Check your email</h2>
               <p className="text-[15px] leading-relaxed" style={{ color: "var(--ink-soft)" }}>We sent a confirmation link to <strong>{email}</strong>. Click it, then come back and log in.</p>
-              <button onClick={()=>{ setStatus("idle"); setMode("login"); }} className="focus-ring mt-4 text-sm font-semibold" style={{ color: "var(--cyan-ink)" }}>Back to log in</button>
+              <button onClick={()=>{ setStatus("idle"); setMode("login"); }} className="focus-ring back-link mt-4"><IconArrowRight size={14} className="ll-unflip" style={{ transform: "rotate(180deg)" }} /> Back to log in</button>
             </div>
           ) : (
             <>

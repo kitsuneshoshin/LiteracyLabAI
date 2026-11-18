@@ -37,7 +37,7 @@
   --on-ink: #FFFDF8;
   --on-solid: #FFFFFF;
   --serif-display: "EB Garamond", "Iowan Old Style", Georgia, "Times New Roman", serif;
-  --mono-label: "Courier Prime", "Courier New", Courier, monospace;
+  --mono-label: "Lexend", ui-sans-serif, system-ui, sans-serif; /* small labels use the site font; the name is kept so every page picks it up */
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
@@ -123,7 +123,7 @@ h1, h2,
 .label-mono{
   font-family: var(--mono-label);
   font-size: 12px;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   font-weight: 400;
 }

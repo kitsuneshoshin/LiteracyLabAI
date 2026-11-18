@@ -117,7 +117,7 @@ test("a year that borrows another year's targets says why, the way that country 
 
 test("the trend chart is drawn at the width of its card so it lines up with the heading", () => {
   assert.match(APP, /new ResizeObserver\(measure\)/);
-  assert.match(APP, /const W = Math\.max\(300, Math\.min\(1400, boxW \|\| 640\)\)/);
+  assert.match(APP, /const W = Math\.max\(300, Math\.min\(2200, boxW \|\| 640\)\)/);
   assert.doesNotMatch(APP, /className="w-full" style=\{\{ height: 200 \}\}/, "no fixed-height box that centres a narrow chart");
 });
 

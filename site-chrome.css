@@ -1,0 +1,57 @@
+/* Shared header, footer and back-link styles: the same as the homepage and guides. */
+  :root{ --wrap:1140px; }
+  @media (min-width:1280px){ :root{ --wrap:1240px; } }
+  @media (min-width:1536px){ :root{ --wrap:1440px; } }
+  @media (min-width:1920px){ :root{ --wrap:1680px; } }
+  @media (min-width:2400px){ :root{ --wrap:2000px; } }
+  /* Header: identical to the homepage (logo, links, theme toggle, Launch workspace). */
+  .nav{ position:sticky; top:0; z-index:40; background:color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter:blur(10px); border-bottom:1px solid var(--border-soft); }
+  .nav-inner{ position:relative; max-width:var(--wrap); margin:0 auto; padding:14px 24px; display:flex; align-items:center; justify-content:space-between; gap:16px; }
+  .brand{ display:flex; align-items:center; gap:10px; font-family:"Fraunces",serif; font-weight:600; font-size:19px; letter-spacing:-0.01em; text-decoration:none; color:var(--ink); }
+  .brand-mark{ width:28px; height:28px; display:grid; place-items:center; flex-shrink:0; }
+  .brand .ai{ color:var(--accent,var(--cyan)); }
+  .nav-links{ display:flex; align-items:center; gap:28px; font-family:"Lexend",sans-serif; font-size:14px; font-weight:500; color:var(--ink-soft); }
+  .nav-links a{ color:var(--ink-soft); text-decoration:none; }
+  .nav-links a:hover{ color:var(--ink); }
+  .nav-cta{ display:flex; align-items:center; gap:10px; }
+  .theme-toggle, .nav-menu-toggle{ width:34px; height:34px; border-radius:50%; border:1px solid var(--border); display:grid; place-items:center; background:var(--surface); color:var(--ink-soft); cursor:pointer; padding:0; }
+  .nav-menu-toggle{ display:none; }
+  .theme-toggle-menu{ display:none; }
+  .nav-short{ display:none; }
+  a.nav-btn{ display:inline-flex; align-items:center; justify-content:center; font-family:"Lexend",sans-serif; font-weight:600; font-size:14.5px; padding:13px 22px; border-radius:999px; text-decoration:none; border:1px solid var(--ink); background:transparent; color:var(--ink); white-space:nowrap; }
+  a.nav-btn:hover{ background:var(--ink); color:var(--bg); }
+  @media (max-width:780px){
+    .nav-links{ display:none; position:absolute; top:100%; left:0; right:0; flex-direction:column; align-items:flex-start; gap:2px; padding:10px 24px 16px; background:var(--bg); border-bottom:1px solid var(--border-soft); }
+    .nav-links.open{ display:flex; }
+    .nav-links a{ padding:10px 0; width:100%; }
+    .nav-menu-toggle{ display:grid; }
+  }
+  @media (max-width:460px){
+    .nav-inner{ padding-block:10px; gap:10px; }
+    .brand{ font-size:17px; }
+    .nav-cta{ gap:8px; }
+    .nav-cta .theme-toggle{ display:none; }
+    a.nav-btn{ padding:10px 14px; font-size:13.5px; }
+    .nav-long{ display:none; }
+    .nav-short{ display:inline; }
+    .nav-links .theme-toggle-menu{ display:inline-grid; margin-top:6px; }
+  }
+  footer{ border-top:1px solid var(--border-soft); padding-block:32px; }
+  .foot-inner{ max-width:var(--wrap); margin:0 auto; font-family:"Lexend",sans-serif; display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; font-size:12.5px; color:var(--ink-faint); }
+  .foot-links{ display:flex; flex-wrap:wrap; gap:6px 20px; }
+  .foot-links a{ color:var(--ink-soft); text-decoration:none; }
+  .foot-links a:hover{ color:var(--ink); text-decoration:underline; }
+  .foot-note{ max-width:var(--wrap); margin:18px auto 0; font-family:"Lexend",sans-serif; font-size:12px; line-height:1.55; color:var(--ink-faint); }
+  /* One style for every "back" and "previous/next" link on the site. */
+  .back-link, .back-link a{ font-family:"Lexend", ui-sans-serif, system-ui, sans-serif; font-size:14px; font-weight:500; color:var(--ink-soft); text-decoration:none; }
+  .back-link{ display:inline-flex; align-items:center; gap:6px; background:none; border:0; padding:0; cursor:pointer; }
+  .back-link:hover, .back-link a:hover{ color:var(--ink); text-decoration:underline; }
+  .nav-inner, footer{ padding-left:max(clamp(16px,4vw,48px),env(safe-area-inset-left)); padding-right:max(clamp(16px,4vw,48px),env(safe-area-inset-right)); }
+  @media (pointer:coarse), (max-width:640px){
+    .theme-toggle, .nav-menu-toggle{ width:44px; height:44px; }
+    a.nav-btn{ min-height:44px; }
+    .nav-links a{ padding:13px 0; }
+    .foot-links a{ display:inline-block; padding:12px 4px; }
+  }
+  footer{ max-width:none; margin:0; padding-top:32px; padding-bottom:32px; font-size:inherit; }
+  footer .foot-note, .foot-inner{ line-height:1.55; }
