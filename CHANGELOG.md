@@ -4,6 +4,8 @@ Internal engineering changelog, not linked from the site. One entry per shipped 
 
 ## 2026-11-18
 
+- `eddf613` Site-wide consistency: homepage top links now use the same style as the guides, body text is Lexend everywhere (guides, privacy, terms, translated homepages), and guide pages scale to the same wide container as the homepage
+
 - `024d3da` All guide, article and worksheet-hub pages now share the homepage header (logo, links, theme toggle, Launch workspace, phone menu) and footer, and use the full page width with card grids that adapt from phone to desktop
 
 - `ac378e4` Guides hub and country pages now use the full screen width: 4-column country grid on desktop, 2 columns on phones, intro links in columns, fluid text sizes and notch-safe edges
