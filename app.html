@@ -447,6 +447,7 @@ const IconTarget = (p) => <Icon {...p}><circle cx="12" cy="12" r="8" /><circle c
 const IconTrend = (p) => <Icon {...p}><path d="M3.5 16.5l6-6 4 4 7-7.5" /><path d="M14 6.5h6.5V13" /></Icon>;
 const IconAward = (p) => <Icon {...p}><circle cx="12" cy="8.5" r="5" /><path d="M8.3 12.8L6.5 21l5.5-3 5.5 3-1.8-8.2" /></Icon>;
 const IconCheck = (p) => <Icon {...p}><path d="M4.5 12.5l5 5 10-11" /></Icon>;
+const IconSteps = (p) => <Icon {...p}><path d="M9.5 6.5h10M9.5 12h10M9.5 17.5h10" /><path d="M3.8 6.5h.9M3.8 12h.9M3.8 17.5h.9" strokeWidth="2.6" /></Icon>;
 const IconClock = (p) => <Icon {...p}><circle cx="12" cy="12" r="8.5" /><path d="M12 7.5V12l3.2 2" /></Icon>;
 const IconAlert = (p) => <Icon {...p}><path d="M12 3.5L22 20H2z" /><path d="M12 10v4" /><circle cx="12" cy="17" r=".6" fill="currentColor" /></Icon>;
 const IconLock = (p) => <Icon {...p}><rect x="5" y="10.5" width="14" height="10" rx="2" /><path d="M8 10.5V7.8a4 4 0 0 1 8 0v2.7" /></Icon>;
@@ -4760,7 +4761,8 @@ function FocusPicker({ kind, tier, country, gradeLabel, premium, value, onChange
       style={ on ? { background: "var(--cyan-tint)", borderColor: "var(--cyan)", borderWidth: 1.5, color: "var(--cyan-ink)" } : { borderColor: "var(--border)", color: "var(--ink)", background: "var(--surface)" } }>
       <span className="flex items-center justify-between gap-2">
         <Ic size={20} strokeWidth={1.8} style={{ color: on ? "var(--cyan-ink)" : "var(--ink-soft)" }} />
-        {tag && <span className="text-[10px] font-bold uppercase tracking-wide rounded-full px-1.5 py-0.5" style={{ background: "var(--gold-tint)", color: "var(--gold-ink)" }}>{tag}</span>}
+        {on && <span aria-hidden="true" className="inline-flex items-center justify-center rounded-full shrink-0" style={{ width: 18, height: 18, background: "var(--cyan)", color: "var(--on-solid)" }}><IconCheck size={11} strokeWidth={3} /></span>}
+        {tag &&<span className="text-[10px] font-bold uppercase tracking-wide rounded-full px-1.5 py-0.5" style={{ background: "var(--gold-tint)", color: "var(--gold-ink)" }}>{tag}</span>}
       </span>
       <span className="text-[14px] font-semibold leading-tight">{name}</span>
       <span className="text-[12px] leading-snug" style={{ color: on ? "var(--cyan-ink)" : "var(--ink-soft)" }}>{blurb}</span>
@@ -4798,7 +4800,7 @@ function FocusPicker({ kind, tier, country, gradeLabel, premium, value, onChange
   }
   return (
     <div className="w-full flex flex-col gap-4" role="group" aria-label="What would you like to read?">
-      <div className={grid}>
+      <div className={((FOCUS_TEXT_TYPES[tier] || []).length + 1) % 3 === 0 ? "grid grid-cols-2 sm:grid-cols-3 gap-2.5" : grid}>
         {card(!v.textType, "Surprise me", "We pick for you", IconDice, () => onChange({ ...v, textType: undefined }), null, "any")}
         {(FOCUS_TEXT_TYPES[tier] || []).map((t) => { const m = focusTextCard(t); return card(v.textType === t, capFirst(t), m.blurb, m.icon, () => onChange({ ...v, textType: t }), null, t); })}
       </div>
@@ -4815,15 +4817,22 @@ function FocusPicker({ kind, tier, country, gradeLabel, premium, value, onChange
           <IconLock size={12} /> {rexam}-style reading is on Premium
         </button>
       )) : null; })()}
-      <div className="flex items-center justify-between gap-3 flex-wrap">
-        <label className="flex items-center gap-2 text-[13px] font-medium" style={{ color: "var(--ink-soft)" }}>
-          Skill to work on
-          <select value={v.skill || ""} onChange={(e) => onChange({ ...v, skill: e.target.value || undefined })} className="focus-ring rounded-full border px-3 py-1.5 text-[13px]"
-            style={{ borderColor: "var(--border)", background: "var(--surface)", color: "var(--ink)" }}>
-            <option value="">Any</option>
-            {(FOCUS_SKILLS_BY_TIER[tier] || []).map((k) => <option key={k} value={k}>{FOCUS_SKILLS[k]}</option>)}
-          </select>
-        </label>
+      <div role="group" aria-label="Skill to work on" className="flex flex-col gap-2 pt-4 border-t" style={{ borderColor: "var(--border-soft, var(--border))" }}>
+        <span className="text-[13px] font-medium" style={{ color: "var(--ink-soft)" }}>Skill to work on <span style={{ color: "var(--ink-faint)" }}>(optional)</span></span>
+        <div className="flex flex-wrap gap-2">
+          {[["", "Any"], ...(FOCUS_SKILLS_BY_TIER[tier] || []).map((k) => [k, FOCUS_SKILLS[k]])].map(([k, label]) => {
+            const on = (v.skill || "") === k;
+            return (
+              <button key={k || "any"} type="button" aria-pressed={on} onClick={() => onChange({ ...v, skill: k || undefined })}
+                className="focus-ring rounded-full border px-3.5 py-1.5 text-[13px] font-medium"
+                style={on ? { background: "var(--cyan-tint)", borderColor: "var(--cyan)", color: "var(--cyan-ink)", borderWidth: 1.5 } : { background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink-soft)" }}>
+                {label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+      <div className="flex items-center justify-end gap-3 flex-wrap">
         {children}
       </div>
     </div>
@@ -4839,7 +4848,7 @@ const FOCUS_GENRE_CARD = {
 function focusTextCard(t){
   const k = String(t || "").toLowerCase();
   if (/poem/.test(k)) return { blurb: "Rhythm and imagery", icon: IconFeather };
-  if (/instruction/.test(k)) return { blurb: "Steps to follow", icon: IconCheck };
+  if (/instruction/.test(k)) return { blurb: "Steps to follow", icon: IconSteps };
   if (/diary|letter/.test(k)) return { blurb: "A personal voice", icon: IconPen };
   if (/table/.test(k)) return { blurb: "Read the numbers", icon: IconGrid };
   if (/chart/.test(k)) return { blurb: "Read the chart", icon: IconTrend };
