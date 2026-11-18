@@ -71,11 +71,11 @@ function examStyleFor(country, gradeLabel) {
   const label = String(gradeLabel || "");
   if (/Singapore/.test(c)) {
     const p = labelNumber(label, /^Primary\s*(\d{1,2})$/i);
-    if (p === 6) return { name: "PSLE English", style: "the way a PSLE English continuous-writing task is worded: a topic, usually with pictures, to build a story around, with a short instruction, for a timed composition of at least 150 words" };
-    if (p === 4 || p === 5) return { name: "PSLE English", style: "the way a PSLE English continuous-writing task is worded: a topic, usually with pictures, to build a story around, with a short instruction, for a timed composition of a length suited to this year" };
+    if (p === 6) return { name: "PSLE English", style: "the way a PSLE English continuous-writing task is worded: a topic with three pictures, described in words, that offer different angles to build a story around (the composition must be based on at least one), with a short instruction, for a timed composition of at least 150 words" };
+    if (p === 4 || p === 5) return { name: "PSLE English", style: "the way a PSLE English continuous-writing task is worded: a topic with pictures, described in words, to build a story around, with a short instruction, for a timed composition of a length suited to this year" };
     if (labelNumber(label, /^Secondary\s*([1-3])$/i) != null) return { name: "Singapore secondary English", style: "the way a Singapore secondary English writing task is worded: a short instruction with a theme, a title or a viewpoint, asking for a narrative, a descriptive or an argumentative piece" };
     if (/^O-Level\s*\/\s*IGCSE\s*Yr\s*[45]$/i.test(label)) {
-      return { name: "O-Level English Paper 1", style: "the way a Singapore O-Level English writing paper is worded: either a situational writing task (a formal letter or email that must cover given points) or a continuous-writing task from a title or a viewpoint (a narrative, a descriptive or a discursive piece)" };
+      return { name: "O-Level English Paper 1", style: "the way a Singapore O-Level English writing paper is worded: either a situational writing task (250 to 350 words: an email, letter, report or speech built from a situation that includes a visual such as a poster, notice or chart, using the given information) or a continuous-writing task (350 to 500 words, one of several topics, such as a narrative or an argument)" };
     }
     return null;
   }
@@ -120,7 +120,7 @@ function examStyleFor(country, gradeLabel) {
     return { name: "NSC English", style: "the way a South African NSC English writing paper is worded: one essay chosen from several topics (narrative, descriptive, reflective, discursive or argumentative, 400 to 450 words) and two transactional texts of different kinds (for example a letter, a CV and covering letter, a report, a review, a newspaper or magazine article, a speech, a dialogue or a written interview, 180 to 200 words each)" };
   }
   if (/Canada/.test(c)) {
-    if (n === 3 || n === 6) return { name: "EQAO", style: "the way an Ontario EQAO writing task is worded: a short situation or topic and a clear instruction about what to write, in plain language for a timed response" };
+    if (n === 3 || n === 6) return { name: "EQAO", style: "the way an Ontario EQAO writing task is worded: a short situation or topic and a clear instruction about what to write, in plain language, for a written response to a prompt" };
     if (n === 10) return { name: "OSSLT", style: "the way the Ontario Secondary School Literacy Test words its writing tasks: a short topic or situation, and an instruction to write a series of paragraphs giving and supporting an opinion with reasons and examples" };
   }
   if (/United Kingdom/.test(c)) {
@@ -168,7 +168,7 @@ const READING_SKILLS_BY_TIER = {
 // its reading texts and questions; it never names a real published passage.
 const READING_EXAM = {
   "PSLE English": "the way the PSLE English Paper 2 comprehension section does: a narrative or information passage with Singapore settings, and open-ended questions needing a fact, an inference, what a word or phrase refers to, or a meaning in context, with answers put in the pupil's own words (Paper 2 also has multiple-choice questions on a short visual text such as an advert or notice)",
-  "O-Level English Paper 1": "the way a Singapore O-Level English comprehension does: an article or narrative with a clear viewpoint, and questions on inference, the writer's purpose and tone, and vocabulary in context",
+  "O-Level English Paper 1": "the way a Singapore O-Level English comprehension paper does: a short visual text with questions on how the visuals and language are used, a narrative or recount with questions on vocabulary in context and the effect of language, and a non-narrative text with a summary of about 80 words in the pupil's own words",
   "Singapore secondary English": "the way a Singapore secondary English reading task does: an article or narrative with a clear viewpoint, and questions on inference, the writer's purpose and tone, and vocabulary in context",
   "Cambridge Primary Checkpoint": "the way a Cambridge Primary English Checkpoint reading paper does: a story or non-fiction text, and questions that need a fact, an inference, a word meaning or a comment on the writer's choices",
   "Cambridge Lower Secondary Checkpoint": "the way a Cambridge Lower Secondary English Checkpoint reading paper does: a fiction or non-fiction text, and questions on explicit and implicit meaning, the writer's viewpoint and the effect of language",
@@ -183,7 +183,7 @@ const READING_EXAM = {
   "NAPLAN": "the way a NAPLAN reading test does: an imaginative, informative or persuasive text, and questions that range from finding a stated detail to inferring and interpreting",
   "NCEA English": "the way an NCEA English reading task does: unfamiliar texts (for example a poem, a short prose extract and a feature or media text), with questions on how language, structure and ideas create meaning and effects",
   "NSC English": "the way a South African NSC English Paper 1 comprehension does: a prose passage of about 700 to 800 words with a related visual text (for example a cartoon, an advert or a graphic) with questions on it, then literal, inferential and evaluative comprehension questions",
-  "EQAO": "the way an Ontario EQAO reading test does: a story, poem or information text, with questions on explicit and implicit meaning and on forming a view backed by evidence from the text",
+  "EQAO": "the way an Ontario EQAO reading test does: an informational text or a narrative text, each with selected-response questions on explicit information, implicit information (inference) and making connections, and one written answer",
   "OSSLT": "the way the Ontario Secondary School Literacy Test does: a real-life narrative, an information paragraph, a news report or a dialogue, with questions on direct, indirect and implicit meaning",
   "GCSE English Language": "the way a GCSE English Language reading paper does: a literary fiction extract or a non-fiction piece with a viewpoint, and questions on implicit meaning, the effect of language and structure, and the writer's perspective",
   "KS3 English": "the way a Key Stage 3 English reading task does: a fiction or non-fiction text, with questions on inference with evidence, the effect of language and the writer's purpose",
