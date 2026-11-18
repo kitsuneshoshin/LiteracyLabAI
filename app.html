@@ -22,7 +22,7 @@
 <meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700;800&family=Source+Serif+4:ital,wght@0,400;0,600;0,700;1,400&family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600&family=Lexend:wght@400;500;600;700;800&family=Source+Serif+4:ital,wght@0,400;0,600;0,700;1,400&family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
@@ -129,6 +129,13 @@
     font-family: "Lexend", ui-sans-serif, system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
   }
+  :root{ --wrap:1140px; }
+  @media (min-width:1280px){ :root{ --wrap:1240px; } }
+  @media (min-width:1536px){ :root{ --wrap:1440px; } }
+  @media (min-width:1920px){ :root{ --wrap:1680px; } }
+  @media (min-width:2400px){ :root{ --wrap:2000px; } }
+  /* Navigation tabs use the same type as the site's top links. */
+  .tab-ui{ font-family:"Lexend", ui-sans-serif, system-ui, sans-serif; font-size:14px; font-weight:500; letter-spacing:0; text-transform:none; }
   .font-display{ font-family:"Lexend", ui-sans-serif, system-ui, sans-serif; }
   .font-read{ font-family:"Source Serif 4", Georgia, "Times New Roman", serif; }
   /* Translated feedback: each paragraph takes the direction of its own text, so Arabic and Urdu read right to left
@@ -1408,15 +1415,10 @@ function Header({ view, setView, used, total, plan, theme, setTheme, backendLive
   const meta = planMeta(plan);
   return (
     <header className="sticky top-0 z-30 border-b backdrop-blur-md" style={{ borderColor: "var(--border)", background: "color-mix(in srgb, var(--surface) 88%, transparent)" }}>
-      <div className="mx-auto max-w-[1400px] px-4 sm:px-6 py-3.5 flex items-center justify-between gap-3 flex-wrap">
-        <a href="index.html" className="focus-ring flex items-center gap-2.5" style={{ textDecoration: "none" }}>
-          <div className="w-9 h-9 grid place-items-center shrink-0">
-            <IconMark size={30} />
-          </div>
-          <div className="leading-tight">
-            <div className="font-display font-bold text-[17px]" style={{ color: "var(--ink)" }}>LiteracyLab <span style={{ color: "var(--cyan-ink)" }}>AI</span></div>
-            <div className="label-mono" style={{ fontSize: 10, color: "var(--ink-faint)" }}>Adaptive reading &amp; writing coach</div>
-          </div>
+      <div className="mx-auto max-w-[var(--wrap)] px-[clamp(16px,4vw,48px)] py-3.5 flex items-center justify-between gap-3 flex-wrap">
+        <a href="index.html" className="focus-ring flex items-center gap-2.5" style={{ textDecoration: "none", color: "var(--ink)", fontFamily: '"Fraunces", serif', fontWeight: 600, fontSize: 19, letterSpacing: "-0.01em" }}>
+          <span className="w-7 h-7 grid place-items-center shrink-0"><IconMark size={28} /></span>
+          <span>LiteracyLab <span style={{ color: "var(--accent, var(--cyan))" }}>AI</span></span>
         </a>
 
         <div className="flex items-center gap-2 order-3 sm:order-2 w-full sm:w-auto justify-center">
@@ -1425,8 +1427,8 @@ function Header({ view, setView, used, total, plan, theme, setTheme, backendLive
               const disabled = needsOnboarding && key === "workspace";
               return (
                 <button key={key} onClick={()=>setView(key)} disabled={disabled} title={disabled ? "Finish learner setup first" : undefined}
-                  className="focus-ring label-mono inline-flex items-center gap-1.5 px-3 py-2.5 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-                  style={{ fontSize: 12, color: view===key ? "var(--ink)" : "var(--ink-soft)", borderBottom: "2px solid " + (view===key ? "var(--cyan)" : "transparent") }}
+                  className="focus-ring tab-ui inline-flex items-center gap-1.5 px-3 py-2.5 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                  style={{ color: view===key ? "var(--ink)" : "var(--ink-soft)", borderBottom: "2px solid " + (view===key ? "var(--cyan)" : "transparent") }}
                 >
                   <IconEl size={14} strokeWidth={2.2} />
                   {label}
@@ -2478,7 +2480,7 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
   return (
     <>
     {needsOnboarding && !showPlan && (
-      <div className="mx-auto max-w-[1400px] px-4 sm:px-6 pt-8">
+      <div className="mx-auto max-w-[var(--wrap)] px-[clamp(16px,4vw,48px)] pt-8">
         <div className="px-5 py-4 flex items-center gap-3 flex-wrap" style={{ background: "var(--cyan-tint)", borderInlineStart: "4px solid var(--cyan)", borderRadius: 4 }}>
           <div className="w-9 h-9 rounded-full grid place-items-center shrink-0" style={{ background: "var(--cyan)", color: "var(--on-solid)" }}>
             <IconSparkle size={17} strokeWidth={2.2} />
@@ -2490,7 +2492,7 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
         </div>
       </div>
     )}
-    <div className="mx-auto max-w-[1400px] px-4 sm:px-6 py-8 flex flex-col gap-8">
+    <div className="mx-auto max-w-[var(--wrap)] px-[clamp(16px,4vw,48px)] py-8 flex flex-col gap-8">
       {backendLive && !showPlan && (
         <ChildSwitcher children_={children_} activeChildId={activeChildId} onSwitchChild={onSwitchChild} onAddChild={onAddChild} />
       )}
@@ -4691,7 +4693,7 @@ function Workspace({ plan, country, gradeIdx, setGradeIdx, tier, setTierOverride
   }
 
   return (
-    <div className="mx-auto max-w-[1400px] px-4 sm:px-6 py-8">
+    <div className="mx-auto max-w-[var(--wrap)] px-[clamp(16px,4vw,48px)] py-8">
       {backendLive && children_ && children_.length > 1 && (
         <ChildSwitcher children_={children_} activeChildId={childId} onSwitchChild={onSwitchChild} showAdd={false} />
       )}
@@ -4722,8 +4724,8 @@ function Workspace({ plan, country, gradeIdx, setGradeIdx, tier, setTierOverride
       <div className="flex items-center gap-5 sm:gap-8 w-full max-w-full overflow-x-auto mb-6" style={{ borderBottom: "1px solid var(--border)", overflowY: "hidden", scrollbarWidth: "none" }}>
         {[["writing","Writing",IconPen],["reading","Reading Comprehension",IconBookOpenCheck],["vocab","Vocabulary",IconBook]].map(([key,label,IconEl])=>(
           <button key={key} onClick={()=>setExerciseType(key)}
-            className="focus-ring label-mono flex items-center gap-1.5 py-3 transition-colors whitespace-nowrap"
-            style={{ fontSize: 12, color: exerciseType===key ? "var(--ink)" : "var(--ink-soft)", borderBottom: "2px solid " + (exerciseType===key ? "var(--cyan)" : "transparent"), marginBottom: -1 }}>
+            className="focus-ring tab-ui flex items-center gap-1.5 py-3 transition-colors whitespace-nowrap"
+            style={{ color: exerciseType===key ? "var(--ink)" : "var(--ink-soft)", borderBottom: "2px solid " + (exerciseType===key ? "var(--cyan)" : "transparent"), marginBottom: -1 }}>
             <IconEl size={13} strokeWidth={2.2} />{label}
           </button>
         ))}
@@ -5768,7 +5770,7 @@ function App({ session }){
         backendLive={backendLive} onSignOut={handleSignOut} needsOnboarding={needsOnboarding}
         onGoToProfile={()=>setView("profile")} onGoToPlan={()=>setView("plan")}
         onManagePayment={goToBillingPortal} billingPortalLoading={billingPortalLoading} />
-      <div className="md:hidden mx-auto max-w-[1400px] px-4 pt-3 flex flex-col gap-2">
+      <div className="md:hidden mx-auto max-w-[var(--wrap)] px-[clamp(16px,4vw,48px)] pt-3 flex flex-col gap-2">
         <div className="rounded-xl border px-3 py-2 text-xs font-medium flex items-center justify-between" style={{ borderColor: "var(--border)", background: "var(--surface-2)", color: "var(--ink-soft)" }}>
           <span>{isPaidPlan(plan) ? `${planMeta(plan).label}: unlimited submissions` : <>Free Plan: <b className="tabular" style={{ color: "var(--ink)" }}>{total-used}</b> of {total} remaining</>}</span>
           <span className="rounded-full px-2 py-0.5 text-[10px] font-bold" style={{ background: isPaidPlan(plan) ? "var(--gold-tint)" : "var(--navy-tint)", color: isPaidPlan(plan) ? "var(--gold-ink)" : "var(--ink)" }}>{planMeta(plan).badge}</span>
@@ -5806,12 +5808,17 @@ function App({ session }){
           displayName={activeChild?.display_name || ""}
           childId={activeChildId} children_={children} onSwitchChild={switchChild} onMakeUsable={makeLearnerUsable} activeChangeAvailableAt={activeChangeAvailableAt} onSeePlans={()=>setView("plan")} />
       </div>
-      <footer className="mx-auto max-w-[1400px] px-4 sm:px-6 py-10 text-center text-xs flex flex-col items-center gap-2" style={{ color: "var(--ink-faint)" }}>
-        <div>LiteracyLab AI · {backendLive ? "your account data is private to you" : "interactive prototype — all learner data shown is sample data"}.</div>
-        <div className="flex items-center gap-4">
-          <a href="index.html" className="hover:underline" style={{ color: "var(--ink-faint)" }}>Home</a>
-          <a href="privacy.html" className="hover:underline" style={{ color: "var(--ink-faint)" }}>Privacy</a>
-          <a href="terms.html" className="hover:underline" style={{ color: "var(--ink-faint)" }}>Terms</a>
+      <footer style={{ borderTop: "1px solid var(--border-soft)" }}>
+        <div className="mx-auto max-w-[var(--wrap)] px-[clamp(16px,4vw,48px)] py-8 flex items-center justify-between gap-4 flex-wrap text-[12.5px]" style={{ color: "var(--ink-faint)" }}>
+          <span>© 2026 LiteracyLab AI · {backendLive ? "your account data is private to you" : "interactive prototype: all learner data shown is sample data"}</span>
+          <div className="flex flex-wrap gap-x-5 gap-y-1.5">
+            {[["/app.html","Workspace"],["/#pricing","Pricing"],["/#faq","FAQ"],["/learn/","Guides"],["/learn/about-literacylab-ai/","About"],["/privacy.html","Privacy"],["/terms.html","Terms"]].map(([h,t])=>(
+              <a key={h} href={h} className="hover:underline" style={{ color: "var(--ink-soft)" }}>{t}</a>
+            ))}
+            {[["pl","Polski"],["es","Español"],["pt","Português"],["ro","Română"],["ar","العربية"],["ur","اردو"],["hi","हिन्दी"],["zh","中文"],["pa","ਪੰਜਾਬੀ"],["bn","বাংলা"]].map(([c,t])=>(
+              <a key={c} href={"/" + c + "/"} hrefLang={c} lang={c} className="hover:underline" style={{ color: "var(--ink-soft)" }}>{t}</a>
+            ))}
+          </div>
         </div>
       </footer>
     </div>
@@ -5868,7 +5875,7 @@ function AuthScreen(){
       <div className="w-full max-w-md">
         <div className="flex items-center gap-2.5 justify-center mb-6">
           <IconMark size={30} />
-          <span className="font-display text-2xl" style={{ color: "var(--ink)" }}>LiteracyLab <span style={{ color: "var(--cyan-ink)" }}>AI</span></span>
+          <span style={{ fontFamily: '"Fraunces", serif', fontWeight: 600, fontSize: 22, letterSpacing: "-0.01em", color: "var(--ink)" }}>LiteracyLab <span style={{ color: "var(--accent, var(--cyan))" }}>AI</span></span>
         </div>
         <div className="card p-7 sm:p-9">
           {status === "reset-sent" ? (
@@ -5974,7 +5981,7 @@ function SetNewPassword({ onDone }){
       <div className="w-full max-w-md">
         <div className="flex items-center gap-2.5 justify-center mb-6">
           <IconMark size={30} />
-          <span className="font-display text-2xl" style={{ color: "var(--ink)" }}>LiteracyLab <span style={{ color: "var(--cyan-ink)" }}>AI</span></span>
+          <span style={{ fontFamily: '"Fraunces", serif', fontWeight: 600, fontSize: 22, letterSpacing: "-0.01em", color: "var(--ink)" }}>LiteracyLab <span style={{ color: "var(--accent, var(--cyan))" }}>AI</span></span>
         </div>
         <div className="card p-7 sm:p-9">
           {status === "done" ? (
