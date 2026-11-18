@@ -4,6 +4,8 @@ Internal engineering changelog, not linked from the site. One entry per shipped 
 
 ## 2026-11-18
 
+- `abe08c4` Homepage: ChatGPT comparison and verification merged into one section, curriculum chips tighter on phones (page about 250px shorter, SEO markup unchanged)
+
 - `eaeaf45` Free and Core feedback now rates every skill 1-4 on each piece, so their progress bars show graded percentages too
 
 - `a17299b` Premium progress bars use each piece's 1-4 band for every skill, so they show a wider range of percentages
