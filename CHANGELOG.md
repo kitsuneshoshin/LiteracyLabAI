@@ -4,6 +4,8 @@ Internal engineering changelog, not linked from the site. One entry per shipped 
 
 ## 2026-11-18
 
+- `ac378e4` Guides hub and country pages now use the full screen width: 4-column country grid on desktop, 2 columns on phones, intro links in columns, fluid text sizes and notch-safe edges
+
 - `0943ee2` Homepage pricing comparison: on wide screens it is now a normal table (feature on the left, Free / Core / Premium in columns on one row) instead of stacked rows with big gaps
 
 - `4460c42` Homepage hero on wide screens: tighter headline spacing and a smaller demo card, so the two columns balance
