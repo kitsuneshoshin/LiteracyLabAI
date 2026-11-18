@@ -13,7 +13,9 @@ h3, h4, .price-amount, .tier-panel .t-title, .step h4{ font-family: var(--serif-
 
 /* ---------- nav ---------- */
 .nav{ border-bottom-color: var(--border); }
-.nav-links{ font-family: var(--mono-label); font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 400; color: var(--ink); }
+.nav-links{ font-family: "Lexend", sans-serif; font-size: 14px; font-weight: 500; color: var(--ink-soft); }
+.nav-links a{ color: var(--ink-soft); text-decoration: none; }
+.nav-links a:hover{ color: var(--ink); }
 
 /* ---------- hero ---------- */
 .hero{ padding-top: 56px; padding-bottom: 56px; }
@@ -307,7 +309,7 @@ p, li, dd, summary{ overflow-wrap: break-word; }
 /* nav on tablets (781-1000px): links stay on one line and tighten up, the button label stays whole */
 .nav-links a, .nav-cta .btn{ white-space: nowrap; }
 @media (min-width: 781px) and (max-width: 1000px){
-  .nav-links{ gap: 16px; font-size: 11px; letter-spacing: 0.06em; }
+  .nav-links{ gap: 16px; font-size: 13px; }
   .nav-inner{ gap: 10px; }
   .nav-cta .btn{ padding-inline: 14px; font-size: 13.5px; }
 }
