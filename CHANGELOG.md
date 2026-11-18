@@ -4,6 +4,8 @@ Internal engineering changelog, not linked from the site. One entry per shipped 
 
 ## 2026-11-18
 
+- `0943ee2` Homepage pricing comparison: on wide screens it is now a normal table (feature on the left, Free / Core / Premium in columns on one row) instead of stacked rows with big gaps
+
 - `4460c42` Homepage hero on wide screens: tighter headline spacing and a smaller demo card, so the two columns balance
 
 - `abe08c4` Homepage: ChatGPT comparison and verification merged into one section, curriculum chips tighter on phones (page about 250px shorter, SEO markup unchanged)
