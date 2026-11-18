@@ -4,6 +4,8 @@ Internal engineering changelog, not linked from the site. One entry per shipped 
 
 ## 2026-11-18
 
+- `71454f6` Workspace (app): same logo as the homepage (Fraunces wordmark, no tagline), same footer, tabs in the same Lexend style as the top links, and the page uses the same widescreen container that grows on big screens
+
 - `e4e32d3` Guide breadcrumbs (Home › Guides › ...) now use the same Lexend style as the top navigation links instead of uppercase typewriter text
 
 - `eddf613` Site-wide consistency: homepage top links now use the same style as the guides, body text is Lexend everywhere (guides, privacy, terms, translated homepages), and guide pages scale to the same wide container as the homepage
