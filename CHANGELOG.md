@@ -4,6 +4,8 @@ Internal engineering changelog, not linked from the site. One entry per shipped 
 
 ## 2026-11-18
 
+- `a2a4971` Admin feedback: Archive/Restore button and Active/Archived filter (new "archived" status, history kept); public site header removed from admin
+
 - `363d644` Reading picker redesign: nine text types in a 3x3 grid (no orphan card), a tick on the selected card, a steps icon for instructions (was a tick), skill choice as buttons instead of a dropdown, and Get my passage on its own row. Writing cards get the same tick
 
 - `9564b27` Vocabulary bank: new game, Word Dash. Rounds of 10 questions from the learner's own words (meaning, word for a meaning, fill the gap, spell it), combo multiplier, coins that fill an egg and hatch one of 16 Word Pals, daily streak with streak freezes, second chance for missed words. Answers still move words up/down the flashcard ladder. Progress kept on the device. New analytics events vocab_dash_start, vocab_dash_round
