@@ -188,6 +188,18 @@ section{ padding-block: 88px; }
   .plan-table tbody tr.group-head th{ display: block; padding: 18px 16px; }
 }
 
+/* Wide screens: a real comparison table. The feature name sits on the left and Free, Core and Premium answer on the
+   same row, so the eye travels across a row instead of down a tall stack. Tablets and phones keep the layout above. */
+@media (min-width: 1024px){
+  .plan-table tr{ grid-template-columns: minmax(0, 1.5fr) repeat(3, minmax(0, 1fr)); column-gap: 0; background: none; align-items: center; }
+  .plan-table thead th:first-child{ position: static; width: auto; height: auto; padding: 26px 16px 18px; clip: auto; overflow: visible; white-space: normal; }
+  .plan-table th[scope="row"]{ grid-column: auto; padding: 18px 16px; text-align: left; }
+  .plan-table td{ padding: 18px 16px; text-align: center; }
+  .plan-table tbody td.col-best, .plan-table thead th.col-best{ background: var(--best); }
+  .plan-table tbody tr.group-head{ display: block; }
+  .plan-table tbody tr.group-head th{ grid-column: auto; padding: 22px 16px 10px; }
+}
+
 /* ---------- every screen, device and browser ----------
    One responsive layer for the home page (and its translated copies, which share this file). The content column is
    fluid: it fills phones edge to edge with a safe gutter, grows with the window on laptops and desktops, and keeps
