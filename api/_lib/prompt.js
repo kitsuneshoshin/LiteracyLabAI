@@ -2,6 +2,7 @@ const { curriculumLabel, standardsFor } = require("./curriculum");
 const REGIONAL = require("./regional");
 const { MAX_AVG_WORDS_PER_SENTENCE } = require("./validate");
 const { levelFor, ageWords } = require("./gradeLevel");
+const CP = require("./countryProfile");
 const { assessLength, lengthClause } = require("./calibrate");
 const { examTargetsFor } = require("./masteryTargets");
 const RESP = require("./responses");
@@ -523,7 +524,7 @@ const PASSAGE_SKILL = {
 // engaging - and it meant two students with different interests never saw
 // the same original passage even when everything else about them matched.
 // skill: { key, text } the learner chose to work on (see focus.js), or undefined for the age's usual mix.
-function buildReadingPassagePrompt({ tier, country, gradeLabel, textType, template, skill, strict }) {
+function buildReadingPassagePrompt({ tier, country, gradeLabel, textType, template, skill, strict, exam }) {
   const QT = require("./questionTypes");
   const level = levelFor(country, gradeLabel, tier);
   const band = level.reading;
@@ -545,6 +546,13 @@ function buildReadingPassagePrompt({ tier, country, gradeLabel, textType, templa
       : `${band.sentences} sentences (roughly ${band.words[0]}-${band.words[1]} words)`;
   const levelRule = isPoem ? "" : `
 - Reading level: ${level.cefr ? `English learners at CEFR level ${level.cefr}` : `${ageWords(level.age)} in ${gradeLabel}`}. Vocabulary: ${band.vocab}. Sentences: ${band.structure}; the average sentence must be about ${band.avg} words or fewer, and no sentence longer than ${band.avg * 2} words. This is measured after you write it, so keep to it. Aim at the top of what a typical pupil at this level reads comfortably: a small stretch, never above it.`;
+  // What this learner's own curriculum reads and asks, and (Premium) the exam they are preparing for.
+  const regionNote = CP.readingNote(country, level.age);
+  const regionSkill = CP.readingSkill(country, level.age);
+  const regionRule = regionNote ? `
+- Curriculum fit: this learner follows ${curriculumLabel(country)}. Write a text of the kind that curriculum uses: ${regionNote}.` : "";
+  const examRule = exam && exam.read ? `
+- Exam style: this is practice for the ${exam.name}. Set the text and the questions ${exam.read}. Keep to the question styles listed below and to this learner's reading level.` : "";
   const visualRule = type.visual === "table"
     ? `
 - Data: also return "visual", a table of invented but believable data that the text refers to: { "type": "table", "title": a short title, "headers": 2 to 5 short column labels, "rows": 3 to 7 rows, each with exactly one short cell per column (numbers as plain text, no units inside the cells unless short) }. The text and the table must agree. At least two questions must need numbers from the table (reading a value, comparing, a total, or a trend), and every such answer must be certain from the table alone.`
@@ -560,9 +568,9 @@ function buildReadingPassagePrompt({ tier, country, gradeLabel, textType, templa
 Write a short, wholly original ${type.name} - never copied or closely paraphrased from any existing published book, article, poem, or other copyrighted work - appropriate for this age, plus ${count} comprehension questions about it, in the styles listed below.${type.note ? " " + type.note : ""}
 
 Requirements:
-- Text length: ${lengthNote}.${levelRule}
+- Text length: ${lengthNote}.${levelRule}${regionRule}${examRule}
 - Layout: write it ${layout}.
-- The questions should primarily test this comprehension skill: ${skill && skill.text ? skill.text : PASSAGE_SKILL[tier]}, but cover distinct details, moments, or angles of the text so the ${count} questions feel genuinely different.${skill && skill.text ? ` The learner chose to work on this skill, so at least three of the ${count} questions must test it directly.` : ""}
+- The questions should primarily test this comprehension skill: ${skill && skill.text ? skill.text : (regionSkill || PASSAGE_SKILL[tier])}, but cover distinct details, moments, or angles of the text so the ${count} questions feel genuinely different.${skill && skill.text ? ` The learner chose to work on this skill, so at least three of the ${count} questions must test it directly.` : ""}
 - Each question has exactly ONE unambiguously correct answer that is clearly supported by the text. Wrong answers must be clearly wrong to a careful reader, not intentionally tricky or debatable.
 - Do not reuse character names, settings, or plots from well-known published works.
 - ${level.age != null && level.age <= 7 ? `Keep the questions simple and in words this age can read: at least one of the ${count} questions needs a simple inference (how someone feels, or why something happened) rather than finding a stated fact.` : `Pitch it as a small stretch for this level: at least two of the ${count} questions must need inference or interpretation rather than finding a stated fact.`} The questions and answer options must be written at the same reading level as the text.${strict ? ` Hold it to the full standard for this age: at least half of the ${count} questions must need inference, interpretation or comparing details, and every wrong option must be tempting to a reader who skimmed (taken from the text or a likely misreading), never obviously silly.` : ""}${visualRule}
@@ -604,6 +612,9 @@ function buildWritingPromptGenerator({ tier, country, gradeLabel, genre, exam })
   const classify = chosen
     ? `- This prompt must ask for a "${chosen}" piece, so classify it as exactly "${chosen}" (from these exact options: ${VALID_GENRES.join(", ")}). This is used later to decide which writing technique to teach the student.`
     : `- Also classify what this specific prompt is actually asking the student to write, from these exact options: ${VALID_GENRES.join(", ")}. This will typically be "${DEFAULT_GENRE_BY_TIER[tier]}" for a piece written at this tier, but tag whichever one genuinely matches what you wrote — this is used later to decide which writing technique to teach the student, so it must reflect the real exercise, not just default to the usual one.`;
+  const wNote = level.cefr ? null : CP.writingNote(country, level.age);
+  const regionLine = wNote ? `
+- Curriculum fit: this learner follows ${curriculumLabel(country)}. Where it suits the kind of piece asked for, use the forms and conventions that curriculum uses: ${wNote}.` : "";
   return `You are generating an ORIGINAL creative-writing or essay prompt for a ${TIER_LABEL[tier]} student in ${gradeLabel} (${country}).${REGIONAL.spellingClause(country, "write")}
 
 Write ${task}.${examLine}
@@ -613,7 +624,7 @@ Requirements:
 - Do not reuse character names, settings, or specific plots from well-known published works.
 - Pitch it for ${level.cefr ? `English learners at CEFR level ${level.cefr}` : `${ageWords(level.age)} in ${gradeLabel}`}: it should ask for ${wband.ask}. A small stretch is good, but a prompt the student cannot read or picture straight away is too hard.
 - Write the prompt itself in words this reader can read easily, with no specialist vocabulary.
-- Keep the prompt itself short: no more than ${wband.maxWords} words — the student does the writing, not you.
+- Keep the prompt itself short: no more than ${wband.maxWords} words — the student does the writing, not you.${regionLine}
 ${classify}
 
 Respond with ONLY a JSON object (no markdown fences, no commentary) with exactly this shape:

@@ -161,17 +161,52 @@ const READING_SKILLS_BY_TIER = {
   high: SKILL_ORDER.slice(),
 };
 
-// raw: { textType: a name from this age's list, skill: a key } -> { textType: the full entry or null, skill: { key, text } or null }
-function readingFocusFor({ tier }, raw) {
+// Premium: the reading paper of the exam a learner is preparing for. Applies to exactly the years examStyleFor covers, so
+// one switch in the app serves both reading and writing, and the name shown is the same. "read" says how that exam words
+// its reading texts and questions; it never names a real published passage.
+const READING_EXAM = {
+  "PSLE English": "the way a PSLE English comprehension paper does: a narrative or information passage with Singapore settings, questions that need a fact, an inference, what a word or phrase refers to, or a meaning in context, and answers that should be put in the pupil's own words",
+  "O-Level English Paper 1": "the way a Singapore secondary English reading task does: an article or narrative with a clear viewpoint, and questions on inference, the writer's purpose and tone, and vocabulary in context",
+  "Cambridge Primary Checkpoint": "the way a Cambridge Primary English Checkpoint reading paper does: a story or non-fiction text, and questions that need a fact, an inference, a word meaning or a comment on the writer's choices",
+  "Cambridge Lower Secondary Checkpoint": "the way a Cambridge Lower Secondary English Checkpoint reading paper does: a fiction or non-fiction text, and questions on explicit and implicit meaning, the writer's viewpoint and the effect of language",
+  "IGCSE English First Language": "the way an IGCSE English First Language reading paper does: a non-fiction article or report to read closely, with questions on selecting points, implicit meaning and the effect of the writer's word choices",
+  "Cambridge AS and A Level English": "the way a Cambridge AS and A Level English reading task does: a feature, speech or opinion text, with questions on how the writer shapes meaning for an audience",
+  "CBSE Class 10 English": "the way a CBSE Class 10 unseen passage does: a factual, discursive or literary passage with questions on inference, vocabulary (a word's meaning or its opposite) and what a word or phrase refers to",
+  "CBSE Class 12 English": "the way a CBSE Class 12 unseen passage does: a factual or discursive passage on a social or scientific theme, with questions on inference, the writer's attitude, vocabulary and reference",
+  "HKDSE English Language": "the way an HKDSE English Language Paper 1 reading text does: a magazine feature, opinion piece or letter written for a stated purpose, with questions on main ideas, details, inference, the writer's attitude, vocabulary in context and fact versus opinion",
+  "Junior Cycle English": "the way a Junior Cycle English reading text does: a narrative, informational or persuasive text, with questions on understanding, inference and the effect of the writer's choices",
+  "Leaving Certificate English": "the way a Leaving Certificate English Paper 1 comprehension does: an article, speech or personal essay with a clear voice, with questions on the writer's purpose, style, tone and language",
+  "CEFR writing task": "the way a Cambridge English reading task at this CEFR level does: a short everyday text such as a notice, an email, an article or a story, with questions that check understanding at that level",
+  "NAPLAN": "the way a NAPLAN reading test does: an imaginative, informative or persuasive text, and questions that range from finding a stated detail to inferring and interpreting",
+  "NCEA English": "the way an NCEA English reading task does: an article, a feature or a literary extract, with questions on how language and structure create meaning for the audience",
+  "NSC English": "the way a South African NSC English comprehension does: a passage that may come with an advert or a cartoon-style text, with literal, inferential and evaluative questions and a question on the writer's viewpoint or tone",
+  "EQAO": "the way an Ontario EQAO reading test does: a story, poem or information text, with questions on explicit and implicit meaning and on forming a view backed by evidence from the text",
+  "OSSLT": "the way the Ontario Secondary School Literacy Test does: a news report, a short narrative or an opinion piece, with questions on direct, indirect and implicit meaning",
+  "GCSE English Language": "the way a GCSE English Language reading paper does: a literary fiction extract or a non-fiction piece with a viewpoint, and questions on implicit meaning, the effect of language and structure, and the writer's perspective",
+  "KS3 English": "the way a Key Stage 3 English reading task does: a fiction or non-fiction text, with questions on inference with evidence, the effect of language and the writer's purpose",
+  "KS2 SATs": "the way a Key Stage 2 reading test does: a fiction, non-fiction or poetry text, and questions on word meaning, retrieval, summarising, inference with evidence, prediction, structure and the effect of language",
+  "state test (Common Core)": "the way a Common Core state reading test does: a literary or informational text, and questions that ask for the evidence in the text, the theme or central idea, word meaning including figurative language, and the author's point of view",
+};
+
+// The learner's exam, for reading: { name, read } or null. Same applicability as the writing exam style.
+function readingExamStyleFor(country, gradeLabel) {
+  const e = examStyleFor(country, gradeLabel);
+  return e && READING_EXAM[e.name] ? { name: e.name, read: READING_EXAM[e.name] } : null;
+}
+
+// raw: { textType: a name from this age's list, skill: a key, examStyle: true } -> { textType: the full entry or null, skill: { key, text } or null, exam }
+// The exam style is Premium only and only where there is an exam, exactly as for writing.
+function readingFocusFor({ tier, country, gradeLabel, capabilities }, raw) {
   const r = raw && typeof raw === "object" ? raw : {};
   const list = TEXT_TYPES[tier] || [];
   const textType = typeof r.textType === "string" ? list.find((t) => t.name === r.textType) || null : null;
   const allowed = READING_SKILLS_BY_TIER[tier] || [];
   const key = typeof r.skill === "string" && allowed.includes(r.skill) ? r.skill : null;
-  return { textType, skill: key ? { key, text: READING_SKILLS[key] } : null };
+  const exam = r.examStyle === true && capabilities && capabilities.deepFeedback ? readingExamStyleFor(country, gradeLabel) : null;
+  return { textType, skill: key ? { key, text: READING_SKILLS[key] } : null, exam };
 }
 
 module.exports = {
-  WRITING_GENRES, WRITING_TASK, GENRE_ORDER, examStyleFor, gradeNumber, writingFocusFor,
+  WRITING_GENRES, WRITING_TASK, GENRE_ORDER, examStyleFor, readingExamStyleFor, READING_EXAM, gradeNumber, writingFocusFor,
   READING_SKILLS, READING_SKILLS_BY_TIER, SKILL_ORDER, readingFocusFor,
 };

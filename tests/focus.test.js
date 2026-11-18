@@ -120,7 +120,7 @@ test("a chosen kind of text must be on this age's list, and a skill must suit th
   assert.equal(rf("early", { skill: "infer" }).skill.key, "infer");
   assert.equal(rf("middle", { skill: "purpose" }).skill.text, F.READING_SKILLS.purpose);
   for (const bad of ["story; drop table", 5, null, {}, [], "", "constructor"]) { const r = rf("middle", { textType: bad, skill: bad }); assert.deepEqual([r.textType, r.skill], [null, null], JSON.stringify(bad)); }
-  assert.deepEqual(rf("middle", undefined), { textType: null, skill: null });
+  assert.deepEqual(rf("middle", undefined), { textType: null, skill: null, exam: null });
 });
 
 // ------------------------------------------------------------ the prompts

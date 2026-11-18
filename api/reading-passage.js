@@ -124,20 +124,21 @@ module.exports = async function handler(req, res) {
       // Premium learners from Year 3 or so also get one short written answer, marked by the AI after submitting.
       const withShort = !!(usage.capabilities && usage.capabilities.deepFeedback) && !!QT.SHORT_MARKS[tier];
       // What the learner chose to practise: a kind of text and/or a skill (checked against fixed lists).
-      const focus = readingFocusFor({ tier }, body.focus);
+      const focus = readingFocusFor({ tier, country, gradeLabel, capabilities: usage.capabilities }, body.focus);
       const textType = focus.textType || QT.pickTextType(tier);
       const baseTemplate = QT.pickTemplate(tier, Math.random, textType);
       const template = withShort ? [...baseTemplate, "short"] : baseTemplate;
       const strict = !!(usage.capabilities && usage.capabilities.strictStandard);
-      const llmPrompt = buildReadingPassagePrompt({ tier, country, gradeLabel, textType, template, skill: focus.skill || undefined, strict });
+      const llmPrompt = buildReadingPassagePrompt({ tier, country, gradeLabel, textType, template, skill: focus.skill || undefined, strict, exam: focus.exam || undefined });
       // If the styled plan keeps failing, fall back to plain multiple choice, keeping the written answer for Premium.
       const fallbackTemplate = withShort ? [...QT.MC_FOUR, "short"] : QT.MC_FOUR;
-      const fallbackPrompt = buildReadingPassagePrompt({ tier, country, gradeLabel, textType, template: fallbackTemplate, skill: focus.skill || undefined, strict });
+      const fallbackPrompt = buildReadingPassagePrompt({ tier, country, gradeLabel, textType, template: fallbackTemplate, skill: focus.skill || undefined, strict, exam: focus.exam || undefined });
       ({ parsed } = await generateAndValidate(llmPrompt, tier, { template, textType, fallbackPrompt, fallbackTemplate, country, gradeLabel }));
       // A poem keeps its line breaks; prose is regrouped into paragraphs if the model sent one block.
       parsed.passage = (textType.lines || textType.two) ? String(parsed.passage).replace(/\r\n/g, "\n").trim() : paragraphise(parsed.passage);
       parsed.textType = textType.name;
       if (focus.skill) parsed.focusSkill = focus.skill.key;
+      if (focus.exam) parsed.examStyle = focus.exam.name;
       if (textType.visual) parsed.visual = parsed.visual; // checked and tidied in generateAndValidate
       parsed.questionStyles = parsed.questionStyles || template;
     } catch (genErr) {
@@ -161,6 +162,7 @@ module.exports = async function handler(req, res) {
       // happens server-side in api/submit.js against the stored row.
       questions: parsed.questions.map(QT.publicQuestion),
       textType: parsed.textType,
+      examStyle: parsed.examStyle || null,
       visual: parsed.visual || null,
       usage: updatedUsage,
     });

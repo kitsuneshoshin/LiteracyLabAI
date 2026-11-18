@@ -4289,6 +4289,7 @@ function cleanFocus(kind, tier, v){
   const out = {};
   if (FOCUS_TEXT_TYPES[tier] && FOCUS_TEXT_TYPES[tier].includes(o.textType)) out.textType = o.textType;
   if (FOCUS_SKILLS_BY_TIER[tier] && FOCUS_SKILLS_BY_TIER[tier].includes(o.skill)) out.skill = o.skill;
+  if (o.examStyle === true) out.examStyle = true;
   return out;
 }
 
@@ -4343,6 +4344,19 @@ function FocusPicker({ kind, tier, country, gradeLabel, premium, value, onChange
         {card(!v.textType, "Surprise me", "We pick for you", IconDice, () => onChange({ ...v, textType: undefined }), null, "any")}
         {(FOCUS_TEXT_TYPES[tier] || []).map((t) => { const m = focusTextCard(t); return card(v.textType === t, capFirst(t), m.blurb, m.icon, () => onChange({ ...v, textType: t }), null, t); })}
       </div>
+      {(() => { const rexam = focusExamName(country, gradeLabel); return rexam ? (premium ? (
+        <button type="button" role="switch" aria-checked={!!v.examStyle} onClick={() => onChange({ ...v, examStyle: v.examStyle ? undefined : true })}
+          className="focus-ring inline-flex items-center gap-2 text-[13px] font-medium self-start" style={{ color: "var(--ink-soft)" }}>
+          <span className="relative inline-block rounded-full shrink-0" style={{ width: 36, height: 20, background: v.examStyle ? "var(--cyan)" : "var(--border-strong, var(--border))", transition: "background .15s" }}>
+            <span className="absolute rounded-full" style={{ top: 2, insetInlineStart: v.examStyle ? 18 : 2, width: 16, height: 16, background: "var(--surface)", transition: "inset-inline-start .15s" }} />
+          </span>
+          Set it like a {rexam} reading task
+        </button>
+      ) : (
+        <button type="button" onClick={onSeePlans} className="focus-ring inline-flex items-center gap-1.5 text-[12.5px] font-semibold underline self-start" style={{ color: "var(--ink-faint)" }}>
+          <IconLock size={12} /> {rexam}-style reading is on Premium
+        </button>
+      )) : null; })()}
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <label className="flex items-center gap-2 text-[13px] font-medium" style={{ color: "var(--ink-soft)" }}>
           Skill to work on

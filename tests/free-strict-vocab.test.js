@@ -45,7 +45,7 @@ test("Free reading passages ask for mostly inference questions and tempting wron
   assert.match(normal, /at least two of the \d+ questions must need inference/);
   const src = fs.readFileSync(path.join(__dirname, "..", "api", "reading-passage.js"), "utf8");
   assert.match(src, /strictStandard/);
-  assert.equal((src.match(/, strict \}\)/g) || []).length, 2, "the fallback prompt is strict too");
+  assert.equal((src.match(/, strict, exam: focus\.exam \|\| undefined \}\)/g) || []).length, 2, "the fallback prompt is strict too");
 });
 
 // ---------------------------------------------------------------- vocabulary: clearing known words
