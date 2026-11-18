@@ -89,7 +89,7 @@ function shapeSubmission(s, emailByProfile) {
   };
 }
 
-function buildActivity({ events = [], submissions = [], profiles = [], children = [], now = new Date(), days = 30 }) {
+function buildActivity({ events = [], submissions = [], profiles = [], children = [], cancellations = [], now = new Date(), days = 30 }) {
   const emailByProfile = {};
   for (const p of profiles) emailByProfile[p.id] = p.email || "";
   const since = new Date(now.getTime() - days * 86400000).toISOString();
@@ -109,7 +109,13 @@ function buildActivity({ events = [], submissions = [], profiles = [], children 
   const failures = evs.filter((e) => /_failed$/.test(e.name));
 
   const perUser = {};
-  for (const p of profiles) perUser[p.id] = { userId: p.id, email: p.email || "", plan: p.plan, joined: p.created_at, writing: 0, reading: 0, stopped: 0, events: 0, lastSeen: null };
+  for (const p of profiles) perUser[p.id] = { userId: p.id, email: p.email || "", plan: p.plan, joined: p.created_at, writing: 0, reading: 0, stopped: 0, events: 0, lastSeen: null, cancelled: null };
+  // Newest cancellation per account: when, and the reason they gave (the webhook's wording)
+  for (const c of cancellations) {
+    const u = perUser[c.profile_id]; if (!u) continue;
+    if (u.cancelled && String(u.cancelled.when) >= String(c.created_at)) continue;
+    u.cancelled = { when: c.created_at, reason: String(c.message || "").replace(/^CANCELLED \([^)]*\)\.\s*/, "").replace(/^Reason:\s*/, "").trim() };
+  }
   for (const s of submissions) {
     const u = perUser[s.profile_id]; if (!u) continue;
     u[s.kind === "reading" ? "reading" : "writing"] += 1;

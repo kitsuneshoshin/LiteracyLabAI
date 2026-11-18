@@ -362,6 +362,24 @@ test("billing: the reason given when cancelling is saved to the feedback backlog
   assert.equal(t2.feedback.length, 0);
 }));
 
+test("billing: Stripe sends the cancellation reason in a second update, and that one is saved (once, with no second email)", () => withEnv(LIVE, async () => {
+  const tables = { ...billingWorld(), feedback: [] };
+  const r = recorder();
+  const base = { id: "sub_7", cancel_at_period_end: true, current_period_end: 1790000000, status: "active" };
+  // 1st event: the cancellation is scheduled, no reason yet
+  await notifyBillingEvent({ event: ev("customer.subscription.updated", { ...base, cancellation_details: { feedback: null, comment: null, reason: "cancellation_requested" } }, { cancel_at_period_end: false, cancellation_details: { reason: null } }), supabase: fakeDb(tables), after: { plan: "premium" }, before: BEFORE, send: r.send });
+  assert.equal(tables.feedback.length, 0);
+  assert.equal(r.sent.length, 1, "the cancellation email goes with the first event");
+  // 2nd event: the survey answer arrives
+  const second = ev("customer.subscription.updated", { ...base, cancellation_details: { feedback: "missing_features", comment: null, reason: "cancellation_requested" } }, { cancellation_details: { feedback: null } }, "evt_second");
+  await notifyBillingEvent({ event: second, supabase: fakeDb(tables), after: { plan: "premium" }, before: BEFORE, send: r.send });
+  assert.equal(tables.feedback.length, 1);
+  assert.match(tables.feedback[0].message, /missing features/);
+  assert.equal(r.sent.length, 1, "no second email");
+  await notifyBillingEvent({ event: { ...second, id: "evt_retry" }, supabase: fakeDb(tables), after: { plan: "premium" }, before: BEFORE, send: r.send });
+  assert.equal(tables.feedback.length, 1, "a retry adds nothing");
+}));
+
 test("billing: a payment failing (active to past due) sends the failed-payment email once per billing period", () => withEnv(LIVE, async () => {
   const tables = billingWorld({ kids: 1 });
   const r = recorder();

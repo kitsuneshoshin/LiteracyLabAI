@@ -474,15 +474,17 @@ async function handleActivity(req, res) {
   const days = Math.min(90, Math.max(1, Number(req.query && req.query.days) || 30));
   const limit = Math.min(200, Math.max(1, Number(req.query && req.query.limit) || 60));
   const since = new Date(Date.now() - days * 86400000).toISOString();
-  const [events, submissions, profiles, children] = await Promise.all([
+  const [events, submissions, profiles, children, cancellations] = await Promise.all([
     supabase.from("usage_events").select("profile_id, name, props, created_at").gte("created_at", since).order("created_at", { ascending: false }).limit(5000),
     supabase.from("submissions").select("id, profile_id, child_id, kind, tier, country, grade_label, interest, content, feedback, word_count, score, total_questions, model_used, created_at").order("created_at", { ascending: false }).limit(limit),
     supabase.from("profiles").select("id, email, plan, created_at").limit(2000),
     supabase.from("child_profiles").select("id, profile_id, display_name, country").limit(2000),
+    // Why people cancelled (saved by the Stripe webhook as feedback rows keyed "cancel:<subscription>")
+    supabase.from("feedback").select("profile_id, message, created_at").like("email_key", "cancel:%").order("created_at", { ascending: false }).limit(500),
   ]);
-  const failed = [events, submissions, profiles, children].find((r) => r.error);
+  const failed = [events, submissions, profiles, children, cancellations].find((r) => r.error);
   if (failed) throw new Error(`Activity report query failed: ${failed.error.message}`);
-  return res.status(200).json(buildActivity({ events: events.data || [], submissions: submissions.data || [], profiles: profiles.data || [], children: children.data || [], days }));
+  return res.status(200).json(buildActivity({ events: events.data || [], submissions: submissions.data || [], profiles: profiles.data || [], children: children.data || [], cancellations: cancellations.data || [], days }));
 }
 
 // One learner's Dashboard as their parent sees it: snapshot, target mastery, progress over time, peer comparison and

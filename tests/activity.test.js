@@ -70,6 +70,17 @@ test("the report counts pages, problems and people, and ignores events older tha
   assert.deepEqual(r.interests, [{ label: "coding", count: 1 }]);
 });
 
+test("the people list shows when and why an account cancelled", () => {
+  const cancellations = [
+    { profile_id: "p1", created_at: "2026-11-07T22:00:00Z", message: "CANCELLED (premium plan). Reason: It's missing features I need." },
+    { profile_id: "p1", created_at: "2026-10-01T22:00:00Z", message: "CANCELLED (core plan). Reason: I don't use it enough." },
+    { profile_id: "gone", created_at: "2026-11-07T22:00:00Z", message: "CANCELLED (core plan). Reason: Other." },
+  ];
+  const r = buildActivity({ events, submissions, profiles, cancellations, now: NOW });
+  assert.deepEqual(r.users.find((u) => u.userId === "p1").cancelled, { when: "2026-11-07T22:00:00Z", reason: "It's missing features I need." }, "the newest cancellation wins");
+  assert.equal(r.users.find((u) => u.userId === "p2").cancelled, null);
+});
+
 // ---- the endpoints
 
 const res0 = () => ({ statusCode: 200, body: undefined, headers: {} });

@@ -626,12 +626,12 @@ function render(){
   bars($("genres"), DATA.genres, "label", "count");
 
   var tb = $("users"); tb.textContent = "";
-  var head = el("tr"); ["Person", "Plan", "Joined", "Writing", "Reading", "Stopped", "Events", "Last seen"].forEach(function(h){ head.appendChild(el("th", null, h)); });
+  var head = el("tr"); ["Person", "Plan", "Joined", "Writing", "Reading", "Stopped", "Events", "Last seen", "Cancelled"].forEach(function(h){ head.appendChild(el("th", null, h)); });
   tb.appendChild(head);
   DATA.users.forEach(function(u){
     var r = el("tr", "click"); r.title = "Open this person's learner dashboard";
     r.addEventListener("click", function(){ var l = DATA.learners.filter(function(x){ return x.userId === u.userId; })[0]; if (l) { $("lSel").value = l.childId; loadLearner(); $("dash").scrollIntoView(); } });
-    [u.email || u.userId.slice(0, 8), u.plan, when(u.joined), u.writing, u.reading, u.stopped, u.events, when(u.lastSeen)].forEach(function(v){ r.appendChild(el("td", null, String(v))); });
+    [u.email || u.userId.slice(0, 8), u.plan, when(u.joined), u.writing, u.reading, u.stopped, u.events, when(u.lastSeen), u.cancelled ? when(u.cancelled.when) + " - " + u.cancelled.reason : "-"].forEach(function(v){ r.appendChild(el("td", null, String(v))); });
     tb.appendChild(r);
   });
 

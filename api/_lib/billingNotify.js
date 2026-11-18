@@ -116,6 +116,13 @@ async function notifyBillingEvent({ event, supabase, after, before, send }) {
       }));
     }
 
+    // Stripe sends the cancellation survey answer as a SECOND update, a moment after
+    // the one that scheduled the cancellation (that first one has no reason yet), so
+    // save it when it arrives. Still once per subscription, and no second email.
+    if (event.type === "customer.subscription.updated" && !scheduled && object.cancel_at_period_end === true && previous.cancellation_details !== undefined) {
+      await recordCancellationFeedback({ supabase, profile, subscription: object });
+    }
+
     // A payment failed: the subscription has just moved from active to past due
     if (event.type === "customer.subscription.updated" && previous.status === "active" && ["past_due", "unpaid"].includes(object.status)) {
       out.push(await sendBillingEmail({ supabase, profile, key: "bill-failed", dedupeKey: `bill-failed:${object.id}:${object.current_period_end || ""}`, send }));
