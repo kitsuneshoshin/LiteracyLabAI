@@ -546,6 +546,15 @@
   "{n0} thing to fix": {
    "one": "ਸੁਧਾਰਨ ਵਾਲੀ {n0} ਗੱਲ",
    "other": "ਸੁਧਾਰਨ ਵਾਲੀਆਂ {n0} ਗੱਲਾਂ"
-  }
+  },
+  "Workspace": "ਵਰਕਸਪੇਸ",
+  "Pricing": "ਕੀਮਤਾਂ",
+  "FAQ": "ਅਕਸਰ ਪੁੱਛੇ ਜਾਂਦੇ ਸਵਾਲ",
+  "Guides": "ਗਾਈਡ",
+  "About": "ਸਾਡੇ ਬਾਰੇ",
+  "We could not mark this one this time, so compare it with the model answer beside it.": "ਇਸ ਵਾਰ ਅਸੀਂ ਇਸ ਜਵਾਬ ਨੂੰ ਨਹੀਂ ਜਾਂਚ ਸਕੇ, ਇਸ ਲਈ ਇਸਨੂੰ ਨਾਲ ਦਿੱਤੇ ਨਮੂਨਾ ਜਵਾਬ ਨਾਲ ਮਿਲਾ ਕੇ ਵੇਖੋ।",
+  "First name or nickname (optional)": "ਪਹਿਲਾ ਨਾਮ ਜਾਂ ਉਪਨਾਮ (ਚੋਣਵਾਂ)",
+  "First name or nickname for the card": "ਕਾਰਡ ਲਈ ਪਹਿਲਾ ਨਾਮ ਜਾਂ ਉਪਨਾਮ",
+  "Thanks for flagging it. What looked wrong? (for example a spelling it marked that was right, or a score that seems off)": "ਦੱਸਣ ਲਈ ਧੰਨਵਾਦ। ਕੀ ਗਲਤ ਲੱਗਿਆ? (ਜਿਵੇਂ ਸਹੀ ਸ਼ਬਦ-ਜੋੜ ਨੂੰ ਗਲਤ ਨਿਸ਼ਾਨ ਲਾਇਆ ਗਿਆ, ਜਾਂ ਕੋਈ ਅੰਕ ਜੋ ਠੀਕ ਨਹੀਂ ਲੱਗਦਾ)"
  }
 }

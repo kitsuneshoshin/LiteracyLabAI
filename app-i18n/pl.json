@@ -554,6 +554,15 @@
    "few": "{n0} rzeczy do poprawy",
    "many": "{n0} rzeczy do poprawy",
    "other": "{n0} rzeczy do poprawy"
-  }
+  },
+  "Workspace": "Przestrzeń robocza",
+  "Pricing": "Cennik",
+  "FAQ": "Najczęstsze pytania",
+  "Guides": "Poradniki",
+  "About": "O nas",
+  "We could not mark this one this time, so compare it with the model answer beside it.": "Tym razem nie udało się ocenić tej odpowiedzi, więc porównaj ją z wzorcową obok.",
+  "First name or nickname (optional)": "Imię lub pseudonim (opcjonalnie)",
+  "First name or nickname for the card": "Imię lub pseudonim na karcie",
+  "Thanks for flagging it. What looked wrong? (for example a spelling it marked that was right, or a score that seems off)": "Dziękujemy za zgłoszenie. Co wyglądało źle? (na przykład pisownia oznaczona błędnie albo dziwny wynik)"
  }
 }

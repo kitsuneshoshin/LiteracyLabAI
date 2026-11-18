@@ -546,6 +546,15 @@
   "{n0} thing to fix": {
    "one": "ঠিক করার মতো {n0}টি বিষয়",
    "other": "ঠিক করার মতো {n0}টি বিষয়"
-  }
+  },
+  "Workspace": "ওয়ার্কস্পেস",
+  "Pricing": "মূল্য",
+  "FAQ": "সচরাচর জিজ্ঞাসা",
+  "Guides": "গাইড",
+  "About": "আমাদের সম্পর্কে",
+  "We could not mark this one this time, so compare it with the model answer beside it.": "এবার আমরা এই উত্তরটি মূল্যায়ন করতে পারিনি, তাই পাশের আদর্শ উত্তরের সঙ্গে মিলিয়ে দেখুন।",
+  "First name or nickname (optional)": "প্রথম নাম বা ডাকনাম (ঐচ্ছিক)",
+  "First name or nickname for the card": "কার্ডের জন্য প্রথম নাম বা ডাকনাম",
+  "Thanks for flagging it. What looked wrong? (for example a spelling it marked that was right, or a score that seems off)": "জানানোর জন্য ধন্যবাদ। কী ভুল মনে হয়েছিল? (যেমন সঠিক বানান ভুল হিসেবে চিহ্নিত হয়েছে, বা কোনো স্কোর ঠিক মনে হচ্ছে না)"
  }
 }

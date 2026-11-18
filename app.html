@@ -5813,7 +5813,7 @@ function App({ session }){
       </div>
       <footer style={{ borderTop: "1px solid var(--border-soft)" }}>
         <div className="mx-auto max-w-[var(--wrap)] px-[clamp(16px,4vw,48px)] py-8 flex items-center justify-between gap-4 flex-wrap text-[12.5px]" style={{ color: "var(--ink-faint)" }}>
-          <span>© 2026 LiteracyLab AI · {backendLive ? "your account data is private to you" : "interactive prototype: all learner data shown is sample data"}</span>
+          <span>© 2026 <span>{backendLive ? "LiteracyLab AI · your account data is private to you." : "LiteracyLab AI · interactive prototype — all learner data shown is sample data."}</span></span>
           <div className="flex flex-wrap gap-x-5 gap-y-1.5">
             {[["/app.html","Workspace"],["/#pricing","Pricing"],["/#faq","FAQ"],["/learn/","Guides"],["/learn/about-literacylab-ai/","About"],["/privacy.html","Privacy"],["/terms.html","Terms"]].map(([h,t])=>(
               <a key={h} href={h} className="hover:underline" style={{ color: "var(--ink-soft)" }}>{t}</a>

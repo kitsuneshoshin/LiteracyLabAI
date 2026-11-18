@@ -562,6 +562,15 @@
    "few": "{n0} أشياء للتصحيح",
    "many": "{n0} شيئًا للتصحيح",
    "other": "{n0} شيء للتصحيح"
-  }
+  },
+  "Workspace": "مساحة العمل",
+  "Pricing": "الأسعار",
+  "FAQ": "الأسئلة الشائعة",
+  "Guides": "الأدلة",
+  "About": "حول",
+  "We could not mark this one this time, so compare it with the model answer beside it.": "لم نتمكن من تقييم هذه الإجابة هذه المرة، فقارنها بالإجابة النموذجية المجاورة.",
+  "First name or nickname (optional)": "الاسم الأول أو اللقب (اختياري)",
+  "First name or nickname for the card": "الاسم الأول أو اللقب للبطاقة",
+  "Thanks for flagging it. What looked wrong? (for example a spelling it marked that was right, or a score that seems off)": "شكرًا على الإبلاغ. ما الذي بدا خاطئًا؟ (مثلًا إملاء تم تحديده رغم أنه صحيح، أو درجة تبدو غير دقيقة)"
  }
 }

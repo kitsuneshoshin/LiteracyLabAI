@@ -546,6 +546,15 @@
   "{n0} thing to fix": {
    "one": "درست کرنے والی {n0} بات",
    "other": "درست کرنے والی {n0} باتیں"
-  }
+  },
+  "Workspace": "ورک اسپیس",
+  "Pricing": "قیمتیں",
+  "FAQ": "اکثر پوچھے گئے سوالات",
+  "Guides": "رہنما",
+  "About": "ہمارے بارے میں",
+  "We could not mark this one this time, so compare it with the model answer beside it.": "اس بار ہم اس جواب کو نمبر نہیں دے سکے، اس لیے اسے ساتھ دیے گئے نمونہ جواب سے ملا کر دیکھیں۔",
+  "First name or nickname (optional)": "پہلا نام یا عرفیت (اختیاری)",
+  "First name or nickname for the card": "کارڈ کے لیے پہلا نام یا عرفیت",
+  "Thanks for flagging it. What looked wrong? (for example a spelling it marked that was right, or a score that seems off)": "نشاندہی کا شکریہ۔ کیا غلط لگا؟ (مثلاً ایسی ہجے جو درست تھی مگر غلط نشان زد ہوئی، یا کوئی اسکور جو ٹھیک نہیں لگتا)"
  }
 }

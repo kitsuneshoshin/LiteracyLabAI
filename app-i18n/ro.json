@@ -550,6 +550,15 @@
    "one": "{n0} lucru de corectat",
    "few": "{n0} lucruri de corectat",
    "other": "{n0} de lucruri de corectat"
-  }
+  },
+  "Workspace": "Spațiu de lucru",
+  "Pricing": "Prețuri",
+  "FAQ": "Întrebări frecvente",
+  "Guides": "Ghiduri",
+  "About": "Despre",
+  "We could not mark this one this time, so compare it with the model answer beside it.": "De data aceasta nu am putut nota acest răspuns, așa că compară-l cu răspunsul model de alături.",
+  "First name or nickname (optional)": "Prenume sau poreclă (opțional)",
+  "First name or nickname for the card": "Prenume sau poreclă pentru card",
+  "Thanks for flagging it. What looked wrong? (for example a spelling it marked that was right, or a score that seems off)": "Mulțumim că ne-ai spus. Ce părea greșit? (de exemplu, o greșeală marcată care era corectă sau un scor care pare nepotrivit)"
  }
 }

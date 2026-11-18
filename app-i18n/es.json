@@ -546,6 +546,15 @@
   "{n0} thing to fix": {
    "one": "{n0} cosa por corregir",
    "other": "{n0} cosas por corregir"
-  }
+  },
+  "Workspace": "Espacio de trabajo",
+  "Pricing": "Precios",
+  "FAQ": "Preguntas frecuentes",
+  "Guides": "Guías",
+  "About": "Acerca de",
+  "We could not mark this one this time, so compare it with the model answer beside it.": "Esta vez no pudimos calificar esta respuesta, así que compárala con la respuesta modelo de al lado.",
+  "First name or nickname (optional)": "Nombre o apodo (opcional)",
+  "First name or nickname for the card": "Nombre o apodo para la tarjeta",
+  "Thanks for flagging it. What looked wrong? (for example a spelling it marked that was right, or a score that seems off)": "Gracias por avisarnos. ¿Qué parecía estar mal? (por ejemplo, una ortografía marcada que era correcta, o una puntuación que parece incorrecta)"
  }
 }
