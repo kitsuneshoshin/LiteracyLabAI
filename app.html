@@ -1638,6 +1638,13 @@ function VocabularyBank({ session, childId, backendLive, onSeePlans, displayName
             authedFetch(session, "/api/history", { method: "POST", body: JSON.stringify({ childId, updates: toPush.slice(i, i + 100) }) }).catch(() => {});
           }
         }
+        // The same for the game (coins, Word Pals, streak): join this device's copy with the account's, never losing a pal,
+        // and save the joined copy back when the account is behind.
+        if (!d.vocabLocked) {
+          const joined = dashMerge(dashLoad(childId), d.vocabGame);
+          setDash(joined); dashSave(childId, joined);
+          if (!dashSame(joined, d.vocabGame)) authedFetch(session, "/api/history", { method: "POST", body: JSON.stringify({ childId, game: joined }) }).catch(() => {});
+        }
       })
       .catch(err => { if (!cancelled) { setLoadError(err.message || "Couldn't load your vocabulary right now."); setWords([]); } });
     return ()=>{ cancelled = true; };
@@ -1665,6 +1672,13 @@ function VocabularyBank({ session, childId, backendLive, onSeePlans, displayName
     const out = dashApplyRound(dash, res, dashDay(Date.now()), Math.random);
     setDash(out.state);
     if (childId) dashSave(childId, out.state);
+    // Saved to the account too, quietly. The account sends back the joined game (a second device may have played), so
+    // the page takes that; if it cannot be saved, this device keeps it and the next time the page opens it is sent up.
+    if (backendLive && childId && session) {
+      authedFetch(session, "/api/history", { method: "POST", body: JSON.stringify({ childId, game: out.state }) })
+        .then((r) => { if (r && r.game) setDash((prev) => { const m = dashMerge(prev, r.game); dashSave(childId, m); return m; }); })
+        .catch(() => {});
+    }
     logEvent("vocab_dash_round", { status: res.stars }, childId);
     return out;
   }
@@ -1998,7 +2012,8 @@ function VocabQuiz({ quiz, error, onRate, onRetry, onBack, loading }){
 // formats is what makes words stick. The hook: a combo that builds, coins that fill an egg, a Word Pal that hatches
 // (a surprise, but always earned by answering), and a daily streak with a safety net (a streak freeze) so one missed day
 // does not feel like a punishment. No timer and no lives, so it stays calm. Right and wrong answers still move each word
-// up or down the same ladder as the flashcards. Game progress (coins, pals, streak) is kept on this device.
+// up or down the same ladder as the flashcards. Game progress (coins, pals, streak) is kept on this device AND saved to
+// the account (api/_lib/vocabGame.js), so it follows the learner between devices.
 const DASH_ROUND = 10;
 const DASH_EGG = 150; // coins per egg
 const DASH_PALS = [
@@ -2014,19 +2029,36 @@ const DASH_PALS = [
 const DASH_RARITY = ["Common", "Rare", "Epic"];
 const DASH_BLANK = { coins: 0, egg: 0, pals: [], streak: 0, lastDay: -1, freezes: 0, rounds: 0, right: 0, bestCombo: 0, perfect: 0 };
 const dashDay = (ms) => Math.floor((ms - new Date(ms).getTimezoneOffset() * 60000) / 86400000);
-const dashCount = (v) => (Number.isFinite(v) && v > 0 ? Math.floor(v) : 0);
+const dashCount = (v) => (Number.isFinite(v) && v > 0 ? Math.min(10000000, Math.floor(v)) : 0);
 // Whatever is saved is cleaned up on the way in, so a corrupted or hand-edited store can never break the game.
+// (api/_lib/vocabGame.js does the same on the server; tests/vocab-game.test.js proves the two agree.)
 function dashState(v){
   const s = v && typeof v === "object" && !Array.isArray(v) ? v : {};
-  const known = DASH_PALS.map((p) => p.id);
-  const pals = Array.isArray(s.pals) ? s.pals.filter((id, i, a) => known.includes(id) && a.indexOf(id) === i) : [];
+  const pals = Array.isArray(s.pals) ? DASH_PALS.map((p) => p.id).filter((id) => s.pals.includes(id)) : [];
   return {
     coins: dashCount(s.coins), egg: Math.min(DASH_EGG - 1, dashCount(s.egg)), pals,
-    streak: dashCount(s.streak), lastDay: Number.isFinite(s.lastDay) ? Math.floor(s.lastDay) : -1,
+    streak: dashCount(s.streak), lastDay: Number.isFinite(s.lastDay) ? Math.min(10000000, Math.floor(s.lastDay)) : -1,
     freezes: Math.min(2, dashCount(s.freezes)), rounds: dashCount(s.rounds), right: dashCount(s.right),
     bestCombo: dashCount(s.bestCombo), perfect: dashCount(s.perfect),
   };
 }
+// Joins two copies of one learner's game (this device and the account). The copy with more rounds is the base, pals
+// from both are kept, counts take the larger, and the streak comes from whichever played most recently - so two devices
+// can never undo each other. Same rules as api/_lib/vocabGame.js.
+function dashMerge(a, b){
+  const A = dashState(a), B = dashState(b);
+  const tie = A.rounds === B.rounds && A.lastDay === B.lastDay;
+  const base = B.rounds > A.rounds || (B.rounds === A.rounds && B.lastDay > A.lastDay) ? B : A;
+  const live = B.lastDay > A.lastDay || (B.lastDay === A.lastDay && B.streak > A.streak) ? B : A;
+  const pals = DASH_PALS.map((p) => p.id).filter((id) => A.pals.includes(id) || B.pals.includes(id));
+  const m = Math.max;
+  return {
+    coins: m(A.coins, B.coins), egg: pals.length >= DASH_PALS.length ? 0 : tie ? m(A.egg, B.egg) : base.egg, pals,
+    streak: live.streak, lastDay: live.lastDay, freezes: live.freezes,
+    rounds: m(A.rounds, B.rounds), right: m(A.right, B.right), bestCombo: m(A.bestCombo, B.bestCombo), perfect: m(A.perfect, B.perfect),
+  };
+}
+const dashSame = (a, b) => JSON.stringify(dashState(a)) === JSON.stringify(dashState(b));
 function dashLoad(childId){
   try { return dashState(JSON.parse(localStorage.getItem("ll_vocab_game_" + childId) || "{}")); } catch (e) { return dashState(); }
 }

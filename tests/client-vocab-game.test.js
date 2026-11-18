@@ -11,7 +11,7 @@ const a0 = APP.indexOf("const VOCAB_BOXES = "), a1 = APP.indexOf("// The Frayer 
 const b0 = APP.indexOf("// ---- Word Dash rules (start)"), b1 = APP.indexOf("// ---- Word Dash rules (end)");
 assert.ok(a0 > 0 && a1 > a0 && b0 > 0 && b1 > b0, "the vocabulary helpers and the game rules are in app.html");
 const G = new Function("localStorage", APP.slice(a0, a1) + "\n" + APP.slice(b0, b1) + `
-return { DASH_ROUND, DASH_EGG, DASH_PALS, dashState, dashLoad, dashSave, dashStreakShown, dashMult, dashCoins, dashStars, dashRoundResult, dashApplyRound, dashBlank, dashQuestion, dashPlan, dashRetry, dashDay };`)(
+return { DASH_ROUND, DASH_EGG, DASH_PALS, dashState, dashLoad, dashSave, dashStreakShown, dashMult, dashCoins, dashStars, dashRoundResult, dashApplyRound, dashBlank, dashQuestion, dashPlan, dashRetry, dashDay, dashMerge, dashSame };`)(
   (() => { const m = {}; return { getItem: (k) => (k in m ? m[k] : null), setItem: (k, v) => { m[k] = String(v); }, _m: m }; })()
 );
 

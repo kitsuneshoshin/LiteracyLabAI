@@ -359,6 +359,21 @@ alter table public.vocab_progress enable row level security;
 create index if not exists vocab_progress_profile_idx on public.vocab_progress (profile_id);
 
 -- ---------------------------------------------------------------------------
+-- Word Dash, the vocabulary game (api/_lib/vocabGame.js, read and written through api/history.js): coins, Word
+-- Pals and the daily streak, so they follow a learner between devices. One row per learner holding the whole game as
+-- small JSON, joined with the device's copy by rules that never lose a pal. Holds only game counters, never anything
+-- a student wrote. RLS on with no policy, like every table here; only the server (service role) reads or writes.
+-- ---------------------------------------------------------------------------
+create table if not exists public.vocab_game (
+  child_id uuid primary key references public.child_profiles(id) on delete cascade,
+  profile_id uuid not null references public.profiles(id) on delete cascade,
+  state jsonb not null,
+  updated_at timestamptz not null default now()
+);
+alter table public.vocab_game enable row level security;
+create index if not exists vocab_game_profile_idx on public.vocab_game (profile_id);
+
+-- ---------------------------------------------------------------------------
 -- Refer-a-friend (api/_lib/referrals.js, served by GET /api/account?action=referral). Each parent has a personal
 -- code. A referral row ties a new account (referred_id, unique: one referral per account) to the parent whose link it
 -- came through. It starts "signed_up", becomes "rewarded" once the friend has confirmed their email and finished a

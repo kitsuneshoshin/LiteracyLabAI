@@ -4,6 +4,7 @@ const { computeTimeline, computeStreak } = require("./_lib/progressHistory");
 const { getMonthlyUsage } = require("./_lib/usage");
 const { dedupeByTerm, buildQuiz } = require("./_lib/vocabQuiz");
 const { readVocabProgress, writeVocabProgress } = require("./_lib/vocabProgress");
+const { readVocabGame, writeVocabGame } = require("./_lib/vocabGame");
 const { checkRateLimit } = require("./_lib/rateLimit");
 const { translatableLanguage } = require("./_lib/languages");
 const { translateFeedback } = require("./_lib/translateFeedback");
@@ -62,6 +63,8 @@ module.exports = async function handler(req, res) {
       if (!child) return res.status(404).json({ error: "Learner not found for this account." });
       await checkRateLimit(supabase, user.id, "vocab_progress", { limit: 120, windowSeconds: 300 });
       const saved = await writeVocabProgress(supabase, user.id, child.id, body.updates);
+      // Word Dash (the game): joined with what is stored, then handed back so a second device can pick it up.
+      if (body.game && typeof body.game === "object") return res.status(200).json({ saved, game: await writeVocabGame(supabase, user.id, child.id, body.game) });
       return res.status(200).json({ saved });
     }
     const { childId, quiz, count, submissionId } = req.query;
@@ -180,6 +183,7 @@ module.exports = async function handler(req, res) {
       vocabWords: vocabLocked ? [] : vocabWords,
       // How well each word is known, so a second device starts where the first left off ({} until saved, or on a plan without the bank).
       vocabProgress: vocabLocked ? {} : await readVocabProgress(supabase, user.id, childId),
+      vocabGame: vocabLocked ? null : await readVocabGame(supabase, user.id, childId),
       vocabLocked,
       totalSubmissions: submissions.length,
       wordsWritten,
