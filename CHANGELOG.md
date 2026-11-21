@@ -2,6 +2,10 @@
 
 Internal engineering changelog, not linked from the site. One entry per shipped commit, newest first, grouped by day. Generated from git history — run `git log --format="%ad|%h|%s" --date=short` in the repo to regenerate or extend.
 
+## 2026-11-21
+
+- `13c8245` App: dropped connections ("Failed to fetch") no longer alert Sentry; reads retry once and users see a friendly connection message
+
 ## 2026-11-18
 
 - `895fe37` Admin People tab: plan is now a colour-coded tag (free grey, core blue, premium gold) and the list can be filtered by email search, plan, and activity (has used it / never used it / cancelled)
