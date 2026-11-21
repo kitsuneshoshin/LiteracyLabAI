@@ -2,6 +2,10 @@
 
 Internal engineering changelog, not linked from the site. One entry per shipped commit, newest first, grouped by day. Generated from git history — run `git log --format="%ad|%h|%s" --date=short` in the repo to regenerate or extend.
 
+## 2026-11-22
+
+- `8d44a45` Elementary writing: removed the "+50 XP on submit" chip and the Word Wizard / Great Opener / Mission Ready badges (on-screen only, never saved or counted), and their translations in all 10 languages
+
 ## 2026-11-21
 
 - `13c8245` App: dropped connections ("Failed to fetch") no longer alert Sentry; reads retry once and users see a friendly connection message
