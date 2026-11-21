@@ -10,6 +10,8 @@ Internal engineering changelog, not linked from the site. One entry per shipped 
 
 - `895fe37` Admin People tab: plan is now a colour-coded tag (free grey, core blue, premium gold) and the list can be filtered by email search, plan, and activity (has used it / never used it / cancelled)
 
+- `LOGOHEAD` Admin page title now has the logo and reads "LiteracyLab AI Admin"
+
 - `bb42b92` Admin footer styling restored (the site stylesheet had been removed along with the header)
 
 - `3b178c4` Admin People table: Plan column shows the plan they cancelled from, an arrow, then cancelled (still on it until period end) or the plan they are on now
