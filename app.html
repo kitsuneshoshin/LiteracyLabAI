@@ -5886,11 +5886,6 @@ function TierEditor({ tier, meta, text, setText, words, phase, onSubmit, onNew, 
   }
 
   if (tier === "elementary") {
-    const badges = [
-      { label: "Word Wizard", earned: words >= 50, tip: "Earned once the draft reaches 50 words." },
-      { label: "Great Opener", earned: /^[A-Z]/.test(text.trim()), tip: "Earned when the story starts with a capital letter." },
-      { label: "Mission Ready", earned: words >= meta.target, tip: `Earned once the draft reaches the ${meta.target}-word target for this mission.` },
-    ];
     return (
       <div className="card p-6 relative overflow-hidden" style={{ borderRadius: 24 }}>
         {phase === "analyzing" && <AnalyzingOverlay />}
@@ -5899,23 +5894,8 @@ function TierEditor({ tier, meta, text, setText, words, phase, onSubmit, onNew, 
             <span className="w-9 h-9 rounded-xl grid place-items-center" style={{ background: "var(--cyan-tint)", color: "var(--cyan-ink)" }}><IconTarget size={17} /></span>
             <h3 className="font-display font-bold text-lg" style={{ color: "var(--ink)" }}>{meta.title}</h3>
           </div>
-          <Tooltip text="A fun on-screen badge for younger writers - it's not tracked, saved, or added up anywhere, and doesn't affect progress or mastery.">
-            <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold cursor-help" style={{ background: "var(--gold-tint)", color: "var(--gold-ink)" }}>
-              <IconFlame size={12} /> +50 XP on submit
-            </span>
-          </Tooltip>
         </div>
         <p className="text-[15px] mb-4" style={{ color: "var(--ink)" }}>{meta.prompt}</p>
-        <div className="flex gap-2 mb-4 flex-wrap">
-          {badges.map(b=> (
-            <Tooltip key={b.label} text={b.tip}>
-              <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold cursor-help"
-                style={{ background: b.earned ? "var(--good-tint)" : "var(--surface-2)", color: b.earned ? "var(--good)" : "var(--ink-faint)" }}>
-                <IconAward size={12} strokeWidth={2.3} /> {b.label}
-              </span>
-            </Tooltip>
-          ))}
-        </div>
         <textarea value={text} onChange={(e)=>setText(e.target.value)} rows={10} disabled={disabled} maxLength={meta.maxChars}
           className="focus-ring w-full rounded-2xl border p-4 text-base leading-relaxed resize-none"
           style={{ borderColor: "var(--border)", background: "var(--surface-2)", color: "var(--ink)" }}

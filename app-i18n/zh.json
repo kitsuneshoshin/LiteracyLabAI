@@ -76,13 +76,6 @@
   "Timed essay practice": "限时作文练习",
   "Timed Essay Response": "限时作文",
   "The timer starts when you begin typing": "开始输入时计时开始",
-  "+50 XP on submit": "提交后 +50 XP",
-  "A fun on-screen badge for younger writers - it's not tracked, saved, or added up anywhere, and doesn't affect progress or mastery.": "给低龄写作者的屏幕小徽章——它不会被追踪、保存或累计，也不影响进步或掌握度。",
-  "Word Wizard": "词语魔法师",
-  "Earned once the draft reaches 50 words.": "草稿达到 50 字时获得。",
-  "Great Opener": "精彩开头",
-  "Earned when the story starts with a capital letter.": "故事以大写字母开头时获得。",
-  "Mission Ready": "任务就绪",
   "Start your mission here…": "在这里开始你的任务…",
   "Start typing your story here…": "在这里开始写你的故事…",
   "Write your response here…": "在这里写下你的回答…",
@@ -469,7 +462,6 @@
   "{n0} words": {
    "other": "{n0} 字"
   },
-  "Earned once the draft reaches the {n0}-word target for this mission.": "草稿达到本任务 {n0} 字的目标时获得。",
   "{n0}:{n1} remaining": "剩余 {n0}:{n1}",
   "Manage {0}'s profile": "管理 {0} 的档案",
   "{0}'s name, year group, interests and account settings": "{0} 的姓名、年级、兴趣和账户设置",
