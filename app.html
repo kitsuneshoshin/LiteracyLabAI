@@ -235,6 +235,8 @@ function ensureSentry(){
     environment: !BACKEND_CONFIGURED ? "demo" : location.hostname === "www.literacylabai.com" ? "production" : "preview",
     tracesSampleRate: 0,
     sendDefaultPii: false,
+    // Browser-level "the request never left this device" errors (offline, ad-blocker, tab closed mid-request).
+    ignoreErrors: ["Failed to fetch", "Load failed", "NetworkError when attempting to fetch resource"],
     // Same rule as api/_lib/sentry.js: children's writing never goes to an
     // error tracker. Error messages from the API can quote AI feedback that
     // quotes the child, so quoted content is blanked, and console
@@ -266,6 +268,7 @@ ensureSentry();
 function logAppError(message, err, extra){
   console.error(message, err);
   if (err && err.statusCode === 401) return; // expired sign-in: handled by authedFetch, not a bug
+  if (err && err.isNetworkError) return; // the visitor's connection dropped: nothing we can fix, not worth a Sentry alert
   if (ensureSentry()) window.Sentry.captureException(err, { extra: { message, ...extra } });
 }
 
@@ -322,14 +325,31 @@ async function authedFetch(session, path, options = {}) {
       ...(options.headers || {}),
     },
   });
-  let res = await send(session.access_token);
+  // "Failed to fetch" (Safari: "Load failed") is the browser saying the request never reached us: patchy wifi/mobile
+  // signal, a laptop waking from sleep, an ad-blocker, or the page being closed mid-request. It is not a server bug.
+  // Safe reads (GET) are retried once; writes are not, so a flaky connection can never double-submit anything.
+  const sendSafely = async (token) => {
+    try { return await send(token); }
+    catch (netErr) {
+      const isRead = !options.method || String(options.method).toUpperCase() === "GET";
+      if (isRead) {
+        await new Promise((r) => setTimeout(r, 800));
+        try { return await send(token); } catch (e) { /* fall through to the friendly error */ }
+      }
+      const err = new Error("We couldn't reach LiteracyLab - please check your internet connection and try again.");
+      err.isNetworkError = true;
+      err.statusCode = 0;
+      throw err;
+    }
+  };
+  let res = await sendSafely(session.access_token);
   // A 401 usually means the page was left open past the token's life. Get a
   // fresh token and retry once; if that fails too, sign out so the person lands
   // on the sign-in screen instead of a half-loaded app.
   if (res.status === 401 && typeof supabaseClient !== "undefined" && supabaseClient) {
     let fresh = null;
     try { fresh = (await supabaseClient.auth.refreshSession()).data?.session; } catch (e) { /* fall through to sign-out */ }
-    if (fresh?.access_token) res = await send(fresh.access_token);
+    if (fresh?.access_token) res = await sendSafely(fresh.access_token);
     if (res.status === 401) {
       try { await supabaseClient.auth.signOut(); } catch (e) { /* already signed out */ }
     }
