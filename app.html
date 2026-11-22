@@ -619,7 +619,7 @@ function defaultGradeIndexForTier(country, tierKey){
 
 const TIER_META = {
   early:      { label: "Early Years",   ageRange: "Ages 5–7",  icon: IconFeather, blurb: "Large buttons, simple language, and heavy visual rewards." },
-  elementary: { label: "Elementary",    ageRange: "Ages 8–10", icon: IconAward,   blurb: "Gamified progress bars, word targets, and dynamic feedback pills." },
+  elementary: { label: "Elementary",    ageRange: "Ages 8–10", icon: IconAward,   blurb: "Progress bars, word targets, and dynamic feedback pills." },
   middle:     { label: "Middle School", ageRange: "Ages 11–13",icon: IconBook,    blurb: "Balanced academic UI focused on paragraph structure and vocabulary." },
   high:       { label: "High School",   ageRange: "Ages 14–18",icon: IconGrad,    blurb: "A sleek, distraction-free editor for thesis strength and exam prep (AP, GCSE, IB)." },
 };
@@ -2222,15 +2222,15 @@ function DashHome({ dash, today, canPlay, onPlay, onPals }){
           <div className="flex items-center gap-2 flex-wrap">
             <h3 className="font-display text-2xl" style={{ color: "var(--ink)" }}>Word Dash</h3>
             <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[12px] font-bold" style={{ background: sh.days > 0 ? "var(--gold-tint)" : "var(--surface-2)", color: sh.days > 0 ? "var(--gold-ink)" : "var(--ink-faint)" }} title="Days in a row with a round played">
-              <IconFlame size={13} /> {sh.days > 0 ? sh.days + "-day streak" : "No streak yet"}
+              <IconFlame size={13} /> {sh.days > 0 ? "Day streak: " + sh.days : "No streak yet"}
             </span>
-            {dash.freezes > 0 && <span className="text-[12px] font-semibold" style={{ color: "var(--cyan-ink)" }} title="Covers one missed day">❄ {dash.freezes} streak freeze{dash.freezes === 1 ? "" : "s"}</span>}
+            {dash.freezes > 0 && <span className="text-[12px] font-semibold" style={{ color: "var(--cyan-ink)" }} title="Covers one missed day"><span aria-hidden="true">❄</span> {"Streak freezes: " + dash.freezes}</span>}
           </div>
           <p className="text-[13px] mt-1" style={{ color: "var(--ink-soft)" }}>{line}</p>
           <div className="mt-3 max-w-md">
             <div className="flex items-center justify-between text-[12px] mb-1" style={{ color: "var(--ink-soft)" }}>
-              <span>{full ? "Every Word Pal collected!" : "🥚 Next Word Pal"}</span>
-              {!full && <span className="tabular">{dash.egg} / {DASH_EGG} coins</span>}
+              <span>{full ? "Every Word Pal collected!" : <><span aria-hidden="true">🥚</span> {"Next Word Pal"}</>}</span>
+              {!full && <span className="tabular">{dash.egg + " / " + DASH_EGG + " coins"}</span>}
             </div>
             <div className="h-2.5 rounded-full overflow-hidden" style={{ background: "var(--border)" }} role="progressbar" aria-valuemin={0} aria-valuemax={DASH_EGG} aria-valuenow={full ? DASH_EGG : dash.egg} aria-label="Coins towards the next Word Pal">
               <div className="h-full rounded-full" style={{ width: pct + "%", background: "var(--gold)", transition: "width 300ms" }} />
@@ -2242,7 +2242,7 @@ function DashHome({ dash, today, canPlay, onPlay, onPals }){
             <IconSparkle size={14} /> {played ? "Play again" : "Play Word Dash"}
           </button>
           <button onClick={onPals} className="focus-ring inline-flex items-center gap-1.5 rounded-full px-4 py-2.5 text-sm font-bold" style={{ background: "var(--surface-2)", color: "var(--ink)" }}>
-            My Word Pals ({dash.pals.length}/{DASH_PALS.length})
+            {"My Word Pals (" + dash.pals.length + "/" + DASH_PALS.length + ")"}
           </button>
         </div>
       </div>
@@ -2258,12 +2258,12 @@ function DashPals({ dash, onBack }){
         <h3 className="font-display text-2xl" style={{ color: "var(--ink)" }}>My Word Pals</h3>
         <span className="text-xs font-semibold tabular ms-auto" style={{ color: "var(--ink-soft)" }}>{dash.pals.length} / {DASH_PALS.length}</span>
       </div>
-      <p className="text-[13px]" style={{ color: "var(--ink-soft)" }}>Answer words to earn coins. Every {DASH_EGG} coins hatches a new Word Pal. Rare and epic pals are harder to find.</p>
+      <p className="text-[13px]" style={{ color: "var(--ink-soft)" }}>{"Answer words to earn coins. Every " + DASH_EGG + " coins hatches a new Word Pal. Rare and epic pals are harder to find."}</p>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {DASH_PALS.map((p) => {
           const own = dash.pals.includes(p.id);
           return (
-            <div key={p.id} className="card p-4 flex flex-col items-center text-center gap-1" style={{ opacity: own ? 1 : 0.55 }} aria-label={own ? p.name + ", " + DASH_RARITY[p.rare] : "Not found yet"}>
+            <div key={p.id} className="card p-4 flex flex-col items-center text-center gap-1" style={{ opacity: own ? 1 : 0.55 }} aria-label={own ? p.name : "Not found yet"}>
               <div className="text-5xl" style={{ filter: own ? "none" : "grayscale(1) brightness(0.35)", lineHeight: 1.1 }} aria-hidden="true">{p.emoji}</div>
               <div className="font-display text-lg" style={{ color: "var(--ink)" }}>{own ? p.name : "???"}</div>
               <div className="text-[11px] font-bold uppercase tracking-wide" style={{ color: p.rare === 2 ? "var(--bad)" : p.rare === 1 ? "var(--cyan-ink)" : "var(--ink-faint)" }}>{DASH_RARITY[p.rare]}</div>
@@ -2352,26 +2352,33 @@ function DashRound({ words, boxes, onRate, onFinish, onAgain, onPals, onBack }){
           {[1, 2, 3].map((n) => <IconStar key={n} size={34} strokeWidth={1.8} style={{ color: n <= res.stars ? "var(--gold)" : "var(--border)", fill: n <= res.stars ? "var(--gold)" : "none" }} />)}
         </div>
         <h3 className="font-display font-bold text-2xl" style={{ color: "var(--ink)" }}>{res.perfect ? "Perfect round!" : res.stars >= 2 ? "Great round!" : res.stars === 1 ? "Good going!" : "Keep dashing!"}</h3>
-        <p className="text-[14px]" style={{ color: "var(--ink-soft)" }}>
-          <strong className="tabular" style={{ color: "var(--ink)" }}>{res.right}</strong> of {res.outOf} right · best combo <strong className="tabular" style={{ color: "var(--ink)" }}>{res.bestCombo}</strong> · <strong className="tabular" style={{ color: "var(--gold-ink)" }}>+{res.coins} coins</strong>{res.bonus > 0 ? " (includes a +" + res.bonus + " perfect bonus)" : ""}
-        </p>
+        <div className="grid grid-cols-3 gap-2 w-full max-w-sm">
+          {[["Right", res.right + " / " + res.outOf, "var(--ink)"], ["Best combo", String(res.bestCombo), "var(--ink)"], ["Coins", "+" + res.coins, "var(--gold-ink)"]].map(([label, value, col]) => (
+            <div key={label} className="rounded-xl py-2 px-1" style={{ background: "var(--surface-2)" }}>
+              <div className="font-display text-2xl tabular" style={{ color: col, lineHeight: 1.1 }}>{value}</div>
+              <div className="text-[11px] font-semibold uppercase tracking-wide" style={{ color: "var(--ink-faint)" }}>{label}</div>
+            </div>
+          ))}
+        </div>
+        {res.bonus > 0 && <p className="text-[13px] font-semibold" style={{ color: "var(--gold-ink)" }}>{"Perfect round bonus: +" + res.bonus + " coins"}</p>}
         {out.hatched.map((p) => (
           <div key={p.id} className="rounded-2xl p-4 w-full" style={{ background: "var(--gold-tint)" }} role="status">
             <div className="text-7xl dash-hatch" aria-hidden="true">{p.emoji}</div>
-            <div className="font-display text-xl mt-1" style={{ color: "var(--ink)" }}>A new Word Pal hatched: {p.name}!</div>
+            <div className="font-display text-xl mt-1" style={{ color: "var(--ink)" }}>{"A new Word Pal hatched: " + p.name + "!"}</div>
             <div className="text-[11px] font-bold uppercase tracking-wide" style={{ color: "var(--gold-ink)" }}>{DASH_RARITY[p.rare]}</div>
           </div>
         ))}
         {!full && (
           <div className="w-full max-w-sm">
-            <div className="flex items-center justify-between text-[12px] mb-1" style={{ color: "var(--ink-soft)" }}><span>🥚 Next Word Pal</span><span className="tabular">{st.egg} / {DASH_EGG} coins</span></div>
+            <div className="flex items-center justify-between text-[12px] mb-1" style={{ color: "var(--ink-soft)" }}><span><span aria-hidden="true">🥚</span> {"Next Word Pal"}</span><span className="tabular">{st.egg + " / " + DASH_EGG + " coins"}</span></div>
             <div className="h-2.5 rounded-full overflow-hidden" style={{ background: "var(--border)" }}><div className="h-full rounded-full" style={{ width: Math.min(100, (st.egg / DASH_EGG) * 100) + "%", background: "var(--gold)", transition: "width 600ms" }} /></div>
           </div>
         )}
         <div className="flex flex-col gap-1 text-[13.5px]" style={{ color: "var(--ink-soft)" }}>
-          <span className="inline-flex items-center justify-center gap-1.5 font-semibold" style={{ color: "var(--gold-ink)" }}><IconFlame size={15} /> {st.streak}-day streak{out.extended && st.streak > 1 ? " — one more day!" : ""}</span>
-          {out.usedFreeze && <span>❄ A streak freeze covered a missed day, so your streak is safe.</span>}
-          {out.earnedFreeze && <span>❄ You earned a streak freeze. It covers one missed day.</span>}
+          <span className="inline-flex items-center justify-center gap-1.5 font-semibold" style={{ color: "var(--gold-ink)" }}><IconFlame size={15} /> {"Day streak: " + st.streak}</span>
+          {out.extended && st.streak > 1 && <span className="font-semibold" style={{ color: "var(--gold-ink)" }}>{"One more day!"}</span>}
+          {out.usedFreeze && <span><span aria-hidden="true">❄</span> {"A streak freeze covered a missed day, so your streak is safe."}</span>}
+          {out.earnedFreeze && <span><span aria-hidden="true">❄</span> {"You earned a streak freeze. It covers one missed day."}</span>}
         </div>
         {missed.length > 0 && (
           <div className="w-full text-start flex flex-col gap-2">
@@ -2406,13 +2413,13 @@ function DashRound({ words, boxes, onRate, onFinish, onAgain, onPals, onBack }){
       </div>
       <div className="flex items-center justify-between gap-2">
         <span className="inline-flex items-center gap-1 rounded-full px-3 py-1 text-[13px] font-bold" style={{ background: combo >= 2 ? "var(--gold-tint)" : "var(--surface-2)", color: combo >= 2 ? "var(--gold-ink)" : "var(--ink-faint)" }} aria-live="polite">
-          <IconFlame size={14} /> {combo >= 2 ? combo + " in a row · x" + mult : "Build a combo"}
+          <IconFlame size={14} /> {combo >= 2 ? <>{combo + " in a row"} <span data-no-i18n="" className="ms-1">{"x" + mult}</span></> : "Build a combo"}
         </span>
         <span className="text-[13px] font-bold tabular" style={{ color: "var(--gold-ink)" }}>🪙 {coins}</span>
       </div>
       <div className={"card p-5 sm:p-6" + (verdict === false ? " dash-shake" : "")}>
         <div className="label-mono mb-1.5" style={{ color: q.retry ? "var(--cyan-ink)" : "var(--ink-soft)" }}>{q.label}</div>
-        <div className={(q.kind === "meaning" ? "font-display text-4xl" : "font-read text-[17px] leading-snug") + " mb-5"} style={{ color: "var(--ink)", lineHeight: q.kind === "meaning" ? 1.1 : undefined }}>{q.prompt}</div>
+        <div className={(q.kind === "meaning" ? "font-display text-4xl" : "font-read text-[17px] leading-snug") + " mb-5"} style={{ color: "var(--ink)", lineHeight: q.kind === "meaning" ? 1.1 : undefined }} data-no-i18n="">{q.prompt}</div>
         {q.kind === "spell" ? (
           <div>
             <div className="flex flex-wrap gap-1.5 mb-4" role="group" aria-label="Your spelling">
@@ -2440,7 +2447,7 @@ function DashRound({ words, boxes, onRate, onFinish, onAgain, onPals, onBack }){
               return (
                 <button key={oi} disabled={verdict !== null} onClick={()=>pick(oi)} className="focus-ring text-start rounded-xl border px-3.5 py-2.5 text-[14px] disabled:cursor-default flex items-start gap-2.5" style={st}>
                   <span className="text-[11px] font-bold rounded-md px-1.5 py-0.5 mt-0.5 shrink-0" style={{ background: "var(--surface-2)", color: "var(--ink-faint)" }} aria-hidden="true">{oi + 1}</span>
-                  <span>{opt}</span>
+                  <span data-no-i18n="">{opt}</span>
                 </button>
               );
             })}
