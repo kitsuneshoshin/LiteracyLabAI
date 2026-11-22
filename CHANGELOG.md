@@ -4,6 +4,8 @@ Internal engineering changelog, not linked from the site. One entry per shipped 
 
 ## 2026-11-22
 
+- `ef79e27` Word Dash and the flashcard/quiz screens translated into all 10 interface languages (78 lines each, independently reviewed); game lines built from pieces are now whole strings so the translator can match them; tests/vocab-game-i18n.test.js fails if a line is untranslated
+
 - `8d44a45` Elementary writing: removed the "+50 XP on submit" chip and the Word Wizard / Great Opener / Mission Ready badges (on-screen only, never saved or counted), and their translations in all 10 languages
 
 ## 2026-11-21
