@@ -4,6 +4,8 @@ Internal engineering changelog, not linked from the site. One entry per shipped 
 
 ## 2026-11-24
 
+- `a9ea82d` Fix It question bank grown from about 150 to 372 (early 74, elementary 114, middle 96, high 88). Nine plural-owner apostrophe questions had the singular marked as right (the two girls' coats): corrected, with a test that keeps plural owners taking the apostrophe after the s. Added a check for words that read differently outside the UK
+
 - `ebee428` New Games tab with Fix It, a writing game: each sentence has one mistake, the learner taps it then picks the fix. About 150 questions across the four age bands, with each country's spelling and terms (period or full stop, mom or mum); skills the learner finds hardest come up more and harder questions unlock with steady accuracy. Shares coins, egg, Word Pals and streak with Word Dash; translated into all 10 languages. New analytics events fixit_start, fixit_round
 
 ## 2026-11-22
