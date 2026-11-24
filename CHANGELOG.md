@@ -2,6 +2,10 @@
 
 Internal engineering changelog, not linked from the site. One entry per shipped commit, newest first, grouped by day. Generated from git history — run `git log --format="%ad|%h|%s" --date=short` in the repo to regenerate or extend.
 
+## 2026-11-24
+
+- `ebee428` New Games tab with Fix It, a writing game: each sentence has one mistake, the learner taps it then picks the fix. About 150 questions across the four age bands, with each country's spelling and terms (period or full stop, mom or mum); skills the learner finds hardest come up more and harder questions unlock with steady accuracy. Shares coins, egg, Word Pals and streak with Word Dash; translated into all 10 languages. New analytics events fixit_start, fixit_round
+
 ## 2026-11-22
 
 - `ef79e27` Word Dash and the flashcard/quiz screens translated into all 10 interface languages (78 lines each, independently reviewed); game lines built from pieces are now whole strings so the translator can match them; tests/vocab-game-i18n.test.js fails if a line is untranslated
