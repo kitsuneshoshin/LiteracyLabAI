@@ -2205,6 +2205,340 @@ function dashRetry(q, words, rng){
 }
 // ---- Word Dash rules (end)
 
+// ---- Fix It rules (start). A quick writing game: every sentence has ONE mistake. The learner taps the word with the mistake,
+// then picks the fix. Nothing is marked by an AI, so it is instant and free to run. Each sentence is written once in a
+// compact form, [[wrong|right|other wrong choice|...]], and the game builds the question from it. The questions fit the
+// learner's age band, use the spelling and terms of their country, lean towards the skills they find hardest, and get
+// harder in a skill once they are doing well in it. It shares the coins, egg, Word Pals and streak with Word Dash
+// (the dash* rules above), so one set of rewards follows the learner across both games.
+const FIXIT_ROUND = 10;
+// Which spelling and words a country uses (the sentences are written in British English and changed on the way out).
+function fixitRegion(country){
+  const c = String(country || "");
+  if (/United States/.test(c)) return "us";
+  if (/Canada/.test(c)) return "ca";
+  if (/Australia/.test(c)) return "au";
+  return "uk";
+}
+const FIXIT_SWAP = {
+  us: [["colour", "color"], ["colours", "colors"], ["favourite", "favorite"], ["neighbour", "neighbor"], ["neighbours", "neighbors"], ["grey", "gray"],
+    ["centre", "center"], ["theatre", "theater"], ["realise", "realize"], ["realised", "realized"], ["organise", "organize"], ["organised", "organized"],
+    ["travelled", "traveled"], ["travelling", "traveling"], ["mum", "mom"], ["maths", "math"], ["behaviour", "behavior"], ["humour", "humor"], ["honour", "honor"]],
+  ca: [["realise", "realize"], ["realised", "realized"], ["organise", "organize"], ["organised", "organized"], ["mum", "mom"], ["maths", "math"]],
+};
+function fixitSpell(s, region){
+  let out = String(s);
+  for (const [from, to] of FIXIT_SWAP[region] || []) {
+    out = out.replace(new RegExp("(^|[^\\p{L}])(" + from + ")(?![\\p{L}])", "giu"), (m, a, w) => a + (w[0] === w[0].toUpperCase() ? to[0].toUpperCase() + to.slice(1) : to));
+  }
+  return out;
+}
+const fixitTerms = (region) => ({ stop: region === "us" || region === "ca" ? "period" : "full stop", quote: region === "uk" ? "speech marks" : "quotation marks" });
+// The skills, the short reminder shown after each answer, and the name shown on the skills list.
+const FIXIT_SKILLS = {
+  caps: { label: "Capital letters", hint: "A sentence begins with a capital letter. So do names, days of the week and months. The word I is always a capital." },
+  stop: { label: "Full stops", labelUs: "Periods", hint: "A sentence that tells us something ends with a {stop}." },
+  question: { label: "Question marks", hint: "A sentence that asks something ends with a question mark." },
+  comma: { label: "Commas", hint: "Commas separate things in a list and come after a sentence opener such as 'However,' or 'Later that day,'." },
+  apos: { label: "Apostrophes", hint: "An apostrophe shows missing letters (don't = do not) or that something belongs to someone (Ella's hat). It is never used for a plain plural." },
+  speech: { label: "Speech marks", labelUs: "Quotation marks", hint: "Spoken words go inside {quote}. The comma, question mark or exclamation mark that ends the speech goes inside the closing {quote} too." },
+  homophone: { label: "Sound-alike words", hint: "Some words sound the same but are spelt differently and mean different things. Think about what the word means in this sentence." },
+  tense: { label: "Verb tenses", hint: "Think about when it happened. Words like yesterday and last week need the past tense, and one sentence should not jump between tenses." },
+  agree: { label: "Verb agreement", hint: "The verb has to match who or what is doing it: the children were, he doesn't." },
+  pronoun: { label: "Pronouns", hint: "Use I when you are the one doing it (Tom and I built it) and me when something is done to you or after a word like between or to." },
+  spell: { label: "Spelling", hint: "Look closely at the letters. Say the word slowly, one sound at a time, and picture how it looks." },
+  endings: { label: "Word endings", hint: "Check the end of the word: a plural usually adds s, and talking about the past usually adds ed." },
+  splice: { label: "Run-on sentences", hint: "A comma cannot join two whole sentences on its own. Add a joining word such as so or but, or use a semicolon or a {stop}." },
+  semi: { label: "Semicolons and colons", hint: "A colon introduces a list or an explanation. A semicolon joins two whole sentences that belong together." },
+  tone: { label: "Formal tone", hint: "In formal writing, choose precise, serious words and avoid slang and short chatty forms." },
+};
+function fixitSkillLabel(skill, region){
+  const s = FIXIT_SKILLS[skill];
+  if (!s) return skill;
+  return (region === "us" || region === "ca" || region === "au") && s.labelUs && (skill !== "stop" || region !== "au") ? s.labelUs : s.label;
+}
+// The questions. Each line is [skill, level 1 to 3, sentence, optional note shown after the answer]. The part in [[ ]] is
+// ONE word (with any punctuation stuck to it): first the mistake as it is shown, then the right fix, then other wrong
+// choices. Written in British English; fixitSpell changes it for the learner's country.
+const FIXIT_BANK = {
+  early: [
+    ["caps", 1, "[[the|The|THE]] dog ran home."],
+    ["caps", 1, "[[we|We|WE]] like to play."],
+    ["caps", 1, "[[it|It|IT]] is a sunny day."],
+    ["caps", 1, "My friend is called [[sam.|Sam.|SAM.]]", "A name starts with a capital letter."],
+    ["caps", 2, "Mia and [[ben|Ben|BEN]] play ball.", "A name starts with a capital letter."],
+    ["caps", 2, "We swim on [[monday.|Monday.|MONDAY.]]", "Days of the week start with a capital letter."],
+    ["caps", 2, "[[she|She|SHE]] has a red hat."],
+    ["stop", 1, "The cat sat on the [[mat|mat.|mat,|mat?]]"],
+    ["stop", 1, "I can see a big [[bus|bus.|bus,|bus?]]"],
+    ["stop", 1, "We had fun at the [[park|park.|park,|park?]]"],
+    ["stop", 1, "The sun is [[hot|hot.|hot,|hot?]]"],
+    ["stop", 2, "Dad made some [[soup|soup.|soup,|soup?]]"],
+    ["stop", 2, "The frog jumped into the [[pond|pond.|pond,|pond?]]"],
+    ["question", 1, "Can you see the [[moon.|moon?|moon,]]"],
+    ["question", 1, "What is your [[name.|name?|name,]]"],
+    ["question", 1, "Where is my [[hat.|hat?|hat,]]"],
+    ["question", 2, "Do you like [[cake.|cake?|cake,]]"],
+    ["question", 2, "Who wants to [[play.|play?|play,]]"],
+    ["spell", 1, "She [[sed|said|sayd|siad]] hello to me."],
+    ["spell", 1, "My [[frend|friend|freind|frind]] is kind."],
+    ["spell", 1, "We [[wint|went|wnet|whent]] to the shop."],
+    ["spell", 1, "I have a [[bluu|blue|blew|blu]] hat."],
+    ["spell", 2, "Mum [[luvs|loves|lovs|luves]] me."],
+    ["spell", 2, "I like to [[reed|read|red|rede]] books."],
+    ["spell", 2, "The [[skool|school|scool|schol]] bell rang."],
+    ["endings", 1, "Two [[cat|cats|cates]] sat on the mat."],
+    ["endings", 1, "I have three [[dog|dogs|doges]]."],
+    ["endings", 2, "The bird is [[jump|jumping|jumpping|jumps]] up."],
+    ["tense", 1, "Yesterday I [[walk|walked|walking|walks]] to school."],
+    ["tense", 2, "Last night we [[play|played|playing|plays]] a game."],
+  ],
+  elementary: [
+    ["caps", 1, "[[on|On|ON]] Saturday we visited my gran."],
+    ["caps", 1, "My brother and [[i|I|me]] built a den."],
+    ["caps", 2, "Our school trip is in [[march.|March.|MARCH.]]", "Months start with a capital letter."],
+    ["caps", 2, "My cousin lives in [[paris.|Paris.|PARIS.]]", "The names of places start with a capital letter."],
+    ["caps", 2, "The captain said, [[“we|“We|“WE]] sail at dawn.”", "The first word of someone's speech starts with a capital letter."],
+    ["stop", 1, "We walked to the shop after [[school|school.|school,|school?]]"],
+    ["stop", 2, "The lights went out and everyone [[laughed|laughed.|laughed,|laughed?]]"],
+    ["question", 1, "Why is the sky [[blue.|blue?|blue,]]"],
+    ["question", 2, "Have you finished your [[homework.|homework?|homework,]]"],
+    ["comma", 1, "We bought bread, [[milk|milk,|milk.|milk;]] eggs and cheese."],
+    ["comma", 1, "I packed a towel, [[goggles|goggles,|goggles.|goggles;]] sun cream and a hat."],
+    ["comma", 2, "As soon as the bell [[rang|rang,|rang.|rang;]] the children ran outside."],
+    ["comma", 2, "Later that [[day|day,|day.|day;]] we went to the beach."],
+    ["comma", 2, "Although it was raining [[hard|hard,|hard.|hard;]] we still went out."],
+    ["comma", 3, "If you finish [[early|early,|early.|early;]] you can draw."],
+    ["apos", 1, "[[dont|don't|do'nt|dont']] touch the wet paint."],
+    ["apos", 1, "We [[cant|can't|ca'nt|cant']] find our coats."],
+    ["apos", 1, "[[Ellas|Ella's|Ellas']] hat blew away."],
+    ["apos", 2, "The [[childrens|children's|childrens']] toys are in the box."],
+    ["apos", 2, "The cat licked [[it's|its|its']] paw.", "It's means it is. Its shows that something belongs to it."],
+    ["apos", 2, "[[Its|It's|Its']] a lovely day.", "It's means it is. Its shows that something belongs to it."],
+    ["apos", 2, "I [[havent|haven't|have'nt|havent']] seen that film."],
+    ["apos", 3, "The two [[girls|girl's|girls']] coats were wet.", "There are two girls, so the apostrophe goes after the s."],
+    ["apos", 3, "We went to [[Toms|Tom's|Toms']] house."],
+    ["speech", 2, "“Time for [[bed,|bed,”|bed”,|“bed,]] said Mum."],
+    ["speech", 2, "“Where are you [[going|going?”|going.”|going,”]] asked Tom."],
+    ["speech", 3, "Dad said, [[Pass|“Pass|”Pass|“pass]] the salt, please.”"],
+    ["speech", 3, "“I love this [[song,|song,”|song”,|“song,]] said Jo."],
+    ["homophone", 1, "[[There|Their|They're]] coats are on the hook."],
+    ["homophone", 1, "Can I come [[to?|too?|two?]]", "Too can mean also."],
+    ["homophone", 1, "I can [[here|hear|hare]] the birds singing.", "You hear with your ears. You are here when you are in this place."],
+    ["homophone", 2, "[[Your|You're|Yore]] my best friend.", "You're means you are. Your shows that something belongs to you."],
+    ["homophone", 2, "The wind [[blue|blew|blow]] the door shut."],
+    ["homophone", 2, "I [[no|know|now]] the answer."],
+    ["homophone", 3, "Put your coat [[their|there|they're]] on the peg."],
+    ["tense", 1, "Yesterday the dog [[runned|ran|runs|running]] away."],
+    ["tense", 1, "We [[swimmed|swam|swum]] in the sea last summer."],
+    ["tense", 2, "I [[bringed|brought|brung]] my lunch this morning."],
+    ["tense", 2, "Last week she [[thinked|thought|thinks]] about it."],
+    ["tense", 2, "The bell [[ringed|rang|rung]] and the lesson began."],
+    ["agree", 1, "The children [[was|were|is]] very happy."],
+    ["agree", 1, "He [[don't|doesn't|dont]] like peas."],
+    ["agree", 2, "We [[was|were|is]] late for the bus."],
+    ["agree", 2, "There [[is|are|be]] three birds in the tree."],
+    ["agree", 3, "Each of the pupils [[have|has|are]] a book.", "Each means one at a time, so it takes has."],
+    ["spell", 1, "I was late [[becuase|because|becos|becaus]] it rained."],
+    ["spell", 1, "That was a [[diffrent|different|diferent|differant]] game."],
+    ["spell", 2, "The sunset was [[beutiful|beautiful|beatiful|beautifull]]."],
+    ["spell", 2, "Please do not [[intrerupt|interrupt|interupt|interrupte]] me."],
+    ["spell", 3, "It is [[neccessary|necessary|necesary|neccesary]] to wear a coat.", "Necessary has one c and two s's."],
+    ["spell", 3, "I [[beleive|believe|belive|beleve]] you.", "Think i before e, except after c, but not here: believe."],
+  ],
+  middle: [
+    ["comma", 1, "Despite the cold [[weather|weather,|weather.|weather;]] the match went ahead."],
+    ["comma", 1, "[[However|However,|However.|However;]] the rain did not stop."],
+    ["comma", 2, "When the final whistle [[blew|blew,|blew.|blew;]] the crowd roared."],
+    ["comma", 2, "The film, which I watched [[twice|twice,|twice.|twice;]] was brilliant.", "Extra information in the middle of a sentence goes between a pair of commas."],
+    ["comma", 2, "My sister, [[Priya|Priya,|Priya.|Priya;]] plays the violin.", "Extra information in the middle of a sentence goes between a pair of commas."],
+    ["apos", 1, "The two [[teams|team's|teams']] captains shook hands.", "There are two teams, so the apostrophe goes after the s."],
+    ["apos", 1, "[[Its|It's|Its']] been a long week.", "It's here means it has."],
+    ["apos", 2, "The company lost [[it's|its|its']] biggest customer.", "It's means it is or it has. Its shows that something belongs to it."],
+    ["apos", 2, "The [[womens|women's|womens']] team won the cup."],
+    ["apos", 2, "Both [[boys|boy's|boys']] bags were left on the bus."],
+    ["speech", 1, "“Do not [[move|move!”|move”!|“move!]] whispered Leah."],
+    ["speech", 2, "Ravi shouted, [[Catch|“Catch|”Catch|“catch]] the ball!”"],
+    ["homophone", 1, "The storm had a big [[affect|effect|affected]] on the crops.", "An effect is a result. To affect something is to change it."],
+    ["homophone", 1, "[[Who's|Whose|Whos]] coat is this?", "Who's means who is. Whose shows who something belongs to."],
+    ["homophone", 2, "Do not [[loose|lose|loss]] your ticket.", "Lose means to not keep something. Loose means not tight."],
+    ["homophone", 2, "I would rather walk [[then|than|that]] drive."],
+    ["homophone", 2, "The team [[past|passed|pasted]] the ball quickly."],
+    ["homophone", 3, "She gave me a [[complement|compliment|compliments]] on my story.", "A compliment is a kind word. A complement is something that completes another thing."],
+    ["tense", 1, "Yesterday, we [[goes|went|gone|go]] to the museum."],
+    ["tense", 2, "Last summer I [[swim|swam|swum]] every day."],
+    ["tense", 2, "She opened the door and [[sees|saw|seen]] a puppy.", "The whole sentence is in the past, so keep every verb in the past."],
+    ["tense", 3, "He walked into the room and [[starts|started|starting]] to sing.", "The whole sentence is in the past, so keep every verb in the past."],
+    ["agree", 1, "There [[was|were|is]] two cats on the wall."],
+    ["agree", 2, "Everyone in the class [[were|was|are]] excited.", "Everyone is singular, so it takes was."],
+    ["agree", 2, "My friends and I [[was|were|is]] late."],
+    ["agree", 3, "The list of rules [[are|is|were]] on the wall.", "The verb matches the list, not the rules."],
+    ["pronoun", 1, "Tom and [[me|I|myself]] built the raft."],
+    ["pronoun", 2, "The prize was shared between Anna and [[I|me|myself]].", "After a word like between, use me."],
+    ["splice", 2, "The bus was [[late,|late, so|late so|late. so]] I walked."],
+    ["splice", 2, "It was [[raining,|raining, so|raining so|raining. so]] we stayed inside."],
+    ["splice", 2, "He was [[tired,|tired, but|tired but|tired. but]] he kept running."],
+    ["spell", 1, "It was [[definately|definitely|definitly|definatly]] the best day."],
+    ["spell", 1, "Please [[seperate|separate|separete|seperete]] the cans and bottles.", "There is a rat in separate."],
+    ["spell", 2, "I did not [[recieve|receive|receve|receiv]] your message.", "I before e, except after c: receive."],
+    ["spell", 2, "He made a strong [[arguement|argument|arguemant|argumnet]]."],
+    ["spell", 3, "The [[goverment|government|govermant|governmant]] announced new rules.", "Say it slowly: govern-ment."],
+  ],
+  high: [
+    ["splice", 2, "The results were [[inconclusive,|inconclusive;|inconclusive?|inconclusive!]] the sample was too small."],
+    ["splice", 2, "Social media is [[addictive,|addictive;|addictive?|addictive!]] it is designed to hold attention."],
+    ["splice", 3, "The author uses short sentences to create [[tension,|tension;|tension?|tension!]] the pace quickens."],
+    ["splice", 3, "She had revised for [[weeks,|weeks;|weeks?|weeks!]] she still felt nervous."],
+    ["semi", 2, "He packed three [[essentials|essentials:|essentials;|essentials,]] a tent, a stove and a torch.", "A colon introduces a list. A semicolon would not work here."],
+    ["semi", 3, "You will need the following [[equipment|equipment:|equipment;|equipment,]] a laptop, a charger and a notebook.", "A colon introduces a list. A semicolon would not work here."],
+    ["comma", 2, "The novel, which was published in [[1925|1925,|1925.|1925;]] is a classic.", "Extra information in the middle of a sentence goes between a pair of commas."],
+    ["comma", 2, "Although the evidence is [[limited|limited,|limited.|limited;]] the conclusion seems sound."],
+    ["comma", 3, "On the other [[hand|hand,|hand.|hand;]] the cost is high."],
+    ["comma", 3, "Having finished the [[exam|exam,|exam.|exam;]] Sara went home."],
+    ["comma", 3, "Paris, the capital of [[France|France,|France.|France;]] attracts millions of visitors.", "Extra information in the middle of a sentence goes between a pair of commas."],
+    ["apos", 2, "[[Shakespeares|Shakespeare's|Shakespeares']] plays are still performed."],
+    ["apos", 2, "All the [[students|student's|students']] essays were marked."],
+    ["apos", 3, "[[Its|It's|Its']] clear that the plan failed.", "It's means it is. Its shows that something belongs to it."],
+    ["homophone", 2, "The [[principal|principle|principals]] of fairness matters.", "A principle is a rule or belief. A principal is a head teacher or the main thing."],
+    ["homophone", 2, "His speech had a powerful [[affect|effect|effects]] on the crowd.", "An effect is a result. To affect something is to change it."],
+    ["homophone", 2, "I [[except|accept|expect]] your apology.", "Accept means to agree to take something. Except means not including."],
+    ["homophone", 2, "It was [[there|their|they're]] fault the project failed."],
+    ["homophone", 3, "The [[stationary|stationery|stationers]] cupboard was empty.", "Stationery is pens and paper. Stationary means not moving."],
+    ["agree", 2, "The number of applicants [[have|has|are]] risen.", "The number is singular, so it takes has."],
+    ["agree", 2, "Each of the essays [[were|was|are]] marked."],
+    ["agree", 3, "The evidence [[are|is|were]] clear.", "Evidence is not counted as separate things, so it takes is."],
+    ["tense", 2, "She opened the letter and [[reads|read|red]] it twice."],
+    ["tone", 2, "The author is [[gonna|going to|goin to|gone to]] argue that technology helps.", "Gonna is spoken English. Write going to."],
+    ["tone", 2, "Many [[kids|children|childs|kiddos]] struggle with exam stress.", "Kids is chatty. Children is more formal."],
+    ["tone", 3, "The results were [[awesome|significant|well good|cool]].", "Choose a precise, serious word for a formal report."],
+    ["tone", 3, "[[Basically,|Overall,|Like,|So yeah,]] the policy has failed.", "A formal writer sums up with Overall or In conclusion."],
+    ["spell", 2, "The hotel can [[accomodate|accommodate|acommodate|accommodete]] two hundred guests.", "Accommodate has two c's and two m's."],
+    ["spell", 2, "There is no [[occurence|occurrence|ocurrence|occurrance]] of this in the text.", "Occurrence has two c's and two r's."],
+    ["spell", 3, "It was [[embarassing|embarrassing|embarrasing|embarrassng]] to lose.", "Embarrassing has two r's and two s's."],
+    ["spell", 3, "She had a guilty [[consience|conscience|concience|consciense]].", "Conscience has science tucked inside it."],
+  ],
+};
+// A short fingerprint of a question, so the game can remember which ones were seen lately.
+function fixitId(src){
+  let h = 5381;
+  for (let i = 0; i < src.length; i++) h = ((h * 33) ^ src.charCodeAt(i)) >>> 0;
+  return h.toString(36);
+}
+const fixitShuffle = (arr, rng) => dashShuffle(arr, rng);
+// One question, ready to play, or null when the written form is broken. The words are the sentence as it is shown, `at` is
+// the word with the mistake, and `options` are the choices for the fix (the right one at `correctIndex`).
+function fixitParse(item, region, rng){
+  const src = item.src;
+  const m = /\[\[([^\]]+)\]\]/.exec(src);
+  if (!m) return null;
+  const parts = m[1].split("|");
+  if (parts.length < 3) return null;
+  // Anything stuck to the marked word (a full stop after it, an opening quote before it) belongs to that same word.
+  let before = src.slice(0, m.index), after = src.slice(m.index + m[0].length);
+  const head = (/\S*$/.exec(before) || [""])[0], tail = (/^\S*/.exec(after) || [""])[0];
+  before = before.slice(0, before.length - head.length); after = after.slice(tail.length);
+  const [wrong, right, ...others] = parts.map((p) => fixitSpell(head + p + tail, region));
+  before = fixitSpell(before, region); after = fixitSpell(after, region);
+  if (/\s/.test(wrong)) return null;
+  const words = (before + wrong + after).split(" ");
+  const at = before.split(" ").length - 1;
+  if (words[at] !== wrong) return null;
+  const choices = [right, ...others].filter((o, i, a) => o && o !== wrong && a.indexOf(o) === i);
+  if (choices.length < 2 || choices[0] !== right) return null;
+  const options = fixitShuffle(choices, rng);
+  const t = fixitTerms(region);
+  const note = item.note || (FIXIT_SKILLS[item.skill] || {}).hint || "";
+  return {
+    id: item.id, skill: item.skill, level: item.level, words, at, wrong, right, options, correctIndex: options.indexOf(right),
+    fixed: words.map((w, i) => (i === at ? right : w)).join(" "),
+    hint: note.replace(/\{stop\}/g, t.stop).replace(/\{quote\}/g, t.quote),
+  };
+}
+// What the game remembers about one learner (on this device): how each skill is going, and the questions seen lately.
+const FIXIT_BLANK = { stats: {}, recent: [] };
+function fixitState(v){
+  const s = v && typeof v === "object" && !Array.isArray(v) ? v : {};
+  const stats = {};
+  for (const k of Object.keys(FIXIT_SKILLS)) {
+    const x = s.stats && s.stats[k];
+    if (x && typeof x === "object") {
+      const n = Math.min(1000, dashCount(x.n)), r = Math.min(n, dashCount(x.r));
+      if (n > 0) stats[k] = { n, r };
+    }
+  }
+  const recent = Array.isArray(s.recent) ? s.recent.filter((x) => typeof x === "string" && x.length < 16).slice(-80) : [];
+  return { stats, recent };
+}
+function fixitLoad(childId){
+  try { return fixitState(JSON.parse(localStorage.getItem("ll_fixit_" + childId) || "{}")); } catch (e) { return fixitState(); }
+}
+function fixitSave(childId, state){
+  try { localStorage.setItem("ll_fixit_" + childId, JSON.stringify(state)); } catch (e) { /* private window: it still plays, it just is not remembered */ }
+}
+// How well a skill is going (smoothed so one answer does not swing it), the step on the four-step ladder the list shows, and
+// how hard the questions for it may be: a skill starts at its easiest and unlocks the next level with steady accuracy.
+const fixitAcc = (st) => ((st ? st.r : 0) + 1) / ((st ? st.n : 0) + 2);
+function fixitSkillBox(st){
+  if (!st || st.n < 3) return 0;
+  const a = st.r / st.n;
+  return st.n >= 10 && a >= 0.85 ? 3 : a >= 0.6 ? 2 : 1;
+}
+function fixitSkillLevel(st, base){
+  if (!st) return base;
+  const a = st.r / st.n;
+  return Math.min(3, base + (st.n >= 6 && a >= 0.75 ? 1 : 0) + (st.n >= 15 && a >= 0.8 ? 1 : 0));
+}
+function fixitSkillsFor(tier){
+  const seen = [];
+  for (const it of FIXIT_BANK[tier] || FIXIT_BANK.elementary) if (!seen.includes(it[0])) seen.push(it[0]);
+  return seen;
+}
+// A round: the skills the learner finds hardest come up more, harder questions only where they are doing well, questions
+// seen lately are held back, and the same skill never comes up three times running.
+function fixitPlan(tier, region, state, rng, size = FIXIT_ROUND){
+  const s = fixitState(state);
+  const items = (FIXIT_BANK[tier] || FIXIT_BANK.elementary).map(([skill, level, src, note]) => ({ skill, level, src, note, id: fixitId(src) }));
+  const base = {};
+  for (const it of items) base[it.skill] = Math.min(base[it.skill] || 9, it.level);
+  const unlocked = items.filter((it) => it.level <= fixitSkillLevel(s.stats[it.skill], base[it.skill]));
+  const recent = new Set(s.recent);
+  let pool = unlocked.filter((it) => !recent.has(it.id));
+  if (pool.length < size) pool = pool.concat(unlocked.filter((it) => recent.has(it.id)));
+  if (pool.length < size) pool = pool.concat(items.filter((it) => !pool.includes(it)));
+  const out = [];
+  let left = pool.slice();
+  while (out.length < size && left.length) {
+    const p1 = out.length ? out[out.length - 1].skill : "", p2 = out.length > 1 ? out[out.length - 2].skill : "";
+    let cand = left.filter((it) => !(it.skill === p1 && it.skill === p2));
+    if (!cand.length) cand = left;
+    const weights = cand.map((it) => 1 + 3 * (1 - fixitAcc(s.stats[it.skill])));
+    let r = rng() * weights.reduce((a, b) => a + b, 0), pick = cand[cand.length - 1];
+    for (let i = 0; i < cand.length; i++) { r -= weights[i]; if (r < 0) { pick = cand[i]; break; } }
+    out.push(pick);
+    left = left.filter((it) => it !== pick);
+  }
+  return out.map((it) => fixitParse(it, region, rng)).filter(Boolean);
+}
+// A missed sentence comes back once at the end as a second chance, with its choices shuffled again.
+function fixitRetry(q, tier, region, rng){
+  const it = (FIXIT_BANK[tier] || FIXIT_BANK.elementary).map(([skill, level, src, note]) => ({ skill, level, src, note, id: fixitId(src) })).find((x) => x.id === q.id);
+  const r = it ? fixitParse(it, region, rng) : null;
+  return r ? { ...r, retry: true } : null;
+}
+// Adds a finished round's answers ([{id, skill, ok}]) to what is remembered.
+function fixitRecord(state, answers){
+  const s = fixitState(state);
+  const stats = { ...s.stats };
+  for (const a of answers) {
+    if (!FIXIT_SKILLS[a.skill]) continue;
+    let n = (stats[a.skill] ? stats[a.skill].n : 0) + 1, r = (stats[a.skill] ? stats[a.skill].r : 0) + (a.ok ? 1 : 0);
+    if (n > 40) { n = Math.round(n / 2); r = Math.round(r / 2); }
+    stats[a.skill] = { n, r: Math.min(n, r) };
+  }
+  return { stats, recent: s.recent.concat(answers.map((a) => a.id)).slice(-80) };
+}
+// ---- Fix It rules (end)
+
 // The card on the word list: streak, egg and the way in.
 function DashHome({ dash, today, canPlay, onPlay, onPals }){
   const sh = dashStreakShown(dash, today);
@@ -2471,6 +2805,318 @@ function DashRound({ words, boxes, onRate, onFinish, onAgain, onPals, onBack }){
       </div>
       <button ref={nextRef} onClick={next} disabled={verdict === null} className="focus-ring rounded-xl py-3 text-sm font-bold disabled:opacity-40" style={{ background: "var(--ink)", color: "var(--on-ink)" }}>
         {idx + 1 >= qs.length ? "Finish the round" : "Next word"}
+      </button>
+    </div>
+  );
+}
+
+// The Games tab. For now it holds Fix It, a writing game that shares its coins, Word Pals and streak with Word Dash.
+// Progress is joined with the account's copy of the game the same way the vocabulary tab does it (only on plans that
+// save the game to the account); how each skill is going is kept on this device.
+function GamesHub({ plan, country, tier, childId, session, backendLive }){
+  const region = fixitRegion(country);
+  const canSync = !!(backendLive && childId && session && planMeta(plan).vocabBank);
+  const [dash, setDash] = useState(() => dashState());
+  const [fx, setFx] = useState(() => fixitState());
+  const [view, setView] = useState("home"); // home | round | pals
+  const [roundKey, setRoundKey] = useState(0);
+
+  useEffect(()=>{
+    setView("home");
+    setDash(childId ? dashLoad(childId) : dashState());
+    setFx(childId ? fixitLoad(childId) : fixitState());
+    if (!canSync) return;
+    let cancelled = false;
+    authedFetch(session, `/api/history?childId=${childId}`)
+      .then(d => {
+        if (cancelled || d.vocabLocked) return;
+        const joined = dashMerge(dashLoad(childId), d.vocabGame);
+        setDash(joined); dashSave(childId, joined);
+        if (!dashSame(joined, d.vocabGame)) authedFetch(session, "/api/history", { method: "POST", body: JSON.stringify({ childId, game: joined }) }).catch(() => {});
+      })
+      .catch(() => {});
+    return ()=>{ cancelled = true; };
+  }, [childId, canSync]);
+
+  function startRound(){ logEvent("fixit_start", { tier }, childId); setRoundKey((k) => k + 1); setView("round"); }
+  // Called when a round ends: adds it to the shared game and to the skill record, and hands back what changed for the summary.
+  function finishRound(res, answers){
+    const out = dashApplyRound(dash, res, dashDay(Date.now()), Math.random);
+    setDash(out.state);
+    if (childId) dashSave(childId, out.state);
+    const nextFx = fixitRecord(fx, answers);
+    setFx(nextFx);
+    if (childId) fixitSave(childId, nextFx);
+    if (canSync) {
+      authedFetch(session, "/api/history", { method: "POST", body: JSON.stringify({ childId, game: out.state }) })
+        .then((r) => { if (r && r.game) setDash((prev) => { const m = dashMerge(prev, r.game); dashSave(childId, m); return m; }); })
+        .catch(() => {});
+    }
+    logEvent("fixit_round", { status: res.stars }, childId);
+    return out;
+  }
+
+  if (view === "pals") return <DashPals dash={dash} onBack={()=>setView("home")} />;
+  if (view === "round") return <FixItRound key={roundKey} tier={tier} region={region} fx={fx} onFinish={finishRound} onAgain={startRound} onPals={()=>setView("pals")} onBack={()=>setView("home")} />;
+  return <FixItHome dash={dash} fx={fx} tier={tier} region={region} onPlay={startRound} onPals={()=>setView("pals")} />;
+}
+
+// The card on the Games tab: streak, egg, the way in, and how each skill is going.
+function FixItHome({ dash, fx, tier, region, onPlay, onPals }){
+  const today = dashDay(Date.now());
+  const sh = dashStreakShown(dash, today);
+  const played = dash.lastDay === today;
+  const full = dash.pals.length >= DASH_PALS.length;
+  const pct = full ? 100 : Math.min(100, Math.round((dash.egg / DASH_EGG) * 100));
+  const line = played ? "Today's round is done. Play more to hatch more Word Pals."
+    : sh.days > 0 ? (sh.saved ? "A streak freeze will cover yesterday. Play today to keep your streak." : "Play today to keep your streak going.")
+    : "Play a quick round to start your streak.";
+  return (
+    <div className="max-w-3xl mx-auto w-full flex flex-col gap-4">
+      <div className="card p-5 sm:p-6" style={{ borderInlineStart: "4px solid var(--gold)" }} aria-label="Fix It">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-4 justify-between">
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h3 className="font-display text-2xl" style={{ color: "var(--ink)" }}>Fix It</h3>
+              <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[12px] font-bold" style={{ background: sh.days > 0 ? "var(--gold-tint)" : "var(--surface-2)", color: sh.days > 0 ? "var(--gold-ink)" : "var(--ink-faint)" }} title="Days in a row with a round played">
+                <IconFlame size={13} /> {sh.days > 0 ? "Day streak: " + sh.days : "No streak yet"}
+              </span>
+              {dash.freezes > 0 && <span className="text-[12px] font-semibold" style={{ color: "var(--cyan-ink)" }} title="Covers one missed day"><span aria-hidden="true">❄</span> {"Streak freezes: " + dash.freezes}</span>}
+            </div>
+            <p className="text-[13.5px] mt-1" style={{ color: "var(--ink)" }}>Spot the mistake, then fix it. Every right answer earns coins for your Word Pals.</p>
+            <p className="text-[13px] mt-1" style={{ color: "var(--ink-soft)" }}>{line}</p>
+            <div className="mt-3 max-w-md">
+              <div className="flex items-center justify-between text-[12px] mb-1" style={{ color: "var(--ink-soft)" }}>
+                <span>{full ? "Every Word Pal collected!" : <><span aria-hidden="true">🥚</span> {"Next Word Pal"}</>}</span>
+                {!full && <span className="tabular">{dash.egg + " / " + DASH_EGG + " coins"}</span>}
+              </div>
+              <div className="h-2.5 rounded-full overflow-hidden" style={{ background: "var(--border)" }} role="progressbar" aria-valuemin={0} aria-valuemax={DASH_EGG} aria-valuenow={full ? DASH_EGG : dash.egg} aria-label="Coins towards the next Word Pal">
+                <div className="h-full rounded-full" style={{ width: pct + "%", background: "var(--gold)", transition: "width 300ms" }} />
+              </div>
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-2 shrink-0">
+            <button onClick={onPlay} className="focus-ring inline-flex items-center gap-1.5 rounded-full px-5 py-2.5 text-sm font-bold" style={{ background: "var(--gold)", color: "var(--on-solid)" }}>
+              <IconSparkle size={14} /> {played ? "Play again" : "Play Fix It"}
+            </button>
+            <button onClick={onPals} className="focus-ring inline-flex items-center gap-1.5 rounded-full px-4 py-2.5 text-sm font-bold" style={{ background: "var(--surface-2)", color: "var(--ink)" }}>
+              {"My Word Pals (" + dash.pals.length + "/" + DASH_PALS.length + ")"}
+            </button>
+          </div>
+        </div>
+      </div>
+      <div className="card p-5 sm:p-6">
+        <div className="label-mono mb-3" style={{ color: "var(--ink-soft)" }}>Your skills</div>
+        <div className="grid sm:grid-cols-2 gap-2">
+          {fixitSkillsFor(tier).map((k) => (
+            <div key={k} className="flex items-center justify-between gap-3 rounded-xl px-3 py-2" style={{ background: "var(--surface-2)" }}>
+              <span className="text-[13px] font-semibold" style={{ color: "var(--ink)" }}>{fixitSkillLabel(k, region)}</span>
+              <MasteryPips box={fixitSkillBox(fx.stats[k])} />
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function FixItRound({ tier, region, fx, onFinish, onAgain, onPals, onBack }){
+  const [qs, setQs] = useState(() => fixitPlan(tier, region, fx, Math.random));
+  const total = useRef(qs.length).current;
+  const [idx, setIdx] = useState(0);
+  const [stage, setStage] = useState("spot"); // spot (tap the mistake) -> fix (choose the fix)
+  const [tapped, setTapped] = useState(null);
+  const [picked, setPicked] = useState(null);
+  const [verdict, setVerdict] = useState(null); // null = not answered yet
+  const [combo, setCombo] = useState(0);
+  const [best, setBest] = useState(0);
+  const [coins, setCoins] = useState(0);
+  const [right, setRight] = useState(0);
+  const [gain, setGain] = useState(0);
+  const [answers, setAnswers] = useState([]);
+  const [missed, setMissed] = useState([]);
+  const [done, setDone] = useState(null);
+  const nextRef = useRef(null);
+  const q = qs[idx];
+  const big = tier === "early";
+
+  useEffect(()=>{ if (verdict !== null && nextRef.current) nextRef.current.focus(); }, [verdict]);
+  // Keys 1-4 pick a fix, for learners on a keyboard.
+  useEffect(()=>{
+    if (!q || stage !== "fix" || verdict !== null || done) return;
+    const onKey = (e) => { const n = Number(e.key); if (n >= 1 && n <= q.options.length && !e.metaKey && !e.ctrlKey && !e.altKey) pick(n - 1); };
+    window.addEventListener("keydown", onKey);
+    return ()=>window.removeEventListener("keydown", onKey);
+  });
+
+  function settle(ok){
+    setVerdict(ok);
+    if (q.retry) { setGain(ok ? 5 : 0); if (ok) setCoins((c) => c + 5); return; }
+    setAnswers((a) => [...a, { id: q.id, skill: q.skill, ok }]);
+    if (ok) {
+      const c = combo + 1, g = dashCoins(c);
+      setCombo(c); setBest((b) => Math.max(b, c)); setCoins((x) => x + g); setGain(g); setRight((r) => r + 1);
+    } else {
+      setCombo(0); setGain(0);
+      setMissed((m) => [...m, { id: q.id, fixed: q.fixed }]);
+      const again = fixitRetry(q, tier, region, Math.random);
+      if (again) setQs((list) => [...list, again]);
+    }
+  }
+  function spot(i){ if (verdict !== null || stage !== "spot") return; setTapped(i); if (i === q.at) setStage("fix"); else settle(false); }
+  function pick(oi){ if (verdict !== null || stage !== "fix") return; setPicked(oi); settle(oi === q.correctIndex); }
+  function next(){
+    if (idx + 1 >= qs.length) {
+      if (done) return;
+      const res = dashRoundResult({ right, outOf: total, coins, bestCombo: best });
+      setDone({ res, out: onFinish(res, answers) });
+      return;
+    }
+    setIdx(idx + 1); setStage("spot"); setTapped(null); setPicked(null); setVerdict(null); setGain(0);
+  }
+
+  if (!q && !done) {
+    return (
+      <div className="card p-6 max-w-xl mx-auto w-full">
+        <button onClick={onBack} className="focus-ring w-full rounded-full py-2.5 text-sm font-bold" style={{ background: "var(--surface-2)", color: "var(--ink)" }}>Back</button>
+      </div>
+    );
+  }
+
+  if (done) {
+    const { res, out } = done;
+    const st = out.state;
+    const full = st.pals.length >= DASH_PALS.length;
+    return (
+      <div className="card p-6 sm:p-8 flex flex-col items-center gap-4 text-center max-w-xl mx-auto w-full animate-float-in">
+        <div className="flex items-center gap-1" role="img" aria-label={res.stars + " out of 3 stars"}>
+          {[1, 2, 3].map((n) => <IconStar key={n} size={34} strokeWidth={1.8} style={{ color: n <= res.stars ? "var(--gold)" : "var(--border)", fill: n <= res.stars ? "var(--gold)" : "none" }} />)}
+        </div>
+        <h3 className="font-display font-bold text-2xl" style={{ color: "var(--ink)" }}>{res.perfect ? "Perfect round!" : res.stars >= 2 ? "Great round!" : res.stars === 1 ? "Good going!" : "Keep going!"}</h3>
+        <div className="grid grid-cols-3 gap-2 w-full max-w-sm">
+          {[["Right", res.right + " / " + res.outOf, "var(--ink)"], ["Best combo", String(res.bestCombo), "var(--ink)"], ["Coins", "+" + res.coins, "var(--gold-ink)"]].map(([label, value, col]) => (
+            <div key={label} className="rounded-xl py-2 px-1" style={{ background: "var(--surface-2)" }}>
+              <div className="font-display text-2xl tabular" style={{ color: col, lineHeight: 1.1 }}>{value}</div>
+              <div className="text-[11px] font-semibold uppercase tracking-wide" style={{ color: "var(--ink-faint)" }}>{label}</div>
+            </div>
+          ))}
+        </div>
+        {res.bonus > 0 && <p className="text-[13px] font-semibold" style={{ color: "var(--gold-ink)" }}>{"Perfect round bonus: +" + res.bonus + " coins"}</p>}
+        {out.hatched.map((p) => (
+          <div key={p.id} className="rounded-2xl p-4 w-full" style={{ background: "var(--gold-tint)" }} role="status">
+            <div className="text-7xl dash-hatch" aria-hidden="true">{p.emoji}</div>
+            <div className="font-display text-xl mt-1" style={{ color: "var(--ink)" }}>{"A new Word Pal hatched: " + p.name + "!"}</div>
+            <div className="text-[11px] font-bold uppercase tracking-wide" style={{ color: "var(--gold-ink)" }}>{DASH_RARITY[p.rare]}</div>
+          </div>
+        ))}
+        {!full && (
+          <div className="w-full max-w-sm">
+            <div className="flex items-center justify-between text-[12px] mb-1" style={{ color: "var(--ink-soft)" }}><span><span aria-hidden="true">🥚</span> {"Next Word Pal"}</span><span className="tabular">{st.egg + " / " + DASH_EGG + " coins"}</span></div>
+            <div className="h-2.5 rounded-full overflow-hidden" style={{ background: "var(--border)" }}><div className="h-full rounded-full" style={{ width: Math.min(100, (st.egg / DASH_EGG) * 100) + "%", background: "var(--gold)", transition: "width 600ms" }} /></div>
+          </div>
+        )}
+        <div className="flex flex-col gap-1 text-[13.5px]" style={{ color: "var(--ink-soft)" }}>
+          <span className="inline-flex items-center justify-center gap-1.5 font-semibold" style={{ color: "var(--gold-ink)" }}><IconFlame size={15} /> {"Day streak: " + st.streak}</span>
+          {out.extended && st.streak > 1 && <span className="font-semibold" style={{ color: "var(--gold-ink)" }}>{"One more day!"}</span>}
+          {out.usedFreeze && <span><span aria-hidden="true">❄</span> {"A streak freeze covered a missed day, so your streak is safe."}</span>}
+          {out.earnedFreeze && <span><span aria-hidden="true">❄</span> {"You earned a streak freeze. It covers one missed day."}</span>}
+        </div>
+        {missed.length > 0 && (
+          <div className="w-full text-start flex flex-col gap-2">
+            <div className="label-mono" style={{ color: "var(--ink-soft)" }}>Sentences to revisit</div>
+            {missed.map((m) => (
+              <div key={m.id} className="rounded-xl p-3" style={{ background: "var(--surface-2)" }}>
+                <p className="font-read text-[15px]" style={{ color: "var(--ink)" }} dir="ltr" lang="en" data-no-i18n="">{m.fixed}</p>
+              </div>
+            ))}
+          </div>
+        )}
+        <div className="flex gap-2 flex-wrap justify-center">
+          <button onClick={onAgain} className="focus-ring rounded-full px-5 py-2.5 text-sm font-bold" style={{ background: "var(--gold)", color: "var(--on-solid)" }}>One more round</button>
+          <button onClick={onPals} className="focus-ring rounded-full px-5 py-2.5 text-sm font-bold" style={{ background: "var(--surface-2)", color: "var(--ink)" }}>My Word Pals</button>
+          <button onClick={onBack} className="focus-ring rounded-full px-5 py-2.5 text-sm font-bold" style={{ background: "var(--surface-2)", color: "var(--ink)" }}>Done</button>
+        </div>
+      </div>
+    );
+  }
+
+  const mult = dashMult(Math.max(1, combo));
+  const PRAISE = ["Nice!", "Spot on!", "Brilliant!", "You got it!", "Yes!", "Smart!"];
+  return (
+    <div className="max-w-xl mx-auto w-full flex flex-col gap-4">
+      <div className="flex items-center gap-3">
+        <button onClick={onBack} className="focus-ring text-[13px] font-semibold underline py-3 pe-3" style={{ color: "var(--ink-soft)" }}>Quit</button>
+        <div className="flex-1 h-2 rounded-full overflow-hidden" style={{ background: "var(--border)" }} role="progressbar" aria-valuemin={0} aria-valuemax={qs.length} aria-valuenow={idx} aria-label="Round progress">
+          <div className="h-full rounded-full" style={{ width: (idx / qs.length) * 100 + "%", background: "var(--gold)", transition: "width 250ms" }} />
+        </div>
+        <span className="text-xs font-semibold tabular" style={{ color: "var(--ink-soft)" }}>{idx + 1} / {qs.length}</span>
+      </div>
+      <div className="flex items-center justify-between gap-2">
+        <span className="inline-flex items-center gap-1 rounded-full px-3 py-1 text-[13px] font-bold" style={{ background: combo >= 2 ? "var(--gold-tint)" : "var(--surface-2)", color: combo >= 2 ? "var(--gold-ink)" : "var(--ink-faint)" }} aria-live="polite">
+          <IconFlame size={14} /> {combo >= 2 ? <>{combo + " in a row"} <span data-no-i18n="" className="ms-1">{"x" + mult}</span></> : "Build a combo"}
+        </span>
+        <span className="text-[13px] font-bold tabular" style={{ color: "var(--gold-ink)" }}>🪙 {coins}</span>
+      </div>
+      <div className={"card p-5 sm:p-6" + (verdict === false ? " dash-shake" : "")}>
+        <div className="flex items-center justify-between gap-2 mb-3">
+          <div className="label-mono" style={{ color: q.retry ? "var(--cyan-ink)" : "var(--ink-soft)" }}>
+            {stage === "spot" && verdict === null ? "Tap the word with the mistake" : stage === "fix" && verdict === null ? "Now choose the fix" : fixitSkillLabel(q.skill, region)}
+            {q.retry && <span className="ms-2 font-bold" style={{ color: "var(--cyan-ink)" }}>{"· "}<span>Second chance</span></span>}
+          </div>
+          <button type="button" onClick={()=>speakText(q.words.join(" "))} className="focus-ring inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[12px] font-bold shrink-0" style={{ background: "var(--surface-2)", color: "var(--ink)" }}>
+            <IconMic size={13} strokeWidth={2.3} /> Read aloud
+          </button>
+        </div>
+        <div dir="ltr" lang="en" data-no-i18n="" className={"flex flex-wrap gap-x-1 gap-y-2 mb-5 font-read leading-snug " + (big ? "text-[26px]" : "text-[19px]")} role="group">
+          {q.words.map((w, i) => {
+            const isErr = i === q.at;
+            let st = { borderColor: "transparent", background: "transparent", color: "var(--ink)" };
+            let shown = w;
+            if (verdict === true && isErr) { st = { borderColor: "var(--good)", background: "var(--good-tint)", color: "var(--ink)" }; shown = q.right; }
+            else if (verdict === false && isErr) st = { borderColor: "var(--bad)", background: "var(--bad-tint)", color: "var(--ink)" };
+            else if (verdict === false && i === tapped) st = { borderColor: "var(--ink-faint)", background: "var(--surface-2)", color: "var(--ink-faint)" };
+            else if (verdict === null && stage === "fix" && isErr) st = { borderColor: "var(--cyan)", background: "var(--cyan-tint)", color: "var(--ink)" };
+            return (
+              <button key={i} type="button" disabled={verdict !== null || stage !== "spot"} onClick={()=>spot(i)}
+                className="focus-ring rounded-lg border-2 px-1.5 py-0.5 disabled:cursor-default" style={{ ...st, cursor: verdict === null && stage === "spot" ? "pointer" : "default" }}>{shown}</button>
+            );
+          })}
+        </div>
+        {stage === "fix" && (
+          <div className="flex flex-col gap-2" dir="ltr">
+            {q.options.map((opt, oi) => {
+              const isCorrect = oi === q.correctIndex, isChosen = oi === picked;
+              let st = { borderColor: "var(--border)", background: "var(--surface)", color: "var(--ink)" };
+              if (verdict !== null && isCorrect) st = { borderColor: "var(--good)", background: "var(--good-tint)", color: "var(--ink)" };
+              else if (verdict !== null && isChosen) st = { borderColor: "var(--bad)", background: "var(--bad-tint)", color: "var(--ink)" };
+              return (
+                <button key={oi} disabled={verdict !== null} onClick={()=>pick(oi)} className={"focus-ring text-start rounded-xl border px-3.5 py-2.5 disabled:cursor-default flex items-start gap-2.5 font-read " + (big ? "text-[20px]" : "text-[16px]")} style={st}>
+                  <span className="text-[11px] font-bold rounded-md px-1.5 py-0.5 mt-1 shrink-0 font-sans" style={{ background: "var(--surface-2)", color: "var(--ink-faint)" }} aria-hidden="true">{oi + 1}</span>
+                  <span data-no-i18n="" lang="en">{opt}</span>
+                </button>
+              );
+            })}
+          </div>
+        )}
+        {verdict !== null && (
+          <div className="mt-4 flex flex-col gap-2" role="status">
+            {verdict ? (
+              <p className="text-[14px] font-bold flex items-center gap-2" style={{ color: "var(--good)" }}>
+                {PRAISE[idx % PRAISE.length]} {gain > 0 && <span className="dash-pop inline-block rounded-full px-2.5 py-0.5 text-[13px]" style={{ background: "var(--gold-tint)", color: "var(--gold-ink)" }}>+{gain} 🪙</span>}
+              </p>
+            ) : (
+              <div className="rounded-xl p-3" style={{ background: "var(--bad-tint)" }}>
+                <p className="text-[13px] font-semibold" style={{ color: "var(--bad)" }}>Not quite. Here is the fixed sentence.</p>
+                <p className={"font-read mt-1 " + (big ? "text-[20px]" : "text-[16px]")} style={{ color: "var(--ink)" }} dir="ltr" lang="en" data-no-i18n="">{q.fixed}</p>
+                {!q.retry && <p className="text-[12.5px] mt-1.5" style={{ color: "var(--ink-soft)" }}>This sentence will come back for a second chance.</p>}
+              </div>
+            )}
+            {(verdict === false || !big) && q.hint && <p className="text-[13px]" style={{ color: "var(--ink-soft)" }} data-no-i18n="" lang="en">{q.hint}</p>}
+          </div>
+        )}
+      </div>
+      <button ref={nextRef} onClick={next} disabled={verdict === null} className="focus-ring rounded-xl py-3 text-sm font-bold disabled:opacity-40" style={{ background: "var(--ink)", color: "var(--on-ink)" }}>
+        {idx + 1 >= qs.length ? "Finish the round" : "Next sentence"}
       </button>
     </div>
   );
@@ -4924,7 +5570,7 @@ function focusTextCard(t){
 function Workspace({ plan, country, gradeIdx, setGradeIdx, tier, setTierOverride, interests, confidenceWriting, confidenceReading, motivation, used, total, onSubmit, session, backendLive, childId, children_, onSwitchChild, onMakeUsable, activeChangeAvailableAt, onSeePlans, displayName }){
   const grades = GRADE_DATA[country].grades;
   const gradeLabel = grades[gradeIdx];
-  const [exerciseType, setExerciseType] = useState("writing"); // writing | reading | vocab
+  const [exerciseType, setExerciseType] = useState("writing"); // writing | reading | vocab | games
   const [text, setText] = useState(()=> (backendLive ? "" : PROMPTS[tier].sample));
   const [answers, setAnswers] = useState({});
   const [readingScore, setReadingScore] = useState(0);
@@ -5246,7 +5892,7 @@ function Workspace({ plan, country, gradeIdx, setGradeIdx, tier, setTierOverride
       </div>
 
       <div className="flex items-center gap-5 sm:gap-8 w-full max-w-full overflow-x-auto mb-6" style={{ borderBottom: "1px solid var(--border)", overflowY: "hidden", scrollbarWidth: "none" }}>
-        {[["writing","Writing",IconPen],["reading","Reading Comprehension",IconBookOpenCheck],["vocab","Vocabulary",IconBook]].map(([key,label,IconEl])=>(
+        {[["writing","Writing",IconPen],["reading","Reading Comprehension",IconBookOpenCheck],["vocab","Vocabulary",IconBook],["games","Games",IconTrophy]].map(([key,label,IconEl])=>(
           <button key={key} onClick={()=>setExerciseType(key)}
             className="focus-ring tab-ui flex items-center gap-1.5 py-3 transition-colors whitespace-nowrap"
             style={{ color: exerciseType===key ? "var(--ink)" : "var(--ink-soft)", borderBottom: "2px solid " + (exerciseType===key ? "var(--cyan)" : "transparent"), marginBottom: -1 }}>
@@ -5255,7 +5901,9 @@ function Workspace({ plan, country, gradeIdx, setGradeIdx, tier, setTierOverride
         ))}
       </div>
 
-      {exerciseType === "vocab" ? (
+      {exerciseType === "games" ? (
+        <GamesHub plan={plan} country={country} tier={tier} childId={childId} session={session} backendLive={backendLive} />
+      ) : exerciseType === "vocab" ? (
         <VocabularyBank session={session} childId={childId} backendLive={backendLive} onSeePlans={onSeePlans} displayName={displayName} />
       ) : phase === "done" ? (
         // Once feedback is in, this stops being two things happening side by
