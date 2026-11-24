@@ -59,7 +59,7 @@ test("a country's spelling never changes the word being tested, so the mistake a
 });
 
 test("the bank is big enough for every age band, uses only known skills and levels, and has no repeats", () => {
-  const minimum = { early: 24, elementary: 36, middle: 30, high: 28 };
+  const minimum = { early: 70, elementary: 105, middle: 90, high: 80 };
   for (const tier of TIERS) {
     const rows = G.FIXIT_BANK[tier];
     assert.ok(rows.length >= minimum[tier], `${tier}: only ${rows.length} questions`);
@@ -73,6 +73,32 @@ test("the bank is big enough for every age band, uses only known skills and leve
     assert.ok(G.fixitSkillsFor(tier).length >= 5, tier + ": too few skills");
   }
   for (const [k, s] of Object.entries(G.FIXIT_SKILLS)) assert.ok(s.label && s.hint, k + ": label and hint");
+});
+
+test("no question uses a word that would read oddly or wrongly in another country", () => {
+  // Words the spelling swap does not cover, and one that means something different in the US.
+  const risky = /\b(rubber|programme|criticis\w*|apologis\w*|practis\w*|recognis\w*|analys\w*|cosy|tyre|pyjamas|jumper|lorry|petrol|holiday|biscuit)\b/i;
+  for (const tier of TIERS) for (const [, , src] of G.FIXIT_BANK[tier]) assert.ok(!risky.test(src), "reads differently in another country: " + src);
+});
+
+test("a plural owner takes the apostrophe after the s, and a single owner before it", () => {
+  // Written once as [[stem|right|other]]: where the sentence says there is more than one owner, the right fix ends s'.
+  const plural = /\b(two|three|four|five|several|both|many|all the)\s+$/i;
+  let checked = 0;
+  for (const tier of TIERS) {
+    for (const [skill, , src] of G.FIXIT_BANK[tier]) {
+      if (skill !== "apos") continue;
+      const m = /^(.*?)\[\[([^|\]]+)\|([^|\]]+)\|([^\]]+)\]\]/.exec(src);
+      if (!m) continue;
+      const [, before, wrong, right, rest] = m;
+      const forms = [right, ...rest.split("|")];
+      const owner = forms.find((f) => /s'$/.test(f)), single = forms.find((f) => /'s$/.test(f) && f.slice(0, -2) === wrong.replace(/s$/, ""));
+      if (!owner || !single) continue;
+      checked++;
+      if (plural.test(before)) assert.equal(right, owner, "more than one owner, so the apostrophe goes after the s: " + src);
+    }
+  }
+  assert.ok(checked >= 8, "the check found the plural-owner questions (" + checked + ")");
 });
 
 test("the youngest learners get short sentences and only the simple skills", () => {
