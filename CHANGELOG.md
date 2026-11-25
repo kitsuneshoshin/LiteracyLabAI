@@ -4,6 +4,8 @@ Internal engineering changelog, not linked from the site. One entry per shipped 
 
 ## 2026-11-25
 
+- `ad5f77a` Boss Battle: the Grows with a rewrite in a child's own feedback become bosses (card on the writing feedback screen). Edit the sentence, strike, compare with the suggested fix; 15 coins for an exact hit, 8 for a fix the child says works, 3 for taking the suggestion, into the shared Word Dash and Fix It egg. No AI marking, open to every plan, translated into all 10 languages, new events boss_start and boss_round. The pricing page (Free and Core cards, comparison table with new Fix It and Boss Battle and Game progress rows, vocabulary row now names Word Dash), the in-app Core card, the How it works guide, llms-full.txt and all 10 translated homepages now describe the games; tests keep the table in step with plans.js
+
 - `f963113` Four new free UK history worksheets with answer keys and PDFs: Living in the Stone Age (Year 3), Ancient Egypt and the River Nile (Year 4), Who Were the Anglo-Saxons? (Year 5) and Children in Victorian Britain (Year 6). UK sheets go from 20 to 24, six per year. The GCSE English Language article has a new title and description that answer the AO5 and AO6 search directly, as it had 742 impressions and only 5 clicks in four weeks.
 
 - `c74d6c1` Fix It: the Games tab now uses the full width of the workspace like the other tabs (it had been a narrow centred column). Skills spread over up to four columns, the answer choices sit side by side when there is room, and the Word Pals page (shared with Word Dash) is full width with up to eight pals per row
