@@ -4,6 +4,8 @@ Internal engineering changelog, not linked from the site. One entry per shipped 
 
 ## 2026-11-25
 
+- `f963113` Four new free UK history worksheets with answer keys and PDFs: Living in the Stone Age (Year 3), Ancient Egypt and the River Nile (Year 4), Who Were the Anglo-Saxons? (Year 5) and Children in Victorian Britain (Year 6). UK sheets go from 20 to 24, six per year. The GCSE English Language article has a new title and description that answer the AO5 and AO6 search directly, as it had 742 impressions and only 5 clicks in four weeks.
+
 - `c74d6c1` Fix It: the Games tab now uses the full width of the workspace like the other tabs (it had been a narrow centred column). Skills spread over up to four columns, the answer choices sit side by side when there is room, and the Word Pals page (shared with Word Dash) is full width with up to eight pals per row
 
 - `eab8ed9` Fix It made responsive: the Games home, the round and the results grow with the screen (wider cards, bigger text, three-column skills list on large displays), buttons stack full width on phones, every tap target is 40 to 48px, and right-to-left languages keep counters, scores and the English reminder in the right order. Checked from 320px to 2560px wide, in dark mode and right to left
