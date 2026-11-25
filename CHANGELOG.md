@@ -2,6 +2,10 @@
 
 Internal engineering changelog, not linked from the site. One entry per shipped commit, newest first, grouped by day. Generated from git history — run `git log --format="%ad|%h|%s" --date=short` in the repo to regenerate or extend.
 
+## 2026-11-25
+
+- `eab8ed9` Fix It made responsive: the Games home, the round and the results grow with the screen (wider cards, bigger text, three-column skills list on large displays), buttons stack full width on phones, every tap target is 40 to 48px, and right-to-left languages keep counters, scores and the English reminder in the right order. Checked from 320px to 2560px wide, in dark mode and right to left
+
 ## 2026-11-24
 
 - `a9ea82d` Fix It question bank grown from about 150 to 372 (early 74, elementary 114, middle 96, high 88). Nine plural-owner apostrophe questions had the singular marked as right (the two girls' coats): corrected, with a test that keeps plural owners taking the apostrophe after the s. Added a check for words that read differently outside the UK
