@@ -232,10 +232,15 @@ test("a missed question comes back once with the same fix and freshly shuffled c
 
 test("the screens adapt to the device: wider on big screens, easy to tap on phones, and correct right to left", () => {
   const ui = APP.slice(APP.indexOf("function GamesHub("), APP.indexOf("// Tell us what you think: a short form"));
-  // Big screens: the home card, the round and the results grow, and so does the text.
-  assert.match(ui, /max-w-3xl lg:max-w-5xl 2xl:max-w-6xl/);
-  assert.match(ui, /sm:grid-cols-2 lg:grid-cols-3/, "skills: one column on a phone, two, then three");
-  assert.match(ui, /max-w-xl md:max-w-2xl 2xl:max-w-3xl/);
+  // Big screens: the home page and the round use the whole width of the workspace like the other tabs (no narrow centred
+  // column), the skills spread over up to four columns, the choices sit side by side, and the text grows.
+  assert.ok(!/max-w-3xl lg:max-w-5xl|max-w-xl md:max-w-2xl 2xl:max-w-3xl/.test(ui), "the home page and the round are not a narrow column");
+  assert.ok((ui.match(/<div className="w-full flex flex-col gap-4">/g) || []).length >= 2, "home and round are full width");
+  assert.match(ui, /sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4/, "skills: one column on a phone, then two, three and four");
+  assert.match(ui, /grid gap-2 sm:grid-cols-2" dir="ltr"/, "the choices sit side by side when there is room");
+  const pals = APP.slice(APP.indexOf("function DashPals("), APP.indexOf("function DashRound("));
+  assert.match(pals, /<div className="w-full flex flex-col gap-4">/, "the Word Pals page is full width too");
+  assert.match(pals, /lg:grid-cols-6 xl:grid-cols-8/);
   assert.match(ui, /text-\[19px\] md:text-\[22px\] 2xl:text-\[26px\]/);
   assert.match(ui, /text-\[26px\] md:text-\[32px\] 2xl:text-\[38px\]/);
   // Phones: the two main buttons stack full width, and every tappable thing is at least 40 to 48px.
