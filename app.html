@@ -3096,7 +3096,7 @@ function FixItHome({ dash, fx, tier, region, onPlay, onPals }){
     : sh.days > 0 ? (sh.saved ? "A streak freeze will cover yesterday. Play today to keep your streak." : "Play today to keep your streak going.")
     : "Play a quick round to start your streak.";
   return (
-    <div className="max-w-3xl mx-auto w-full flex flex-col gap-4">
+    <div className="max-w-3xl lg:max-w-5xl 2xl:max-w-6xl mx-auto w-full flex flex-col gap-4">
       <div className="card p-5 sm:p-6" style={{ borderInlineStart: "4px solid var(--gold)" }} aria-label="Fix It">
         <div className="flex flex-col sm:flex-row sm:items-center gap-4 justify-between">
           <div className="min-w-0 flex-1">
@@ -3119,11 +3119,11 @@ function FixItHome({ dash, fx, tier, region, onPlay, onPals }){
               </div>
             </div>
           </div>
-          <div className="flex flex-wrap gap-2 shrink-0">
-            <button onClick={onPlay} className="focus-ring inline-flex items-center gap-1.5 rounded-full px-5 py-2.5 text-sm font-bold" style={{ background: "var(--gold)", color: "var(--on-solid)" }}>
+          <div className="flex flex-col sm:flex-row sm:flex-wrap gap-2 sm:shrink-0">
+            <button onClick={onPlay} className="focus-ring inline-flex items-center justify-center gap-1.5 rounded-full px-5 py-3 text-sm font-bold w-full sm:w-auto" style={{ background: "var(--gold)", color: "var(--on-solid)" }}>
               <IconSparkle size={14} /> {played ? "Play again" : "Play Fix It"}
             </button>
-            <button onClick={onPals} className="focus-ring inline-flex items-center gap-1.5 rounded-full px-4 py-2.5 text-sm font-bold" style={{ background: "var(--surface-2)", color: "var(--ink)" }}>
+            <button onClick={onPals} className="focus-ring inline-flex items-center justify-center gap-1.5 rounded-full px-4 py-3 text-sm font-bold w-full sm:w-auto" style={{ background: "var(--surface-2)", color: "var(--ink)" }}>
               {"My Word Pals (" + dash.pals.length + "/" + DASH_PALS.length + ")"}
             </button>
           </div>
@@ -3131,7 +3131,7 @@ function FixItHome({ dash, fx, tier, region, onPlay, onPals }){
       </div>
       <div className="card p-5 sm:p-6">
         <div className="label-mono mb-3" style={{ color: "var(--ink-soft)" }}>Your skills</div>
-        <div className="grid sm:grid-cols-2 gap-2">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2">
           {fixitSkillsFor(tier).map((k) => (
             <div key={k} className="flex items-center justify-between gap-3 rounded-xl px-3 py-2" style={{ background: "var(--surface-2)" }}>
               <span className="text-[13px] font-semibold" style={{ color: "var(--ink)" }}>{fixitSkillLabel(k, region)}</span>
@@ -3212,7 +3212,7 @@ function FixItRound({ tier, region, fx, onFinish, onAgain, onPals, onBack }){
     const st = out.state;
     const full = st.pals.length >= DASH_PALS.length;
     return (
-      <div className="card p-6 sm:p-8 flex flex-col items-center gap-4 text-center max-w-xl mx-auto w-full animate-float-in">
+      <div className="card p-6 sm:p-8 flex flex-col items-center gap-4 text-center max-w-xl md:max-w-2xl mx-auto w-full animate-float-in">
         <div className="flex items-center gap-1" role="img" aria-label={res.stars + " out of 3 stars"}>
           {[1, 2, 3].map((n) => <IconStar key={n} size={34} strokeWidth={1.8} style={{ color: n <= res.stars ? "var(--gold)" : "var(--border)", fill: n <= res.stars ? "var(--gold)" : "none" }} />)}
         </div>
@@ -3220,7 +3220,7 @@ function FixItRound({ tier, region, fx, onFinish, onAgain, onPals, onBack }){
         <div className="grid grid-cols-3 gap-2 w-full max-w-sm">
           {[["Right", res.right + " / " + res.outOf, "var(--ink)"], ["Best combo", String(res.bestCombo), "var(--ink)"], ["Coins", "+" + res.coins, "var(--gold-ink)"]].map(([label, value, col]) => (
             <div key={label} className="rounded-xl py-2 px-1" style={{ background: "var(--surface-2)" }}>
-              <div className="font-display text-2xl tabular" style={{ color: col, lineHeight: 1.1 }}>{value}</div>
+              <div className="font-display text-2xl tabular" style={{ color: col, lineHeight: 1.1 }} dir="ltr">{value}</div>
               <div className="text-[11px] font-semibold uppercase tracking-wide" style={{ color: "var(--ink-faint)" }}>{label}</div>
             </div>
           ))}
@@ -3267,13 +3267,13 @@ function FixItRound({ tier, region, fx, onFinish, onAgain, onPals, onBack }){
   const mult = dashMult(Math.max(1, combo));
   const PRAISE = ["Nice!", "Spot on!", "Brilliant!", "You got it!", "Yes!", "Smart!"];
   return (
-    <div className="max-w-xl mx-auto w-full flex flex-col gap-4">
+    <div className="max-w-xl md:max-w-2xl 2xl:max-w-3xl mx-auto w-full flex flex-col gap-4">
       <div className="flex items-center gap-3">
         <button onClick={onBack} className="focus-ring text-[13px] font-semibold underline py-3 pe-3" style={{ color: "var(--ink-soft)" }}>Quit</button>
         <div className="flex-1 h-2 rounded-full overflow-hidden" style={{ background: "var(--border)" }} role="progressbar" aria-valuemin={0} aria-valuemax={qs.length} aria-valuenow={idx} aria-label="Round progress">
           <div className="h-full rounded-full" style={{ width: (idx / qs.length) * 100 + "%", background: "var(--gold)", transition: "width 250ms" }} />
         </div>
-        <span className="text-xs font-semibold tabular" style={{ color: "var(--ink-soft)" }}>{idx + 1} / {qs.length}</span>
+        <span className="text-xs font-semibold tabular" style={{ color: "var(--ink-soft)" }} dir="ltr">{idx + 1} / {qs.length}</span>
       </div>
       <div className="flex items-center justify-between gap-2">
         <span className="inline-flex items-center gap-1 rounded-full px-3 py-1 text-[13px] font-bold" style={{ background: combo >= 2 ? "var(--gold-tint)" : "var(--surface-2)", color: combo >= 2 ? "var(--gold-ink)" : "var(--ink-faint)" }} aria-live="polite">
@@ -3287,11 +3287,11 @@ function FixItRound({ tier, region, fx, onFinish, onAgain, onPals, onBack }){
             {stage === "spot" && verdict === null ? "Tap the word with the mistake" : stage === "fix" && verdict === null ? "Now choose the fix" : fixitSkillLabel(q.skill, region)}
             {q.retry && <span className="ms-2 font-bold" style={{ color: "var(--cyan-ink)" }}>{"· "}<span>Second chance</span></span>}
           </div>
-          <button type="button" onClick={()=>speakText(q.words.join(" "))} className="focus-ring inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[12px] font-bold shrink-0" style={{ background: "var(--surface-2)", color: "var(--ink)" }}>
+          <button type="button" onClick={()=>speakText(q.words.join(" "))} className="focus-ring inline-flex items-center gap-1 rounded-full px-3 min-h-[40px] text-[12px] font-bold shrink-0" style={{ background: "var(--surface-2)", color: "var(--ink)" }}>
             <IconMic size={13} strokeWidth={2.3} /> Read aloud
           </button>
         </div>
-        <div dir="ltr" lang="en" data-no-i18n="" className={"flex flex-wrap gap-x-1 gap-y-2 mb-5 font-read leading-snug " + (big ? "text-[26px]" : "text-[19px]")} role="group">
+        <div dir="ltr" lang="en" data-no-i18n="" className={"flex flex-wrap gap-x-1 gap-y-1 mb-5 font-read leading-snug " + (big ? "text-[26px] md:text-[32px] 2xl:text-[38px]" : "text-[19px] md:text-[22px] 2xl:text-[26px]")} role="group">
           {q.words.map((w, i) => {
             const isErr = i === q.at;
             let st = { borderColor: "transparent", background: "transparent", color: "var(--ink)" };
@@ -3302,7 +3302,7 @@ function FixItRound({ tier, region, fx, onFinish, onAgain, onPals, onBack }){
             else if (verdict === null && stage === "fix" && isErr) st = { borderColor: "var(--cyan)", background: "var(--cyan-tint)", color: "var(--ink)" };
             return (
               <button key={i} type="button" disabled={verdict !== null || stage !== "spot"} onClick={()=>spot(i)}
-                className="focus-ring rounded-lg border-2 px-1.5 py-0.5 disabled:cursor-default" style={{ ...st, cursor: verdict === null && stage === "spot" ? "pointer" : "default" }}>{shown}</button>
+                className="focus-ring rounded-lg border-2 px-1.5 min-h-[44px] min-w-[44px] inline-flex items-center justify-center disabled:cursor-default" style={{ ...st, cursor: verdict === null && stage === "spot" ? "pointer" : "default" }}>{shown}</button>
             );
           })}
         </div>
@@ -3314,7 +3314,7 @@ function FixItRound({ tier, region, fx, onFinish, onAgain, onPals, onBack }){
               if (verdict !== null && isCorrect) st = { borderColor: "var(--good)", background: "var(--good-tint)", color: "var(--ink)" };
               else if (verdict !== null && isChosen) st = { borderColor: "var(--bad)", background: "var(--bad-tint)", color: "var(--ink)" };
               return (
-                <button key={oi} disabled={verdict !== null} onClick={()=>pick(oi)} className={"focus-ring text-start rounded-xl border px-3.5 py-2.5 disabled:cursor-default flex items-start gap-2.5 font-read " + (big ? "text-[20px]" : "text-[16px]")} style={st}>
+                <button key={oi} disabled={verdict !== null} onClick={()=>pick(oi)} className={"focus-ring text-start rounded-xl border px-3.5 py-2.5 min-h-[48px] disabled:cursor-default flex items-start gap-2.5 font-read " + (big ? "text-[20px] md:text-[24px] 2xl:text-[28px]" : "text-[16px] md:text-[18px] 2xl:text-[21px]")} style={st}>
                   <span className="text-[11px] font-bold rounded-md px-1.5 py-0.5 mt-1 shrink-0 font-sans" style={{ background: "var(--surface-2)", color: "var(--ink-faint)" }} aria-hidden="true">{oi + 1}</span>
                   <span data-no-i18n="" lang="en">{opt}</span>
                 </button>
@@ -3331,11 +3331,11 @@ function FixItRound({ tier, region, fx, onFinish, onAgain, onPals, onBack }){
             ) : (
               <div className="rounded-xl p-3" style={{ background: "var(--bad-tint)" }}>
                 <p className="text-[13px] font-semibold" style={{ color: "var(--bad)" }}>Not quite. Here is the fixed sentence.</p>
-                <p className={"font-read mt-1 " + (big ? "text-[20px]" : "text-[16px]")} style={{ color: "var(--ink)" }} dir="ltr" lang="en" data-no-i18n="">{q.fixed}</p>
+                <p className={"font-read mt-1 " + (big ? "text-[20px] md:text-[24px] 2xl:text-[28px]" : "text-[16px] md:text-[18px] 2xl:text-[21px]")} style={{ color: "var(--ink)" }} dir="ltr" lang="en" data-no-i18n="">{q.fixed}</p>
                 {!q.retry && <p className="text-[12.5px] mt-1.5" style={{ color: "var(--ink-soft)" }}>This sentence will come back for a second chance.</p>}
               </div>
             )}
-            {(verdict === false || !big) && q.hint && <p className="text-[13px]" style={{ color: "var(--ink-soft)" }} data-no-i18n="" lang="en">{q.hint}</p>}
+            {(verdict === false || !big) && q.hint && <p className="text-[13px]" style={{ color: "var(--ink-soft)" }} data-no-i18n="" lang="en" dir="ltr">{q.hint}</p>}
           </div>
         )}
       </div>

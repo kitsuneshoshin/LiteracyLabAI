@@ -230,6 +230,28 @@ test("a missed question comes back once with the same fix and freshly shuffled c
   assert.equal(G.fixitRetry({ id: "nope" }, "middle", "uk", seeded()), null);
 });
 
+test("the screens adapt to the device: wider on big screens, easy to tap on phones, and correct right to left", () => {
+  const ui = APP.slice(APP.indexOf("function GamesHub("), APP.indexOf("// Tell us what you think: a short form"));
+  // Big screens: the home card, the round and the results grow, and so does the text.
+  assert.match(ui, /max-w-3xl lg:max-w-5xl 2xl:max-w-6xl/);
+  assert.match(ui, /sm:grid-cols-2 lg:grid-cols-3/, "skills: one column on a phone, two, then three");
+  assert.match(ui, /max-w-xl md:max-w-2xl 2xl:max-w-3xl/);
+  assert.match(ui, /text-\[19px\] md:text-\[22px\] 2xl:text-\[26px\]/);
+  assert.match(ui, /text-\[26px\] md:text-\[32px\] 2xl:text-\[38px\]/);
+  // Phones: the two main buttons stack full width, and every tappable thing is at least 40 to 48px.
+  assert.match(ui, /flex flex-col sm:flex-row/);
+  assert.equal((ui.match(/w-full sm:w-auto/g) || []).length, 2);
+  assert.match(ui, /min-h-\[44px\] min-w-\[44px\]/, "each word of the sentence");
+  assert.match(ui, /min-h-\[40px\] text-\[12px\]/, "read aloud");
+  assert.match(ui, /min-h-\[48px\]/, "the choices");
+  // Right to left: counters and scores keep their order, and the English reminder keeps its punctuation.
+  assert.match(ui, /dir="ltr">\{idx \+ 1\} \/ \{qs\.length\}/);
+  assert.match(ui, /dir="ltr">\{value\}/);
+  assert.match(ui, /lang="en" dir="ltr">\{q\.hint\}/);
+  // Nothing fixed-width that could push a phone sideways.
+  assert.ok(!/\bw-\[\d{3,}px\]|min-w-\[\d{3,}px\]|style=\{\{[^}]*\bwidth: \d{3,}\b/.test(ui), "a fixed width wider than a small phone");
+});
+
 test("it shares its coins, Word Pals and streak with Word Dash, and the screens are wired into the workspace", () => {
   const out = G.dashApplyRound(G.dashState(), { right: 10, outOf: 10, coins: 160, bestCombo: 10, perfect: true }, 20000, seeded());
   assert.equal(out.state.streak, 1);
