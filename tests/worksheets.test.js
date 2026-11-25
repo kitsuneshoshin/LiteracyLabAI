@@ -14,7 +14,7 @@ const ROOT = path.join(__dirname, "..");
 const SHEETS = W.SHEETS;
 const TYPES = ["retrieval", "vocabulary", "inference", "explain", "order", "summary", "language", "opinion", "quote"];
 const COUNTRY_KEY = Object.fromEntries(Object.entries(W.REGION).map(([k, r]) => [k, r.countryKey]));
-const PER_LEVEL = { uk: 5, us: 2, australia: 2 };
+const PER_LEVEL = { uk: 6, us: 2, australia: 2 };
 const norm = (s) => s.toLowerCase().replace(/[‘’]/g, "'").replace(/[“”]/g, '"');
 const passageText = (s) => s.passage.map((p) => (p.h ? p.h + " " : "") + p.p).join(" ");
 const sentences = (s) => s.passage.map((p) => p.p).join(" ").split(/(?<=[.!?])["”]?\s+/).filter(Boolean);
@@ -26,8 +26,8 @@ const NOT_FROM_PASSAGE = ["flew up smoothly and powerfully", "wax tablets", "won
 const SENTENCE_CAP = { uk: { 3: 12, 4: 15, 5: 17, 6: 20 }, us: { 3: 15, 4: 17, 5: 19, 6: 20 }, australia: { 3: 15, 4: 17, 5: 19, 6: 20 } };
 const WORDS = { uk: { 3: [150, 240], 4: [170, 270], 5: [260, 400], 6: [300, 480] }, us: { 3: [170, 270], 4: [250, 380], 5: [280, 420], 6: [300, 480] }, australia: { 3: [170, 270], 4: [250, 380], 5: [280, 420], 6: [300, 480] } };
 
-test("the sheets: UK Years 3 to 6 (five each), US Grades 3 to 6 and Australian Years 3 to 6 (two each), all with unique ids", () => {
-  assert.equal(SHEETS.length, 20 + 8 + 8);
+test("the sheets: UK Years 3 to 6 (six each), US Grades 3 to 6 and Australian Years 3 to 6 (two each), all with unique ids", () => {
+  assert.equal(SHEETS.length, 24 + 8 + 8);
   assert.equal(new Set(SHEETS.map((s) => s.id)).size, SHEETS.length);
   for (const region of ["uk", "us", "australia"]) {
     for (const y of [3, 4, 5, 6]) assert.equal(of(region).filter((s) => W.yearNum(s.year) === y).length, PER_LEVEL[region], `${region} ${y}`);

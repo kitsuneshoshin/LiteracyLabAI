@@ -158,8 +158,8 @@ const EXAM = {
 
   "gcse-english-language-explained": {
     slug: "gcse-english-language-explained",
-    title: "GCSE English Language assessment objectives: AO1 to AO6 (AQA)",
-    description: "GCSE English Language assessment objectives AO1 to AO6 explained: what AO5 and AO6 mean, how many marks each carries on AQA Papers 1 and 2, and how to help.",
+    title: "What are AO5 and AO6 in GCSE English Language? AQA guide",
+    description: "AO5 is content and organisation (24 marks) and AO6 is technical accuracy (16 marks) in AQA's 40-mark writing questions. AO1 to AO4 explained too.",
     lead: "GCSE English Language is marked against six assessment objectives, usually shortened to AO1 to AO6: AO1 to AO4 for reading, and AO5 (content and organisation) and AO6 (technical accuracy) for writing. Knowing what they mean, and how they appear in each paper, shows you exactly what examiners are looking for. This guide uses the AQA specification, the most widely taught. Other exam boards have similar objectives but different paper structures, so check your own board's specification.",
     sections: [
       { h: "The GCSE English Language assessment objectives at a glance", ul: [
