@@ -2761,6 +2761,22 @@ function fixitRecord(state, answers){
   }
   return { stats, recent: s.recent.concat(answers.map((a) => a.id)).slice(-80) };
 }
+// Joins two copies of one learner's skill record (this device and the account): for each skill the copy with more answers
+// behind it wins (the larger right count on a tie), and the questions seen lately are put together. Same rules as
+// api/_lib/vocabGame.js, so two devices never undo each other.
+function fixitMerge(a, b){
+  const A = fixitState(a), B = fixitState(b);
+  const stats = {};
+  for (const k of Object.keys(FIXIT_SKILLS)) {
+    const x = A.stats[k], y = B.stats[k];
+    if (!x && !y) continue;
+    stats[k] = !x ? y : !y ? x : y.n > x.n || (y.n === x.n && y.r > x.r) ? y : x;
+  }
+  const seen = new Set(), recent = [];
+  for (const id of A.recent.concat(B.recent)) if (!seen.has(id)) { seen.add(id); recent.push(id); }
+  return { stats, recent: recent.slice(-80) };
+}
+const fixitSame = (a, b) => JSON.stringify(fixitState(a)) === JSON.stringify(fixitState(b));
 // ---- Fix It rules (end)
 
 // ---- Boss Battle rules (start). The parts of a child's OWN piece that the feedback flagged as a Grow, each with the
@@ -3101,7 +3117,7 @@ function DashRound({ words, boxes, onRate, onFinish, onAgain, onPals, onBack }){
 
 // The Games tab. For now it holds Fix It, a writing game that shares its coins, Word Pals and streak with Word Dash.
 // Progress is joined with the account's copy of the game the same way the vocabulary tab does it (only on plans that
-// save the game to the account); how each skill is going is kept on this device.
+// save the game to the account). How each skill is going is joined the same way and travels in the same saved game.
 function GamesHub({ plan, country, tier, childId, session, backendLive }){
   const region = fixitRegion(country);
   const canSync = !!(backendLive && childId && session && planMeta(plan).vocabBank);
@@ -3121,7 +3137,11 @@ function GamesHub({ plan, country, tier, childId, session, backendLive }){
         if (cancelled || d.vocabLocked) return;
         const joined = dashMerge(dashLoad(childId), d.vocabGame);
         setDash(joined); dashSave(childId, joined);
-        if (!dashSame(joined, d.vocabGame)) authedFetch(session, "/api/history", { method: "POST", body: JSON.stringify({ childId, game: joined }) }).catch(() => {});
+        const remoteFx = d.vocabGame && d.vocabGame.fixit;
+        const joinedFx = fixitMerge(fixitLoad(childId), remoteFx);
+        setFx(joinedFx); fixitSave(childId, joinedFx);
+        // Whatever the account lacks (a new device's games, a first ever sync) is sent up, joined with what it has.
+        if (!dashSame(joined, d.vocabGame) || !fixitSame(joinedFx, remoteFx)) authedFetch(session, "/api/history", { method: "POST", body: JSON.stringify({ childId, game: { ...joined, fixit: joinedFx } }) }).catch(() => {});
       })
       .catch(() => {});
     return ()=>{ cancelled = true; };
@@ -3130,9 +3150,15 @@ function GamesHub({ plan, country, tier, childId, session, backendLive }){
   function startRound(){ logEvent("fixit_start", { tier }, childId); setRoundKey((k) => k + 1); setView("round"); }
   // Called when a round ends: adds it to the shared game and to the skill record, and hands back what changed for the summary.
   function finishRound(res, answers){
-    const out = dashFinishRound(dash, res, { childId, session, canSync, onJoined: (g) => setDash((prev) => { const m = dashMerge(prev, g); if (childId) dashSave(childId, m); return m; }) });
-    setDash(out.state);
     const nextFx = fixitRecord(fx, answers);
+    const out = dashFinishRound(dash, res, {
+      childId, session, canSync, extra: { fixit: nextFx },
+      onJoined: (g) => {
+        setDash((prev) => { const m = dashMerge(prev, g); if (childId) dashSave(childId, m); return m; });
+        if (g.fixit) setFx((prev) => { const m = fixitMerge(prev, g.fixit); if (childId) fixitSave(childId, m); return m; });
+      },
+    });
+    setDash(out.state);
     setFx(nextFx);
     if (childId) fixitSave(childId, nextFx);
     logEvent("fixit_round", { status: res.stars }, childId);
@@ -3407,11 +3433,11 @@ function FixItRound({ tier, region, fx, onFinish, onAgain, onPals, onBack }){
 
 // Adds a finished round to the shared game (coins, egg, Word Pals, streak), saves it on this device and, on plans that keep
 // the game on the account, saves it there too. `onJoined` hears the account's joined copy (a second device may have played).
-function dashFinishRound(dash, res, { childId, session, canSync, onJoined }){
+function dashFinishRound(dash, res, { childId, session, canSync, onJoined, extra }){
   const out = dashApplyRound(dash, res, dashDay(Date.now()), Math.random);
   if (childId) dashSave(childId, out.state);
   if (canSync && childId && session) {
-    authedFetch(session, "/api/history", { method: "POST", body: JSON.stringify({ childId, game: out.state }) })
+    authedFetch(session, "/api/history", { method: "POST", body: JSON.stringify({ childId, game: { ...out.state, ...(extra || {}) } }) })
       .then((r) => { if (r && r.game && onJoined) onJoined(r.game); })
       .catch(() => {});
   }
