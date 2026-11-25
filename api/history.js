@@ -5,6 +5,7 @@ const { getMonthlyUsage } = require("./_lib/usage");
 const { dedupeByTerm, buildQuiz } = require("./_lib/vocabQuiz");
 const { readVocabProgress, writeVocabProgress } = require("./_lib/vocabProgress");
 const { readVocabGame, writeVocabGame } = require("./_lib/vocabGame");
+const { countFixes } = require("./_lib/bossFixes");
 const { checkRateLimit } = require("./_lib/rateLimit");
 const { translatableLanguage } = require("./_lib/languages");
 const { translateFeedback } = require("./_lib/translateFeedback");
@@ -203,6 +204,8 @@ module.exports = async function handler(req, res) {
         id: s.id, kind: s.kind, tier: s.tier, createdAt: s.created_at,
         score: s.score, totalQuestions: s.total_questions, wordCount: s.word_count,
         glowSnippet: s.feedback?.glow ? String(s.feedback.glow).slice(0, 140) : null,
+        // How many Boss Battle bosses the feedback could give (0 for reading, and for a piece with no Grow that has a rewrite).
+        fixes: s.kind === "writing" ? countFixes(s.feedback) : 0,
         // Writing only (see api/_lib/prompt.js's overallScoreClause) - a
         // holistic 1-10 judged against the WHOLE piece, deliberately kept
         // separate from the mastery trend line above (computeTimeline),

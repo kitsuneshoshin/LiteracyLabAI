@@ -678,6 +678,13 @@
   "Turn the parts of your story that need work into a boss. Fix them to win coins for your Word Pals.": "Transformă părțile din povestea ta care au nevoie de lucru într-un șef. Corectează-le ca să câștigi monede pentru Prietenii tăi de cuvinte.",
   "Start Boss Battle": "Începe Boss Battle",
   "Good thinking. Remember this fix for next time.": "Te-ai gândit bine. Ține minte această corectură pentru data viitoare.",
-  "Boss health": "Viața șefului"
+  "Boss health": "Viața șefului",
+  "Battle the sentences from your own pieces that need work.": "Luptă-te cu propozițiile din textele tale care au nevoie de lucru.",
+  "Your pieces with sentences to fix": "Textele tale cu propoziții de corectat",
+  "Bosses: {n0}": "Șefi: {n0}",
+  "Battle": "Luptă",
+  "Finish a piece of writing and read its feedback to unlock boss battles here.": "Termină un text și citește feedbackul lui ca să deblochezi aici luptele cu șefii.",
+  "Couldn't open that piece right now. Please try again.": "Nu s-a putut deschide acest text acum. Încearcă din nou.",
+  "This piece has no sentences to battle.": "Acest text nu are propoziții de luptat."
  }
 }

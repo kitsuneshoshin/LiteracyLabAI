@@ -670,6 +670,13 @@
   "Turn the parts of your story that need work into a boss. Fix them to win coins for your Word Pals.": "把故事中需要改进的部分变成一个头目。改对它们，为你的词语伙伴赢取金币。",
   "Start Boss Battle": "开始 Boss Battle",
   "Good thinking. Remember this fix for next time.": "想得好。下次记住这个改法。",
-  "Boss health": "头目血量"
+  "Boss health": "头目血量",
+  "Battle the sentences from your own pieces that need work.": "挑战你自己作品中需要改进的句子。",
+  "Your pieces with sentences to fix": "有句子可改的作品",
+  "Bosses: {n0}": "头目：{n0}",
+  "Battle": "挑战",
+  "Finish a piece of writing and read its feedback to unlock boss battles here.": "完成一篇写作并阅读它的反馈，就能在这里解锁头目挑战。",
+  "Couldn't open that piece right now. Please try again.": "暂时无法打开这篇作品。请再试一次。",
+  "This piece has no sentences to battle.": "这篇作品没有可挑战的句子。"
  }
 }

@@ -682,6 +682,13 @@
   "Turn the parts of your story that need work into a boss. Fix them to win coins for your Word Pals.": "Zamień fragmenty swojej historii, które wymagają pracy, w bossa. Popraw je, by wygrać monety dla Twoich Słownych Kumpli.",
   "Start Boss Battle": "Zacznij Boss Battle",
   "Good thinking. Remember this fix for next time.": "Dobre myślenie. Zapamiętaj tę poprawkę na następny raz.",
-  "Boss health": "Życie bossa"
+  "Boss health": "Życie bossa",
+  "Battle the sentences from your own pieces that need work.": "Zmierz się ze zdaniami z własnych prac, które wymagają poprawy.",
+  "Your pieces with sentences to fix": "Twoje prace ze zdaniami do poprawy",
+  "Bosses: {n0}": "Bossowie: {n0}",
+  "Battle": "Walcz",
+  "Finish a piece of writing and read its feedback to unlock boss battles here.": "Skończ pracę pisemną i przeczytaj informację zwrotną, aby tu odblokować walki z bossami.",
+  "Couldn't open that piece right now. Please try again.": "Nie udało się teraz otworzyć tej pracy. Spróbuj ponownie.",
+  "This piece has no sentences to battle.": "Ta praca nie ma zdań do walki."
  }
 }

@@ -674,6 +674,13 @@
   "Turn the parts of your story that need work into a boss. Fix them to win coins for your Word Pals.": "अपनी कहानी के जिन हिस्सों पर काम चाहिए, उन्हें एक बॉस बना दें। उन्हें ठीक करके अपने शब्द-साथियों के लिए सिक्के जीतें।",
   "Start Boss Battle": "Boss Battle शुरू करें",
   "Good thinking. Remember this fix for next time.": "अच्छी सोच। अगली बार के लिए यह सुधार याद रखें।",
-  "Boss health": "बॉस की सेहत"
+  "Boss health": "बॉस की सेहत",
+  "Battle the sentences from your own pieces that need work.": "अपनी लिखी रचनाओं के उन वाक्यों से भिड़ें जिन पर काम चाहिए।",
+  "Your pieces with sentences to fix": "आपकी वे रचनाएँ जिनमें ठीक करने लायक वाक्य हैं",
+  "Bosses: {n0}": "बॉस: {n0}",
+  "Battle": "भिड़ें",
+  "Finish a piece of writing and read its feedback to unlock boss battles here.": "कोई रचना पूरी करें और उसका फ़ीडबैक पढ़ें, तब यहाँ बॉस की लड़ाइयाँ खुलेंगी।",
+  "Couldn't open that piece right now. Please try again.": "यह रचना अभी नहीं खुल सकी। कृपया फिर कोशिश करें।",
+  "This piece has no sentences to battle.": "इस रचना में लड़ने के लिए कोई वाक्य नहीं है।"
  }
 }

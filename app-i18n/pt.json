@@ -674,6 +674,13 @@
   "Turn the parts of your story that need work into a boss. Fix them to win coins for your Word Pals.": "Transforme as partes da sua história que precisam de trabalho num chefe. Corrija-as para ganhar moedas para os seus Amigos das Palavras.",
   "Start Boss Battle": "Começar Boss Battle",
   "Good thinking. Remember this fix for next time.": "Bem pensado. Lembre-se desta correção para a próxima vez.",
-  "Boss health": "Vida do chefe"
+  "Boss health": "Vida do chefe",
+  "Battle the sentences from your own pieces that need work.": "Enfrente as frases dos seus próprios textos que precisam de trabalho.",
+  "Your pieces with sentences to fix": "Os seus textos com frases para corrigir",
+  "Bosses: {n0}": "Chefes: {n0}",
+  "Battle": "Lutar",
+  "Finish a piece of writing and read its feedback to unlock boss battles here.": "Termine um texto e leia o feedback dele para desbloquear aqui as batalhas contra chefes.",
+  "Couldn't open that piece right now. Please try again.": "Não foi possível abrir esse texto agora. Tente novamente.",
+  "This piece has no sentences to battle.": "Este texto não tem frases para enfrentar."
  }
 }

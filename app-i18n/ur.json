@@ -674,6 +674,13 @@
   "Turn the parts of your story that need work into a boss. Fix them to win coins for your Word Pals.": "اپنی کہانی کے وہ حصے جن پر کام درکار ہے، ایک باس میں بدل دیں۔ انہیں ٹھیک کر کے اپنے لفظی ساتھیوں کے لیے سکے جیتیں۔",
   "Start Boss Battle": "Boss Battle شروع کریں",
   "Good thinking. Remember this fix for next time.": "اچھی سوچ۔ اگلی بار کے لیے یہ درستی یاد رکھیں۔",
-  "Boss health": "باس کی صحت"
+  "Boss health": "باس کی صحت",
+  "Battle the sentences from your own pieces that need work.": "اپنی تحریروں کے ان جملوں سے مقابلہ کریں جن پر کام درکار ہے۔",
+  "Your pieces with sentences to fix": "آپ کی وہ تحریریں جن میں درست کرنے کے جملے ہیں",
+  "Bosses: {n0}": "باس: {n0}",
+  "Battle": "مقابلہ",
+  "Finish a piece of writing and read its feedback to unlock boss battles here.": "تحریر مکمل کریں اور اس کا فیڈ بیک پڑھیں تاکہ یہاں باس کے مقابلے کھلیں۔",
+  "Couldn't open that piece right now. Please try again.": "یہ تحریر ابھی نہیں کھل سکی۔ دوبارہ کوشش کریں۔",
+  "This piece has no sentences to battle.": "اس تحریر میں مقابلے کے لیے کوئی جملہ نہیں۔"
  }
 }

@@ -674,6 +674,13 @@
   "Turn the parts of your story that need work into a boss. Fix them to win coins for your Word Pals.": "আপনার গল্পের যে অংশগুলোতে কাজ দরকার, সেগুলোকে একটি বস বানিয়ে ফেলুন। সেগুলো ঠিক করে আপনার শব্দ-বন্ধুদের জন্য কয়েন জিতুন।",
   "Start Boss Battle": "Boss Battle শুরু করুন",
   "Good thinking. Remember this fix for next time.": "ভালো ভাবনা। পরের বারের জন্য এই সংশোধন মনে রাখুন।",
-  "Boss health": "বসের স্বাস্থ্য"
+  "Boss health": "বসের স্বাস্থ্য",
+  "Battle the sentences from your own pieces that need work.": "নিজের লেখার যে বাক্যগুলোতে কাজ দরকার, সেগুলোর সঙ্গে লড়াই করুন।",
+  "Your pieces with sentences to fix": "আপনার যেসব লেখায় ঠিক করার মতো বাক্য আছে",
+  "Bosses: {n0}": "বস: {n0}",
+  "Battle": "লড়ুন",
+  "Finish a piece of writing and read its feedback to unlock boss battles here.": "একটি লেখা শেষ করে তার ফিডব্যাক পড়ুন, তাহলে এখানে বসের লড়াই খুলবে।",
+  "Couldn't open that piece right now. Please try again.": "এই লেখাটি এখন খোলা যায়নি। আবার চেষ্টা করুন।",
+  "This piece has no sentences to battle.": "এই লেখায় লড়ার মতো কোনো বাক্য নেই।"
  }
 }

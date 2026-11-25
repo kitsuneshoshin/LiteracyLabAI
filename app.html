@@ -2842,6 +2842,14 @@ function bossTotals(results){
     coins: list.reduce((s, r) => s + BOSS_COINS[r], 0), bestCombo: best,
   };
 }
+// The past pieces the Games tab offers: writing only, newest first, only those whose feedback could give a boss (the activity
+// list carries that as `fixes`, see api/_lib/bossFixes.js), at most eight.
+function bossPieces(recent, max = 8){
+  return (Array.isArray(recent) ? recent : [])
+    .filter((r) => r && r.kind === "writing" && r.id && Number(r.fixes) > 0)
+    .slice(0, max)
+    .map((r) => ({ id: r.id, createdAt: r.createdAt, wordCount: r.wordCount, bosses: Math.min(BOSS_MAX, Math.floor(Number(r.fixes))) }));
+}
 // ---- Boss Battle rules (end)
 
 // The card on the word list: streak, egg and the way in.
@@ -3118,23 +3126,69 @@ function DashRound({ words, boxes, onRate, onFinish, onAgain, onPals, onBack }){
 // The Games tab. For now it holds Fix It, a writing game that shares its coins, Word Pals and streak with Word Dash.
 // Progress is joined with the account's copy of the game the same way the vocabulary tab does it (only on plans that
 // save the game to the account). How each skill is going is joined the same way and travels in the same saved game.
+// The Boss Battle card on the Games tab: the learner's own past pieces that have sentences to fix, newest first.
+function BossPieces({ pieces, opening, error, onOpen }){
+  const fmt = (iso) => new Date(iso).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
+  return (
+    <div className="card p-5 sm:p-6" style={{ borderInlineStart: "4px solid var(--bad)" }} aria-label="Boss Battle">
+      <div className="flex items-center gap-2 flex-wrap">
+        <span aria-hidden="true" className="text-2xl">👾</span>
+        <h3 className="font-display text-2xl" style={{ color: "var(--ink)" }}>Boss Battle</h3>
+      </div>
+      <p className="text-[13.5px] mt-1" style={{ color: "var(--ink)" }}>Battle the sentences from your own pieces that need work.</p>
+      {error && <p className="text-[13px] font-semibold mt-2" style={{ color: "var(--bad)" }} role="status">{error}</p>}
+      {pieces === null ? (
+        <p className="text-[13px] mt-3" style={{ color: "var(--ink-faint)" }}>Loading…</p>
+      ) : pieces.length === 0 ? (
+        <p className="text-[13px] mt-3" style={{ color: "var(--ink-soft)" }}>Finish a piece of writing and read its feedback to unlock boss battles here.</p>
+      ) : (
+        <div className="mt-4">
+          <div className="label-mono mb-2" style={{ color: "var(--ink-soft)" }}>Your pieces with sentences to fix</div>
+          <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-3">
+            {pieces.map((p) => (
+              <div key={p.id} className="flex items-center justify-between gap-3 rounded-xl px-3 py-2" style={{ background: "var(--surface-2)" }}>
+                <div className="min-w-0">
+                  <div className="text-[13px] font-semibold" style={{ color: "var(--ink)" }}>{fmt(p.createdAt)}</div>
+                  <div className="text-[12px]" style={{ color: "var(--ink-soft)" }}>
+                    {p.wordCount != null && <><span>{p.wordCount + " words"}</span> · </>}<span>{"Bosses: " + p.bosses}</span>
+                  </div>
+                </div>
+                <button type="button" disabled={!!opening} onClick={()=>onOpen(p.id)} className="focus-ring rounded-full px-4 min-h-[44px] text-sm font-bold shrink-0 disabled:opacity-50" style={{ background: "var(--gold)", color: "var(--on-solid)" }}>
+                  {opening === p.id ? "Loading…" : "Battle"}
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function GamesHub({ plan, country, tier, childId, session, backendLive }){
   const region = fixitRegion(country);
   const canSync = !!(backendLive && childId && session && planMeta(plan).vocabBank);
   const [dash, setDash] = useState(() => dashState());
   const [fx, setFx] = useState(() => fixitState());
-  const [view, setView] = useState("home"); // home | round | pals
+  const [view, setView] = useState("home"); // home | round | pals | boss
   const [roundKey, setRoundKey] = useState(0);
+  const online = !!(backendLive && childId && session);
+  const [pieces, setPieces] = useState(null); // past pieces that can be battled: null = loading, false = not available
+  const [opening, setOpening] = useState("");
+  const [openError, setOpenError] = useState("");
+  const [battle, setBattle] = useState(null); // { text, highlights } of the piece being battled
 
   useEffect(()=>{
-    setView("home");
+    setView("home"); setBattle(null); setOpenError(""); setOpening(""); setPieces(online ? null : false);
     setDash(childId ? dashLoad(childId) : dashState());
     setFx(childId ? fixitLoad(childId) : fixitState());
-    if (!canSync) return;
+    if (!online) return;
     let cancelled = false;
     authedFetch(session, `/api/history?childId=${childId}`)
       .then(d => {
-        if (cancelled || d.vocabLocked) return;
+        if (cancelled) return;
+        setPieces(bossPieces(d.recent));
+        if (!canSync || d.vocabLocked) return;
         const joined = dashMerge(dashLoad(childId), d.vocabGame);
         setDash(joined); dashSave(childId, joined);
         const remoteFx = d.vocabGame && d.vocabGame.fixit;
@@ -3143,9 +3197,23 @@ function GamesHub({ plan, country, tier, childId, session, backendLive }){
         // Whatever the account lacks (a new device's games, a first ever sync) is sent up, joined with what it has.
         if (!dashSame(joined, d.vocabGame) || !fixitSame(joinedFx, remoteFx)) authedFetch(session, "/api/history", { method: "POST", body: JSON.stringify({ childId, game: { ...joined, fixit: joinedFx } }) }).catch(() => {});
       })
-      .catch(() => {});
+      .catch(() => { if (!cancelled) setPieces(false); });
     return ()=>{ cancelled = true; };
-  }, [childId, canSync]);
+  }, [childId, canSync, online]);
+
+  // Opens one past piece in full (what was written and the feedback given) and starts a battle with its flagged sentences.
+  async function openPiece(id){
+    setOpening(id); setOpenError("");
+    try {
+      const d = await authedFetch(session, `/api/history?childId=${childId}&submissionId=${encodeURIComponent(id)}`, { cache: "no-store" });
+      const highlights = d && d.feedback ? d.feedback.highlights : null;
+      if (!d || typeof d.text !== "string" || bossList(d.text, highlights).length === 0) setOpenError("This piece has no sentences to battle.");
+      else { setBattle({ text: d.text, highlights }); setView("boss"); }
+    } catch (e) {
+      setOpenError("Couldn't open that piece right now. Please try again.");
+    }
+    setOpening("");
+  }
 
   function startRound(){ logEvent("fixit_start", { tier }, childId); setRoundKey((k) => k + 1); setView("round"); }
   // Called when a round ends: adds it to the shared game and to the skill record, and hands back what changed for the summary.
@@ -3166,12 +3234,18 @@ function GamesHub({ plan, country, tier, childId, session, backendLive }){
   }
 
   if (view === "pals") return <DashPals dash={dash} onBack={()=>setView("home")} />;
+  if (view === "boss" && battle) {
+    // The battle saves its own coins; the home page picks them up again from this device when it comes back.
+    return <BossBattle key={"b" + roundKey + (battle.text || "").length} text={battle.text} highlights={battle.highlights} plan={plan} tier={tier} childId={childId} session={session} backendLive={backendLive}
+      backLabel="Back" onBack={()=>{ setBattle(null); setView("home"); setDash(childId ? dashLoad(childId) : dashState()); }} />;
+  }
   if (view === "round") return <FixItRound key={roundKey} tier={tier} region={region} fx={fx} onFinish={finishRound} onAgain={startRound} onPals={()=>setView("pals")} onBack={()=>setView("home")} />;
-  return <FixItHome dash={dash} fx={fx} tier={tier} region={region} onPlay={startRound} onPals={()=>setView("pals")} />;
+  return <FixItHome dash={dash} fx={fx} tier={tier} region={region} onPlay={startRound} onPals={()=>setView("pals")}
+    middle={pieces === false ? null : <BossPieces pieces={pieces} opening={opening} error={openError} onOpen={openPiece} />} />;
 }
 
 // The card on the Games tab: streak, egg, the way in, and how each skill is going.
-function FixItHome({ dash, fx, tier, region, onPlay, onPals }){
+function FixItHome({ dash, fx, tier, region, onPlay, onPals, middle }){
   const today = dashDay(Date.now());
   const sh = dashStreakShown(dash, today);
   const played = dash.lastDay === today;
@@ -3214,6 +3288,7 @@ function FixItHome({ dash, fx, tier, region, onPlay, onPals }){
           </div>
         </div>
       </div>
+      {middle}
       <div className="card p-5 sm:p-6">
         <div className="label-mono mb-3" style={{ color: "var(--ink-soft)" }}>Your skills</div>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
@@ -3460,7 +3535,7 @@ function BossBattleCard({ count, onStart }){
   );
 }
 
-function BossBattle({ text, highlights, plan, tier, childId, session, backendLive, onBack, onGames }){
+function BossBattle({ text, highlights, plan, tier, childId, session, backendLive, onBack, onGames, backLabel = "Back to my feedback" }){
   const bosses = useMemo(() => bossList(text, highlights), [text, highlights]);
   const canSync = !!(backendLive && childId && session && planMeta(plan).vocabBank);
   const total = bosses.length;
@@ -3505,7 +3580,7 @@ function BossBattle({ text, highlights, plan, tier, childId, session, backendLiv
   if (total === 0) {
     return (
       <div className="card p-6 max-w-xl mx-auto w-full">
-        <button onClick={onBack} className="focus-ring w-full rounded-full py-3 text-sm font-bold" style={{ background: "var(--surface-2)", color: "var(--ink)" }}>Back to my feedback</button>
+        <button onClick={onBack} className="focus-ring w-full rounded-full py-3 text-sm font-bold" style={{ background: "var(--surface-2)", color: "var(--ink)" }}>{backLabel}</button>
       </div>
     );
   }
@@ -3549,7 +3624,7 @@ function BossBattle({ text, highlights, plan, tier, childId, session, backendLiv
           {out.earnedFreeze && <span><span aria-hidden="true">❄</span> {"You earned a streak freeze. It covers one missed day."}</span>}
         </div>
         <div className="flex gap-2 flex-wrap justify-center w-full">
-          <button onClick={onBack} className="focus-ring rounded-full px-5 py-3 text-sm font-bold" style={{ background: "var(--gold)", color: "var(--on-solid)" }}>Back to my feedback</button>
+          <button onClick={onBack} className="focus-ring rounded-full px-5 py-3 text-sm font-bold" style={{ background: "var(--gold)", color: "var(--on-solid)" }}>{backLabel}</button>
           {onGames && <button onClick={onGames} className="focus-ring rounded-full px-5 py-3 text-sm font-bold" style={{ background: "var(--surface-2)", color: "var(--ink)" }}>Play Fix It</button>}
         </div>
       </div>

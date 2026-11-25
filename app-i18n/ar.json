@@ -690,6 +690,13 @@
   "Turn the parts of your story that need work into a boss. Fix them to win coins for your Word Pals.": "حوّل الأجزاء التي تحتاج إلى تحسين في قصتك إلى زعيم. صحّحها لتربح عملات لرفاق الكلمات.",
   "Start Boss Battle": "ابدأ Boss Battle",
   "Good thinking. Remember this fix for next time.": "تفكير جيد. تذكّر هذا التصحيح في المرة القادمة.",
-  "Boss health": "صحة الزعيم"
+  "Boss health": "صحة الزعيم",
+  "Battle the sentences from your own pieces that need work.": "واجه الجمل في كتاباتك التي تحتاج إلى تحسين.",
+  "Your pieces with sentences to fix": "كتاباتك التي فيها جمل تحتاج إلى تصحيح",
+  "Bosses: {n0}": "الزعماء: {n0}",
+  "Battle": "قاتل",
+  "Finish a piece of writing and read its feedback to unlock boss battles here.": "أنهِ قطعة كتابة واقرأ ملاحظاتها لتفتح هنا معارك الزعماء.",
+  "Couldn't open that piece right now. Please try again.": "تعذّر فتح هذه القطعة الآن. حاول مرة أخرى.",
+  "This piece has no sentences to battle.": "ليس في هذه القطعة جمل لمواجهتها."
  }
 }
