@@ -166,7 +166,6 @@
   "Unlimited writing &amp; reading submissions": "不限次数的写作与阅读提交",
   "26-week progress trend, not just today's score": "26 周进步趋势，而不只是今天的分数",
   "Anonymous ranking against their own year group": "在本年级内的匿名排名",
-  "Vocabulary bank with flashcards, a quiz and progress saved across devices": "词汇库，配有闪卡、测验，进度跨设备保存",
   "Choose Core": "选择 Core",
   "One learner. Cancel anytime.": "一名学生。随时取消。",
   "Premium": "Premium",
@@ -216,7 +215,6 @@
   "Reopen past work &amp; feedback": "重新打开过往作品与反馈",
   "Last 10": "最近 10 次",
   "Full history": "完整历史",
-  "Vocabulary bank, flashcards &amp; self-test quiz, with progress saved across devices": "词汇库、闪卡和自测测验，进度跨设备保存",
   "Account": "账户",
   "Export or delete your data": "导出或删除你的数据",
   "Cancel anytime, no contract": "随时取消，无合约",
@@ -254,7 +252,12 @@
   "Workspace": "应用",
   "About": "关于",
   "Privacy": "隐私（英文）",
-  "Terms": "条款（英文）"
+  "Terms": "条款（英文）",
+  "Fix It and Boss Battle, writing games with coins, Word Pals and a daily streak": "Fix It 和 Boss Battle：写作游戏，有金币、词语伙伴和每日连续记录",
+  "Vocabulary bank with flashcards, a quiz and Word Dash, with game progress saved across devices": "词汇库，配有闪卡、测验和 Word Dash，游戏进度跨设备保存",
+  "Vocabulary bank, flashcards, self-test quiz and Word Dash, with progress saved across devices": "词汇库、闪卡、自测测验和 Word Dash，进度跨设备保存",
+  "Game progress (coins, Word Pals, streak) saved to your account": "游戏进度（金币、词语伙伴、连续记录）保存到你的账户",
+  "This device only": "仅限此设备"
  },
  "script": {
   "'READ IT'": "'阅读'",

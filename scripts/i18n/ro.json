@@ -166,7 +166,6 @@
   "Unlimited writing &amp; reading submissions": "Lucrări de scris și citit nelimitate",
   "26-week progress trend, not just today's score": "Tendința progresului pe 26 de săptămâni, nu doar nota de azi",
   "Anonymous ranking against their own year group": "Clasament anonim în propria clasă",
-  "Vocabulary bank with flashcards, a quiz and progress saved across devices": "Bancă de vocabular cu flashcard-uri, un test și progres salvat pe toate dispozitivele",
   "Choose Core": "Alege Core",
   "One learner. Cancel anytime.": "Un elev. Anulezi oricând.",
   "Premium": "Premium",
@@ -216,7 +215,6 @@
   "Reopen past work &amp; feedback": "Redeschide lucrări și feedbackuri vechi",
   "Last 10": "Ultimele 10",
   "Full history": "Istoric complet",
-  "Vocabulary bank, flashcards &amp; self-test quiz, with progress saved across devices": "Bancă de vocabular, flashcard-uri și test de autoevaluare, cu progres salvat pe toate dispozitivele",
   "Account": "Cont",
   "Export or delete your data": "Exportă sau șterge-ți datele",
   "Cancel anytime, no contract": "Anulezi oricând, fără contract",
@@ -254,7 +252,12 @@
   "Workspace": "Aplicația",
   "About": "Despre noi",
   "Privacy": "Confidențialitate (în engleză)",
-  "Terms": "Termeni (în engleză)"
+  "Terms": "Termeni (în engleză)",
+  "Fix It and Boss Battle, writing games with coins, Word Pals and a daily streak": "Fix It și Boss Battle, jocuri de scris cu monede, Prieteni de cuvinte și o serie zilnică",
+  "Vocabulary bank with flashcards, a quiz and Word Dash, with game progress saved across devices": "Bancă de vocabular cu flashcard-uri, un test și Word Dash, cu progresul din jocuri salvat pe toate dispozitivele",
+  "Vocabulary bank, flashcards, self-test quiz and Word Dash, with progress saved across devices": "Bancă de vocabular, flashcard-uri, test de autoevaluare și Word Dash, cu progres salvat pe toate dispozitivele",
+  "Game progress (coins, Word Pals, streak) saved to your account": "Progresul din jocuri (monede, Prieteni de cuvinte, serie) salvat în contul tău",
+  "This device only": "Doar pe acest dispozitiv"
  },
  "script": {
   "'READ IT'": "'CITIRE'",

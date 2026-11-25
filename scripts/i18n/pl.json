@@ -166,7 +166,6 @@
   "Unlimited writing &amp; reading submissions": "Nielimitowane prace pisemne i czytelnicze",
   "26-week progress trend, not just today's score": "26-tygodniowy trend postępów, a nie tylko dzisiejszy wynik",
   "Anonymous ranking against their own year group": "Anonimowy ranking na tle własnego rocznika",
-  "Vocabulary bank with flashcards, a quiz and progress saved across devices": "Bank słownictwa z fiszkami, quizem i postępami zapisanymi na wszystkich urządzeniach",
   "Choose Core": "Wybierz Core",
   "One learner. Cancel anytime.": "Jeden uczeń. Rezygnacja w każdej chwili.",
   "Premium": "Premium",
@@ -216,7 +215,6 @@
   "Reopen past work &amp; feedback": "Wracanie do dawnych prac i informacji zwrotnych",
   "Last 10": "Ostatnie 10",
   "Full history": "Pełna historia",
-  "Vocabulary bank, flashcards &amp; self-test quiz, with progress saved across devices": "Bank słownictwa, fiszki i quiz sprawdzający, z postępami zapisanymi na wszystkich urządzeniach",
   "Account": "Konto",
   "Export or delete your data": "Eksport lub usunięcie danych",
   "Cancel anytime, no contract": "Rezygnacja w każdej chwili, bez umowy",
@@ -254,7 +252,12 @@
   "Workspace": "Aplikacja",
   "About": "O nas",
   "Privacy": "Prywatność (po angielsku)",
-  "Terms": "Warunki (po angielsku)"
+  "Terms": "Warunki (po angielsku)",
+  "Fix It and Boss Battle, writing games with coins, Word Pals and a daily streak": "Fix It i Boss Battle, gry pisarskie z monetami, Słownymi Kumplami i codzienną serią",
+  "Vocabulary bank with flashcards, a quiz and Word Dash, with game progress saved across devices": "Bank słownictwa z fiszkami, quizem i Word Dash, z postępami w grach zapisanymi na wszystkich urządzeniach",
+  "Vocabulary bank, flashcards, self-test quiz and Word Dash, with progress saved across devices": "Bank słownictwa, fiszki, quiz sprawdzający i Word Dash, z postępami zapisanymi na wszystkich urządzeniach",
+  "Game progress (coins, Word Pals, streak) saved to your account": "Postępy w grach (monety, Słowni Kumple, seria) zapisane na Twoim koncie",
+  "This device only": "Tylko na tym urządzeniu"
  },
  "script": {
   "'READ IT'": "'CZYTANIE'",

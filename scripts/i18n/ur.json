@@ -166,7 +166,6 @@
   "Unlimited writing &amp; reading submissions": "لامحدود تحریری اور مطالعے کے کام",
   "26-week progress trend, not just today's score": "26 ہفتوں کا پیش رفت کا رجحان، صرف آج کا اسکور نہیں",
   "Anonymous ranking against their own year group": "اپنی جماعت میں گمنام درجہ بندی",
-  "Vocabulary bank with flashcards, a quiz and progress saved across devices": "فلیش کارڈز، کوئز اور تمام آلات پر محفوظ پیش رفت کے ساتھ الفاظ کا بینک",
   "Choose Core": "Core چنیں",
   "One learner. Cancel anytime.": "ایک طالب علم۔ جب چاہیں منسوخ کریں۔",
   "Premium": "Premium",
@@ -216,7 +215,6 @@
   "Reopen past work &amp; feedback": "پرانے کام اور فیڈبیک دوبارہ کھولیں",
   "Last 10": "آخری 10",
   "Full history": "مکمل تاریخ",
-  "Vocabulary bank, flashcards &amp; self-test quiz, with progress saved across devices": "الفاظ کا بینک، فلیش کارڈز اور خود جانچ کا کوئز، تمام آلات پر محفوظ پیش رفت کے ساتھ",
   "Account": "اکاؤنٹ",
   "Export or delete your data": "اپنا ڈیٹا برآمد یا حذف کریں",
   "Cancel anytime, no contract": "جب چاہیں منسوخ کریں، کوئی معاہدہ نہیں",
@@ -254,7 +252,12 @@
   "Workspace": "ایپ",
   "About": "تعارف",
   "Privacy": "رازداری (انگریزی میں)",
-  "Terms": "شرائط (انگریزی میں)"
+  "Terms": "شرائط (انگریزی میں)",
+  "Fix It and Boss Battle, writing games with coins, Word Pals and a daily streak": "Fix It اور Boss Battle، لکھنے کے کھیل جن میں سکے، لفظی ساتھی اور روزانہ کا سلسلہ شامل ہے",
+  "Vocabulary bank with flashcards, a quiz and Word Dash, with game progress saved across devices": "فلیش کارڈز، کوئز اور Word Dash کے ساتھ الفاظ کا بینک، اور کھیلوں کی پیش رفت تمام آلات پر محفوظ",
+  "Vocabulary bank, flashcards, self-test quiz and Word Dash, with progress saved across devices": "الفاظ کا بینک، فلیش کارڈز، خود جانچ کا کوئز اور Word Dash، تمام آلات پر محفوظ پیش رفت کے ساتھ",
+  "Game progress (coins, Word Pals, streak) saved to your account": "کھیلوں کی پیش رفت (سکے، لفظی ساتھی، سلسلہ) آپ کے اکاؤنٹ میں محفوظ",
+  "This device only": "صرف اسی آلے پر"
  },
  "script": {
   "'READ IT'": "'پڑھنا'",

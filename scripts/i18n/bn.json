@@ -166,7 +166,6 @@
   "Unlimited writing &amp; reading submissions": "সীমাহীন লেখা ও পড়ার কাজ",
   "26-week progress trend, not just today's score": "২৬ সপ্তাহের অগ্রগতির প্রবণতা, শুধু আজকের স্কোর নয়",
   "Anonymous ranking against their own year group": "নিজের শ্রেণিতে বেনামি র‍্যাঙ্কিং",
-  "Vocabulary bank with flashcards, a quiz and progress saved across devices": "ফ্ল্যাশকার্ড, কুইজ ও সব ডিভাইসে সংরক্ষিত অগ্রগতি সহ শব্দভান্ডার ব্যাংক",
   "Choose Core": "Core বেছে নিন",
   "One learner. Cancel anytime.": "একজন শিক্ষার্থী। যখন খুশি বাতিল করুন।",
   "Premium": "Premium",
@@ -216,7 +215,6 @@
   "Reopen past work &amp; feedback": "আগের কাজ ও ফিডব্যাক আবার খুলুন",
   "Last 10": "শেষ ১০টি",
   "Full history": "সম্পূর্ণ ইতিহাস",
-  "Vocabulary bank, flashcards &amp; self-test quiz, with progress saved across devices": "শব্দভান্ডার ব্যাংক, ফ্ল্যাশকার্ড ও নিজে যাচাইয়ের কুইজ, সব ডিভাইসে সংরক্ষিত অগ্রগতি সহ",
   "Account": "অ্যাকাউন্ট",
   "Export or delete your data": "আপনার তথ্য রপ্তানি করুন বা মুছে ফেলুন",
   "Cancel anytime, no contract": "যখন খুশি বাতিল করুন, কোনো চুক্তি নেই",
@@ -254,7 +252,12 @@
   "Workspace": "অ্যাপ",
   "About": "পরিচিতি",
   "Privacy": "গোপনীয়তা (ইংরেজিতে)",
-  "Terms": "শর্তাবলি (ইংরেজিতে)"
+  "Terms": "শর্তাবলি (ইংরেজিতে)",
+  "Fix It and Boss Battle, writing games with coins, Word Pals and a daily streak": "Fix It এবং Boss Battle, কয়েন, শব্দ-বন্ধু আর প্রতিদিনের ধারাবাহিকতা সহ লেখার খেলা",
+  "Vocabulary bank with flashcards, a quiz and Word Dash, with game progress saved across devices": "ফ্ল্যাশকার্ড, কুইজ ও Word Dash সহ শব্দভান্ডার ব্যাংক, এবং খেলার অগ্রগতি সব ডিভাইসে সংরক্ষিত",
+  "Vocabulary bank, flashcards, self-test quiz and Word Dash, with progress saved across devices": "শব্দভান্ডার ব্যাংক, ফ্ল্যাশকার্ড, নিজে যাচাইয়ের কুইজ ও Word Dash, সব ডিভাইসে সংরক্ষিত অগ্রগতি সহ",
+  "Game progress (coins, Word Pals, streak) saved to your account": "খেলার অগ্রগতি (কয়েন, শব্দ-বন্ধু, ধারাবাহিকতা) আপনার অ্যাকাউন্টে সংরক্ষিত",
+  "This device only": "শুধু এই ডিভাইসে"
  },
  "script": {
   "'READ IT'": "'পড়া'",

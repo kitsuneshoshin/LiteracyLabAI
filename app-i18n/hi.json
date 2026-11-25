@@ -654,6 +654,26 @@
   "Word endings": "शब्दों के अंत",
   "Run-on sentences": "गलत जुड़े वाक्य",
   "Semicolons and colons": "अर्धविराम और कोलन",
-  "Formal tone": "औपचारिक शैली"
+  "Formal tone": "औपचारिक शैली",
+  "Boss {n0} of {n1}": "बॉस {n0} / {n1}",
+  "Edit this part of your story to fix the problem": "समस्या ठीक करने के लिए अपनी कहानी के इस हिस्से को बदलें",
+  "Show hint": "संकेत दिखाएँ",
+  "Hide hint": "संकेत छिपाएँ",
+  "Strike!": "वार करें!",
+  "Change something before you strike.": "वार करने से पहले कुछ बदलें।",
+  "Direct hit! That is exactly the fix.": "सीधा निशाना! यही बिल्कुल सही सुधार है।",
+  "Your fix": "आपका सुधार",
+  "Suggested fix": "सुझाया गया सुधार",
+  "Does your fix work too?": "क्या आपका सुधार भी चलता है?",
+  "Yes, mine works": "हाँ, मेरा चलता है",
+  "No, I'll use this one": "नहीं, इसी को अपनाना है",
+  "Next boss": "अगला बॉस",
+  "Direct hits": "सीधे निशाने",
+  "Back to my feedback": "मेरे फ़ीडबैक पर वापस जाएँ",
+  "Fix your own sentences": "अपने वाक्य खुद ठीक करें",
+  "Turn the parts of your story that need work into a boss. Fix them to win coins for your Word Pals.": "अपनी कहानी के जिन हिस्सों पर काम चाहिए, उन्हें एक बॉस बना दें। उन्हें ठीक करके अपने शब्द-साथियों के लिए सिक्के जीतें।",
+  "Start Boss Battle": "Boss Battle शुरू करें",
+  "Good thinking. Remember this fix for next time.": "अच्छी सोच। अगली बार के लिए यह सुधार याद रखें।",
+  "Boss health": "बॉस की सेहत"
  }
 }

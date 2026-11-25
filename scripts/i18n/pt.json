@@ -166,7 +166,6 @@
   "Unlimited writing &amp; reading submissions": "Envios de escrita e leitura ilimitados",
   "26-week progress trend, not just today's score": "Tendência de progresso de 26 semanas, não só a nota de hoje",
   "Anonymous ranking against their own year group": "Classificação anônima na própria série",
-  "Vocabulary bank with flashcards, a quiz and progress saved across devices": "Banco de vocabulário com flashcards, um quiz e progresso salvo em todos os dispositivos",
   "Choose Core": "Escolher o Core",
   "One learner. Cancel anytime.": "Um estudante. Cancele quando quiser.",
   "Premium": "Premium",
@@ -216,7 +215,6 @@
   "Reopen past work &amp; feedback": "Rever trabalhos e feedbacks anteriores",
   "Last 10": "Os últimos 10",
   "Full history": "Histórico completo",
-  "Vocabulary bank, flashcards &amp; self-test quiz, with progress saved across devices": "Banco de vocabulário, flashcards e quiz de autoavaliação, com progresso salvo em todos os dispositivos",
   "Account": "Conta",
   "Export or delete your data": "Exportar ou excluir seus dados",
   "Cancel anytime, no contract": "Cancele quando quiser, sem contrato",
@@ -254,7 +252,12 @@
   "Workspace": "Aplicativo",
   "About": "Sobre",
   "Privacy": "Privacidade (em inglês)",
-  "Terms": "Termos (em inglês)"
+  "Terms": "Termos (em inglês)",
+  "Fix It and Boss Battle, writing games with coins, Word Pals and a daily streak": "Fix It e Boss Battle, jogos de escrita com moedas, Amigos das Palavras e uma sequência diária",
+  "Vocabulary bank with flashcards, a quiz and Word Dash, with game progress saved across devices": "Banco de vocabulário com flashcards, um quiz e Word Dash, com o progresso dos jogos salvo em todos os dispositivos",
+  "Vocabulary bank, flashcards, self-test quiz and Word Dash, with progress saved across devices": "Banco de vocabulário, flashcards, quiz de autoavaliação e Word Dash, com progresso salvo em todos os dispositivos",
+  "Game progress (coins, Word Pals, streak) saved to your account": "Progresso nos jogos (moedas, Amigos das Palavras, sequência) salvo na sua conta",
+  "This device only": "Somente neste dispositivo"
  },
  "script": {
   "'READ IT'": "'LER'",

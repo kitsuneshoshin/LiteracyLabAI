@@ -662,6 +662,26 @@
   "Word endings": "Końcówki wyrazów",
   "Run-on sentences": "Zdania połączone błędnie",
   "Semicolons and colons": "Średniki i dwukropki",
-  "Formal tone": "Styl formalny"
+  "Formal tone": "Styl formalny",
+  "Boss {n0} of {n1}": "Boss {n0} z {n1}",
+  "Edit this part of your story to fix the problem": "Popraw tę część swojej historii, żeby naprawić problem",
+  "Show hint": "Pokaż podpowiedź",
+  "Hide hint": "Ukryj podpowiedź",
+  "Strike!": "Uderz!",
+  "Change something before you strike.": "Zmień coś, zanim uderzysz.",
+  "Direct hit! That is exactly the fix.": "Trafienie! To dokładnie ta poprawka.",
+  "Your fix": "Twoja poprawka",
+  "Suggested fix": "Proponowana poprawka",
+  "Does your fix work too?": "Czy Twoja poprawka też działa?",
+  "Yes, mine works": "Tak, moja działa",
+  "No, I'll use this one": "Nie, użyję tej",
+  "Next boss": "Następny boss",
+  "Direct hits": "Celne trafienia",
+  "Back to my feedback": "Wróć do mojej informacji zwrotnej",
+  "Fix your own sentences": "Popraw własne zdania",
+  "Turn the parts of your story that need work into a boss. Fix them to win coins for your Word Pals.": "Zamień fragmenty swojej historii, które wymagają pracy, w bossa. Popraw je, by wygrać monety dla Twoich Słownych Kumpli.",
+  "Start Boss Battle": "Zacznij Boss Battle",
+  "Good thinking. Remember this fix for next time.": "Dobre myślenie. Zapamiętaj tę poprawkę na następny raz.",
+  "Boss health": "Życie bossa"
  }
 }

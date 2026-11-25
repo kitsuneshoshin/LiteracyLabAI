@@ -245,7 +245,7 @@ test("the screens adapt to the device: wider on big screens, easy to tap on phon
   assert.match(ui, /text-\[26px\] md:text-\[32px\] 2xl:text-\[38px\]/);
   // Phones: the two main buttons stack full width, and every tappable thing is at least 40 to 48px.
   assert.match(ui, /flex flex-col sm:flex-row/);
-  assert.equal((ui.match(/w-full sm:w-auto/g) || []).length, 2);
+  assert.ok((ui.match(/w-full sm:w-auto/g) || []).length >= 2, "the Fix It buttons, and the Boss Battle start button");
   assert.match(ui, /min-h-\[44px\] min-w-\[44px\]/, "each word of the sentence");
   assert.match(ui, /min-h-\[40px\] text-\[12px\]/, "read aloud");
   assert.match(ui, /min-h-\[48px\]/, "the choices");

@@ -2763,6 +2763,71 @@ function fixitRecord(state, answers){
 }
 // ---- Fix It rules (end)
 
+// ---- Boss Battle rules (start). The parts of a child's OWN piece that the feedback flagged as a Grow, each with the
+// suggested rewrite, become bosses. The child edits the flagged part to fix it and strikes. Nothing here is marked by an AI:
+// the feedback was already paid for, and the check is only "did you change it, and is it exactly the suggested fix". When it
+// is not exactly the suggestion the child compares the two and says whether theirs works too, because a sentence can often
+// be fixed more than one way. Coins go into the same egg as Word Dash and Fix It.
+const BOSS_MAX = 5;
+const BOSS_COINS = { exact: 15, works: 8, learn: 3 };
+// Compared with spaces collapsed and curly quotes treated like straight ones, but with capitals and punctuation kept.
+function bossNorm(s){
+  return String(s == null ? "" : s).replace(/[‘’]/g, "'").replace(/[“”]/g, '"').replace(/\s+/g, " ").trim();
+}
+// A little of the story on either side of the flagged part, cut at a word edge, so the child sees where it sits.
+function bossContext(s, beforeTheBoss){
+  const t = String(s || "").replace(/\s+/g, " ");
+  if (!t.trim()) return "";
+  if (beforeTheBoss) {
+    const u = t.trimEnd();
+    if (u.length <= 60) return u.trimStart();
+    const c = u.slice(-60), sp = c.indexOf(" ");
+    return "… " + (sp >= 0 ? c.slice(sp + 1) : c);
+  }
+  const u = t.trimStart();
+  if (u.length <= 60) return u.trimEnd();
+  const c = u.slice(0, 60), sp = c.lastIndexOf(" ");
+  return (sp >= 0 ? c.slice(0, sp) : c) + " …";
+}
+// The bosses for one piece: every Grow that has a different rewrite, in the order they appear, no overlaps, short enough to
+// edit in a box, at most BOSS_MAX.
+function bossList(text, highlights, max = BOSS_MAX){
+  if (!text || !Array.isArray(highlights)) return [];
+  const lower = String(text).toLowerCase();
+  const found = [];
+  highlights.forEach((h, i) => {
+    if (!h || h.type !== "grow" || !h.quote || typeof h.revision !== "string") return;
+    const revision = h.revision.trim();
+    if (!revision || bossNorm(revision) === bossNorm(h.quote)) return;
+    if (String(h.quote).length > 220 || revision.length > 300) return;
+    const start = lower.indexOf(String(h.quote).toLowerCase());
+    if (start < 0) return;
+    found.push({ start, end: start + String(h.quote).length, quote: String(text).slice(start, start + String(h.quote).length), revision, note: String(h.note || ""), key: i });
+  });
+  found.sort((a, b) => a.start - b.start);
+  const out = [];
+  let cursor = 0;
+  for (const f of found) if (f.start >= cursor) { out.push(f); cursor = f.end; }
+  return out.slice(0, max).map((f) => ({ ...f, before: bossContext(String(text).slice(0, f.start), true), after: bossContext(String(text).slice(f.end), false) }));
+}
+// What the child's edit amounts to: unchanged, exactly the suggested fix, or something else (they say if it works).
+function bossJudge(answer, boss){
+  const a = bossNorm(answer);
+  if (!a || a === bossNorm(boss.quote)) return "same";
+  return a === bossNorm(boss.revision) ? "exact" : "other";
+}
+// A finished battle: results is one of "exact", "works" (their own fix, they say it works) or "learn" (they took the suggestion).
+function bossTotals(results){
+  const list = Array.isArray(results) ? results.filter((r) => BOSS_COINS[r] != null) : [];
+  let combo = 0, best = 0;
+  for (const r of list) { combo = r === "learn" ? 0 : combo + 1; best = Math.max(best, combo); }
+  return {
+    outOf: list.length, exact: list.filter((r) => r === "exact").length, right: list.filter((r) => r !== "learn").length,
+    coins: list.reduce((s, r) => s + BOSS_COINS[r], 0), bestCombo: best,
+  };
+}
+// ---- Boss Battle rules (end)
+
 // The card on the word list: streak, egg and the way in.
 function DashHome({ dash, today, canPlay, onPlay, onPals }){
   const sh = dashStreakShown(dash, today);
@@ -3065,17 +3130,11 @@ function GamesHub({ plan, country, tier, childId, session, backendLive }){
   function startRound(){ logEvent("fixit_start", { tier }, childId); setRoundKey((k) => k + 1); setView("round"); }
   // Called when a round ends: adds it to the shared game and to the skill record, and hands back what changed for the summary.
   function finishRound(res, answers){
-    const out = dashApplyRound(dash, res, dashDay(Date.now()), Math.random);
+    const out = dashFinishRound(dash, res, { childId, session, canSync, onJoined: (g) => setDash((prev) => { const m = dashMerge(prev, g); if (childId) dashSave(childId, m); return m; }) });
     setDash(out.state);
-    if (childId) dashSave(childId, out.state);
     const nextFx = fixitRecord(fx, answers);
     setFx(nextFx);
     if (childId) fixitSave(childId, nextFx);
-    if (canSync) {
-      authedFetch(session, "/api/history", { method: "POST", body: JSON.stringify({ childId, game: out.state }) })
-        .then((r) => { if (r && r.game) setDash((prev) => { const m = dashMerge(prev, r.game); dashSave(childId, m); return m; }); })
-        .catch(() => {});
-    }
     logEvent("fixit_round", { status: res.stars }, childId);
     return out;
   }
@@ -3342,6 +3401,210 @@ function FixItRound({ tier, region, fx, onFinish, onAgain, onPals, onBack }){
       <button ref={nextRef} onClick={next} disabled={verdict === null} className="focus-ring rounded-xl py-3 text-sm font-bold disabled:opacity-40" style={{ background: "var(--ink)", color: "var(--on-ink)" }}>
         {idx + 1 >= qs.length ? "Finish the round" : "Next sentence"}
       </button>
+    </div>
+  );
+}
+
+// Adds a finished round to the shared game (coins, egg, Word Pals, streak), saves it on this device and, on plans that keep
+// the game on the account, saves it there too. `onJoined` hears the account's joined copy (a second device may have played).
+function dashFinishRound(dash, res, { childId, session, canSync, onJoined }){
+  const out = dashApplyRound(dash, res, dashDay(Date.now()), Math.random);
+  if (childId) dashSave(childId, out.state);
+  if (canSync && childId && session) {
+    authedFetch(session, "/api/history", { method: "POST", body: JSON.stringify({ childId, game: out.state }) })
+      .then((r) => { if (r && r.game && onJoined) onJoined(r.game); })
+      .catch(() => {});
+  }
+  return out;
+}
+
+// The card on the writing feedback: turns the parts of this child's own piece that need work into a boss battle.
+function BossBattleCard({ count, onStart }){
+  return (
+    <div className="card p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3" style={{ borderInlineStart: "4px solid var(--gold)" }} aria-label="Boss Battle">
+      <div className="min-w-0">
+        <div className="font-display font-semibold text-sm flex items-center gap-2" style={{ color: "var(--ink)" }}><span aria-hidden="true">👾</span> Boss Battle</div>
+        <div className="font-display font-semibold text-[15px] mt-0.5" style={{ color: "var(--ink)" }}>Fix your own sentences</div>
+        <div className="text-[13px]" style={{ color: "var(--ink-soft)" }}>Turn the parts of your story that need work into a boss. Fix them to win coins for your Word Pals.</div>
+      </div>
+      <button onClick={onStart} className="focus-ring inline-flex items-center justify-center gap-1.5 rounded-full px-5 py-3 text-sm font-bold shrink-0 w-full sm:w-auto" style={{ background: "var(--gold)", color: "var(--on-solid)" }}>
+        <IconSparkle size={14} /> Start Boss Battle
+      </button>
+    </div>
+  );
+}
+
+function BossBattle({ text, highlights, plan, tier, childId, session, backendLive, onBack, onGames }){
+  const bosses = useMemo(() => bossList(text, highlights), [text, highlights]);
+  const canSync = !!(backendLive && childId && session && planMeta(plan).vocabBank);
+  const total = bosses.length;
+  const [dash, setDash] = useState(() => (childId ? dashLoad(childId) : dashState()));
+  const [idx, setIdx] = useState(0);
+  const [answer, setAnswer] = useState(() => (bosses[0] ? bosses[0].quote : ""));
+  const [hint, setHint] = useState(false);
+  const [nudge, setNudge] = useState(false);
+  const [stage, setStage] = useState("edit"); // edit -> check (their own fix, say if it works) -> result
+  const [outcome, setOutcome] = useState(null); // exact | works | learn
+  const [results, setResults] = useState([]);
+  const [done, setDone] = useState(null);
+  const nextRef = useRef(null);
+  const boss = bosses[idx];
+  const big = tier === "early" || tier === "elementary";
+
+  useEffect(()=>{ logEvent("boss_start", { tier }, childId); }, []);
+  useEffect(()=>{ if (stage === "result" && nextRef.current) nextRef.current.focus(); }, [stage]);
+
+  function strike(){
+    const j = bossJudge(answer, boss);
+    if (j === "same") { setNudge(true); return; }
+    setNudge(false);
+    if (j === "exact") { setOutcome("exact"); setResults((r) => [...r, "exact"]); setStage("result"); }
+    else setStage("check");
+  }
+  function say(kind){ setOutcome(kind); setResults((r) => [...r, kind]); setStage("result"); }
+  function next(){
+    if (idx + 1 >= total) {
+      if (done) return;
+      const t = bossTotals(results);
+      const res = dashRoundResult({ right: t.right, outOf: t.outOf, coins: t.coins, bestCombo: t.bestCombo });
+      const out = dashFinishRound(dash, res, { childId, session, canSync, onJoined: (g) => setDash((prev) => { const m = dashMerge(prev, g); if (childId) dashSave(childId, m); return m; }) });
+      setDash(out.state);
+      logEvent("boss_round", { status: res.stars }, childId);
+      setDone({ res, out, exact: t.exact });
+      return;
+    }
+    setIdx(idx + 1); setAnswer(bosses[idx + 1].quote); setHint(false); setNudge(false); setStage("edit"); setOutcome(null);
+  }
+
+  if (total === 0) {
+    return (
+      <div className="card p-6 max-w-xl mx-auto w-full">
+        <button onClick={onBack} className="focus-ring w-full rounded-full py-3 text-sm font-bold" style={{ background: "var(--surface-2)", color: "var(--ink)" }}>Back to my feedback</button>
+      </div>
+    );
+  }
+
+  if (done) {
+    const { res, out, exact } = done;
+    const st = out.state;
+    const full = st.pals.length >= DASH_PALS.length;
+    return (
+      <div className="card p-6 sm:p-8 flex flex-col items-center gap-4 text-center max-w-xl md:max-w-2xl mx-auto w-full animate-float-in">
+        <div className="flex items-center gap-1" role="img" aria-label={res.stars + " out of 3 stars"}>
+          {[1, 2, 3].map((n) => <IconStar key={n} size={34} strokeWidth={1.8} style={{ color: n <= res.stars ? "var(--gold)" : "var(--border)", fill: n <= res.stars ? "var(--gold)" : "none" }} />)}
+        </div>
+        <h3 className="font-display font-bold text-2xl" style={{ color: "var(--ink)" }}>{res.perfect ? "Perfect round!" : res.stars >= 2 ? "Great round!" : res.stars === 1 ? "Good going!" : "Keep going!"}</h3>
+        <div className="grid grid-cols-3 gap-2 w-full max-w-sm">
+          {[["Right", res.right + " / " + res.outOf, "var(--ink)"], ["Direct hits", String(exact), "var(--ink)"], ["Coins", "+" + res.coins, "var(--gold-ink)"]].map(([label, value, col]) => (
+            <div key={label} className="rounded-xl py-2 px-1" style={{ background: "var(--surface-2)" }}>
+              <div className="font-display text-2xl tabular" style={{ color: col, lineHeight: 1.1 }} dir="ltr">{value}</div>
+              <div className="text-[11px] font-semibold uppercase tracking-wide" style={{ color: "var(--ink-faint)" }}>{label}</div>
+            </div>
+          ))}
+        </div>
+        {res.bonus > 0 && <p className="text-[13px] font-semibold" style={{ color: "var(--gold-ink)" }}>{"Perfect round bonus: +" + res.bonus + " coins"}</p>}
+        {out.hatched.map((p) => (
+          <div key={p.id} className="rounded-2xl p-4 w-full" style={{ background: "var(--gold-tint)" }} role="status">
+            <div className="text-7xl dash-hatch" aria-hidden="true">{p.emoji}</div>
+            <div className="font-display text-xl mt-1" style={{ color: "var(--ink)" }}>{"A new Word Pal hatched: " + p.name + "!"}</div>
+            <div className="text-[11px] font-bold uppercase tracking-wide" style={{ color: "var(--gold-ink)" }}>{DASH_RARITY[p.rare]}</div>
+          </div>
+        ))}
+        {!full && (
+          <div className="w-full max-w-sm">
+            <div className="flex items-center justify-between text-[12px] mb-1" style={{ color: "var(--ink-soft)" }}><span><span aria-hidden="true">🥚</span> {"Next Word Pal"}</span><span className="tabular">{st.egg + " / " + DASH_EGG + " coins"}</span></div>
+            <div className="h-2.5 rounded-full overflow-hidden" style={{ background: "var(--border)" }}><div className="h-full rounded-full" style={{ width: Math.min(100, (st.egg / DASH_EGG) * 100) + "%", background: "var(--gold)", transition: "width 600ms" }} /></div>
+          </div>
+        )}
+        <div className="flex flex-col gap-1 text-[13.5px]" style={{ color: "var(--ink-soft)" }}>
+          <span className="inline-flex items-center justify-center gap-1.5 font-semibold" style={{ color: "var(--gold-ink)" }}><IconFlame size={15} /> {"Day streak: " + st.streak}</span>
+          {out.extended && st.streak > 1 && <span className="font-semibold" style={{ color: "var(--gold-ink)" }}>{"One more day!"}</span>}
+          {out.usedFreeze && <span><span aria-hidden="true">❄</span> {"A streak freeze covered a missed day, so your streak is safe."}</span>}
+          {out.earnedFreeze && <span><span aria-hidden="true">❄</span> {"You earned a streak freeze. It covers one missed day."}</span>}
+        </div>
+        <div className="flex gap-2 flex-wrap justify-center w-full">
+          <button onClick={onBack} className="focus-ring rounded-full px-5 py-3 text-sm font-bold" style={{ background: "var(--gold)", color: "var(--on-solid)" }}>Back to my feedback</button>
+          {onGames && <button onClick={onGames} className="focus-ring rounded-full px-5 py-3 text-sm font-bold" style={{ background: "var(--surface-2)", color: "var(--ink)" }}>Play Fix It</button>}
+        </div>
+      </div>
+    );
+  }
+
+  const remaining = Math.max(0, total - results.length);
+  const sizeCls = big ? "text-[20px] md:text-[24px] 2xl:text-[28px]" : "text-[16px] md:text-[18px] 2xl:text-[21px]";
+  const PRAISE = ["Nice!", "Spot on!", "Brilliant!", "You got it!", "Yes!", "Smart!"];
+  return (
+    <div className="w-full flex flex-col gap-4">
+      <div className="flex items-center gap-3">
+        <button onClick={onBack} className="focus-ring text-[13px] font-semibold underline py-3 pe-3" style={{ color: "var(--ink-soft)" }}>Quit</button>
+        <div className="flex-1 h-2.5 rounded-full overflow-hidden" style={{ background: "var(--border)" }} role="progressbar" aria-valuemin={0} aria-valuemax={total} aria-valuenow={remaining} aria-label="Boss health">
+          <div className="h-full rounded-full" style={{ width: (remaining / total) * 100 + "%", background: "var(--bad)", transition: "width 400ms" }} />
+        </div>
+        <span className="text-xs font-semibold tabular" style={{ color: "var(--ink-soft)" }}>{"Boss " + (idx + 1) + " of " + total}</span>
+      </div>
+      <div className={"card p-5 sm:p-6" + (stage === "result" && outcome === "learn" ? " dash-shake" : "")} style={{ borderInlineStart: "4px solid var(--bad)" }}>
+        <div className="flex items-center justify-between gap-2 mb-3">
+          <div className="label-mono flex items-center gap-2" style={{ color: "var(--ink-soft)" }}><span aria-hidden="true" className="text-xl">👾</span> Edit this part of your story to fix the problem</div>
+          {stage === "edit" && boss.note && (
+            <button type="button" onClick={()=>setHint((h) => !h)} className="focus-ring inline-flex items-center rounded-full px-3 min-h-[40px] text-[12px] font-bold shrink-0" style={{ background: "var(--surface-2)", color: "var(--ink)" }}>{hint ? "Hide hint" : "Show hint"}</button>
+          )}
+        </div>
+        <p className={"font-read leading-snug mb-3 " + sizeCls} style={{ color: "var(--ink-soft)" }} dir="ltr" lang="en" data-no-i18n="">
+          {boss.before && <span>{boss.before} </span>}<mark className="rounded px-1" style={{ background: "var(--bad-tint)", color: "var(--ink)" }}>{boss.quote}</mark>{boss.after && <span> {boss.after}</span>}
+        </p>
+        {stage === "edit" && hint && boss.note && <p className="text-[13px] mb-3 rounded-xl p-3" style={{ background: "var(--cyan-tint)", color: "var(--ink)" }} dir="ltr" lang="en" data-no-i18n="">{boss.note}</p>}
+        {stage === "edit" ? (
+          <>
+            <textarea value={answer} onChange={(e)=>{ setAnswer(e.target.value); setNudge(false); }} rows={3} maxLength={400} dir="ltr" lang="en"
+              className={"focus-ring w-full rounded-2xl border p-4 leading-relaxed resize-y font-read " + sizeCls}
+              style={{ borderColor: "var(--border)", background: "var(--surface-2)", color: "var(--ink)" }} />
+            {nudge && <p className="text-[13px] font-semibold mt-2" style={{ color: "var(--bad)" }} role="status">Change something before you strike.</p>}
+          </>
+        ) : (
+          <div className="flex flex-col gap-3" dir="ltr">
+            <div className="rounded-xl p-3" style={{ background: "var(--surface-2)" }}>
+              <div className="label-mono mb-1" style={{ color: "var(--ink-soft)" }} dir="auto">Your fix</div>
+              <p className={"font-read " + sizeCls} style={{ color: "var(--ink)" }} lang="en" data-no-i18n="">{answer.trim()}</p>
+            </div>
+            <div className="rounded-xl p-3" style={{ background: "var(--good-tint)" }}>
+              <div className="label-mono mb-1" style={{ color: "var(--good)" }} dir="auto">Suggested fix</div>
+              <p className={"font-read " + sizeCls} style={{ color: "var(--ink)" }} lang="en" data-no-i18n="">{diffWordsToParts(boss.quote, boss.revision)}</p>
+            </div>
+          </div>
+        )}
+        {stage === "check" && (
+          <div className="mt-4 flex flex-col gap-2">
+            <p className="text-[14px] font-bold" style={{ color: "var(--ink)" }}>Does your fix work too?</p>
+            <div className="flex flex-col sm:flex-row gap-2">
+              <button onClick={()=>say("works")} className="focus-ring rounded-xl px-4 py-3 min-h-[48px] text-sm font-bold" style={{ background: "var(--good)", color: "var(--on-solid)" }}>Yes, mine works</button>
+              <button onClick={()=>say("learn")} className="focus-ring rounded-xl px-4 py-3 min-h-[48px] text-sm font-bold" style={{ background: "var(--surface-2)", color: "var(--ink)" }}>No, I'll use this one</button>
+            </div>
+          </div>
+        )}
+        {stage === "result" && (
+          <div className="mt-4 flex flex-col gap-2" role="status">
+            {outcome === "learn" ? (
+              <p className="text-[14px] font-bold" style={{ color: "var(--ink)" }}>Good thinking. Remember this fix for next time.</p>
+            ) : (
+              <p className="text-[14px] font-bold flex items-center gap-2 flex-wrap" style={{ color: "var(--good)" }}>
+                {outcome === "exact" ? "Direct hit! That is exactly the fix." : PRAISE[idx % PRAISE.length]} <span className="dash-pop inline-block rounded-full px-2.5 py-0.5 text-[13px]" style={{ background: "var(--gold-tint)", color: "var(--gold-ink)" }}>+{BOSS_COINS[outcome]} 🪙</span>
+              </p>
+            )}
+            {outcome === "exact" && (
+              <p className={"font-read rounded-xl p-3 " + sizeCls} style={{ background: "var(--good-tint)", color: "var(--ink)" }} dir="ltr" lang="en" data-no-i18n="">{answer.trim()}</p>
+            )}
+            {boss.note && <p className="text-[13px]" style={{ color: "var(--ink-soft)" }} dir="ltr" lang="en" data-no-i18n="">{boss.note}</p>}
+          </div>
+        )}
+      </div>
+      {stage === "edit" && (
+        <button onClick={strike} className="focus-ring rounded-xl py-3 min-h-[48px] text-sm font-bold" style={{ background: "var(--ink)", color: "var(--on-ink)" }}>Strike!</button>
+      )}
+      {stage === "result" && (
+        <button ref={nextRef} onClick={next} className="focus-ring rounded-xl py-3 min-h-[48px] text-sm font-bold" style={{ background: "var(--ink)", color: "var(--on-ink)" }}>
+          {idx + 1 >= total ? "See my results" : "Next boss"}
+        </button>
+      )}
     </div>
   );
 }
@@ -3790,7 +4053,7 @@ function Dashboard({ country, setCountry, gradeIdx, setGradeIdx, tier, interests
   // (it used to get only a sentence about Premium and no way to act on it),
   // Premium/Pro/Admin have nothing left to upgrade to.
   const PLAN_CARDS = [
-                    { tier: "core", name: "Core", price: PLAN_META.core.price, sub: "One learner", features: ["Unlimited writing & reading submissions", "26-week progress trend chart", "Anonymous ranking in their year group", "Full history: reopen any past piece", "Vocabulary bank with flashcards, a quiz and progress saved across devices"] },
+                    { tier: "core", name: "Core", price: PLAN_META.core.price, sub: "One learner", features: ["Unlimited writing & reading submissions", "26-week progress trend chart", "Anonymous ranking in their year group", "Full history: reopen any past piece", "Vocabulary bank with flashcards, a quiz and Word Dash, with game progress saved across devices"] },
                     { tier: "premium", name: "Premium", price: PLAN_META.premium.price, sub: "Up to 6 learners", features: ["Everything in Core, for the whole household", "Extended feedback: a second, harder next step", "Your response rewritten and a model response, with the framework shown in both", "A short written answer in reading, marked out of 2 or 3", "Exam-style prompts: NAPLAN, KS2 SATs, KS3, GCSE, EQAO, PSLE, IGCSE, NCEA, Leaving Cert, CBSE, NSC, HKDSE, US state tests and CEFR writing tasks", "Spelling & grammar check and a score out of 10 on every piece", "Exam-technique scoring against real assessment objectives (ages 11+)"] },
   ];
   const upsellCards = plan === "free" ? PLAN_CARDS : plan === "core" ? PLAN_CARDS.filter(c => c.tier === "premium") : [];
@@ -4801,7 +5064,7 @@ function FeedbackPanel(props){
     render={(fb) => <FeedbackPanelBody {...props} feedback={fb} />} />;
 }
 
-function FeedbackPanelBody({ tier, gradeLabel, country, interest, confidence, motivation, seed, feedback, submissionId, session, backendLive, submittedText, onSeePlans, onPractise }){
+function FeedbackPanelBody({ tier, gradeLabel, country, interest, confidence, motivation, seed, feedback, submissionId, session, backendLive, submittedText, onSeePlans, onPractise, onBattle }){
   // Real feedback from a plan without the spelling check / overall score
   // simply doesn't contain them (the server never generates them - see
   // api/_lib/plans.js), so their absence, on feedback that exists at all, is
@@ -4819,6 +5082,7 @@ function FeedbackPanelBody({ tier, gradeLabel, country, interest, confidence, mo
   const vocabList = feedback?.vocab
     ? feedback.vocab.map(v=>[v.term, v.definition, v.example, v.trick, v.characteristics, v.nonExample])
     : vocabFor(interest, tier, country);
+  const bossCount = onBattle ? bossList(submittedText, feedback && feedback.highlights).length : 0;
 
   return (
     <div className="animate-float-in flex flex-col gap-4 min-w-0">
@@ -4871,6 +5135,8 @@ function FeedbackPanelBody({ tier, gradeLabel, country, interest, confidence, mo
         <VocabList items={vocabList} />
       </Collapsible>
       </div>
+
+      {bossCount > 0 && <BossBattleCard count={bossCount} onStart={onBattle} />}
 
       {onPractise && (
         <div className="card p-4 sm:p-5 flex items-center justify-between gap-3 flex-wrap">
@@ -5799,6 +6065,8 @@ function Workspace({ plan, country, gradeIdx, setGradeIdx, tier, setTierOverride
   const [answers, setAnswers] = useState({});
   const [readingScore, setReadingScore] = useState(0);
   const [phase, setPhase] = useState("draft"); // draft | analyzing | done
+  const [battle, setBattle] = useState(false); // Boss Battle open in place of the writing feedback
+  useEffect(()=>{ setBattle(false); }, [exerciseType, phase]);
   // Live testing found this defaulting to the literal id "exam" ("College /
   // Exam Prep") whenever a child had no interests selected yet, regardless
   // of age tier — INTERESTS_BY_TIER doesn't even offer that option below
@@ -6138,11 +6406,14 @@ function Workspace({ plan, country, gradeIdx, setGradeIdx, tier, setTierOverride
         // else: a line of prose that runs the full width of a wide screen is
         // harder to read, not easier.
         <div className="mx-auto flex flex-col gap-4 max-w-none">
-          {exerciseType === "writing" ? (
+          {exerciseType === "writing" && battle ? (
+            <BossBattle text={text} highlights={backendFeedback?.highlights} plan={plan} tier={tier} childId={childId} session={session} backendLive={backendLive}
+              onBack={()=>setBattle(false)} onGames={()=>{ setBattle(false); setExerciseType("games"); }} />
+          ) : exerciseType === "writing" ? (
             <>
               <SubmissionRecap tier={tier} title={meta?.title || "Your story"} words={words} onNew={handleNew} />
               <FeedbackPanel tier={tier} gradeLabel={gradeLabel} country={country} interest={feedbackInterest} confidence={confidenceWriting} motivation={motivation} seed={words}
-                feedback={backendFeedback} submissionId={submissionId} session={session} backendLive={backendLive} submittedText={text} onSeePlans={onSeePlans} onPractise={()=>setExerciseType("vocab")} />
+                feedback={backendFeedback} submissionId={submissionId} session={session} backendLive={backendLive} submittedText={text} onSeePlans={onSeePlans} onPractise={()=>setExerciseType("vocab")} onBattle={()=>setBattle(true)} />
             </>
           ) : readingBankEntry && Array.isArray(backendFeedback?.questionReview) && backendFeedback.questionReview.length > 0 ? (
             <ReadingFeedbackPanel tier={tier} country={country} interest={feedbackInterest} confidence={confidenceReading} motivation={motivation} score={readingScore} totalQ={qAutoCount(readingQuestions)}

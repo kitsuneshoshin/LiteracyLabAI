@@ -654,6 +654,26 @@
   "Word endings": "Terminações das palavras",
   "Run-on sentences": "Frases mal unidas",
   "Semicolons and colons": "Ponto e vírgula e dois pontos",
-  "Formal tone": "Tom formal"
+  "Formal tone": "Tom formal",
+  "Boss {n0} of {n1}": "Chefe {n0} de {n1}",
+  "Edit this part of your story to fix the problem": "Edite esta parte da sua história para corrigir o problema",
+  "Show hint": "Ver dica",
+  "Hide hint": "Ocultar dica",
+  "Strike!": "Ataque!",
+  "Change something before you strike.": "Mude algo antes de atacar.",
+  "Direct hit! That is exactly the fix.": "Acerto em cheio! É exatamente essa a correção.",
+  "Your fix": "A sua correção",
+  "Suggested fix": "Correção sugerida",
+  "Does your fix work too?": "A sua correção também funciona?",
+  "Yes, mine works": "Sim, a minha funciona",
+  "No, I'll use this one": "Não, vou usar esta",
+  "Next boss": "Próximo chefe",
+  "Direct hits": "Acertos em cheio",
+  "Back to my feedback": "Voltar ao meu feedback",
+  "Fix your own sentences": "Corrija as suas próprias frases",
+  "Turn the parts of your story that need work into a boss. Fix them to win coins for your Word Pals.": "Transforme as partes da sua história que precisam de trabalho num chefe. Corrija-as para ganhar moedas para os seus Amigos das Palavras.",
+  "Start Boss Battle": "Começar Boss Battle",
+  "Good thinking. Remember this fix for next time.": "Bem pensado. Lembre-se desta correção para a próxima vez.",
+  "Boss health": "Vida do chefe"
  }
 }

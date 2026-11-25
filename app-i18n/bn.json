@@ -654,6 +654,26 @@
   "Word endings": "শব্দের শেষাংশ",
   "Run-on sentences": "ভুলভাবে জোড়া বাক্য",
   "Semicolons and colons": "সেমিকোলন ও কোলন",
-  "Formal tone": "আনুষ্ঠানিক সুর"
+  "Formal tone": "আনুষ্ঠানিক সুর",
+  "Boss {n0} of {n1}": "বস {n0} / {n1}",
+  "Edit this part of your story to fix the problem": "সমস্যা ঠিক করতে আপনার গল্পের এই অংশটি বদলান",
+  "Show hint": "ইঙ্গিত দেখান",
+  "Hide hint": "ইঙ্গিত লুকান",
+  "Strike!": "আঘাত করুন!",
+  "Change something before you strike.": "আঘাত করার আগে কিছু বদলান।",
+  "Direct hit! That is exactly the fix.": "সরাসরি আঘাত! ঠিক এটাই সঠিক সংশোধন।",
+  "Your fix": "আপনার সংশোধন",
+  "Suggested fix": "প্রস্তাবিত সংশোধন",
+  "Does your fix work too?": "আপনার সংশোধনও কি কাজ করে?",
+  "Yes, mine works": "হ্যাঁ, আমারটা কাজ করে",
+  "No, I'll use this one": "না, আমি এটাই ব্যবহার করব",
+  "Next boss": "পরের বস",
+  "Direct hits": "সরাসরি আঘাত",
+  "Back to my feedback": "আমার ফিডব্যাকে ফিরে যান",
+  "Fix your own sentences": "নিজের বাক্য নিজে ঠিক করুন",
+  "Turn the parts of your story that need work into a boss. Fix them to win coins for your Word Pals.": "আপনার গল্পের যে অংশগুলোতে কাজ দরকার, সেগুলোকে একটি বস বানিয়ে ফেলুন। সেগুলো ঠিক করে আপনার শব্দ-বন্ধুদের জন্য কয়েন জিতুন।",
+  "Start Boss Battle": "Boss Battle শুরু করুন",
+  "Good thinking. Remember this fix for next time.": "ভালো ভাবনা। পরের বারের জন্য এই সংশোধন মনে রাখুন।",
+  "Boss health": "বসের স্বাস্থ্য"
  }
 }

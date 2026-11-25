@@ -166,7 +166,6 @@
   "Unlimited writing &amp; reading submissions": "Trabajos de escritura y lectura ilimitados",
   "26-week progress trend, not just today's score": "Tendencia de progreso de 26 semanas, no solo la nota de hoy",
   "Anonymous ranking against their own year group": "Clasificación anónima frente a su propio curso",
-  "Vocabulary bank with flashcards, a quiz and progress saved across devices": "Banco de vocabulario con tarjetas, un cuestionario y progreso guardado en todos los dispositivos",
   "Choose Core": "Elegir Core",
   "One learner. Cancel anytime.": "Un estudiante. Cancela cuando quieras.",
   "Premium": "Premium",
@@ -216,7 +215,6 @@
   "Reopen past work &amp; feedback": "Volver a abrir trabajos y comentarios anteriores",
   "Last 10": "Los últimos 10",
   "Full history": "Historial completo",
-  "Vocabulary bank, flashcards &amp; self-test quiz, with progress saved across devices": "Banco de vocabulario, tarjetas y cuestionario de autoevaluación, con el progreso guardado en todos los dispositivos",
   "Account": "Cuenta",
   "Export or delete your data": "Exportar o eliminar tus datos",
   "Cancel anytime, no contract": "Cancela cuando quieras, sin contrato",
@@ -254,7 +252,12 @@
   "Workspace": "Aplicación",
   "About": "Acerca de",
   "Privacy": "Privacidad (en inglés)",
-  "Terms": "Términos (en inglés)"
+  "Terms": "Términos (en inglés)",
+  "Fix It and Boss Battle, writing games with coins, Word Pals and a daily streak": "Fix It y Boss Battle, juegos de escritura con monedas, Amigos de palabras y una racha diaria",
+  "Vocabulary bank with flashcards, a quiz and Word Dash, with game progress saved across devices": "Banco de vocabulario con tarjetas, un cuestionario y Word Dash, con el progreso de los juegos guardado en todos los dispositivos",
+  "Vocabulary bank, flashcards, self-test quiz and Word Dash, with progress saved across devices": "Banco de vocabulario, tarjetas, cuestionario de autoevaluación y Word Dash, con el progreso guardado en todos los dispositivos",
+  "Game progress (coins, Word Pals, streak) saved to your account": "Progreso de los juegos (monedas, Amigos de palabras, racha) guardado en tu cuenta",
+  "This device only": "Solo en este dispositivo"
  },
  "script": {
   "'READ IT'": "'LEER'",

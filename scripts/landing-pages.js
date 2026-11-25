@@ -102,7 +102,7 @@ const BASE_PAGES = [
 <h2>4. Read the feedback</h2>
 <p>For writing: a Glow (what worked), a Grow (one next step), highlights in their own text with rewrites, vocabulary to try and a named writing technique such as PEEL or Story Mountain, taught from their own words. For reading: why each answer is right or wrong, with the line from the passage that shows it. The app never writes the piece for the child.</p>
 <h2>5. Watch progress</h2>
-<p>Every plan shows a streak, words written and a skill breakdown. Core and Premium add a 26-week progress trend, a vocabulary bank with flashcards and a quiz, and full history of past work. The Free plan reopens the last 10 pieces.</p>
+<p>Every plan shows a streak, words written and a skill breakdown. Core and Premium add a 26-week progress trend, a vocabulary bank with flashcards, a quiz and the Word Dash game, and full history of past work. The Free plan reopens the last 10 pieces. Every plan includes Fix It and Boss Battle, two writing games that earn coins for collectable Word Pals; Core and Premium also save that game progress to the account so it follows the learner between devices.</p>
 <h2>What Premium adds</h2>
 <p>Premium adds a second, harder next step, a spelling and grammar check, an overall score out of 10 with the reason, a model response shown next to the child's own, a short written answer in reading comprehension marked by AI, exam-style prompts, and for students aged 11 and over, a band from 1 to 4 against the published assessment objectives for their year and region. It also covers up to 6 learners on one account.</p>
 <h2>What it does not do</h2>

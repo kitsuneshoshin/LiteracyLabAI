@@ -658,6 +658,26 @@
   "Word endings": "Terminațiile cuvintelor",
   "Run-on sentences": "Propoziții lipite greșit",
   "Semicolons and colons": "Punct și virgulă și două puncte",
-  "Formal tone": "Ton formal"
+  "Formal tone": "Ton formal",
+  "Boss {n0} of {n1}": "Șeful {n0} din {n1}",
+  "Edit this part of your story to fix the problem": "Editează această parte din povestea ta ca să rezolvi problema",
+  "Show hint": "Arată indiciul",
+  "Hide hint": "Ascunde indiciul",
+  "Strike!": "Lovește!",
+  "Change something before you strike.": "Schimbă ceva înainte să lovești.",
+  "Direct hit! That is exactly the fix.": "Lovitură directă! Exact asta e corectura.",
+  "Your fix": "Corectura ta",
+  "Suggested fix": "Corectura sugerată",
+  "Does your fix work too?": "Funcționează și corectura ta?",
+  "Yes, mine works": "Da, a mea funcționează",
+  "No, I'll use this one": "Nu, o voi folosi pe aceasta",
+  "Next boss": "Următorul șef",
+  "Direct hits": "Lovituri directe",
+  "Back to my feedback": "Înapoi la feedbackul meu",
+  "Fix your own sentences": "Corectează propriile propoziții",
+  "Turn the parts of your story that need work into a boss. Fix them to win coins for your Word Pals.": "Transformă părțile din povestea ta care au nevoie de lucru într-un șef. Corectează-le ca să câștigi monede pentru Prietenii tăi de cuvinte.",
+  "Start Boss Battle": "Începe Boss Battle",
+  "Good thinking. Remember this fix for next time.": "Te-ai gândit bine. Ține minte această corectură pentru data viitoare.",
+  "Boss health": "Viața șefului"
  }
 }

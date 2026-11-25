@@ -670,6 +670,26 @@
   "Word endings": "نهايات الكلمات",
   "Run-on sentences": "جمل متصلة بشكل خاطئ",
   "Semicolons and colons": "الفاصلة المنقوطة والنقطتان",
-  "Formal tone": "الأسلوب الرسمي"
+  "Formal tone": "الأسلوب الرسمي",
+  "Boss {n0} of {n1}": "الزعيم {n0} من {n1}",
+  "Edit this part of your story to fix the problem": "عدّل هذا الجزء من قصتك لإصلاح المشكلة",
+  "Show hint": "إظهار التلميح",
+  "Hide hint": "إخفاء التلميح",
+  "Strike!": "اضرب!",
+  "Change something before you strike.": "غيّر شيئًا قبل أن تضرب.",
+  "Direct hit! That is exactly the fix.": "إصابة مباشرة! هذا هو التصحيح تمامًا.",
+  "Your fix": "تصحيحك",
+  "Suggested fix": "التصحيح المقترح",
+  "Does your fix work too?": "هل ينجح تصحيحك أيضًا؟",
+  "Yes, mine works": "نعم، تصحيحي ناجح",
+  "No, I'll use this one": "لا، سأستخدم هذا",
+  "Next boss": "الزعيم التالي",
+  "Direct hits": "إصابات مباشرة",
+  "Back to my feedback": "العودة إلى ملاحظاتي",
+  "Fix your own sentences": "صحّح جملك بنفسك",
+  "Turn the parts of your story that need work into a boss. Fix them to win coins for your Word Pals.": "حوّل الأجزاء التي تحتاج إلى تحسين في قصتك إلى زعيم. صحّحها لتربح عملات لرفاق الكلمات.",
+  "Start Boss Battle": "ابدأ Boss Battle",
+  "Good thinking. Remember this fix for next time.": "تفكير جيد. تذكّر هذا التصحيح في المرة القادمة.",
+  "Boss health": "صحة الزعيم"
  }
 }

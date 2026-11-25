@@ -650,6 +650,26 @@
   "Word endings": "词尾",
   "Run-on sentences": "连写句",
   "Semicolons and colons": "分号和冒号",
-  "Formal tone": "正式语气"
+  "Formal tone": "正式语气",
+  "Boss {n0} of {n1}": "头目 {n0} / {n1}",
+  "Edit this part of your story to fix the problem": "修改你故事中的这一部分来解决问题",
+  "Show hint": "显示提示",
+  "Hide hint": "隐藏提示",
+  "Strike!": "出击！",
+  "Change something before you strike.": "出击前先改点什么。",
+  "Direct hit! That is exactly the fix.": "正中靶心！正是这个改法。",
+  "Your fix": "你的改法",
+  "Suggested fix": "建议的改法",
+  "Does your fix work too?": "你的改法也行得通吗？",
+  "Yes, mine works": "是的，我的行得通",
+  "No, I'll use this one": "不，我用这个",
+  "Next boss": "下一个头目",
+  "Direct hits": "正中靶心",
+  "Back to my feedback": "返回我的反馈",
+  "Fix your own sentences": "改正你自己的句子",
+  "Turn the parts of your story that need work into a boss. Fix them to win coins for your Word Pals.": "把故事中需要改进的部分变成一个头目。改对它们，为你的词语伙伴赢取金币。",
+  "Start Boss Battle": "开始 Boss Battle",
+  "Good thinking. Remember this fix for next time.": "想得好。下次记住这个改法。",
+  "Boss health": "头目血量"
  }
 }

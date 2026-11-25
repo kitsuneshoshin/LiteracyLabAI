@@ -17,6 +17,8 @@ const EVENT_NAMES = [
   "vocab_dash_round", // finished a round: props.status = stars won (0 to 3)
   "fixit_start",      // started a round of Fix It (the writing game): props.tier
   "fixit_round",      // finished a round of Fix It: props.status = stars won (0 to 3)
+  "boss_start",       // opened Boss Battle (fixing the parts of their own piece the feedback flagged): props.tier
+  "boss_round",       // finished a Boss Battle: props.status = stars won (0 to 3)
   "feedback_rated",   // thumbs up/down on feedback: props.rating
 ];
 // The only values an event may carry, each cut to a short string.

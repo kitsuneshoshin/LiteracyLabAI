@@ -654,6 +654,26 @@
   "Word endings": "ਸ਼ਬਦਾਂ ਦੇ ਅੰਤ",
   "Run-on sentences": "ਗ਼ਲਤ ਜੁੜੇ ਵਾਕ",
   "Semicolons and colons": "ਅਰਧ ਵਿਰਾਮ ਅਤੇ ਕੋਲਨ",
-  "Formal tone": "ਰਸਮੀ ਢੰਗ"
+  "Formal tone": "ਰਸਮੀ ਢੰਗ",
+  "Boss {n0} of {n1}": "ਬੌਸ {n0} / {n1}",
+  "Edit this part of your story to fix the problem": "ਸਮੱਸਿਆ ਠੀਕ ਕਰਨ ਲਈ ਆਪਣੀ ਕਹਾਣੀ ਦੇ ਇਸ ਹਿੱਸੇ ਨੂੰ ਬਦਲੋ",
+  "Show hint": "ਸੰਕੇਤ ਦਿਖਾਓ",
+  "Hide hint": "ਸੰਕੇਤ ਲੁਕਾਓ",
+  "Strike!": "ਵਾਰ ਕਰੋ!",
+  "Change something before you strike.": "ਵਾਰ ਕਰਨ ਤੋਂ ਪਹਿਲਾਂ ਕੁਝ ਬਦਲੋ।",
+  "Direct hit! That is exactly the fix.": "ਸਿੱਧਾ ਨਿਸ਼ਾਨਾ! ਇਹੀ ਬਿਲਕੁਲ ਸਹੀ ਸੁਧਾਰ ਹੈ।",
+  "Your fix": "ਤੁਹਾਡਾ ਸੁਧਾਰ",
+  "Suggested fix": "ਸੁਝਾਇਆ ਸੁਧਾਰ",
+  "Does your fix work too?": "ਕੀ ਤੁਹਾਡਾ ਸੁਧਾਰ ਵੀ ਚੱਲਦਾ ਹੈ?",
+  "Yes, mine works": "ਹਾਂ, ਮੇਰਾ ਚੱਲਦਾ ਹੈ",
+  "No, I'll use this one": "ਨਹੀਂ, ਇਹੀ ਵਰਤਣਾ ਹੈ",
+  "Next boss": "ਅਗਲਾ ਬੌਸ",
+  "Direct hits": "ਸਿੱਧੇ ਨਿਸ਼ਾਨੇ",
+  "Back to my feedback": "ਮੇਰੇ ਫੀਡਬੈਕ ਤੇ ਵਾਪਸ ਜਾਓ",
+  "Fix your own sentences": "ਆਪਣੇ ਵਾਕ ਆਪ ਠੀਕ ਕਰੋ",
+  "Turn the parts of your story that need work into a boss. Fix them to win coins for your Word Pals.": "ਆਪਣੀ ਕਹਾਣੀ ਦੇ ਜਿਨ੍ਹਾਂ ਹਿੱਸਿਆਂ ਉੱਤੇ ਕੰਮ ਦੀ ਲੋੜ ਹੈ, ਉਨ੍ਹਾਂ ਨੂੰ ਇੱਕ ਬੌਸ ਬਣਾ ਦਿਓ। ਉਨ੍ਹਾਂ ਨੂੰ ਠੀਕ ਕਰਕੇ ਆਪਣੇ ਸ਼ਬਦ-ਸਾਥੀਆਂ ਲਈ ਸਿੱਕੇ ਜਿੱਤੋ।",
+  "Start Boss Battle": "Boss Battle ਸ਼ੁਰੂ ਕਰੋ",
+  "Good thinking. Remember this fix for next time.": "ਵਧੀਆ ਸੋਚ। ਅਗਲੀ ਵਾਰ ਲਈ ਇਹ ਸੁਧਾਰ ਯਾਦ ਰੱਖੋ।",
+  "Boss health": "ਬੌਸ ਦੀ ਸਿਹਤ"
  }
 }

@@ -168,7 +168,7 @@ test("wiring: the table exists in the schema with RLS on, /admin is routed, the 
 
 test("wiring: the app logs the key moments with the shared helper, and sends it no free text", () => {
   const app = fs.readFileSync(path.join(ROOT, "app.html"), "utf8");
-  for (const name of ["app_open", "view", "prompt_generated", "passage_generated", "generate_failed", "submit_failed", "vocab_cards", "vocab_quiz", "vocab_dash_start", "vocab_dash_round", "fixit_start", "fixit_round", "feedback_rated"]) {
+  for (const name of ["app_open", "view", "prompt_generated", "passage_generated", "generate_failed", "submit_failed", "vocab_cards", "vocab_quiz", "vocab_dash_start", "vocab_dash_round", "fixit_start", "fixit_round", "boss_start", "boss_round", "feedback_rated"]) {
     assert.ok(app.includes(`logEvent("${name}"`), `${name} is not logged`);
     assert.ok(EVENT_NAMES.includes(name), `${name} is not on the server's list`);
   }

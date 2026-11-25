@@ -48,6 +48,7 @@ const BOOLEAN_ROWS = [
   ["Spelling & grammar check", "spellingGrammar"],
   ["Overall score out of 10", "overallScore"],
   ["Vocabulary bank", "vocabBank"],
+  ["Game progress", "vocabBank"],
   ["26-week progress trend chart", "progressTrend"],
   ["Anonymous ranking", "peerComparison"],
 ];
@@ -74,6 +75,30 @@ test("pricing table: submissions, learners and history match plans.js", () => {
   assert.match(history[0].text, new RegExp(String(PLANS.free.recentHistoryLimit)), "Free's history limit");
   assert.match(history[1].text, /Full/);
   assert.match(history[2].text, /Full/);
+});
+
+// ---- the games: Fix It and Boss Battle are open to every plan; only SAVING the game to the account is Core and Premium
+test("pricing: Fix It and Boss Battle are ticked for every plan, and the game progress row says Free keeps it on one device", () => {
+  const games = rowFor("Fix It and Boss Battle");
+  assert.ok(games.every((c) => c.yes), "the games are not behind a plan");
+  const saved = rowFor("Game progress");
+  assert.equal(saved[0].text, "This device only", "Free keeps game progress on the device");
+  assert.ok(saved[1].yes && saved[2].yes);
+  // Why that is true: nothing in the app gates the games, and only the account copy of the game needs a plan with a vocabulary bank.
+  const gamesCode = APP.slice(APP.indexOf("function GamesHub("), APP.indexOf("// Tell us what you think: a short form"));
+  assert.ok(!/isPaidPlan|LockedFeature|onSeePlans/.test(gamesCode), "the games screens never lock themselves");
+  assert.match(gamesCode, /const canSync = !!\(backendLive && childId && session && planMeta\(plan\)\.vocabBank\)/);
+  assert.equal(PLANS.free.vocabBank, false);
+});
+
+test("the plan cards and the vocabulary row name the games wherever they describe the vocabulary bank", () => {
+  assert.match(rowFor("Vocabulary bank").length ? Object.keys(ROWS).find((k) => k.startsWith("Vocabulary bank")) : "", /Word Dash/, "the table's vocabulary row names Word Dash");
+  const freeCard = INDEX.split('<div class="price-plan">Free</div>')[1].split('<div class="price-card pro">')[0];
+  assert.match(freeCard, /Fix It and Boss Battle, writing games/, "the Free card lists the games");
+  const coreCard = INDEX.split('<div class="price-plan">Core</div>')[1].split('<div class="price-plan">Premium</div>')[0];
+  assert.match(coreCard, /Word Dash, with game progress saved across devices/, "the Core card names Word Dash and the saved progress");
+  assert.match(APP, /"Vocabulary bank with flashcards, a quiz and Word Dash, with game progress saved across devices"/, "the in-app Core card");
+  assert.ok(!/Vocabulary bank with flashcards, a quiz and progress saved across devices/.test(INDEX + APP), "the old wording is gone");
 });
 
 test("pricing table: a plan is never shown as having less than the plan below it", () => {

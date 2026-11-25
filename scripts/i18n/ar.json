@@ -166,7 +166,6 @@
   "Unlimited writing &amp; reading submissions": "أعمال كتابة وقراءة غير محدودة",
   "26-week progress trend, not just today's score": "منحنى تقدّم لمدة 26 أسبوعًا، لا درجة اليوم فقط",
   "Anonymous ranking against their own year group": "ترتيب مجهول الهوية بين طلاب صفّه",
-  "Vocabulary bank with flashcards, a quiz and progress saved across devices": "بنك مفردات مع بطاقات تعليمية واختبار وتقدّم محفوظ على كل الأجهزة",
   "Choose Core": "اختر Core",
   "One learner. Cancel anytime.": "طالب واحد. إلغاء في أي وقت.",
   "Premium": "Premium",
@@ -216,7 +215,6 @@
   "Reopen past work &amp; feedback": "إعادة فتح الأعمال والملاحظات السابقة",
   "Last 10": "آخر 10",
   "Full history": "السجل الكامل",
-  "Vocabulary bank, flashcards &amp; self-test quiz, with progress saved across devices": "بنك مفردات وبطاقات تعليمية واختبار ذاتي، مع تقدّم محفوظ على كل الأجهزة",
   "Account": "الحساب",
   "Export or delete your data": "تصدير بياناتك أو حذفها",
   "Cancel anytime, no contract": "إلغاء في أي وقت، دون عقد",
@@ -254,7 +252,12 @@
   "Workspace": "التطبيق",
   "About": "نبذة",
   "Privacy": "الخصوصية (بالإنجليزية)",
-  "Terms": "الشروط (بالإنجليزية)"
+  "Terms": "الشروط (بالإنجليزية)",
+  "Fix It and Boss Battle, writing games with coins, Word Pals and a daily streak": "Fix It وBoss Battle، لعبتا كتابة مع العملات ورفاق الكلمات وسلسلة يومية",
+  "Vocabulary bank with flashcards, a quiz and Word Dash, with game progress saved across devices": "بنك مفردات مع بطاقات تعليمية واختبار ولعبة Word Dash، مع تقدّم الألعاب محفوظًا على كل الأجهزة",
+  "Vocabulary bank, flashcards, self-test quiz and Word Dash, with progress saved across devices": "بنك مفردات وبطاقات تعليمية واختبار ذاتي ولعبة Word Dash، مع تقدّم محفوظ على كل الأجهزة",
+  "Game progress (coins, Word Pals, streak) saved to your account": "تقدّم الألعاب (العملات ورفاق الكلمات والسلسلة) محفوظ في حسابك",
+  "This device only": "على هذا الجهاز فقط"
  },
  "script": {
   "'READ IT'": "'القراءة'",

@@ -166,7 +166,6 @@
   "Unlimited writing &amp; reading submissions": "ਬੇਅੰਤ ਲਿਖਤ ਅਤੇ ਪੜ੍ਹਾਈ ਦੇ ਕੰਮ",
   "26-week progress trend, not just today's score": "26 ਹਫ਼ਤਿਆਂ ਦੀ ਤਰੱਕੀ ਦਾ ਰੁਝਾਨ, ਸਿਰਫ਼ ਅੱਜ ਦਾ ਸਕੋਰ ਨਹੀਂ",
   "Anonymous ranking against their own year group": "ਆਪਣੀ ਜਮਾਤ ਵਿੱਚ ਗੁੰਮਨਾਮ ਦਰਜਾਬੰਦੀ",
-  "Vocabulary bank with flashcards, a quiz and progress saved across devices": "ਫਲੈਸ਼ਕਾਰਡ, ਕੁਇਜ਼ ਅਤੇ ਸਾਰੇ ਡਿਵਾਈਸਾਂ ਉੱਤੇ ਸੰਭਾਲੀ ਤਰੱਕੀ ਨਾਲ ਸ਼ਬਦਾਵਲੀ ਬੈਂਕ",
   "Choose Core": "Core ਚੁਣੋ",
   "One learner. Cancel anytime.": "ਇੱਕ ਵਿਦਿਆਰਥੀ। ਜਦੋਂ ਚਾਹੋ ਰੱਦ ਕਰੋ।",
   "Premium": "Premium",
@@ -216,7 +215,6 @@
   "Reopen past work &amp; feedback": "ਪੁਰਾਣੇ ਕੰਮ ਅਤੇ ਫੀਡਬੈਕ ਦੁਬਾਰਾ ਖੋਲ੍ਹੋ",
   "Last 10": "ਆਖ਼ਰੀ 10",
   "Full history": "ਪੂਰਾ ਇਤਿਹਾਸ",
-  "Vocabulary bank, flashcards &amp; self-test quiz, with progress saved across devices": "ਸ਼ਬਦਾਵਲੀ ਬੈਂਕ, ਫਲੈਸ਼ਕਾਰਡ ਅਤੇ ਸਵੈ-ਜਾਂਚ ਕੁਇਜ਼, ਸਾਰੇ ਡਿਵਾਈਸਾਂ ਉੱਤੇ ਸੰਭਾਲੀ ਤਰੱਕੀ ਸਮੇਤ",
   "Account": "ਖਾਤਾ",
   "Export or delete your data": "ਆਪਣਾ ਡੇਟਾ ਬਰਾਮਦ ਕਰੋ ਜਾਂ ਹਟਾਓ",
   "Cancel anytime, no contract": "ਜਦੋਂ ਚਾਹੋ ਰੱਦ ਕਰੋ, ਕੋਈ ਇਕਰਾਰਨਾਮਾ ਨਹੀਂ",
@@ -254,7 +252,12 @@
   "Workspace": "ਐਪ",
   "About": "ਜਾਣ-ਪਛਾਣ",
   "Privacy": "ਗੋਪਨੀਯਤਾ (ਅੰਗਰੇਜ਼ੀ ਵਿੱਚ)",
-  "Terms": "ਸ਼ਰਤਾਂ (ਅੰਗਰੇਜ਼ੀ ਵਿੱਚ)"
+  "Terms": "ਸ਼ਰਤਾਂ (ਅੰਗਰੇਜ਼ੀ ਵਿੱਚ)",
+  "Fix It and Boss Battle, writing games with coins, Word Pals and a daily streak": "Fix It ਅਤੇ Boss Battle, ਸਿੱਕਿਆਂ, ਸ਼ਬਦ-ਸਾਥੀਆਂ ਅਤੇ ਰੋਜ਼ ਦੀ ਲੜੀ ਵਾਲੀਆਂ ਲਿਖਣ ਦੀਆਂ ਖੇਡਾਂ",
+  "Vocabulary bank with flashcards, a quiz and Word Dash, with game progress saved across devices": "ਫਲੈਸ਼ਕਾਰਡ, ਕੁਇਜ਼ ਅਤੇ Word Dash ਨਾਲ ਸ਼ਬਦਾਵਲੀ ਬੈਂਕ, ਅਤੇ ਖੇਡਾਂ ਦੀ ਤਰੱਕੀ ਸਾਰੇ ਡਿਵਾਈਸਾਂ ਉੱਤੇ ਸੰਭਾਲੀ ਹੋਈ",
+  "Vocabulary bank, flashcards, self-test quiz and Word Dash, with progress saved across devices": "ਸ਼ਬਦਾਵਲੀ ਬੈਂਕ, ਫਲੈਸ਼ਕਾਰਡ, ਸਵੈ-ਜਾਂਚ ਕੁਇਜ਼ ਅਤੇ Word Dash, ਸਾਰੇ ਡਿਵਾਈਸਾਂ ਉੱਤੇ ਸੰਭਾਲੀ ਤਰੱਕੀ ਸਮੇਤ",
+  "Game progress (coins, Word Pals, streak) saved to your account": "ਖੇਡਾਂ ਦੀ ਤਰੱਕੀ (ਸਿੱਕੇ, ਸ਼ਬਦ-ਸਾਥੀ, ਲੜੀ) ਤੁਹਾਡੇ ਖਾਤੇ ਵਿੱਚ ਸੰਭਾਲੀ ਹੋਈ",
+  "This device only": "ਸਿਰਫ਼ ਇਸ ਡਿਵਾਈਸ ਉੱਤੇ"
  },
  "script": {
   "'READ IT'": "'ਪੜ੍ਹਨਾ'",

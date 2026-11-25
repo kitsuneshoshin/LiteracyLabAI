@@ -166,7 +166,6 @@
   "Unlimited writing &amp; reading submissions": "असीमित लेखन और पठन के काम",
   "26-week progress trend, not just today's score": "26 हफ़्तों की प्रगति का रुझान, सिर्फ़ आज का स्कोर नहीं",
   "Anonymous ranking against their own year group": "अपनी कक्षा में गुमनाम रैंकिंग",
-  "Vocabulary bank with flashcards, a quiz and progress saved across devices": "फ़्लैशकार्ड, क्विज़ और सभी डिवाइस पर सहेजी गई प्रगति के साथ शब्दावली बैंक",
   "Choose Core": "Core चुनें",
   "One learner. Cancel anytime.": "एक विद्यार्थी। जब चाहें रद्द करें।",
   "Premium": "Premium",
@@ -216,7 +215,6 @@
   "Reopen past work &amp; feedback": "पुराने काम और फ़ीडबैक दोबारा खोलें",
   "Last 10": "पिछले 10",
   "Full history": "पूरा इतिहास",
-  "Vocabulary bank, flashcards &amp; self-test quiz, with progress saved across devices": "शब्दावली बैंक, फ़्लैशकार्ड और स्व-जाँच क्विज़, सभी डिवाइस पर सहेजी गई प्रगति के साथ",
   "Account": "खाता",
   "Export or delete your data": "अपना डेटा निर्यात करें या हटाएँ",
   "Cancel anytime, no contract": "जब चाहें रद्द करें, कोई अनुबंध नहीं",
@@ -254,7 +252,12 @@
   "Workspace": "ऐप",
   "About": "परिचय",
   "Privacy": "गोपनीयता (अंग्रेज़ी में)",
-  "Terms": "शर्तें (अंग्रेज़ी में)"
+  "Terms": "शर्तें (अंग्रेज़ी में)",
+  "Fix It and Boss Battle, writing games with coins, Word Pals and a daily streak": "Fix It और Boss Battle, सिक्कों, शब्द-साथियों और रोज़ की स्ट्रीक वाले लेखन के खेल",
+  "Vocabulary bank with flashcards, a quiz and Word Dash, with game progress saved across devices": "फ़्लैशकार्ड, क्विज़ और Word Dash के साथ शब्दावली बैंक, और खेलों की प्रगति सभी डिवाइस पर सहेजी गई",
+  "Vocabulary bank, flashcards, self-test quiz and Word Dash, with progress saved across devices": "शब्दावली बैंक, फ़्लैशकार्ड, स्व-जाँच क्विज़ और Word Dash, सभी डिवाइस पर सहेजी गई प्रगति के साथ",
+  "Game progress (coins, Word Pals, streak) saved to your account": "खेलों की प्रगति (सिक्के, शब्द-साथी, स्ट्रीक) आपके खाते में सहेजी गई",
+  "This device only": "केवल इसी डिवाइस पर"
  },
  "script": {
   "'READ IT'": "'पढ़ना'",
