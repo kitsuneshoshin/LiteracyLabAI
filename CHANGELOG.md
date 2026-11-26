@@ -2,6 +2,10 @@
 
 Internal engineering changelog, not linked from the site. One entry per shipped commit, newest first, grouped by day. Generated from git history — run `git log --format="%ad|%h|%s" --date=short` in the repo to regenerate or extend.
 
+## 2026-11-26
+
+- `4c43385` Homepage 'sentence, step by step' example now uses the Kalam handwriting font instead of italic EB Garamond (home.css, font link on the homepage and all 10 translated homepages, home.css cache bumped to v=18)
+
 ## 2026-11-25
 
 - `fa7eec7` Boss Battle on the Games tab: a card under Fix It lists the learner's past writing pieces that have sentences to fix (up to eight, newest first) and opens one into a battle. The activity list now carries a `fixes` count per piece (api/_lib/bossFixes.js countFixes, same rules as the page's bossList) so only battleable pieces are offered; the piece itself is opened with the existing submissionId path. Works on every plan (Free sees its last 10 pieces); the account sync of the game stays Core and Premium. Hidden when the history cannot be loaded. Translated into all 10 languages; tests/boss-pieces.test.js
