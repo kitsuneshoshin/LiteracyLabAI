@@ -4,7 +4,7 @@ Internal engineering changelog, not linked from the site. One entry per shipped 
 
 ## 2026-11-26
 
-- `4c43385` Homepage 'sentence, step by step' example now uses the Kalam handwriting font instead of italic EB Garamond (home.css, font link on the homepage and all 10 translated homepages, home.css cache bumped to v=18)
+- `4c43385` Homepage 'sentence, step by step' example now uses the Patrick Hand handwriting font instead of italic EB Garamond (briefly Kalam) (home.css, font link on the homepage and all 10 translated homepages, home.css cache bumped to v=19)
 
 ## 2026-11-25
 
