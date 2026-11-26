@@ -44,7 +44,7 @@ h3, h4, .price-amount, .tier-panel .t-title, .step h4{ font-family: var(--serif-
 .plate svg{ display: block; width: 100%; height: auto; }
 .plate svg [hidden]{ display: none; }
 .plate .rule{ stroke: var(--border); stroke-width: 1; }
-.plate .child{ font-family: var(--serif-display); font-style: italic; font-size: 31px; fill: var(--ink); }
+.plate .child{ font-family: "Kalam", "Patrick Hand", "Comic Sans MS", cursive; font-size: 29px; fill: var(--ink); }
 .plate .mark{ fill: none; stroke: var(--accent); stroke-width: 2.2; stroke-linecap: round; }
 .plate .mark-fill{ fill: color-mix(in srgb, var(--accent) 30%, transparent); stroke: none; }
 .plate .mark-dash{ stroke-dasharray: 7 5; }
